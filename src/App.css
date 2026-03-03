@@ -1,0 +1,357 @@
+/* ==========================================================================
+   1. VARIABLES & THEMING
+   ========================================================================== */
+:root {
+  --bg-color: #fcfcfd;
+  --text-color: #18181b;
+  --brand-green: #0A4C23;
+  --border-color: #e4e4e7;
+  --font-main: 'Inter', system-ui, sans-serif;
+  --transition-main: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme='dark'] {
+  --bg-color: #09090b;
+  --text-color: #f4f4f5;
+  --brand-green: #25D064;
+  --border-color: #3f3f46;
+}
+
+/* ==========================================================================
+   2. GLOBAL RESET & BASE STYLES
+   ========================================================================== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  font-family: var(--font-main);
+}
+
+#root { width: 100%; height: 100%; }
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-color);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+  border: 2px solid var(--bg-color);
+}
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+/* ==========================================================================
+   3. LAYOUT STRUCTURE
+   ========================================================================== */
+.app-container {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+  transition: all var(--transition-main);
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-top: 40px;
+}
+
+/* ==========================================================================
+   4. HEADER & BRANDING
+   ========================================================================== */
+.app-header {
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-left, .header-right { flex: 1; display: flex; align-items: center; }
+.header-center { flex: 2; display: flex; justify-content: center; align-items: center; }
+.header-right { justify-content: flex-end; }
+
+.logo-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+.logo-button.hidden { visibility: hidden; pointer-events: none; }
+.logo-svg { width: 35px; height: 35px; object-fit: contain; }
+
+.brand-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  white-space: nowrap;
+}
+
+.theme-toggle-btn {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 0.1px solid var(--border-color);
+  background-color: transparent;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+.theme-toggle-btn:hover { background-color: var(--border-color); }
+
+/* ==========================================================================
+   5. EXECUTIVE SUMMARY (LEFT-ALIGNED LAYOUT)
+   ========================================================================== */
+.home-summary-view { animation: fadeIn 0.4s ease-out; }
+.summary-header { margin-bottom: 32px; }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.summary-column-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-card {
+  border-left: 6px solid var(--stage-color);
+  background-color: color-mix(in srgb, var(--stage-color), transparent 95%);
+  border-radius: 12px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  min-height: 90px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.summary-count { 
+  font-size: 2.2rem; 
+  font-weight: 900; 
+  color: color-mix(in srgb, var(--stage-color), transparent 50%); 
+  -webkit-text-stroke: 1.5px var(--stage-color);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  text-align: right;
+}
+
+/* ==========================================================================
+   6. BREAKDOWN LIST (ABSORBED LOGIC)
+   ========================================================================== */
+.vertical-breakdown-list {
+  background-color: color-mix(in srgb, var(--stage-color), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--stage-color), transparent 80%);
+  border-radius: 12px;
+  padding: 12px 4px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.vertical-mini-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.vertical-mini-row:last-child { border-bottom: none; }
+
+.v-mini-label {
+  opacity: 0.6;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.v-mini-count {
+  font-weight: 800;
+  font-family: monospace; 
+  font-size: 0.9rem;
+  color: var(--stage-color); 
+  -webkit-text-stroke: 0.8px var(--stage-color);
+}
+
+.summary-column-group:hover .vertical-breakdown-list {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* ==========================================================================
+   7. TASK MANAGEMENT & KANBAN STYLING
+   ========================================================================== */
+.task-card {
+  /* Dynamic Background & Borders matching Stage Color */
+  background-color: color-mix(in srgb, var(--task-stage-color), transparent 96%);
+  border: 1px solid color-mix(in srgb, var(--task-stage-color), transparent 85%);
+  border-left: 4px solid var(--task-stage-color);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--task-stage-color), transparent 90%);
+}
+
+.task-card-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: flex-start; 
+  gap: 10px;
+}
+
+.task-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-color);
+  line-height: 1.4;
+}
+
+.task-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Styled Dropdown for Task Cards */
+.stage-select-dropdown {
+  background-color: color-mix(in srgb, var(--task-stage-color), transparent 90%);
+  color: var(--task-stage-color);
+  border: 1px solid color-mix(in srgb, var(--task-stage-color), transparent 80%);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  appearance: none;
+  outline: none;
+}
+
+.stage-select-dropdown:hover {
+  background-color: color-mix(in srgb, var(--task-stage-color), transparent 85%);
+}
+
+.stage-select-dropdown option {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  text-transform: none;
+}
+
+.delete-task-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.2;
+  transition: opacity 0.2s;
+}
+
+.task-card:hover .delete-task-btn { opacity: 1; }
+.delete-task-btn:hover { color: #dc2626; transform: scale(1.1); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   8. CONFIGURATION VIEW STYLING
+   ========================================================================== */
+.configuration-view {
+  /* Uses the same entry animation as the Executive Summary for a seamless feel */
+  animation: fadeIn 0.4s ease-out; 
+  padding: 0 20px;
+  max-width: 800px; /* Constrains settings for better readability on wide screens */
+  color: var(--text-color);
+}
+
+.configuration-view h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand-green); /* Highlights the header in your brand color */
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.configuration-view p {
+  font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+/* Base styles for future configuration cards/sections */
+.config-section {
+  background-color: color-mix(in srgb, var(--text-color), transparent 97%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   9. GLOBAL ANIMATIONS (Existing)
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

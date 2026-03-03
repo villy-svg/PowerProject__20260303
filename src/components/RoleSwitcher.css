@@ -1,0 +1,23 @@
+/* RoleSwitcher.css */
+.role-switcher-container {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.role-select-dropdown {
+  background-color: var(--bg-color);
+  color: var(--brand-green);
+  border: 1px solid var(--border-color);
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.role-select-dropdown:hover {
+  border-color: var(--brand-green);
+}

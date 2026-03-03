@@ -1,0 +1,74 @@
+/* Configuration.css */
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.config-section {
+  background-color: color-mix(in srgb, var(--text-color), transparent 97%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  gap: 20px;
+  transition: transform 0.2s ease;
+}
+
+.config-section:hover {
+  border-color: var(--brand-green);
+}
+
+.section-icon {
+  font-size: 1.5rem;
+  background: var(--bg-color);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.section-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.section-content p {
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.btn-danger {
+  background-color: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.config-info-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--brand-green);
+  opacity: 0.8;
+}

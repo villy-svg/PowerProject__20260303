@@ -1,0 +1,183 @@
+/* ==========================================================================
+   VERTICAL WORKSPACE LAYOUT
+   ========================================================================== */
+
+.workspace-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  transition: all var(--transition-main); /* */
+}
+
+/* 1. LEFT SUB-SIDEBAR */
+.sub-sidebar {
+  width: 260px; 
+  /* The "Fill" Design: 3% tint of text color for depth */
+  background-color: color-mix(in srgb, var(--bg-color), var(--text-color) 3%); /* */
+  border-right: 1px solid var(--border-color); /* */
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* */
+  overflow: hidden; 
+  flex-shrink: 0;
+}
+
+/* Collapsed State */
+.workspace-container.sub-sidebar-collapsed .sub-sidebar {
+  width: 64px; /* */
+}
+
+/* 2. SUB-SIDEBAR HEADER */
+.sub-sidebar-header {
+  padding: 0 16px; /* Reduced side padding to prevent pushing the button */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  min-height: 64px;
+  width: 100%;
+}
+
+/* CRITICAL FIX: Center the button when collapsed */
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-header {
+  justify-content: center; 
+  padding: 0; /* Clear padding so it's perfectly centered */
+}
+
+.sub-sidebar-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* REMOVE TITLE FROM FLOW: This prevents the 'push' to the right */
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-header h3 {
+  display: none; /* */
+}
+
+/* The Toggle Button */
+.sub-sidebar-toggle {
+  background: var(--bg-color); /* */
+  border: 1px solid var(--border-color); /* */
+  color: var(--brand-green); /* */
+  border-radius: 6px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  flex-shrink: 0; /* Prevents button from shrinking */
+  z-index: 10;
+}
+
+.sub-sidebar-toggle:hover {
+  background-color: var(--brand-green);
+  color: #ffffff;
+}
+
+/* 3. BODY CONTENT */
+.sub-sidebar-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-body {
+  display: none; /* Completely remove from layout when collapsed */
+}
+
+/* 4. MAIN CONTENT AREA */
+.workspace-content {
+  flex: 1;
+  padding: 24px;
+  overflow-x: auto;
+  background-color: var(--bg-color); /* */
+  min-width: 0; 
+}
+
+/* ==========================================================================
+   SUB-SIDEBAR HEADER LOGIC
+   ========================================================================== */
+
+.sub-sidebar-header {
+  display: grid;
+  /* Column 1: 32px (Button) | Column 2: Flexible (Title) | Column 3: 32px (Empty Space) */
+  grid-template-columns: 32px 1fr 32px; 
+  align-items: center;
+  min-height: 64px;
+  padding: 0 16px;
+  width: 100%;
+}
+
+/* Position the Toggle Button in Column 1 */
+.sub-sidebar-toggle {
+  grid-column: 1;
+  grid-row: 1; /* Ensure it stays on the first row */
+  
+  /* Styling */
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--brand-green);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Position the Title in Column 2 (Mathematical Center) */
+.sub-sidebar-header h3 {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   COLLAPSED STATE LOGIC
+   ========================================================================== */
+
+.workspace-container.sub-sidebar-collapsed .sub-sidebar {
+  width: 64px;
+}
+
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-header {
+  /* Switch to simple centering when collapsed */
+  display: flex;
+  justify-content: center;
+  padding: 0;
+}
+
+.workspace-container.sub-sidebar-collapsed h3,
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-body {
+  display: none;
+}
+
+/* ==========================================================================
+   SIDEBAR "FILL" & BORDER DESIGN
+   ========================================================================== */
+.sub-sidebar {
+  width: 260px;
+  background-color: color-mix(in srgb, var(--bg-color), var(--text-color) 3%);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  flex-shrink: 0;
+}

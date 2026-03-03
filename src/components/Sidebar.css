@@ -1,0 +1,118 @@
+/* 1. Sidebar Container */
+.sidebar {
+  position: relative;
+  height: 100vh;
+  background-color: var(--bg-color);
+  border-right: 1px solid var(--border-color);
+  z-index: 10;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Critical for the 'sliding door' effect */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease;
+}
+
+/* 2. Collapsed State */
+.sidebar:not(.open) {
+  width: 0;
+  opacity: 0;
+  border-right: none;
+}
+
+/* 3. The Content Wrapper 
+   Merged redundancies and applied space-between to push config to bottom 
+*/
+.sidebar-content-wrapper {
+  width: 280px; 
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+}
+
+/* 4. Structural Sections */
+.sidebar-top-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-bottom-section {
+  padding-bottom: 10px; 
+}
+
+/* 5. Sidebar Header & Logo */
+.sidebar-header {
+  height: 60px; 
+  display: flex;
+  align-items: center; 
+  justify-content: flex-start;
+  margin-bottom: 20px; 
+}
+
+.sidebar-logo-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-logo-btn:hover {
+  opacity: 0.7;
+}
+
+/* 6. Navigation Styling */
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  padding: 12px 15px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap; 
+  overflow: hidden;
+  display: block;
+}
+
+.sidebar-nav li:hover {
+  background-color: var(--border-color);
+  color: var(--brand-green);
+}
+
+.sidebar-nav li.active {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 90%);
+  color: var(--brand-green);
+  font-weight: 700;
+}
+
+/* 7. Dividers & Cleanup */
+.nav-divider {
+  margin: 15px 0;
+  border: none;
+  border-top: 1px solid var(--border-color);
+  opacity: 0.5;
+  width: 100%;
+}
+
+.sidebar-bottom-section .nav-divider {
+  margin-bottom: 15px;
+}
+
+.sidebar-overlay {
+  display: none;
+}
