@@ -1,3 +1,5 @@
+console.log("Vite Env Check:", import.meta.env);
+
 import { createClient } from '@supabase/supabase-js'
 
 // Using Vite's environment variables for security
