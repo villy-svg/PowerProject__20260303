@@ -70,9 +70,12 @@ const TaskController = ({
 
       <div className="kanban-board">
         {STAGE_LIST.map((stage) => {
-          const stageTasks = (tasks || []).filter(
-            (t) => t.verticalId === activeVertical && t.stageId === stage.id
-          );
+          // const stageTasks = (tasks || []).filter(
+          //   (t) => t.verticalId === activeVertical && t.stageId === stage.id
+          // );
+            const stageTasks = (tasks || []).filter(
+              (t) => t.stageId === stage.id
+            );
 
           return (
             <div 
