@@ -1,17 +1,22 @@
 import React from 'react';
+import { supabase } from '../services/supabaseClient'; // Import the connection client
 import './Configuration.css';
 
 /**
  * Configuration Component
  * Provides an interface for system-wide settings and data management.
- * Updated: Added Access Control panel for Master Admins to manage role CRUD.
+ * Supabase Update: Wipes the cloud 'tasks' table if the user is a Master Admin.
  */
 const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
   
-  // PERMISSION CHECK: Restricted global actions
+  // PERMISSION CHECK: Restricted global actions based on user role
   const isMasterAdmin = user?.roleId === 'master_admin';
 
-  const handleClearAllTasks = () => {
+  /**
+   * UPDATED: handleClearAllTasks
+   * Now an async function to perform a global DELETE on the Supabase table.
+   */
+  const handleClearAllTasks = async () => {
     if (!isMasterAdmin) return;
 
     const confirmed = window.confirm(
@@ -19,7 +24,23 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
     );
     
     if (confirmed) {
-      setTasks([]);
+      try {
+        // 1. Target the 'tasks' table and delete all records
+        // Using a filter like .neq('id', 0) ensures all rows are targeted in most setups
+        const { error } = await supabase
+          .from('tasks')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000'); 
+
+        if (error) throw error;
+
+        // 2. Update local state so the UI reflects the empty database instantly
+        setTasks([]);
+        alert("Cloud database successfully cleared.");
+      } catch (err) {
+        console.error("Cloud Wipe Error:", err.message);
+        alert("Failed to clear cloud data. Check your connection.");
+      }
     }
   };
 
@@ -60,7 +81,7 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
             <div className="section-icon">💾</div>
             <div className="section-content">
               <h3>Data Management</h3>
-              <p>Current system load: <strong>{totalTasks}</strong> total tasks.</p>
+              <p>Current cloud system load: <strong>{totalTasks}</strong> total tasks.</p>
               
               <div className="config-actions">
                 <button 
@@ -68,7 +89,7 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                   onClick={handleClearAllTasks}
                   disabled={totalTasks === 0}
                 >
-                  Clear All Task Data
+                  Clear All Cloud Task Data
                 </button>
               </div>
             </div>

@@ -3,6 +3,9 @@ import { useTheme } from './theme/useTheme';
 import ThemeToggle from './theme/themeToggle'; 
 import './App.css';
 
+// 1. New Supabase Import
+import { supabase } from './services/supabaseClient';
+
 // Constants
 import { VERTICALS } from './constants/verticals';
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
@@ -20,11 +23,31 @@ import powerLogo from './assets/logo.svg';
 
 function App() {
   const { darkMode, toggleTheme } = useTheme();
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeVertical, setActiveVertical] = useState(null);
 
-  /**
-   * 1. PERSISTENT USER STATE
-   * Ensures assignedVerticals is always initialized as an array.
-   */
+  // 2. Initial Data Fetch from Supabase
+  useEffect(() => {
+    const fetchTasks = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .order('createdAt', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching tasks:", error.message);
+      } else {
+        setTasks(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchTasks();
+  }, []);
+
+  // 3. User Identity (Keeping LocalStorage for fast profile loading)
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('power_project_user');
     if (!savedUser) return {
@@ -34,20 +57,17 @@ function App() {
       assignedVerticals: ["v1"], 
       id: "u1"
     };
-    
     try {
       const parsed = JSON.parse(savedUser);
-      // Migration: Ensure assignedVerticals exists if loading an old singular record
       return {
         ...parsed,
-        assignedVerticals: parsed.assignedVerticals || (parsed.assignedVertical ? [parsed.assignedVertical] : ["v1"])
+        assignedVerticals: parsed.assignedVerticals || ["v1"]
       };
     } catch {
       return { name: "Alex Rivera", role: "Master Admin", roleId: "master_admin", assignedVerticals: ["v1"], id: "u1" };
     }
   });
 
-  // 2. PERSISTENT PERMISSIONS
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
     if (!saved) return DEFAULT_ROLE_PERMISSIONS;
@@ -66,25 +86,65 @@ function App() {
     return saved !== null ? saved === 'true' : true;
   });
 
-  const [activeVertical, setActiveVertical] = useState(null);
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('power_project_tasks');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Sync effects
+  // Sync Local Preferences
   useEffect(() => { localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
-  useEffect(() => { localStorage.setItem('power_project_tasks', JSON.stringify(tasks)); }, [tasks]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  // 4. Supabase CRUD Helpers (Replaces LocalStorage mutation)
+  
+  /**
+   * Adds a task to the Supabase cloud.
+   * Logic: Inserts and then updates local state with the returned DB object (including its new UUID).
+   */
+  const addTask = async (taskData) => {
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert([taskData])
+      .select();
+
+    if (error) {
+      console.error("Error adding task:", error.message);
+    } else if (data) {
+      setTasks(prev => [...prev, data[0]]);
+    }
+  };
 
   /**
-   * REFACTORED ROLE CHANGE HANDLER
-   * Fixes the TypeError by ensuring prev.assignedVerticals is always treated as an array.
+   * Deletes a task from Supabase.
    */
+  const deleteTask = async (taskId) => {
+    if (window.confirm("Delete this task?")) {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) {
+        console.error("Error deleting task:", error.message);
+      } else {
+        setTasks(prev => prev.filter(t => t.id !== taskId));
+      }
+    }
+  };
+
+  /**
+   * Updates a task stage in Supabase.
+   */
+  const updateTaskStage = async (taskId, newStageId) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ stageId: newStageId, updatedAt: new Date().toISOString() })
+      .eq('id', taskId);
+
+    if (error) {
+      console.error("Error updating stage:", error.message);
+    } else {
+      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
+    }
+  };
+
   const handleRoleChange = (roleId, assignedVerticalId) => {
     const roleLabels = {
       master_admin: "Master Admin",
@@ -94,36 +154,26 @@ function App() {
     };
     
     setUser(prev => {
-      // Fix: Use a fallback empty array to prevent spreading undefined/null
       const currentVerticals = Array.isArray(prev?.assignedVerticals) ? prev.assignedVerticals : [];
       let newVerticals = [...currentVerticals];
-      
       if (assignedVerticalId && !newVerticals.includes(assignedVerticalId)) {
         newVerticals.push(assignedVerticalId);
       }
-
-      return {
-        ...prev,
-        roleId: roleId,
-        role: roleLabels[roleId],
-        assignedVerticals: newVerticals 
-      };
+      return { ...prev, roleId: roleId, role: roleLabels[roleId], assignedVerticals: newVerticals };
     });
     setActiveVertical(null);
   };
 
-  // Helpers
-  const deleteTask = (taskId) => {
-    if (window.confirm("Delete this task?")) {
-      setTasks(tasks.filter(t => t.id !== taskId));
-    }
-  };
-
-  const updateTaskStage = (taskId, newStageId) => {
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
-  };
-
   const currentUserPermissions = rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId];
+
+  // Loading Screen for initial fetch
+  if (loading) {
+    return (
+      <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <h2>Connecting to Cloud Database...</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
@@ -139,7 +189,7 @@ function App() {
         <div className="app-main-area">
           <header className="app-header">
             <div className="header-left">
-              <button className={`logo-button ${isSidebarOpen ? 'hidden' : ''}`} onClick={toggleSidebar}>
+              <button className={`logo-button ${isSidebarOpen ? 'hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
                 <img src={powerLogo} alt="Logo" className="logo-svg" />
               </button>
             </div>
@@ -162,7 +212,7 @@ function App() {
                 label={VERTICALS[activeVertical]?.label}
                 activeVertical={activeVertical}
                 tasks={tasks}
-                setTasks={setTasks}
+                setTasks={addTask} // Re-wired to use the addTask helper
                 deleteTask={deleteTask}
                 updateTaskStage={updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}

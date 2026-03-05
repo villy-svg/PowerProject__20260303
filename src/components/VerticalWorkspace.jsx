@@ -5,13 +5,13 @@ import './VerticalWorkspace.css';
 /**
  * VerticalWorkspace Component
  * Acts as the layout wrapper for specific vertical content.
- * Multi-Vertical Update: Refactored to support the 'assignedVerticals' array.
+ * Updated: Now handles asynchronous task state from Supabase.
  */
 const VerticalWorkspace = ({ 
   label, 
   activeVertical, 
   tasks, 
-  setTasks, 
+  setTasks, // This now receives the 'addTask' async helper from App.jsx
   deleteTask,
   updateTaskStage,
   isSubSidebarOpen,
@@ -21,14 +21,13 @@ const VerticalWorkspace = ({
 }) => {
   
   /**
-   * REFACTORED LAYOUT GUARD logic
-   * Master/Global roles enter any room; 
-   * Restricted roles must have the activeVertical ID in their assigned list.
+   * LAYOUT GUARD
+   * Determines if the user has permission to view this vertical.
    */
   const hasAccess = 
     permissions.canRead && (
       permissions.scope === 'global' || 
-      user?.assignedVerticals?.includes(activeVertical) // Refactored check
+      user?.assignedVerticals?.includes(activeVertical)
     );
 
   // Security Interception
@@ -69,10 +68,13 @@ const VerticalWorkspace = ({
       </aside>
 
       <main className="workspace-content">
+        {/* The TaskController now receives the 'addTask' helper (as setTasks) 
+            and the 'deleteTask'/'updateTaskStage' async functions.
+        */}
         <TaskController 
           activeVertical={activeVertical}
           tasks={tasks}
-          setTasks={setTasks}
+          setTasks={setTasks} 
           deleteTask={deleteTask}
           updateTaskStage={updateTaskStage}
           user={user} 

@@ -6,12 +6,12 @@ import './TaskController.css';
 /**
  * TaskController Component
  * Functional engine of the workspace.
- * Multi-Vertical Update: Refactored CRUD logic to use the assignedVerticals array.
+ * Supabase Update: Integrated async handling for Cloud CRUD operations.
  */
 const TaskController = ({ 
   activeVertical, 
   tasks = [], 
-  setTasks, 
+  setTasks, // This is the 'addTask' async helper from App.jsx
   deleteTask, 
   updateTaskStage,
   user = {},
@@ -20,8 +20,8 @@ const TaskController = ({
   const [newTaskText, setNewTaskText] = useState('');
 
   /**
-   * REFACTORED PERMISSION LOGIC
-   * Checks the capability flags against the new array structure.
+   * PERMISSION LOGIC
+   * Checks the capability flags against the assignedVerticals array.
    */
   const canUserCreate = permissions.canCreate && 
     (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
@@ -33,21 +33,29 @@ const TaskController = ({
     (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
 
   /**
-   * Handles adding a new task
+   * UPDATED: handleAddTask
+   * Now an async function to ensure the cloud database confirms the save
+   * before the UI input is cleared.
    */
-  const handleAddTask = (e) => {
+  const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTaskText.trim() || !canUserCreate) return;
     
-    // Create task for the specific vertical the user is currently viewing
+    // Create the schema-compliant task object
     const newTask = createInitialTask(newTaskText, activeVertical);
-    setTasks([...(tasks || []), newTask]);  
-    setNewTaskText('');             
+    
+    try {
+      // Trigger the Supabase insert helper from App.jsx
+      await setTasks(newTask);
+      setNewTaskText(''); 
+    } catch (err) {
+      console.error("Cloud Sync Error:", err);
+      alert("Failed to save task to the cloud. Please check your connection.");
+    }
   };
 
   return (
     <div className="task-controller">
-      {/* Create Permission Check */}
       {canUserCreate && (
         <form className="add-task-form" onSubmit={handleAddTask}>
           <input 
@@ -90,48 +98,49 @@ const TaskController = ({
 
               <div className="task-drop-zone">
                 {stageTasks.map((task) => (
-                    <div 
-                      key={task.id} 
-                      className="task-card"
-                      style={{ '--task-stage-color': stage.color }}
-                    >
-                        <div className="task-card-header">
-                            <span className="task-text">{task.text}</span>
-                            
-                            <div className="task-card-actions">
-                                {/* Update & Delete Permission Checks */}
-                                {(canUserUpdate || canUserDelete) ? (
-                                  <>
-                                    {canUserUpdate && (
-                                      <select 
-                                        className="stage-select-dropdown"
-                                        value={task.stageId}
-                                        onChange={(e) => updateTaskStage(task.id, e.target.value)}
-                                      >
-                                        {STAGE_LIST.map(s => (
-                                          <option key={s.id} value={s.id}>
-                                            {s.label}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    )}
+                  <div 
+                    key={task.id} 
+                    className="task-card"
+                    style={{ '--task-stage-color': stage.color }}
+                  >
+                    <div className="task-card-header">
+                      <span className="task-text">{task.text}</span>
+                      
+                      <div className="task-card-actions">
+                        {(canUserUpdate || canUserDelete) ? (
+                          <>
+                            {canUserUpdate && (
+                              <select 
+                                className="stage-select-dropdown"
+                                value={task.stageId}
+                                // Triggers async update in App.jsx
+                                onChange={(e) => updateTaskStage(task.id, e.target.value)}
+                              >
+                                {STAGE_LIST.map(s => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.label}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
 
-                                    {canUserDelete && (
-                                      <button 
-                                        className="delete-task-btn" 
-                                        onClick={() => deleteTask(task.id)}
-                                        title="Delete Task Permanently"
-                                      >
-                                      ×
-                                      </button>
-                                    )}
-                                  </>
-                                ) : (
-                                  <span className="read-only-badge">Read Only</span>
-                                )}
-                            </div>
-                        </div>
+                            {canUserDelete && (
+                              <button 
+                                className="delete-task-btn" 
+                                // Triggers async delete in App.jsx
+                                onClick={() => deleteTask(task.id)}
+                                title="Delete Task Permanently"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <span className="read-only-badge">Read Only</span>
+                        )}
+                      </div>
                     </div>
+                  </div>
                 ))}
                 
                 {stageTasks.length === 0 && (
