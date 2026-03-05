@@ -54,7 +54,7 @@ function App() {
       name: "Alex Rivera",
       role: "Master Admin",
       roleId: "master_admin",
-      assignedVerticals: ["v1"], 
+      assignedVerticals: ["CHARGING_HUBS"], 
       id: "u1"
     };
     try {
@@ -135,7 +135,7 @@ function App() {
   const updateTaskStage = async (taskId, newStageId) => {
     const { error } = await supabase
       .from('tasks')
-      .update({ stageId: newStageId, updatedAt: new Date().toISOString() })
+      .update({ stageId: newStageId, updatedat: new Date().toISOString() })
       .eq('id', taskId);
 
     if (error) {
