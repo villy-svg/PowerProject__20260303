@@ -67,8 +67,11 @@ function App() {
       }
     } catch (err) {
       console.error("❌ TRACE 1 CRASH:", err);
-    }
-    setLoading(false);
+    }finally {
+    // 🚩 THIS IS THE FIX: This must be outside the 'else' but inside the function
+    console.log("🚩 TRACE 1.2: Setting loading to false now.");
+    setLoading(false); 
+  }
   };
   fetchTasks();
 }, []);
