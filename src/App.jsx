@@ -49,26 +49,29 @@ function App() {
 
   // src/App.jsx - around line 35
   useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      console.log("🚩 TRACE 1: Fetching started...");
-      
-      const { data, error } = await supabase
+  const fetchTasks = async () => {
+    setLoading(true);
+    console.log("🚩 TRACE 1: Starting Fetch...");
+    
+    try {
+      const { data, error, status } = await supabase
         .from('tasks')
         .select('*')
         .order('updatedat', { ascending: true });
 
       if (error) {
-        console.error("❌ TRACE 1 ERROR:", error.message);
+        console.error(`❌ TRACE 1 ERROR [Status ${status}]:`, error.message);
       } else {
-        console.log("✅ TRACE 1 SUCCESS: Received raw rows:", data?.length);
-        console.table(data); // This will show you exactly what columns/values exist
+        console.log("✅ TRACE 1 SUCCESS: Rows received:", data?.length);
         setTasks(data || []);
       }
-      setLoading(false);
-    };
-    fetchTasks();
-  }, []);
+    } catch (err) {
+      console.error("❌ TRACE 1 CRASH:", err);
+    }
+    setLoading(false);
+  };
+  fetchTasks();
+}, []);
 
   // 3. User Identity (Keeping LocalStorage for fast profile loading)
   const [user, setUser] = useState(() => {
