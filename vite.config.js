@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/PowerProject__20260303/', // 👈 Changed from '/PowerProject__20260303/' to '/' for subdomain use
+  base: '/', // 👈 Changed from '/PowerProject__20260303/' to '/' for subdomain use
   server: {
     open: true,
   }
