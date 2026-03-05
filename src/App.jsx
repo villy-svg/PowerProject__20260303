@@ -201,6 +201,8 @@ function App() {
     );
   }
 
+console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
+
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
       <div className="app-layout">
