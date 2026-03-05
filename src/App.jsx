@@ -34,7 +34,7 @@ function App() {
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .order('createdAt', { ascending: true });
+        .order('createdat', { ascending: true });
 
       if (error) {
         console.error("Error fetching tasks:", error.message);
