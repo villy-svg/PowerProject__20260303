@@ -1,13 +1,17 @@
-console.log("Vite Env Check:", import.meta.env);
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Using Vite's environment variables for security
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// DEBUG LOGS - Check your browser console for these!
+console.log("--- Supabase Env Debug ---");
+console.log("URL exists:", !!supabaseUrl);
+console.log("Key exists:", !!supabaseAnonKey);
+console.log("All Vite Env:", import.meta.env);
+console.log("--------------------------");
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase credentials missing. Check your .env file.")
+  throw new Error("Supabase credentials are missing! Check .env naming and restart your dev server.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
