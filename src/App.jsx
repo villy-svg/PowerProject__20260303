@@ -28,22 +28,45 @@ function App() {
   const [activeVertical, setActiveVertical] = useState(null);
 
   // 2. Initial Data Fetch from Supabase
+  // useEffect(() => {
+  //   const fetchTasks = async () => {
+  //     setLoading(true);
+  //     const { data, error } = await supabase
+  //       .from('tasks')
+  //       .select('*')
+  //       .order('createdat', { ascending: true });
+
+  //     if (error) {
+  //       console.error("Error fetching tasks:", error.message);
+  //     } else {
+  //       setTasks(data || []);
+  //     }
+  //     setLoading(false);
+  //   };
+
+  //   fetchTasks();
+  // }, []);
+
+  // src/App.jsx - around line 35
   useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
+      console.log("🚩 TRACE 1: Fetching started...");
+      
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
-        .order('createdat', { ascending: true });
+        .order('updatedat', { ascending: true });
 
       if (error) {
-        console.error("Error fetching tasks:", error.message);
+        console.error("❌ TRACE 1 ERROR:", error.message);
       } else {
+        console.log("✅ TRACE 1 SUCCESS: Received raw rows:", data?.length);
+        console.table(data); // This will show you exactly what columns/values exist
         setTasks(data || []);
       }
       setLoading(false);
     };
-
     fetchTasks();
   }, []);
 
