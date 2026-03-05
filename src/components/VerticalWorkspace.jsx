@@ -20,8 +20,11 @@ const VerticalWorkspace = ({
   permissions = {} 
 }) => {
 
-  // 🚩 ADD THIS TRACE LOG HERE:
-  console.log(`🚩 TRACE 2: Workspace [${label}] received tasks. Count:`, tasks?.length);
+  // 🚩 ADD THIS TRACE LOG:
+  console.log(`🚩 TRACE 2: Workspace [${label}] received tasks. Count: ${tasks?.length}`);
+  if (tasks?.length > 0) {
+    console.log("Detailed Task Check:", tasks[0]);
+  }
   
   /**
    * LAYOUT GUARD
