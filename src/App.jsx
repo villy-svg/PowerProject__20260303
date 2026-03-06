@@ -21,6 +21,19 @@ import RoleManagement from './components/RoleManagement';
 // Assets
 import powerLogo from './assets/logo.svg';
 
+/**
+ * Supabase stores column names in lowercase.
+ * This mapper converts them to the camelCase keys the rest of the app expects.
+ */
+const normalizeTask = (row) => ({
+  id: row.id,
+  text: row.text,
+  verticalId: row.verticalid ?? row.verticalId,
+  stageId: row.stageid ?? row.stageId,
+  createdAt: row.createdat ?? row.createdAt,
+  updatedAt: row.updatedat ?? row.updatedAt,
+});
+
 function App() {
   const { darkMode, toggleTheme } = useTheme();
   const [tasks, setTasks] = useState([]);
@@ -63,7 +76,7 @@ function App() {
         console.error(`❌ TRACE 1 ERROR [Status ${status}]:`, error.message);
       } else {
         console.log("✅ TRACE 1 SUCCESS: Rows received:", data?.length);
-        setTasks(data || []);
+        setTasks((data || []).map(normalizeTask));
       }
     } catch (err) {
       console.error("❌ TRACE 1 CRASH:", err);
@@ -128,15 +141,24 @@ function App() {
    * Logic: Inserts and then updates local state with the returned DB object (including its new UUID).
    */
   const addTask = async (taskData) => {
+    // Remap camelCase keys to the lowercase column names Supabase uses
+    const dbRow = {
+      id: taskData.id,
+      text: taskData.text,
+      verticalid: taskData.verticalId,
+      stageid: taskData.stageId,
+      createdat: taskData.createdAt,
+      updatedat: taskData.updatedAt,
+    };
     const { data, error } = await supabase
       .from('tasks')
-      .insert([taskData])
+      .insert([dbRow])
       .select();
 
     if (error) {
       console.error("Error adding task:", error.message);
     } else if (data) {
-      setTasks(prev => [...prev, data[0]]);
+      setTasks(prev => [...prev, normalizeTask(data[0])]);
     }
   };
 
@@ -164,7 +186,7 @@ function App() {
   const updateTaskStage = async (taskId, newStageId) => {
     const { error } = await supabase
       .from('tasks')
-      .update({ stageId: newStageId, updatedat: new Date().toISOString() })
+      .update({ stageid: newStageId, updatedat: new Date().toISOString() })
       .eq('id', taskId);
 
     if (error) {
