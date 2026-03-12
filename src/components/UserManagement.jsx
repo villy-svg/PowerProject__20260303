@@ -39,23 +39,28 @@ const UserManagement = ({ currentUser }) => {
 
     console.log("🛠️ Attempting to update user:", editingUser.email, "Role:", editingUser.role_id);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('user_profiles')
       .update({
         role_id: editingUser.role_id,
         assigned_verticals: editingUser.assigned_verticals
       })
-      .eq('id', editingUser.id);
+      .eq('id', editingUser.id)
+      .select();
 
     if (error) {
       console.error("❌ Database Update Error:", error);
       setStatus({ type: 'error', text: `Sync Error: ${error.message}` });
       setLoading(false);
+    } else if (!data || data.length === 0) {
+      console.warn("⚠️ No rows updated. This usually means an RLS Policy violation.");
+      setStatus({ type: 'error', text: 'Permission Denied: RLS Policy blocked the update.' });
+      setLoading(false);
     } else {
-      console.log("✅ Update Successful!");
+      console.log("✅ Update Successful! Server returned:", data[0]);
       setStatus({ type: 'success', text: 'User permissions synchronized with cloud!' });
       setEditingUser(null);
-      await fetchUsers(); // Re-fetch to ensure UI is in sync
+      await fetchUsers();
     }
   };
 
