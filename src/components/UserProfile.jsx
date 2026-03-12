@@ -65,32 +65,11 @@ const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
 
       {isOpen && (
         <div className="user-dropdown-menu">
-          <div className="dropdown-header">Select Role</div>
-          {roles.map((role) => (
-            <button 
-              key={role.id} 
-              className={`dropdown-item ${user.roleId === role.id ? 'active' : ''}`}
-              onClick={() => handleRoleSelect(role.id)}
-            >
-              <span className="role-icon">{role.icon}</span>
-              <span className="role-label">{role.label}</span>
-            </button>
-          ))}
-          
-          {isVerticalRole && (
-            <div className="vertical-assignment-area">
-              <div className="dropdown-header">Assign Vertical</div>
-              <select 
-                className="vertical-mini-select"
-                value={user.assignedVertical || ''}
-                onChange={(e) => handleVerticalSelect(e.target.value)}
-              >
-                {VERTICAL_LIST.map(v => (
-                  <option key={v.id} value={v.id}>{v.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="dropdown-header">Profile Details</div>
+          <div className="dropdown-item static">
+            <span className="role-icon">🛡️</span>
+            <span className="role-label">{user?.roleId?.replace('_', ' ').toUpperCase()}</span>
+          </div>
           
           <div className="dropdown-divider" />
           

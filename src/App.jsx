@@ -234,24 +234,7 @@ function App() {
     }
   };
 
-  const handleRoleChange = (roleId, assignedVerticalId) => {
-    const roleLabels = {
-      master_admin: "Master Admin",
-      vertical_admin: "Vertical Admin",
-      master_viewer: "Master Viewer",
-      vertical_viewer: "Vertical Viewer"
-    };
-    
-    setUser(prev => {
-      const currentVerticals = Array.isArray(prev?.assignedVerticals) ? prev.assignedVerticals : [];
-      let newVerticals = [...currentVerticals];
-      if (assignedVerticalId && !newVerticals.includes(assignedVerticalId)) {
-        newVerticals.push(assignedVerticalId);
-      }
-      return { ...prev, roleId: roleId, role: roleLabels[roleId], assignedVerticals: newVerticals };
-    });
-    setActiveVertical(null);
-  };
+
 
   const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
 
@@ -319,7 +302,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
             <div className="header-right">
               <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
               <div style={{ width: '16px' }} />
-              <UserProfile user={user} onRoleChange={handleRoleChange} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
+              <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
             </div>
           </header>
           <main className="app-content">

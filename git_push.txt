@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "20260312 login page creation -- added registration page" 
+git commit -m "20260312 no access by default" 
 git push origin main
