@@ -90,16 +90,16 @@ const Login = () => {
         ) : (
           <form className="login-form" onSubmit={handleVerifyOtp}>
             <h2>Verify OTP</h2>
-            <p className="login-subtitle">Enter the 6-digit code sent to {email}.</p>
+            <p className="login-subtitle">Enter the code sent to {email}.</p>
             <div className="form-group">
               <label>Security Code</label>
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456"
+                placeholder="12345678"
                 required
-                maxLength={6}
+                maxLength={8}
               />
             </div>
             <button type="submit" className="login-button" disabled={loading}>
