@@ -18,6 +18,7 @@ import Configuration from './components/Configuration';
 import UserProfile from './components/UserProfile'; 
 import RoleManagement from './components/RoleManagement'; 
 import UserManagement from './components/UserManagement';
+import HubManagement from './verticals/ChargingHubs/HubManagement';
 import Login from './components/Login';
 
 // Assets
@@ -315,6 +316,8 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
+            ) : activeVertical === 'hub_management' ? (
+              <HubManagement />
             ) : (
               <VerticalWorkspace 
                 label={VERTICALS[activeVertical]?.label}

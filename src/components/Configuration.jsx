@@ -57,22 +57,39 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
         
         {/* PHASE 3: Access Control Section - Master Admin Only */}
         {isMasterAdmin && (
-          <section className="config-section highlight-border">
-            <div className="section-icon">🔐</div>
-            <div className="section-content">
-              <h3>Access Control</h3>
-              <p>Define Create, Read, Update, and Delete capabilities for each role.</p>
-              
-              <div className="config-actions">
-                <button 
-                  className="btn-primary" 
-                  onClick={() => setActiveVertical('role_management')}
-                >
-                  Manage Role Permissions
-                </button>
+          <>
+            <section className="config-section highlight-border">
+              <div className="section-icon">🔐</div>
+              <div className="section-content">
+                <h3>Access Control</h3>
+                <p>Define Create, Read, Update, and Delete capabilities for each role.</p>
+                <div className="config-actions">
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => setActiveVertical('role_management')}
+                  >
+                    Manage Role Permissions
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            <section className="config-section master-tools">
+              <div className="section-icon">⚡</div>
+              <div className="section-content">
+                <h3>Master Admin Tools</h3>
+                <p>Configure global vertical elements like Charging Hubs.</p>
+                <div className="config-actions">
+                  <button 
+                    className="btn-primary" 
+                    onClick={() => setActiveVertical('hub_management')}
+                  >
+                    Manage Charging Hubs
+                  </button>
+                </div>
+              </div>
+            </section>
+          </>
         )}
 
         {/* Data Management Section - Restricted to Master Admin */}

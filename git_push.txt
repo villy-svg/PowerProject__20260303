@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "20260312 Users Vertical Functions Added 2" 
+git commit -m "20260312 Start Making Charging Hubs Manager" 
 git push origin main
