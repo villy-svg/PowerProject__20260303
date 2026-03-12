@@ -6,7 +6,7 @@ import './UserProfile.css';
  * UserProfile Component
  * Handles identity display, role switching, and vertical assignment.
  */
-const UserProfile = ({ user, onRoleChange, onConfigClick }) => {
+const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -96,6 +96,10 @@ const UserProfile = ({ user, onRoleChange, onConfigClick }) => {
           
           <button className="dropdown-item config-link" onClick={() => { onConfigClick(); setIsOpen(false); }}>
             ⚙️ Configuration
+          </button>
+          
+          <button className="dropdown-item logout-button" onClick={() => { onLogout(); setIsOpen(false); }}>
+            🚪 Log Out
           </button>
         </div>
       )}

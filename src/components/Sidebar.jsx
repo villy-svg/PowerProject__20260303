@@ -68,19 +68,27 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
 
               {/* Multi-Vertical Render Logic */}
               {isHydrating ? (
-                filteredVerticals.map((v) => (
+                VERTICAL_LIST.map((v) => (
                   <li key={v.id} className="nav-loading-pulse">{v.label}</li>
                 ))
-              ) : filteredVerticals.length > 0 ? (
-                filteredVerticals.map((vertical) => (
-                  <li 
-                    key={vertical.id} 
-                    className={activeVertical === vertical.id ? 'active' : ''} 
-                    onClick={() => setActiveVertical(vertical.id)}
-                  >
-                    {vertical.label}
-                  </li>
-                ))
+              ) : VERTICAL_LIST.length > 0 ? (
+                VERTICAL_LIST.map((vertical) => {
+                  const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
+                  const isLocked = vertical.locked || !isAssigned;
+
+                  return (
+                    <li 
+                      key={vertical.id} 
+                      className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                      onClick={() => !isLocked && setActiveVertical(vertical.id)}
+                      title={isLocked ? "Coming Soon / No Access" : ""}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <span>{vertical.label}</span>
+                      {isLocked && <span className="lock-icon" style={{ fontSize: '12px', opacity: 0.5 }}>🔒</span>}
+                    </li>
+                  );
+                })
               ) : (
                 <li className="nav-empty-state">No Access</li>
               )}

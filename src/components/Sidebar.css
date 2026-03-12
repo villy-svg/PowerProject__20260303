@@ -89,7 +89,7 @@
   display: block;
 }
 
-.sidebar-nav li:hover {
+.sidebar-nav li:not(.locked):hover {
   background-color: var(--border-color);
   color: var(--brand-green);
 }
@@ -98,6 +98,16 @@
   background-color: color-mix(in srgb, var(--brand-green), transparent 90%);
   color: var(--brand-green);
   font-weight: 700;
+}
+
+.sidebar-nav li.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sidebar-nav li.locked:hover {
+  background-color: transparent;
+  color: var(--text-color);
 }
 
 /* 7. Dividers & Cleanup */

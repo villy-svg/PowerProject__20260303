@@ -1,3 +1,3 @@
 git add .
-git commit -m "20260306 successful supabase read run 1"
+git commit -m "20260312 lock all verticals except -- hub manager"
 git push origin main

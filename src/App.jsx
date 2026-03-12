@@ -17,6 +17,7 @@ import ExecutiveSummary from './components/ExecutiveSummary';
 import Configuration from './components/Configuration';
 import UserProfile from './components/UserProfile'; 
 import RoleManagement from './components/RoleManagement'; 
+import Login from './components/Login';
 
 // Assets
 import powerLogo from './assets/logo.svg';
@@ -89,26 +90,9 @@ function App() {
   fetchTasks();
 }, []);
 
-  // 3. User Identity (Keeping LocalStorage for fast profile loading)
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('power_project_user');
-    if (!savedUser) return {
-      name: "Alex Rivera",
-      role: "Master Admin",
-      roleId: "master_admin",
-      assignedVerticals: ["CHARGING_HUBS"], 
-      id: "u1"
-    };
-    try {
-      const parsed = JSON.parse(savedUser);
-      return {
-        ...parsed,
-        assignedVerticals: parsed.assignedVerticals || ["v1"]
-      };
-    } catch {
-      return { name: "Alex Rivera", role: "Master Admin", roleId: "master_admin", assignedVerticals: ["v1"], id: "u1" };
-    }
-  });
+  // 3. Auth and User Identity
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
@@ -128,8 +112,53 @@ function App() {
     return saved !== null ? saved === 'true' : true;
   });
 
+  // Auth State Listener
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) fetchUserProfile(session.user.id);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserProfile = async (userId) => {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (error) {
+      console.error("Error fetching user profile:", error);
+    } else if (data) {
+      setUser({
+        id: data.id,
+        name: data.name || "User",
+        role: data.role_id, 
+        roleId: data.role_id,
+        assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"]
+      });
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   // Sync Local Preferences
-  useEffect(() => { localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
+  useEffect(() => { if(user) localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
@@ -215,13 +244,31 @@ function App() {
     setActiveVertical(null);
   };
 
-  const currentUserPermissions = rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId];
+  const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
 
   // Loading Screen for initial fetch
   if (loading) {
     return (
       <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <h2>Connecting to Cloud Database...</h2>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
+        <Login />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
+        <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <h2>Loading User Profile...</h2>
+        </div>
       </div>
     );
   }
@@ -250,7 +297,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
             <div className="header-right">
               <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
               <div style={{ width: '16px' }} />
-              <UserProfile user={user} onRoleChange={handleRoleChange} onConfigClick={() => setActiveVertical('configuration')} />
+              <UserProfile user={user} onRoleChange={handleRoleChange} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
             </div>
           </header>
           <main className="app-content">
