@@ -17,6 +17,7 @@ import ExecutiveSummary from './components/ExecutiveSummary';
 import Configuration from './components/Configuration';
 import UserProfile from './components/UserProfile'; 
 import RoleManagement from './components/RoleManagement'; 
+import UserManagement from './components/UserManagement';
 import Login from './components/Login';
 
 // Assets
@@ -312,6 +313,8 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <Configuration tasks={tasks} setTasks={setTasks} user={user} setActiveVertical={setActiveVertical} />
             ) : activeVertical === 'role_management' ? (
               <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
+            ) : activeVertical === 'user_management' ? (
+              <UserManagement currentUser={user} />
             ) : (
               <VerticalWorkspace 
                 label={VERTICALS[activeVertical]?.label}

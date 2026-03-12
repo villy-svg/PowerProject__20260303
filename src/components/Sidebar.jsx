@@ -44,6 +44,12 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
     if (canSeeConfig) setActiveVertical('configuration');
   };
 
+  const handleUserMgmtNavigate = () => {
+    setActiveVertical('user_management');
+  };
+
+  const showUserMgmt = permissions?.scope === 'global' && permissions?.canManageRoles;
+
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content-wrapper">
@@ -102,6 +108,14 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
               {canSeeConfig && (
                 <>
                   <hr className="nav-divider" />
+                  {showUserMgmt && (
+                    <li 
+                      className={activeVertical === 'user_management' ? 'active' : ''} 
+                      onClick={handleUserMgmtNavigate}
+                    >
+                      User Management
+                    </li>
+                  )}
                   <li 
                     className={activeVertical === 'configuration' ? 'active' : ''} 
                     onClick={handleConfigNavigate}
