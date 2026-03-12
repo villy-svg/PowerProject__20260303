@@ -34,20 +34,29 @@ const UserManagement = ({ currentUser }) => {
     e.preventDefault();
     if (!editingUser) return;
 
+    setLoading(true);
+    setStatus({ type: '', text: '' });
+
+    console.log("🛠️ Attempting to update user:", editingUser.email, "Role:", editingUser.role_id);
+
     const { error } = await supabase
       .from('user_profiles')
       .update({
         role_id: editingUser.role_id,
-        assigned_verticals: editingUser.assigned_verticals
+        assigned_verticals: editingUser.assigned_verticals,
+        updated_at: new Date().toISOString()
       })
       .eq('id', editingUser.id);
 
     if (error) {
-      setStatus({ type: 'error', text: error.message });
+      console.error("❌ Database Update Error:", error);
+      setStatus({ type: 'error', text: `Sync Error: ${error.message}` });
+      setLoading(false);
     } else {
-      setStatus({ type: 'success', text: 'User updated successfully!' });
+      console.log("✅ Update Successful!");
+      setStatus({ type: 'success', text: 'User permissions synchronized with cloud!' });
       setEditingUser(null);
-      fetchUsers();
+      await fetchUsers(); // Re-fetch to ensure UI is in sync
     }
   };
 
