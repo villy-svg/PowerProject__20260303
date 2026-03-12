@@ -4,23 +4,32 @@ import powerLogo from '../assets/logo.svg';
 import './Login.css';
 
 const Login = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP
+  const [step, setStep] = useState(1); // 1: Form, 2: OTP
+  const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleSendOtp = async (e) => {
+  const handleAuthAction = async (e) => {
     e.preventDefault();
     if (!email) return;
+    if (isRegistering && !name) {
+      setMessage({ type: 'error', text: 'Please enter your name to register.' });
+      return;
+    }
 
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    // We use signInWithOtp for both.
+    // If isRegistering, we pass the name in the data object for the Supabase Trigger.
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
+        data: isRegistering ? { name } : {}
       }
     });
 
@@ -62,7 +71,7 @@ const Login = () => {
           <img src={powerLogo} alt="PowerProject Logo" className="logo-svg-large" />
           <h1 className="brand-title">PowerProject</h1>
         </div>
-        
+
         {message.text && (
           <div className={`login-message ${message.type}`}>
             {message.text}
@@ -70,21 +79,58 @@ const Login = () => {
         )}
 
         {step === 1 ? (
-          <form className="login-form" onSubmit={handleSendOtp}>
-            <h2>Sign In</h2>
-            <p className="login-subtitle">Enter your email to receive a secure OTP.</p>
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex@example.com"
-                required
-              />
+          <form className="login-form" onSubmit={handleAuthAction}>
+            <h2>{isRegistering ? 'Create Account' : 'Sign In'}</h2>
+            <p className="login-subtitle">
+              {isRegistering
+                ? 'Welcome to PowerProject'
+                : 'Enter your email to receive a secure OTP.'}
+            </p>
+
+            <div className="login-toggle">
+              <button
+                type="button"
+                className={!isRegistering ? 'active' : ''}
+                onClick={() => { setIsRegistering(false); setMessage({ type: '', text: '' }); }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                className={isRegistering ? 'active' : ''}
+                onClick={() => { setIsRegistering(true); setMessage({ type: '', text: '' }); }}
+              >
+                Register
+              </button>
             </div>
+
+            <div className="form-group-stack">
+              {isRegistering && (
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Alex Rivera"
+                    required
+                  />
+                </div>
+              )}
+              <div className="form-group">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="alex@example.com"
+                  required
+                />
+              </div>
+            </div>
+
             <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Sending OTP...' : 'Send OTP'}
+              {loading ? 'Sending OTP...' : isRegistering ? 'Register' : 'Send OTP'}
             </button>
           </form>
         ) : (
@@ -105,13 +151,13 @@ const Login = () => {
             <button type="submit" className="login-button" disabled={loading}>
               {loading ? 'Verifying...' : 'Sign In'}
             </button>
-            <button 
-              type="button" 
-              className="login-back-button" 
+            <button
+              type="button"
+              className="login-back-button"
               onClick={() => { setStep(1); setOtp(''); setMessage({ type: '', text: '' }); }}
               disabled={loading}
             >
-              Back to Email
+              Back
             </button>
           </form>
         )}

@@ -93,6 +93,7 @@ function App() {
   // 3. Auth and User Identity
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
+  const [profileError, setProfileError] = useState(null);
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
@@ -142,6 +143,12 @@ function App() {
       
     if (error) {
       console.error("Error fetching user profile:", error);
+      // If code is PGRST116 (0 rows returned), the trigger may not have fired
+      if (error.code === 'PGRST116') {
+        setProfileError("User profile not found in database. Did you run the SQL script or sign in before the trigger was added?");
+      } else {
+        setProfileError(error.message);
+      }
     } else if (data) {
       setUser({
         id: data.id,
@@ -150,11 +157,13 @@ function App() {
         roleId: data.role_id,
         assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"]
       });
+      setProfileError(null);
     }
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setProfileError(null);
   };
 
   // Sync Local Preferences
@@ -266,8 +275,21 @@ function App() {
   if (!user) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
-        <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <h2>Loading User Profile...</h2>
+        <div className="loading-screen" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          {profileError ? (
+            <>
+              <h2 style={{ color: '#ff4444' }}>Profile Error</h2>
+              <p style={{ maxWidth: '400px', textAlign: 'center' }}>{profileError}</p>
+              <button 
+                onClick={handleLogout}
+                style={{ marginTop: '1rem', padding: '10px 20px', backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                Sign Out & Try Again
+              </button>
+            </>
+          ) : (
+            <h2>Loading User Profile...</h2>
+          )}
         </div>
       </div>
     );
