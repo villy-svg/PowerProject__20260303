@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "20260312 Users Vertical Added" 
+git commit -m "20260312 Users Vertical Functions Added" 
 git push origin main

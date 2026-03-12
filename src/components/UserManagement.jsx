@@ -43,8 +43,7 @@ const UserManagement = ({ currentUser }) => {
       .from('user_profiles')
       .update({
         role_id: editingUser.role_id,
-        assigned_verticals: editingUser.assigned_verticals,
-        updated_at: new Date().toISOString()
+        assigned_verticals: editingUser.assigned_verticals
       })
       .eq('id', editingUser.id);
 
