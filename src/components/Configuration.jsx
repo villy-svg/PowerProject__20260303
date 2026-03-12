@@ -1,136 +1,140 @@
-import React from 'react';
-import { supabase } from '../services/supabaseClient'; // Import the connection client
+import React, { useState } from 'react';
+import { supabase } from '../services/supabaseClient';
+import { VERTICAL_LIST } from '../constants/verticals';
 import './Configuration.css';
 
-/**
- * Configuration Component
- * Provides an interface for system-wide settings and data management.
- * Supabase Update: Wipes the cloud 'tasks' table if the user is a Master Admin.
- */
 const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   
-  // PERMISSION CHECK: Restricted global actions based on user role
   const isMasterAdmin = user?.roleId === 'master_admin';
 
-  /**
-   * UPDATED: handleClearAllTasks
-   * Now an async function to perform a global DELETE on the Supabase table.
-   */
+  const toggleViewMode = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem('config_view_mode', mode);
+  };
+
   const handleClearAllTasks = async () => {
     if (!isMasterAdmin) return;
-
-    const confirmed = window.confirm(
-      "CRITICAL: This will permanently delete ALL tasks across ALL verticals. Proceed?"
-    );
-    
+    const confirmed = window.confirm("CRITICAL: Delete ALL tasks across ALL verticals?");
     if (confirmed) {
       try {
-        // 1. Target the 'tasks' table and delete all records
-        // Using a filter like .neq('id', 0) ensures all rows are targeted in most setups
-        const { error } = await supabase
-          .from('tasks')
-          .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000'); 
-
+        const { error } = await supabase.from('tasks').delete().neq('id', '00000000-0000-0000-0000-000000000000'); 
         if (error) throw error;
-
-        // 2. Update local state so the UI reflects the empty database instantly
         setTasks([]);
-        alert("Cloud database successfully cleared.");
+        alert("Cloud database cleared.");
       } catch (err) {
-        console.error("Cloud Wipe Error:", err.message);
-        alert("Failed to clear cloud data. Check your connection.");
+        alert("Failed to clear cloud data.");
       }
     }
   };
 
-  const totalTasks = (tasks || []).length;
+  // Define config items for each vertical
+  const verticalConfigs = {
+    CHARGING_HUBS: [
+      {
+        id: 'manage_hubs',
+        title: 'Manage Charging Hubs',
+        desc: 'Add, edit or remove global charging hub locations.',
+        icon: '⚡',
+        action: () => setActiveVertical('hub_management'),
+        adminOnly: true
+      }
+    ],
+    // Placeholders for other verticals
+    CLIENTS: [],
+    EMPLOYEES: [],
+    PARTNERS: [],
+    VENDORS: []
+  };
 
   return (
-    <div className="configuration-view">
+    <div className={`configuration-view ${viewMode}-view`}>
       <header className="config-header">
-        <h2>System Configuration</h2>
-        <p>Manage global settings and application data.</p>
+        <div className="header-text">
+          <h2>System Configuration</h2>
+          <p>Manage groupings and global application settings.</p>
+        </div>
+        <div className="view-toggle">
+          <button 
+            className={viewMode === 'grid' ? 'active' : ''} 
+            onClick={() => toggleViewMode('grid')}
+            title="Grid View"
+          >
+            田
+          </button>
+          <button 
+            className={viewMode === 'horizontal' ? 'active' : ''} 
+            onClick={() => toggleViewMode('horizontal')}
+            title="List View"
+          >
+            ☰
+          </button>
+        </div>
       </header>
 
-      <div className="config-grid">
-        
-        {/* PHASE 3: Access Control Section - Master Admin Only */}
-        {isMasterAdmin && (
-          <>
-            <section className="config-section highlight-border">
-              <div className="section-icon">🔐</div>
-              <div className="section-content">
-                <h3>Access Control</h3>
-                <p>Define Create, Read, Update, and Delete capabilities for each role.</p>
-                <div className="config-actions">
-                  <button 
-                    className="btn-primary" 
-                    onClick={() => setActiveVertical('role_management')}
-                  >
-                    Manage Role Permissions
-                  </button>
-                </div>
-              </div>
-            </section>
+      <div className="config-content">
+        {/* Render Sections by Vertical Order */}
+        {VERTICAL_LIST.map(vertical => {
+          const items = verticalConfigs[vertical.id] || [];
+          if (items.length === 0) return null;
 
-            <section className="config-section master-tools">
-              <div className="section-icon">⚡</div>
-              <div className="section-content">
-                <h3>Master Admin Tools</h3>
-                <p>Configure global vertical elements like Charging Hubs.</p>
-                <div className="config-actions">
-                  <button 
-                    className="btn-primary" 
-                    onClick={() => setActiveVertical('hub_management')}
-                  >
-                    Manage Charging Hubs
-                  </button>
-                </div>
-              </div>
-            </section>
-          </>
-        )}
-
-        {/* Data Management Section - Restricted to Master Admin */}
-        {isMasterAdmin ? (
-          <section className="config-section">
-            <div className="section-icon">💾</div>
-            <div className="section-content">
-              <h3>Data Management</h3>
-              <p>Current cloud system load: <strong>{totalTasks}</strong> total tasks.</p>
-              
-              <div className="config-actions">
-                <button 
-                  className="btn-danger" 
-                  onClick={handleClearAllTasks}
-                  disabled={totalTasks === 0}
-                >
-                  Clear All Cloud Task Data
-                </button>
+          return (
+            <div key={vertical.id} className="config-group">
+              <h3 className="group-label">{vertical.label}</h3>
+              <div className="config-items-container">
+                {items.map(item => {
+                  if (item.adminOnly && !isMasterAdmin) return null;
+                  return (
+                    <div key={item.id} className="config-tile" onClick={item.action}>
+                      <div className="tile-icon">{item.icon}</div>
+                      <div className="tile-info">
+                        <h4>{item.title}</h4>
+                        <p>{item.desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </section>
-        ) : (
-          <section className="config-section locked">
-            <div className="section-icon">🔒</div>
-            <div className="section-content">
-              <h3>Data Management</h3>
-              <p>Global data management is restricted to the <strong>Master Admin</strong>.</p>
-              <div className="config-info-tag">Access Denied</div>
-            </div>
-          </section>
-        )}
+          );
+        })}
 
-        {/* User Preferences Placeholder */}
-        <section className="config-section">
-          <div className="section-icon">⚙️</div>
-          <div className="section-content">
-            <h3>Display Preferences</h3>
-            <p>Customize how PowerProject looks and feels on your device.</p>
-            <div className="config-info-tag">Theme is managed via the header toggle</div>
+        {/* Global Settings (Accessible to all) */}
+        <div className="config-group">
+          <h3 className="group-label">General Settings</h3>
+          <div className="config-items-container">
+            <div className="config-tile non-clickable">
+              <div className="tile-icon">⚙️</div>
+              <div className="tile-info">
+                <h4>Display Preferences</h4>
+                <p>Theme and UI scaling are managed via the header.</p>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
+
+        {/* Master Admin Controls at the Bottom */}
+        {isMasterAdmin && (
+          <div className="config-group master-controls">
+            <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
+            <div className="config-items-container">
+              <div className="config-tile" onClick={() => setActiveVertical('role_management')}>
+                <div className="tile-icon">🔐</div>
+                <div className="tile-info">
+                  <h4>Access Control Matrix</h4>
+                  <p>Define permissions for all roles globally.</p>
+                </div>
+              </div>
+              <div className="config-tile destructive" onClick={handleClearAllTasks}>
+                <div className="tile-icon">🗑️</div>
+                <div className="tile-info">
+                  <h4>Clear All Cloud Data</h4>
+                  <p>Permanently wipe all horizontal task data.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
