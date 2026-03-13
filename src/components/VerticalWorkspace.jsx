@@ -23,6 +23,8 @@ const VerticalWorkspace = ({
   onHeaderClick,
   TaskFormComponent, 
   TaskTileComponent, // New prop
+  onFilterChange, // Add this
+  filters, // Add this
   user = {}, 
   permissions = {} 
 }) => {
@@ -77,7 +79,13 @@ const VerticalWorkspace = ({
         
         {/* Render the specific SidebarComponent if provided, otherwise show generic placeholder */}
         {SidebarComponent ? (
-          <SidebarComponent user={user} setActiveVertical={setActiveVertical} />
+          <SidebarComponent 
+            user={user} 
+            setActiveVertical={setActiveVertical} 
+            onFilterChange={handleFilterChange}
+            filters={filters}
+            tasks={tasks}
+          />
 
         ) : (
           <div className="sub-sidebar-body">
@@ -99,6 +107,7 @@ const VerticalWorkspace = ({
         <TaskController 
           activeVertical={activeVertical}
           tasks={tasks}
+          filters={filters}
           setTasks={setTasks} 
           updateTask={updateTask}
           bulkUpdateTasks={bulkUpdateTasks}

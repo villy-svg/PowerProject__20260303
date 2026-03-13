@@ -41,6 +41,7 @@ const TaskCard = ({
   return (
     <div 
       className="task-card-master" 
+      onDoubleClick={() => canUpdate && openEditModal(task)}
       style={{ 
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
         '--stage-color': stage?.color || 'var(--brand-green)'

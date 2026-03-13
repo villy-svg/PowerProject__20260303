@@ -85,18 +85,9 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 0; /* Standardized: No padding here, sub-components handle it */
   overflow-y: auto;
   transition: all var(--transition-main);
-}
-
-/* FIX: Remove gap for vertical workspaces */
-.app-main-area.no-padding {
-  padding: 0;
-}
-
-.app-main-area.no-padding .app-header {
-  padding: 20px 20px 0 20px;
 }
 
 .app-content {
@@ -107,36 +98,64 @@ html, body {
   padding-top: 40px;
 }
 
-.app-main-area.no-padding .app-content {
-  padding-top: 0;
-}
-
 /* ==========================================================================
    4. HEADER & BRANDING
    ========================================================================== */
 .app-header {
-  height: 60px;
+  height: 90px; /* Consistent height */
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   border-bottom: 1px solid var(--border-color);
+  padding: 0 40px; /* CONSISTENT PADDING AT ALL TIMES */
+  position: relative;
+  flex-shrink: 0;
 }
 
-.header-left, .header-right { flex: 1; display: flex; align-items: center; }
-.header-center { flex: 2; display: flex; justify-content: center; align-items: center; }
-.header-right { justify-content: flex-end; }
+.header-left { 
+  width: 120px; /* Space reserved for the logo */
+  display: flex; 
+  align-items: center; 
+}
+
+.header-center { 
+  flex: 2; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.header-right { 
+  flex: 1;
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center;
+}
 
 .logo-button {
+  position: absolute; /* FIXED ANCHOR */
+  left: 40px; /* ALIGNED WITH HEADER PADDING */
+  top: 25px; /* Centered vertically in 90px header */
+  z-index: 1001; /* Above sidebar */
   background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   outline: none;
+  transition: transform 0.2s ease;
 }
-.logo-button.hidden { visibility: hidden; pointer-events: none; }
-.logo-svg { width: 35px; height: 35px; object-fit: contain; }
+
+.logo-button:hover {
+  transform: scale(1.05);
+}
+
+.logo-svg { 
+  width: 40px; 
+  height: 40px; 
+  object-fit: contain; 
+}
 
 .brand-title {
   margin: 0;

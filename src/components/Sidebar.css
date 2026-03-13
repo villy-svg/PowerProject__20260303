@@ -45,7 +45,7 @@
 
 /* 5. Sidebar Header & Logo */
 .sidebar-header {
-  height: 60px; 
+  height: 90px; /* Match App Header height for alignment */
   display: flex;
   align-items: center; 
   justify-content: flex-start;

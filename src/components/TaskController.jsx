@@ -23,19 +23,32 @@ const TaskController = ({
   updateTaskStage,
   TaskFormComponent, 
   TaskTileComponent, // New prop for custom tile rendering
+  filters = { city: '', hub: '', priority: '', function: '' },
   user = {},
   permissions = {} 
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // Track task being edited
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_task_view') || 'kanban');
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_task_view') || 'list');
   const [showDeprioritized, setShowDeprioritized] = useState(true);
 
   // Persist view mode choice
   useEffect(() => {
     localStorage.setItem('powerpod_task_view', viewMode);
   }, [viewMode]);
+
+  /**
+   * FILTER LOGIC
+   * Applies City, Hub, Priority, and Function filters to the task set.
+   */
+  const filteredTasks = (tasks || []).filter(t => {
+    if (filters.city && t.city !== filters.city) return false;
+    if (filters.hub && t.hub_id !== filters.hub) return false;
+    if (filters.priority && t.priority !== filters.priority) return false;
+    if (filters.function && t.function !== filters.function) return false;
+    return true;
+  });
 
   /**
    * PERMISSION LOGIC
@@ -138,8 +151,9 @@ const TaskController = ({
             className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
             onClick={() => setShowDeprioritized(!showDeprioritized)}
             title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
+            style={{ fontWeight: 800, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
           >
-            {showDeprioritized ? 'Hide Depri.' : 'Show Depri.'}
+            DEPR
           </button>
 
           {permissions.roleId === 'master_admin' && (
@@ -212,7 +226,7 @@ const TaskController = ({
           <div className="kanban-board">
             {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
               const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-              const stageTasks = (tasks || [])
+              const stageTasks = filteredTasks
                 .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
                 .sort((a, b) => {
                   const pA = priorityOrder[a.priority] ?? 99;
@@ -278,12 +292,13 @@ const TaskController = ({
           </div>
         ) : (
           <TaskListView 
-            tasks={tasks}
+            tasks={filteredTasks}
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={activeVertical}
             canUpdate={canUserUpdate}
             canDelete={canUserDelete}
             updateTaskStage={updateTaskStage}
+            deleteTask={deleteTask}
             openEditModal={openEditModal}
             TaskTileComponent={TaskTileComponent}
           />

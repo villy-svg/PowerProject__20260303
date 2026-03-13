@@ -53,6 +53,7 @@ const TaskListView = ({
                   <div 
                     key={task.id} 
                     className="list-task-row"
+                    onDoubleClick={() => canUpdate && openEditModal(task)}
                     style={{ '--stage-color': stage.color }}
                   >
                     {/* Left: Metadata */}

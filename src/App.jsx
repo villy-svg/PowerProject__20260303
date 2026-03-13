@@ -455,6 +455,9 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
       <div className="app-layout">
+        <button className="logo-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          <img src={powerLogo} alt="Logo" className="logo-svg" />
+        </button>
         <Sidebar 
           isOpen={isSidebarOpen} 
           onClose={() => setIsSidebarOpen(false)} 
@@ -466,9 +469,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
         <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
           <header className="app-header">
             <div className="header-left">
-              <button className={`logo-button ${isSidebarOpen ? 'hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                <img src={powerLogo} alt="Logo" className="logo-svg" />
-              </button>
+              {/* Spacer for absolute logo */}
             </div>
             <div className="header-center"><h1 className="brand-title">PowerProject</h1></div>
             <div className="header-right">

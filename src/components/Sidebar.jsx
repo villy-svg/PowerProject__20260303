@@ -56,9 +56,7 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
         
         <div className="sidebar-top-section">
           <div className="sidebar-header">
-            <button className="sidebar-logo-btn" onClick={onClose}>
-              <img src={powerLogo} alt="PowerProject Logo" className="logo-svg" />
-            </button>
+            {/* Header space maintained for alignment with external logo */}
           </div>
 
           <nav className="sidebar-nav">
