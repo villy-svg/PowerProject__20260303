@@ -29,8 +29,13 @@ const TaskController = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // Track task being edited
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_task_view') || 'kanban');
   const [showDeprioritized, setShowDeprioritized] = useState(true);
+
+  // Persist view mode choice
+  useEffect(() => {
+    localStorage.setItem('powerpod_task_view', viewMode);
+  }, [viewMode]);
 
   /**
    * PERMISSION LOGIC

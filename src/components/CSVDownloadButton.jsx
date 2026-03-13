@@ -14,10 +14,27 @@ const CSVDownloadButton = ({
   filename = 'template.csv',
   headers = [],
   sampleRows = [],
+  onDownload, // New optional async callback that returns the data array
   label = 'Download Template',
   className = '',
 }) => {
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    let exportData = sampleRows;
+
+    // If an onDownload hook is provided, use its result
+    if (typeof onDownload === 'function') {
+      try {
+        const dynamicData = await onDownload();
+        if (dynamicData && Array.isArray(dynamicData)) {
+          exportData = dynamicData;
+        }
+      } catch (err) {
+        console.error("CSV Data Preparation Error:", err);
+        alert("Failed to prepare CSV data.");
+        return;
+      }
+    }
+
     const rowToCSV = (obj) =>
       headers.map((h) => {
         const val = obj[h] ?? '';
@@ -27,7 +44,7 @@ const CSVDownloadButton = ({
 
     const lines = [
       headers.join(','),       // header row
-      ...sampleRows.map(rowToCSV) // optional sample rows
+      ...exportData.map(rowToCSV) // data rows
     ];
 
     const csv = lines.join('\r\n');

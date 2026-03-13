@@ -50,8 +50,8 @@ const TaskCSVDownload = ({ data = [], label = 'Export Tasks', filename, isTempla
       label={label}
       filename={filename || (isTemplate ? 'task_template.csv' : `tasks_export_${new Date().toISOString().split('T')[0]}.csv`)}
       headers={headers}
-      sampleRows={sampleRows}
-      onPrepareData={!isTemplate ? handleExport : null}
+      sampleRows={isTemplate ? sampleRows : []}
+      onDownload={!isTemplate ? handleExport : null}
       className="add-task-main-btn"
     />
   );
