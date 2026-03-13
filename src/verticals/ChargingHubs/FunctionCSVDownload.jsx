@@ -1,7 +1,7 @@
 import React from 'react';
 import CSVDownloadButton from '../../components/CSVDownloadButton';
 
-const FunctionCSVDownload = ({ className }) => {
+const FunctionCSVDownload = ({ className, data, label = "Download CSV Template", filename = "hub_functions_template.csv" }) => {
   const headers = ['name', 'function_code', 'description'];
   const sampleRows = [
     { name: 'Maintenance', function_code: 'MNT', description: 'Regular upkeep of charging station hardware and site.' },
@@ -11,10 +11,10 @@ const FunctionCSVDownload = ({ className }) => {
 
   return (
     <CSVDownloadButton
-      filename="hub_functions_template.csv"
+      filename={filename}
       headers={headers}
-      sampleRows={sampleRows}
-      label="Download CSV Template"
+      sampleRows={data || sampleRows}
+      label={label}
       className={className}
     />
   );

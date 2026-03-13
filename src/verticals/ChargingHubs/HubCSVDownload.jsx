@@ -1,7 +1,7 @@
 import React from 'react';
 import CSVDownloadButton from '../../components/CSVDownloadButton';
 
-const HubCSVDownload = ({ className }) => {
+const HubCSVDownload = ({ className, data, label = "Download CSV Form", filename = "charging_hubs_template.csv" }) => {
   const headers = ['name', 'hub_code', 'city', 'status'];
   const sampleRows = [
     { name: 'Downtown Fast Chargers', hub_code: 'DTN-01', city: '123 Main St, NY', status: 'active' },
@@ -10,10 +10,10 @@ const HubCSVDownload = ({ className }) => {
 
   return (
     <CSVDownloadButton
-      filename="charging_hubs_template.csv"
+      filename={filename}
       headers={headers}
-      sampleRows={sampleRows}
-      label="Download CSV Form"
+      sampleRows={data || sampleRows}
+      label={label}
       className={className}
     />
   );

@@ -26,7 +26,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   }, []);
 
   const fetchHubs = async () => {
-    let { data } = await supabase.from('hubs').select('id, name, city').order('name');
+    let { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
     
     if (data) {
       // Find if we already have an 'ALL' hub
@@ -48,7 +48,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   };
 
   const fetchFunctions = async () => {
-    const { data } = await supabase.from('hub_functions').select('name').order('name');
+    const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
     if (data) setFunctions(data);
   };
 
@@ -111,7 +111,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
           >
             <option value="">N/A (No Hub Linked)</option>
             {filteredHubs.map(hub => (
-              <option key={hub.id} value={hub.id}>{hub.name}</option>
+              <option key={hub.id} value={hub.id}>{hub.hub_code || hub.name}</option>
             ))}
           </select>
         </div>
@@ -139,7 +139,9 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
           >
             <option value="">N/A (General)</option>
             {functions.map(fn => (
-              <option key={fn.name} value={fn.name}>{fn.name}</option>
+              <option key={fn.name} value={fn.name}>
+                {fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name}
+              </option>
             ))}
           </select>
         </div>

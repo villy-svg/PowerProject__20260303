@@ -109,6 +109,12 @@ const HubFunctionManagement = () => {
           <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
             New Function
           </button>
+          <FunctionCSVDownload 
+            className="add-hub-main-btn" 
+            data={functions} 
+            label="Export Function Data" 
+            filename={`hub_functions_export_${new Date().toISOString().split('T')[0]}.csv`}
+          />
           <FunctionCSVDownload className="add-hub-main-btn" />
           <FunctionCSVImport className="add-hub-main-btn" onImportComplete={fetchFunctions} />
         </div>

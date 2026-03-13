@@ -88,9 +88,7 @@
 }
 
 .card-nav-button:hover:not(:disabled) {
-  background: var(--brand-green);
-  color: #000;
-  border-color: var(--brand-green);
+  background: var(--halo-bg);
   opacity: 1;
 }
 

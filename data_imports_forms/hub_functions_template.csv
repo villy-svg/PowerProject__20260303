@@ -1,4 +1,8 @@
-name,description
-Maintenance,Regular upkeep of charging station hardware and site.
-Cleaning,Routine cleaning of the charging bay and station surfaces.
-Inspection,Technician site visit to verify station safety and compliance.
+name,function_code,description
+Facility,FLT,"Facility related like water, washrooms, systems, tvs etc"
+Electrical,ELE,"Related to any and all electrical wiring tasks including bescom, lt panels, wiring, etc"
+Slow Chargers,SCH,Slow Chargers in the hubs including 3.3 & 7.2
+Fast Chargers,FCH,"DC Fast chargers, GBT & CCS"
+Civil,CVL,"Flooring, roof, walls, etc"
+Hiring,HRG,Team hiring jobs
+Network,NWK,"Wifi, CCTV, sim, etc"
