@@ -237,8 +237,8 @@ function App() {
    * Logic: Inserts and then updates local state with the returned DB object (including its new UUID).
    */
   const addTask = async (taskData) => {
-    // Remap camelCase keys and Clean data for Postgres (e.g. empty strings to null)
-    const dbRow = {
+    // 1. Prepare Full Row (Rich data)
+    const fullRow = {
       id: taskData.id,
       text: taskData.text,
       verticalid: taskData.verticalId,
@@ -249,16 +249,44 @@ function App() {
       createdat: taskData.createdAt,
       updatedat: taskData.updatedAt,
     };
-    
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([dbRow])
-      .select();
 
-    if (error) {
-      console.error("Error adding task:", error.message);
-    } else if (data) {
-      setTasks(prev => [...prev, normalizeTask(data[0])]);
+    // 2. Prepare Basic Row (Fallback for missing columns)
+    const basicRow = {
+      id: taskData.id,
+      text: taskData.text,
+      verticalid: taskData.verticalId,
+      stageid: taskData.stageId,
+      createdat: taskData.createdAt,
+      updatedat: taskat: taskData.updatedAt,
+    };
+
+    try {
+      // First attempt: Try to save with all new fields
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([fullRow])
+        .select();
+
+      if (error) {
+        // ERROR 42703: Columns missing in DB (Migration not run)
+        if (error.code === '42703') {
+          console.warn("⚠️ Database schema outdated. Falling back to basic task save.");
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('tasks')
+            .insert([basicRow])
+            .select();
+          
+          if (fallbackError) throw fallbackError;
+          setTasks(prev => [...prev, normalizeTask(fallbackData[0])]);
+        } else {
+          throw error;
+        }
+      } else if (data) {
+        setTasks(prev => [...prev, normalizeTask(data[0])]);
+      }
+    } catch (err) {
+      console.error("❌ Cloud Sync Error:", err.message);
+      throw err; // Propagate to TaskController for UI alert
     }
   };
 

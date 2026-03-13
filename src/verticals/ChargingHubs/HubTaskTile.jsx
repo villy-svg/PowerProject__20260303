@@ -27,12 +27,21 @@ const HubTaskTile = ({
   }, [task.hub_id]);
 
   const fetchHubCode = async () => {
-    const { data } = await supabase
-      .from('hubs')
-      .select('hub_code')
-      .eq('id', task.hub_id)
-      .single();
-    if (data) setHubCode(data.hub_code);
+    try {
+      const { data, error } = await supabase
+        .from('hubs')
+        .select('hub_code')
+        .eq('id', task.hub_id)
+        .single();
+      
+      if (error || !data) {
+        setHubCode('NULL');
+      } else {
+        setHubCode(data.hub_code);
+      }
+    } catch (err) {
+      setHubCode('NULL');
+    }
   };
 
   return (
