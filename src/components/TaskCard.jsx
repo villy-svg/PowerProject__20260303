@@ -98,6 +98,17 @@ const TaskCard = ({
             </button>
           )}
 
+          {canUpdate && task.stageId === 'DEPRIORITIZED' && (
+            <button 
+              className="card-reprio-button" 
+              onClick={() => updateTaskStage(task.id, 'BACKLOG')}
+              title="Move back to Pending"
+              style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+            >
+              ⬆
+            </button>
+          )}
+
           {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
             <button 
               className="card-deprio-button" 

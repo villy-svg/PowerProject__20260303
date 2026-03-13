@@ -26,10 +26,21 @@ const VerticalWorkspace = ({
   user = {}, 
   permissions = {} 
 }) => {
-  const [filters, setFilters] = React.useState({ city: '', hub: '', priority: '', function: '' });
+  const [filters, setFilters] = React.useState({ 
+    city: [], 
+    hub: [], 
+    priority: [], 
+    function: [] 
+  });
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const current = prev[key] || [];
+      const updated = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: updated };
+    });
   };
   
   // 🚩 RESTORE TRACE LOG:

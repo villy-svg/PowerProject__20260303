@@ -7,6 +7,7 @@ const TaskListView = ({
   activeVertical,
   canUpdate,
   canDelete,
+  deleteTask,
   updateTaskStage,
   openEditModal,
   TaskTileComponent // To render vertical-specific metadata
@@ -106,6 +107,16 @@ const TaskListView = ({
                             title="Edit Task"
                           >
                             ✎
+                          </button>
+                        )}
+                        {canUpdate && task.stageId === 'DEPRIORITIZED' && (
+                          <button 
+                            className="card-reprio-button" 
+                            onClick={() => updateTaskStage(task.id, 'BACKLOG')}
+                            title="Move back to Pending"
+                            style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+                          >
+                            ⬆
                           </button>
                         )}
                         {canUpdate && task.stageId !== 'DEPRIORITIZED' && (

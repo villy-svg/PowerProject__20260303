@@ -41,12 +41,13 @@ const TaskController = ({
   /**
    * FILTER LOGIC
    * Applies City, Hub, Priority, and Function filters to the task set.
+   * Supabase Update: Now handles multi-select arrays.
    */
   const filteredTasks = (tasks || []).filter(t => {
-    if (filters.city && t.city !== filters.city) return false;
-    if (filters.hub && t.hub_id !== filters.hub) return false;
-    if (filters.priority && t.priority !== filters.priority) return false;
-    if (filters.function && t.function !== filters.function) return false;
+    if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
+    if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
+    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
+    if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
     return true;
   });
 
