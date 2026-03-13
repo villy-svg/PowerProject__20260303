@@ -1,0 +1,8 @@
+name,function_code,description
+Civil,CVL,"Flooring, roof, walls, etc"
+Electrical,ELE,"Related to any and all electrical wiring tasks including bescom, lt panels, wiring, etc"
+Facility,FLT,"Facility related like water, washrooms, systems, tvs etc"
+Fast Chargers,FCH,"DC Fast chargers, GBT & CCS"
+Hiring,HRG,Team hiring jobs
+Network,NWK,"Wifi, CCTV, sim, etc"
+Slow Chargers,SCH,Slow Chargers in the hubs including 3.3 & 7.2

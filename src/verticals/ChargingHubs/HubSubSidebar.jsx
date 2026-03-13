@@ -17,6 +17,18 @@ const HubSubSidebar = ({ user, setActiveVertical }) => {
           <small>Vertical Active</small>
         </div>
       </div>
+
+      {isMasterAdmin && (
+        <div className="sub-sidebar-actions" style={{ padding: '0 12px' }}>
+          <button 
+            className="halo-button" 
+            style={{ width: '100%', marginTop: '12px' }}
+            onClick={() => setActiveVertical('hub_function_management')}
+          >
+            Function Manager
+          </button>
+        </div>
+      )}
     </div>
 
   );

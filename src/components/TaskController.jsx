@@ -132,9 +132,14 @@ const TaskController = ({
 
       <div className="kanban-board">
         {STAGE_LIST.map((stage) => {
-          const stageTasks = (tasks || []).filter(
-            (t) => t.verticalId === activeVertical && t.stageId === stage.id
-          );
+          const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+          const stageTasks = (tasks || [])
+            .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
+            .sort((a, b) => {
+              const pA = priorityOrder[a.priority] ?? 99;
+              const pB = priorityOrder[b.priority] ?? 99;
+              return pA - pB;
+            });
 
           return (
             <div 

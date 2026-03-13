@@ -16,6 +16,7 @@ const VerticalWorkspace = ({
   updateTask,
   updateTaskStage,
   isSubSidebarOpen,
+  setIsSubSidebarOpen,
   setActiveVertical,
   SidebarComponent, 
   onHeaderClick,
