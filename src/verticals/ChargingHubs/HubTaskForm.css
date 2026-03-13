@@ -1,0 +1,83 @@
+.vertical-task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: formSlideUp 0.4s ease-out;
+}
+
+.vertical-task-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vertical-task-form label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--brand-green);
+  opacity: 0.8;
+  padding-left: 4px;
+}
+
+.vertical-task-form input[type="text"],
+.vertical-task-form select,
+.vertical-task-form textarea {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  width: 100%;
+}
+
+.vertical-task-form input[type="text"]::placeholder,
+.vertical-task-form textarea::placeholder {
+  color: var(--text-color);
+  opacity: 0.3;
+}
+
+.vertical-task-form input[type="text"]:focus,
+.vertical-task-form select:focus,
+.vertical-task-form textarea:focus {
+  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 95%);
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+
+/* Custom styling for priority select to reflect colors */
+.vertical-task-form select option {
+  background: var(--bg-color);
+  color: var(--text-color);
+  padding: 10px;
+}
+
+.vertical-task-form textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@keyframes formSlideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Focus improvement for the whole group */
+.form-group:focus-within label {
+  opacity: 1;
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
