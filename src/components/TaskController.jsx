@@ -12,6 +12,7 @@ import './TaskController.css';
 const TaskController = ({ 
   activeVertical, 
   tasks = [], 
+  setTasks,
   deleteTask, 
   updateTaskStage,
   TaskFormComponent, 
