@@ -56,7 +56,7 @@
 .user-avatar {
   width: 32px;
   height: 32px;
-  background-color: #2ecc71; /* Brand green remains constant */
+  background-color: var(--brand-green); 
   color: white;
   border-radius: 50%;
   display: flex;
