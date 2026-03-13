@@ -7,6 +7,7 @@ const HubCSVImport = ({ onImportComplete, className }) => {
     // Map parsed keys to match database columns
     const rowsToInsert = validRows.map(row => ({
       name: row.name,
+      hub_code: row.hub_code || null,
       location: row.location || null,
       status: row.status || 'inactive',
       updated_at: new Date().toISOString(),

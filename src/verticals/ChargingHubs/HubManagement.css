@@ -1,9 +1,10 @@
 .hub-management-container {
   padding: 32px;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   animation: fadeIn 0.4s ease-out;
 }
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -12,24 +13,25 @@
 
 .hub-header {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
   margin-bottom: 32px;
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 24px;
 }
 
 .header-actions {
-  width: 100%;
-  max-width: 300px; /* Match typical title width/feel */
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .add-hub-main-btn {
-  width: 100%; /* Spans matched width */
+  white-space: nowrap;
+  min-width: 140px;
 }
 
 /* Ensure inner CSV import button takes full width of the wrapper */
@@ -93,6 +95,18 @@
 .status-badge.active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
 .status-badge.maintenance { background: rgba(234, 179, 8, 0.1); color: #eab308; }
 .status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+.hub-code-tag {
+  display: inline-block;
+  background: var(--halo-bg);
+  color: var(--brand-green);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
+  margin-bottom: 12px;
+}
 
 .hub-card h3 {
   margin: 0 0 12px 0;

@@ -10,7 +10,7 @@ const HubManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHub, setEditingHub] = useState(null);
-  const [formData, setFormData] = useState({ name: '', location: '', status: 'active' });
+  const [formData, setFormData] = useState({ name: '', hub_code: '', location: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -35,10 +35,15 @@ const HubManagement = () => {
   const handleOpenModal = (hub = null) => {
     if (hub) {
       setEditingHub(hub);
-      setFormData({ name: hub.name, location: hub.location || '', status: hub.status || 'active' });
+      setFormData({ 
+        name: hub.name, 
+        hub_code: hub.hub_code || '', 
+        location: hub.location || '', 
+        status: hub.status || 'active' 
+      });
     } else {
       setEditingHub(null);
-      setFormData({ name: '', location: '', status: 'active' });
+      setFormData({ name: '', hub_code: '', location: '', status: 'active' });
     }
     setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
@@ -116,6 +121,7 @@ const HubManagement = () => {
         {hubs.map(hub => (
           <div key={hub.id} className="hub-card">
             <div className={`status-badge ${hub.status}`}>{hub.status}</div>
+            <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
             <h3>{hub.name}</h3>
             <p className="hub-location">{hub.location || 'No location set'}</p>
             <div className="hub-actions">
@@ -148,6 +154,16 @@ const HubManagement = () => {
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   placeholder="e.g. Downtown Supercharger"
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Hub Code (Unique ID)</label>
+                <input 
+                  type="text" 
+                  value={formData.hub_code} 
+                  onChange={(e) => setFormData({...formData, hub_code: e.target.value})}
+                  placeholder="e.g. NYC-001"
                 />
               </div>
 

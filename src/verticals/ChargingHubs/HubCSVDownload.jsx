@@ -2,10 +2,10 @@ import React from 'react';
 import CSVDownloadButton from '../../components/CSVDownloadButton';
 
 const HubCSVDownload = ({ className }) => {
-  const headers = ['name', 'location', 'status'];
+  const headers = ['name', 'hub_code', 'location', 'status'];
   const sampleRows = [
-    { name: 'Downtown Fast Chargers', location: '123 Main St, NY', status: 'active' },
-    { name: 'Suburban Hub', location: '456 Oak Ave, NJ', status: 'maintenance' },
+    { name: 'Downtown Fast Chargers', hub_code: 'DTN-01', location: '123 Main St, NY', status: 'active' },
+    { name: 'Suburban Hub', hub_code: 'SUB-02', location: '456 Oak Ave, NJ', status: 'maintenance' },
   ];
 
   return (
