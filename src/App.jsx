@@ -19,6 +19,7 @@ import UserProfile from './components/UserProfile';
 import RoleManagement from './components/RoleManagement'; 
 import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
+import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
 import Login from './components/Login';
 
 // Assets
@@ -369,15 +370,18 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 label={VERTICALS[activeVertical]?.label}
                 activeVertical={activeVertical}
                 tasks={tasks}
-                setTasks={addTask} // Re-wired to use the addTask helper
+                setTasks={addTask} 
                 deleteTask={deleteTask}
                 updateTaskStage={updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
+                setActiveVertical={setActiveVertical}
+                SidebarComponent={activeVertical === 'CHARGING_HUBS' ? HubSubSidebar : null}
                 user={user} 
                 permissions={currentUserPermissions} 
               />
             )}
+
           </main>
         </div>
       </div>

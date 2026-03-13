@@ -15,16 +15,14 @@ const VerticalWorkspace = ({
   deleteTask,
   updateTaskStage,
   isSubSidebarOpen,
-  setIsSubSidebarOpen,
+  setActiveVertical,
+  SidebarComponent, // New generic prop
   user = {}, 
   permissions = {} 
 }) => {
-
-  // 🚩 ADD THIS TRACE LOG:
+  
+  // 🚩 RESTORE TRACE LOG:
   console.log(`🚩 TRACE 2: Workspace [${label}] received tasks. Count: ${tasks?.length}`);
-  if (tasks?.length > 0) {
-    console.log("Detailed Task Check:", tasks[0]);
-  }
   
   /**
    * LAYOUT GUARD
@@ -65,13 +63,22 @@ const VerticalWorkspace = ({
           <h3>{label}</h3>
         </div>
         
-        <div className="sub-sidebar-body">
-          <div className="sub-sidebar-placeholder">
-            <p>Module Navigation</p>
-            <small>Session Role: {user?.role}</small>
+        {/* Render the specific SidebarComponent if provided, otherwise show generic placeholder */}
+        {SidebarComponent ? (
+          <SidebarComponent user={user} setActiveVertical={setActiveVertical} />
+        ) : (
+          <div className="sub-sidebar-body">
+            <div className="sub-nav-item">
+              <div className="sub-nav-icon">📁</div>
+              <div className="sub-nav-text">
+                <p>{label} Workspace</p>
+                <small>Session Role: {user?.roleId || 'User'}</small>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </aside>
+
 
       <main className="workspace-content">
         {/* The TaskController now receives the 'addTask' helper (as setTasks) 
