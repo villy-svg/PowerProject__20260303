@@ -23,7 +23,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   }, []);
 
   const fetchHubs = async () => {
-    let { data } = await supabase.from('hubs').select('id, name').order('name');
+    let { data } = await supabase.from('hubs').select('id, name, city').order('name');
     
     if (data) {
       // Find if we already have an 'ALL' hub
@@ -42,6 +42,23 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
       }
       setHubs(data);
     }
+  };
+
+  // Get unique cities from the hubs list
+  const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();
+
+  // Filter hubs based on selected city
+  const filteredHubs = formData.city 
+    ? hubs.filter(h => h.city === formData.city)
+    : [];
+
+  const handleCityChange = (e) => {
+    const newCity = e.target.value;
+    setFormData({
+      ...formData,
+      city: newCity,
+      hub_id: '' // Reset hub selection when city changes
+    });
   };
 
   const handleSubmit = (e) => {
@@ -64,26 +81,31 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
       <div className="form-row-grid">
         <div className="form-group">
-          <label>Charging Hub</label>
+          <label>Charging Hub City</label>
           <select 
-            value={formData.hub_id}
-            onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
+            value={formData.city}
+            onChange={handleCityChange}
+            required
           >
-            <option value="">N/A (No Hub Linked)</option>
-            {hubs.map(hub => (
-              <option key={hub.id} value={hub.id}>{hub.name}</option>
+            <option value="">Select City...</option>
+            {uniqueCities.map(city => (
+              <option key={city} value={city}>{city}</option>
             ))}
           </select>
         </div>
 
         <div className="form-group">
-          <label>Charging Hub City</label>
-          <input 
-            type="text" 
-            value={formData.city}
-            onChange={(e) => setFormData({...formData, city: e.target.value})}
-            placeholder="e.g. London"
-          />
+          <label>Charging Hub</label>
+          <select 
+            value={formData.hub_id}
+            onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
+            disabled={!formData.city}
+          >
+            <option value="">N/A (No Hub Linked)</option>
+            {filteredHubs.map(hub => (
+              <option key={hub.id} value={hub.id}>{hub.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
