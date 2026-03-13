@@ -17,7 +17,8 @@ const VerticalWorkspace = ({
   isSubSidebarOpen,
   setActiveVertical,
   SidebarComponent, 
-  onHeaderClick, // New prop for header interactivity
+  onHeaderClick,
+  TaskFormComponent, // New prop
   user = {}, 
   permissions = {} 
 }) => {
@@ -97,6 +98,7 @@ const VerticalWorkspace = ({
           setTasks={setTasks} 
           deleteTask={deleteTask}
           updateTaskStage={updateTaskStage}
+          TaskFormComponent={TaskFormComponent}
           user={user} 
           permissions={permissions} 
         />

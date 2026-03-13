@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { createInitialTask } from '../constants/taskSchema';
+import TaskModal from './TaskModal';
 import './TaskController.css';
 
 /**
@@ -11,13 +12,15 @@ import './TaskController.css';
 const TaskController = ({ 
   activeVertical, 
   tasks = [], 
-  setTasks, // This is the 'addTask' async helper from App.jsx
+  setTasks, 
   deleteTask, 
   updateTaskStage,
+  TaskFormComponent, // New prop for specific forms
   user = {},
   permissions = {} 
 }) => {
-  const [newTaskText, setNewTaskText] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   /**
    * PERMISSION LOGIC
@@ -33,40 +36,66 @@ const TaskController = ({
     (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
 
   /**
-   * UPDATED: handleAddTask
-   * Now an async function to ensure the cloud database confirms the save
-   * before the UI input is cleared.
+   * handleAddTask
+   * Receives structured data from the specific form component.
    */
-  const handleAddTask = async (e) => {
-    e.preventDefault();
-    if (!newTaskText.trim() || !canUserCreate) return;
+  const handleAddTask = async (formData) => {
+    if (!canUserCreate) return;
+    setSaving(true);
     
-    // Create the schema-compliant task object
-    const newTask = createInitialTask(newTaskText, activeVertical);
+    // Create the schema-compliant task object with extended data
+    const newTask = {
+      ...createInitialTask(formData.text, activeVertical),
+      ...formData // Spread in vertical-specific fields (priority, hub_id, etc.)
+    };
     
     try {
-      // Trigger the Supabase insert helper from App.jsx
       await setTasks(newTask);
-      setNewTaskText(''); 
+      setIsModalOpen(false); 
     } catch (err) {
       console.error("Cloud Sync Error:", err);
-      alert("Failed to save task to the cloud. Please check your connection.");
+      alert("Failed to save task to the cloud.");
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="task-controller">
       {canUserCreate && (
-        <form className="add-task-form" onSubmit={handleAddTask}>
-          <input 
-            type="text" 
-            placeholder={`Add a new task to ${activeVertical}...`} 
-            value={newTaskText}
-            onChange={(e) => setNewTaskText(e.target.value)}
-          />
-          <button className="halo-button" type="submit">Add Task</button>
-        </form>
+        <div className="task-controller-header">
+          <button 
+            className="halo-button add-task-btn" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            + Add Task
+          </button>
+        </div>
       )}
+
+      <TaskModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        title={`Add New ${activeVertical.replace('_', ' ')} Task`}
+      >
+        {TaskFormComponent ? (
+          <TaskFormComponent onSubmit={handleAddTask} loading={saving} />
+        ) : (
+          <form className="simple-task-form" onSubmit={(e) => {
+            e.preventDefault();
+            const text = e.target.elements.taskText.value;
+            if (text) handleAddTask({ text });
+          }}>
+            <div className="form-group">
+              <label>Task Details</label>
+              <input name="taskText" type="text" placeholder="What needs to be done?" required />
+            </div>
+            <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%' }} disabled={saving}>
+              {saving ? 'Saving...' : 'Create Task'}
+            </button>
+          </form>
+        )}
+      </TaskModal>
 
       <div className="kanban-board">
         {STAGE_LIST.map((stage) => {

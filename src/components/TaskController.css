@@ -9,46 +9,18 @@
   flex-direction: column;
 }
 
-/* 1. QUICK ADD FORM STRUCTURE */
-.add-task-form {
+/* 1. TASK CONTROLLER HEADER (Modal Trigger) */
+.task-controller-header {
   display: flex;
-  gap: 12px;
+  justify-content: flex-end;
   margin-bottom: 24px;
-  background: rgba(120, 120, 120, 0.05); /* Subtle area for input */
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
 }
 
-.add-task-form input {
-  flex: 1;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.add-task-form input:focus {
-  border-color: var(--brand-green); /* Visual feedback on focus */
-}
-
-.add-task-form button {
-  background: var(--brand-green);
-  color: white;
-  border: none;
-  padding: 0 20px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.add-task-form button:hover {
-  opacity: 0.9;
+.add-task-btn {
+  padding: 10px 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* 2. KANBAN BOARD LAYOUT */

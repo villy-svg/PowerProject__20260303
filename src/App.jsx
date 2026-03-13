@@ -20,6 +20,7 @@ import RoleManagement from './components/RoleManagement';
 import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
+import HubTaskForm from './verticals/ChargingHubs/HubTaskForm';
 import Login from './components/Login';
 
 // Assets
@@ -377,6 +378,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={activeVertical === 'CHARGING_HUBS' ? HubSubSidebar : null}
+                TaskFormComponent={activeVertical === 'CHARGING_HUBS' ? HubTaskForm : null}
                 onHeaderClick={
                   (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
                   ? () => setActiveVertical('hub_management') 
