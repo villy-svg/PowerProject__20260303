@@ -22,7 +22,9 @@
 .user-profile-toggle:hover {
   background-color: var(--halo-bg);
   border-color: var(--brand-green);
-  box-shadow: 0 0 10px var(--halo-glow);
+  border-width: 2px;
+  margin: -1px; /* Correct for border-width increase */
+  box-shadow: 0 0 15px var(--halo-glow);
   opacity: 1;
 }
 

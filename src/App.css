@@ -358,13 +358,13 @@ html, body {
 .halo-button {
   background: var(--halo-bg);
   color: var(--brand-green);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
   padding: 10px 20px;
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 0 0 transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px var(--halo-glow); /* Persistent halo */
   backdrop-filter: blur(4px);
   display: inline-flex;
   align-items: center;
@@ -373,9 +373,11 @@ html, body {
 }
 
 .halo-button:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
   border-color: var(--brand-green);
-  box-shadow: 0 0 15px var(--halo-glow);
+  border-width: 2px; /* Thicker border on hover */
+  margin: -1px; /* Offset to prevent layout shift from thicker border */
+  box-shadow: 0 0 20px var(--halo-glow);
   transform: translateY(-1px);
 }
 
