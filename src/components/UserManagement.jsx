@@ -127,7 +127,7 @@ const UserManagement = ({ currentUser }) => {
                   </div>
                 </td>
                 <td>
-                  <button className="edit-user-btn" onClick={() => setEditingUser({ ...u })}>
+                  <button className="halo-button edit-user-btn" onClick={() => setEditingUser({ ...u })}>
                     Edit Permissions
                   </button>
                 </td>

@@ -64,7 +64,7 @@ const TaskController = ({
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
           />
-          <button type="submit">Add Task</button>
+          <button className="halo-button" type="submit">Add Task</button>
         </form>
       )}
 
