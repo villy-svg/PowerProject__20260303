@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function useTheme() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('power_project_theme');
+    return saved !== 'light'; // Defaults to true (dark) if nothing saved
+  });
 
-  // We wrap the toggle logic into its own function
+  useEffect(() => {
+    const theme = darkMode ? 'dark' : 'light';
+    localStorage.setItem('power_project_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [darkMode]);
+
   const toggleTheme = () => {
-    setDarkMode(darkMode => !darkMode);
-    //setDarkMode(darkMode => !darkMode);
-  }
+    setDarkMode(prev => !prev);
+  };
 
-  // We return the data (darkMode) and the action (toggleTheme) 
-  // so other files can use them
   return { darkMode, toggleTheme };
-}
+}

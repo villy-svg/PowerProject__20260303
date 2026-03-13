@@ -6,6 +6,17 @@
      <link rel="icon" type="image/svg+xml" href="/PowerPod Transparent Background.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PowerPod-Project-Manager</title>
+    <script>
+      // DARK-FIRST STRATEGY: 
+      // Prevents the white "flash" on refresh by applying the theme before the first paint.
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('power_project_theme');
+          var theme = savedTheme || 'dark'; // Default to dark if no cache exists
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
