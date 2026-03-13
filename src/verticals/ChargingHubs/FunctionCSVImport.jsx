@@ -55,6 +55,7 @@ const FunctionCSVImport = ({ onImportComplete, className }) => {
   const finalizeImport = async (rows, skippedCount) => {
     const rowsToInsert = rows.map(row => ({
       name: row.name,
+      function_code: row.function_code || null,
       description: row.description || null,
       updated_at: new Date().toISOString(),
     }));

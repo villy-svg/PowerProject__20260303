@@ -2,11 +2,11 @@ import React from 'react';
 import CSVDownloadButton from '../../components/CSVDownloadButton';
 
 const FunctionCSVDownload = ({ className }) => {
-  const headers = ['name', 'description'];
+  const headers = ['name', 'function_code', 'description'];
   const sampleRows = [
-    { name: 'Maintenance', description: 'Regular upkeep of charging station hardware and site.' },
-    { name: 'Cleaning', description: 'Routine cleaning of the charging bay and station surfaces.' },
-    { name: 'Inspection', description: 'Technician site visit to verify station safety and compliance.' },
+    { name: 'Maintenance', function_code: 'MNT', description: 'Regular upkeep of charging station hardware and site.' },
+    { name: 'Cleaning', function_code: 'CLN', description: 'Routine cleaning of the charging bay and station surfaces.' },
+    { name: 'Inspection', function_code: 'INSP', description: 'Technician site visit to verify station safety and compliance.' },
   ];
 
   return (

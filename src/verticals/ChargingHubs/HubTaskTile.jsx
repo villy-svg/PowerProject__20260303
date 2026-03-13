@@ -9,6 +9,7 @@ import './HubTaskTile.css';
  */
 const HubTaskTile = ({ task }) => {
   const [hubCode, setHubCode] = useState('...');
+  const [functionCode, setFunctionCode] = useState('');
 
   useEffect(() => {
     if (task.hub_id) {
@@ -16,7 +17,13 @@ const HubTaskTile = ({ task }) => {
     } else {
       setHubCode('N/A');
     }
-  }, [task.hub_id]);
+
+    if (task.function) {
+      fetchFunctionCode();
+    } else {
+      setFunctionCode('');
+    }
+  }, [task.hub_id, task.function]);
 
   const fetchHubCode = async () => {
     try {
@@ -36,6 +43,25 @@ const HubTaskTile = ({ task }) => {
     }
   };
 
+  const fetchFunctionCode = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('hub_functions')
+        .select('function_code')
+        .eq('name', task.function)
+        .single();
+      
+      if (!error && data?.function_code) {
+        setFunctionCode(data.function_code);
+      } else {
+        // Fallback to name if code is missing or error
+        setFunctionCode(task.function);
+      }
+    } catch (err) {
+      setFunctionCode(task.function);
+    }
+  };
+
   return (
     <div className="hub-tile-meta">
       <span className="tile-hub-code halo-type" title={`Hub: ${hubCode}`}>
@@ -43,7 +69,7 @@ const HubTaskTile = ({ task }) => {
       </span>
       {task.function && (
         <span className="tile-function-badge halo-type" title={`Function: ${task.function}`}>
-          {task.function}
+          {functionCode || task.function}
         </span>
       )}
     </div>

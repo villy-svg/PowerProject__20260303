@@ -10,7 +10,7 @@ const HubFunctionManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFunction, setEditingFunction] = useState(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', function_code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -37,11 +37,12 @@ const HubFunctionManagement = () => {
       setEditingFunction(fn);
       setFormData({ 
         name: fn.name, 
+        function_code: fn.function_code || '',
         description: fn.description || ''
       });
     } else {
       setEditingFunction(null);
-      setFormData({ name: '', description: '' });
+      setFormData({ name: '', function_code: '', description: '' });
     }
     setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
@@ -118,7 +119,7 @@ const HubFunctionManagement = () => {
       <div className="hubs-grid">
         {functions.map(fn => (
           <div key={fn.id} className="hub-card">
-            <div className="hub-code-tag">FUNCTION</div>
+            <div className="hub-code-tag">{fn.function_code || 'NO CODE'}</div>
             <h3>{fn.name}</h3>
             <p className="hub-city">{fn.description || 'No description provided'}</p>
             <div className="hub-actions">
@@ -151,6 +152,16 @@ const HubFunctionManagement = () => {
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   placeholder="e.g. Maintenance, Inspection, Cleaning"
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Function Code (Short ID)</label>
+                <input 
+                  type="text" 
+                  value={formData.function_code} 
+                  onChange={(e) => setFormData({...formData, function_code: e.target.value})}
+                  placeholder="e.g. MNT, CLN, INSP"
                 />
               </div>
 
