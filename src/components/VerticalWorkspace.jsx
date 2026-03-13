@@ -16,7 +16,8 @@ const VerticalWorkspace = ({
   updateTaskStage,
   isSubSidebarOpen,
   setActiveVertical,
-  SidebarComponent, // New generic prop
+  SidebarComponent, 
+  onHeaderClick, // New prop for header interactivity
   user = {}, 
   permissions = {} 
 }) => {
@@ -60,16 +61,22 @@ const VerticalWorkspace = ({
             {isSubSidebarOpen ? '«' : '»'}
           </button>
 
-          <h3>{label}</h3>
+          <h3 
+            className={onHeaderClick ? 'navigable-header' : ''} 
+            onClick={onHeaderClick}
+            title={onHeaderClick ? "Click to open Management View" : ""}
+          >
+            {label}
+          </h3>
         </div>
         
         {/* Render the specific SidebarComponent if provided, otherwise show generic placeholder */}
         {SidebarComponent ? (
           <SidebarComponent user={user} setActiveVertical={setActiveVertical} />
+
         ) : (
           <div className="sub-sidebar-body">
             <div className="sub-nav-item">
-              <div className="sub-nav-icon">📁</div>
               <div className="sub-nav-text">
                 <p>{label} Workspace</p>
                 <small>Session Role: {user?.roleId || 'User'}</small>

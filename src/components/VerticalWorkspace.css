@@ -52,6 +52,11 @@
   transition: all 0.3s ease;
 }
 
+.sub-sidebar-header h3.navigable-header {
+  cursor: pointer;
+  position: relative;
+}
+
 /* Balanced Toggle Button */
 .sub-sidebar-toggle {
   background: transparent;
@@ -141,17 +146,6 @@
   background: rgba(45, 212, 191, 0.05);
   border-color: var(--brand-green);
   transform: translateX(4px);
-}
-
-.sub-nav-icon {
-  font-size: 1.2rem;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--halo-bg);
-  border-radius: 8px;
 }
 
 .sub-nav-text p {

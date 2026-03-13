@@ -377,6 +377,11 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={activeVertical === 'CHARGING_HUBS' ? HubSubSidebar : null}
+                onHeaderClick={
+                  (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
+                  ? () => setActiveVertical('hub_management') 
+                  : null
+                }
                 user={user} 
                 permissions={currentUserPermissions} 
               />

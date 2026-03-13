@@ -11,18 +11,14 @@ const HubSubSidebar = ({ user, setActiveVertical }) => {
 
   return (
     <div className="sub-sidebar-body">
-      <div 
-        className={`sub-nav-item ${isMasterAdmin ? 'navigable' : ''}`}
-        onClick={() => isMasterAdmin && setActiveVertical('hub_management')}
-      >
-        <div className="sub-nav-icon">🏢</div>
+      <div className="sub-nav-item">
         <div className="sub-nav-text">
-          <p>Hub Management</p>
-          <small>{isMasterAdmin ? 'Open Admin View' : 'Workspace Active'}</small>
+          <p>Module Navigation</p>
+          <small>Vertical Active</small>
         </div>
-        {isMasterAdmin && <span className="nav-arrow">→</span>}
       </div>
     </div>
+
   );
 };
 
