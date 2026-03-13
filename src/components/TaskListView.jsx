@@ -107,6 +107,15 @@ const TaskListView = ({
                             ✎
                           </button>
                         )}
+                        {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
+                          <button 
+                            className="card-deprio-button" 
+                            onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
+                            title="Move to Deprioritized"
+                          >
+                            ⬇
+                          </button>
+                        )}
                         {canDelete && (
                           <button 
                             className="card-delete-button"
