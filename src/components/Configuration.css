@@ -2,13 +2,17 @@
   height: calc(100vh - 100px);
   overflow-y: auto; /* Scrollbar on this edge */
   width: 100%;
+  display: block; /* Ensure it's not a flex child that left-aligns */
 }
 
 .config-inner-wrap {
   padding: 32px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto; /* CENTER the block */
+  display: flex;
+  flex-direction: column;
 }
+
 
 
 
