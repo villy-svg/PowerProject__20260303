@@ -1,0 +1,101 @@
+/* Shared sophisticated form styles for all management modals */
+
+.vertical-task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: formSlideUp 0.4s ease-out;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vertical-task-form label, 
+.form-group label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--brand-green);
+  opacity: 0.8;
+  padding-left: 4px;
+}
+
+.vertical-task-form input[type="text"],
+.vertical-task-form select,
+.vertical-task-form textarea,
+.hub-modal input[type="text"],
+.hub-modal select,
+.hub-modal textarea {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  width: 100%;
+}
+
+.vertical-task-form input[type="text"]::placeholder,
+.vertical-task-form textarea::placeholder,
+.hub-modal input[type="text"]::placeholder,
+.hub-modal textarea::placeholder {
+  color: var(--text-color);
+  opacity: 0.3;
+}
+
+.vertical-task-form input[type="text"]:focus,
+.vertical-task-form select:focus,
+.vertical-task-form textarea:focus,
+.hub-modal input[type="text"]:focus,
+.hub-modal select:focus,
+.hub-modal textarea:focus {
+  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 95%);
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+
+.vertical-task-form textarea,
+.hub-modal textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@keyframes formSlideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group:focus-within label {
+  opacity: 1;
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
+
+.form-footer, .modal-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.form-footer .halo-button, .modal-footer .halo-button {
+  flex: 1;
+  padding: 14px;
+  font-size: 1rem;
+}

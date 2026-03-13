@@ -170,48 +170,52 @@ const HubManagement = () => {
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Hub Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="e.g. Downtown Supercharger"
-                  required
-                />
+            <form onSubmit={handleSubmit} className="vertical-task-form">
+              <div className="form-row-grid">
+                <div className="form-group">
+                  <label>Hub Name</label>
+                  <input 
+                    type="text" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g. Downtown Supercharger"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Hub Code (Unique ID)</label>
+                  <input 
+                    type="text" 
+                    value={formData.hub_code} 
+                    onChange={(e) => setFormData({...formData, hub_code: e.target.value})}
+                    placeholder="e.g. NYC-001"
+                  />
+                </div>
               </div>
 
-              <div className="form-group">
-                <label>Hub Code (Unique ID)</label>
-                <input 
-                  type="text" 
-                  value={formData.hub_code} 
-                  onChange={(e) => setFormData({...formData, hub_code: e.target.value})}
-                  placeholder="e.g. NYC-001"
-                />
-              </div>
+              <div className="form-row-grid">
+                <div className="form-group">
+                  <label>City / Address</label>
+                  <input 
+                    type="text" 
+                    value={formData.city} 
+                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    placeholder="e.g. 5th Avenue, NY"
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>City / Address</label>
-                <input 
-                  type="text" 
-                  value={formData.city} 
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  placeholder="e.g. 5th Avenue, NY"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Status</label>
-                <select 
-                  value={formData.status} 
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
-                >
-                  <option value="active">Active</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select 
+                    value={formData.status} 
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  >
+                    <option value="active">Active</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
               </div>
 
               {statusMsg.text && (

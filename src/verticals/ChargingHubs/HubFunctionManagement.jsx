@@ -143,26 +143,28 @@ const HubFunctionManagement = () => {
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Function Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="e.g. Maintenance, Inspection, Cleaning"
-                  required
-                />
-              </div>
+            <form onSubmit={handleSubmit} className="vertical-task-form">
+              <div className="form-row-grid">
+                <div className="form-group">
+                  <label>Function Name</label>
+                  <input 
+                    type="text" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g. Maintenance, Inspection, Cleaning"
+                    required
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>Function Code (Short ID)</label>
-                <input 
-                  type="text" 
-                  value={formData.function_code} 
-                  onChange={(e) => setFormData({...formData, function_code: e.target.value})}
-                  placeholder="e.g. MNT, CLN, INSP"
-                />
+                <div className="form-group">
+                  <label>Function Code (Short ID)</label>
+                  <input 
+                    type="text" 
+                    value={formData.function_code} 
+                    onChange={(e) => setFormData({...formData, function_code: e.target.value})}
+                    placeholder="e.g. MNT, CLN, INSP"
+                  />
+                </div>
               </div>
 
               <div className="form-group">
