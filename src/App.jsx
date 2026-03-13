@@ -257,7 +257,7 @@ function App() {
       verticalid: taskData.verticalId,
       stageid: taskData.stageId,
       createdat: taskData.createdAt,
-      updatedat: taskat: taskData.updatedAt,
+      updatedat: taskData.updatedAt,
     };
 
     try {
