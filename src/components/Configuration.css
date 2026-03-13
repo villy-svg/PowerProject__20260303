@@ -1,17 +1,20 @@
 .configuration-view {
   height: calc(100vh - 100px);
   overflow-y: auto; /* Scrollbar on this edge */
-  width: 100%;
-  display: block; /* Ensure it's not a flex child that left-aligns */
+  width: 100vw; /* Force absolute full viewport width */
+  margin-left: calc(-50vw + 50%); /* Center the 100vw container if parent is constrained */
+  display: block;
+  animation: fadeIn 0.4s ease-out;
 }
 
 .config-inner-wrap {
   padding: 32px;
   max-width: 1200px;
-  margin: 0 auto; /* CENTER the block */
+  margin: 0 auto; /* CENTER the content */
   display: flex;
   flex-direction: column;
 }
+
 
 
 
@@ -26,13 +29,18 @@
 }
 
 .header-text h2 {
-  font-size: 2rem;
-  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand-green);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .header-text p {
-  opacity: 0.6;
   font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 32px;
+  line-height: 1.5;
 }
 
 /* View Toggle */
