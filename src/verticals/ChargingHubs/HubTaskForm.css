@@ -81,3 +81,16 @@
   transform: translateX(2px);
   transition: all 0.2s ease;
 }
+
+.form-footer {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.form-footer .halo-button {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+}

@@ -39,6 +39,7 @@ const normalizeTask = (row) => ({
   priority: row.priority,
   description: row.description,
   hub_id: row.hub_id,
+  city: row.city,
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
 });
@@ -246,6 +247,7 @@ function App() {
       priority: taskData.priority || null,
       description: taskData.description || null,
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
+      city: taskData.city || null,
       createdat: taskData.createdAt,
       updatedat: taskData.updatedAt,
     };
@@ -337,6 +339,7 @@ function App() {
       priority: taskData.priority || null,
       description: taskData.description || null,
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
+      city: taskData.city || null,
       updatedat: new Date().toISOString(),
     };
 

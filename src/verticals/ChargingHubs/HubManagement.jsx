@@ -10,7 +10,7 @@ const HubManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHub, setEditingHub] = useState(null);
-  const [formData, setFormData] = useState({ name: '', hub_code: '', location: '', status: 'active' });
+  const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -38,12 +38,12 @@ const HubManagement = () => {
       setFormData({ 
         name: hub.name, 
         hub_code: hub.hub_code || '', 
-        location: hub.location || '', 
+        city: hub.city || '', 
         status: hub.status || 'active' 
       });
     } else {
       setEditingHub(null);
-      setFormData({ name: '', hub_code: '', location: '', status: 'active' });
+      setFormData({ name: '', hub_code: '', city: '', status: 'active' });
     }
     setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
@@ -146,7 +146,7 @@ const HubManagement = () => {
                 <div className={`status-badge ${hub.status}`}>{hub.status}</div>
                 <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
                 <h3>{hub.name}</h3>
-                <p className="hub-location">{hub.location || 'No location set'}</p>
+                <p className="hub-city">{hub.city || 'No city set'}</p>
                 <div className="hub-actions">
                   <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
                   <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
@@ -193,11 +193,11 @@ const HubManagement = () => {
               </div>
 
               <div className="form-group">
-                <label>Location / Address</label>
+                <label>City / Address</label>
                 <input 
                   type="text" 
-                  value={formData.location} 
-                  onChange={(e) => setFormData({...formData, location: e.target.value})}
+                  value={formData.city} 
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
                   placeholder="e.g. 5th Avenue, NY"
                 />
               </div>

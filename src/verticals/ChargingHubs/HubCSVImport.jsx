@@ -56,7 +56,7 @@ const HubCSVImport = ({ onImportComplete, className }) => {
     const rowsToInsert = rows.map(row => ({
       name: row.name,
       hub_code: row.hub_code || null,
-      location: row.location || null,
+      city: row.city || null,
       status: row.status || 'inactive',
       updated_at: new Date().toISOString(),
     }));
@@ -86,7 +86,7 @@ const HubCSVImport = ({ onImportComplete, className }) => {
       </h5>
       <div style={{ fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
         <strong>Code:</strong> {conflict.csvRow.hub_code}<br/>
-        <strong>New Loc:</strong> {conflict.csvRow.location || 'N/A'}<br/>
+        <strong>New City:</strong> {conflict.csvRow.city || 'N/A'}<br/>
         <em style={{fontSize: '0.7rem'}}>Existing: {conflict.existingHub.name}</em>
       </div>
     </div>

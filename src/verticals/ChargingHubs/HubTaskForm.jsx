@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
+import './HubTaskForm.css';
 
 /**
  * HubTaskForm
@@ -12,6 +13,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
     hub_id: safeData.hub_id || '',
+    city: safeData.city || '',
     description: safeData.description || ''
   });
   const [hubs, setHubs] = useState([]);
@@ -31,7 +33,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         // Automatically provision an 'ALL' hub to satisfy UUID relationships
         const { data: newHub } = await supabase
           .from('hubs')
-          .insert([{ name: 'ALL', hub_code: 'ALL', location: 'System', status: 'Active' }])
+          .insert([{ name: 'ALL', hub_code: 'ALL', city: 'System', status: 'Active' }])
           .select();
           
         if (newHub) {
@@ -60,30 +62,44 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         />
       </div>
 
-      <div className="form-group">
-        <label>Linked Hub</label>
-        <select 
-          value={formData.hub_id}
-          onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
-        >
-          <option value="">N/A (No Hub Linked)</option>
-          {hubs.map(hub => (
-            <option key={hub.id} value={hub.id}>{hub.name}</option>
-          ))}
-        </select>
+      <div className="form-row-grid">
+        <div className="form-group">
+          <label>Charging Hub</label>
+          <select 
+            value={formData.hub_id}
+            onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
+          >
+            <option value="">N/A (No Hub Linked)</option>
+            {hubs.map(hub => (
+              <option key={hub.id} value={hub.id}>{hub.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Charging Hub City</label>
+          <input 
+            type="text" 
+            value={formData.city}
+            onChange={(e) => setFormData({...formData, city: e.target.value})}
+            placeholder="e.g. London"
+          />
+        </div>
       </div>
 
-      <div className="form-group">
-        <label>Priority</label>
-        <select 
-          value={formData.priority}
-          onChange={(e) => setFormData({...formData, priority: e.target.value})}
-        >
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-          <option value="Urgent">Urgent</option>
-        </select>
+      <div className="form-row-grid">
+        <div className="form-group">
+          <label>Priority</label>
+          <select 
+            value={formData.priority}
+            onChange={(e) => setFormData({...formData, priority: e.target.value})}
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
       </div>
 
       <div className="form-group">
@@ -96,8 +112,8 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         />
       </div>
 
-      <div className="modal-footer" style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
-        <button type="submit" className="halo-button save-btn" style={{ flex: 1 }} disabled={loading}>
+      <div className="form-footer">
+        <button type="submit" className="halo-button save-btn" disabled={loading}>
           {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
         </button>
       </div>

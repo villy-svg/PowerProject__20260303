@@ -1,11 +1,11 @@
 .tile-hub-code.halo-type {
   font-size: 0.7rem;
   font-weight: 800;
-  background: rgba(0, 255, 137, 0.1);
-  color: var(--brand-green);
+  background: color-mix(in srgb, var(--stage-color), transparent 90%);
+  color: var(--stage-color);
   padding: 3px 8px;
   border-radius: 20px;
-  border: 1px solid rgba(0, 255, 137, 0.3);
+  border: 1px solid color-mix(in srgb, var(--stage-color), transparent 70%);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
