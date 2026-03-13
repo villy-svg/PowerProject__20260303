@@ -18,7 +18,8 @@ const VerticalWorkspace = ({
   setActiveVertical,
   SidebarComponent, 
   onHeaderClick,
-  TaskFormComponent, // New prop
+  TaskFormComponent, 
+  TaskTileComponent, // New prop
   user = {}, 
   permissions = {} 
 }) => {
@@ -99,6 +100,7 @@ const VerticalWorkspace = ({
           deleteTask={deleteTask}
           updateTaskStage={updateTaskStage}
           TaskFormComponent={TaskFormComponent}
+          TaskTileComponent={TaskTileComponent}
           user={user} 
           permissions={permissions} 
         />

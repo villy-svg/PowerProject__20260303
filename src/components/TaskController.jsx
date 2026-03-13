@@ -12,10 +12,10 @@ import './TaskController.css';
 const TaskController = ({ 
   activeVertical, 
   tasks = [], 
-  setTasks, 
   deleteTask, 
   updateTaskStage,
-  TaskFormComponent, // New prop for specific forms
+  TaskFormComponent, 
+  TaskTileComponent, // New prop for custom tile rendering
   user = {},
   permissions = {} 
 }) => {
@@ -129,46 +129,57 @@ const TaskController = ({
                 {stageTasks.map((task) => (
                   <div 
                     key={task.id} 
-                    className="task-card"
-                    style={{ '--task-stage-color': stage.color }}
+                    className="task-card-container"
                   >
-                    <div className="task-card-header">
-                      <span className="task-text">{task.text}</span>
-                      
-                      <div className="task-card-actions">
-                        {(canUserUpdate || canUserDelete) ? (
-                          <>
-                            {canUserUpdate && (
-                              <select 
-                                className="stage-select-dropdown"
-                                value={task.stageId}
-                                // Triggers async update in App.jsx
-                                onChange={(e) => updateTaskStage(task.id, e.target.value)}
-                              >
-                                {STAGE_LIST.map(s => (
-                                  <option key={s.id} value={s.id}>
-                                    {s.label}
-                                  </option>
-                                ))}
-                              </select>
-                            )}
+                    {TaskTileComponent ? (
+                      <TaskTileComponent 
+                        task={task} 
+                        stage={stage}
+                        canUpdate={canUserUpdate}
+                        canDelete={canUserDelete}
+                        updateTaskStage={updateTaskStage}
+                        deleteTask={deleteTask}
+                        STAGE_LIST={STAGE_LIST}
+                      />
+                    ) : (
+                      <div className="task-card" style={{ '--task-stage-color': stage.color }}>
+                        <div className="task-card-header">
+                          <span className="task-text">{task.text}</span>
+                          
+                          <div className="task-card-actions">
+                            {(canUserUpdate || canUserDelete) ? (
+                              <>
+                                {canUserUpdate && (
+                                  <select 
+                                    className="stage-select-dropdown"
+                                    value={task.stageId}
+                                    onChange={(e) => updateTaskStage(task.id, e.target.value)}
+                                  >
+                                    {STAGE_LIST.map(s => (
+                                      <option key={s.id} value={s.id}>
+                                        {s.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
 
-                            {canUserDelete && (
-                              <button 
-                                className="delete-task-btn" 
-                                // Triggers async delete in App.jsx
-                                onClick={() => deleteTask(task.id)}
-                                title="Delete Task Permanently"
-                              >
-                                ×
-                              </button>
+                                {canUserDelete && (
+                                  <button 
+                                    className="delete-task-btn" 
+                                    onClick={() => deleteTask(task.id)}
+                                    title="Delete Task Permanently"
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </>
+                            ) : (
+                              <span className="read-only-badge">Read Only</span>
                             )}
-                          </>
-                        ) : (
-                          <span className="read-only-badge">Read Only</span>
-                        )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 ))}
                 
