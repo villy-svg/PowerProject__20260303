@@ -11,15 +11,8 @@ const HubSubSidebar = ({ user, setActiveVertical }) => {
 
   return (
     <div className="sub-sidebar-body">
-      <div className="sub-nav-item">
-        <div className="sub-nav-text">
-          <p>Module Navigation</p>
-          <small>Vertical Active</small>
-        </div>
-      </div>
-
       {isMasterAdmin && (
-        <div className="sub-sidebar-actions" style={{ padding: '0 12px' }}>
+        <div className="sub-sidebar-actions" style={{ padding: '0 12px', marginBottom: '12px' }}>
           <button 
             className="halo-button" 
             style={{ width: '100%', marginTop: '12px' }}
@@ -29,6 +22,13 @@ const HubSubSidebar = ({ user, setActiveVertical }) => {
           </button>
         </div>
       )}
+
+      <div className="sub-nav-item">
+        <div className="sub-nav-text">
+          <p>Module Navigation</p>
+          <small>Vertical Active</small>
+        </div>
+      </div>
     </div>
 
   );

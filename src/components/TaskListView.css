@@ -1,0 +1,92 @@
+.task-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+.list-stage-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.list-stage-header h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.list-task-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 24px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--stage-color);
+  border-radius: 12px;
+  padding: 12px 20px;
+  transition: all 0.2s ease;
+}
+
+.list-task-row:hover {
+  transform: translateX(4px);
+  border-color: var(--stage-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.list-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.list-row-content {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-row-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.list-nav-group, .list-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-action-group {
+  padding-left: 16px;
+  border-left: 1px solid var(--border-color);
+}
+
+/* Reusing existing halo styles but ensuring vertical centering */
+.list-task-row .card-nav-button,
+.list-task-row .card-edit-button,
+.list-task-row .card-delete-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

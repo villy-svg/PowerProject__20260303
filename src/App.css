@@ -96,7 +96,7 @@ html, body {
 }
 
 .app-main-area.no-padding .app-header {
-  padding: 0 20px;
+  padding: 20px 20px 0 20px;
 }
 
 .app-content {

@@ -3,6 +3,7 @@ import { STAGE_LIST } from '../constants/stages';
 import { createInitialTask } from '../constants/taskSchema';
 import TaskModal from './TaskModal';
 import TaskCard from './TaskCard';
+import TaskListView from './TaskListView';
 import './TaskController.css';
 
 /**
@@ -25,6 +26,7 @@ const TaskController = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null); // Track task being edited
   const [saving, setSaving] = useState(false);
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
 
   /**
    * PERMISSION LOGIC
@@ -85,16 +87,31 @@ const TaskController = ({
 
   return (
     <div className="task-controller">
-      {canUserCreate && (
-        <div className="task-controller-header">
+      <div className="task-controller-header">
+        <div className="view-mode-toggle">
+          <button 
+            className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+            onClick={() => setViewMode('kanban')}
+          >
+            Kanban
+          </button>
+          <button 
+            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+            onClick={() => setViewMode('list')}
+          >
+            List
+          </button>
+        </div>
+
+        {canUserCreate && (
           <button 
             className="halo-button add-task-btn" 
             onClick={openAddModal}
           >
             + Add Task
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       <TaskModal 
         isOpen={isModalOpen} 
@@ -130,72 +147,87 @@ const TaskController = ({
         )}
       </TaskModal>
 
-      <div className="kanban-board">
-        {STAGE_LIST.map((stage) => {
-          const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-          const stageTasks = (tasks || [])
-            .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
-            .sort((a, b) => {
-              const pA = priorityOrder[a.priority] ?? 99;
-              const pB = priorityOrder[b.priority] ?? 99;
-              return pA - pB;
-            });
+      <div className="workspace-main-view">
+        {viewMode === 'kanban' ? (
+          <div className="kanban-board">
+            {STAGE_LIST.map((stage) => {
+              const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+              const stageTasks = (tasks || [])
+                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
+                .sort((a, b) => {
+                  const pA = priorityOrder[a.priority] ?? 99;
+                  const pB = priorityOrder[b.priority] ?? 99;
+                  return pA - pB;
+                });
 
-          return (
-            <div 
-              key={stage.id} 
-              className="kanban-stage-halo"
-              style={{ 
-                borderTop: `4px solid ${stage.color}`,
-                borderColor: `${stage.color}44`,
-                backgroundColor: `${stage.color}08` 
-              }}
-            >
-              <div className="stage-header">
-                <div className="header-left-group">
-                  <h4>{stage.label}</h4>
-                </div>
-                <span 
-                  className="task-count-badge"
-                  style={{ backgroundColor: `${stage.color}22`, color: stage.color }}
+              return (
+                <div 
+                  key={stage.id} 
+                  className="kanban-stage-halo"
+                  style={{ 
+                    borderTop: `4px solid ${stage.color}`,
+                    borderColor: `${stage.color}44`,
+                    backgroundColor: `${stage.color}08` 
+                  }}
                 >
-                  {stageTasks.length}
-                </span>
-              </div>
-
-              <div className="task-drop-zone">
-                {stageTasks.map((task) => (
-                  <div 
-                    key={task.id} 
-                    className="task-card-container"
-                  >
-                    <TaskCard
-                      task={task}
-                      stage={stage}
-                      canUpdate={canUserUpdate}
-                      canDelete={canUserDelete}
-                      updateTaskStage={updateTaskStage}
-                      deleteTask={deleteTask}
-                      openEditModal={openEditModal}
-                      STAGE_LIST={STAGE_LIST}
+                  <div className="stage-header">
+                    <div className="header-left-group">
+                      <h4>{stage.label}</h4>
+                    </div>
+                    <span 
+                      className="task-count-badge"
+                      style={{ backgroundColor: `${stage.color}22`, color: stage.color }}
                     >
-                      {TaskTileComponent && (
-                        <TaskTileComponent 
-                          task={task} 
-                          stage={stage}
-                        />
-                      )}
-                    </TaskCard>
+                      {stageTasks.length}
+                    </span>
                   </div>
-                ))}
-                
-                {stageTasks.length === 0 && (
-                  <p className="empty-msg">No tasks yet</p>
-                )}
-              </div>
-            </div>
-          );
-        })}
+
+                  <div className="task-drop-zone">
+                    {stageTasks.map((task) => (
+                      <div 
+                        key={task.id} 
+                        className="task-card-container"
+                      >
+                        <TaskCard
+                          task={task}
+                          stage={stage}
+                          canUpdate={canUserUpdate}
+                          canDelete={canUserDelete}
+                          updateTaskStage={updateTaskStage}
+                          deleteTask={deleteTask}
+                          openEditModal={openEditModal}
+                          STAGE_LIST={STAGE_LIST}
+                        >
+                          {TaskTileComponent && (
+                            <TaskTileComponent 
+                              task={task} 
+                              stage={stage}
+                            />
+                          )}
+                        </TaskCard>
+                      </div>
+                    ))}
+                    
+                    {stageTasks.length === 0 && (
+                      <p className="empty-msg">No tasks yet</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <TaskListView 
+            tasks={tasks}
+            stageList={STAGE_LIST}
+            activeVertical={activeVertical}
+            canUpdate={canUserUpdate}
+            canDelete={canUserDelete}
+            updateTaskStage={updateTaskStage}
+            openEditModal={openEditModal}
+            TaskTileComponent={TaskTileComponent}
+          />
+        )}
       </div>
     </div>
   );
