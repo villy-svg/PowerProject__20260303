@@ -21,8 +21,25 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   }, []);
 
   const fetchHubs = async () => {
-    const { data } = await supabase.from('hubs').select('id, name').order('name');
-    if (data) setHubs(data);
+    let { data } = await supabase.from('hubs').select('id, name').order('name');
+    
+    if (data) {
+      // Find if we already have an 'ALL' hub
+      const allHub = data.find(h => h.name === 'ALL');
+      
+      if (!allHub) {
+        // Automatically provision an 'ALL' hub to satisfy UUID relationships
+        const { data: newHub } = await supabase
+          .from('hubs')
+          .insert([{ name: 'ALL', hub_code: 'ALL', location: 'System', status: 'Active' }])
+          .select();
+          
+        if (newHub) {
+          data = [...newHub, ...data];
+        }
+      }
+      setHubs(data);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -50,7 +67,6 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
           onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
         >
           <option value="">N/A (No Hub Linked)</option>
-          <option value="ALL">ALL</option>
           {hubs.map(hub => (
             <option key={hub.id} value={hub.id}>{hub.name}</option>
           ))}

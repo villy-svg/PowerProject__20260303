@@ -23,7 +23,7 @@ const HubTaskTile = ({
     if (task.hub_id) {
       fetchHubCode();
     } else {
-      setHubCode('Global');
+      setHubCode('N/A');
     }
   }, [task.hub_id]);
 
@@ -36,12 +36,12 @@ const HubTaskTile = ({
         .single();
       
       if (error || !data) {
-        setHubCode('NULL');
+        setHubCode('N/A');
       } else {
         setHubCode(data.hub_code);
       }
     } catch (err) {
-      setHubCode('NULL');
+      setHubCode('N/A');
     }
   };
 
