@@ -366,7 +366,7 @@ html, body {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px var(--halo-glow); /* Persistent halo */
+  box-shadow: 0 0 6px var(--halo-glow); /* Reduced from 12px for subtlety */
   backdrop-filter: blur(4px);
   display: inline-flex;
   align-items: center;

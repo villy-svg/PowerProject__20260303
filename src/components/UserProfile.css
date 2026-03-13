@@ -7,26 +7,26 @@
 .user-profile-toggle {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Keeps content aligned toward the avatar */
+  justify-content: flex-end;
   gap: 12px;
-  /* UPDATED: Theme-aware background and border */
   background: var(--bg-color); 
   border: 1px solid var(--border-color);
-  padding: 4px 4px 4px 16px;
-  border-radius: 100px;
+  padding: 6px 6px 6px 16px; /* Balanced padding */
+  border-radius: 12px; /* Matching avatar radius */
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 180px; /* Increased to prevent text overlap */
+  min-width: fit-content;
 }
 
 .user-profile-toggle:hover {
   background-color: var(--halo-bg);
   border-color: var(--brand-green);
   border-width: 2px;
-  margin: -1px; /* Correct for border-width increase */
+  padding: 5px 5px 5px 15px; /* Offset for border-width increase */
   box-shadow: 0 0 15px var(--halo-glow);
   opacity: 1;
 }
+
 
 /* THE FIX: Absolute Vertical Stacking */
 .user-info-text {

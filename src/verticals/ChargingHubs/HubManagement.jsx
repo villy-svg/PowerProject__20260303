@@ -95,11 +95,11 @@ const HubManagement = () => {
     <div className="hub-management-container">
       <header className="hub-header">
         <div className="header-info">
-          <h1>Charging Hub Management</h1>
-          <p>Create and manage global charging hub locations for the Hub Manager vertical.</p>
+          <h1>Hub Management</h1>
+          <p>Create and manage global charging hub locations.</p>
         </div>
-        <button className="add-hub-btn" onClick={() => handleOpenModal()}>
-          <span className="plus-icon">+</span> New Charging Hub
+        <button className="halo-button" onClick={() => handleOpenModal()}>
+          New Hub
         </button>
       </header>
 
@@ -110,10 +110,10 @@ const HubManagement = () => {
           <div key={hub.id} className="hub-card">
             <div className={`status-badge ${hub.status}`}>{hub.status}</div>
             <h3>{hub.name}</h3>
-            <p className="hub-location">📍 {hub.location || 'No location set'}</p>
+            <p className="hub-location">{hub.location || 'No location set'}</p>
             <div className="hub-actions">
-              <button className="edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
-              <button className="delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
+              <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
+              <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
             </div>
           </div>
         ))}
@@ -173,9 +173,9 @@ const HubManagement = () => {
               )}
 
               <div className="modal-footer">
-                <button type="button" className="cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" className="save-btn" disabled={loading}>
-                  {loading ? 'Saving...' : (editingHub ? 'Update Hub' : 'Create Hub')}
+                <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="halo-button save-btn" disabled={loading}>
+                  {loading ? 'Saving...' : (editingHub ? 'Update' : 'Create')}
                 </button>
               </div>
             </form>

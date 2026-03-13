@@ -32,13 +32,20 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
   const verticalConfigs = {
     CHARGING_HUBS: [
       {
-        id: 'manage_hubs',
-        title: 'Manage Charging Hubs',
-        desc: 'Add, edit or remove global charging hub locations.',
-        icon: '⚡',
-        action: () => setActiveVertical('hub_management'),
-        adminOnly: true,
-        buttonLabel: 'Manage Charging Hubs'
+        id: 'user_permissions',
+        title: 'User Permissions',
+        desc: 'Review and modify what each user can do.',
+        icon: '',
+        action: () => setActiveVertical('user_management'),
+        adminOnly: true
+      },
+      {
+        id: 'master_matrix',
+        title: 'Master Matrix',
+        desc: 'Global role-based access control rules.',
+        icon: '',
+        action: () => setActiveVertical('role_management'), // Assuming this is the intended action for Master Matrix
+        adminOnly: true
       }
     ],
     // Placeholders for other verticals
@@ -87,7 +94,7 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                   if (item.adminOnly && !isMasterAdmin) return null;
                   return (
                     <div key={item.id} className="config-tile" onClick={item.action}>
-                      <div className="tile-icon">{item.icon}</div>
+                      {item.icon && <div className="tile-icon">{item.icon}</div>}
                       <div className="tile-info">
                         <h4>{item.title}</h4>
                         <p>{item.desc}</p>
@@ -110,7 +117,6 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
           <h3 className="group-label">General Settings</h3>
           <div className="config-items-container">
             <div className="config-tile non-clickable">
-              <div className="tile-icon">⚙️</div>
               <div className="tile-info">
                 <h4>Display Preferences</h4>
                 <p>Theme and UI scaling are managed via the header.</p>
@@ -125,7 +131,6 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
             <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
             <div className="config-items-container">
               <div className="config-tile" onClick={() => setActiveVertical('role_management')}>
-                <div className="tile-icon">🔐</div>
                 <div className="tile-info">
                   <h4>Access Control Matrix</h4>
                   <p>Define permissions for all roles globally.</p>
@@ -135,10 +140,9 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                 </div>
               </div>
               <div className="config-tile destructive" onClick={handleClearAllTasks}>
-                <div className="tile-icon">🗑️</div>
                 <div className="tile-info">
-                  <h4>Clear All Cloud Data</h4>
-                  <p>Permanently wipe all horizontal task data.</p>
+                  <h4>Factory Reset Tasks</h4>
+                  <p>Wipe all task data across all verticals. (Caution!)</p>
                 </div>
               </div>
             </div>

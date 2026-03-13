@@ -67,18 +67,17 @@ const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
         <div className="user-dropdown-menu">
           <div className="dropdown-header">Profile Details</div>
           <div className="dropdown-item static">
-            <span className="role-icon">🛡️</span>
             <span className="role-label">{user?.roleId?.replace('_', ' ').toUpperCase()}</span>
           </div>
           
           <div className="dropdown-divider" />
           
           <button className="dropdown-item config-link" onClick={() => { onConfigClick(); setIsOpen(false); }}>
-            ⚙️ Configuration
+            Configuration
           </button>
           
           <button className="dropdown-item logout-button" onClick={() => { onLogout(); setIsOpen(false); }}>
-            🚪 Log Out
+            Log Out
           </button>
         </div>
       )}
