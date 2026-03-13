@@ -1,0 +1,24 @@
+/* CSVButtons.css — Generic styles for CSV download and import buttons */
+
+.csv-import-wrapper {
+  display: inline-flex;
+}
+
+.csv-import-btn.import-success {
+  border-color: #22c55e !important;
+  color: #22c55e !important;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.25) !important;
+}
+
+.csv-import-btn.import-error {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25) !important;
+}
+
+.csv-actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
