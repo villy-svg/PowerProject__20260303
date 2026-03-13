@@ -17,6 +17,17 @@
   --border-color: #3f3f46;
 }
 
+/* 1.1 HALO VARIABLES */
+:root {
+  --halo-glow: rgba(13, 148, 136, 0.2);
+  --halo-bg: rgba(13, 148, 136, 0.05);
+}
+
+[data-theme='dark'] {
+  --halo-glow: rgba(45, 212, 191, 0.15);
+  --halo-bg: rgba(45, 212, 191, 0.05);
+}
+
 /* ==========================================================================
    2. GLOBAL RESET & BASE STYLES
    ========================================================================== */
@@ -76,12 +87,25 @@ html, body {
   transition: all var(--transition-main);
 }
 
+/* FIX: Remove gap for vertical workspaces */
+.app-main-area.no-padding {
+  padding: 0;
+}
+
+.app-main-area.no-padding .app-header {
+  padding: 0 20px;
+}
+
 .app-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding-top: 40px;
+}
+
+.app-main-area.no-padding .app-content {
+  padding-top: 0;
 }
 
 /* ==========================================================================
@@ -307,6 +331,65 @@ html, body {
 
 .task-card:hover .delete-task-btn { opacity: 1; }
 .delete-task-btn:hover { color: #dc2626; transform: scale(1.1); }
+
+/* ==========================================================================
+   9. HALO BUTTONS & DESIGN SYSTEM REFINEMENTS
+   ========================================================================== */
+
+.btn-primary {
+  background-color: var(--brand-green);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  /* Softened from pure primary */
+  opacity: 0.9;
+}
+
+.btn-primary:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--halo-glow);
+}
+
+.halo-button {
+  background: var(--halo-bg);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 0 transparent;
+  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.halo-button:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+  border-color: var(--brand-green);
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+
+.halo-text-effect {
+  color: var(--brand-green);
+  background: var(--halo-bg);
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
+  box-shadow: 0 0 10px var(--halo-glow);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }

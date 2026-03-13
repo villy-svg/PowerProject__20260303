@@ -31,7 +31,7 @@ const RoleManagement = ({ permissions, setPermissions, onBack }) => {
     <div className="role-management-view">
       <header className="config-header">
         <div className="header-nav">
-          <button className="back-link-btn" onClick={onBack}>
+          <button className="halo-button back-link-btn" onClick={onBack}>
             ← Back to Configuration
           </button>
         </div>

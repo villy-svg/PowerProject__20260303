@@ -293,7 +293,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
           user={user}
           permissions={currentUserPermissions} 
         />
-        <div className="app-main-area">
+        <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
           <header className="app-header">
             <div className="header-left">
               <button className={`logo-button ${isSidebarOpen ? 'hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>

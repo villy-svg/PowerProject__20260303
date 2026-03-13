@@ -37,7 +37,8 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
         desc: 'Add, edit or remove global charging hub locations.',
         icon: '⚡',
         action: () => setActiveVertical('hub_management'),
-        adminOnly: true
+        adminOnly: true,
+        buttonLabel: 'Manage Charging Hubs'
       }
     ],
     // Placeholders for other verticals
@@ -90,6 +91,11 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                       <div className="tile-info">
                         <h4>{item.title}</h4>
                         <p>{item.desc}</p>
+                        {item.buttonLabel && (
+                          <button className="halo-button" style={{ marginTop: '12px' }}>
+                            {item.buttonLabel}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -123,6 +129,9 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                 <div className="tile-info">
                   <h4>Access Control Matrix</h4>
                   <p>Define permissions for all roles globally.</p>
+                  <button className="halo-button" style={{ marginTop: '12px', width: '100%' }}>
+                    Manage Role Permissions
+                  </button>
                 </div>
               </div>
               <div className="config-tile destructive" onClick={handleClearAllTasks}>
