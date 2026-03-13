@@ -115,6 +115,8 @@ function App() {
     return saved !== null ? saved === 'true' : true;
   });
 
+  const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
+
   // Auth State Listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -283,10 +285,6 @@ function App() {
       setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
     }
   };
-
-
-
-  const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
 
   // Loading Screen for initial fetch
   if (loading) {
