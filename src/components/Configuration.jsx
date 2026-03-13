@@ -32,20 +32,13 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
   const verticalConfigs = {
     CHARGING_HUBS: [
       {
-        id: 'user_permissions',
-        title: 'User Permissions',
-        desc: 'Review and modify what each user can do.',
+        id: 'manage_hubs',
+        title: 'Hub Administration',
+        desc: 'Add, edit or remove global charging hub locations.',
         icon: '',
-        action: () => setActiveVertical('user_management'),
-        adminOnly: true
-      },
-      {
-        id: 'master_matrix',
-        title: 'Master Matrix',
-        desc: 'Global role-based access control rules.',
-        icon: '',
-        action: () => setActiveVertical('role_management'), // Assuming this is the intended action for Master Matrix
-        adminOnly: true
+        action: () => setActiveVertical('hub_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Hubs'
       }
     ],
     // Placeholders for other verticals
@@ -130,6 +123,15 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
           <div className="config-group master-controls">
             <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
             <div className="config-items-container">
+              <div className="config-tile" onClick={() => setActiveVertical('user_management')}>
+                <div className="tile-info">
+                  <h4>User Management</h4>
+                  <p>Assign roles and vertical access to specific team members.</p>
+                  <button className="halo-button" style={{ marginTop: '12px', width: '100%' }}>
+                    Manage Team
+                  </button>
+                </div>
+              </div>
               <div className="config-tile" onClick={() => setActiveVertical('role_management')}>
                 <div className="tile-info">
                   <h4>Access Control Matrix</h4>
