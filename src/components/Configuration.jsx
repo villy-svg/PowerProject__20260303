@@ -50,106 +50,108 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
 
   return (
     <div className={`configuration-view ${viewMode}-view`}>
-      <header className="config-header">
-        <div className="header-text">
-          <h2>System Configuration</h2>
-          <p>Manage groupings and global application settings.</p>
-        </div>
-        <div className="view-toggle">
-          <button 
-            className={viewMode === 'grid' ? 'active' : ''} 
-            onClick={() => toggleViewMode('grid')}
-            title="Grid View"
-          >
-            田
-          </button>
-          <button 
-            className={viewMode === 'horizontal' ? 'active' : ''} 
-            onClick={() => toggleViewMode('horizontal')}
-            title="List View"
-          >
-            ☰
-          </button>
-        </div>
-      </header>
+      <div className="config-inner-wrap">
+        <header className="config-header">
+          <div className="header-text">
+            <h2>System Configuration</h2>
+            <p>Manage groupings and global application settings.</p>
+          </div>
+          <div className="view-toggle">
+            <button 
+              className={viewMode === 'grid' ? 'active' : ''} 
+              onClick={() => toggleViewMode('grid')}
+              title="Grid View"
+            >
+              田
+            </button>
+            <button 
+              className={viewMode === 'horizontal' ? 'active' : ''} 
+              onClick={() => toggleViewMode('horizontal')}
+              title="List View"
+            >
+              ☰
+            </button>
+          </div>
+        </header>
 
-      <div className="config-content">
-        {/* Render Sections by Vertical Order */}
-        {VERTICAL_LIST.map(vertical => {
-          const items = verticalConfigs[vertical.id] || [];
-          if (items.length === 0) return null;
+        <div className="config-content">
+          {/* Render Sections by Vertical Order */}
+          {VERTICAL_LIST.map(vertical => {
+            const items = verticalConfigs[vertical.id] || [];
+            if (items.length === 0) return null;
 
-          return (
-            <div key={vertical.id} className="config-group">
-              <h3 className="group-label">{vertical.label}</h3>
-              <div className="config-items-container">
-                {items.map(item => {
-                  if (item.adminOnly && !isMasterAdmin) return null;
-                  return (
-                    <div key={item.id} className="config-tile" onClick={item.action}>
-                      {item.icon && <div className="tile-icon">{item.icon}</div>}
-                      <div className="tile-info">
-                        <h4>{item.title}</h4>
-                        <p>{item.desc}</p>
-                        {item.buttonLabel && (
-                          <button className="halo-button" style={{ marginTop: '12px' }}>
-                            {item.buttonLabel}
-                          </button>
-                        )}
+            return (
+              <div key={vertical.id} className="config-group">
+                <h3 className="group-label">{vertical.label}</h3>
+                <div className="config-items-container">
+                  {items.map(item => {
+                    if (item.adminOnly && !isMasterAdmin) return null;
+                    return (
+                      <div key={item.id} className="config-tile" onClick={item.action}>
+                        {item.icon && <div className="tile-icon">{item.icon}</div>}
+                        <div className="tile-info">
+                          <h4>{item.title}</h4>
+                          <p>{item.desc}</p>
+                          {item.buttonLabel && (
+                            <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                              {item.buttonLabel}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
 
-        {/* Global Settings (Accessible to all) */}
-        <div className="config-group">
-          <h3 className="group-label">General Settings</h3>
-          <div className="config-items-container">
-            <div className="config-tile non-clickable">
-              <div className="tile-info">
-                <h4>Display Preferences</h4>
-                <p>Theme and UI scaling are managed via the header.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Master Admin Controls at the Bottom */}
-        {isMasterAdmin && (
-          <div className="config-group master-controls">
-            <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
+          {/* Global Settings (Accessible to all) */}
+          <div className="config-group">
+            <h3 className="group-label">General Settings</h3>
             <div className="config-items-container">
-              <div className="config-tile" onClick={() => setActiveVertical('user_management')}>
+              <div className="config-tile non-clickable">
                 <div className="tile-info">
-                  <h4>User Management</h4>
-                  <p>Assign roles and vertical access to specific team members.</p>
-                  <button className="halo-button" style={{ marginTop: '12px', width: '100%' }}>
-                    Manage Team
-                  </button>
-                </div>
-              </div>
-              <div className="config-tile" onClick={() => setActiveVertical('role_management')}>
-                <div className="tile-info">
-                  <h4>Access Control Matrix</h4>
-                  <p>Define permissions for all roles globally.</p>
-                  <button className="halo-button" style={{ marginTop: '12px', width: '100%' }}>
-                    Manage Role Permissions
-                  </button>
-                </div>
-              </div>
-              <div className="config-tile destructive" onClick={handleClearAllTasks}>
-                <div className="tile-info">
-                  <h4>Factory Reset Tasks</h4>
-                  <p>Wipe all task data across all verticals. (Caution!)</p>
+                  <h4>Display Preferences</h4>
+                  <p>Theme and UI scaling are managed via the header.</p>
                 </div>
               </div>
             </div>
           </div>
-        )}
+
+          {/* Master Admin Controls at the Bottom */}
+          {isMasterAdmin && (
+            <div className="config-group master-controls">
+              <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
+              <div className="config-items-container">
+                <div className="config-tile" onClick={() => setActiveVertical('user_management')}>
+                  <div className="tile-info">
+                    <h4>User Management</h4>
+                    <p>Assign roles and vertical access to specific team members.</p>
+                    <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                      Manage Team
+                    </button>
+                  </div>
+                </div>
+                <div className="config-tile" onClick={() => setActiveVertical('role_management')}>
+                  <div className="tile-info">
+                    <h4>Access Control Matrix</h4>
+                    <p>Define permissions for all roles globally.</p>
+                    <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                      Manage Role Permissions
+                    </button>
+                  </div>
+                </div>
+                <div className="config-tile destructive" onClick={handleClearAllTasks}>
+                  <div className="tile-info">
+                    <h4>Factory Reset Tasks</h4>
+                    <p>Wipe all task data across all verticals. (Caution!)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

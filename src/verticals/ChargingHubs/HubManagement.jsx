@@ -98,9 +98,11 @@ const HubManagement = () => {
           <h1>Hub Management</h1>
           <p>Create and manage global charging hub locations.</p>
         </div>
-        <button className="halo-button" onClick={() => handleOpenModal()}>
-          New Hub
-        </button>
+        <div className="header-actions">
+          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
+            New Hub
+          </button>
+        </div>
       </header>
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Hubs...</div>}

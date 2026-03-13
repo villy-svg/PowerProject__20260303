@@ -1,11 +1,15 @@
-/* Configuration.css */
 .configuration-view {
+  height: calc(100vh - 100px);
+  overflow-y: auto; /* Scrollbar on this edge */
+  width: 100%;
+}
+
+.config-inner-wrap {
   padding: 32px;
   max-width: 1200px;
   margin: 0 auto;
-  height: calc(100vh - 100px); /* Fill remaining viewport */
-  overflow-y: auto; /* Enable scrolling */
 }
+
 
 
 .config-header {
@@ -132,6 +136,12 @@
   flex-shrink: 0;
 }
 
+.tile-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .tile-info h4 {
   margin: 0 0 4px 0;
   font-size: 1rem;
@@ -142,6 +152,7 @@
   font-size: 0.85rem;
   opacity: 0.6;
 }
+
 
 /* Destructive Tile */
 .destructive:hover {

@@ -12,11 +12,21 @@
 
 .hub-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end; /* Align to bottom of text */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 32px;
   border-bottom: 2px solid var(--border-color);
-  padding-bottom: 20px;
+  padding-bottom: 24px;
+}
+
+.header-actions {
+  width: 100%;
+  max-width: 300px; /* Match typical title width/feel */
+}
+
+.add-hub-main-btn {
+  width: 100%; /* Spans matched width */
 }
 
 .header-info h1 {
@@ -34,6 +44,7 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
 
 
 /* Grid and Cards */
