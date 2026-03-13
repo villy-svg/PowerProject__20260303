@@ -1,82 +1,126 @@
 .hub-task-tile {
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .hub-task-tile:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--brand-green);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.tile-main-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0; /* Ensures text truncation works */
+.tile-row-1 {
+  width: 100%;
 }
 
 .tile-task-name {
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
+  display: block;
 }
 
-.tile-hub-code {
+.tile-row-2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.tile-hub-code.halo-type {
   font-size: 0.7rem;
   font-weight: 800;
-  background: var(--brand-green);
-  color: #000;
-  padding: 2px 6px;
-  border-radius: 4px;
+  background: rgba(0, 255, 137, 0.1);
+  color: var(--brand-green);
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 137, 0.3);
   text-transform: uppercase;
-  flex-shrink: 0;
+  letter-spacing: 0.5px;
 }
 
-.tile-actions {
+.tile-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tile-navigation {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-arrow {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  background: var(--brand-green);
+  color: #000;
+  border-color: var(--brand-green);
+}
+
+.nav-arrow:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.tile-actions-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  border-left: 1px solid var(--border-color);
+  padding-left: 8px;
 }
 
-.tile-stage-select {
-  background: var(--halo-bg);
-  border: 1px solid transparent;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 2px 4px;
+.tile-edit-btn, .tile-delete-btn {
+  background: transparent;
+  border: none;
   cursor: pointer;
-  outline: none;
-  min-width: 80px;
+  font-size: 1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-edit-btn:hover {
+  background: rgba(59, 130, 246, 0.1);
 }
 
 .tile-delete-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-color);
-  opacity: 0.3;
+  opacity: 0.4;
   font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-  transition: all 0.2s;
+  color: var(--text-color);
 }
 
 .tile-delete-btn:hover {
   opacity: 1;
-  color: #ff4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
 }

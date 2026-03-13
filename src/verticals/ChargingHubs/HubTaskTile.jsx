@@ -44,37 +44,82 @@ const HubTaskTile = ({
     }
   };
 
+  const handleMove = (direction) => {
+    const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+    let newIndex = currentIndex;
+
+    if (direction === 'left' && currentIndex > 0) {
+      newIndex = currentIndex - 1;
+    } else if (direction === 'right' && currentIndex < STAGE_LIST.length - 1) {
+      newIndex = currentIndex + 1;
+    }
+
+    if (newIndex !== currentIndex) {
+      updateTaskStage(task.id, STAGE_LIST[newIndex].id);
+    }
+  };
+
+  const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+  const canMoveLeft = currentIndex > 0;
+  const canMoveRight = currentIndex < STAGE_LIST.length - 1;
+
   return (
     <div className="hub-task-tile" style={{ borderLeft: `4px solid ${stage.color}` }}>
-      <div className="tile-main-info">
+      <div className="tile-row-1">
         <span className="tile-task-name" title={task.text}>{task.text}</span>
-        <span className="tile-hub-code">{hubCode}</span>
       </div>
 
-      <div className="tile-actions">
-        {canUpdate && (
-          <select 
-            className="tile-stage-select"
-            value={task.stageId}
-            style={{ color: stage.color, borderColor: `${stage.color}44` }}
-            onChange={(e) => updateTaskStage(task.id, e.target.value)}
-          >
-            {STAGE_LIST.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        )}
+      <div className="tile-row-2">
+        <div className="tile-left">
+          <span className="tile-hub-code halo-type">{hubCode}</span>
+        </div>
 
-        {canDelete && (
-          <button 
-            className="tile-delete-btn"
-            onClick={() => deleteTask(task.id)}
-          >
-            ×
-          </button>
-        )}
+        <div className="tile-right">
+          <div className="tile-navigation">
+            {canUpdate && (
+              <>
+                <button 
+                  className={`nav-arrow ${!canMoveLeft ? 'disabled' : ''}`}
+                  onClick={() => handleMove('left')}
+                  disabled={!canMoveLeft}
+                  title="Move Back"
+                >
+                  ←
+                </button>
+                <button 
+                  className={`nav-arrow ${!canMoveRight ? 'disabled' : ''}`}
+                  onClick={() => handleMove('right')}
+                  disabled={!canMoveRight}
+                  title="Move Forward"
+                >
+                  →
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="tile-actions-group">
+            {canUpdate && (
+              <button 
+                className="tile-edit-btn" 
+                onClick={() => openEditModal(task)}
+                title="Edit Task"
+              >
+                ✏️
+              </button>
+            )}
+
+            {canDelete && (
+              <button 
+                className="tile-delete-btn"
+                onClick={() => deleteTask(task.id)}
+                title="Delete Task"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

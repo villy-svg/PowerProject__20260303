@@ -80,7 +80,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
       <div className="modal-footer" style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
         <button type="submit" className="halo-button save-btn" style={{ flex: 1 }} disabled={loading}>
-          {loading ? 'Saving...' : 'Create Task'}
+          {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Task')}
         </button>
       </div>
     </form>

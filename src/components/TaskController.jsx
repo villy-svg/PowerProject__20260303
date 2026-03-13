@@ -13,6 +13,7 @@ const TaskController = ({
   activeVertical, 
   tasks = [], 
   setTasks,
+  updateTask,
   deleteTask, 
   updateTaskStage,
   TaskFormComponent, 
@@ -21,6 +22,7 @@ const TaskController = ({
   permissions = {} 
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null); // Track task being edited
   const [saving, setSaving] = useState(false);
 
   /**
@@ -37,22 +39,31 @@ const TaskController = ({
     (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
 
   /**
-   * handleAddTask
-   * Receives structured data from the specific form component.
+   * handleSaveTask
+   * Combined handler for both Add and Edit operations.
    */
-  const handleAddTask = async (formData) => {
-    if (!canUserCreate) return;
+  const handleSaveTask = async (formData) => {
+    const isEditing = !!editingTask;
+    if (isEditing && !canUserUpdate) return;
+    if (!isEditing && !canUserCreate) return;
+    
     setSaving(true);
     
-    // Create the schema-compliant task object with extended data
-    const newTask = {
-      ...createInitialTask(formData.text, activeVertical),
-      ...formData // Spread in vertical-specific fields (priority, hub_id, etc.)
-    };
-    
     try {
-      await setTasks(newTask);
-      setIsModalOpen(false); 
+      if (isEditing) {
+        // Full update
+        const updatedData = { ...editingTask, ...formData };
+        await updateTask(updatedData);
+      } else {
+        // Create new
+        const newTask = {
+          ...createInitialTask(formData.text, activeVertical),
+          ...formData
+        };
+        await setTasks(newTask);
+      }
+      setIsModalOpen(false);
+      setEditingTask(null);
     } catch (err) {
       console.error("Cloud Sync Error:", err);
       alert(`Failed to save task: ${err.message || err.details || JSON.stringify(err)}`);
@@ -61,13 +72,23 @@ const TaskController = ({
     }
   };
 
+  const openAddModal = () => {
+    setEditingTask(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="task-controller">
       {canUserCreate && (
         <div className="task-controller-header">
           <button 
             className="halo-button add-task-btn" 
-            onClick={() => setIsModalOpen(true)}
+            onClick={openAddModal}
           >
             + Add Task
           </button>
@@ -76,23 +97,33 @@ const TaskController = ({
 
       <TaskModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        title={`Add New ${activeVertical.replace('_', ' ')} Task`}
+        onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
+        title={editingTask ? `Edit Task` : `Add New ${activeVertical.replace('_', ' ')} Task`}
       >
         {TaskFormComponent ? (
-          <TaskFormComponent onSubmit={handleAddTask} loading={saving} />
+          <TaskFormComponent 
+            initialData={editingTask} 
+            onSubmit={handleSaveTask} 
+            loading={saving} 
+          />
         ) : (
           <form className="simple-task-form" onSubmit={(e) => {
             e.preventDefault();
             const text = e.target.elements.taskText.value;
-            if (text) handleAddTask({ text });
+            if (text) handleSaveTask({ text });
           }}>
             <div className="form-group">
               <label>Task Details</label>
-              <input name="taskText" type="text" placeholder="What needs to be done?" required />
+              <input 
+                name="taskText" 
+                type="text" 
+                placeholder="What needs to be done?" 
+                defaultValue={editingTask?.text || ''}
+                required 
+              />
             </div>
             <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%' }} disabled={saving}>
-              {saving ? 'Saving...' : 'Create Task'}
+              {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
             </button>
           </form>
         )}
@@ -140,6 +171,7 @@ const TaskController = ({
                         canDelete={canUserDelete}
                         updateTaskStage={updateTaskStage}
                         deleteTask={deleteTask}
+                        openEditModal={openEditModal}
                         STAGE_LIST={STAGE_LIST}
                       />
                     ) : (

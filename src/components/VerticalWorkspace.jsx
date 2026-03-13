@@ -13,6 +13,7 @@ const VerticalWorkspace = ({
   tasks, 
   setTasks, // This now receives the 'addTask' async helper from App.jsx
   deleteTask,
+  updateTask,
   updateTaskStage,
   isSubSidebarOpen,
   setActiveVertical,
@@ -97,6 +98,7 @@ const VerticalWorkspace = ({
           activeVertical={activeVertical}
           tasks={tasks}
           setTasks={setTasks} 
+          updateTask={updateTask}
           deleteTask={deleteTask}
           updateTaskStage={updateTaskStage}
           TaskFormComponent={TaskFormComponent}

@@ -326,6 +326,56 @@ function App() {
     }
   };
 
+  /**
+   * Performs a full update of a task in Supabase.
+   */
+  const updateTask = async (taskData) => {
+    const fullRow = {
+      text: taskData.text,
+      verticalid: taskData.verticalId,
+      stageid: taskData.stageId,
+      priority: taskData.priority || null,
+      description: taskData.description || null,
+      hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
+      updatedat: new Date().toISOString(),
+    };
+
+    const basicRow = {
+      text: taskData.text,
+      verticalid: taskData.verticalId,
+      stageid: taskData.stageId,
+      updatedat: new Date().toISOString(),
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(fullRow)
+        .eq('id', taskData.id)
+        .select();
+
+      if (error) {
+        const isMissingColumn = error.code === 'PGRST204' || error.code === '42703' || (error.message && error.message.toLowerCase().includes('column'));
+        if (isMissingColumn) {
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('tasks')
+            .update(basicRow)
+            .eq('id', taskData.id)
+            .select();
+          if (fallbackError) throw fallbackError;
+          setTasks(prev => prev.map(t => t.id === taskData.id ? normalizeTask(fallbackData[0]) : t));
+        } else {
+          throw error;
+        }
+      } else if (data) {
+        setTasks(prev => prev.map(t => t.id === taskData.id ? normalizeTask(data[0]) : t));
+      }
+    } catch (err) {
+      console.error("❌ Task Update Error:", err.message);
+      throw err;
+    }
+  };
+
   // Loading Screen for initial fetch
   if (loading) {
     return (
@@ -410,6 +460,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 activeVertical={activeVertical}
                 tasks={tasks}
                 setTasks={addTask} 
+                updateTask={updateTask}
                 deleteTask={deleteTask}
                 updateTaskStage={updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}
