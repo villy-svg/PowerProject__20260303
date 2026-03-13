@@ -15,6 +15,38 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-left-tools, .header-right-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle-depri-btn {
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  opacity: 0.7;
+}
+
+.toggle-depri-btn.active {
+  background: var(--brand-green);
+  color: #000;
+  opacity: 1;
+}
+
+.clear-board-btn {
+  font-size: 0.75rem;
+  padding: 6px 14px;
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.clear-board-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
 }
 
 .view-mode-toggle {

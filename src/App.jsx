@@ -383,6 +383,33 @@ function App() {
     }
   };
 
+  /**
+   * Bulk updates multiple tasks in Supabase.
+   * Useful for "Clear Board" operations.
+   */
+  const bulkUpdateTasks = async (taskIds, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ ...updates, updatedat: new Date().toISOString() })
+        .in('id', taskIds)
+        .select();
+
+      if (error) throw error;
+
+      if (data) {
+        const normalized = data.map(normalizeTask);
+        setTasks(prev => prev.map(t => {
+          const updated = normalized.find(n => n.id === t.id);
+          return updated || t;
+        }));
+      }
+    } catch (err) {
+      console.error("❌ Bulk Update Error:", err.message);
+      throw err;
+    }
+  };
+
   // Loading Screen for initial fetch
   if (loading) {
     return (
@@ -470,6 +497,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 tasks={tasks}
                 setTasks={addTask} 
                 updateTask={updateTask}
+                bulkUpdateTasks={bulkUpdateTasks}
                 deleteTask={deleteTask}
                 updateTaskStage={updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}

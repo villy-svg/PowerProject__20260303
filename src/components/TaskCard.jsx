@@ -49,7 +49,7 @@ const TaskCard = ({
       {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
         {task.priority && (
-          <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
+          <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
             {task.priority}
           </span>
         )}
@@ -75,10 +75,10 @@ const TaskCard = ({
                 ←
               </button>
               <button 
-                className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
+                className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
                 onClick={() => handleMove('right')}
-                disabled={!canMoveRight}
-                title="Move Forward"
+                disabled={!canMoveRight || task.stageId === 'COMPLETED'}
+                title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
               >
                 →
               </button>

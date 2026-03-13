@@ -4,6 +4,8 @@ import { createInitialTask } from '../constants/taskSchema';
 import TaskModal from './TaskModal';
 import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
+import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
+import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
 import './TaskController.css';
 
 /**
@@ -16,6 +18,7 @@ const TaskController = ({
   tasks = [], 
   setTasks,
   updateTask,
+  bulkUpdateTasks,
   deleteTask, 
   updateTaskStage,
   TaskFormComponent, 
@@ -27,6 +30,7 @@ const TaskController = ({
   const [editingTask, setEditingTask] = useState(null); // Track task being edited
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
+  const [showDeprioritized, setShowDeprioritized] = useState(true);
 
   /**
    * PERMISSION LOGIC
@@ -85,32 +89,83 @@ const TaskController = ({
     setIsModalOpen(true);
   };
 
+  /**
+   * handleClearBoard
+   * Moves all tasks in this vertical (except deprioritized ones) to DEPRIORITIZED stage.
+   */
+  const handleClearBoard = async () => {
+    const verticalTasks = (tasks || []).filter(t => t.verticalId === activeVertical && t.stageId !== 'DEPRIORITIZED');
+    if (verticalTasks.length === 0) return;
+
+    if (window.confirm(`Move all ${verticalTasks.length} active tasks to Deprioritized?`)) {
+      setSaving(true);
+      try {
+        await bulkUpdateTasks(verticalTasks.map(t => t.id), { stageid: 'DEPRIORITIZED' });
+        alert("Board cleared successfully!");
+      } catch (err) {
+        alert("Failed to clear board.");
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
   return (
     <div className="task-controller">
       <div className="task-controller-header">
-        <div className="view-mode-toggle">
+        <div className="header-left-tools">
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+              onClick={() => setViewMode('kanban')}
+            >
+              Kanban
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+
           <button 
-            className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-            onClick={() => setViewMode('kanban')}
+            className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
+            onClick={() => setShowDeprioritized(!showDeprioritized)}
+            title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
           >
-            Kanban
+            {showDeprioritized ? 'Hide Depri.' : 'Show Depri.'}
           </button>
-          <button 
-            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
-          >
-            List
-          </button>
+
+          {permissions.roleId === 'master_admin' && (
+            <button 
+              className="halo-button clear-board-btn" 
+              onClick={handleClearBoard}
+              disabled={saving}
+              title="Move all active tasks to Deprioritized"
+            >
+              Clear Board
+            </button>
+          )}
         </div>
 
-        {canUserCreate && (
-          <button 
-            className="halo-button add-task-btn" 
-            onClick={openAddModal}
-          >
-            + Add Task
-          </button>
-        )}
+        <div className="header-right-tools" style={{ display: 'flex', gap: '12px' }}>
+          {activeVertical === 'CHARGING_HUBS' && (
+            <>
+              <TaskCSVDownload data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Data" />
+              <TaskCSVDownload isTemplate label="Download Template" />
+              <TaskCSVImport verticalId={activeVertical} onImportComplete={() => {}} />
+            </>
+          )}
+          {canUserCreate && (
+            <button 
+              className="halo-button add-task-btn" 
+              onClick={openAddModal}
+            >
+              + Add Task
+            </button>
+          )}
+        </div>
       </div>
 
       <TaskModal 
@@ -150,7 +205,7 @@ const TaskController = ({
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
           <div className="kanban-board">
-            {STAGE_LIST.map((stage) => {
+            {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
               const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
               const stageTasks = (tasks || [])
                 .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
@@ -219,7 +274,7 @@ const TaskController = ({
         ) : (
           <TaskListView 
             tasks={tasks}
-            stageList={STAGE_LIST}
+            stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={activeVertical}
             canUpdate={canUserUpdate}
             canDelete={canUserDelete}
