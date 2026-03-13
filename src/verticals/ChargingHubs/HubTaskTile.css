@@ -109,8 +109,14 @@
   justify-content: center;
 }
 
+.tile-edit-btn {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
 .tile-edit-btn:hover {
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--halo-bg);
+  opacity: 1;
 }
 
 .tile-delete-btn {

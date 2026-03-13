@@ -14,6 +14,7 @@ const HubTaskTile = ({
   canDelete, 
   updateTaskStage, 
   deleteTask,
+  openEditModal,
   STAGE_LIST 
 }) => {
   const [hubCode, setHubCode] = useState('...');
@@ -105,7 +106,7 @@ const HubTaskTile = ({
                 onClick={() => openEditModal(task)}
                 title="Edit Task"
               >
-                ✏️
+                ✎
               </button>
             )}
 
