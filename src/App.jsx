@@ -41,7 +41,7 @@ function App() {
   const { darkMode, toggleTheme } = useTheme();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeVertical, setActiveVertical] = useState(null);
+  const [activeVertical, setActiveVertical] = useState(() => localStorage.getItem('power_project_active_vertical'));
 
   // 2. Initial Data Fetch from Supabase
   // useEffect(() => {
@@ -163,6 +163,50 @@ function App() {
     }
   };
 
+
+  /**
+   * SECURITY VALIDATION:
+   * Ensures the user has permissions for the currently 'activeVertical'.
+   * If permissions are revoked in the backend, we force them back to the dashboard.
+   */
+  useEffect(() => {
+    if (!user || !activeVertical) return;
+
+    // Public/Special views logic
+    const isMasterAdmin = user.roleId === 'master_admin';
+    const isConfigView = ['configuration', 'role_management', 'user_management'].includes(activeVertical);
+    
+    // Check if the vertical is strictly assigned OR if they are a Master Admin
+    const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
+    const hasSpecialAccess = isMasterAdmin; // Only Master Admin can see these
+
+    // Validate access
+    if (isSpecialAdminView && !hasSpecialAccess) {
+      setActiveVertical(null);
+      return;
+    }
+
+    if (activeVertical === 'configuration' && !currentUserPermissions.canAccessConfig) {
+      setActiveVertical(null);
+      return;
+    }
+
+    // Charging Hubs special CRUD view handling
+    if (activeVertical === 'hub_management' && !isMasterAdmin) {
+       setActiveVertical(null);
+       return;
+    }
+
+    // Standard Vertical validation
+    const verticalKeys = Object.keys(VERTICALS);
+    if (verticalKeys.includes(activeVertical)) {
+      const isAssigned = user.assignedVerticals?.includes(activeVertical);
+      if (!isAssigned && !isMasterAdmin) {
+        setActiveVertical(null);
+      }
+    }
+  }, [user, activeVertical, currentUserPermissions]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setProfileError(null);
@@ -173,6 +217,10 @@ function App() {
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
+  useEffect(() => { 
+    if (activeVertical) localStorage.setItem('power_project_active_vertical', activeVertical);
+    else localStorage.removeItem('power_project_active_vertical');
+  }, [activeVertical]);
 
   // 4. Supabase CRUD Helpers (Replaces LocalStorage mutation)
   
