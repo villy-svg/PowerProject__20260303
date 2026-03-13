@@ -163,8 +163,8 @@ const HubManagement = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content hub-modal">
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
               <h2>{editingHub ? 'Edit Charging Hub' : 'Create New Hub'}</h2>
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>

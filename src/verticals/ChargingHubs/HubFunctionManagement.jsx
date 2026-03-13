@@ -136,8 +136,8 @@ const HubFunctionManagement = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content hub-modal">
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
               <h2>{editingFunction ? 'Edit Hub Function' : 'Create New Function'}</h2>
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>

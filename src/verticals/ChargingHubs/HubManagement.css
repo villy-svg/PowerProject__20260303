@@ -144,27 +144,6 @@
 }
 
 
-.close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.8rem;
-  color: var(--text-color);
-  opacity: 0.5;
-  cursor: pointer;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s;
-  padding: 0;
-  margin: 0;
-}
-
-.close-modal:hover {
-  opacity: 1;
-}
 
 /* Duplicate Name Highlighting */
 .hub-card.duplicate-name {
