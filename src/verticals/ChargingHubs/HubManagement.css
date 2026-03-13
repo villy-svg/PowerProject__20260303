@@ -165,3 +165,24 @@
 .close-modal:hover {
   opacity: 1;
 }
+
+/* Duplicate Name Highlighting */
+.hub-card.duplicate-name {
+  border: 2px solid #eab308;
+  background: rgba(234, 179, 8, 0.03);
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.15);
+}
+
+.hub-card.duplicate-name::after {
+  content: 'DUPLICATE NAME';
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  background: #eab308;
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 10px 0 0 0;
+  letter-spacing: 0.5px;
+}
