@@ -4,7 +4,7 @@
 :root {
   --bg-color: #fcfcfd;
   --text-color: #18181b;
-  --brand-green: #10b981; /* Emerald 500 */
+  --brand-green: #0d9488; /* Teal 600 */
   --border-color: #e4e4e7;
   --font-main: 'Inter', system-ui, sans-serif;
   --transition-main: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -13,7 +13,7 @@
 [data-theme='dark'] {
   --bg-color: #09090b;
   --text-color: #f4f4f5;
-  --brand-green: #34d399; /* Emerald 400 */
+  --brand-green: #2dd4bf; /* Teal 400 */
   --border-color: #3f3f46;
 }
 
