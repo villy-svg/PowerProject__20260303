@@ -23,11 +23,14 @@ const VerticalWorkspace = ({
   onHeaderClick,
   TaskFormComponent, 
   TaskTileComponent, // New prop
-  onFilterChange, // Add this
-  filters, // Add this
   user = {}, 
   permissions = {} 
 }) => {
+  const [filters, setFilters] = React.useState({ city: '', hub: '', priority: '', function: '' });
+
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
   
   // 🚩 RESTORE TRACE LOG:
   console.log(`🚩 TRACE 2: Workspace [${label}] received tasks. Count: ${tasks?.length}`);
