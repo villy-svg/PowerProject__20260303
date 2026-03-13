@@ -1,3 +1,7 @@
-name,location,status
-Kadubeesanahalli,BLR,active
-Thanisandra,BLR,active
+name,hub_code,location,status
+Hoodi,HDI,BLR,active
+Thanisandra,TSR,BLR,active
+Kadubeesanahalli,KB,BLR,active
+Yeswantpur,YPR,BLR,active
+BLR Airport,KIA,BLR,active
+Electronic City Phase II,ECT,BLR,active
