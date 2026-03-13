@@ -49,7 +49,8 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
           value={formData.hub_id}
           onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
         >
-          <option value="">No Hub Linked</option>
+          <option value="">N/A (No Hub Linked)</option>
+          <option value="ALL">ALL</option>
           {hubs.map(hub => (
             <option key={hub.id} value={hub.id}>{hub.name}</option>
           ))}
