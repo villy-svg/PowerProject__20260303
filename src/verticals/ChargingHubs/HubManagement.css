@@ -23,11 +23,20 @@
 .header-actions {
   width: 100%;
   max-width: 300px; /* Match typical title width/feel */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .add-hub-main-btn {
   width: 100%; /* Spans matched width */
 }
+
+/* Ensure inner CSV import button takes full width of the wrapper */
+.csv-import-wrapper.add-hub-main-btn button {
+  width: 100%;
+}
+
 
 .header-info h1 {
   font-size: 1.8rem;

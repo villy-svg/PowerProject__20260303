@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import './HubManagement.css';
+import HubCSVDownload from './HubCSVDownload';
+import HubCSVImport from './HubCSVImport';
+import '../../components/CSVButtons.css';
 
 const HubManagement = () => {
   const [hubs, setHubs] = useState([]);
@@ -102,6 +105,8 @@ const HubManagement = () => {
           <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
             New Hub
           </button>
+          <HubCSVDownload className="add-hub-main-btn" />
+          <HubCSVImport className="add-hub-main-btn" onImportComplete={fetchHubs} />
         </div>
       </header>
 
