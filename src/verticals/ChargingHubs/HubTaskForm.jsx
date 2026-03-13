@@ -14,12 +14,15 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
     priority: safeData.priority || 'Medium',
     hub_id: safeData.hub_id || '',
     city: safeData.city || '',
+    function: safeData.function || '',
     description: safeData.description || ''
   });
   const [hubs, setHubs] = useState([]);
+  const [functions, setFunctions] = useState([]);
 
   useEffect(() => {
     fetchHubs();
+    fetchFunctions();
   }, []);
 
   const fetchHubs = async () => {
@@ -42,6 +45,11 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
       }
       setHubs(data);
     }
+  };
+
+  const fetchFunctions = async () => {
+    const { data } = await supabase.from('hub_functions').select('name').order('name');
+    if (data) setFunctions(data);
   };
 
   // Get unique cities from the hubs list
@@ -120,6 +128,19 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
             <option value="Medium">Medium</option>
             <option value="High">High</option>
             <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Function</label>
+          <select 
+            value={formData.function}
+            onChange={(e) => setFormData({...formData, function: e.target.value})}
+          >
+            <option value="">N/A (General)</option>
+            {functions.map(fn => (
+              <option key={fn.name} value={fn.name}>{fn.name}</option>
+            ))}
           </select>
         </div>
       </div>

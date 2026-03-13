@@ -1,0 +1,187 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../services/supabaseClient';
+import './HubFunctionManagement.css';
+import FunctionCSVDownload from './FunctionCSVDownload';
+import FunctionCSVImport from './FunctionCSVImport';
+import '../../components/CSVButtons.css';
+
+const HubFunctionManagement = () => {
+  const [functions, setFunctions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingFunction, setEditingFunction] = useState(null);
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    fetchFunctions();
+  }, []);
+
+  const fetchFunctions = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('hub_functions')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching functions:', error);
+    } else {
+      setFunctions(data || []);
+    }
+    setLoading(false);
+  };
+
+  const handleOpenModal = (fn = null) => {
+    if (fn) {
+      setEditingFunction(fn);
+      setFormData({ 
+        name: fn.name, 
+        description: fn.description || ''
+      });
+    } else {
+      setEditingFunction(null);
+      setFormData({ name: '', description: '' });
+    }
+    setIsModalOpen(true);
+    setStatusMsg({ type: '', text: '' });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatusMsg({ type: '', text: '' });
+
+    const functionData = {
+      ...formData,
+      updated_at: new Date().toISOString()
+    };
+
+    let error;
+    if (editingFunction) {
+      const { error: updateError } = await supabase
+        .from('hub_functions')
+        .update(functionData)
+        .eq('id', editingFunction.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from('hub_functions')
+        .insert([functionData]);
+      error = insertError;
+    }
+
+    if (error) {
+      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
+    } else {
+      setStatusMsg({ type: 'success', text: `Function ${editingFunction ? 'updated' : 'created'} successfully!` });
+      setTimeout(() => {
+        setIsModalOpen(false);
+        fetchFunctions();
+      }, 1000);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this functional category?')) return;
+
+    setLoading(true);
+    const { error } = await supabase.from('hub_functions').delete().eq('id', id);
+
+    if (error) {
+      alert(`Delete failed: ${error.message}`);
+    } else {
+      fetchFunctions();
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="hub-management-container">
+      <header className="hub-header">
+        <div className="header-info">
+          <h1>Hub Function Management</h1>
+          <p>Define and manage functional categories for charging hub tasks.</p>
+        </div>
+        <div className="header-actions">
+          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
+            New Function
+          </button>
+          <FunctionCSVDownload className="add-hub-main-btn" />
+          <FunctionCSVImport className="add-hub-main-btn" onImportComplete={fetchFunctions} />
+        </div>
+      </header>
+
+      {loading && !isModalOpen && <div className="loading-spinner">Loading Functions...</div>}
+
+      <div className="hubs-grid">
+        {functions.map(fn => (
+          <div key={fn.id} className="hub-card">
+            <div className="hub-code-tag">FUNCTION</div>
+            <h3>{fn.name}</h3>
+            <p className="hub-city">{fn.description || 'No description provided'}</p>
+            <div className="hub-actions">
+              <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>
+              <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>
+            </div>
+          </div>
+        ))}
+        {functions.length === 0 && !loading && (
+          <div className="empty-state">
+            <p>No functional categories found. Create your first function to get started!</p>
+          </div>
+        )}
+      </div>
+
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content hub-modal">
+            <header className="modal-header">
+              <h2>{editingFunction ? 'Edit Hub Function' : 'Create New Function'}</h2>
+              <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
+            </header>
+
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Function Name</label>
+                <input 
+                  type="text" 
+                  value={formData.name} 
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="e.g. Maintenance, Inspection, Cleaning"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Description</label>
+                <textarea 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="What does this function involve?"
+                  rows={4}
+                />
+              </div>
+
+              {statusMsg.text && (
+                <div className={`status-message ${statusMsg.type}`}>
+                  {statusMsg.text}
+                </div>
+              )}
+
+              <div className="modal-footer">
+                <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="halo-button save-btn" disabled={loading}>
+                  {loading ? 'Saving...' : (editingFunction ? 'Update' : 'Create')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default HubFunctionManagement;

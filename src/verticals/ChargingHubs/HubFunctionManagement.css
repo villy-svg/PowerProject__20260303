@@ -1,0 +1,9 @@
+/* HubFunctionManagement uses HubManagement styles primarily */
+/* Adding specific overrides if needed */
+
+.hub-card .hub-code-tag {
+  background: rgba(0, 255, 137, 0.1);
+  color: var(--brand-green);
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+}

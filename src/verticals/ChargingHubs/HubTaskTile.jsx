@@ -37,7 +37,16 @@ const HubTaskTile = ({ task }) => {
   };
 
   return (
-    <span className="tile-hub-code halo-type">{hubCode}</span>
+    <div className="hub-tile-meta">
+      <span className="tile-hub-code halo-type" title={`Hub: ${hubCode}`}>
+        {hubCode}
+      </span>
+      {task.function && (
+        <span className="tile-function-badge halo-type" title={`Function: ${task.function}`}>
+          {task.function}
+        </span>
+      )}
+    </div>
   );
 };
 

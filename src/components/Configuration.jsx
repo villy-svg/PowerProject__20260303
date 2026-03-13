@@ -39,6 +39,15 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
         action: () => setActiveVertical('hub_management'),
         adminOnly: true,
         buttonLabel: 'Manage Hubs'
+      },
+      {
+        id: 'manage_functions',
+        title: 'Hub Function Management',
+        desc: 'Define functional categories like Maintenance, Cleaning, and Inspection.',
+        icon: '',
+        action: () => setActiveVertical('hub_function_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Functions'
       }
     ],
     // Placeholders for other verticals

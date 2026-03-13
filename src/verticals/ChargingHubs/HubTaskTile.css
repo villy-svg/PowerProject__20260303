@@ -1,3 +1,9 @@
+.hub-tile-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
 .tile-hub-code.halo-type {
   font-size: 0.7rem;
   font-weight: 800;
@@ -8,4 +14,16 @@
   border: 1px solid color-mix(in srgb, var(--stage-color), transparent 70%);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.tile-function-badge.halo-type {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: capitalize;
+  opacity: 0.8;
 }

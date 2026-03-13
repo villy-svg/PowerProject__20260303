@@ -46,19 +46,19 @@ const TaskCard = ({
         '--stage-color': stage?.color || 'var(--brand-green)'
       }}
     >
-      {/* Row 1: Title */}
+      {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
-        <span className="card-task-name" title={task.text}>{task.text}</span>
-      </div>
-
-      {/* Row 2: Metadata (Priority + Custom Children) */}
-      <div className="card-row-2">
         {task.priority && (
           <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
             {task.priority}
           </span>
         )}
         {children}
+      </div>
+
+      {/* Row 2: Title */}
+      <div className="card-row-2">
+        <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>
 
       {/* Row 3: Controls */}

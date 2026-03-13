@@ -19,6 +19,7 @@ import UserProfile from './components/UserProfile';
 import RoleManagement from './components/RoleManagement'; 
 import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
+import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
 import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
 import HubTaskForm from './verticals/ChargingHubs/HubTaskForm';
 import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
@@ -40,6 +41,7 @@ const normalizeTask = (row) => ({
   description: row.description,
   hub_id: row.hub_id,
   city: row.city,
+  function: row.function,
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
 });
@@ -248,6 +250,7 @@ function App() {
       description: taskData.description || null,
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
       city: taskData.city || null,
+      function: taskData.function || null,
       createdat: taskData.createdAt,
       updatedat: taskData.updatedAt,
     };
@@ -340,6 +343,7 @@ function App() {
       description: taskData.description || null,
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
       city: taskData.city || null,
+      function: taskData.function || null,
       updatedat: new Date().toISOString(),
     };
 
@@ -457,6 +461,8 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <UserManagement currentUser={user} />
             ) : activeVertical === 'hub_management' ? (
               <HubManagement />
+            ) : activeVertical === 'hub_function_management' ? (
+              <HubFunctionManagement />
             ) : (
               <VerticalWorkspace 
                 label={VERTICALS[activeVertical]?.label}
