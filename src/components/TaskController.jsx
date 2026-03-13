@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { createInitialTask } from '../constants/taskSchema';
 import TaskModal from './TaskModal';
+import TaskCard from './TaskCard';
 import './TaskController.css';
 
 /**
@@ -163,56 +164,23 @@ const TaskController = ({
                     key={task.id} 
                     className="task-card-container"
                   >
-                    {TaskTileComponent ? (
-                      <TaskTileComponent 
-                        task={task} 
-                        stage={stage}
-                        canUpdate={canUserUpdate}
-                        canDelete={canUserDelete}
-                        updateTaskStage={updateTaskStage}
-                        deleteTask={deleteTask}
-                        openEditModal={openEditModal}
-                        STAGE_LIST={STAGE_LIST}
-                      />
-                    ) : (
-                      <div className="task-card" style={{ '--task-stage-color': stage.color }}>
-                        <div className="task-card-header">
-                          <span className="task-text">{task.text}</span>
-                          
-                          <div className="task-card-actions">
-                            {(canUserUpdate || canUserDelete) ? (
-                              <>
-                                {canUserUpdate && (
-                                  <select 
-                                    className="stage-select-dropdown"
-                                    value={task.stageId}
-                                    onChange={(e) => updateTaskStage(task.id, e.target.value)}
-                                  >
-                                    {STAGE_LIST.map(s => (
-                                      <option key={s.id} value={s.id}>
-                                        {s.label}
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
-
-                                {canUserDelete && (
-                                  <button 
-                                    className="delete-task-btn" 
-                                    onClick={() => deleteTask(task.id)}
-                                    title="Delete Task Permanently"
-                                  >
-                                    ×
-                                  </button>
-                                )}
-                              </>
-                            ) : (
-                              <span className="read-only-badge">Read Only</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    <TaskCard
+                      task={task}
+                      stage={stage}
+                      canUpdate={canUserUpdate}
+                      canDelete={canUserDelete}
+                      updateTaskStage={updateTaskStage}
+                      deleteTask={deleteTask}
+                      openEditModal={openEditModal}
+                      STAGE_LIST={STAGE_LIST}
+                    >
+                      {TaskTileComponent && (
+                        <TaskTileComponent 
+                          task={task} 
+                          stage={stage}
+                        />
+                      )}
+                    </TaskCard>
                   </div>
                 ))}
                 

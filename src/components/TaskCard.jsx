@@ -1,0 +1,115 @@
+import React from 'react';
+import './TaskCard.css';
+
+/**
+ * TaskCard
+ * Master wrapper for all Kanban tasks enforcing a standard 3-row layout.
+ * Row 1: Task Title
+ * Row 2: Priority (Standard) + Vertical Meta (Children)
+ * Row 3: Action Controls (Arrows, Edit, Delete)
+ */
+const TaskCard = ({
+  task,
+  stage,
+  canUpdate,
+  canDelete,
+  updateTaskStage,
+  deleteTask,
+  openEditModal,
+  STAGE_LIST,
+  children // Vertical-specific metadata
+}) => {
+  const handleMove = (direction) => {
+    const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+    let newIndex = currentIndex;
+
+    if (direction === 'left' && currentIndex > 0) {
+      newIndex = currentIndex - 1;
+    } else if (direction === 'right' && currentIndex < STAGE_LIST.length - 1) {
+      newIndex = currentIndex + 1;
+    }
+
+    if (newIndex !== currentIndex) {
+      updateTaskStage(task.id, STAGE_LIST[newIndex].id);
+    }
+  };
+
+  const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+  const canMoveLeft = currentIndex > 0;
+  const canMoveRight = currentIndex < STAGE_LIST.length - 1;
+
+  return (
+    <div 
+      className="task-card-master" 
+      style={{ 
+        borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
+        '--stage-color': stage?.color || 'var(--brand-green)'
+      }}
+    >
+      {/* Row 1: Title */}
+      <div className="card-row-1">
+        <span className="card-task-name" title={task.text}>{task.text}</span>
+      </div>
+
+      {/* Row 2: Metadata (Priority + Custom Children) */}
+      <div className="card-row-2">
+        {task.priority && (
+          <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
+            {task.priority}
+          </span>
+        )}
+        {children}
+      </div>
+
+      {/* Row 3: Controls */}
+      <div className="card-row-3">
+        <div className="card-navigation">
+          {canUpdate && (
+            <>
+              <button 
+                className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+                onClick={() => handleMove('left')}
+                disabled={!canMoveLeft}
+                title="Move Back"
+              >
+                ←
+              </button>
+              <button 
+                className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
+                onClick={() => handleMove('right')}
+                disabled={!canMoveRight}
+                title="Move Forward"
+              >
+                →
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="card-actions">
+          {canUpdate && (
+            <button 
+              className="card-edit-button" 
+              onClick={() => openEditModal(task)}
+              title="Edit Task"
+            >
+              ✎
+            </button>
+          )}
+
+          {canDelete && (
+            <button 
+              className="card-delete-button"
+              onClick={() => deleteTask(task.id)}
+              title="Delete Task"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TaskCard;
