@@ -337,31 +337,33 @@ html, body {
    ========================================================================== */
 
 .btn-primary {
-  background-color: var(--brand-green);
-  color: white;
-  border: none;
+  background-color: var(--halo-bg);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
   padding: 10px 20px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  /* Softened from pure primary */
-  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary:hover {
-  opacity: 1;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--halo-glow);
+  background-color: var(--border-color);
+  box-shadow: 0 0 15px var(--halo-glow);
 }
 
 .halo-button {
-  background: var(--halo-bg);
-  color: var(--brand-green);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 700;
+  background: var(--halo-bg) !important; /* Force override of default button backgrounds */
+  color: var(--brand-green) !important;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%) !important;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 12px var(--halo-glow); /* Persistent halo */
@@ -373,10 +375,10 @@ html, body {
 }
 
 .halo-button:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 85%);
-  border-color: var(--brand-green);
-  border-width: 2px; /* Thicker border on hover */
-  margin: -1px; /* Offset to prevent layout shift from thicker border */
+  background: color-mix(in srgb, var(--brand-green), transparent 85%) !important;
+  border-color: var(--brand-green) !important;
+  border-width: 2px !important;
+  margin: -0.5px; /* Fine-tuned alignment */
   box-shadow: 0 0 20px var(--halo-glow);
   transform: translateY(-1px);
 }

@@ -60,9 +60,9 @@
 .user-avatar {
   width: 32px;
   height: 32px;
-  background-color: var(--brand-green); 
-  color: white;
-  border-radius: 50%;
+  background-color: var(--halo-bg); 
+  color: var(--brand-green);
+  border-radius: 8px; /* Matching button radius */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,7 +70,7 @@
   font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 0 12px var(--halo-glow);
-  border: 1px solid color-mix(in srgb, var(--brand-green), white 20%);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
 }
 
 /* Dropdown Styles - Now Theme Aware */

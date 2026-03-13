@@ -171,8 +171,8 @@ const UserManagement = ({ currentUser }) => {
               </div>
 
               <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={() => setEditingUser(null)}>Cancel</button>
-                <button type="submit" className="save-btn">Save Changes</button>
+                <button type="button" className="halo-button cancel-btn" onClick={() => setEditingUser(null)}>Cancel</button>
+                <button type="submit" className="halo-button save-btn">Save Changes</button>
               </div>
             </form>
           </div>
