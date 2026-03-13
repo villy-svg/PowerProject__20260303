@@ -36,6 +36,9 @@ const normalizeTask = (row) => ({
   text: row.text,
   verticalId: row.verticalid ?? row.verticalId,
   stageId: row.stageid ?? row.stageId,
+  priority: row.priority,
+  description: row.description,
+  hub_id: row.hub_id,
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
 });
@@ -234,15 +237,19 @@ function App() {
    * Logic: Inserts and then updates local state with the returned DB object (including its new UUID).
    */
   const addTask = async (taskData) => {
-    // Remap camelCase keys to the lowercase column names Supabase uses
+    // Remap camelCase keys and Clean data for Postgres (e.g. empty strings to null)
     const dbRow = {
       id: taskData.id,
       text: taskData.text,
       verticalid: taskData.verticalId,
       stageid: taskData.stageId,
+      priority: taskData.priority || null,
+      description: taskData.description || null,
+      hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
       createdat: taskData.createdAt,
       updatedat: taskData.updatedAt,
     };
+    
     const { data, error } = await supabase
       .from('tasks')
       .insert([dbRow])
