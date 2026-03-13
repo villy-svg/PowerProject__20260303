@@ -7,11 +7,12 @@ import { supabase } from '../../services/supabaseClient';
  * Includes text, priority, and link to a specific hub.
  */
 const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
+  const safeData = initialData || {};
   const [formData, setFormData] = useState({
-    text: initialData.text || '',
-    priority: initialData.priority || 'Medium',
-    hub_id: initialData.hub_id || '',
-    description: initialData.description || ''
+    text: safeData.text || '',
+    priority: safeData.priority || 'Medium',
+    hub_id: safeData.hub_id || '',
+    description: safeData.description || ''
   });
   const [hubs, setHubs] = useState([]);
 
@@ -80,7 +81,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
       <div className="modal-footer" style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
         <button type="submit" className="halo-button save-btn" style={{ flex: 1 }} disabled={loading}>
-          {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Task')}
+          {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
         </button>
       </div>
     </form>
