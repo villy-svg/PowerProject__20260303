@@ -73,6 +73,11 @@ const HubTaskTile = ({
       <div className="tile-row-2">
         <div className="tile-left">
           <span className="tile-hub-code halo-type">{hubCode}</span>
+          {task.priority && (
+            <span className={`tile-priority priority-${task.priority.toLowerCase()}`}>
+              {task.priority}
+            </span>
+          )}
         </div>
 
         <div className="tile-right">
