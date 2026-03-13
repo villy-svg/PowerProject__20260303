@@ -54,7 +54,7 @@ const TaskController = ({
       setIsModalOpen(false); 
     } catch (err) {
       console.error("Cloud Sync Error:", err);
-      alert("Failed to save task to the cloud.");
+      alert(`Failed to save task: ${err.message || err.details || JSON.stringify(err)}`);
     } finally {
       setSaving(false);
     }

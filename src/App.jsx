@@ -268,9 +268,11 @@ function App() {
         .select();
 
       if (error) {
-        // ERROR 42703: Columns missing in DB (Migration not run)
-        if (error.code === '42703') {
-          console.warn("⚠️ Database schema outdated. Falling back to basic task save.");
+        // ERROR PGRST204 or 42703: Columns missing in DB (Migration not run)
+        const isMissingColumn = error.code === 'PGRST204' || error.code === '42703' || (error.message && error.message.toLowerCase().includes('column'));
+        
+        if (isMissingColumn) {
+          console.warn(`⚠️ Database schema outdated (${error.code}). Falling back to basic task save.`);
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('tasks')
             .insert([basicRow])
