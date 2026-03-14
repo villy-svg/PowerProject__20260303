@@ -60,7 +60,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
 
   const groupLabelStyle = {
     fontSize: '0.75rem',
-    fontWeight: 800,
+    fontWeight: 600,
     textTransform: 'uppercase',
     color: 'var(--brand-green)',
     letterSpacing: '0.5px'
@@ -120,7 +120,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
                 onBatchFilter(filterKey, allVals); 
               }}
               className="text-action-button"
-              style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+              style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
             >
               SELECT ALL
             </button>
@@ -130,7 +130,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
                 onBatchFilter(filterKey, []); 
               }}
               className="text-action-button"
-              style={{ fontSize: '0.65rem', fontWeight: 700, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+              style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
             >
               CLEAR
             </button>
@@ -151,7 +151,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
                 <div style={checkMarkStyle(isSelected)}>
                   {isSelected && '✓'}
                 </div>
-                <span style={{ fontWeight: isSelected ? 700 : 500 }}>{labelText}</span>
+                <span style={{ fontWeight: isSelected ? 600 : 400 }}>{labelText}</span>
               </div>
             );
           })}
@@ -175,20 +175,20 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
       )}
 
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
+        <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button 
             onClick={() => onFilterChange('duplicatesOnly', !filters.duplicatesOnly)}
             style={{ 
-              background: filters.duplicatesOnly ? 'var(--brand-green)' : 'rgba(255,255,255,0.05)', 
+              background: 'none', 
               border: 'none', 
-              color: filters.duplicatesOnly ? 'black' : 'var(--brand-green)', 
-              fontSize: '0.6rem', 
-              fontWeight: 900, 
+              color: 'var(--brand-green)', 
+              fontSize: '0.7rem', 
+              fontWeight: 800, 
               cursor: 'pointer',
-              padding: '2px 8px',
-              borderRadius: '10px',
-              transition: 'all 0.2s'
+              padding: '4px',
+              opacity: filters.duplicatesOnly ? 1 : 0.5,
+              textDecoration: filters.duplicatesOnly ? 'underline' : 'none'
             }}
           >
             DUP ONLY

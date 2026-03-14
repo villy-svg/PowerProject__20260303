@@ -306,6 +306,19 @@ const TaskController = ({
     });
   };
 
+  const toggleStageSelection = (stageId, stageTasks) => {
+    const stageTaskIds = stageTasks.map(t => t.id);
+    const allInStageSelected = stageTaskIds.every(id => selectedTaskIds.includes(id));
+    
+    if (allInStageSelected) {
+      // Deselect all in stage
+      setSelectedTaskIds(prev => prev.filter(id => !stageTaskIds.includes(id)));
+    } else {
+      // Select all in stage
+      setSelectedTaskIds(prev => [...new Set([...prev, ...stageTaskIds])]);
+    }
+  };
+
   return (
     <div className="task-controller">
       <div className="task-controller-header">
@@ -314,12 +327,14 @@ const TaskController = ({
             <button 
               className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
               onClick={() => setViewMode('kanban')}
+              style={{ fontWeight: viewMode === 'kanban' ? 600 : 400 }}
             >
               Kanban
             </button>
             <button 
               className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
+              style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
             >
               List
             </button>
@@ -329,7 +344,7 @@ const TaskController = ({
             className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
             onClick={() => setShowDeprioritized(!showDeprioritized)}
             title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
-            style={{ fontWeight: 800, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
+            style={{ fontWeight: 600, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
           >
             DEPR
           </button>
@@ -340,6 +355,7 @@ const TaskController = ({
               onClick={handleClearBoard}
               disabled={saving}
               title="Move all active tasks to Deprioritized"
+              style={{ fontWeight: 600 }}
             >
               Clear Board
             </button>
@@ -358,6 +374,7 @@ const TaskController = ({
             <button 
               className="halo-button add-task-btn" 
               onClick={openAddModal}
+              style={{ fontWeight: 600 }}
             >
               + Add Task
             </button>
@@ -392,7 +409,7 @@ const TaskController = ({
                 required 
               />
             </div>
-            <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%' }} disabled={saving}>
+            <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
               {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
             </button>
           </form>
@@ -425,6 +442,7 @@ const TaskController = ({
                   className="halo-button merge-keep-btn" 
                   onClick={() => executeMerge(task.id)}
                   disabled={saving}
+                  style={{ fontWeight: 600 }}
                 >
                   Keep This One
                 </button>
@@ -450,13 +468,14 @@ const TaskController = ({
               className="halo-button confirm-btn" 
               onClick={confirmDialog.onConfirm}
               disabled={saving}
+              style={{ fontWeight: 700 }}
             >
               {saving ? 'Working...' : 'Confirm'}
             </button>
             <button 
               className="halo-button cancel-btn" 
               onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-              style={{ opacity: 0.6 }}
+              style={{ opacity: 0.6, fontWeight: 600 }}
             >
               Cancel
             </button>
@@ -470,6 +489,8 @@ const TaskController = ({
             {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
               const stageTasks = filteredTasks
                 .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id);
+              
+              const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
 
               return (
                 <div 
@@ -483,11 +504,30 @@ const TaskController = ({
                 >
                   <div className="stage-header">
                     <div className="header-left-group">
-                      <h4>{stage.label}</h4>
+                      <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
+                      {stage.id === 'DEPRIORITIZED' && stageTasks.length > 0 && (
+                        <button 
+                          onClick={() => toggleStageSelection(stage.id, stageTasks)}
+                          style={{ 
+                            background: 'none', 
+                            border: 'none', 
+                            color: 'var(--brand-green)', 
+                            fontSize: '0.65rem', 
+                            fontWeight: 600, 
+                            cursor: 'pointer',
+                            padding: '0 8px',
+                            marginLeft: '4px',
+                            height: '100%',
+                            opacity: 0.8
+                          }}
+                        >
+                          {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
+                        </button>
+                      )}
                     </div>
                     <span 
                       className="task-count-badge"
-                      style={{ backgroundColor: `${stage.color}22`, color: stage.color }}
+                      style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
                     >
                       {stageTasks.length}
                     </span>
