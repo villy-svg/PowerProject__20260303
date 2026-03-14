@@ -26,7 +26,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       const [{ data: hubs }, { data: functions }, { data: existingTasks }] = await Promise.all([
         supabase.from('hubs').select('id, hub_code'),
         supabase.from('hub_functions').select('name, function_code'),
-        supabase.from('tasks').select('*').eq('verticalId', verticalId)
+        supabase.from('tasks').select('*').eq('verticalid', verticalId)
       ]);
 
       const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
@@ -102,7 +102,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       // but here we manually filtered so insert is safe, or upsert for logic consistency)
       const { error } = await supabase
         .from('tasks')
-        .upsert(tasksToInsert, { onConflict: 'text,verticalId,hub_id,function' });
+        .upsert(tasksToInsert, { onConflict: 'text,verticalid,hub_id,function' });
 
       if (error) throw error;
 
