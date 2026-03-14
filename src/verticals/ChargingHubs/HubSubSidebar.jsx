@@ -12,7 +12,7 @@ const HubSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
   const [expandedGroups, setExpandedGroups] = useState({
-    city: true,
+    city: false,
     hub: false,
     priority: false,
     function: false

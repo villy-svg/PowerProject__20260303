@@ -32,7 +32,6 @@ const VerticalWorkspace = ({
     city: [], 
     hub: [], 
     priority: [], 
-    priority: [], 
     function: [],
     duplicatesOnly: false 
   });
@@ -46,12 +45,13 @@ const VerticalWorkspace = ({
       const allPriorities = ['Low', 'Medium', 'High', 'Urgent'];
       const allFunctions = [...new Set(tasks.map(t => t.function))];
 
-      setFilters({
+      setFilters(prev => ({
+        ...prev,
         city: allCities,
         hub: allHubs,
         priority: allPriorities,
         function: allFunctions
-      });
+      }));
       setIsInitialized(true);
     }
   }, [tasks, isInitialized]);
