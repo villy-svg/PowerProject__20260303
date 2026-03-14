@@ -25,7 +25,8 @@ const VerticalWorkspace = ({
   TaskFormComponent, 
   TaskTileComponent, // New prop
   user = {}, 
-  permissions = {} 
+  permissions = {},
+  children
 }) => {
   const [filters, setFilters] = React.useState({ 
     city: [], 

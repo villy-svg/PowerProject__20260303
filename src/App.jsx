@@ -508,8 +508,6 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <DepartmentManagement />
             ) : activeVertical === 'employee_role_management' ? (
               <EmployeeRoleManagement />
-            ) : activeVertical === 'employee_management' ? (
-              <EmployeeManagement />
             ) : (
               <VerticalWorkspace 
                 label={activeVertical === 'employee_tasks' ? "Employees" : VERTICALS[activeVertical]?.label}
