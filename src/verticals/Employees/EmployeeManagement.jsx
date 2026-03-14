@@ -1,3 +1,5 @@
+import React from 'react';
+import '../ChargingHubs/HubManagement.css'; // Use shared styles
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
 
