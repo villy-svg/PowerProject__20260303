@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import EmployeeCSVDownload from './EmployeeCSVDownload';
+import EmployeeCSVImport from './EmployeeCSVImport';
 
 /**
  * EmployeeSubSidebar
@@ -159,8 +161,8 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
       )}
 
       {/* Filters Header */}
-      <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
+      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
+        <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Employees</p>
         <button
           onClick={onReset}
           style={{
@@ -175,6 +177,19 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
         >
           RESET
         </button>
+      </div>
+
+      {/* Primary Employee Buttons (CSV/Data) */}
+      {isMasterAdmin && (
+        <div style={{ padding: '4px 12px 12px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <EmployeeCSVDownload label="Download Template" isTemplate={true} />
+          <EmployeeCSVDownload label="Download Employee Data" />
+          <EmployeeCSVImport className="add-hub-main-btn" />
+        </div>
+      )}
+
+      <div style={{ padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
+        <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 600, opacity: 0.5, textTransform: 'uppercase' }}>Filter Records</p>
       </div>
 
       <FilterGroup
