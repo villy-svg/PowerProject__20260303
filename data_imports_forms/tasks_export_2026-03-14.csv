@@ -1,0 +1,15 @@
+text,priority,stageId,hub_code,function_code,description,city
+CCTV,Medium,BACKLOG,KIA,NWK,CCTV Installation in KIA,BLR
+Install 7.2kW,Medium,IN_PROGRESS,KIA,ELE,Install 4 x 7.2kW in KIA,BLR
+Office Room wiring & Lighting circuits installation,Medium,BACKLOG,KIA,ELE,"Wiring has been done ,Needs to fix the switch plates and light,fans installation .",BLR
+Senior Electrician Hirrings,Medium,BACKLOG,,,"Looking for Senior Electrician with good knowledge about HT & LT panel wiring, Should know All kind of wirings works & installations skill",BLR
+Area Manager Hirings,Medium,COMPLETED,ALL,HRG,"Expirianced operaion manager hirrings
+
+interview done & Hired on 13th",ALL
+Adani Partnership Start,Medium,BACKLOG,KB,FCH,"Partner with Adani in KIA
+",BLR
+Bathroom Cleaning,Medium,COMPLETED,ALL,FLT,Thinking,ALL
+CCTV Installation ,High,IN_PROGRESS,KIA,ELE,"Total we have a stock of 8 cctv Cameras in KIA Hub,
+in that 4 is bullet & 4  Doom cameras .
+Needs to install 6 cctv as of now and remaining we will install it later once cunstruct the newe shed",BLR
+CCTV CONFIGURE,High,IN_PROGRESS,KIA,ELE,Total we have a stock of 8 cctv Cameras in KIA Hub,BLR

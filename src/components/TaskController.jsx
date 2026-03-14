@@ -39,11 +39,36 @@ const TaskController = ({
   }, [viewMode]);
 
   /**
+   * DUPLICATE DETECTION LOGIC
+   * Identifies tasks with identical Priority, Hub, Function, and Summary (Text).
+   */
+  const tasksWithDuplicateInfo = React.useMemo(() => {
+    const clusters = {};
+    const processedTasks = (tasks || []).map(t => {
+      const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
+      if (!clusters[key]) clusters[key] = [];
+      clusters[key].push(t.id);
+      return { ...t, duplicateKey: key };
+    });
+
+    return processedTasks.map(t => {
+      const cluster = clusters[t.duplicateKey];
+      const isDuplicate = cluster.length > 1;
+      return {
+        ...t,
+        isDuplicate,
+        duplicateCount: cluster.length,
+        isFirstInCluster: cluster[0] === t.id
+      };
+    });
+  }, [tasks]);
+
+  /**
    * FILTER LOGIC
    * Applies City, Hub, Priority, and Function filters to the task set.
    * Supabase Update: Now handles multi-select arrays.
    */
-  const filteredTasks = (tasks || []).filter(t => {
+  const filteredTasks = tasksWithDuplicateInfo.filter(t => {
     if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
     if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
     if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;

@@ -422,6 +422,39 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Duplicate Styling */
+.duplicate-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3);
+  margin-left: 6px;
+  text-transform: uppercase;
+}
+
+.duplicate-badge-mini {
+  background: #f59e0b;
+  color: white;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+.task-card-master.is-duplicate-stacked {
+  box-shadow: 
+    3px 3px 0 -1px var(--bg-color),
+    3px 3px 0 0 var(--border-color),
+    6px 6px 0 -2px var(--bg-color),
+    6px 6px 0 0 var(--border-color);
+  margin-bottom: 24px; /* More space for the stack shadow */
+}
+
 /* ==========================================================================
    9. GLOBAL ANIMATIONS (Existing)
    ========================================================================== */

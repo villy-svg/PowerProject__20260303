@@ -64,6 +64,11 @@ const TaskListView = ({
                           {task.priority}
                         </span>
                       )}
+                      {task.isDuplicate && (
+                        <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
+                          DUP
+                        </span>
+                      )}
                       {TaskTileComponent && (
                         <TaskTileComponent task={task} stage={stage} />
                       )}

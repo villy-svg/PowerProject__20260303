@@ -40,7 +40,7 @@ const TaskCard = ({
 
   return (
     <div 
-      className="task-card-master" 
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''}`} 
       onDoubleClick={() => canUpdate && openEditModal(task)}
       style={{ 
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
@@ -52,6 +52,11 @@ const TaskCard = ({
         {task.priority && (
           <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
             {task.priority}
+          </span>
+        )}
+        {task.isDuplicate && (
+          <span className="duplicate-badge" title={`${task.duplicateCount} identical tasks found`}>
+            DUPLICATE ({task.duplicateCount})
           </span>
         )}
         {children}

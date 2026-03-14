@@ -11,10 +11,15 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
   const isMasterAdmin = user?.roleId === 'master_admin';
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
+  const [expandedGroups, setExpandedGroups] = useState({
+    city: true,
+    hub: false,
+    priority: false,
+    function: false
+  });
 
   useEffect(() => {
     const fetchData = async () => {
-      // FIX: Use 'hubs' table, not 'charging_hubs'
       const { data: hubData } = await supabase.from('hubs').select('id, hub_code');
       const { data: funcData } = await supabase.from('hub_functions').select('id, function_code');
       if (hubData) setHubs(hubData);
@@ -23,34 +28,53 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
     fetchData();
   }, []);
 
-  // Extract unique cities from tasks
   const cities = [...new Set((tasks || []).map(t => t.city).filter(Boolean))].sort();
   const priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
-  const filterSectionStyle = {
-    padding: '16px 12px',
-    borderBottom: '1px solid var(--border-color)'
+  const toggleGroup = (key) => {
+    setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const sectionLabelStyle = {
+  const selectAll = (key, options, valueKey) => {
+    options.forEach(opt => {
+      const val = valueKey ? opt[valueKey] : opt;
+      if (!filters[key]?.includes(val)) {
+        onFilterChange(key, val);
+      }
+    });
+  };
+
+  const filterSectionStyle = {
+    borderBottom: '1px solid var(--border-color)',
+    transition: 'all 0.3s ease'
+  };
+
+  const groupHeaderStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px',
+    cursor: 'pointer',
+    userSelect: 'none'
+  };
+
+  const groupLabelStyle = {
     fontSize: '0.75rem',
     fontWeight: 800,
     textTransform: 'uppercase',
     color: 'var(--brand-green)',
-    letterSpacing: '0.5px',
-    marginBottom: '12px',
-    display: 'block',
-    opacity: 0.8
+    letterSpacing: '0.5px'
   };
 
-  const checkboxGroupStyle = {
-    display: 'flex',
+  const checkboxGroupStyle = (isExpanded) => ({
+    display: isExpanded ? 'flex' : 'none',
     flexDirection: 'column',
     gap: '8px',
     maxHeight: '180px',
     overflowY: 'auto',
-    paddingRight: '4px'
-  };
+    padding: '0 12px 16px 12px',
+    transition: 'opacity 0.2s ease'
+  });
 
   const checkboxItemStyle = {
     display: 'flex',
@@ -60,8 +84,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
     fontSize: '0.85rem',
     color: 'var(--text-color)',
     padding: '4px 0',
-    transition: 'opacity 0.2s ease',
-    userSelect: 'none'
+    opacity: 0.8
   };
 
   const checkMarkStyle = (isSelected) => ({
@@ -79,30 +102,49 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
   });
 
-  const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => (
-    <div style={filterSectionStyle}>
-      <label style={sectionLabelStyle}>{label}</label>
-      <div style={checkboxGroupStyle} className="custom-scrollbar">
-        {options.map(opt => {
-          const val = valueKey ? opt[valueKey] : opt;
-          const labelText = displayKey ? opt[displayKey] : opt;
-          const isSelected = currentFilters.includes(val);
-          return (
-            <div 
-              key={val} 
-              style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
-              onClick={() => onFilterChange(filterKey, val)}
+  const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+    const isExpanded = expandedGroups[filterKey];
+    return (
+      <div style={filterSectionStyle}>
+        <div style={groupHeaderStyle} onClick={() => toggleGroup(filterKey)}>
+          <span style={groupLabelStyle}>{label}</span>
+          <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{isExpanded ? '▲' : '▼'}</span>
+        </div>
+        
+        {isExpanded && (
+          <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); selectAll(filterKey, options, valueKey); }}
+              className="text-action-button"
+              style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
             >
-              <div style={checkMarkStyle(isSelected)}>
-                {isSelected && '✓'}
+              SELECT ALL
+            </button>
+          </div>
+        )}
+
+        <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
+          {options.map(opt => {
+            const val = valueKey ? opt[valueKey] : opt;
+            const labelText = displayKey ? opt[displayKey] : opt;
+            const isSelected = currentFilters.includes(val);
+            return (
+              <div 
+                key={val} 
+                style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
+                onClick={() => onFilterChange(filterKey, val)}
+              >
+                <div style={checkMarkStyle(isSelected)}>
+                  {isSelected && '✓'}
+                </div>
+                <span style={{ fontWeight: isSelected ? 700 : 500 }}>{labelText}</span>
               </div>
-              <span style={{ fontWeight: isSelected ? 700 : 500 }}>{labelText}</span>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="sub-sidebar-body">
@@ -118,12 +160,14 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
         </div>
       )}
 
-      <div style={{ padding: '4px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
         <button 
           onClick={() => {
             ['city', 'hub', 'priority', 'function'].forEach(key => {
               if (filters[key]?.length > 0) {
+                // Clear by replacing with empty array in setFilters (this needs a change in handleFilterChange or a reset helper)
+                // For now, toggle all off
                 filters[key].forEach(val => onFilterChange(key, val));
               }
             });
@@ -138,7 +182,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
             padding: '4px'
           }}
         >
-          CLEAR ALL
+          RESET
         </button>
       </div>
 
