@@ -8,8 +8,11 @@ import { supabase } from '../../services/supabaseClient';
  * Uses CSVDownloadButton master for all Excel logic.
  * Defines: headers, data transformation, and dropdown validation data.
  */
-const EmployeeCSVDownload = ({ data = [], label = 'Export Data', filename, isTemplate = false }) => {
+const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false }) => {
   const headers = ['full_name', 'email', 'phone', 'dept_code', 'role_code', 'status', 'hire_date'];
+
+  const defaultLabel = isTemplate ? "Download Employee Template" : "Export Employee Data";
+  const finalLabel = label || defaultLabel;
 
   const handleDownload = async () => {
     const [{ data: depts }, { data: roles }] = await Promise.all([
@@ -60,7 +63,7 @@ const EmployeeCSVDownload = ({ data = [], label = 'Export Data', filename, isTem
 
   return (
     <CSVDownloadButton
-      label={label}
+      label={finalLabel}
       format="xlsx"
       worksheetName="Employees"
       headers={headers}

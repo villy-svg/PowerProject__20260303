@@ -4,7 +4,8 @@
 :root {
   --bg-color: #fcfcfd;
   --text-color: #18181b;
-  --brand-green: #0d9488; /* Teal 600 */
+  --brand-green: #0d9488;
+  /* Teal 600 */
   --border-color: #e4e4e7;
   --font-main: 'Inter', system-ui, sans-serif;
   --transition-main: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -13,7 +14,8 @@
 [data-theme='dark'] {
   --bg-color: #09090b;
   --text-color: #f4f4f5;
-  --brand-green: #2dd4bf; /* Teal 400 */
+  --brand-green: #2dd4bf;
+  /* Teal 400 */
   --border-color: #3f3f46;
 }
 
@@ -31,19 +33,24 @@
 /* ==========================================================================
    2. GLOBAL RESET & BASE STYLES
    ========================================================================== */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  background-color: #09090b; /* DARK-FIRST: Prevents white flash even if cache is cleared */
+  background-color: #09090b;
+  /* DARK-FIRST: Prevents white flash even if cache is cleared */
   color: var(--text-color);
   font-family: var(--font-main);
   transition: background-color 0.3s ease;
 }
 
 
-#root { width: 100%; height: 100%; }
+#root {
+  width: 100%;
+  height: 100%;
+}
 
 * {
   box-sizing: border-box;
@@ -52,14 +59,24 @@ html, body {
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-color); }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 10px;
   border: 2px solid var(--bg-color);
 }
-::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
 
 /* ==========================================================================
    3. LAYOUT STRUCTURE
@@ -85,7 +102,8 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0; /* Standardized: No padding here, sub-components handle it */
+  padding: 0;
+  /* Standardized: No padding here, sub-components handle it */
   overflow-y: auto;
   transition: all var(--transition-main);
 }
@@ -102,42 +120,49 @@ html, body {
    4. HEADER & BRANDING
    ========================================================================== */
 .app-header {
-  height: 90px; /* Consistent height */
+  height: 90px;
+  /* Consistent height */
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   border-bottom: 1px solid var(--border-color);
-  padding: 0 40px; /* CONSISTENT PADDING AT ALL TIMES */
+  padding: 0 40px;
+  /* CONSISTENT PADDING AT ALL TIMES */
   position: relative;
   flex-shrink: 0;
 }
 
-.header-left { 
-  width: 120px; /* Space reserved for the logo */
-  display: flex; 
-  align-items: center; 
+.header-left {
+  width: 120px;
+  /* Space reserved for the logo */
+  display: flex;
+  align-items: center;
 }
 
-.header-center { 
-  flex: 2; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
+.header-center {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.header-right { 
+.header-right {
   flex: 1;
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   align-items: center;
 }
 
 .logo-button {
-  position: absolute; /* FIXED ANCHOR */
-  left: 40px; /* ALIGNED WITH HEADER PADDING */
-  top: 25px; /* Centered vertically in 90px header */
-  z-index: 1001; /* Above sidebar */
+  position: absolute;
+  /* FIXED ANCHOR */
+  left: 40px;
+  /* ALIGNED WITH HEADER PADDING */
+  top: 25px;
+  /* Centered vertically in 90px header */
+  z-index: 1001;
+  /* Above sidebar */
   background: transparent;
   border: none;
   cursor: pointer;
@@ -151,10 +176,10 @@ html, body {
   transform: scale(1.05);
 }
 
-.logo-svg { 
-  width: 40px; 
-  height: 40px; 
-  object-fit: contain; 
+.logo-svg {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .brand-title {
@@ -178,17 +203,24 @@ html, body {
   color: inherit;
   transition: all 0.2s ease;
 }
-.theme-toggle-btn:hover { background-color: var(--border-color); }
+
+.theme-toggle-btn:hover {
+  background-color: var(--border-color);
+}
 
 /* ==========================================================================
    5. EXECUTIVE SUMMARY (LEFT-ALIGNED LAYOUT)
    ========================================================================== */
-.home-summary-view { animation: fadeIn 0.4s ease-out; }
-.summary-header { 
-  margin-bottom: 40px; 
+.home-summary-view {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.summary-header {
+  margin-bottom: 40px;
   border-left: 3px solid var(--brand-green);
   padding-left: 15px;
 }
+
 .summary-header h2 {
   font-size: 1.1rem;
   font-weight: 600;
@@ -217,7 +249,7 @@ html, body {
   border-radius: 12px;
   padding: 12px 24px;
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between;
   align-items: center;
   min-height: 90px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -225,13 +257,13 @@ html, body {
 
 .summary-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
-.summary-count { 
-  font-size: 2.2rem; 
-  font-weight: 900; 
-  color: color-mix(in srgb, var(--stage-color), transparent 50%); 
+.summary-count {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: color-mix(in srgb, var(--stage-color), transparent 50%);
   -webkit-text-stroke: 1.5px var(--stage-color);
   letter-spacing: 1px;
   line-height: 1;
@@ -267,7 +299,10 @@ html, body {
   font-size: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
-.vertical-mini-row:last-child { border-bottom: none; }
+
+.vertical-mini-row:last-child {
+  border-bottom: none;
+}
 
 .v-mini-label {
   opacity: 0.6;
@@ -281,9 +316,9 @@ html, body {
 
 .v-mini-count {
   font-weight: 800;
-  font-family: monospace; 
+  font-family: monospace;
   font-size: 0.9rem;
-  color: var(--stage-color); 
+  color: var(--stage-color);
   -webkit-text-stroke: 0.8px var(--stage-color);
 }
 
@@ -311,10 +346,10 @@ html, body {
   box-shadow: 0 4px 12px color-mix(in srgb, var(--task-stage-color), transparent 90%);
 }
 
-.task-card-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: flex-start; 
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 10px;
 }
 
@@ -368,8 +403,14 @@ html, body {
   transition: opacity 0.2s;
 }
 
-.task-card:hover .delete-task-btn { opacity: 1; }
-.delete-task-btn:hover { color: #dc2626; transform: scale(1.1); }
+.task-card:hover .delete-task-btn {
+  opacity: 1;
+}
+
+.delete-task-btn:hover {
+  color: #dc2626;
+  transform: scale(1.1);
+}
 
 /* ==========================================================================
    9. HALO BUTTONS & DESIGN SYSTEM REFINEMENTS
@@ -394,7 +435,8 @@ html, body {
 }
 
 .halo-button {
-  background: var(--halo-bg) !important; /* Force override of default button backgrounds */
+  background: var(--halo-bg) !important;
+  /* Force override of default button backgrounds */
   color: var(--brand-green) !important;
   border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%) !important;
   padding: 8px 16px;
@@ -405,7 +447,8 @@ html, body {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 3px var(--halo-glow); /* Further reduced for ultra-subtle look */
+  box-shadow: 0 0 3px var(--halo-glow);
+  /* Further reduced for ultra-subtle look */
   backdrop-filter: blur(4px);
   display: inline-flex;
   align-items: center;
@@ -417,7 +460,8 @@ html, body {
   background: color-mix(in srgb, var(--brand-green), transparent 85%) !important;
   border-color: var(--brand-green) !important;
   border-width: 2px !important;
-  margin: -0.5px; /* Fine-tuned alignment */
+  margin: -0.5px;
+  /* Fine-tuned alignment */
   box-shadow: 0 0 20px var(--halo-glow);
   transform: translateY(-1px);
 }
@@ -435,8 +479,15 @@ html, body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Duplicate Styling */
@@ -464,18 +515,26 @@ html, body {
 }
 
 .task-card-master.is-duplicate-stacked {
-  box-shadow: 
+  box-shadow:
     3px 3px 0 -1px var(--bg-color),
     3px 3px 0 0 var(--border-color),
     6px 6px 0 -2px var(--bg-color),
     6px 6px 0 0 var(--border-color);
-  margin-bottom: 24px; /* More space for the stack shadow */
+  margin-bottom: 24px;
+  /* More space for the stack shadow */
 }
 
 /* ==========================================================================
    9. GLOBAL ANIMATIONS (Existing)
    ========================================================================== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
