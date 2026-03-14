@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from './theme/useTheme';
 import ThemeToggle from './theme/themeToggle'; 
 import './App.css';
@@ -79,9 +79,8 @@ function App() {
   // }, []);
 
   // src/App.jsx - around line 35
-  useEffect(() => {
-  const fetchTasks = async () => {
-    setLoading(true);
+  const fetchTasks = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     console.log("🚩 TRACE 1: Starting Fetch...");
     
     try {
@@ -98,14 +97,15 @@ function App() {
       }
     } catch (err) {
       console.error("❌ TRACE 1 CRASH:", err);
-    }finally {
-    // 🚩 THIS IS THE FIX: This must be outside the 'else' but inside the function
-    console.log("🚩 TRACE 1.2: Setting loading to false now.");
-    setLoading(false); 
-  }
-  };
-  fetchTasks();
-}, []);
+    } finally {
+      if (showLoading) setLoading(false);
+      console.log("🚩 TRACE 1.2: Fetch complete.");
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   // 3. Auth and User Identity
   const [session, setSession] = useState(null);
@@ -515,6 +515,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 tasks={tasks} 
                 setTasks={addTask} 
                 actualSetTasks={setTasks} // Pass raw setter for local updates
+                refreshTasks={fetchTasks}
                 updateTask={updateTask}
                 bulkUpdateTasks={bulkUpdateTasks}
                 deleteTask={deleteTask}

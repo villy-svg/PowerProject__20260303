@@ -19,6 +19,7 @@ const TaskController = ({
   tasks = [], 
   setTasks,
   actualSetTasks,
+  refreshTasks,
   updateTask,
   bulkUpdateTasks,
   deleteTask, 
@@ -387,7 +388,7 @@ const TaskController = ({
             <>
               <TaskCSVDownload data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Data" />
               <TaskCSVDownload isTemplate label="Download Template" />
-              <TaskCSVImport verticalId={activeVertical} onImportComplete={() => {}} />
+              <TaskCSVImport verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
             </>
           )}
           {canUserCreate && (
