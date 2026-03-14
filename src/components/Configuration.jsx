@@ -52,7 +52,26 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
     ],
     // Placeholders for other verticals
     CLIENTS: [],
-    EMPLOYEES: [],
+    EMPLOYEES: [
+      {
+        id: 'manage_departments',
+        title: 'Department Management',
+        desc: 'Define and manage organization departments.',
+        icon: '',
+        action: () => setActiveVertical('department_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Departments'
+      },
+      {
+        id: 'manage_employee_roles',
+        title: 'Role Management',
+        desc: 'Define functional roles within the employee manager.',
+        icon: '',
+        action: () => setActiveVertical('employee_role_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Roles'
+      }
+    ],
     PARTNERS: [],
     VENDORS: []
   };

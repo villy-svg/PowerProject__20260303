@@ -140,13 +140,20 @@ const EmployeeSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, 
     <div className="sub-sidebar-body">
       {/* Admin Quick Links */}
       {isMasterAdmin && (
-        <div style={{ padding: '12px', marginBottom: '8px' }}>
+        <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             className="halo-button"
             style={{ width: '100%' }}
             onClick={() => setActiveVertical('employee_management')}
           >
             Employee Records
+          </button>
+          <button
+            className="halo-button"
+            style={{ width: '100%' }}
+            onClick={() => setActiveVertical('department_management')}
+          >
+            Department Manager
           </button>
         </div>
       )}

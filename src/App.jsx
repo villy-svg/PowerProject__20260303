@@ -26,6 +26,8 @@ import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
 import EmployeeSubSidebar from './verticals/Employees/EmployeeSubSidebar';
 import EmployeeTaskForm from './verticals/Employees/EmployeeTaskForm';
 import EmployeeTaskTile from './verticals/Employees/EmployeeTaskTile';
+import DepartmentManagement from './verticals/Employees/DepartmentManagement';
+import EmployeeRoleManagement from './verticals/Employees/EmployeeRoleManagement';
 import Login from './components/Login';
 
 // Assets
@@ -492,10 +494,21 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
-            ) : activeVertical === 'hub_management' ? (
-              <HubManagement />
             ) : activeVertical === 'hub_function_management' ? (
               <HubFunctionManagement />
+            ) : activeVertical === 'department_management' ? (
+              <DepartmentManagement />
+            ) : activeVertical === 'employee_role_management' ? (
+              <EmployeeRoleManagement />
+            ) : activeVertical === 'employee_management' ? (
+              <div className="hub-management-container">
+                <header className="hub-header">
+                  <div className="header-info">
+                    <h1>Employee Records</h1>
+                    <p>Manage detailed employee profiles, departments, and roles. (Coming Soon)</p>
+                  </div>
+                </header>
+              </div>
             ) : (
               <VerticalWorkspace 
                 label={VERTICALS[activeVertical]?.label}
