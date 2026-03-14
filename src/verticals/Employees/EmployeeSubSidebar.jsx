@@ -6,7 +6,7 @@ import React, { useState } from 'react';
  * Vertical-specific sidebar content for the Employee Manager.
  * Contains filters for tasks within the employee context.
  */
-const EmployeeSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
+const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
   const isMasterAdmin = user?.roleId === 'master_admin';
 
   const [expandedGroups, setExpandedGroups] = useState({
