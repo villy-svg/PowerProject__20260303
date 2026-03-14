@@ -1,5 +1,5 @@
-import React from 'react';
-import '../ChargingHubs/HubManagement.css'; // Use shared styles
+import EmployeeCSVDownload from './EmployeeCSVDownload';
+import EmployeeCSVImport from './EmployeeCSVImport';
 
 /**
  * EmployeeManagement
@@ -7,7 +7,9 @@ import '../ChargingHubs/HubManagement.css'; // Use shared styles
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = () => {
+const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
+  const isMasterAdmin = user?.roleId === 'master_admin';
+
   return (
     <div className="hub-management-container" style={{ padding: 0 }}>
       <header className="hub-header">
@@ -15,9 +17,16 @@ const EmployeeManagement = () => {
           <h1>Employee Records</h1>
           <p>Centralized database for personnel profiles, performance tracking, and organizational assignments.</p>
         </div>
-        <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          {isMasterAdmin && (
+            <>
+              <EmployeeCSVDownload data={tasks} label="Download Data" />
+              <EmployeeCSVDownload isTemplate label="Download Template" />
+              <EmployeeCSVImport onImportComplete={() => window.location.reload()} />
+            </>
+          )}
           <button className="halo-button add-hub-main-btn" onClick={() => alert('Add Employee logic coming soon')}>
-            Add New Employee
+            + Add New Employee
           </button>
         </div>
       </header>

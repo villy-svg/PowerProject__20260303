@@ -512,7 +512,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <VerticalWorkspace 
                 label={(activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? "Employees" : VERTICALS[activeVertical]?.label}
                 activeVertical={activeVertical}
-                tasks={tasks}
+                tasks={tasks} 
                 setTasks={addTask} 
                 actualSetTasks={setTasks} // Pass raw setter for local updates
                 updateTask={updateTask}

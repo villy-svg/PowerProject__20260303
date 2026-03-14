@@ -7,7 +7,7 @@ import { supabase } from '../../services/supabaseClient';
  * Specialized Excel exporter for Employee Records.
  * Supports .xlsx with dropdown menus for Department and Role.
  */
-const EmployeeCSVDownload = ({ data = [], label = 'Export Employees', filename, isTemplate = false }) => {
+const EmployeeCSVDownload = ({ data = [], label = 'Export Data', filename, isTemplate = false }) => {
   const headers = ['full_name', 'email', 'phone', 'dept_code', 'role_code', 'status', 'hire_date'];
 
   const handleDownload = async () => {
