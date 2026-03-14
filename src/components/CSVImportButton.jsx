@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
+import ExcelJS from 'exceljs';
 
 /**
  * Generic CSV Import Button
@@ -9,12 +10,14 @@ import Papa from 'papaparse';
  *   requiredFields {string[]} - Fields that must exist for a row to be valid
  *   label          {string}   - Button label text
  *   className      {string}   - Extra CSS class names
+ *   accept         {string}   - Accepted file extensions (default: .csv,.xlsx)
  */
 const CSVImportButton = ({
   onDataParsed,
   requiredFields = [],
   label = 'Import CSV',
   className = '',
+  accept = '.csv,.xlsx'
 }) => {
   const inputRef = useRef(null);
   const [status, setStatus] = useState(null); // null | 'success' | 'error'
@@ -25,32 +28,76 @@ const CSVImportButton = ({
 
     setStatus(null);
 
-    Papa.parse(file, {
-      header: true,           // Use first row as keys
-      skipEmptyLines: true,
-      transformHeader: (h) => h.trim().toLowerCase(), // Normalize keys
-      complete: (result) => {
-        const rows = result.data;
-        let skipped = 0;
+    const isExcel = file.name.endsWith('.xlsx');
 
-        const valid = rows.filter((row) => {
-          const isValid = requiredFields.every(
-            (field) => row[field] && String(row[field]).trim() !== ''
-          );
-          if (!isValid) skipped++;
-          return isValid;
-        });
+    if (isExcel) {
+      // Excel Parsing Logic
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        try {
+          const buffer = evt.target.result;
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(buffer);
+          
+          const worksheet = workbook.worksheets[0]; // First sheet
+          const rows = [];
+          
+          // Get headers from first row
+          const headerRow = worksheet.getRow(1);
+          const headers = [];
+          headerRow.eachCell((cell, colNumber) => {
+            headers[colNumber] = cell.text.trim().toLowerCase();
+          });
 
-        if (valid.length === 0) {
+          // Process data rows
+          worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return; // Skip header
+            const rowData = {};
+            row.eachCell((cell, colNumber) => {
+              const header = headers[colNumber];
+              if (header) {
+                rowData[header] = cell.text;
+              }
+            });
+            rows.push(rowData);
+          });
+          
+          processRows(rows);
+        } catch (err) {
+          console.error("Excel Parsing Error:", err);
           setStatus('error');
-          return;
         }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      // CSV Parsing Logic
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (h) => h.trim().toLowerCase(),
+        complete: (result) => processRows(result.data),
+        error: () => setStatus('error'),
+      });
+    }
 
-        setStatus('success');
-        onDataParsed?.(valid, skipped);
-      },
-      error: () => setStatus('error'),
-    });
+    const processRows = (rows) => {
+      let skipped = 0;
+      const valid = rows.filter((row) => {
+        const isValid = requiredFields.every(
+          (field) => row[field] && String(row[field]).trim() !== ''
+        );
+        if (!isValid) skipped++;
+        return isValid;
+      });
+
+      if (valid.length === 0) {
+        setStatus('error');
+        return;
+      }
+
+      setStatus('success');
+      onDataParsed?.(valid, skipped);
+    };
 
     // Reset input so the same file can be re-uploaded if needed
     e.target.value = '';
@@ -61,7 +108,7 @@ const CSVImportButton = ({
       <input
         ref={inputRef}
         type="file"
-        accept=".csv"
+        accept={accept}
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />

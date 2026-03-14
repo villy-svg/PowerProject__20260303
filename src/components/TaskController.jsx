@@ -114,12 +114,20 @@ const TaskController = ({
    */
   const tasksWithDuplicateInfo = React.useMemo(() => {
     const clusters = {};
-    // First pass: identify clusters among non-deprioritized tasks
+    const clusterMaxDates = {};
     (tasks || []).forEach(t => {
       if (t.stageId !== 'DEPRIORITIZED') {
         const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
+        
+        // Populate clusters
         if (!clusters[key]) clusters[key] = [];
         clusters[key].push(t.id);
+
+        // Track max date
+        const tDate = new Date(t.updatedAt || t.createdat).getTime();
+        if (!clusterMaxDates[key] || tDate > clusterMaxDates[key]) {
+          clusterMaxDates[key] = tDate;
+        }
       }
     });
 
@@ -135,7 +143,8 @@ const TaskController = ({
         isDuplicate,
         duplicateCount: isDeprioritized ? 0 : cluster.length,
         isFirstInCluster: !isDeprioritized && cluster[0] === t.id,
-        duplicateGroup: isDeprioritized ? [] : cluster
+        duplicateGroup: isDeprioritized ? [] : cluster,
+        clusterMaxDate: clusterMaxDates[key] || new Date(t.updatedAt || t.createdat).getTime()
       };
     });
 
@@ -146,13 +155,14 @@ const TaskController = ({
       const pB = priorityOrder[b.priority] ?? 99;
       if (pA !== pB) return pA - pB;
 
-      // 2. Adjacency (Duplicate clusters)
-      if (a.duplicateKey !== b.duplicateKey) {
-        // 3. Updated At (Recency)
-        const dateA = new Date(a.updatedAt || a.createdat).getTime();
-        const dateB = new Date(b.updatedAt || b.createdat).getTime();
-        if (dateB !== dateA) return dateB - dateA;
+      // 2. Cluster Recency (Group adjacency)
+      // Members of the same cluster have identical clusterMaxDate
+      if (a.clusterMaxDate !== b.clusterMaxDate) {
+        return b.clusterMaxDate - a.clusterMaxDate;
+      }
 
+      // 3. Adjacency tie-breaker
+      if (a.duplicateKey !== b.duplicateKey) {
         return a.duplicateKey.localeCompare(b.duplicateKey);
       }
       
