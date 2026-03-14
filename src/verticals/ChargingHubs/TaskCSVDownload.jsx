@@ -13,12 +13,13 @@ const TaskCSVDownload = ({ data = [], label = 'Export Tasks', filename, isTempla
   const handleDownload = async () => {
     // 1. Fetch live data for dropdowns
     const [{ data: hubs }, { data: functions }] = await Promise.all([
-      supabase.from('hubs').select('hub_code').order('hub_code'),
+      supabase.from('hubs').select('hub_code, city').order('hub_code'),
       supabase.from('hub_functions').select('function_code').order('function_code')
     ]);
 
     const hubCodes = hubs?.map(h => h.hub_code).filter(Boolean) || [];
     const funcCodes = functions?.map(f => f.function_code).filter(Boolean) || [];
+    const cityList = [...new Set(hubs?.map(h => h.city).filter(Boolean) || [])].sort();
     const priorities = ['Low', 'Medium', 'High', 'Urgent'];
     const stages = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'COMPLETED', 'DEPRIORITIZED'];
 
@@ -27,7 +28,7 @@ const TaskCSVDownload = ({ data = [], label = 'Export Tasks', filename, isTempla
     const worksheet = workbook.addWorksheet('Tasks');
 
     // Define columns
-    worksheet.columns = headers.map(h => ({ header: h, key: h, width: 20 }));
+    worksheet.columns = headers.map(h => ({ header: h, key: h, width: 25 }));
 
     // 3. Populate Data
     if (isTemplate) {
@@ -38,39 +39,46 @@ const TaskCSVDownload = ({ data = [], label = 'Export Tasks', filename, isTempla
         hub_code: hubCodes[0] || 'NYC-001',
         function_code: funcCodes[0] || 'MNT',
         description: 'Sample description',
-        city: 'Sample City'
+        city: cityList[0] || 'New York'
       });
 
       // 4. Add Data Validation (Dropdowns) for 100 rows
-      const hubList = `"${hubCodes.join(',')}"`;
-      const funcList = `"${funcCodes.join(',')}"`;
-      const prioList = `"${priorities.join(',')}"`;
-      const stageList = `"${stages.join(',')}"`;
+      const hubListStr = `"${hubCodes.join(',')}"`;
+      const funcListStr = `"${funcCodes.join(',')}"`;
+      const prioListStr = `"${priorities.join(',')}"`;
+      const stageListStr = `"${stages.join(',')}"`;
+      const cityListStr = `"${cityList.join(',')}"`;
 
       for (let i = 2; i <= 101; i++) {
         // Priority (Col B)
         worksheet.getCell(`B${i}`).dataValidation = {
           type: 'list',
           allowBlank: true,
-          formulae: [prioList]
+          formulae: [prioListStr]
         };
         // Stage (Col C)
         worksheet.getCell(`C${i}`).dataValidation = {
           type: 'list',
           allowBlank: true,
-          formulae: [stageList]
+          formulae: [stageListStr]
         };
         // Hub (Col D)
         worksheet.getCell(`D${i}`).dataValidation = {
           type: 'list',
           allowBlank: true,
-          formulae: [hubList]
+          formulae: [hubListStr]
         };
         // Function (Col E)
         worksheet.getCell(`E${i}`).dataValidation = {
           type: 'list',
           allowBlank: true,
-          formulae: [funcList]
+          formulae: [funcListStr]
+        };
+        // City (Col G)
+        worksheet.getCell(`G${i}`).dataValidation = {
+          type: 'list',
+          allowBlank: true,
+          formulae: [cityListStr]
         };
       }
     } else {
