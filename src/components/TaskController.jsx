@@ -35,18 +35,18 @@ const TaskController = ({
   const [showDeprioritized, setShowDeprioritized] = useState(true);
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
 
+  // Custom Confirmation Modal State
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
   // Persist view mode choice
   useEffect(() => {
     localStorage.setItem('powerpod_task_view', viewMode);
   }, [viewMode]);
 
-  const toggleTaskSelection = (taskId) => {
-    setSelectedTaskIds(prev => 
-      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
-    );
-  };
-
   const clearSelection = () => setSelectedTaskIds([]);
+  const toggleTaskSelection = (taskId) => {
+    setSelectedTaskIds(prev => prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]);
+  };
 
   // Determine stage consistency of selection
   const selectedTasks = React.useMemo(() => 
@@ -61,42 +61,55 @@ const TaskController = ({
   const handleBulkAction = async (action) => {
     if (selectedTaskIds.length === 0) return;
     
-    try {
-      if (action === 'delete') {
-        // Single confirmation for the whole batch; deleteTask in App.jsx also confirms per-task
-        // So we bypass it by deleting directly via bulkUpdateTasks workaround — or accept one prompt.
-        // Here we issue ONE confirm for the whole batch:
-        if (!window.confirm(`Permanently delete ${selectedTaskIds.length} task${selectedTaskIds.length > 1 ? 's' : ''}?`)) return;
-        for (const id of selectedTaskIds) {
-          const { error } = await supabase.from('tasks').delete().eq('id', id);
-          if (error) throw error;
+    if (action === 'delete') {
+      setConfirmDialog({
+        isOpen: true,
+        title: 'Confirm Bulk Delete',
+        message: `Are you sure you want to permanently delete these ${selectedTaskIds.length} tasks? This cannot be undone.`,
+        onConfirm: async () => {
+          setSaving(true);
+          try {
+            for (const id of selectedTaskIds) {
+              const { error } = await supabase.from('tasks').delete().eq('id', id);
+              if (error) throw error;
+            }
+            actualSetTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
+            clearSelection();
+          } catch (err) {
+            console.error("Bulk Delete Failed:", err);
+            alert("Some tasks could not be deleted.");
+          } finally {
+            setSaving(false);
+            setConfirmDialog({ ...confirmDialog, isOpen: false });
+          }
         }
-        setTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
-      } else if (action === 'deprio') {
-        await bulkUpdateTasks(selectedTaskIds, { stageid: 'DEPRIORITIZED' });
-      } else if (action === 'restore') {
-        await bulkUpdateTasks(selectedTaskIds, { stageid: 'BACKLOG' });
-      } else if (action === 'forward' || action === 'backward') {
-        if (!sameStage) return;
-        const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
-        let newIndex = currentIndex;
-        if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
-        if (action === 'backward' && currentIndex > 0) newIndex--;
-        
-        if (newIndex !== currentIndex) {
-          await bulkUpdateTasks(selectedTaskIds, { stageid: STAGE_LIST[newIndex].id });
-        }
+      });
+    } else if (action === 'deprio') {
+      await bulkUpdateTasks(selectedTaskIds, { stageid: 'DEPRIORITIZED' });
+      clearSelection();
+    } else if (action === 'restore') {
+      await bulkUpdateTasks(selectedTaskIds, { stageid: 'BACKLOG' });
+      clearSelection();
+    } else if (action === 'forward' || action === 'backward') {
+      if (!sameStage) return;
+      const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
+      let newIndex = currentIndex;
+      if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
+      if (action === 'backward' && currentIndex > 0) newIndex--;
+      
+      if (newIndex !== currentIndex) {
+        await bulkUpdateTasks(selectedTaskIds, { stageid: STAGE_LIST[newIndex].id });
       }
       clearSelection();
-    } catch (err) {
-      console.error("Bulk Action Failed:", err);
     }
   };
 
   /**
    * DUPLICATE DETECTION & SORTING LOGIC
-   * 1. Identifies clusters of identical tasks.
-   * 2. Sorts to ensure duplicates are adjacent.
+   * Hierarchy:
+   * 1. Priority (Urgent -> High -> Medium -> Low)
+   * 2. Updated At (Most recent first)
+   * 3. Adjacency (Duplicate clusters together)
    */
   const tasksWithDuplicateInfo = React.useMemo(() => {
     const clusters = {};
@@ -115,23 +128,29 @@ const TaskController = ({
         isDuplicate,
         duplicateCount: cluster.length,
         isFirstInCluster: cluster[0] === t.id,
-        duplicateGroup: cluster // List of IDs in the cluster
+        duplicateGroup: cluster 
       };
     });
 
-    // Enforce Duplicate Adjacency: Sort by cluster key first, then priority
     const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
     return enriched.sort((a, b) => {
-      // If they are in the same duplicate cluster, keep original creation order
-      if (a.duplicateKey === b.duplicateKey) return 0;
-      
-      // If one is duplicate and other isn't, we still sort by priority mainly
-      // But we use the duplicateKey as secondary sort to keep groups together
+      // 1. Priority
       const pA = priorityOrder[a.priority] ?? 99;
       const pB = priorityOrder[b.priority] ?? 99;
-      
       if (pA !== pB) return pA - pB;
-      return a.duplicateKey.localeCompare(b.duplicateKey);
+
+      // 2. Adjacency (Duplicate clusters)
+      if (a.duplicateKey !== b.duplicateKey) {
+        // 3. Updated At (Recency)
+        const dateA = new Date(a.updatedAt || a.createdat).getTime();
+        const dateB = new Date(b.updatedAt || b.createdat).getTime();
+        if (dateB !== dateA) return dateB - dateA;
+
+        return a.duplicateKey.localeCompare(b.duplicateKey);
+      }
+      
+      // Keep original order within clusters
+      return 0;
     });
   }, [tasks]);
 
@@ -160,24 +179,27 @@ const TaskController = ({
 
   const executeMerge = async (primaryTaskId) => {
     if (!mergeTaskCluster) return;
-    const clonesToDelete = mergeTaskCluster.filter(t => t.id !== primaryTaskId).map(t => t.id);
+    const clonesToDeprio = mergeTaskCluster.filter(t => t.id !== primaryTaskId).map(t => t.id);
     
-    if (window.confirm(`Merge confirmed. ${clonesToDelete.length} duplicates will be deleted. Proceed?`)) {
-      setSaving(true);
-      try {
-        for (const id of clonesToDelete) {
-          const { error } = await supabase.from('tasks').delete().eq('id', id);
-          if (error) throw error;
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Confirm Consolidation',
+      message: `Proceed with merge? ${clonesToDeprio.length} duplicate records will be moved to Deprioritized.`,
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          // Update clones to DEPRIORITIZED instead of deleting
+          await bulkUpdateTasks(clonesToDeprio, { stageid: 'DEPRIORITIZED' });
+          setMergeTaskCluster(null);
+        } catch (err) {
+          console.error("Merge Failed:", err);
+          alert("Consolidation failed. Please try again.");
+        } finally {
+          setSaving(false);
+          setConfirmDialog({ ...confirmDialog, isOpen: false });
         }
-        setTasks(prev => prev.filter(t => !clonesToDelete.includes(t.id)));
-        setMergeTaskCluster(null);
-      } catch (err) {
-        console.error("Merge Failed:", err);
-        alert("Consolidation failed. Please try again.");
-      } finally {
-        setSaving(false);
       }
-    }
+    });
   };
 
   /**
@@ -237,6 +259,27 @@ const TaskController = ({
     setIsModalOpen(true);
   };
 
+  const handleSingleDelete = (taskId) => {
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to permanently delete this task?',
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+          if (error) throw error;
+          setTasks(prev => prev.filter(t => t.id !== taskId));
+        } catch (err) {
+          alert("Delete failed.");
+        } finally {
+          setSaving(false);
+          setConfirmDialog({ ...confirmDialog, isOpen: false });
+        }
+      }
+    });
+  };
+
   /**
    * handleClearBoard
    * Moves all tasks in this vertical (except deprioritized ones) to DEPRIORITIZED stage.
@@ -245,17 +288,22 @@ const TaskController = ({
     const verticalTasks = (tasks || []).filter(t => t.verticalId === activeVertical && t.stageId !== 'DEPRIORITIZED');
     if (verticalTasks.length === 0) return;
 
-    if (window.confirm(`Move all ${verticalTasks.length} active tasks to Deprioritized?`)) {
-      setSaving(true);
-      try {
-        await bulkUpdateTasks(verticalTasks.map(t => t.id), { stageid: 'DEPRIORITIZED' });
-        alert("Board cleared successfully!");
-      } catch (err) {
-        alert("Failed to clear board.");
-      } finally {
-        setSaving(false);
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Clear Board',
+      message: `Move all ${verticalTasks.length} active tasks to Deprioritized?`,
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          await bulkUpdateTasks(verticalTasks.map(t => t.id), { stageid: 'DEPRIORITIZED' });
+        } catch (err) {
+          alert("Failed to clear board.");
+        } finally {
+          setSaving(false);
+          setConfirmDialog({ ...confirmDialog, isOpen: false });
+        }
       }
-    }
+    });
   };
 
   return (
@@ -358,7 +406,7 @@ const TaskController = ({
         title="Consolidate Duplicate Tasks"
       >
         <div className="duplicate-merge-container">
-          <p className="merge-intro">We found {mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be deleted.</p>
+          <p className="merge-intro">We found {mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.</p>
           <div className="merge-grid">
             {mergeTaskCluster?.slice(0, 3).map((task, idx) => (
               <div key={task.id} className="merge-option-card">
@@ -384,8 +432,35 @@ const TaskController = ({
             ))}
           </div>
           {mergeTaskCluster?.length > 3 && (
-            <p className="merge-footer-info">+ {mergeTaskCluster.length - 3} more hidden clones will also be merged.</p>
+            <p className="merge-footer-info">+ {mergeTaskCluster.length - 3} more clones will also be deprioritized.</p>
           )}
+        </div>
+      </TaskModal>
+
+      {/* Custom Confirmation Modal */}
+      <TaskModal
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        title={confirmDialog.title}
+      >
+        <div className="confirm-modal-body">
+          <p className="confirm-message">{confirmDialog.message}</p>
+          <div className="confirm-actions">
+            <button 
+              className="halo-button confirm-btn" 
+              onClick={confirmDialog.onConfirm}
+              disabled={saving}
+            >
+              {saving ? 'Working...' : 'Confirm'}
+            </button>
+            <button 
+              className="halo-button cancel-btn" 
+              onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+              style={{ opacity: 0.6 }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </TaskModal>
 
@@ -430,7 +505,7 @@ const TaskController = ({
                           canUpdate={canUserUpdate}
                           canDelete={canUserDelete}
                           updateTaskStage={updateTaskStage}
-                          deleteTask={deleteTask}
+                          deleteTask={handleSingleDelete}
                           openEditModal={openEditModal}
                           onDuplicateMerge={handleDuplicateMergeTrigger}
                           STAGE_LIST={STAGE_LIST}
@@ -463,7 +538,7 @@ const TaskController = ({
             canUpdate={canUserUpdate}
             canDelete={canUserDelete}
             updateTaskStage={updateTaskStage}
-            deleteTask={deleteTask}
+            deleteTask={handleSingleDelete}
             openEditModal={openEditModal}
             onDuplicateMerge={handleDuplicateMergeTrigger}
             TaskTileComponent={TaskTileComponent}
@@ -474,56 +549,63 @@ const TaskController = ({
       </div>
 
       {selectedTaskIds.length > 0 && (
-        <div className="bulk-action-bar">
+        <div className="bulk-action-bar active">
           <div className="bulk-info">
-            <span className="selection-count">{selectedTaskIds.length} task{selectedTaskIds.length > 1 ? 's' : ''} selected</span>
-            <button className="clear-selection-btn" onClick={clearSelection}>✕ Clear</button>
+            <span className="selection-count">{selectedTaskIds.length} tasks selected</span>
           </div>
-          
+
           <div className="bulk-actions">
-            {canUserUpdate && sameStage && (
-              <>
-                <button 
-                  className="bulk-nav-btn" 
-                  onClick={() => handleBulkAction('backward')}
-                  title="Move Selected Back"
-                >
-                  ← Move Back
-                </button>
-                <button 
-                  className="bulk-nav-btn" 
-                  onClick={() => handleBulkAction('forward')}
-                  title="Move Selected Forward"
-                >
-                  Move Forward →
-                </button>
-              </>
-            )}
-            
-            {canUserUpdate && (
-              <>
-                <button 
-                  className="bulk-action-btn deprio" 
-                  onClick={() => handleBulkAction('deprio')}
-                >
-                  Deprioritize
-                </button>
-                <button 
-                  className="bulk-action-btn restore" 
-                  onClick={() => handleBulkAction('restore')}
-                >
-                  Restore
-                </button>
-              </>
-            )}
-            {canUserDelete && (
-              <button 
-                className="bulk-action-btn delete" 
-                onClick={() => handleBulkAction('delete')}
+            {canUserUpdate && sameStage && commonStageId !== STAGE_LIST[0].id && (
+              <button
+                className="bulk-btn"
+                onClick={() => handleBulkAction('backward')}
+                title="Move Backward"
               >
-                Delete
+                ← Prev
               </button>
             )}
+
+            {canUserUpdate && sameStage && commonStageId !== STAGE_LIST[STAGE_LIST.length - 1].id && (
+              <button
+                className="bulk-btn"
+                onClick={() => handleBulkAction('forward')}
+                title="Move Forward"
+              >
+                Next →
+              </button>
+            )}
+
+            {canUserUpdate && commonStageId !== 'DEPRIORITIZED' && (
+              <button
+                className="bulk-btn deprio"
+                onClick={() => handleBulkAction('deprio')}
+                title="Deprioritize Selection"
+              >
+                ⬇ Deprio
+              </button>
+            )}
+
+            {canUserUpdate && commonStageId === 'DEPRIORITIZED' && (
+              <button
+                className="bulk-btn restore"
+                onClick={() => handleBulkAction('restore')}
+                title="Restore to Pending"
+              >
+                ⬆ Restore
+              </button>
+            )}
+
+            {canUserDelete && (
+              <button
+                className="bulk-btn delete"
+                onClick={() => handleBulkAction('delete')}
+                title="Delete Permanently"
+              >
+                × Delete
+              </button>
+            )}
+
+            <button className="bulk-btn cancel" onClick={clearSelection}>Cancel</button>
           </div>
         </div>
       )}

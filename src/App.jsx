@@ -497,6 +497,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 activeVertical={activeVertical}
                 tasks={tasks}
                 setTasks={addTask} 
+                actualSetTasks={setTasks} // Pass raw setter for local updates
                 updateTask={updateTask}
                 bulkUpdateTasks={bulkUpdateTasks}
                 deleteTask={deleteTask}

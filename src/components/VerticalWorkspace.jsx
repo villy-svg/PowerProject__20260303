@@ -12,6 +12,7 @@ const VerticalWorkspace = ({
   activeVertical, 
   tasks, 
   setTasks, // This now receives the 'addTask' async helper from App.jsx
+  actualSetTasks,
   deleteTask,
   updateTask,
   bulkUpdateTasks,
@@ -153,6 +154,7 @@ const VerticalWorkspace = ({
           tasks={tasks}
           filters={filters}
           setTasks={setTasks} 
+          actualSetTasks={actualSetTasks}
           updateTask={updateTask}
           bulkUpdateTasks={bulkUpdateTasks}
           deleteTask={deleteTask}
