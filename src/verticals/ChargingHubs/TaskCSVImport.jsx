@@ -47,6 +47,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         );
 
         if (existing) {
+          // Attach existing ID for ID-based upsert later
+          row.id = existing.id;
           conflicts.push({ csvRow: row, existingTask: existing });
         } else {
           nonConflictingRows.push(row);
@@ -87,6 +89,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
   const finalizeImport = async (rows, hubCodeMap, funcCodeMap) => {
     try {
       const tasksToInsert = rows.map(row => ({
+        id: row.id || undefined, // Carry over existing ID for updates
         text: row.text,
         verticalid: verticalId,
         stageid: row.stageid || 'BACKLOG',
@@ -98,11 +101,10 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         updatedat: new Date().toISOString()
       }));
 
-      // Use upsert to handle updates if text+hub+func matches (requires unique constraint in DB if strictly enforcing, 
-      // but here we manually filtered so insert is safe, or upsert for logic consistency)
+      // Use id-based upsert to avoid constraint errors
       const { error } = await supabase
         .from('tasks')
-        .upsert(tasksToInsert, { onConflict: 'text,verticalid,hub_id,function' });
+        .upsert(tasksToInsert, { onConflict: 'id' });
 
       if (error) throw error;
 
