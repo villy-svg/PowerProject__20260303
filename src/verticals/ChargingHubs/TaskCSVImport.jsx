@@ -24,12 +24,13 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
     try {
       // 1. Fetch resolution maps (Hubs/Functions) and existing Tasks for conflict checking
       const [{ data: hubs }, { data: functions }, { data: existingTasks }] = await Promise.all([
-        supabase.from('hubs').select('id, hub_code'),
+        supabase.from('hubs').select('id, hub_code, name'),
         supabase.from('hub_functions').select('name, function_code'),
         supabase.from('tasks').select('*').eq('verticalid', verticalId)
       ]);
 
       const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
+      const hubNameMap = Object.fromEntries(hubs?.map(h => [h.id, h.hub_code || h.name]) || []);
       const funcCodeMap = Object.fromEntries(functions?.map(f => [f.function_code, f.name]) || []);
 
       const conflicts = [];
@@ -56,10 +57,10 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       });
 
       if (conflicts.length > 0) {
-        setPendingData({ conflicts, nonConflictingRows, hubCodeMap, funcCodeMap });
+        setPendingData({ conflicts, nonConflictingRows, hubCodeMap, hubNameMap, funcCodeMap });
         setShowConflicts(true);
       } else {
-        await finalizeImport(rows, hubCodeMap, funcCodeMap);
+        await finalizeImport(rows, hubCodeMap, hubNameMap, funcCodeMap);
       }
     } catch (err) {
       console.error("Import Error:", err);
@@ -83,23 +84,43 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       return;
     }
     
-    await finalizeImport(finalDataToProcess, pendingData.hubCodeMap, pendingData.funcCodeMap);
+    await finalizeImport(finalDataToProcess, pendingData.hubCodeMap, pendingData.hubNameMap, pendingData.funcCodeMap);
   };
 
-  const finalizeImport = async (rows, hubCodeMap, funcCodeMap) => {
+  const finalizeImport = async (rows, hubCodeMap, hubNameMap, funcCodeMap) => {
     try {
-      const tasksToInsert = rows.map(row => ({
-        id: row.id || undefined, // Carry over existing ID for updates
-        text: row.text,
-        verticalid: verticalId,
-        stageid: row.stageid || 'BACKLOG',
-        priority: row.priority || 'Medium',
-        description: row.description || null,
-        hub_id: hubCodeMap[row.hub_code] || null,
-        function: funcCodeMap[row.function_code] || row.function_code || null,
-        city: row.city || null,
-        updatedat: new Date().toISOString()
-      }));
+      const tasksToInsert = rows.map(row => {
+        let finalTaskText = row.text?.trim() || 'Untitled Task';
+        const resolvedHubId = hubCodeMap[row.hub_code] || null;
+        const resolvedFunc = funcCodeMap[row.function_code] || row.function || null;
+        const funcLower = resolvedFunc?.toLowerCase();
+
+        if (funcLower === 'hiring') {
+          const prefix = "Hire : ";
+          if (!finalTaskText.startsWith(prefix)) {
+            finalTaskText = `${prefix}${finalTaskText}`;
+          }
+        } else if (funcLower === 'facility' && resolvedHubId) {
+          const hubName = hubNameMap[resolvedHubId] || 'Hub';
+          const prefix = `${hubName} : `;
+          if (!finalTaskText.startsWith(prefix)) {
+            finalTaskText = `${prefix}${finalTaskText}`;
+          }
+        }
+
+        return {
+          id: row.id || undefined,
+          text: finalTaskText,
+          verticalid: verticalId,
+          stageid: row.stageid || 'BACKLOG',
+          priority: row.priority || 'Medium',
+          description: row.description || null,
+          hub_id: resolvedHubId,
+          function: resolvedFunc,
+          city: row.city || null,
+          updatedat: new Date().toISOString()
+        };
+      });
 
       // Use id-based upsert to avoid constraint errors
       const { error } = await supabase

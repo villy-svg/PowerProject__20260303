@@ -71,7 +71,25 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    let finalTaskText = formData.text.trim();
+    const funcLower = formData.function?.toLowerCase();
+
+    if (funcLower === 'hiring') {
+      const prefix = "Hire : ";
+      if (!finalTaskText.startsWith(prefix)) {
+        finalTaskText = `${prefix}${finalTaskText}`;
+      }
+    } else if (funcLower === 'facility' && formData.hub_id) {
+      const selectedHub = hubs.find(h => h.id === formData.hub_id);
+      const hubName = selectedHub?.hub_code || selectedHub?.name || 'Hub';
+      const prefix = `${hubName} : `;
+      if (!finalTaskText.startsWith(prefix)) {
+        finalTaskText = `${prefix}${finalTaskText}`;
+      }
+    }
+
+    onSubmit({ ...formData, text: finalTaskText });
   };
 
   return (
