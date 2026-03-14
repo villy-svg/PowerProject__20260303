@@ -17,6 +17,8 @@ const TaskCard = ({
   deleteTask,
   openEditModal,
   STAGE_LIST,
+  isSelected = false,
+  onSelect,
   children // Vertical-specific metadata
 }) => {
   const handleMove = (direction) => {
@@ -40,13 +42,18 @@ const TaskCard = ({
 
   return (
     <div 
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''}`} 
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''}`} 
       onDoubleClick={() => canUpdate && openEditModal(task)}
       style={{ 
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
         '--stage-color': stage?.color || 'var(--brand-green)'
       }}
     >
+      <div className="task-selection-area" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+          {isSelected && '✓'}
+        </div>
+      </div>
       {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
         {task.priority && (

@@ -6,6 +6,7 @@ import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
 import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
+import { supabase } from '../services/supabaseClient';
 import './TaskController.css';
 
 /**
@@ -28,15 +29,69 @@ const TaskController = ({
   permissions = {} 
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null); // Track task being edited
+  const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_task_view') || 'list');
   const [showDeprioritized, setShowDeprioritized] = useState(true);
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
 
   // Persist view mode choice
   useEffect(() => {
     localStorage.setItem('powerpod_task_view', viewMode);
   }, [viewMode]);
+
+  const toggleTaskSelection = (taskId) => {
+    setSelectedTaskIds(prev => 
+      prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  const clearSelection = () => setSelectedTaskIds([]);
+
+  // Determine stage consistency of selection
+  const selectedTasks = React.useMemo(() => 
+    (tasks || []).filter(t => selectedTaskIds.includes(t.id)), 
+    [tasks, selectedTaskIds]
+  );
+  
+  const sameStage = selectedTasks.length > 0 && 
+    selectedTasks.every(t => t.stageId === selectedTasks[0].stageId);
+  const commonStageId = sameStage ? selectedTasks[0].stageId : null;
+
+  const handleBulkAction = async (action) => {
+    if (selectedTaskIds.length === 0) return;
+    
+    try {
+      if (action === 'delete') {
+        // Single confirmation for the whole batch; deleteTask in App.jsx also confirms per-task
+        // So we bypass it by deleting directly via bulkUpdateTasks workaround — or accept one prompt.
+        // Here we issue ONE confirm for the whole batch:
+        if (!window.confirm(`Permanently delete ${selectedTaskIds.length} task${selectedTaskIds.length > 1 ? 's' : ''}?`)) return;
+        for (const id of selectedTaskIds) {
+          const { error } = await supabase.from('tasks').delete().eq('id', id);
+          if (error) throw error;
+        }
+        setTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
+      } else if (action === 'deprio') {
+        await bulkUpdateTasks(selectedTaskIds, { stageid: 'DEPRIORITIZED' });
+      } else if (action === 'restore') {
+        await bulkUpdateTasks(selectedTaskIds, { stageid: 'BACKLOG' });
+      } else if (action === 'forward' || action === 'backward') {
+        if (!sameStage) return;
+        const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
+        let newIndex = currentIndex;
+        if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
+        if (action === 'backward' && currentIndex > 0) newIndex--;
+        
+        if (newIndex !== currentIndex) {
+          await bulkUpdateTasks(selectedTaskIds, { stageid: STAGE_LIST[newIndex].id });
+        }
+      }
+      clearSelection();
+    } catch (err) {
+      console.error("Bulk Action Failed:", err);
+    }
+  };
 
   /**
    * DUPLICATE DETECTION LOGIC
@@ -69,10 +124,12 @@ const TaskController = ({
    * Supabase Update: Now handles multi-select arrays.
    */
   const filteredTasks = tasksWithDuplicateInfo.filter(t => {
-    if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
-    if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
-    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
-    if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
+    // If a filter array exists, the task MUST be included in it.
+    // Empty array means "Show Nothing" for that category.
+    if (filters.city && !filters.city.includes(t.city)) return false;
+    if (filters.hub && !filters.hub.includes(t.hub_id)) return false;
+    if (filters.priority && !filters.priority.includes(t.priority)) return false;
+    if (filters.function && !filters.function.includes(t.function)) return false;
     return true;
   });
 
@@ -297,6 +354,8 @@ const TaskController = ({
                           deleteTask={deleteTask}
                           openEditModal={openEditModal}
                           STAGE_LIST={STAGE_LIST}
+                          isSelected={selectedTaskIds.includes(task.id)}
+                          onSelect={() => toggleTaskSelection(task.id)}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent 
@@ -327,9 +386,66 @@ const TaskController = ({
             deleteTask={deleteTask}
             openEditModal={openEditModal}
             TaskTileComponent={TaskTileComponent}
+            selectedTaskIds={selectedTaskIds}
+            onSelect={toggleTaskSelection}
           />
         )}
       </div>
+
+      {selectedTaskIds.length > 0 && (
+        <div className="bulk-action-bar">
+          <div className="bulk-info">
+            <span className="selection-count">{selectedTaskIds.length} task{selectedTaskIds.length > 1 ? 's' : ''} selected</span>
+            <button className="clear-selection-btn" onClick={clearSelection}>✕ Clear</button>
+          </div>
+          
+          <div className="bulk-actions">
+            {canUserUpdate && sameStage && (
+              <>
+                <button 
+                  className="bulk-nav-btn" 
+                  onClick={() => handleBulkAction('backward')}
+                  title="Move Selected Back"
+                >
+                  ← Move Back
+                </button>
+                <button 
+                  className="bulk-nav-btn" 
+                  onClick={() => handleBulkAction('forward')}
+                  title="Move Selected Forward"
+                >
+                  Move Forward →
+                </button>
+              </>
+            )}
+            
+            {canUserUpdate && (
+              <>
+                <button 
+                  className="bulk-action-btn deprio" 
+                  onClick={() => handleBulkAction('deprio')}
+                >
+                  Deprioritize
+                </button>
+                <button 
+                  className="bulk-action-btn restore" 
+                  onClick={() => handleBulkAction('restore')}
+                >
+                  Restore
+                </button>
+              </>
+            )}
+            {canUserDelete && (
+              <button 
+                className="bulk-action-btn delete" 
+                onClick={() => handleBulkAction('delete')}
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

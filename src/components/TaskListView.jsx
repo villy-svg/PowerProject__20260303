@@ -10,7 +10,9 @@ const TaskListView = ({
   deleteTask,
   updateTaskStage,
   openEditModal,
-  TaskTileComponent // To render vertical-specific metadata
+  TaskTileComponent, // To render vertical-specific metadata
+  selectedTaskIds = [],
+  onSelect
 }) => {
   
   const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
@@ -53,10 +55,17 @@ const TaskListView = ({
                 return (
                   <div 
                     key={task.id} 
-                    className="list-task-row"
+                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''}`}
                     onDoubleClick={() => canUpdate && openEditModal(task)}
                     style={{ '--stage-color': stage.color }}
                   >
+                    {/* Checkbox Column */}
+                    <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
+                      <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
+                        {selectedTaskIds.includes(task.id) && '✓'}
+                      </div>
+                    </div>
+
                     {/* Left: Metadata */}
                     <div className="list-row-meta">
                       {task.priority && (

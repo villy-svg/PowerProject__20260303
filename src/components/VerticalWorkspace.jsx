@@ -32,6 +32,25 @@ const VerticalWorkspace = ({
     priority: [], 
     function: [] 
   });
+  const [isInitialized, setIsInitialized] = React.useState(false);
+
+  // Auto-populate filters on first load (Select All by default)
+  React.useEffect(() => {
+    if (tasks?.length > 0 && !isInitialized) {
+      const allCities = [...new Set(tasks.map(t => t.city))];
+      const allHubs = [...new Set(tasks.map(t => t.hub_id))];
+      const allPriorities = ['Low', 'Medium', 'High', 'Urgent'];
+      const allFunctions = [...new Set(tasks.map(t => t.function))];
+
+      setFilters({
+        city: allCities,
+        hub: allHubs,
+        priority: allPriorities,
+        function: allFunctions
+      });
+      setIsInitialized(true);
+    }
+  }, [tasks, isInitialized]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => {
@@ -41,6 +60,15 @@ const VerticalWorkspace = ({
         : [...current, value];
       return { ...prev, [key]: updated };
     });
+  };
+
+  const resetFilters = (newFilters) => {
+    if (newFilters) {
+      setFilters(newFilters);
+    } else {
+      // Default reset logic
+      setIsInitialized(false); // Trigger re-init from tasks
+    }
   };
   
   // 🚩 RESTORE TRACE LOG:
@@ -97,6 +125,8 @@ const VerticalWorkspace = ({
             user={user} 
             setActiveVertical={setActiveVertical} 
             onFilterChange={handleFilterChange}
+            onReset={() => resetFilters()}
+            onBatchFilter={(key, values) => setFilters(prev => ({ ...prev, [key]: values }))}
             filters={filters}
             tasks={tasks}
           />

@@ -7,7 +7,7 @@ import { supabase } from '../../services/supabaseClient';
  * Vertical-specific sidebar content for Charging Hubs.
  * Contains the Master Admin administrative shortcut and task filters.
  */
-const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks }) => {
+const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
   const isMasterAdmin = user?.roleId === 'master_admin';
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
@@ -112,13 +112,27 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
         </div>
         
         {isExpanded && (
-          <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '8px' }}>
+          <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
             <button 
-              onClick={(e) => { e.stopPropagation(); selectAll(filterKey, options, valueKey); }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
+                onBatchFilter(filterKey, allVals); 
+              }}
               className="text-action-button"
-              style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
             >
               SELECT ALL
+            </button>
+            <button 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onBatchFilter(filterKey, []); 
+              }}
+              className="text-action-button"
+              style={{ fontSize: '0.65rem', fontWeight: 700, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+            >
+              CLEAR
             </button>
           </div>
         )}
@@ -163,15 +177,7 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, filters, tasks
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
         <button 
-          onClick={() => {
-            ['city', 'hub', 'priority', 'function'].forEach(key => {
-              if (filters[key]?.length > 0) {
-                // Clear by replacing with empty array in setFilters (this needs a change in handleFilterChange or a reset helper)
-                // For now, toggle all off
-                filters[key].forEach(val => onFilterChange(key, val));
-              }
-            });
-          }}
+          onClick={onReset}
           style={{ 
             background: 'none', 
             border: 'none', 
