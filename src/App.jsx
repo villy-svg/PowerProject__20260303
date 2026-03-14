@@ -23,6 +23,9 @@ import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagemen
 import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
 import HubTaskForm from './verticals/ChargingHubs/HubTaskForm';
 import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
+import EmployeeSubSidebar from './verticals/Employees/EmployeeSubSidebar';
+import EmployeeTaskForm from './verticals/Employees/EmployeeTaskForm';
+import EmployeeTaskTile from './verticals/Employees/EmployeeTaskTile';
 import Login from './components/Login';
 
 // Assets
@@ -507,9 +510,21 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
-                SidebarComponent={activeVertical === 'CHARGING_HUBS' ? HubSubSidebar : null}
-                TaskFormComponent={activeVertical === 'CHARGING_HUBS' ? HubTaskForm : null}
-                TaskTileComponent={activeVertical === 'CHARGING_HUBS' ? HubTaskTile : null}
+                SidebarComponent={
+                  activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
+                  activeVertical === 'EMPLOYEES' ? EmployeeSubSidebar :
+                  null
+                }
+                TaskFormComponent={
+                  activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
+                  activeVertical === 'EMPLOYEES' ? EmployeeTaskForm :
+                  null
+                }
+                TaskTileComponent={
+                  activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
+                  activeVertical === 'EMPLOYEES' ? EmployeeTaskTile :
+                  null
+                }
                 onHeaderClick={
                   (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
                   ? () => setActiveVertical('hub_management') 
