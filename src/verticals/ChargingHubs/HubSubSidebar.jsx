@@ -21,7 +21,7 @@ const HubSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange
   useEffect(() => {
     const fetchData = async () => {
       const { data: hubData } = await supabase.from('hubs').select('id, hub_code');
-      const { data: funcData } = await supabase.from('hub_functions').select('id, function_code');
+      const { data: funcData } = await supabase.from('hub_functions').select('id, function_code, name');
       if (hubData) setHubs(hubData);
       if (funcData) setFunctions(funcData);
     };
@@ -239,7 +239,7 @@ const HubSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange
         currentFilters={filters.function || []} 
         filterKey="function" 
         displayKey="function_code"
-        valueKey="id"
+        valueKey="name"
       />
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>

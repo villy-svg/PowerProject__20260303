@@ -32,7 +32,9 @@ const VerticalWorkspace = ({
     city: [], 
     hub: [], 
     priority: [], 
-    function: [] 
+    priority: [], 
+    function: [],
+    duplicatesOnly: false 
   });
   const [isInitialized, setIsInitialized] = React.useState(false);
 
@@ -56,10 +58,17 @@ const VerticalWorkspace = ({
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => {
-      const current = prev[key] || [];
-      const updated = current.includes(value)
+      const current = prev[key];
+      
+      // Handle boolean toggles (like duplicatesOnly)
+      if (typeof current === 'boolean') {
+        return { ...prev, [key]: !current };
+      }
+
+      // Handle array-based filters
+      const updated = (current || []).includes(value)
         ? current.filter(v => v !== value)
-        : [...current, value];
+        : [...(current || []), value];
       return { ...prev, [key]: updated };
     });
   };
