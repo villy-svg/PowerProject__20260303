@@ -26,6 +26,7 @@ import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
 import EmployeeSubSidebar from './verticals/Employees/EmployeeSubSidebar';
 import EmployeeTaskForm from './verticals/Employees/EmployeeTaskForm';
 import EmployeeTaskTile from './verticals/Employees/EmployeeTaskTile';
+import EmployeeManagement from './verticals/Employees/EmployeeManagement';
 import DepartmentManagement from './verticals/Employees/DepartmentManagement';
 import EmployeeRoleManagement from './verticals/Employees/EmployeeRoleManagement';
 import Login from './components/Login';
@@ -234,8 +235,15 @@ function App() {
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
   useEffect(() => { 
-    if (activeVertical) localStorage.setItem('power_project_active_vertical', activeVertical);
-    else localStorage.removeItem('power_project_active_vertical');
+    if (activeVertical) {
+      // Don't save transient management sub-views as the default vertical
+      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks'];
+      if (persistentVerticals.includes(activeVertical)) {
+        localStorage.setItem('power_project_active_vertical', activeVertical);
+      }
+    } else {
+      localStorage.removeItem('power_project_active_vertical');
+    }
   }, [activeVertical]);
 
   // 4. Supabase CRUD Helpers (Replaces LocalStorage mutation)
@@ -501,17 +509,10 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
             ) : activeVertical === 'employee_role_management' ? (
               <EmployeeRoleManagement />
             ) : activeVertical === 'employee_management' ? (
-              <div className="hub-management-container">
-                <header className="hub-header">
-                  <div className="header-info">
-                    <h1>Employee Records</h1>
-                    <p>Manage detailed employee profiles, departments, and roles. (Coming Soon)</p>
-                  </div>
-                </header>
-              </div>
+              <EmployeeManagement />
             ) : (
               <VerticalWorkspace 
-                label={VERTICALS[activeVertical]?.label}
+                label={activeVertical === 'employee_tasks' ? "Employees" : VERTICALS[activeVertical]?.label}
                 activeVertical={activeVertical}
                 tasks={tasks}
                 setTasks={addTask} 
@@ -525,27 +526,33 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
-                  activeVertical === 'EMPLOYEES' ? EmployeeSubSidebar :
+                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
                   null
                 }
                 TaskFormComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
-                  activeVertical === 'EMPLOYEES' ? EmployeeTaskForm :
+                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
                   null
                 }
                 TaskTileComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
-                  activeVertical === 'EMPLOYEES' ? EmployeeTaskTile :
+                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
                   null
                 }
                 onHeaderClick={
-                  (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
+                  (activeVertical === 'employee_tasks') 
+                  ? () => setActiveVertical('EMPLOYEES') 
+                  : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
                   ? () => setActiveVertical('hub_management') 
                   : null
                 }
                 user={user} 
                 permissions={currentUserPermissions} 
-              />
+              >
+                {activeVertical === 'EMPLOYEES' && (
+                  <EmployeeManagement />
+                )}
+              </VerticalWorkspace>
             )}
 
           </main>

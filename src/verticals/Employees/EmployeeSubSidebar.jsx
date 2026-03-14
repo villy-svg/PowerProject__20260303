@@ -143,14 +143,14 @@ const EmployeeSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, 
         <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             className="halo-button"
-            style={{ width: '100%' }}
-            onClick={() => setActiveVertical('employee_management')}
+            style={{ width: '100%', opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
+            onClick={() => setActiveVertical('employee_tasks')}
           >
-            Employee Records
+            Employee Tasks
           </button>
           <button
             className="halo-button"
-            style={{ width: '100%' }}
+            style={{ width: '100%', opacity: activeVertical === 'department_management' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('department_management')}
           >
             Department Manager

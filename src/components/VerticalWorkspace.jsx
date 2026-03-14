@@ -146,24 +146,30 @@ const VerticalWorkspace = ({
 
 
       <main className="workspace-content">
-        {/* The TaskController now receives the 'addTask' helper (as setTasks) 
-            and the 'deleteTask'/'updateTaskStage' async functions.
-        */}
-        <TaskController 
-          activeVertical={activeVertical}
-          tasks={tasks}
-          filters={filters}
-          setTasks={setTasks} 
-          actualSetTasks={actualSetTasks}
-          updateTask={updateTask}
-          bulkUpdateTasks={bulkUpdateTasks}
-          deleteTask={deleteTask}
-          updateTaskStage={updateTaskStage}
-          TaskFormComponent={TaskFormComponent}
-          TaskTileComponent={TaskTileComponent}
-          user={user} 
-          permissions={permissions} 
-        />
+        {children ? (
+          children
+        ) : (
+          /* The TaskController now receives the 'addTask' helper (as setTasks) 
+              and the 'deleteTask'/'updateTaskStage' async functions.
+          */
+          <TaskController 
+            activeVertical={activeVertical}
+            tasks={tasks}
+            filters={filters}
+            setTasks={setTasks} 
+            actualSetTasks={actualSetTasks}
+            updateTask={updateTask}
+            bulkUpdateTasks={bulkUpdateTasks}
+            deleteTask={deleteTask}
+            updateTaskStage={updateTaskStage}
+            handleFilterChange={handleFilterChange} // Added this
+            resetFilters={resetFilters} // Added this
+            TaskFormComponent={TaskFormComponent}
+            TaskTileComponent={TaskTileComponent}
+            user={user} 
+            permissions={permissions} 
+          />
+        )}
       </main>
     </div>
   );
