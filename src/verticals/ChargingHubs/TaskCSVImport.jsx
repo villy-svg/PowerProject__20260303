@@ -109,7 +109,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         }
 
         return {
-          id: row.id || undefined,
+          id: row.id || crypto.randomUUID(), // Ensure every row has a UUID for bulk upsert
           text: finalTaskText,
           verticalid: verticalId,
           stageid: row.stageid || 'BACKLOG',
