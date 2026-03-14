@@ -18,6 +18,7 @@ const TaskController = ({
   activeVertical, 
   tasks = [], 
   setTasks,
+  actualSetTasks,
   updateTask,
   bulkUpdateTasks,
   deleteTask, 
@@ -139,7 +140,7 @@ const TaskController = ({
     });
 
     const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-    return enriched.sort((a, b) => {
+    return baseTasks.sort((a, b) => {
       // 1. Priority
       const pA = priorityOrder[a.priority] ?? 99;
       const pB = priorityOrder[b.priority] ?? 99;
@@ -184,7 +185,6 @@ const TaskController = ({
       t.duplicateKey === task.duplicateKey && t.stageId !== 'DEPRIORITIZED'
     );
     setMergeTaskCluster(clusterTasks);
-    setMergeModalOpen(true);
   };
 
   const executeMerge = async (primaryTaskId) => {
