@@ -1,5 +1,5 @@
 import React from 'react';
-import '../verticals/ChargingHubs/HubManagement.css'; // Use shared styles
+import '../ChargingHubs/HubManagement.css'; // Use shared styles
 
 /**
  * EmployeeManagement
