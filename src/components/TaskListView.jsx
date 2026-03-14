@@ -13,6 +13,7 @@ const TaskListView = ({
   TaskTileComponent, // To render vertical-specific metadata
   selectedTaskIds = [],
   onSelect,
+  onToggleStageSelection,
   onDuplicateMerge
 }) => {
   
@@ -34,8 +35,28 @@ const TaskListView = ({
         return (
           <section key={stage.id} className="list-stage-section">
             <header className="list-stage-header">
-              <h4 style={{ color: stage.color }}>{stage.label}</h4>
-              <span className="task-count-badge" style={{ backgroundColor: `${stage.color}22`, color: stage.color }}>
+              <div className="header-left-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h4 style={{ color: stage.color, fontWeight: 700 }}>{stage.label}</h4>
+                {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
+                  <button 
+                    onClick={() => onToggleStageSelection(stage.id, stageTasks)}
+                    style={{ 
+                      background: 'none', 
+                      border: 'none', 
+                      color: 'var(--brand-green)', 
+                      fontSize: '0.65rem', 
+                      fontWeight: 600, 
+                      cursor: 'pointer',
+                      padding: '0 8px',
+                      height: '100%',
+                      opacity: 0.8
+                    }}
+                  >
+                    {stageTasks.every(t => selectedTaskIds.includes(t.id)) ? 'DESELECT ALL' : 'SELECT ALL'}
+                  </button>
+                )}
+              </div>
+              <span className="task-count-badge" style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}>
                 {stageTasks.length}
               </span>
             </header>

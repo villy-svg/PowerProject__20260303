@@ -113,22 +113,28 @@ const TaskController = ({
    */
   const tasksWithDuplicateInfo = React.useMemo(() => {
     const clusters = {};
-    const baseTasks = (tasks || []).map(t => {
-      const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
-      if (!clusters[key]) clusters[key] = [];
-      clusters[key].push(t.id);
-      return { ...t, duplicateKey: key };
+    // First pass: identify clusters among non-deprioritized tasks
+    (tasks || []).forEach(t => {
+      if (t.stageId !== 'DEPRIORITIZED') {
+        const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
+        if (!clusters[key]) clusters[key] = [];
+        clusters[key].push(t.id);
+      }
     });
 
-    const enriched = baseTasks.map(t => {
-      const cluster = clusters[t.duplicateKey];
-      const isDuplicate = cluster.length > 1;
-      return {
-        ...t,
+    const baseTasks = (tasks || []).map(t => {
+      const isDeprioritized = t.stageId === 'DEPRIORITIZED';
+      const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
+      const cluster = clusters[key] || [];
+      const isDuplicate = !isDeprioritized && cluster.length > 1;
+      
+      return { 
+        ...t, 
+        duplicateKey: key,
         isDuplicate,
-        duplicateCount: cluster.length,
-        isFirstInCluster: cluster[0] === t.id,
-        duplicateGroup: cluster 
+        duplicateCount: isDeprioritized ? 0 : cluster.length,
+        isFirstInCluster: !isDeprioritized && cluster[0] === t.id,
+        duplicateGroup: isDeprioritized ? [] : cluster
       };
     });
 
@@ -173,8 +179,12 @@ const TaskController = ({
 
   const handleDuplicateMergeTrigger = (task) => {
     if (!task.isDuplicate) return;
-    const clusterTasks = tasksWithDuplicateInfo.filter(t => t.duplicateKey === task.duplicateKey);
+    // Strictly filter cluster to NON-deprioritized tasks only
+    const clusterTasks = tasksWithDuplicateInfo.filter(t => 
+      t.duplicateKey === task.duplicateKey && t.stageId !== 'DEPRIORITIZED'
+    );
     setMergeTaskCluster(clusterTasks);
+    setMergeModalOpen(true);
   };
 
   const executeMerge = async (primaryTaskId) => {
@@ -425,29 +435,41 @@ const TaskController = ({
         <div className="duplicate-merge-container">
           <p className="merge-intro">We found {mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.</p>
           <div className="merge-grid">
-            {mergeTaskCluster?.slice(0, 3).map((task, idx) => (
-              <div key={task.id} className="merge-option-card">
-                <div className="merge-header">
-                  <span className="merge-label">Record #{idx + 1}</span>
-                  <span className="merge-stage-tag">{task.stageId}</span>
-                </div>
-                <div className="merge-body">
-                  <p className="merge-summary">{task.text}</p>
-                  <div className="merge-meta">
-                    <span>Priority: {task.priority}</span>
-                    {task.city && <span>City: {task.city}</span>}
+            {mergeTaskCluster?.slice(0, 3).map((task, idx) => {
+              const stageInfo = STAGE_LIST.find(s => s.id === task.stageId);
+              return (
+                <div key={task.id} className="merge-option-card">
+                  <div className="merge-header">
+                    <span className="merge-label">Record #{idx + 1}</span>
+                    <span 
+                      className="merge-stage-tag"
+                      style={{ 
+                        backgroundColor: `${stageInfo?.color}22`, 
+                        color: stageInfo?.color,
+                        border: `1px solid ${stageInfo?.color}44`
+                      }}
+                    >
+                      {stageInfo?.label || task.stageId}
+                    </span>
                   </div>
+                  <div className="merge-body">
+                    <p className="merge-summary">{task.text}</p>
+                    <div className="merge-meta">
+                      <span>Priority: {task.priority}</span>
+                      {task.city && <span>City: {task.city}</span>}
+                    </div>
+                  </div>
+                  <button 
+                    className="halo-button merge-keep-btn" 
+                    onClick={() => executeMerge(task.id)}
+                    disabled={saving}
+                    style={{ fontWeight: 600 }}
+                  >
+                    Keep This One
+                  </button>
                 </div>
-                <button 
-                  className="halo-button merge-keep-btn" 
-                  onClick={() => executeMerge(task.id)}
-                  disabled={saving}
-                  style={{ fontWeight: 600 }}
-                >
-                  Keep This One
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
           {mergeTaskCluster?.length > 3 && (
             <p className="merge-footer-info">+ {mergeTaskCluster.length - 3} more clones will also be deprioritized.</p>
@@ -505,7 +527,7 @@ const TaskController = ({
                   <div className="stage-header">
                     <div className="header-left-group">
                       <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
-                      {stage.id === 'DEPRIORITIZED' && stageTasks.length > 0 && (
+                      {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
                         <button 
                           onClick={() => toggleStageSelection(stage.id, stageTasks)}
                           style={{ 
@@ -584,6 +606,7 @@ const TaskController = ({
             TaskTileComponent={TaskTileComponent}
             selectedTaskIds={selectedTaskIds}
             onSelect={toggleTaskSelection}
+            onToggleStageSelection={toggleStageSelection}
           />
         )}
       </div>

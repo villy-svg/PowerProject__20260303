@@ -473,7 +473,9 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
             </div>
             <div className="header-center"><h1 className="brand-title">PowerProject</h1></div>
             <div className="header-right">
-              <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
+              {user?.roleId === 'master_admin' && (
+                <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
+              )}
               <div style={{ width: '16px' }} />
               <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
             </div>

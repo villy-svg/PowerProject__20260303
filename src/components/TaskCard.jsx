@@ -70,7 +70,7 @@ const TaskCard = ({
         )}
         {task.isDuplicate && (
           <span className="duplicate-badge" title={`${task.duplicateCount} identical tasks found`}>
-            DUPLICATE ({task.duplicateCount})
+            DUP
           </span>
         )}
         {children}
