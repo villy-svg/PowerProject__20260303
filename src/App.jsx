@@ -187,6 +187,7 @@ function App() {
    * If permissions are revoked in the backend, we force them back to the dashboard.
    */
   useEffect(() => {
+    console.log('🚩 EmployeeManagement Received Props:', { user: !!user, tasks: tasks.length });
     if (!user || !activeVertical) return;
 
     // Public/Special views logic
@@ -548,8 +549,13 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 permissions={currentUserPermissions} 
               >
                 {activeVertical === 'EMPLOYEES' && (
-                  <EmployeeManagement />
+                  <EmployeeManagement 
+                    user={user} 
+                    permissions={currentUserPermissions} 
+                    tasks={tasks.filter(t => t.verticalId === 'EMPLOYEES')} 
+                  />
                 )}
+                {console.log(`🚩 App Render: activeVertical=${activeVertical}, userRole=${user?.roleId}`)}
               </VerticalWorkspace>
             )}
 
