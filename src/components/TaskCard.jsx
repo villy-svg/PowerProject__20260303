@@ -16,6 +16,7 @@ const TaskCard = ({
   updateTaskStage,
   deleteTask,
   openEditModal,
+  onDuplicateMerge,
   STAGE_LIST,
   isSelected = false,
   onSelect,
@@ -43,7 +44,13 @@ const TaskCard = ({
   return (
     <div 
       className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''}`} 
-      onDoubleClick={() => canUpdate && openEditModal(task)}
+      onDoubleClick={() => {
+        if (task.isDuplicate) {
+          onDuplicateMerge(task);
+        } else if (canUpdate) {
+          openEditModal(task);
+        }
+      }}
       style={{ 
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
         '--stage-color': stage?.color || 'var(--brand-green)'

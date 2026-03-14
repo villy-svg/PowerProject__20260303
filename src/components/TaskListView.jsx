@@ -12,7 +12,8 @@ const TaskListView = ({
   openEditModal,
   TaskTileComponent, // To render vertical-specific metadata
   selectedTaskIds = [],
-  onSelect
+  onSelect,
+  onDuplicateMerge
 }) => {
   
   const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
@@ -56,62 +57,73 @@ const TaskListView = ({
                   <div 
                     key={task.id} 
                     className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''}`}
-                    onDoubleClick={() => canUpdate && openEditModal(task)}
+                    onDoubleClick={() => {
+                      if (task.isDuplicate) {
+                        onDuplicateMerge(task);
+                      } else if (canUpdate) {
+                        openEditModal(task);
+                      }
+                    }}
                     style={{ '--stage-color': stage.color }}
                   >
-                    {/* Checkbox Column */}
-                    <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
-                      <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
-                        {selectedTaskIds.includes(task.id) && '✓'}
+                    {/* LEFT SIDE: Identity & Content */}
+                    <div className="list-row-main">
+                      {/* 1. Select Checkbox */}
+                      <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
+                        <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
+                          {selectedTaskIds.includes(task.id) && '✓'}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Left: Metadata */}
-                    <div className="list-row-meta">
+                      {/* 2. Priority */}
                       {task.priority && (
                         <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
                           {task.priority}
                         </span>
                       )}
+
+                      {/* 3. Dup Tag */}
                       {task.isDuplicate && (
                         <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
                           DUP
                         </span>
                       )}
+
+                      {/* 4. Hub Code & 5. Function Code (Vertical Specific) */}
                       {TaskTileComponent && (
-                        <TaskTileComponent task={task} stage={stage} />
+                        <div className="list-row-vertical-meta">
+                          <TaskTileComponent task={task} stage={stage} />
+                        </div>
                       )}
-                    </div>
 
-                    {/* Center: Summary */}
-                    <div className="list-row-content" title={task.text}>
-                      {task.text}
-                    </div>
-
-                    {/* Right: Controls */}
-                    <div className="list-row-controls">
-                      <div className="list-nav-group">
-                        {canUpdate && (
-                          <>
-                            <button 
-                              className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
-                              onClick={() => handleMove('left')}
-                              disabled={!canMoveLeft}
-                              title="Move Back"
-                            >
-                              ←
-                            </button>
-                            <button 
-                              className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
-                              onClick={() => handleMove('right')}
-                              disabled={!canMoveRight || task.stageId === 'COMPLETED'}
-                              title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
-                            >
-                              →
-                            </button>
-                          </>
-                        )}
+                      {/* 6. Task Summary */}
+                      <div className="list-row-content" title={task.text}>
+                        {task.text}
                       </div>
+                    </div>
+
+                    {/* RIGHT SIDE: Controls (Wrappable) */}
+                    <div className="list-row-controls">
+                      {canUpdate && (
+                        <div className="list-nav-group">
+                          <button 
+                            className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+                            onClick={() => handleMove('left')}
+                            disabled={!canMoveLeft}
+                            title="Move Back"
+                          >
+                            ←
+                          </button>
+                          <button 
+                            className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
+                            onClick={() => handleMove('right')}
+                            disabled={!canMoveRight || task.stageId === 'COMPLETED'}
+                            title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+                          >
+                            →
+                          </button>
+                        </div>
+                      )}
 
                       <div className="list-action-group">
                         {canUpdate && (

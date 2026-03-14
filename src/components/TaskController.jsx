@@ -94,44 +94,91 @@ const TaskController = ({
   };
 
   /**
-   * DUPLICATE DETECTION LOGIC
-   * Identifies tasks with identical Priority, Hub, Function, and Summary (Text).
+   * DUPLICATE DETECTION & SORTING LOGIC
+   * 1. Identifies clusters of identical tasks.
+   * 2. Sorts to ensure duplicates are adjacent.
    */
   const tasksWithDuplicateInfo = React.useMemo(() => {
     const clusters = {};
-    const processedTasks = (tasks || []).map(t => {
+    const baseTasks = (tasks || []).map(t => {
       const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
       if (!clusters[key]) clusters[key] = [];
       clusters[key].push(t.id);
       return { ...t, duplicateKey: key };
     });
 
-    return processedTasks.map(t => {
+    const enriched = baseTasks.map(t => {
       const cluster = clusters[t.duplicateKey];
       const isDuplicate = cluster.length > 1;
       return {
         ...t,
         isDuplicate,
         duplicateCount: cluster.length,
-        isFirstInCluster: cluster[0] === t.id
+        isFirstInCluster: cluster[0] === t.id,
+        duplicateGroup: cluster // List of IDs in the cluster
       };
+    });
+
+    // Enforce Duplicate Adjacency: Sort by cluster key first, then priority
+    const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+    return enriched.sort((a, b) => {
+      // If they are in the same duplicate cluster, keep original creation order
+      if (a.duplicateKey === b.duplicateKey) return 0;
+      
+      // If one is duplicate and other isn't, we still sort by priority mainly
+      // But we use the duplicateKey as secondary sort to keep groups together
+      const pA = priorityOrder[a.priority] ?? 99;
+      const pB = priorityOrder[b.priority] ?? 99;
+      
+      if (pA !== pB) return pA - pB;
+      return a.duplicateKey.localeCompare(b.duplicateKey);
     });
   }, [tasks]);
 
   /**
    * FILTER LOGIC
-   * Applies City, Hub, Priority, and Function filters to the task set.
-   * Supabase Update: Now handles multi-select arrays.
    */
   const filteredTasks = tasksWithDuplicateInfo.filter(t => {
-    // If a filter array exists, the task MUST be included in it.
-    // Empty array means "Show Nothing" for that category.
+    // 1. Duplicates Only filter
+    if (filters.duplicatesOnly && !t.isDuplicate) return false;
+
+    // 2. Metadata filters
     if (filters.city && !filters.city.includes(t.city)) return false;
     if (filters.hub && !filters.hub.includes(t.hub_id)) return false;
     if (filters.priority && !filters.priority.includes(t.priority)) return false;
     if (filters.function && !filters.function.includes(t.function)) return false;
     return true;
   });
+
+  const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
+
+  const handleDuplicateMergeTrigger = (task) => {
+    if (!task.isDuplicate) return;
+    const clusterTasks = tasksWithDuplicateInfo.filter(t => t.duplicateKey === task.duplicateKey);
+    setMergeTaskCluster(clusterTasks);
+  };
+
+  const executeMerge = async (primaryTaskId) => {
+    if (!mergeTaskCluster) return;
+    const clonesToDelete = mergeTaskCluster.filter(t => t.id !== primaryTaskId).map(t => t.id);
+    
+    if (window.confirm(`Merge confirmed. ${clonesToDelete.length} duplicates will be deleted. Proceed?`)) {
+      setSaving(true);
+      try {
+        for (const id of clonesToDelete) {
+          const { error } = await supabase.from('tasks').delete().eq('id', id);
+          if (error) throw error;
+        }
+        setTasks(prev => prev.filter(t => !clonesToDelete.includes(t.id)));
+        setMergeTaskCluster(null);
+      } catch (err) {
+        console.error("Merge Failed:", err);
+        alert("Consolidation failed. Please try again.");
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
 
   /**
    * PERMISSION LOGIC
@@ -304,18 +351,50 @@ const TaskController = ({
         )}
       </TaskModal>
 
+      {/* Duplicate Merge Modal */}
+      <TaskModal
+        isOpen={!!mergeTaskCluster}
+        onClose={() => setMergeTaskCluster(null)}
+        title="Consolidate Duplicate Tasks"
+      >
+        <div className="duplicate-merge-container">
+          <p className="merge-intro">We found {mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be deleted.</p>
+          <div className="merge-grid">
+            {mergeTaskCluster?.slice(0, 3).map((task, idx) => (
+              <div key={task.id} className="merge-option-card">
+                <div className="merge-header">
+                  <span className="merge-label">Record #{idx + 1}</span>
+                  <span className="merge-stage-tag">{task.stageId}</span>
+                </div>
+                <div className="merge-body">
+                  <p className="merge-summary">{task.text}</p>
+                  <div className="merge-meta">
+                    <span>Priority: {task.priority}</span>
+                    {task.city && <span>City: {task.city}</span>}
+                  </div>
+                </div>
+                <button 
+                  className="halo-button merge-keep-btn" 
+                  onClick={() => executeMerge(task.id)}
+                  disabled={saving}
+                >
+                  Keep This One
+                </button>
+              </div>
+            ))}
+          </div>
+          {mergeTaskCluster?.length > 3 && (
+            <p className="merge-footer-info">+ {mergeTaskCluster.length - 3} more hidden clones will also be merged.</p>
+          )}
+        </div>
+      </TaskModal>
+
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
           <div className="kanban-board">
             {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
-              const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
               const stageTasks = filteredTasks
-                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
-                .sort((a, b) => {
-                  const pA = priorityOrder[a.priority] ?? 99;
-                  const pB = priorityOrder[b.priority] ?? 99;
-                  return pA - pB;
-                });
+                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id);
 
               return (
                 <div 
@@ -353,6 +432,7 @@ const TaskController = ({
                           updateTaskStage={updateTaskStage}
                           deleteTask={deleteTask}
                           openEditModal={openEditModal}
+                          onDuplicateMerge={handleDuplicateMergeTrigger}
                           STAGE_LIST={STAGE_LIST}
                           isSelected={selectedTaskIds.includes(task.id)}
                           onSelect={() => toggleTaskSelection(task.id)}
@@ -385,6 +465,7 @@ const TaskController = ({
             updateTaskStage={updateTaskStage}
             deleteTask={deleteTask}
             openEditModal={openEditModal}
+            onDuplicateMerge={handleDuplicateMergeTrigger}
             TaskTileComponent={TaskTileComponent}
             selectedTaskIds={selectedTaskIds}
             onSelect={toggleTaskSelection}

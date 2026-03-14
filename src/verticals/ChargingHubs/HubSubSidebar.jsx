@@ -176,20 +176,38 @@ const HubSubSidebar = ({ user, setActiveVertical, onFilterChange, onReset, onBat
 
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 900, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
-        <button 
-          onClick={onReset}
-          style={{ 
-            background: 'none', 
-            border: 'none', 
-            color: 'var(--brand-green)', 
-            fontSize: '0.7rem', 
-            fontWeight: 800, 
-            cursor: 'pointer',
-            padding: '4px'
-          }}
-        >
-          RESET
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={() => onFilterChange('duplicatesOnly', !filters.duplicatesOnly)}
+            style={{ 
+              background: filters.duplicatesOnly ? 'var(--brand-green)' : 'rgba(255,255,255,0.05)', 
+              border: 'none', 
+              color: filters.duplicatesOnly ? 'black' : 'var(--brand-green)', 
+              fontSize: '0.6rem', 
+              fontWeight: 900, 
+              cursor: 'pointer',
+              padding: '2px 8px',
+              borderRadius: '10px',
+              transition: 'all 0.2s'
+            }}
+          >
+            DUP ONLY
+          </button>
+          <button 
+            onClick={onReset}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--brand-green)', 
+              fontSize: '0.7rem', 
+              fontWeight: 800, 
+              cursor: 'pointer',
+              padding: '4px'
+            }}
+          >
+            RESET
+          </button>
+        </div>
       </div>
 
       <FilterGroup 

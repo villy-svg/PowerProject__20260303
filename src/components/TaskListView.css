@@ -29,16 +29,24 @@
 }
 
 .list-task-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
   border-left: 4px solid var(--stage-color);
   border-radius: 12px;
-  padding: 12px 20px;
+  padding: 8px 16px;
   transition: all 0.2s ease;
+}
+
+.list-row-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
 }
 
 .list-task-row:hover {
@@ -47,15 +55,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.list-row-meta {
+.list-row-vertical-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-width: 200px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .list-row-content {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-color);
   white-space: nowrap;
@@ -66,17 +74,20 @@
 .list-row-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .list-nav-group, .list-action-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .list-action-group {
-  padding-left: 16px;
+  padding-left: 12px;
   border-left: 1px solid var(--border-color);
 }
 
