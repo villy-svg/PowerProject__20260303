@@ -3,7 +3,7 @@ import { supabase } from '../../services/supabaseClient';
 import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
-import '../../components/CSVButtons.css';
+import MasterPageHeader from '../../components/MasterPageHeader';
 
 const HubManagement = () => {
   const [hubs, setHubs] = useState([]);
@@ -101,25 +101,25 @@ const HubManagement = () => {
 
   return (
     <div className="hub-management-container">
-      <header className="hub-header">
-        <div className="header-info">
-          <h1>Hub Management</h1>
-          <p>Create and manage global charging hub locations.</p>
-        </div>
-        <div className="header-actions">
-          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
-            + New Hub
-          </button>
-          <HubCSVDownload 
-            className="add-hub-main-btn" 
-            data={hubs} 
-            label="Export Hubs Data" 
-            filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
-          />
-          <HubCSVDownload className="add-hub-main-btn" label="Download Hubs Template" />
-          <HubCSVImport className="add-hub-main-btn" onImportComplete={fetchHubs} />
-        </div>
-      </header>
+      <MasterPageHeader
+        title="Hub Management"
+        description="Create and manage global charging hub locations."
+        rightActions={
+          <>
+            <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
+              + New Hub
+            </button>
+            <HubCSVDownload 
+              className="add-hub-main-btn" 
+              data={hubs} 
+              label="Export Hubs Data" 
+              filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
+            />
+            <HubCSVDownload className="add-hub-main-btn" label="Download Hubs Template" />
+            <HubCSVImport className="add-hub-main-btn" onImportComplete={fetchHubs} />
+          </>
+        }
+      />
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
 

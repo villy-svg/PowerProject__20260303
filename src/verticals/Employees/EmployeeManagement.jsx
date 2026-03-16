@@ -2,6 +2,7 @@ import React from 'react';
 import '../ChargingHubs/HubManagement.css'; // Use shared styles
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
+import MasterPageHeader from '../../components/MasterPageHeader';
 
 /**
  * EmployeeManagement
@@ -12,20 +13,20 @@ import EmployeeCSVImport from './EmployeeCSVImport';
 const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
   return (
     <div className="hub-management-container" style={{ padding: 0 }}>
-      <header className="hub-header">
-        <div className="header-info">
-          <h1>Employee Manager</h1>
-          <p>Centralized database for personnel profiles, performance tracking, and organizational assignments.</p>
-        </div>
-        <div className="header-actions">
-          <EmployeeCSVDownload className="add-hub-main-btn" data={tasks} label="Export Employee Data" />
-          <EmployeeCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
-          <EmployeeCSVImport className="add-hub-main-btn" onImportComplete={() => window.location.reload()} />
-          <button className="halo-button add-hub-main-btn" onClick={() => alert('Add Employee logic coming soon')}>
-            + Add New Employee
-          </button>
-        </div>
-      </header>
+      <MasterPageHeader
+        title="Employee Manager"
+        description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
+        rightActions={
+          <>
+            <EmployeeCSVDownload className="add-hub-main-btn" data={tasks} label="Export Employee Data" />
+            <EmployeeCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
+            <EmployeeCSVImport className="add-hub-main-btn" onImportComplete={() => window.location.reload()} />
+            <button className="halo-button add-hub-main-btn" onClick={() => alert('Add Employee logic coming soon')}>
+              + Add New Employee
+            </button>
+          </>
+        }
+      />
 
       <div className="empty-state" style={{ marginTop: '100px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>👥</div>

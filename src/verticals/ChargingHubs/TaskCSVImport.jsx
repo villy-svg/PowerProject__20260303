@@ -143,7 +143,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
   return (
     <CSVImportButton
-      label={importing ? 'Importing...' : 'Import Employees'}
+      label={importing ? 'Importing...' : 'Import Tasks'}
       onDataParsed={handleDataParsed}
       requiredFields={['text']}
       getConflictKey={getConflictKey}

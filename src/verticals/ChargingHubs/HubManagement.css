@@ -11,25 +11,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.hub-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 20px;
-  margin-bottom: 32px;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 24px;
-}
-
-.header-actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 12px;
-  width: 100%;
-}
-
 .add-hub-main-btn {
   white-space: nowrap;
   min-width: 160px;

@@ -7,6 +7,7 @@ import TaskListView from './TaskListView';
 import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
 import { supabase } from '../services/supabaseClient';
+import MasterPageHeader from './MasterPageHeader';
 import './TaskController.css';
 
 /**
@@ -342,9 +343,11 @@ const TaskController = ({
 
   return (
     <div className="task-controller">
-      <div className="task-controller-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '24px', marginBottom: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-          <div className="header-left-tools">
+      <MasterPageHeader
+        title="Hub Task Manager"
+        description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
+        leftActions={
+          <>
             <div className="view-mode-toggle">
               <button 
                 className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
@@ -382,28 +385,29 @@ const TaskController = ({
                 Clear Board
               </button>
             )}
-          </div>
-        </div>
-
-        <div className="header-right-tools" style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
-          {activeVertical === 'CHARGING_HUBS' && (
-            <>
-              <TaskCSVDownload className="add-hub-main-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
-              <TaskCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
-              <TaskCSVImport className="add-hub-main-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
-            </>
-          )}
-          {canUserCreate && (
-            <button 
-              className="halo-button add-task-btn add-hub-main-btn" 
-              onClick={openAddModal}
-              style={{ fontWeight: 600 }}
-            >
-              + Add Task
-            </button>
-          )}
-        </div>
-      </div>
+          </>
+        }
+        rightActions={
+          <>
+            {activeVertical === 'CHARGING_HUBS' && (
+              <>
+                <TaskCSVDownload className="add-hub-main-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
+                <TaskCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
+                <TaskCSVImport className="add-hub-main-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
+              </>
+            )}
+            {canUserCreate && (
+              <button 
+                className="halo-button add-task-btn add-hub-main-btn" 
+                onClick={openAddModal}
+                style={{ fontWeight: 600 }}
+              >
+                + Add Task
+              </button>
+            )}
+          </>
+        }
+      />
 
       <TaskModal 
         isOpen={isModalOpen} 
