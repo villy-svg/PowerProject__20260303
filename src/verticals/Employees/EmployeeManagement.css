@@ -1,0 +1,186 @@
+/* EmployeeManagement.css - Styling for Employee Tiles and List View */
+
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.employee-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-left: 4px solid var(--brand-green);
+}
+
+.employee-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.employee-card.inactive {
+  opacity: 0.6;
+  border-left-color: #ff4444;
+}
+
+/* Row 1: Badges */
+.employee-card-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dept-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--brand-green);
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 135, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: capitalize;
+  opacity: 0.8;
+}
+
+/* Row 2: Name */
+.employee-card-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+/* Row 3: Contact */
+.employee-card-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Row 4: Footer Meta */
+.employee-card-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.8rem;
+}
+
+.join-date {
+  opacity: 0.6;
+}
+
+.employee-status {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+}
+
+/* Controls */
+.employee-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-icon-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.action-icon-btn.edit:hover { color: var(--brand-green); }
+.action-icon-btn.delete:hover { color: #ff4444; }
+
+/* List View Styling */
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 1rem 0;
+}
+
+.employee-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s;
+  border-left: 3px solid var(--brand-green);
+}
+
+.employee-list-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.employee-list-row.inactive {
+  opacity: 0.6;
+  border-left-color: #ff4444;
+}
+
+.list-main-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.list-name {
+  font-weight: 600;
+  min-width: 180px;
+}
+
+.list-meta-badges {
+  display: flex;
+  gap: 8px;
+  min-width: 250px;
+}
+
+.list-contact {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  flex: 1;
+}
