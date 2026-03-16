@@ -12,7 +12,7 @@ import { supabase } from '../../services/supabaseClient';
  *   - Dropdown validation data (fetched from Supabase)
  *   - Sample row data for templates
  */
-const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false }) => {
+const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
   const headers = ['text', 'priority', 'stageid', 'hub_code', 'function_code', 'description', 'city'];
 
   const defaultLabel = isTemplate ? "Download Task Template" : "Export Tasks";
@@ -89,7 +89,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false }) => 
       filename={filename || (isTemplate ? 'task_template.xlsx' : `tasks_export_${new Date().toISOString().split('T')[0]}.xlsx`)}
       onDownload={handleDownload}
       validations={isTemplate ? validations : []}
-      className="add-task-main-btn"
+      className={className}
       style={{}}
     />
   );

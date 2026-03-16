@@ -4,6 +4,7 @@ import './HubFunctionManagement.css';
 import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import '../../components/CSVButtons.css';
+import MasterPageHeader from '../../components/MasterPageHeader';
 
 const HubFunctionManagement = () => {
   const [functions, setFunctions] = useState([]);

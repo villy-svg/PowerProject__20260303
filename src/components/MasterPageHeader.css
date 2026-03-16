@@ -51,7 +51,7 @@
    ========================================================================== */
 
 .master-action-btn {
-  /* Dimensions & Layout */
+  /* Dimensions & Layout - Enforce consistency across all verticals */
   height: 42px !important;
   min-width: 160px !important;
   padding: 0 20px !important;
@@ -60,66 +60,29 @@
   justify-content: center !important;
   white-space: nowrap !important;
   
-  /* Typography */
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  
-  /* Styling (Inherits halo-button properties but refines them) */
-  border: 1px solid var(--border-color);
-  border-radius: 12px !important;
-  background: var(--halo-bg);
-  color: var(--brand-green) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Inherit Aesthetics from .halo-button (App.css) */
+  /* We only override if strictly necessary to fix a layout break */
 }
 
-.master-action-btn:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 90%);
-  border-color: var(--brand-green);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--halo-glow);
-}
-
-.master-action-btn:active {
-  transform: translateY(0);
-}
-
-/* --- Inner Component Fixes (CSV Buttons) --- */
-
-.csv-import-wrapper.master-action-btn,
-.csv-download-btn.master-action-btn {
-  /* Remove wrapper padding to let actual button fill space */
-  padding: 0 !important;
-}
-
-.csv-import-wrapper.master-action-btn button,
-.csv-download-btn.master-action-btn button,
-.csv-download-btn.master-action-btn {
+/* Specific fix for inner component buttons (CSV Buttons) */
+.master-action-btn button {
   width: 100% !important;
   height: 100% !important;
   background: transparent !important;
   border: none !important;
   color: inherit !important;
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  text-transform: inherit !important;
-  letter-spacing: inherit !important;
+  padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 0 20px !important;
-  cursor: pointer !important;
+  text-transform: inherit !important;
+  font-weight: inherit !important;
+  font-size: inherit !important;
+  letter-spacing: inherit !important;
 }
 
-/* Specific fix for Halo button styling when used as master */
-button.halo-button.master-action-btn {
-  /* Override any default halo-button padding that might conflict */
-  padding: 0 20px !important;
+.master-action-btn:active {
+  transform: translateY(0);
 }
 
 /* Mobile adjustments */
