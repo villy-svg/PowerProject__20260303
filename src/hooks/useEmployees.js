@@ -30,7 +30,7 @@ export const useEmployees = () => {
 
       const processed = (emps || []).map(emp => ({
         ...emp,
-        hub_code: hubMap.get(emp.hub_id) || 'NO HUB',
+        hub_code: emp.hub_id ? (hubMap.get(emp.hub_id) || 'NO HUB') : 'ALL',
         role_code: roleMap.get(emp.role_id) || 'NO ROLE',
         dept_code: deptMap.get(emp.department_id) || 'NO DEPT'
       }));
