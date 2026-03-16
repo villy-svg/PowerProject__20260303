@@ -172,7 +172,7 @@ const CSVImportButton = ({
 
   return (
     <>
-      <div className={`csv-import-wrapper ${className}`}>
+      <div className={`csv-import-wrapper halo-button ${className}`}>
         <input
           ref={inputRef}
           type="file"

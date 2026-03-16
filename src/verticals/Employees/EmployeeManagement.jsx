@@ -18,9 +18,9 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
         rightActions={
           <>
-            <EmployeeCSVDownload className="master-action-btn" data={tasks} label="Export Employee Data" />
-            <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <EmployeeCSVImport className="master-action-btn" onImportComplete={() => window.location.reload()} />
+            <EmployeeCSVDownload className="halo-button master-action-btn" data={tasks} label="Export Team Data" />
+            <EmployeeCSVDownload className="halo-button master-action-btn" isTemplate label="Download Template" />
+            <EmployeeCSVImport className="halo-button master-action-btn" label="Import Team Data" onImportComplete={() => window.location.reload()} />
             <button className="halo-button master-action-btn" onClick={() => alert('Add Employee logic coming soon')}>
               + Add Employee
             </button>

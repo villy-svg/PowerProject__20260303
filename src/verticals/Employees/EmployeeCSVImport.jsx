@@ -11,7 +11,7 @@ import { supabase } from '../../services/supabaseClient';
  *
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
-const EmployeeCSVImport = ({ onImportComplete, className }) => {
+const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => {
   const [importing, setImporting] = React.useState(false);
   const [existingEmps, setExistingEmps] = React.useState(null);
   const [lookupMaps, setLookupMaps] = React.useState(null);
@@ -81,7 +81,7 @@ const EmployeeCSVImport = ({ onImportComplete, className }) => {
 
   return (
     <CSVImportButton
-      label={importing ? 'Importing...' : 'Import CSV'}
+      label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
       requiredFields={['full_name', 'email']}
       getConflictKey={getConflictKey}
