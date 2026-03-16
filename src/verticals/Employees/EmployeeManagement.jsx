@@ -14,12 +14,12 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
     <div className="hub-management-container" style={{ padding: 0 }}>
       <header className="hub-header">
         <div className="header-info">
-          <h1>Employee Records</h1>
+          <h1>Employee Manager</h1>
           <p>Centralized database for personnel profiles, performance tracking, and organizational assignments.</p>
         </div>
-        <div className="header-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <EmployeeCSVDownload data={tasks} label="Export Data" />
-          <EmployeeCSVDownload isTemplate label="Download Template" />
+        <div className="header-actions">
+          <EmployeeCSVDownload className="add-hub-main-btn" data={tasks} label="Export Employee Data" />
+          <EmployeeCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
           <EmployeeCSVImport className="add-hub-main-btn" onImportComplete={() => window.location.reload()} />
           <button className="halo-button add-hub-main-btn" onClick={() => alert('Add Employee logic coming soon')}>
             + Add New Employee

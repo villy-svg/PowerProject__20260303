@@ -342,58 +342,60 @@ const TaskController = ({
 
   return (
     <div className="task-controller">
-      <div className="task-controller-header">
-        <div className="header-left-tools">
-          <div className="view-mode-toggle">
+      <div className="task-controller-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <div className="header-left-tools">
+            <div className="view-mode-toggle">
+              <button 
+                className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
+                onClick={() => setViewMode('kanban')}
+                style={{ fontWeight: viewMode === 'kanban' ? 600 : 400 }}
+              >
+                Kanban
+              </button>
+              <button 
+                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
+              >
+                List
+              </button>
+            </div>
+
             <button 
-              className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-              onClick={() => setViewMode('kanban')}
-              style={{ fontWeight: viewMode === 'kanban' ? 600 : 400 }}
+              className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
+              onClick={() => setShowDeprioritized(!showDeprioritized)}
+              title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
+              style={{ fontWeight: 600, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
             >
-              Kanban
+              DEPR
             </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-              style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
-            >
-              List
-            </button>
+
+            {permissions.roleId === 'master_admin' && (
+              <button 
+                className="halo-button clear-board-btn" 
+                onClick={handleClearBoard}
+                disabled={saving}
+                title="Move all active tasks to Deprioritized"
+                style={{ fontWeight: 600 }}
+              >
+                Clear Board
+              </button>
+            )}
           </div>
-
-          <button 
-            className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
-            onClick={() => setShowDeprioritized(!showDeprioritized)}
-            title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
-            style={{ fontWeight: 600, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
-          >
-            DEPR
-          </button>
-
-          {permissions.roleId === 'master_admin' && (
-            <button 
-              className="halo-button clear-board-btn" 
-              onClick={handleClearBoard}
-              disabled={saving}
-              title="Move all active tasks to Deprioritized"
-              style={{ fontWeight: 600 }}
-            >
-              Clear Board
-            </button>
-          )}
         </div>
 
-        <div className="header-right-tools" style={{ display: 'flex', gap: '12px' }}>
+        <div className="header-right-tools" style={{ display: 'flex', gap: '12px', width: '100%', flexWrap: 'wrap' }}>
           {activeVertical === 'CHARGING_HUBS' && (
             <>
-              <TaskCSVDownload data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Data" />
-              <TaskCSVDownload isTemplate label="Download Template" />
-              <TaskCSVImport verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
+              <TaskCSVDownload className="add-hub-main-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
+              <TaskCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
+              <TaskCSVImport className="add-hub-main-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
             </>
           )}
           {canUserCreate && (
             <button 
-              className="halo-button add-task-btn" 
+              className="halo-button add-task-btn add-hub-main-btn" 
               onClick={openAddModal}
               style={{ fontWeight: 600 }}
             >
