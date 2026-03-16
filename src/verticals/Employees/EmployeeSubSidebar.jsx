@@ -25,7 +25,7 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
   useEffect(() => {
     const fetchOptions = async () => {
       const [{ data: hubs }, { data: roles }, { data: depts }] = await Promise.all([
-        supabase.from('hubs').select('id, name').order('name'),
+        supabase.from('hubs').select('id, name, hub_code').order('name'),
         supabase.from('employee_roles').select('name, role_code').order('name'),
         supabase.from('departments').select('name, dept_code').order('name')
       ]);
@@ -223,8 +223,8 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
       <FilterGroup
         label="Department"
         options={filterOptions.departments}
-        currentFilters={filters.city}
-        filterKey="city"
+        currentFilters={filters.department}
+        filterKey="department"
         displayKey="dept_code"
         valueKey="dept_code"
       />

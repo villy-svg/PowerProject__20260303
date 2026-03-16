@@ -24,8 +24,11 @@ export const useEmployees = () => {
       
     if (error) {
       console.error('Error fetching employees:', error);
+      // Fallback to simple select if join fails to prevent blank screen
+      const { data: simpleData } = await supabase.from('employees').select('*').order('full_name');
+      setEmployees(simpleData || []);
     } else {
-      // Flatten the data for easier consumption
+      // Flatten the joined data for components
       const flattened = (data || []).map(emp => ({
         ...emp,
         hub_code: emp.hubs?.hub_code || null,

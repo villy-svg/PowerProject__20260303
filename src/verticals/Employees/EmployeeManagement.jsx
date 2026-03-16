@@ -100,7 +100,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
     // Apply Subsidebar Filters
     const matchesRole = !filters?.role?.length || filters.role.includes(emp.role_code);
     const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
-    const matchesDept = !filters?.city?.length || filters.city.includes(emp.dept_code);
+    const matchesDept = !filters?.department?.length || filters.department.includes(emp.dept_code);
 
     return matchesStatus && matchesRole && matchesHub && matchesDept;
   });
