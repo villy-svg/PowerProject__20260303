@@ -84,46 +84,22 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
-      const normalizeRow = (row) => {
-        const normalized = {};
-        const keyMap = {
-          full_name: ['full_name', 'name', 'full name', 'employee name', 'staff name'],
-          email: ['email', 'email address', 'emailid', 'email_id'],
-          phone: ['phone', 'contact', 'mobile', 'phone number', 'contact number', 'contactnumber'],
-          dept_code: ['dept_code', 'department', 'dept', 'department_code'],
-          role_code: ['role_code', 'role', 'designation', 'employee_role'],
-          status: ['status'],
-          hire_date: ['hire_date', 'doj', 'joining date', 'hire date']
-        };
-
-        Object.keys(row).forEach(key => {
-          const lowerKey = key.toLowerCase().trim().replace(/_/g, ' ');
-          const canonicalKey = Object.keys(keyMap).find(ck => 
-            keyMap[ck].some(alias => alias.toLowerCase() === lowerKey || alias === key.toLowerCase().trim())
-          );
-          if (canonicalKey) {
-            normalized[canonicalKey] = row[key];
-          } else {
-            normalized[key] = row[key];
-          }
-        });
-        return normalized;
-      };
-
       const empsToInsert = rows.map(row => {
-        const normRow = normalizeRow(row);
+        // Since CSVImportButton now handles robust header normalization,
+        // we can safely assume canonical keys (full_name, email, phone, etc.) are present.
+        
         // Find if this row matches an existing record by our conflict key
-        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(normRow));
+        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
         
         return {
           id: existingMatch?.id || crypto.randomUUID(),
-          full_name: normRow.full_name,
-          email: normRow.email,
-          phone: normRow.phone || null,
-          department_id: ctx.deptMap[normRow.dept_code] || null,
-          role_id: ctx.roleMap[normRow.role_code] || null,
-          status: normRow.status || 'Active',
-          hire_date: parseDateForDB(normRow.hire_date),
+          full_name: row.full_name,
+          email: row.email,
+          phone: row.phone || null,
+          department_id: ctx.deptMap[row.dept_code || row.department] || null,
+          role_id: ctx.roleMap[row.role_code || row.role] || null,
+          status: row.status || 'Active',
+          hire_date: parseDateForDB(row.hire_date),
           updated_at: new Date().toISOString(),
         };
       });

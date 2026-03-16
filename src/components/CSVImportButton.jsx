@@ -97,7 +97,44 @@ const CSVImportButton = ({
     e.target.value = '';
   };
 
-  const processRows = (rows) => {
+  const normalizeHeaders = (data) => {
+    if (!data || data.length === 0) return data;
+    
+    // Default system-wide mapping (can be extended via props)
+    const defaultMap = {
+      full_name: ['full_name', 'name', 'full name', 'employee name', 'staff name', 'fullname', 'emp name'],
+      email: ['email', 'email address', 'emailid', 'email_id', 'mail'],
+      phone: ['phone', 'contact', 'mobile', 'phone number', 'contact number', 'contactnumber', 'phone_number'],
+      department: ['department', 'dept', 'city', 'location', 'unit'],
+      role: ['role', 'designation', 'position', 'job title'],
+      hire_date: ['hire_date', 'doj', 'joining date', 'hire date', 'joining_date'],
+      status: ['status', 'active', 'state']
+    };
+
+    return data.map(row => {
+      const normalized = {};
+      Object.keys(row).forEach(key => {
+        const lowerKey = key.toLowerCase().trim().replace(/_/g, '').replace(/\s/g, '');
+        const canonicalKey = Object.keys(defaultMap).find(ck => 
+          defaultMap[ck].some(alias => {
+            const normAlias = alias.toLowerCase().replace(/_/g, '').replace(/\s/g, '');
+            return normAlias === lowerKey;
+          })
+        );
+        if (canonicalKey) {
+          normalized[canonicalKey] = row[key];
+        } else {
+          normalized[key] = row[key];
+        }
+      });
+      return normalized;
+    });
+  };
+
+  const processRows = (rawRows) => {
+    // 0. Robust Header Normalization
+    const rows = normalizeHeaders(rawRows);
+
     // 1. Required field validation
     let skipped = 0;
     const valid = rows.filter((row) => {
@@ -109,6 +146,7 @@ const CSVImportButton = ({
     });
 
     if (valid.length === 0) {
+      console.warn('All rows failed required field check:', requiredFields);
       setStatus('error');
       return;
     }
