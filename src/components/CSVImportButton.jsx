@@ -192,7 +192,9 @@ const CSVImportButton = ({
 
   const handleResolveConflicts = (selectedRowsToUpdate) => {
     setShowConflicts(false);
-    const finalRows = [...pendingConflicts.nonConflictingRows, ...selectedRowsToUpdate];
+    // CRITICAL: Extract the actual row data (csvRow) from the conflict objects
+    const resolvedData = selectedRowsToUpdate.map(c => c.csvRow);
+    const finalRows = [...pendingConflicts.nonConflictingRows, ...resolvedData];
     finalize(finalRows, { skipped: 0, inFileDups: 0 });
   };
 

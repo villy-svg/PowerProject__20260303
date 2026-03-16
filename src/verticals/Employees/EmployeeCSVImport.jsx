@@ -84,17 +84,22 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
-      const empsToInsert = rows.map(row => {
+      console.log('--- Import Logic Check ---');
+      console.log('Rows entering handleDataParsed:', rows.length);
+      console.log('Sample Row 0 keys:', Object.keys(rows[0] || {}));
+
+      const empsToInsert = rows.map((row, idx) => {
         const name = row.full_name || row.name || '';
+        
         if (!name.trim()) {
-          console.warn('Skipping employee row with missing name:', row);
+          console.warn(`[Row ${idx}] Skipping: missing name. Keys present:`, Object.keys(row));
           return null;
         }
 
         // Find if this row matches an existing record by our conflict key
         const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
         
-        return {
+        const mapped = {
           id: existingMatch?.id || crypto.randomUUID(),
           full_name: name.trim(),
           email: row.email,
@@ -105,10 +110,16 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           hire_date: parseDateForDB(row.hire_date),
           updated_at: new Date().toISOString(),
         };
+
+        if (idx === 0) console.log('Sample Mapped Row 0:', mapped);
+        return mapped;
       }).filter(Boolean);
 
+      console.log('Final rows filtered for DB:', empsToInsert.length);
+      console.log('--------------------------');
+
       if (empsToInsert.length === 0) {
-        throw new Error('No valid employee records found (all missing names).');
+        throw new Error('No valid employee records found (all missing names). Check console logs for details.');
       }
 
       const { error } = await supabase
