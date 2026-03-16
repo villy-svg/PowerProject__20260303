@@ -28,7 +28,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
     const { data, error } = await supabase
       .from('employees')
       .select('*')
-      .order('name', { ascending: true });
+      .order('full_name', { ascending: true });
       
     if (error) {
       console.error('Error fetching employees:', error);
@@ -41,15 +41,15 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
   const handleAddEmployee = async (formData) => {
     setIsSaving(true);
     const employeeData = {
-      name: formData.name,
-      contact_number: formData.contactNumber,
-      email_id: formData.emailId || null,
+      full_name: formData.name,
+      phone: formData.contactNumber,
+      email: formData.emailId || null,
       gender: formData.gender,
       dob: formData.dob,
-      doj: formData.doj || null,
+      hire_date: formData.doj || null,
       hub_id: formData.hub_id || null,
-      role: formData.role,
-      department: formData.department,
+      role: formData.role || null,
+      department: formData.department || null,
       account_number: formData.accountNumber,
       ifsc_code: formData.ifscCode,
       account_name: formData.accountName,
@@ -129,13 +129,13 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
                   {emp.status === 'Active' ? 'Deactivate' : 'Activate'}
                 </button>
               </div>
-              <h3 style={{ margin: '0.5rem 0' }}>{emp.name}</h3>
+              <h3 style={{ margin: '0.5rem 0' }}>{emp.full_name}</h3>
               <p className="hub-city" style={{ margin: 0, opacity: 0.8 }}>
-                📞 {emp.contact_number} <br />
-                {emp.email_id && `✉️ ${emp.email_id}`}
+                📞 {emp.phone} <br />
+                {emp.email && `✉️ ${emp.email}`}
               </p>
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.85rem', opacity: 0.7 }}>
-                Joined: {emp.doj || 'N/A'} <br />
+                Joined: {emp.hire_date || 'N/A'} <br />
                 Status: <span style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444', fontWeight: 'bold' }}>{emp.status}</span>
               </div>
             </div>
