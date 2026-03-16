@@ -12,6 +12,7 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
           <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
         )}
         <span className="dept-badge">{emp.department || 'NO DEPT'}</span>
+        <span className="hub-badge">{emp.hub_name || 'NO HUB'}</span>
         <span className="role-badge">{emp.role || 'NO ROLE'}</span>
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
           {isMasterAdmin && (

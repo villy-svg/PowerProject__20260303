@@ -12,15 +12,19 @@ import { supabase } from '../../services/supabaseClient';
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
 const FunctionCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => {
+  const [loading, setLoading] = React.useState(false);
   const [existingFns, setExistingFns] = React.useState(null);
 
   const handleFocus = async () => {
     if (existingFns) return;
+    setLoading(true);
     try {
       const { data } = await supabase.from('hub_functions').select('id, name');
       setExistingFns(data || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,7 +68,7 @@ const FunctionCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
 
   return (
     <CSVImportButton
-      label={label}
+      label={loading ? 'Loading...' : label}
       onDataParsed={handleDataParsed}
       requiredFields={['name']}
       getConflictKey={getConflictKey}
@@ -72,6 +76,7 @@ const FunctionCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       renderConflictTile={renderConflictTile}
       entityName="Functions"
       className={className}
+      disabled={loading}
       onFocus={handleFocus}
     />
   );

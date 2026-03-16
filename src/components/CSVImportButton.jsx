@@ -38,6 +38,7 @@ const CSVImportButton = ({
   className = '',
   accept = '.csv,.xlsx',
   disabled = false,
+  onFocus = null,
 }) => {
   const inputRef = useRef(null);
   const [status, setStatus] = useState(null); // null | 'success' | 'error'
@@ -184,6 +185,8 @@ const CSVImportButton = ({
         <button
           className={`halo-button csv-import-btn ${className} ${status === 'error' ? 'import-error' : status === 'success' ? 'import-success' : ''}`}
           onClick={() => inputRef.current?.click()}
+          onFocus={onFocus}
+          onMouseEnter={onFocus} // Also trigger on hover for faster loading
           title="Import a filled CSV or Excel file"
           disabled={disabled}
         >

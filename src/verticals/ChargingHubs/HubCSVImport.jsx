@@ -12,6 +12,7 @@ import { supabase } from '../../services/supabaseClient';
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
 const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => {
+  const [loading, setLoading] = React.useState(false);
   const [existingHubs, setExistingHubs] = React.useState(null);
 
   const loadExistingHubs = async () => {
@@ -23,7 +24,15 @@ const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => 
   };
 
   const handleFocus = async () => {
-    try { await loadExistingHubs(); } catch (err) { console.error(err); }
+    if (existingHubs) return;
+    setLoading(true);
+    try { 
+      await loadExistingHubs(); 
+    } catch (err) { 
+      console.error(err); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Uniqueness: hub_code
@@ -68,7 +77,7 @@ const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => 
 
   return (
     <CSVImportButton
-      label={label}
+      label={loading ? 'Loading...' : label}
       onDataParsed={handleDataParsed}
       requiredFields={['name']}
       getConflictKey={getConflictKey}
@@ -76,6 +85,7 @@ const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => 
       renderConflictTile={renderConflictTile}
       entityName="Hubs"
       className={className}
+      disabled={loading}
       onFocus={handleFocus}
     />
   );

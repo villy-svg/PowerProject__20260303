@@ -33,6 +33,7 @@ const VerticalWorkspace = ({
     city: [], 
     hub: [], 
     priority: [], 
+    role: [],
     function: [],
     duplicatesOnly: false 
   });
@@ -158,7 +159,11 @@ const VerticalWorkspace = ({
 
       <main className="workspace-content">
         {children ? (
-          children
+          React.Children.map(children, child => 
+            React.isValidElement(child) 
+              ? React.cloneElement(child, { filters, onFilterChange: handleFilterChange })
+              : child
+          )
         ) : (
           /* The TaskController now receives the 'addTask' helper (as setTasks) 
               and the 'deleteTask'/'updateTaskStage' async functions.

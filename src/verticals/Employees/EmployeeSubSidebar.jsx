@@ -1,22 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../services/supabaseClient';
 
 /**
  * EmployeeSubSidebar
  * 
  * Vertical-specific sidebar content for the Employee Manager.
- * Contains filters for tasks within the employee context.
+ * Contains filters for employee records.
  */
 const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
   const isMasterAdmin = user?.roleId === 'master_admin';
 
   const [expandedGroups, setExpandedGroups] = useState({
-    priority: true,
+    role: false,
+    hub: false,
     department: false,
   });
 
-  const priorities = ['Low', 'Medium', 'High', 'Urgent'];
-  // Dynamically derive departments from task data (placeholders for now)
-  const departments = [...new Set((tasks || []).map(t => t.city).filter(Boolean))].sort();
+  const [filterOptions, setFilterOptions] = useState({
+    hubs: [],
+    roles: [],
+    departments: []
+  });
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const [{ data: hubs }, { data: roles }, { data: depts }] = await Promise.all([
+        supabase.from('hubs').select('id, name').order('name'),
+        supabase.from('employee_roles').select('name, role_code').order('name'),
+        supabase.from('departments').select('name, dept_code').order('name')
+      ]);
+
+      setFilterOptions({
+        hubs: hubs || [],
+        roles: roles || [],
+        departments: depts || []
+      });
+    };
+    fetchOptions();
+  }, []);
 
   const toggleGroup = (key) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
@@ -117,7 +138,7 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
           {options.map(opt => {
             const val = valueKey ? opt[valueKey] : opt;
             const labelText = displayKey ? opt[displayKey] : opt;
-            const isSelected = currentFilters.includes(val);
+            const isSelected = (currentFilters || []).includes(val);
             return (
               <div
                 key={val}
@@ -182,20 +203,31 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
       </div>
 
       <FilterGroup
-        label="Priority"
-        options={priorities}
-        currentFilters={filters.priority || []}
-        filterKey="priority"
+        label="Employee Role"
+        options={filterOptions.roles}
+        currentFilters={filters.role}
+        filterKey="role"
+        displayKey="name"
+        valueKey="name"
       />
 
-      {departments.length > 0 && (
-        <FilterGroup
-          label="Department"
-          options={departments}
-          currentFilters={filters.city || []}
-          filterKey="city"
-        />
-      )}
+      <FilterGroup
+        label="Primary Hub"
+        options={filterOptions.hubs}
+        currentFilters={filters.hub}
+        filterKey="hub"
+        displayKey="name"
+        valueKey="id"
+      />
+
+      <FilterGroup
+        label="Department"
+        options={filterOptions.departments}
+        currentFilters={filters.city}
+        filterKey="city"
+        displayKey="name"
+        valueKey="name"
+      />
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
         <div className="sub-nav-text">

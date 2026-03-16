@@ -22,13 +22,17 @@ export const useEmployees = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('employees')
-      .select('*')
+      .select('*, hubs(name)')
       .order('full_name', { ascending: true });
       
     if (error) {
       console.error('Error fetching employees:', error);
     } else {
-      setEmployees(data || []);
+      const flattened = (data || []).map(emp => ({
+        ...emp,
+        hub_name: emp.hubs?.name || 'N/A'
+      }));
+      setEmployees(flattened);
     }
     setLoading(false);
   }, []);

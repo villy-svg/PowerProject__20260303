@@ -1,6 +1,7 @@
 import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
 import { supabase } from '../../services/supabaseClient';
+import { normalizeValue } from '../../utils/matchingAlgorithms';
 
 /**
  * EmployeeCSVImport — Thin Wrapper
@@ -21,7 +22,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     const [{ data: depts }, { data: roles }, { data: emps }] = await Promise.all([
       supabase.from('departments').select('id, dept_code'),
       supabase.from('employee_roles').select('id, role_code'),
-      supabase.from('employees').select('email, full_name'),
+      supabase.from('employees').select('id, email, full_name, phone'),
     ]);
     const deptMap = Object.fromEntries(depts?.map(d => [d.dept_code, d.id]) || []);
     const roleMap = Object.fromEntries(roles?.map(r => [r.role_code, r.id]) || []);
@@ -33,18 +34,35 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
 
   // Pre-load on first interaction
   const handleFocus = async () => {
-    try { await loadContext(); } catch (err) { console.error(err); }
+    if (existingEmps) return;
+    setImporting(true);
+    try { 
+      await loadContext(); 
+    } catch (err) { 
+      console.error(err); 
+    } finally {
+      setImporting(false);
+    }
   };
 
-  // Uniqueness: email (case-insensitive)
-  const getConflictKey = (row) => (row.email || '').toLowerCase().trim();
+  // Uniqueness: Name + Phone (normalized)
+  const getConflictKey = (row) => {
+    const name = normalizeValue(row.full_name || row.name || '');
+    const phone = normalizeValue(row.phone || row.contactNumber || '');
+    return `${name}|${phone}`;
+  };
 
   const renderConflictTile = (conflict) => (
     <div className="tile-content">
       <h5 style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--brand-green)' }}>
-        {conflict.csvRow.full_name}
+        {conflict.csvRow.full_name || conflict.csvRow.name}
       </h5>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{conflict.csvRow.email}</p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
+        {conflict.csvRow.email}
+      </p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
+        {conflict.csvRow.phone || conflict.csvRow.contactNumber || 'No Phone'}
+      </p>
     </div>
   );
 
@@ -66,20 +84,26 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
-      const empsToInsert = rows.map(row => ({
-        full_name: row.full_name,
-        email: row.email,
-        phone: row.phone || null,
-        department_id: ctx.deptMap[row.dept_code] || null,
-        role_id: ctx.roleMap[row.role_code] || null,
-        status: row.status || 'Active',
-        hire_date: parseDateForDB(row.hire_date),
-        updated_at: new Date().toISOString(),
-      }));
+      const empsToInsert = rows.map(row => {
+        // Find if this row matches an existing record by our conflict key
+        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
+        
+        return {
+          id: existingMatch?.id || crypto.randomUUID(),
+          full_name: row.full_name || row.name,
+          email: row.email,
+          phone: row.phone || row.contactNumber || null,
+          department_id: ctx.deptMap[row.dept_code] || null,
+          role_id: ctx.roleMap[row.role_code] || null,
+          status: row.status || 'Active',
+          hire_date: parseDateForDB(row.hire_date || row.doj),
+          updated_at: new Date().toISOString(),
+        };
+      });
 
       const { error } = await supabase
         .from('employees')
-        .upsert(empsToInsert, { onConflict: 'email' });
+        .upsert(empsToInsert, { onConflict: 'id' });
 
       if (error) throw error;
       alert(`Successfully processed ${empsToInsert.length} employees.`);

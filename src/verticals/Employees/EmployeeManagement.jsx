@@ -19,7 +19,7 @@ import ConflictModal from '../../components/ConflictModal';
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = ({ permissions }) => {
+const EmployeeManagement = ({ permissions, filters }) => {
   const { employees, loading, fetchEmployees, addEmployee, updateEmployee, toggleStatus, deleteEmployee } = useEmployees();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -40,9 +40,16 @@ const EmployeeManagement = ({ permissions }) => {
   const handleSave = async (formData, force = false) => {
     if (!force) {
       // MASTER-SLAVE: Use master criteria logic
+      // MASTER-SLAVE: Map form fields to match DB criteria
+      const matchingProbe = {
+        full_name: formData.name,
+        phone: formData.contactNumber,
+        email: formData.emailId
+      };
+
       const existingMatch = employees.find(emp => 
         emp.id !== (editingEmployee?.id) && 
-        matchesCriteria(formData, emp, { 
+        matchesCriteria(matchingProbe, emp, { 
           fields: ['full_name'], 
           useFuzzy: true, 
           threshold: 0.85, 
@@ -87,7 +94,17 @@ const EmployeeManagement = ({ permissions }) => {
     setIsAddModalOpen(true);
   };
 
-  const filteredEmployees = employees.filter(emp => showInactive || emp.status === 'Active');
+  const filteredEmployees = employees.filter(emp => {
+    const matchesStatus = showInactive || emp.status === 'Active';
+    
+    // Apply Subsidebar Filters
+    const matchesRole = !filters?.role?.length || filters.role.includes(emp.role);
+    const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
+    const matchesDept = !filters?.city?.length || filters.city.includes(emp.department);
+
+    return matchesStatus && matchesRole && matchesHub && matchesDept;
+  });
+
   const isMasterAdmin = permissions?.roleId === 'master_admin';
 
   return (
