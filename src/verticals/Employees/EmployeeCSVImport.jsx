@@ -52,6 +52,20 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     setImporting(true);
     try {
       const ctx = await loadContext();
+
+      const parseDateForDB = (rawDate) => {
+        if (!rawDate) return new Date().toISOString().split('T')[0];
+        const parsed = new Date(rawDate);
+        if (!isNaN(parsed.valueOf())) {
+          // Extract local YYYY-MM-DD to avoid GMT offset string issues in Postgres
+          const year = parsed.getFullYear();
+          const month = String(parsed.getMonth() + 1).padStart(2, '0');
+          const day = String(parsed.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+        return new Date().toISOString().split('T')[0];
+      };
+
       const empsToInsert = rows.map(row => ({
         full_name: row.full_name,
         email: row.email,
@@ -59,7 +73,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         department_id: ctx.deptMap[row.dept_code] || null,
         role_id: ctx.roleMap[row.role_code] || null,
         status: row.status || 'Active',
-        hire_date: row.hire_date || new Date().toISOString().split('T')[0],
+        hire_date: parseDateForDB(row.hire_date),
         updated_at: new Date().toISOString(),
       }));
 
