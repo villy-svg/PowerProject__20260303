@@ -98,9 +98,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
     const matchesStatus = showInactive || emp.status === 'Active';
     
     // Apply Subsidebar Filters
-    const matchesRole = !filters?.role?.length || filters.role.includes(emp.role);
+    const matchesRole = !filters?.role?.length || filters.role.includes(emp.role_code);
     const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
-    const matchesDept = !filters?.city?.length || filters.city.includes(emp.department);
+    const matchesDept = !filters?.city?.length || filters.city.includes(emp.dept_code);
 
     return matchesStatus && matchesRole && matchesHub && matchesDept;
   });

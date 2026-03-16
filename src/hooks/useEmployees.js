@@ -14,13 +14,25 @@ export const useEmployees = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('employees')
-      .select('*')
+      .select(`
+        *,
+        hubs (hub_code),
+        employee_roles!employees_role_fkey (role_code),
+        departments!employees_department_fkey (dept_code)
+      `)
       .order('full_name', { ascending: true });
       
     if (error) {
       console.error('Error fetching employees:', error);
     } else {
-      setEmployees(data || []);
+      // Flatten the data for easier consumption
+      const flattened = (data || []).map(emp => ({
+        ...emp,
+        hub_code: emp.hubs?.hub_code || null,
+        role_code: emp.employee_roles?.role_code || null,
+        dept_code: emp.departments?.dept_code || null
+      }));
+      setEmployees(flattened);
     }
     setLoading(false);
   }, []);

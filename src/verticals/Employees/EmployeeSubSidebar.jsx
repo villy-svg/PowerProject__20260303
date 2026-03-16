@@ -207,8 +207,8 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
         options={filterOptions.roles}
         currentFilters={filters.role}
         filterKey="role"
-        displayKey="name"
-        valueKey="name"
+        displayKey="role_code"
+        valueKey="role_code"
       />
 
       <FilterGroup
@@ -216,7 +216,7 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
         options={filterOptions.hubs}
         currentFilters={filters.hub}
         filterKey="hub"
-        displayKey="name"
+        displayKey="hub_code"
         valueKey="id"
       />
 
@@ -225,8 +225,8 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
         options={filterOptions.departments}
         currentFilters={filters.city}
         filterKey="city"
-        displayKey="name"
-        valueKey="name"
+        displayKey="dept_code"
+        valueKey="dept_code"
       />
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
