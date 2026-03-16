@@ -19,19 +19,37 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
 
   const loadContext = async () => {
     if (existingEmps) return { existingEmps, ...lookupMaps };
-    const [{ data: depts }, { data: roles }, { data: emps }] = await Promise.all([
-      supabase.from('departments').select('id, dept_code'),
-      supabase.from('employee_roles').select('id, role_code'),
+    const [{ data: depts }, { data: roles }, { data: hubs }, { data: emps }] = await Promise.all([
+      supabase.from('departments').select('id, name, dept_code'),
+      supabase.from('employee_roles').select('id, name, role_code'),
+      supabase.from('hubs').select('id, name, hub_code'),
       supabase.from('employees').select('id, email, full_name, phone'),
     ]);
-    const deptMap = Object.fromEntries(depts?.map(d => [d.dept_code, d.id]) || []);
-    const roleMap = Object.fromEntries(roles?.map(r => [r.role_code, r.id]) || []);
-    const maps = { deptMap, roleMap };
+
+    // Robust Mapping: Support both Names and Codes
+    const createMap = (items, codeKey) => {
+      const m = {};
+      items?.forEach(item => {
+        if (item.id) {
+          const nameKey = item.name?.toLowerCase().trim();
+          const codeK = item[codeKey]?.toLowerCase().trim();
+          if (nameKey) m[nameKey] = item.id;
+          if (codeK) m[codeK] = item.id;
+        }
+      });
+      return m;
+    };
+
+    const maps = {
+      deptMap: createMap(depts, 'dept_code'),
+      roleMap: createMap(roles, 'role_code'),
+      hubMap: createMap(hubs, 'hub_code')
+    };
+
     setExistingEmps(emps || []);
     setLookupMaps(maps);
     return { existingEmps: emps || [], ...maps };
   };
-
   // Pre-load on first interaction
   const handleFocus = async () => {
     if (existingEmps) return;
@@ -86,37 +104,35 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
 
       console.log('--- Import Logic Check ---');
       console.log('Rows entering handleDataParsed:', rows.length);
-      console.log('Sample Row 0 keys:', Object.keys(rows[0] || {}));
 
       const empsToInsert = rows.map((row, idx) => {
         const name = row.full_name || row.name || '';
-        
-        if (!name.trim()) {
-          console.warn(`[Row ${idx}] Skipping: missing name. Keys present:`, Object.keys(row));
-          return null;
-        }
+        if (!name.trim()) return null;
 
         // Find if this row matches an existing record by our conflict key
         const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
         
+        // Robust Lookup: Clean and normalize input
+        const lookup = (val, map) => {
+          if (!val) return null;
+          return map[val.toString().toLowerCase().trim()] || null;
+        };
+
         const mapped = {
           id: existingMatch?.id || crypto.randomUUID(),
           full_name: name.trim(),
           email: row.email,
           phone: row.phone || null,
-          department_id: ctx.deptMap[row.dept_code || row.department] || null,
-          role_id: ctx.roleMap[row.role_code || row.role] || null,
+          department_id: lookup(row.dept_code || row.department, ctx.deptMap),
+          role_id: lookup(row.role_code || row.role, ctx.roleMap),
+          hub_id: lookup(row.hub_code || row.hub, ctx.hubMap),
           status: row.status || 'Active',
           hire_date: parseDateForDB(row.hire_date),
           updated_at: new Date().toISOString(),
         };
 
-        if (idx === 0) console.log('Sample Mapped Row 0:', mapped);
         return mapped;
       }).filter(Boolean);
-
-      console.log('Final rows filtered for DB:', empsToInsert.length);
-      console.log('--------------------------');
 
       if (empsToInsert.length === 0) {
         throw new Error('No valid employee records found (all missing names). Check console logs for details.');
