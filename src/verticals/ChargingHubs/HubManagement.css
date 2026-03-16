@@ -11,24 +11,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.add-hub-main-btn {
-  white-space: nowrap;
-  min-width: 160px;
-  height: 42px;
-  padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
-/* Ensure inner CSV import/download buttons match the form factor */
-.csv-import-wrapper.add-hub-main-btn button,
-.csv-download-btn.add-hub-main-btn {
-  width: 100%;
-  height: 100%;
-}
 
 
 .header-info h1 {

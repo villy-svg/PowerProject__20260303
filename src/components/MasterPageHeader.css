@@ -30,15 +30,14 @@
   align-items: center;
   width: 100%;
   margin-top: 8px;
-  flex-wrap: wrap;
-  gap: 16px;
+  gap: 16px; /* Spacing between Left and Right groups */
 }
 
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px; /* Standardized spacing between buttons */
+  flex-wrap: nowrap; /* Prevent individual buttons from wrapping on desktop */
 }
 
 .header-right {
@@ -46,8 +45,35 @@
   flex: 1;
 }
 
+/* Standardized Master Action Button */
+.master-action-btn {
+  white-space: nowrap;
+  min-width: 160px;
+  height: 42px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+/* Ensure inner components (CSV Buttons) fill the master container */
+.csv-import-wrapper.master-action-btn button,
+.csv-download-btn.master-action-btn {
+  width: 100%;
+  height: 100%;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  color: inherit !important;
+}
+
 /* Mobile adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .header-row-3 {
     flex-direction: column;
     align-items: flex-start;
@@ -55,5 +81,8 @@
   .header-right {
     width: 100%;
     justify-content: flex-start;
+  }
+  .header-left, .header-right {
+    flex-wrap: wrap; /* Allow wrapping on mobile */
   }
 }

@@ -391,16 +391,15 @@ const TaskController = ({
           <>
             {activeVertical === 'CHARGING_HUBS' && (
               <>
-                <TaskCSVDownload className="add-hub-main-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
-                <TaskCSVDownload className="add-hub-main-btn" isTemplate label="Download Template" />
-                <TaskCSVImport className="add-hub-main-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
+                <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
+                <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+                <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
               </>
             )}
             {canUserCreate && (
               <button 
-                className="halo-button add-task-btn add-hub-main-btn" 
+                className="halo-button master-action-btn" 
                 onClick={openAddModal}
-                style={{ fontWeight: 600 }}
               >
                 + Add Task
               </button>
