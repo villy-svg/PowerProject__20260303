@@ -502,6 +502,8 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
               <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
+            ) : activeVertical === 'hub_management' ? (
+              <HubManagement />
             ) : activeVertical === 'hub_function_management' ? (
               <HubFunctionManagement />
             ) : activeVertical === 'department_management' ? (

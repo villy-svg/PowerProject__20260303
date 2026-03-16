@@ -14,7 +14,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
   return (
     <>
       <MasterPageHeader
-        title="Employee Manager"
+        title="Employee Records Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
         rightActions={
           <>
@@ -22,7 +22,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
             <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             <EmployeeCSVImport className="master-action-btn" onImportComplete={() => window.location.reload()} />
             <button className="halo-button master-action-btn" onClick={() => alert('Add Employee logic coming soon')}>
-              + Add New Employee
+              + Add Employee
             </button>
           </>
         }
