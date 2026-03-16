@@ -6,7 +6,11 @@ import React from 'react';
  */
 const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) => {
   return (
-    <div className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''}`}>
+    <div 
+      className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''}`}
+      onDoubleClick={() => onEdit(emp)}
+      title="Double-click to edit"
+    >
       <div className="employee-card-badges">
         {emp.isDuplicate && (
           <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
@@ -15,11 +19,16 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
         <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
         <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
+          <button 
+            className="action-icon-btn edit-pencil" 
+            onClick={() => onEdit(emp)} 
+            title="Edit Employee"
+            style={{ opacity: 0.5, filter: 'grayscale(1)' }}
+          >
+            ✎
+          </button>
           {isMasterAdmin && (
-            <>
-              <button className="action-icon-btn edit" onClick={() => onEdit(emp)} title="Edit">✎</button>
-              <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
-            </>
+            <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
           )}
           <button 
             className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
@@ -40,17 +49,7 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
 
       <div className="employee-card-footer">
         <div className="join-date">Joined: {emp.hire_date || 'N/A'}</div>
-        <div className="employee-status" style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {isMasterAdmin && (
-            <button 
-              className="action-icon-btn edit" 
-              onClick={() => onEdit(emp)} 
-              style={{ fontSize: '0.8rem', padding: '0', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7 }}
-              title="Edit Record"
-            >
-              ✎
-            </button>
-          )}
+        <div className="employee-status" style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444' }}>
           {emp.status}
         </div>
       </div>

@@ -121,6 +121,8 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           full_name: name.trim(),
           email: row.email,
           phone: row.phone || null,
+          gender: row.gender || null,
+          dob: parseDateForDB(row.dob),
           department_id: lookup(row.dept_code || row.department, ctx.deptMap),
           role_id: lookup(row.role_code || row.role, ctx.roleMap),
           hub_id: lookup(row.hub_code || row.hub, ctx.hubMap),
@@ -167,8 +169,11 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         { key: 'full_name', label: 'Name' },
         { key: 'email', label: 'Email' },
         { key: 'phone', label: 'Phone' },
-        { key: 'dept_code', label: 'Dept Code' },
-        { key: 'role_code', label: 'Role Code' },
+        { key: 'gender', label: 'Gender' },
+        { key: 'dob', label: 'D.O.B' },
+        { key: 'hub_code', label: 'Hub' },
+        { key: 'dept_code', label: 'Dept' },
+        { key: 'role_code', label: 'Role' },
         { key: 'hire_date', label: 'D.O.J' }
       ]}
       onFocus={handleFocus}

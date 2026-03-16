@@ -6,7 +6,11 @@ import React from 'react';
  */
 const EmployeeListRow = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) => {
   return (
-    <div className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''}`}>
+    <div 
+      className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''}`}
+      onDoubleClick={() => onEdit(emp)}
+      title="Double-click to edit"
+    >
       <div className="list-main-info">
         <div className="list-name">
           {emp.full_name}
@@ -28,11 +32,16 @@ const EmployeeListRow = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin 
         <div className="employee-status" style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444', fontSize: '0.75rem', fontWeight: 700, marginRight: '1rem', alignSelf: 'center' }}>
           {emp.status}
         </div>
+        <button 
+          className="action-icon-btn edit-pencil" 
+          onClick={() => onEdit(emp)} 
+          title="Edit Employee"
+          style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
+        >
+          ✎
+        </button>
         {isMasterAdmin && (
-          <>
-            <button className="action-icon-btn edit" onClick={() => onEdit(emp)} title="Edit">✎</button>
-            <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
-          </>
+          <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
         )}
         <button 
           className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}

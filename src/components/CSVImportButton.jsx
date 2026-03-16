@@ -108,7 +108,10 @@ const CSVImportButton = ({
       department: ['department', 'dept', 'city', 'location', 'unit'],
       role: ['role', 'designation', 'position', 'job title'],
       hire_date: ['hire_date', 'doj', 'joining date', 'hire date', 'joining_date'],
-      status: ['status', 'active', 'state']
+      status: ['status', 'active', 'state'],
+      gender: ['gender', 'sex', 'male/female'],
+      dob: ['dob', 'date of birth', 'birth date', 'birthdate'],
+      hub_code: ['hub_code', 'primary hub', 'hub', 'location code', 'station']
     };
 
     return data.map(row => {

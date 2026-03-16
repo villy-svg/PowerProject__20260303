@@ -9,44 +9,52 @@ import { supabase } from '../../services/supabaseClient';
  * Defines: headers, data transformation, and dropdown validation data.
  */
 const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['full_name', 'email', 'phone', 'dept_code', 'role_code', 'status', 'hire_date', 'account_number', 'ifsc_code', 'account_name'];
+  const headers = ['Full Name', 'Email', 'Phone', 'Gender', 'Date of Birth', 'Primary Hub', 'Department', 'Role', 'Status', 'Date of Joining', 'Account Number', 'IFSC Code', 'Account Name'];
 
   const defaultLabel = isTemplate ? "Download Employee Template" : "Export Employee Data";
   const finalLabel = label || defaultLabel;
 
   const handleDownload = async () => {
-    const [{ data: depts }, { data: roles }] = await Promise.all([
+    const [{ data: depts }, { data: roles }, { data: hubs }] = await Promise.all([
       supabase.from('departments').select('id, dept_code').order('dept_code'),
       supabase.from('employee_roles').select('id, role_code').order('role_code'),
+      supabase.from('hubs').select('id, hub_code').order('hub_code'),
     ]);
     const deptMap = Object.fromEntries(depts?.map(d => [d.id, d.dept_code]) || []);
     const roleMap = Object.fromEntries(roles?.map(r => [r.id, r.role_code]) || []);
+    const hubMap = Object.fromEntries(hubs?.map(h => [h.id, h.hub_code]) || []);
 
     if (isTemplate) {
       return [{
-        full_name: 'John Doe',
-        email: 'john.doe@powerpod.com',
-        phone: '+919876543210',
-        dept_code: Object.values(deptMap)[0] || 'ENG',
-        role_code: Object.values(roleMap)[0] || 'SR-DEV',
-        status: 'Active',
-        hire_date: new Date().toISOString().split('T')[0],
-        account_number: '123456789012',
-        ifsc_code: 'SBIN0001234',
-        account_name: 'John Doe'
+        'Full Name': 'John Doe',
+        'Email': 'john.doe@powerpod.com',
+        'Phone': '+919876543210',
+        'Gender': 'Male',
+        'Date of Birth': '1990-01-01',
+        'Primary Hub': Object.values(hubMap)[0] || 'HUB-01',
+        'Department': Object.values(deptMap)[0] || 'ENG',
+        'Role': Object.values(roleMap)[0] || 'SR-DEV',
+        'Status': 'Active',
+        'Date of Joining': new Date().toISOString().split('T')[0],
+        'Account Number': '123456789012',
+        'IFSC Code': 'SBIN0001234',
+        'Account Name': 'John Doe'
       }];
     } else {
       return data.map(emp => ({
-        full_name: emp.full_name,
-        email: emp.email,
-        phone: emp.phone || '',
-        dept_code: deptMap[emp.department_id] || '',
-        role_code: roleMap[emp.role_id] || '',
-        status: emp.status || 'Active',
-        hire_date: emp.hire_date || '',
-        account_number: emp.account_number || '',
-        ifsc_code: emp.ifsc_code || '',
-        account_name: emp.account_name || ''
+        'Full Name': emp.full_name,
+        'Email': emp.email,
+        'Phone': emp.phone || '',
+        'Gender': emp.gender || '',
+        'Date of Birth': emp.dob || '',
+        'Primary Hub': hubMap[emp.hub_id] || '',
+        'Department': deptMap[emp.department_id] || '',
+        'Role': roleMap[emp.role_id] || '',
+        'Status': emp.status || 'Active',
+        'Date of Joining': emp.hire_date || '',
+        'Account Number': emp.account_number || '',
+        'IFSC Code': emp.ifsc_code || '',
+        'Account Name': emp.account_name || ''
       }));
     }
   };
@@ -55,14 +63,17 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
   React.useEffect(() => {
     if (!isTemplate) return;
     (async () => {
-      const [{ data: depts }, { data: roles }] = await Promise.all([
+      const [{ data: depts }, { data: roles }, { data: hubs }] = await Promise.all([
         supabase.from('departments').select('dept_code').order('dept_code'),
         supabase.from('employee_roles').select('role_code').order('role_code'),
+        supabase.from('hubs').select('hub_code').order('hub_code'),
       ]);
       setValidations([
-        { colLetter: 'D', values: depts?.map(d => d.dept_code).filter(Boolean) || [] },
-        { colLetter: 'E', values: roles?.map(r => r.role_code).filter(Boolean) || [] },
-        { colLetter: 'F', values: ['Active', 'On Leave', 'Inactive', 'Terminated'] },
+        { colLetter: 'D', values: ['Male', 'Female', 'Other', 'Prefer not to say'] },
+        { colLetter: 'F', values: hubs?.map(h => h.hub_code).filter(Boolean) || [] },
+        { colLetter: 'G', values: depts?.map(d => d.dept_code).filter(Boolean) || [] },
+        { colLetter: 'H', values: roles?.map(r => r.role_code).filter(Boolean) || [] },
+        { colLetter: 'I', values: ['Active', 'On Leave', 'Inactive', 'Terminated'] },
       ]);
     })();
   }, [isTemplate]);
