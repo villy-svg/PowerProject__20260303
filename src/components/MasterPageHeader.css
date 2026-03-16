@@ -29,14 +29,14 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 12px;
   gap: 16px; /* Spacing between Left and Right groups */
 }
 
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 8px; /* Standardized spacing between buttons */
+  gap: 8px; /* High-precision standardized spacing */
   flex-wrap: nowrap; /* Prevent individual buttons from wrapping on desktop */
 }
 
@@ -45,35 +45,85 @@
   flex: 1;
 }
 
-/* Standardized Master Action Button */
+/* ==========================================================================
+   MASTER ACTION BUTTONS
+   Enforced consistency for sizing, typography, and form factor.
+   ========================================================================== */
+
 .master-action-btn {
-  white-space: nowrap;
-  min-width: 160px;
-  height: 42px;
-  padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* Dimensions & Layout */
+  height: 42px !important;
+  min-width: 160px !important;
+  padding: 0 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  
+  /* Typography */
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  
+  /* Styling (Inherits halo-button properties but refines them) */
+  border: 1px solid var(--border-color);
+  border-radius: 12px !important;
+  background: var(--halo-bg);
+  color: var(--brand-green) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 600;
-  border-radius: 12px;
-  transition: all 0.2s ease;
 }
 
-/* Ensure inner components (CSV Buttons) fill the master container */
-.csv-import-wrapper.master-action-btn button,
+.master-action-btn:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+  border-color: var(--brand-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--halo-glow);
+}
+
+.master-action-btn:active {
+  transform: translateY(0);
+}
+
+/* --- Inner Component Fixes (CSV Buttons) --- */
+
+.csv-import-wrapper.master-action-btn,
 .csv-download-btn.master-action-btn {
-  width: 100%;
-  height: 100%;
-  border: none !important;
-  background: transparent !important;
+  /* Remove wrapper padding to let actual button fill space */
   padding: 0 !important;
+}
+
+.csv-import-wrapper.master-action-btn button,
+.csv-download-btn.master-action-btn button,
+.csv-download-btn.master-action-btn {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
   color: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  text-transform: inherit !important;
+  letter-spacing: inherit !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 20px !important;
+  cursor: pointer !important;
+}
+
+/* Specific fix for Halo button styling when used as master */
+button.halo-button.master-action-btn {
+  /* Override any default halo-button padding that might conflict */
+  padding: 0 20px !important;
 }
 
 /* Mobile adjustments */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .header-row-3 {
     flex-direction: column;
     align-items: flex-start;
@@ -83,6 +133,10 @@
     justify-content: flex-start;
   }
   .header-left, .header-right {
-    flex-wrap: wrap; /* Allow wrapping on mobile */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+  }
+  .master-action-btn {
+    flex: 1;
+    min-width: 140px;
   }
 }

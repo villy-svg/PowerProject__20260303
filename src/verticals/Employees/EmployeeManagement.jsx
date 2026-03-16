@@ -12,7 +12,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
  */
 const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
   return (
-    <div className="hub-management-container" style={{ padding: 0 }}>
+    <>
       <MasterPageHeader
         title="Employee Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
@@ -34,7 +34,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
         <p>This section will house your full employee roster, including department links and functional roles.</p>
         <p style={{ marginTop: '1rem', color: 'var(--brand-green)', fontWeight: 600 }}>Stay tuned for the record management rollout.</p>
       </div>
-    </div>
+    </>
   );
 };
 

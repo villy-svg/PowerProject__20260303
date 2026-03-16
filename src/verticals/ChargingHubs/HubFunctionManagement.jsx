@@ -99,26 +99,26 @@ const HubFunctionManagement = () => {
   };
 
   return (
-    <div className="hub-management-container">
-      <header className="hub-header">
-        <div className="header-info">
-          <h1>Hub Function Management</h1>
-          <p>Define and manage functional categories for charging hub tasks.</p>
-        </div>
-        <div className="header-actions">
-          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
-            New Function
-          </button>
-          <FunctionCSVDownload 
-            className="add-hub-main-btn" 
-            data={functions} 
-            label="Export Function Data" 
-            filename={`hub_functions_export_${new Date().toISOString().split('T')[0]}.csv`}
-          />
-          <FunctionCSVDownload className="add-hub-main-btn" />
-          <FunctionCSVImport className="add-hub-main-btn" onImportComplete={fetchFunctions} />
-        </div>
-      </header>
+    <>
+      <MasterPageHeader
+        title="Hub Function Management"
+        description="Define and manage functional categories for charging hub tasks."
+        rightActions={
+          <>
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Function
+            </button>
+            <FunctionCSVDownload 
+              className="master-action-btn" 
+              data={functions} 
+              label="Export Function Data" 
+              filename={`hub_functions_export_${new Date().toISOString().split('T')[0]}.csv`}
+            />
+            <FunctionCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            <FunctionCSVImport className="master-action-btn" onImportComplete={fetchFunctions} />
+          </>
+        }
+      />
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Functions...</div>}
 
@@ -199,7 +199,7 @@ const HubFunctionManagement = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

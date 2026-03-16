@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
 import '../../components/CSVButtons.css';
+import MasterPageHeader from '../../components/MasterPageHeader';
 
 const EmployeeRoleManagement = () => {
   const [roles, setRoles] = useState([]);
@@ -97,18 +98,16 @@ const EmployeeRoleManagement = () => {
   };
 
   return (
-    <div className="hub-management-container">
-      <header className="hub-header">
-        <div className="header-info">
-          <h1>Employee Role Management</h1>
-          <p>Define and manage specific job roles for the employee vertical.</p>
-        </div>
-        <div className="header-actions">
-          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
-            New Role
+    <>
+      <MasterPageHeader
+        title="Employee Role Management"
+        description="Define and manage specific job roles for the employee vertical."
+        rightActions={
+          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+            + New Role
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Roles...</div>}
 
@@ -189,7 +188,7 @@ const EmployeeRoleManagement = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

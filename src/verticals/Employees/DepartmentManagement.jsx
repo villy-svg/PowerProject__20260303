@@ -97,18 +97,16 @@ const DepartmentManagement = () => {
   };
 
   return (
-    <div className="hub-management-container">
-      <header className="hub-header">
-        <div className="header-info">
-          <h1>Department Management</h1>
-          <p>Define and manage organization departments for employee tracking.</p>
-        </div>
-        <div className="header-actions">
-          <button className="halo-button add-hub-main-btn" onClick={() => handleOpenModal()}>
-            New Department
+    <>
+      <MasterPageHeader
+        title="Department Management"
+        description="Define and manage organization departments for employee tracking."
+        rightActions={
+          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+            + New Department
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Departments...</div>}
 
@@ -189,7 +187,7 @@ const DepartmentManagement = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
