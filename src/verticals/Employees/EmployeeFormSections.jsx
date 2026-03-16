@@ -54,19 +54,19 @@ export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, r
       </div>
       <div className="form-group">
         <label>Role</label>
-        <select name="role" value={formData.role} onChange={onChange} required>
+        <select name="role_id" value={formData.role_id} onChange={onChange} required>
           <option value="">Select Role</option>
           {roles.map(r => (
-            <option key={r.name} value={r.name}>{r.role_code ? `[${r.role_code}] ` : ''}{r.name}</option>
+            <option key={r.id} value={r.id}>{r.role_code ? `[${r.role_code}] ` : ''}{r.name}</option>
           ))}
         </select>
       </div>
       <div className="form-group">
         <label>Department</label>
-        <select name="department" value={formData.department} onChange={onChange} required>
+        <select name="department_id" value={formData.department_id} onChange={onChange} required>
           <option value="">Select Department</option>
           {departments.map(d => (
-            <option key={d.name} value={d.name}>{d.dept_code ? `[${d.dept_code}] ` : ''}{d.name}</option>
+            <option key={d.id} value={d.id}>{d.dept_code ? `[${d.dept_code}] ` : ''}{d.name}</option>
           ))}
         </select>
       </div>

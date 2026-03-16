@@ -200,8 +200,8 @@ const EmployeeManagement = ({ permissions, filters }) => {
             dob: editingEmployee.dob,
             doj: editingEmployee.hire_date,
             hub_id: editingEmployee.hub_id,
-            role: editingEmployee.role,
-            department: editingEmployee.department,
+            role_id: editingEmployee.role_id,
+            department_id: editingEmployee.department_id,
             accountNumber: editingEmployee.account_number,
             ifscCode: editingEmployee.ifsc_code,
             accountName: editingEmployee.account_name

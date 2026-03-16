@@ -20,8 +20,8 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
     const fetchCompanyData = async () => {
       const [hubsRes, deptRes, roleRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code').order('name'),
-        supabase.from('departments').select('name, dept_code').order('name'),
-        supabase.from('employee_roles').select('name, role_code').order('name')
+        supabase.from('departments').select('id, name, dept_code').order('name'),
+        supabase.from('employee_roles').select('id, name, role_code').order('name')
       ]);
       
       if (hubsRes.data) setHubs(hubsRes.data);
@@ -39,8 +39,8 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
     dob: initialData.dob || '',
     doj: initialData.doj || new Date().toISOString().split('T')[0], // Default today
     hub_id: initialData.hub_id || '',
-    role: initialData.role || '',
-    department: initialData.department || '',
+    role_id: initialData.role_id || '',
+    department_id: initialData.department_id || '',
     accountNumber: initialData.accountNumber || '',
     ifscCode: initialData.ifscCode || '',
     accountName: initialData.accountName || ''
