@@ -12,38 +12,38 @@ export const useEmployees = () => {
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('employees')
-      .select(`
-        *,
-        hubs (hub_code),
-        employee_roles!employees_role_fkey (role_code),
-        departments!employees_department_fkey (dept_code)
-      `)
-      .order('full_name', { ascending: true });
+    try {
+      // Robust Fetch: Separate requests for data + metadata to avoid fragile joins/400 errors
+      const [{ data: emps, error: empErr }, { data: hubs }, { data: roles }, { data: depts }] = await Promise.all([
+        supabase.from('employees').select('*').order('full_name', { ascending: true }),
+        supabase.from('hubs').select('id, hub_code'),
+        supabase.from('employee_roles').select('id, role_code'),
+        supabase.from('departments').select('id, dept_code')
+      ]);
 
-    if (error) {
+      if (empErr) throw empErr;
+
+      // Efficient ID Mapping
+      const hubMap = new Map((hubs || []).map(h => [h.id, h.hub_code]));
+      const roleMap = new Map((roles || []).map(r => [r.id, r.role_code]));
+      const deptMap = new Map((depts || []).map(d => [d.id, d.dept_code]));
+
+      const processed = (emps || []).map(emp => ({
+        ...emp,
+        hub_code: hubMap.get(emp.hub_id) || 'NO HUB',
+        role_code: roleMap.get(emp.role_id) || 'NO ROLE',
+        dept_code: deptMap.get(emp.department_id) || 'NO DEPT'
+      }));
+
+      setEmployees(processed);
+    } catch (error) {
       console.error('Error fetching employees:', error);
-      // Fallback to simple select if join fails to prevent blank screen
-      const { data: simpleData } = await supabase.from('employees').select('*').order('full_name');
-      setEmployees(simpleData || []);
-    } else {
-      // Flatten the joined data for components (handle potential array or object return)
-      const flattened = (data || []).map(emp => {
-        const h = Array.isArray(emp.hubs) ? emp.hubs[0] : emp.hubs;
-        const r = Array.isArray(emp.employee_roles) ? emp.employee_roles[0] : emp.employee_roles;
-        const d = Array.isArray(emp.departments) ? emp.departments[0] : emp.departments;
-
-        return {
-          ...emp,
-          hub_code: h?.hub_code || null,
-          role_code: r?.role_code || null,
-          dept_code: d?.dept_code || null
-        };
-      });
-      setEmployees(flattened);
+      // Absolute fallback to simple list
+      const { data } = await supabase.from('employees').select('*').order('full_name');
+      setEmployees(data || []);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const addEmployee = async (formData) => {
@@ -54,7 +54,7 @@ export const useEmployees = () => {
       gender: formData.gender,
       dob: formData.dob,
       hire_date: formData.doj || null,
-      hub_id: formData.hub_id || null,
+      hub_id: (formData.hub_id === 'ALL' || !formData.hub_id) ? null : formData.hub_id,
       role_id: formData.role_id || null,
       department_id: formData.department_id || null,
       account_number: formData.accountNumber,
@@ -64,8 +64,15 @@ export const useEmployees = () => {
       updated_at: new Date().toISOString()
     };
 
-    const { error } = await supabase.from('employees').insert([employeeData]);
-    if (error) throw error;
+    console.log('useEmployees: Attempting to insert:', employeeData);
+
+    const { data, error } = await supabase.from('employees').insert([employeeData]).select();
+    
+    if (error) {
+      console.error('useEmployees: Insert Error:', error);
+      throw error;
+    }
+    console.log('useEmployees: Insert Success:', data);
     await fetchEmployees();
   };
 
@@ -77,7 +84,7 @@ export const useEmployees = () => {
       gender: formData.gender,
       dob: formData.dob,
       hire_date: formData.doj || null,
-      hub_id: formData.hub_id || null,
+      hub_id: (formData.hub_id === 'ALL' || !formData.hub_id) ? null : formData.hub_id,
       role_id: formData.role_id || null,
       department_id: formData.department_id || null,
       account_number: formData.accountNumber,
@@ -86,12 +93,19 @@ export const useEmployees = () => {
       updated_at: new Date().toISOString()
     };
 
-    const { error } = await supabase
+    console.log(`useEmployees: Attempting to update ${id}:`, updateData);
+
+    const { data, error } = await supabase
       .from('employees')
       .update(updateData)
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('useEmployees: Update Error:', error);
+      throw error;
+    }
+    console.log('useEmployees: Update Success:', data);
     await fetchEmployees();
   };
 

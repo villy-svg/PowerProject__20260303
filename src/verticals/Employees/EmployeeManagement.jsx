@@ -38,6 +38,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
   }, [viewMode]);
 
   const handleSave = async (formData, force = false) => {
+    console.log('EmployeeManagement: handleSave called. Data:', formData, 'Force:', force);
     if (!force) {
       // MASTER-SLAVE: Use master criteria logic
       // MASTER-SLAVE: Map form fields to match DB criteria
@@ -58,6 +59,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
       );
 
       if (existingMatch) {
+        console.warn('EmployeeManagement: Duplicate detected:', existingMatch);
         setPendingConflict({ formData, existingRecord: existingMatch });
         return;
       }
@@ -66,13 +68,16 @@ const EmployeeManagement = ({ permissions, filters }) => {
     setIsSaving(true);
     try {
       if (editingEmployee) {
+        console.log('EmployeeManagement: Calling updateEmployee for ID:', editingEmployee.id);
         await updateEmployee(editingEmployee.id, formData);
       } else {
+        console.log('EmployeeManagement: Calling addEmployee');
         await addEmployee(formData);
       }
       setIsAddModalOpen(false);
       setEditingEmployee(null);
     } catch (err) {
+      console.error('EmployeeManagement: Operation Error:', err);
       alert(`Operation failed: ${err.message}`);
     } finally {
       setIsSaving(false);
