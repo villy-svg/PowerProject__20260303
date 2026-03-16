@@ -11,7 +11,7 @@ import { supabase } from '../../services/supabaseClient';
  *
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
-const HubCSVImport = ({ onImportComplete, className }) => {
+const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => {
   const [existingHubs, setExistingHubs] = React.useState(null);
 
   const loadExistingHubs = async () => {
@@ -68,7 +68,7 @@ const HubCSVImport = ({ onImportComplete, className }) => {
 
   return (
     <CSVImportButton
-      label="Import CSV"
+      label={label}
       onDataParsed={handleDataParsed}
       requiredFields={['name']}
       getConflictKey={getConflictKey}

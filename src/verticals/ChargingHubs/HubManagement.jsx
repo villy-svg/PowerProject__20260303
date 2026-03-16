@@ -106,17 +106,17 @@ const HubManagement = () => {
         description="Create and manage global charging hub locations."
         rightActions={
           <>
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Hub
-            </button>
             <HubCSVDownload 
-              className="master-action-btn" 
+              className="halo-button master-action-btn" 
               data={hubs} 
-              label="Export Hubs Data" 
+              label="Export Hubs" 
               filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
             />
-            <HubCSVDownload className="master-action-btn" label="Download Hubs Template" />
-            <HubCSVImport className="master-action-btn" onImportComplete={fetchHubs} />
+            <HubCSVDownload className="halo-button master-action-btn" label="Download Template" />
+            <HubCSVImport className="halo-button master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + Add New Hub
+            </button>
           </>
         }
       />
