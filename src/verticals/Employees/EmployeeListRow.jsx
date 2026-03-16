@@ -15,9 +15,9 @@ const EmployeeListRow = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin 
           )}
         </div>
         <div className="list-meta-badges">
-          <span className="dept-badge">{emp.dept_code || emp.department || 'DEPT'}</span>
-          <span className="hub-badge">{emp.hub_code || 'HUB'}</span>
-          <span className="role-badge">{emp.role_code || emp.role || 'ROLE'}</span>
+          <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
+          <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
+          <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
         <div className="list-contact">
           {emp.phone} {emp.email && `| ${emp.email}`}

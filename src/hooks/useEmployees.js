@@ -21,20 +21,26 @@ export const useEmployees = () => {
         departments!employees_department_fkey (dept_code)
       `)
       .order('full_name', { ascending: true });
-      
+
     if (error) {
       console.error('Error fetching employees:', error);
       // Fallback to simple select if join fails to prevent blank screen
       const { data: simpleData } = await supabase.from('employees').select('*').order('full_name');
       setEmployees(simpleData || []);
     } else {
-      // Flatten the joined data for components
-      const flattened = (data || []).map(emp => ({
-        ...emp,
-        hub_code: emp.hubs?.hub_code || null,
-        role_code: emp.employee_roles?.role_code || null,
-        dept_code: emp.departments?.dept_code || null
-      }));
+      // Flatten the joined data for components (handle potential array or object return)
+      const flattened = (data || []).map(emp => {
+        const h = Array.isArray(emp.hubs) ? emp.hubs[0] : emp.hubs;
+        const r = Array.isArray(emp.employee_roles) ? emp.employee_roles[0] : emp.employee_roles;
+        const d = Array.isArray(emp.departments) ? emp.departments[0] : emp.departments;
+
+        return {
+          ...emp,
+          hub_code: h?.hub_code || null,
+          role_code: r?.role_code || null,
+          dept_code: d?.dept_code || null
+        };
+      });
       setEmployees(flattened);
     }
     setLoading(false);
@@ -84,16 +90,16 @@ export const useEmployees = () => {
       .from('employees')
       .update(updateData)
       .eq('id', id);
-    
+
     if (error) throw error;
     await fetchEmployees();
   };
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    
+
     // Optimistic UI update
-    setEmployees(prev => prev.map(emp => 
+    setEmployees(prev => prev.map(emp =>
       emp.id === id ? { ...emp, status: newStatus } : emp
     ));
 

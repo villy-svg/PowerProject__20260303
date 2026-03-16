@@ -85,15 +85,18 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       };
 
       const empsToInsert = rows.map(row => {
-        // Since CSVImportButton now handles robust header normalization,
-        // we can safely assume canonical keys (full_name, email, phone, etc.) are present.
-        
+        const name = row.full_name || row.name || '';
+        if (!name.trim()) {
+          console.warn('Skipping employee row with missing name:', row);
+          return null;
+        }
+
         // Find if this row matches an existing record by our conflict key
         const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
         
         return {
           id: existingMatch?.id || crypto.randomUUID(),
-          full_name: row.full_name,
+          full_name: name.trim(),
           email: row.email,
           phone: row.phone || null,
           department_id: ctx.deptMap[row.dept_code || row.department] || null,
@@ -102,7 +105,11 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           hire_date: parseDateForDB(row.hire_date),
           updated_at: new Date().toISOString(),
         };
-      });
+      }).filter(Boolean);
+
+      if (empsToInsert.length === 0) {
+        throw new Error('No valid employee records found (all missing names).');
+      }
 
       const { error } = await supabase
         .from('employees')
