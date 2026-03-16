@@ -9,7 +9,7 @@ import { supabase } from '../../services/supabaseClient';
  * Defines: headers, data transformation, and dropdown validation data.
  */
 const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['full_name', 'email', 'phone', 'dept_code', 'role_code', 'status', 'hire_date'];
+  const headers = ['full_name', 'email', 'phone', 'dept_code', 'role_code', 'status', 'hire_date', 'account_number', 'ifsc_code', 'account_name'];
 
   const defaultLabel = isTemplate ? "Download Employee Template" : "Export Employee Data";
   const finalLabel = label || defaultLabel;
@@ -26,11 +26,14 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
       return [{
         full_name: 'John Doe',
         email: 'john.doe@powerpod.com',
-        phone: '+1 234 567 890',
+        phone: '+919876543210',
         dept_code: Object.values(deptMap)[0] || 'ENG',
         role_code: Object.values(roleMap)[0] || 'SR-DEV',
         status: 'Active',
         hire_date: new Date().toISOString().split('T')[0],
+        account_number: '123456789012',
+        ifsc_code: 'SBIN0001234',
+        account_name: 'John Doe'
       }];
     } else {
       return data.map(emp => ({
@@ -41,6 +44,9 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         role_code: roleMap[emp.role_id] || '',
         status: emp.status || 'Active',
         hire_date: emp.hire_date || '',
+        account_number: emp.account_number || '',
+        ifsc_code: emp.ifsc_code || '',
+        account_name: emp.account_name || ''
       }));
     }
   };
