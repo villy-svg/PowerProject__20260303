@@ -4,6 +4,7 @@ import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 
 const HubManagement = () => {
   const [hubs, setHubs] = useState([]);
@@ -12,6 +13,12 @@ const HubManagement = () => {
   const [editingHub, setEditingHub] = useState(null);
   const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
+  // MASTER-SLAVE: Unified Duplicate Detection
+  const hubsWithDuplicateInfo = useDuplicateDetection(hubs, {
+    fields: ['name'],
+    sortByDuplicates: true
+  });
 
   useEffect(() => {
     fetchHubs();
@@ -124,43 +131,21 @@ const HubManagement = () => {
       {loading && !isModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
 
       <div className="hubs-grid">
-        {(() => {
-          // 1. Logic to detect duplicates by Name
-          const nameCounts = {};
-          hubs.forEach(h => {
-            const name = h.name?.trim().toLowerCase();
-            nameCounts[name] = (nameCounts[name] || 0) + 1;
-          });
-
-          // 2. Sort hubs: Group duplicates together, then by name
-          const sortedHubs = [...hubs].sort((a, b) => {
-            const nameA = a.name?.trim().toLowerCase();
-            const nameB = b.name?.trim().toLowerCase();
-            const isADup = nameCounts[nameA] > 1;
-            const isBDup = nameCounts[nameB] > 1;
-
-            if (isADup && !isBDup) return -1;
-            if (!isADup && isBDup) return 1;
-            return nameA.localeCompare(nameB);
-          });
-
-          return sortedHubs.map(hub => {
-            const isDuplicateName = nameCounts[hub.name?.trim().toLowerCase()] > 1;
-
-            return (
-              <div key={hub.id} className={`hub-card ${isDuplicateName ? 'duplicate-name' : ''}`}>
-                <div className={`status-badge ${hub.status}`}>{hub.status}</div>
-                <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
-                <h3>{hub.name}</h3>
-                <p className="hub-city">{hub.city || 'No city set'}</p>
-                <div className="hub-actions">
-                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
-                  <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
-                </div>
-              </div>
-            );
-          });
-        })()}
+        {hubsWithDuplicateInfo.map(hub => (
+          <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
+            {hub.isDuplicate && (
+              <span className="duplicate-badge" style={{ position: 'absolute', top: '10px', right: '10px' }}>DUP</span>
+            )}
+            <div className={`status-badge ${hub.status}`}>{hub.status}</div>
+            <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
+            <h3>{hub.name}</h3>
+            <p className="hub-city">{hub.city || 'No city set'}</p>
+            <div className="hub-actions">
+              <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
+              <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
+            </div>
+          </div>
+        ))}
         {hubs.length === 0 && !loading && (
           <div className="empty-state">
             <p>No hubs found. Create your first charging hub to get started!</p>

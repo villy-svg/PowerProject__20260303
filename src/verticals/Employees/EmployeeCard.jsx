@@ -8,6 +8,9 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
   return (
     <div className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''}`}>
       <div className="employee-card-badges">
+        {emp.isDuplicate && (
+          <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
+        )}
         <span className="dept-badge">{emp.department || 'NO DEPT'}</span>
         <span className="role-badge">{emp.role || 'NO ROLE'}</span>
         <div style={{ marginLeft: 'auto' }} className="employee-actions">

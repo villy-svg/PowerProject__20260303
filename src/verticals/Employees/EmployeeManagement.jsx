@@ -9,7 +9,9 @@ import TaskModal from '../../components/TaskModal';
 import EmployeeForm from './EmployeeForm';
 import EmployeeCard from './EmployeeCard';
 import EmployeeListRow from './EmployeeListRow';
-import { useEmployees } from './useEmployees';
+import { useEmployees } from '../../hooks/useEmployees';
+import { matchesCriteria } from '../../utils/matchingAlgorithms';
+import ConflictModal from '../../components/ConflictModal';
 
 /**
  * EmployeeManagement
@@ -25,6 +27,7 @@ const EmployeeManagement = ({ permissions }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
   const [showInactive, setShowInactive] = useState(true);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
 
   useEffect(() => {
     fetchEmployees();
@@ -34,7 +37,25 @@ const EmployeeManagement = ({ permissions }) => {
     localStorage.setItem('powerpod_employee_view', viewMode);
   }, [viewMode]);
 
-  const handleSave = async (formData) => {
+  const handleSave = async (formData, force = false) => {
+    if (!force) {
+      // MASTER-SLAVE: Use master criteria logic
+      const existingMatch = employees.find(emp => 
+        emp.id !== (editingEmployee?.id) && 
+        matchesCriteria(formData, emp, { 
+          fields: ['full_name'], 
+          useFuzzy: true, 
+          threshold: 0.85, 
+          exactFields: ['phone'] 
+        })
+      );
+
+      if (existingMatch) {
+        setPendingConflict({ formData, existingRecord: existingMatch });
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       if (editingEmployee) {
@@ -171,6 +192,29 @@ const EmployeeManagement = ({ permissions }) => {
           loading={isSaving} 
         />
       </TaskModal>
+
+      {/* Unified Conflict Resolution Modal */}
+      <ConflictModal
+        isOpen={!!pendingConflict}
+        onClose={() => setPendingConflict(null)}
+        title="Potential Duplicate Detected"
+        description="We found a similar employee record in the database. Are you sure you want to create a new entry or update the existing one?"
+        conflicts={pendingConflict ? [pendingConflict.existingRecord] : []}
+        strategy="REPLACE_ALL_OR_SELECT"
+        entityName="Employees"
+        onResolve={() => {
+          const data = pendingConflict.formData;
+          setPendingConflict(null);
+          handleSave(data, true); // Force save
+        }}
+        renderConflictTile={(emp) => (
+          <div className="conflict-emp-tile">
+            <h5 style={{ color: 'var(--brand-green)', margin: '0 0 4px 0' }}>{emp.full_name}</h5>
+            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{emp.email || 'No Email'}</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{emp.phone || 'No Phone'}</p>
+          </div>
+        )}
+      />
     </>
   );
 };

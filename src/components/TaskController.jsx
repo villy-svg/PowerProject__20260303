@@ -8,6 +8,8 @@ import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
 import { supabase } from '../services/supabaseClient';
 import MasterPageHeader from './MasterPageHeader';
+import ConflictModal from './ConflictModal';
+import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
 import './TaskController.css';
 
 /**
@@ -108,70 +110,13 @@ const TaskController = ({
   };
 
   /**
-   * DUPLICATE DETECTION & SORTING LOGIC
-   * Hierarchy:
-   * 1. Priority (Urgent -> High -> Medium -> Low)
-   * 2. Updated At (Most recent first)
-   * 3. Adjacency (Duplicate clusters together)
+   * MASTER-SLAVE: Unified Duplicate Detection
    */
-  const tasksWithDuplicateInfo = React.useMemo(() => {
-    const clusters = {};
-    const clusterMaxDates = {};
-    (tasks || []).forEach(t => {
-      if (t.stageId !== 'DEPRIORITIZED') {
-        const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
-        
-        // Populate clusters
-        if (!clusters[key]) clusters[key] = [];
-        clusters[key].push(t.id);
-
-        // Track max date
-        const tDate = new Date(t.updatedAt || t.createdat).getTime();
-        if (!clusterMaxDates[key] || tDate > clusterMaxDates[key]) {
-          clusterMaxDates[key] = tDate;
-        }
-      }
-    });
-
-    const baseTasks = (tasks || []).map(t => {
-      const isDeprioritized = t.stageId === 'DEPRIORITIZED';
-      const key = `${t.priority || ''}|${t.hub_id || ''}|${t.function || ''}|${t.text || ''}`.toLowerCase();
-      const cluster = clusters[key] || [];
-      const isDuplicate = !isDeprioritized && cluster.length > 1;
-      
-      return { 
-        ...t, 
-        duplicateKey: key,
-        isDuplicate,
-        duplicateCount: isDeprioritized ? 0 : cluster.length,
-        isFirstInCluster: !isDeprioritized && cluster[0] === t.id,
-        duplicateGroup: isDeprioritized ? [] : cluster,
-        clusterMaxDate: clusterMaxDates[key] || new Date(t.updatedAt || t.createdat).getTime()
-      };
-    });
-
-    const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
-    return baseTasks.sort((a, b) => {
-      // 1. Priority
-      const pA = priorityOrder[a.priority] ?? 99;
-      const pB = priorityOrder[b.priority] ?? 99;
-      if (pA !== pB) return pA - pB;
-
-      // 2. Cluster Recency (Group adjacency)
-      // Members of the same cluster have identical clusterMaxDate
-      if (a.clusterMaxDate !== b.clusterMaxDate) {
-        return b.clusterMaxDate - a.clusterMaxDate;
-      }
-
-      // 3. Adjacency tie-breaker
-      if (a.duplicateKey !== b.duplicateKey) {
-        return a.duplicateKey.localeCompare(b.duplicateKey);
-      }
-      
-      // Keep original order within clusters
-      return 0;
-    });
-  }, [tasks]);
+  const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
+    fields: ['text', 'priority', 'hub_id', 'function'],
+    activeVertical: activeVertical,
+    sortByDuplicates: true
+  });
 
   /**
    * FILTER LOGIC
@@ -442,56 +387,32 @@ const TaskController = ({
         )}
       </TaskModal>
 
-      {/* Duplicate Merge Modal */}
-      <TaskModal
+      {/* Unified Duplicate Merge Modal */}
+      <ConflictModal
         isOpen={!!mergeTaskCluster}
         onClose={() => setMergeTaskCluster(null)}
         title="Consolidate Duplicate Tasks"
-      >
-        <div className="duplicate-merge-container">
-          <p className="merge-intro">We found {mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.</p>
-          <div className="merge-grid">
-            {mergeTaskCluster?.slice(0, 3).map((task, idx) => {
-              const stageInfo = STAGE_LIST.find(s => s.id === task.stageId);
-              return (
-                <div key={task.id} className="merge-option-card">
-                  <div className="merge-header">
-                    <span className="merge-label">Record #{idx + 1}</span>
-                    <span 
-                      className="merge-stage-tag"
-                      style={{ 
-                        backgroundColor: `${stageInfo?.color}22`, 
-                        color: stageInfo?.color,
-                        border: `1px solid ${stageInfo?.color}44`
-                      }}
-                    >
-                      {stageInfo?.label || task.stageId}
-                    </span>
-                  </div>
-                  <div className="merge-body">
-                    <p className="merge-summary">{task.text}</p>
-                    <div className="merge-meta">
-                      <span>Priority: {task.priority}</span>
-                      {task.city && <span>City: {task.city}</span>}
-                    </div>
-                  </div>
-                  <button 
-                    className="halo-button merge-keep-btn" 
-                    onClick={() => executeMerge(task.id)}
-                    disabled={saving}
-                    style={{ fontWeight: 600 }}
-                  >
-                    Keep This One
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-          {mergeTaskCluster?.length > 3 && (
-            <p className="merge-footer-info">+ {mergeTaskCluster.length - 3} more clones will also be deprioritized.</p>
-          )}
-        </div>
-      </TaskModal>
+        description={`We found ${mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.`}
+        conflicts={mergeTaskCluster || []}
+        strategy="PICK_ONE"
+        entityName="Tasks"
+        onResolve={(selection) => executeMerge(selection[0].id)}
+        renderConflictTile={(task) => {
+          const stageInfo = STAGE_LIST.find(s => s.id === task.stageId);
+          return (
+            <div className="merge-body">
+              <span className="merge-stage-tag" style={{ border: `1px solid ${stageInfo?.color}`, color: stageInfo?.color, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+                {stageInfo?.label || task.stageId}
+              </span>
+              <p className="merge-summary" style={{ margin: '8px 0', fontSize: '0.9rem' }}>{task.text}</p>
+              <div className="merge-meta" style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+                <span>Priority: {task.priority}</span>
+                {task.city && <span style={{ marginLeft: '8px' }}>City: {task.city}</span>}
+              </div>
+            </div>
+          );
+        }}
+      />
 
       {/* Custom Confirmation Modal */}
       <TaskModal

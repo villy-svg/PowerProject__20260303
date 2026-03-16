@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import ExcelJS from 'exceljs';
-import CSVConflictModal from './CSVConflictModal';
+import CSVConflictModal from './ConflictModal';
 import './CSVImportButton.css';
 
 /**
@@ -193,11 +193,12 @@ const CSVImportButton = ({
 
       {showConflicts && renderConflictTile && (
         <CSVConflictModal
+          isOpen={showConflicts}
+          onClose={handleCancelConflicts}
           entityName={entityName}
           conflicts={pendingConflicts.conflicts}
           onResolve={handleResolveConflicts}
-          onCancel={handleCancelConflicts}
-          renderConflictTile={renderConflictTile}
+          renderConflictTile={(c) => renderConflictTile(c)}
         />
       )}
     </>

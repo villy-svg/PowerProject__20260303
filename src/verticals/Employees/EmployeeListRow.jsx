@@ -8,7 +8,12 @@ const EmployeeListRow = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin 
   return (
     <div className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''}`}>
       <div className="list-main-info">
-        <div className="list-name">{emp.full_name}</div>
+        <div className="list-name">
+          {emp.full_name}
+          {emp.isDuplicate && (
+            <span className="duplicate-badge-mini" style={{ marginLeft: '8px' }} title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
+          )}
+        </div>
         <div className="list-meta-badges">
           <span className="dept-badge">{emp.department || 'DEPT'}</span>
           <span className="role-badge">{emp.role || 'ROLE'}</span>

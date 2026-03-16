@@ -1,22 +1,14 @@
-import { useState, useCallback, useMemo } from 'react';
-import { supabase } from '../../services/supabaseClient';
-import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
+import { useState, useCallback } from 'react';
+import { supabase } from '../services/supabaseClient';
 
 /**
  * useEmployees Hook
  * Encapsulates all data fetching and mutation logic for employee records.
+ * Located in global hooks to allow cross-vertical access (e.g., Task Assignments).
  */
 export const useEmployees = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // MASTER-SLAVE: Using the generic detection hook
-  const employeesWithDuplicateInfo = useDuplicateDetection(employees, {
-    fields: ['full_name'], 
-    useFuzzy: true, 
-    threshold: 0.85, 
-    exactFields: ['phone']
-  });
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
@@ -109,8 +101,7 @@ export const useEmployees = () => {
   };
 
   return {
-    employees: employeesWithDuplicateInfo,
-    rawEmployees: employees,
+    employees,
     loading,
     fetchEmployees,
     addEmployee,
