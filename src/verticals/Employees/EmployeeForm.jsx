@@ -11,14 +11,23 @@ import './EmployeeForm.css';
 const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hubs, setHubs] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [roles, setRoles] = useState([]);
 
-  // Fetch Hubs for Company Details dropdown
+  // Fetch Hubs, Departments, and Roles for Company Details dropdowns
   useEffect(() => {
-    const fetchHubs = async () => {
-      const { data } = await supabase.from('hubs').select('id, name, hub_code').order('name');
-      if (data) setHubs(data);
+    const fetchCompanyData = async () => {
+      const [hubsRes, deptRes, roleRes] = await Promise.all([
+        supabase.from('hubs').select('id, name, hub_code').order('name'),
+        supabase.from('departments').select('name, dept_code').order('name'),
+        supabase.from('employee_roles').select('name, role_code').order('name')
+      ]);
+      
+      if (hubsRes.data) setHubs(hubsRes.data);
+      if (deptRes.data) setDepartments(deptRes.data);
+      if (roleRes.data) setRoles(roleRes.data);
     };
-    fetchHubs();
+    fetchCompanyData();
   }, []);
 
   const [formData, setFormData] = useState({
@@ -43,7 +52,29 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
 
   const handleNext = (e) => {
     e.preventDefault();
-    if (currentPage === 1) setCurrentPage(2);
+    if (currentPage === 1) {
+      // Validate and format phone number
+      let phone = formData.contactNumber.replace(/\s+/g, '');
+      if (phone.startsWith('0')) {
+        phone = '+91' + phone.substring(1);
+      } else if (!phone.startsWith('+')) {
+        phone = '+91' + phone;
+      }
+      
+      // Length check
+      if (phone.startsWith('+91') && phone.length < 13) {
+        alert('Indian phone numbers must have at least 10 digits after +91.');
+        return;
+      } else if (phone.length < 10) {
+        alert('Phone number must have at least 10 basic digits.');
+        return;
+      }
+
+      // Update state with formatted phone before proceeding
+      setFormData(prev => ({ ...prev, contactNumber: phone }));
+
+      setCurrentPage(2);
+    }
   };
 
   const handleBack = (e) => {
@@ -156,14 +187,17 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
               </div>
               <div className="form-group">
                 <label>Role</label>
-                <input
-                  type="text"
+                <select
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  placeholder="e.g. Site Manager"
                   required
-                />
+                >
+                  <option value="">Select Role</option>
+                  {roles.map(r => (
+                    <option key={r.name} value={r.name}>{r.role_code ? `[${r.role_code}] ` : ''}{r.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label>Department</label>
@@ -174,10 +208,9 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
                   required
                 >
                   <option value="">Select Department</option>
-                  <option value="Operations">Operations</option>
-                  <option value="Maintenance">Maintenance</option>
-                  <option value="Support">Support</option>
-                  <option value="Management">Management</option>
+                  {departments.map(d => (
+                    <option key={d.name} value={d.name}>{d.dept_code ? `[${d.dept_code}] ` : ''}{d.name}</option>
+                  ))}
                 </select>
               </div>
             </div>
