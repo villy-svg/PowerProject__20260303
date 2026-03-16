@@ -55,6 +55,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         title="Add New Employee Record"
+        className="large-modal"
       >
         <EmployeeForm onSubmit={handleAddEmployee} loading={isSaving} />
       </TaskModal>
