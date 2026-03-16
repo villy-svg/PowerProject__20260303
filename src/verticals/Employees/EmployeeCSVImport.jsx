@@ -102,8 +102,6 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
-      console.log('--- Import Logic Check ---');
-      console.log('Rows entering handleDataParsed:', rows.length);
 
       const empsToInsert = rows.map((row, idx) => {
         const name = row.full_name || row.name || '';

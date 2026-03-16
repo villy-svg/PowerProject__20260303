@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from './theme/useTheme';
-import ThemeToggle from './theme/themeToggle'; 
+import ThemeToggle from './theme/themeToggle';
 import './App.css';
 
 // 1. New Supabase Import
@@ -15,8 +15,8 @@ import Sidebar from './components/Sidebar';
 import VerticalWorkspace from './components/VerticalWorkspace';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import Configuration from './components/Configuration';
-import UserProfile from './components/UserProfile'; 
-import RoleManagement from './components/RoleManagement'; 
+import UserProfile from './components/UserProfile';
+import RoleManagement from './components/RoleManagement';
 import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
@@ -58,31 +58,11 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [activeVertical, setActiveVertical] = useState(() => localStorage.getItem('power_project_active_vertical'));
 
-  // 2. Initial Data Fetch from Supabase
-  // useEffect(() => {
-  //   const fetchTasks = async () => {
-  //     setLoading(true);
-  //     const { data, error } = await supabase
-  //       .from('tasks')
-  //       .select('*')
-  //       .order('createdat', { ascending: true });
-
-  //     if (error) {
-  //       console.error("Error fetching tasks:", error.message);
-  //     } else {
-  //       setTasks(data || []);
-  //     }
-  //     setLoading(false);
-  //   };
-
-  //   fetchTasks();
-  // }, []);
 
   // src/App.jsx - around line 35
   const fetchTasks = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
-    console.log("🚩 TRACE 1: Starting Fetch...");
-    
+
     try {
       const { data, error, status } = await supabase
         .from('tasks')
@@ -92,14 +72,12 @@ function App() {
       if (error) {
         console.error(`❌ TRACE 1 ERROR [Status ${status}]:`, error.message);
       } else {
-        console.log("✅ TRACE 1 SUCCESS: Rows received:", data?.length);
         setTasks((data || []).map(normalizeTask));
       }
     } catch (err) {
       console.error("❌ TRACE 1 CRASH:", err);
     } finally {
       if (showLoading) setLoading(false);
-      console.log("🚩 TRACE 1.2: Fetch complete.");
     }
   }, []);
 
@@ -159,7 +137,7 @@ function App() {
       .select('*')
       .eq('id', userId)
       .single();
-      
+
     if (error) {
       console.error("Error fetching user profile:", error);
       // If code is PGRST116 (0 rows returned), the trigger may not have fired
@@ -172,7 +150,7 @@ function App() {
       setUser({
         id: data.id,
         name: data.name || "User",
-        role: data.role_id, 
+        role: data.role_id,
         roleId: data.role_id,
         assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"]
       });
@@ -192,7 +170,7 @@ function App() {
     // Public/Special views logic
     const isMasterAdmin = user.roleId === 'master_admin';
     const isConfigView = ['configuration', 'role_management', 'user_management'].includes(activeVertical);
-    
+
     // Check if the vertical is strictly assigned OR if they are a Master Admin
     const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
     const hasSpecialAccess = isMasterAdmin; // Only Master Admin can see these
@@ -210,8 +188,8 @@ function App() {
 
     // Charging Hubs special CRUD view handling
     if (activeVertical === 'hub_management' && !isMasterAdmin) {
-       setActiveVertical(null);
-       return;
+      setActiveVertical(null);
+      return;
     }
 
     // Standard Vertical validation
@@ -230,11 +208,11 @@ function App() {
   };
 
   // Sync Local Preferences
-  useEffect(() => { if(user) localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
+  useEffect(() => { if (user) localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
-  useEffect(() => { 
+  useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views as the default vertical
       const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks'];
@@ -247,14 +225,13 @@ function App() {
   }, [activeVertical]);
 
   // 4. Supabase CRUD Helpers (Replaces LocalStorage mutation)
-  
+
   /**
    * Adds a task to the Supabase cloud.
    * Logic: Inserts and then updates local state with the returned DB object (including its new UUID).
    */
   const addTask = async (taskData) => {
-    // 1. Prepare Full Row (Rich data)
-    const fullRow = {
+    const taskRow = {
       id: taskData.id,
       text: taskData.text,
       verticalid: taskData.verticalId,
@@ -268,45 +245,19 @@ function App() {
       updatedat: taskData.updatedAt,
     };
 
-    // 2. Prepare Basic Row (Fallback for missing columns)
-    const basicRow = {
-      id: taskData.id,
-      text: taskData.text,
-      verticalid: taskData.verticalId,
-      stageid: taskData.stageId,
-      createdat: taskData.createdAt,
-      updatedat: taskData.updatedAt,
-    };
-
     try {
-      // First attempt: Try to save with all new fields
       const { data, error } = await supabase
         .from('tasks')
-        .insert([fullRow])
+        .insert([taskRow])
         .select();
 
-      if (error) {
-        // ERROR PGRST204 or 42703: Columns missing in DB (Migration not run)
-        const isMissingColumn = error.code === 'PGRST204' || error.code === '42703' || (error.message && error.message.toLowerCase().includes('column'));
-        
-        if (isMissingColumn) {
-          console.warn(`⚠️ Database schema outdated (${error.code}). Falling back to basic task save.`);
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('tasks')
-            .insert([basicRow])
-            .select();
-          
-          if (fallbackError) throw fallbackError;
-          setTasks(prev => [...prev, normalizeTask(fallbackData[0])]);
-        } else {
-          throw error;
-        }
-      } else if (data) {
+      if (error) throw error;
+      if (data) {
         setTasks(prev => [...prev, normalizeTask(data[0])]);
       }
     } catch (err) {
       console.error("❌ Cloud Sync Error:", err.message);
-      throw err; // Propagate to TaskController for UI alert
+      throw err;
     }
   };
 
@@ -348,7 +299,7 @@ function App() {
    * Performs a full update of a task in Supabase.
    */
   const updateTask = async (taskData) => {
-    const fullRow = {
+    const taskRow = {
       text: taskData.text,
       verticalid: taskData.verticalId,
       stageid: taskData.stageId,
@@ -360,34 +311,15 @@ function App() {
       updatedat: new Date().toISOString(),
     };
 
-    const basicRow = {
-      text: taskData.text,
-      verticalid: taskData.verticalId,
-      stageid: taskData.stageId,
-      updatedat: new Date().toISOString(),
-    };
-
     try {
       const { data, error } = await supabase
         .from('tasks')
-        .update(fullRow)
+        .update(taskRow)
         .eq('id', taskData.id)
         .select();
 
-      if (error) {
-        const isMissingColumn = error.code === 'PGRST204' || error.code === '42703' || (error.message && error.message.toLowerCase().includes('column'));
-        if (isMissingColumn) {
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('tasks')
-            .update(basicRow)
-            .eq('id', taskData.id)
-            .select();
-          if (fallbackError) throw fallbackError;
-          setTasks(prev => prev.map(t => t.id === taskData.id ? normalizeTask(fallbackData[0]) : t));
-        } else {
-          throw error;
-        }
-      } else if (data) {
+      if (error) throw error;
+      if (data) {
         setTasks(prev => prev.map(t => t.id === taskData.id ? normalizeTask(data[0]) : t));
       }
     } catch (err) {
@@ -448,7 +380,7 @@ function App() {
             <>
               <h2 style={{ color: '#ff4444' }}>Profile Error</h2>
               <p style={{ maxWidth: '400px', textAlign: 'center' }}>{profileError}</p>
-              <button 
+              <button
                 onClick={handleLogout}
                 style={{ marginTop: '1rem', padding: '10px 20px', backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
               >
@@ -463,7 +395,6 @@ function App() {
     );
   }
 
-console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
 
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
@@ -471,13 +402,13 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
         <button className="logo-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
         </button>
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          onClose={() => setIsSidebarOpen(false)} 
-          setActiveVertical={setActiveVertical} 
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          setActiveVertical={setActiveVertical}
           activeVertical={activeVertical}
           user={user}
-          permissions={currentUserPermissions} 
+          permissions={currentUserPermissions}
         />
         <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
           <header className="app-header">
@@ -495,7 +426,7 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
           </header>
           <main className="app-content">
             {!activeVertical ? (
-              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} /> 
+              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'configuration' ? (
               <Configuration tasks={tasks} setTasks={setTasks} user={user} setActiveVertical={setActiveVertical} />
             ) : activeVertical === 'role_management' ? (
@@ -511,11 +442,11 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
             ) : activeVertical === 'employee_role_management' ? (
               <EmployeeRoleManagement />
             ) : (
-              <VerticalWorkspace 
+              <VerticalWorkspace
                 label={(activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? "Employees" : VERTICALS[activeVertical]?.label}
                 activeVertical={activeVertical}
-                tasks={tasks} 
-                setTasks={addTask} 
+                tasks={tasks}
+                setTasks={addTask}
                 actualSetTasks={setTasks} // Pass raw setter for local updates
                 refreshTasks={fetchTasks}
                 updateTask={updateTask}
@@ -527,34 +458,34 @@ console.log("🚩 TRACE 1.5: Current activeVertical is:", activeVertical);
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
-                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                  null
+                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
+                      null
                 }
                 TaskFormComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
-                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                  null
+                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
+                      null
                 }
                 TaskTileComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
-                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
-                  null
+                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
+                      null
                 }
                 onHeaderClick={
-                  (activeVertical === 'employee_tasks') 
-                  ? () => setActiveVertical('EMPLOYEES') 
-                  : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS') 
-                  ? () => setActiveVertical('hub_management') 
-                  : null
+                  (activeVertical === 'employee_tasks')
+                    ? () => setActiveVertical('EMPLOYEES')
+                    : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS')
+                      ? () => setActiveVertical('hub_management')
+                      : null
                 }
-                user={user} 
-                permissions={currentUserPermissions} 
+                user={user}
+                permissions={currentUserPermissions}
               >
                 {activeVertical === 'EMPLOYEES' && (
-                  <EmployeeManagement 
-                    user={user} 
-                    permissions={currentUserPermissions} 
-                    tasks={tasks.filter(t => t.verticalId === 'EMPLOYEES')} 
+                  <EmployeeManagement
+                    user={user}
+                    permissions={currentUserPermissions}
+                    tasks={tasks.filter(t => t.verticalId === 'EMPLOYEES')}
                   />
                 )}
               </VerticalWorkspace>

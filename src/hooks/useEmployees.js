@@ -64,7 +64,6 @@ export const useEmployees = () => {
       updated_at: new Date().toISOString()
     };
 
-    console.log('useEmployees: Attempting to insert:', employeeData);
 
     const { data, error } = await supabase.from('employees').insert([employeeData]).select();
     
@@ -72,7 +71,6 @@ export const useEmployees = () => {
       console.error('useEmployees: Insert Error:', error);
       throw error;
     }
-    console.log('useEmployees: Insert Success:', data);
     await fetchEmployees();
   };
 
@@ -93,7 +91,6 @@ export const useEmployees = () => {
       updated_at: new Date().toISOString()
     };
 
-    console.log(`useEmployees: Attempting to update ${id}:`, updateData);
 
     const { data, error } = await supabase
       .from('employees')
@@ -105,7 +102,6 @@ export const useEmployees = () => {
       console.error('useEmployees: Update Error:', error);
       throw error;
     }
-    console.log('useEmployees: Update Success:', data);
     await fetchEmployees();
   };
 

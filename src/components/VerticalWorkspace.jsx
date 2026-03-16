@@ -84,8 +84,6 @@ const VerticalWorkspace = ({
     }
   };
   
-  // 🚩 RESTORE TRACE LOG:
-  console.log(`🚩 TRACE 2: Workspace [${label}] received tasks. Count: ${tasks?.length}`);
   
   /**
    * LAYOUT GUARD
