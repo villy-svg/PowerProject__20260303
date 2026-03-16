@@ -3,7 +3,6 @@ import { supabase } from '../../services/supabaseClient';
 import './HubFunctionManagement.css';
 import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
-import '../../components/CSVButtons.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 
 const HubFunctionManagement = () => {
@@ -113,7 +112,7 @@ const HubFunctionManagement = () => {
               filename={`hub_functions_export_${new Date().toISOString().split('T')[0]}.csv`}
             />
             <FunctionCSVDownload className="halo-button master-action-btn" label="Download Template" />
-            <FunctionCSVImport className="halo-button master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
+            <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
               + New Function
             </button>

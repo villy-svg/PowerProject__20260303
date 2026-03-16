@@ -107,13 +107,13 @@ const HubManagement = () => {
         rightActions={
           <>
             <HubCSVDownload 
-              className="halo-button master-action-btn" 
+              className="master-action-btn" 
               data={hubs} 
               label="Export Hubs" 
               filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
             />
-            <HubCSVDownload className="halo-button master-action-btn" label="Download Template" />
-            <HubCSVImport className="halo-button master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
+            <HubCSVDownload className="master-action-btn" label="Download Template" />
+            <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
               + Add New Hub
             </button>
