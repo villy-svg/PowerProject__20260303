@@ -31,20 +31,20 @@
   width: 100%;
   margin-top: 12px;
   gap: 16px 24px; /* Row and Column gap */
-  flex-wrap: wrap; /* Enable wrapping for Left/Right groups */
+  flex-wrap: wrap; /* Allows entire Right block to drop below Left block */
 }
 
 .header-left, .header-right {
   display: flex;
   align-items: center;
-  gap: 12px; /* Increased gap for better touch targets and spacing */
-  flex-wrap: wrap; /* Allow individual buttons to wrap within their group */
+  gap: 12px;
+  flex-wrap: nowrap; /* Unify toggles/badges on desktop */
+  min-width: max-content;
 }
 
 .header-right {
   justify-content: flex-end;
   flex: 1;
-  min-width: fit-content;
 }
 
 /* ==========================================================================
@@ -88,17 +88,21 @@
 }
 
 /* Mobile adjustments */
-@media (max-width: 1200px) {
+@media (max-width: 840px) {
   .header-row-3 {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
   }
   .header-right {
     width: 100%;
     justify-content: flex-start;
   }
+}
+
+@media (max-width: 480px) {
   .header-left, .header-right {
-    flex-wrap: wrap; /* Allow wrapping on small screens */
+    flex-wrap: wrap; /* Only wrap individual buttons on very narrow screens */
   }
   .master-action-btn {
     flex: 1;
