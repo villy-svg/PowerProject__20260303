@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../ChargingHubs/HubManagement.css'; // Use shared styles
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import TaskModal from '../../components/TaskModal';
+import EmployeeForm from './EmployeeForm';
 
 /**
  * EmployeeManagement
@@ -11,6 +13,20 @@ import MasterPageHeader from '../../components/MasterPageHeader';
  * Displays employee records, profiles, and administrative summaries.
  */
 const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleAddEmployee = async (formData) => {
+    setIsSaving(true);
+    console.log('Adding employee:', formData);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      setIsAddModalOpen(false);
+      alert('Employee record created successfully (Simulated)');
+    }, 1000);
+  };
+
   return (
     <>
       <MasterPageHeader
@@ -21,7 +37,7 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
             <EmployeeCSVDownload className="master-action-btn" data={tasks} label="Export Team" />
             <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={() => window.location.reload()} />
-            <button className="halo-button master-action-btn" onClick={() => alert('Add Employee logic coming soon')}>
+            <button className="halo-button master-action-btn" onClick={() => setIsAddModalOpen(true)}>
               + Add Employee
             </button>
           </>
@@ -34,6 +50,14 @@ const EmployeeManagement = ({ user, permissions, tasks = [] }) => {
         <p>This section will house your full employee roster, including department links and functional roles.</p>
         <p style={{ marginTop: '1rem', color: 'var(--brand-green)', fontWeight: 600 }}>Stay tuned for the record management rollout.</p>
       </div>
+
+      <TaskModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New Employee Record"
+      >
+        <EmployeeForm onSubmit={handleAddEmployee} loading={isSaving} />
+      </TaskModal>
     </>
   );
 };

@@ -1,0 +1,81 @@
+.employee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.form-section-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-section-header::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background: var(--brand-green);
+  border-radius: 2px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.employee-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.employee-form .form-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.employee-form .form-group label .optional {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+.employee-form .form-group input,
+.employee-form .form-group select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  color: white;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.employee-form .form-group input:focus,
+.employee-form .form-group select:focus {
+  border-color: var(--brand-green);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.2);
+}
+
+.employee-form .form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.employee-form .save-btn {
+  padding: 0.75rem 2rem;
+  font-weight: 700;
+  min-width: 160px;
+}
