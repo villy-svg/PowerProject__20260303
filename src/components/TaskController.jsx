@@ -446,8 +446,27 @@ const TaskController = ({
         {viewMode === 'kanban' ? (
           <div className="kanban-board">
             {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
+              const getPriorityWeight = (p) => {
+                if (!p) return 0;
+                const lowerP = p.toLowerCase();
+                if (lowerP === 'high') return 3;
+                if (lowerP === 'medium') return 2;
+                if (lowerP === 'low') return 1;
+                return 0;
+              };
+
               const stageTasks = filteredTasks
-                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id);
+                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
+                .sort((a, b) => {
+                  const weightA = getPriorityWeight(a.priority);
+                  const weightB = getPriorityWeight(b.priority);
+                  if (weightA !== weightB) return weightB - weightA;
+                  
+                  // Secondary: Duplicates together
+                  if (a.isDuplicate && !b.isDuplicate) return -1;
+                  if (!a.isDuplicate && b.isDuplicate) return 1;
+                  return 0;
+                });
               
               const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
 
