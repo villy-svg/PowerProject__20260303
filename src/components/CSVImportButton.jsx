@@ -39,6 +39,7 @@ const CSVImportButton = ({
   accept = '.csv,.xlsx',
   disabled = false,
   onFocus = null,
+  compareFields = []
 }) => {
   const inputRef = useRef(null);
   const [status, setStatus] = useState(null); // null | 'success' | 'error'
@@ -202,6 +203,7 @@ const CSVImportButton = ({
           conflicts={pendingConflicts.conflicts}
           onResolve={handleResolveConflicts}
           renderConflictTile={(c) => renderConflictTile(c)}
+          compareFields={compareFields}
         />
       )}
     </>

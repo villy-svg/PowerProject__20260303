@@ -84,19 +84,46 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
+      const normalizeRow = (row) => {
+        const normalized = {};
+        const keyMap = {
+          full_name: ['full_name', 'name', 'full name', 'employee name', 'staff name'],
+          email: ['email', 'email address', 'emailid', 'email_id'],
+          phone: ['phone', 'contact', 'mobile', 'phone number', 'contact number', 'contactnumber'],
+          dept_code: ['dept_code', 'department', 'dept', 'department_code'],
+          role_code: ['role_code', 'role', 'designation', 'employee_role'],
+          status: ['status'],
+          hire_date: ['hire_date', 'doj', 'joining date', 'hire date']
+        };
+
+        Object.keys(row).forEach(key => {
+          const lowerKey = key.toLowerCase().trim().replace(/_/g, ' ');
+          const canonicalKey = Object.keys(keyMap).find(ck => 
+            keyMap[ck].some(alias => alias.toLowerCase() === lowerKey || alias === key.toLowerCase().trim())
+          );
+          if (canonicalKey) {
+            normalized[canonicalKey] = row[key];
+          } else {
+            normalized[key] = row[key];
+          }
+        });
+        return normalized;
+      };
+
       const empsToInsert = rows.map(row => {
+        const normRow = normalizeRow(row);
         // Find if this row matches an existing record by our conflict key
-        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
+        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(normRow));
         
         return {
           id: existingMatch?.id || crypto.randomUUID(),
-          full_name: row.full_name || row.name,
-          email: row.email,
-          phone: row.phone || row.contactNumber || null,
-          department_id: ctx.deptMap[row.dept_code] || null,
-          role_id: ctx.roleMap[row.role_code] || null,
-          status: row.status || 'Active',
-          hire_date: parseDateForDB(row.hire_date || row.doj),
+          full_name: normRow.full_name,
+          email: normRow.email,
+          phone: normRow.phone || null,
+          department_id: ctx.deptMap[normRow.dept_code] || null,
+          role_id: ctx.roleMap[normRow.role_code] || null,
+          status: normRow.status || 'Active',
+          hire_date: parseDateForDB(normRow.hire_date),
           updated_at: new Date().toISOString(),
         };
       });
@@ -128,6 +155,14 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       entityName="Employees"
       className={className}
       disabled={importing}
+      compareFields={[
+        { key: 'full_name', label: 'Name' },
+        { key: 'email', label: 'Email' },
+        { key: 'phone', label: 'Phone' },
+        { key: 'dept_code', label: 'Dept Code' },
+        { key: 'role_code', label: 'Role Code' },
+        { key: 'hire_date', label: 'D.O.J' }
+      ]}
       onFocus={handleFocus}
     />
   );
