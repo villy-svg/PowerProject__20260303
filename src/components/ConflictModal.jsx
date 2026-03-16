@@ -51,44 +51,65 @@ const ConflictModal = ({
   };
 
   return (
-    <TaskModal isOpen={isOpen} onClose={onClose} title={reviewIdx !== null ? `Review Changes: ${entityName}` : title}>
+    <TaskModal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={reviewIdx !== null ? `Detailed Comparison: ${entityName}` : title}
+      className={reviewIdx !== null ? 'xl-modal' : 'large-modal'}
+    >
       <div className="conflict-modal-body">
         {reviewIdx !== null ? (
           <div className="conflict-review-view">
-            <button className="back-to-list" onClick={() => setReviewIdx(null)}>← Back to List</button>
-            <p className="review-intro">Comparing CSV data (left) with existing Database record (right).</p>
-            
-            <table className="comparison-table">
-              <thead>
-                <tr>
-                  <th>Field</th>
-                  <th>New (CSV)</th>
-                  <th>Existing (DB)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {compareFields.map(field => {
-                  const csvVal = conflicts[reviewIdx].csvRow[field.key] || 'N/A';
-                  const dbVal = conflicts[reviewIdx].existingRecord[field.key] || 'N/A';
-                  const hasDiff = String(csvVal).toLowerCase() !== String(dbVal).toLowerCase();
+            <div className="review-header">
+              <button className="back-to-list" onClick={() => setReviewIdx(null)}>
+                <span>←</span> Back to Conflict List
+              </button>
+              <div className="review-status-indicator">
+                {selectedIndices.has(reviewIdx) ? (
+                  <span className="status-badge selected">Selected for Update</span>
+                ) : (
+                  <span className="status-badge pending">Pending Review</span>
+                )}
+              </div>
+            </div>
 
-                  return (
-                    <tr key={field.key} className={hasDiff ? 'has-difference' : ''}>
-                      <td><strong>{field.label}</strong></td>
-                      <td className="val-new">{csvVal}</td>
-                      <td className="val-old">{dbVal}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="comparison-container">
+              <div className="comparison-legend">
+                <p>New CSV Data (Left) vs Existing Database Record (Right)</p>
+              </div>
+              
+              <table className="comparison-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '20%' }}>Field</th>
+                    <th style={{ width: '40%' }}>New Data (Incoming)</th>
+                    <th style={{ width: '40%' }}>Current Record (In System)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareFields.map(field => {
+                    const csvVal = conflicts[reviewIdx].csvRow[field.key] || 'N/A';
+                    const dbVal = conflicts[reviewIdx].existingRecord[field.key] || 'N/A';
+                    const hasDiff = String(csvVal).toLowerCase() !== String(dbVal).toLowerCase();
+
+                    return (
+                      <tr key={field.key} className={hasDiff ? 'has-difference' : ''}>
+                        <td className="field-label">{field.label}</td>
+                        <td className="val-new">{csvVal}</td>
+                        <td className="val-old">{dbVal}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
             <div className="review-actions">
               <button 
                 className={`halo-button ${selectedIndices.has(reviewIdx) ? 'delete-btn' : 'save-btn'}`}
                 onClick={() => { toggleSelection(reviewIdx); setReviewIdx(null); }}
               >
-                {selectedIndices.has(reviewIdx) ? 'Unselect for Update' : 'Select for Update'}
+                {selectedIndices.has(reviewIdx) ? 'Unselect & Close' : 'Select to Overwrite & Close'}
               </button>
             </div>
           </div>

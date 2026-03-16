@@ -10,9 +10,21 @@
   line-height: 1.5;
 }
 
-/* Review View (Side-by-Side Comparison) */
+/* Review View (Page Flow Style) */
 .conflict-review-view {
   animation: fadeIn 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .back-to-list {
@@ -22,22 +34,50 @@
   font-weight: 700;
   cursor: pointer;
   padding: 8px 0;
-  margin-bottom: 16px;
   font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: opacity 0.2s;
+  gap: 10px;
+  transition: transform 0.2s;
 }
 
 .back-to-list:hover {
-  opacity: 0.7;
+  transform: translateX(-4px);
 }
 
-.review-intro {
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.status-badge.selected {
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--brand-green);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+}
+
+.comparison-container {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 24px;
+  padding-right: 4px;
+}
+
+.comparison-legend {
   font-size: 0.85rem;
-  opacity: 0.6;
+  opacity: 0.5;
   margin-bottom: 16px;
+  text-align: center;
   font-style: italic;
 }
 
@@ -45,7 +85,6 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin-bottom: 24px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -54,50 +93,60 @@
 
 .comparison-table th, 
 .comparison-table td {
-  padding: 14px 16px;
+  padding: 16px 20px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+}
+
+.comparison-table th {
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--brand-green);
+  font-weight: 800;
 }
 
 .comparison-table tr:last-child td {
   border-bottom: none;
 }
 
-.comparison-table th {
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--brand-green);
+.field-label {
   font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.01);
 }
 
 .has-difference {
-  background: rgba(45, 212, 191, 0.08);
+  background: rgba(45, 212, 191, 0.06);
 }
 
-.has-difference td:first-child {
-  border-left: 3px solid var(--brand-green);
+.has-difference .field-label {
+  color: var(--brand-green);
 }
 
 .val-new {
   color: var(--brand-green);
   font-weight: 600;
+  border-left: 1px solid var(--border-color);
 }
 
 .val-old {
   opacity: 0.6;
+  border-left: 1px solid var(--border-color);
 }
 
+/* Action Section */
 .review-actions {
   display: flex;
   justify-content: flex-end;
-  padding-top: 16px;
+  padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
 
-/* Multi-Flow Containers */
+/* Multi-Flow Containers (List View) */
 .conflict-flow-dual {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -119,19 +168,12 @@
   font-weight: 700;
 }
 
-.option-box p {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
 /* Conflict Grid Styles */
 .conflict-tiles-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 420px;
+  max-height: 480px;
   overflow-y: auto;
   padding-right: 8px;
   margin-bottom: 24px;
@@ -151,13 +193,13 @@
 
 .conflict-tile:hover {
   border-color: var(--brand-green);
-  background: rgba(45, 212, 191, 0.03);
+  transform: translateY(-2px);
 }
 
 .conflict-tile.selected {
   border-color: var(--brand-green);
   background: rgba(45, 212, 191, 0.08);
-  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .tile-main {
@@ -168,10 +210,10 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   color: var(--text-color);
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -182,7 +224,7 @@
   border-color: var(--brand-green);
 }
 
-/* Pick Strategy (Inline Review) */
+/* Pick Strategy Styles */
 .conflict-pick-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color);
@@ -193,35 +235,17 @@
   gap: 16px;
 }
 
-.review-btn-inline {
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--brand-green);
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.review-btn-inline:hover {
-  background: rgba(45, 212, 191, 0.1);
-  border-color: var(--brand-green);
-}
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Custom Scrollbar for the grid */
+/* Custom Scrollbar */
+.comparison-container::-webkit-scrollbar,
 .conflict-tiles-grid::-webkit-scrollbar {
   width: 6px;
 }
-.conflict-tiles-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
+.comparison-container::-webkit-scrollbar-thumb,
 .conflict-tiles-grid::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
