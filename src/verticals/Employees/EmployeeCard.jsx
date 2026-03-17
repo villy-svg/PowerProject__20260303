@@ -30,7 +30,6 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterA
         <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
         <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
         <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
-        <span className="badge-id-badge" style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', color: '#007aff', border: '1px solid #007aff', padding: '2px 6px', borderRadius: '4px' }}>B: {emp.badge_id}</span>
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
           <button 
             className="action-icon-btn edit-pencil" 
@@ -57,6 +56,7 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterA
       <h3 className="employee-card-name">{emp.full_name}</h3>
       
       <div className="employee-card-contact">
+        <span style={{ color: '#007aff', fontWeight: 600 }}>🆔 {emp.badge_id}</span>
         <span>📞 {emp.phone}</span>
         {emp.email && <span>✉️ {emp.email}</span>}
       </div>

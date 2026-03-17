@@ -35,9 +35,10 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMast
           <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
           <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
-          <span className="badge-id-badge" style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', color: '#007aff', border: '1px solid #007aff', padding: '2px 6px', borderRadius: '4px' }}>B: {emp.badge_id}</span>
+          <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
         <div className="list-contact">
+          <span style={{ color: '#007aff', fontWeight: 600, marginRight: '8px' }}>ID: {emp.badge_id}</span>
           {emp.phone} {emp.email && `| ${emp.email}`}
         </div>
       </div>
