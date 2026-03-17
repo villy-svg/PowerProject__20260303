@@ -182,6 +182,30 @@ const TaskController = ({
     }
   };
 
+  const handleDuplicateMergeTrigger = (duplicateTask) => {
+    // Opens edit modal for the duplicate task so the user can review/merge manually
+    openEditModal(duplicateTask);
+  };
+
+  const executeMerge = async (primaryTaskId) => {
+    const primaryTask = tasks.find(t => t.id === primaryTaskId);
+    if (!primaryTask) return;
+    const duplicates = tasks.filter(t =>
+      t.id !== primaryTaskId &&
+      t.text === primaryTask.text &&
+      t.priority === primaryTask.priority &&
+      t.verticalId === primaryTask.verticalId
+    );
+    if (duplicates.length === 0) return;
+    try {
+      await bulkUpdateTasks(duplicates.map(t => t.id), { stageid: 'DEPRIORITIZED' });
+      setMergeTaskCluster(null);
+    } catch (err) {
+      console.error('Merge failed:', err);
+      alert('Failed to merge duplicate tasks.');
+    }
+  };
+
   const openAddModal = () => {
     setEditingTask(null);
     setIsModalOpen(true);
