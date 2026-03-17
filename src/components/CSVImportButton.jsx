@@ -107,11 +107,14 @@ const CSVImportButton = ({
       phone: ['phone', 'contact', 'mobile', 'phone number', 'contact number', 'contactnumber', 'phone_number'],
       department: ['department', 'dept', 'city', 'location', 'unit'],
       role: ['role', 'designation', 'position', 'job title'],
-      hire_date: ['hire_date', 'doj', 'joining date', 'hire date', 'joining_date'],
+      hire_date: ['hire_date', 'doj', 'joining date', 'hire date', 'joining_date', 'date of joining', 'dateofjoining'],
       status: ['status', 'active', 'state'],
       gender: ['gender', 'sex', 'male/female'],
       dob: ['dob', 'date of birth', 'birth date', 'birthdate'],
-      hub_code: ['hub_code', 'primary hub', 'hub', 'location code', 'station']
+      hub_code: ['hub_code', 'primary hub', 'hub', 'location code', 'station'],
+      account_number: ['account_number', 'account number', 'bank account', 'acc num'],
+      ifsc_code: ['ifsc_code', 'ifsc code', 'ifsc'],
+      account_name: ['account_name', 'account name', 'bank name', 'beneficiary']
     };
 
     return data.map(row => {

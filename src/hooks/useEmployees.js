@@ -38,7 +38,6 @@ export const useEmployees = () => {
       setEmployees(processed);
     } catch (error) {
       console.error('Error fetching employees:', error);
-      // Absolute fallback to simple list
       const { data } = await supabase.from('employees').select('*').order('full_name');
       setEmployees(data || []);
     } finally {
@@ -47,6 +46,9 @@ export const useEmployees = () => {
   }, []);
 
   const addEmployee = async (formData) => {
+    const empCode = generateEmpCode();
+    const badgeId = await calculateBadgeId(formData, formData.doj);
+
     const employeeData = {
       full_name: formData.name,
       phone: formData.contactNumber,
@@ -61,9 +63,10 @@ export const useEmployees = () => {
       ifsc_code: formData.ifscCode,
       account_name: formData.accountName,
       status: 'Active',
+      emp_code: empCode,
+      badge_id: badgeId,
       updated_at: new Date().toISOString()
     };
-
 
     const { data, error } = await supabase.from('employees').insert([employeeData]).select();
     
@@ -71,10 +74,23 @@ export const useEmployees = () => {
       console.error('useEmployees: Insert Error:', error);
       throw error;
     }
+
+    if (data?.[0]) {
+      await logHistory(data[0].id, data[0], 'INSERT');
+    }
+
     await fetchEmployees();
   };
 
   const updateEmployee = async (id, formData) => {
+    // Check if role or dept changed to re-generate badgeId
+    const { data: current } = await supabase.from('employees').select('role_id, department_id, badge_id, emp_code, hire_date').eq('id', id).single();
+    
+    let badgeId = current?.badge_id;
+    if (current && (current.role_id !== formData.role_id || current.department_id !== formData.department_id)) {
+      badgeId = await calculateBadgeId(formData, current.hire_date);
+    }
+
     const updateData = {
       full_name: formData.name,
       phone: formData.contactNumber,
@@ -88,9 +104,9 @@ export const useEmployees = () => {
       account_number: formData.accountNumber,
       ifsc_code: formData.ifscCode,
       account_name: formData.accountName,
+      badge_id: badgeId,
       updated_at: new Date().toISOString()
     };
-
 
     const { data, error } = await supabase
       .from('employees')
@@ -102,6 +118,11 @@ export const useEmployees = () => {
       console.error('useEmployees: Update Error:', error);
       throw error;
     }
+
+    if (data?.[0]) {
+      await logHistory(id, data[0], 'UPDATE');
+    }
+
     await fetchEmployees();
   };
 

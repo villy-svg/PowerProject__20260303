@@ -22,6 +22,8 @@ const EmployeeListRow = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin 
           <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
           <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
+          <span className="emp-id-badge" style={{ fontSize: '0.6rem', color: 'var(--brand-green)', border: '1px solid var(--brand-green)', padding: '1px 4px', borderRadius: '2px' }}>{emp.emp_code}</span>
+          <span className="badge-id-badge" style={{ fontSize: '0.6rem', color: '#007aff', border: '1px solid #007aff', padding: '1px 4px', borderRadius: '2px' }}>{emp.badge_id}</span>
         </div>
         <div className="list-contact">
           {emp.phone} {emp.email && `| ${emp.email}`}

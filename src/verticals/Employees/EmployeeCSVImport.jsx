@@ -103,7 +103,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       };
 
 
-      const empsToInsert = rows.map((row, idx) => {
+      const empsToInsert = await Promise.all(rows.map(async (row, idx) => {
         const name = row.full_name || row.name || '';
         if (!name.trim()) return null;
 
@@ -116,26 +116,48 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           return map[val.toString().toLowerCase().trim()] || null;
         };
 
+        const role_id = lookup(row.role_code || row.role, ctx.roleMap);
+        const department_id = lookup(row.dept_code || row.department, ctx.deptMap);
+        const hire_date = parseDateForDB(row.hire_date);
+
+        // ID & Badge Logic
+        let emp_code = existingMatch?.emp_code;
+        let badge_id = existingMatch?.badge_id;
+
+        if (!emp_code) {
+          emp_code = generateEmpCode();
+        }
+
+        // Re-calculate badge if new or role/dept changed
+        if (!badge_id || (existingMatch && (existingMatch.role_id !== role_id || existingMatch.department_id !== department_id))) {
+          badge_id = await calculateBadgeId({ role_id, department_id }, hire_date);
+        }
+
         const mapped = {
           id: existingMatch?.id || crypto.randomUUID(),
           full_name: name.trim(),
-          email: row.email,
+          email: row.email || null,
           phone: row.phone || null,
           gender: row.gender || null,
           dob: parseDateForDB(row.dob),
-          department_id: lookup(row.dept_code || row.department, ctx.deptMap),
-          role_id: lookup(row.role_code || row.role, ctx.roleMap),
+          department_id,
+          role_id,
           hub_id: lookup(row.hub_code || row.hub, ctx.hubMap),
           status: row.status || 'Active',
-          hire_date: parseDateForDB(row.hire_date),
+          hire_date,
+          account_number: row.account_number || null,
+          ifsc_code: row.ifsc_code || null,
+          account_name: row.account_name || null,
+          emp_code,
+          badge_id,
           updated_at: new Date().toISOString(),
         };
 
         return mapped;
-      }).filter(Boolean);
+      })).then(results => results.filter(Boolean));
 
       if (empsToInsert.length === 0) {
-        throw new Error('No valid employee records found (all missing names). Check console logs for details.');
+        throw new Error('No valid employee records found.');
       }
 
       const { error } = await supabase
@@ -143,6 +165,12 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         .upsert(empsToInsert, { onConflict: 'id' });
 
       if (error) throw error;
+
+      // History Logging (Batch)
+      for (const emp of empsToInsert) {
+        await logEmployeeHistory(emp.id, emp, 'CSV_IMPORT');
+      }
+
       alert(`Successfully processed ${empsToInsert.length} employees.`);
       setExistingEmps(null); // Reset for next import
       if (onImportComplete) onImportComplete();

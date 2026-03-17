@@ -39,6 +39,14 @@ export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, r
     <h3 className="form-section-header">Company Details</h3>
     <div className="form-grid">
       <div className="form-group">
+        <label>Employee ID (Permanent)</label>
+        <input type="text" value={formData.emp_code || 'Auto-generated'} readOnly style={{ background: 'rgba(255,255,255,0.02)', cursor: 'not-allowed', color: 'var(--brand-green)' }} />
+      </div>
+      <div className="form-group">
+        <label>Current Badge ID</label>
+        <input type="text" value={formData.badge_id || 'Auto-generated'} readOnly style={{ background: 'rgba(255,255,255,0.02)', cursor: 'not-allowed', color: '#007aff' }} />
+      </div>
+      <div className="form-group">
         <label>Date of Joining</label>
         <input type="date" name="doj" value={formData.doj} onChange={onChange} required />
       </div>

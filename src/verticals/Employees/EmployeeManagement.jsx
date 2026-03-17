@@ -205,7 +205,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
             department_id: editingEmployee.department_id,
             accountNumber: editingEmployee.account_number,
             ifscCode: editingEmployee.ifsc_code,
-            accountName: editingEmployee.account_name
+            accountName: editingEmployee.account_name,
+            emp_code: editingEmployee.emp_code,
+            badge_id: editingEmployee.badge_id
           } : {}}
           loading={isSaving} 
         />
