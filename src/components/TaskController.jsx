@@ -135,40 +135,6 @@ const TaskController = ({
 
   const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
 
-  const handleDuplicateMergeTrigger = (task) => {
-    if (!task.isDuplicate) return;
-    // Strictly filter cluster to NON-deprioritized tasks only
-    const clusterTasks = tasksWithDuplicateInfo.filter(t => 
-      t.duplicateKey === task.duplicateKey && t.stageId !== 'DEPRIORITIZED'
-    );
-    setMergeTaskCluster(clusterTasks);
-  };
-
-  const executeMerge = async (primaryTaskId) => {
-    if (!mergeTaskCluster) return;
-    const clonesToDeprio = mergeTaskCluster.filter(t => t.id !== primaryTaskId).map(t => t.id);
-    
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Confirm Consolidation',
-      message: `Proceed with merge? ${clonesToDeprio.length} duplicate records will be moved to Deprioritized.`,
-      onConfirm: async () => {
-        setSaving(true);
-        try {
-          // Update clones to DEPRIORITIZED instead of deleting
-          await bulkUpdateTasks(clonesToDeprio, { stageid: 'DEPRIORITIZED' });
-          setMergeTaskCluster(null);
-        } catch (err) {
-          console.error("Merge Failed:", err);
-          alert("Consolidation failed. Please try again.");
-        } finally {
-          setSaving(false);
-          setConfirmDialog({ ...confirmDialog, isOpen: false });
-        }
-      }
-    });
-  };
-
   /**
    * PERMISSION LOGIC
    * Checks the capability flags against the assignedVerticals array.

@@ -15,14 +15,17 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
     hub_id: safeData.hub_id || '',
     city: safeData.city || '',
     function: safeData.function || '',
-    description: safeData.description || ''
+    description: safeData.description || '',
+    assigned_to: safeData.assigned_to || ''
   });
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
+  const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     fetchHubs();
     fetchFunctions();
+    fetchEmployees();
   }, []);
 
   const fetchHubs = async () => {
@@ -50,6 +53,15 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   const fetchFunctions = async () => {
     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
     if (data) setFunctions(data);
+  };
+
+  const fetchEmployees = async () => {
+    const { data } = await supabase
+      .from('employees')
+      .select('id, full_name, emp_code')
+      .eq('status', 'Active')
+      .order('full_name');
+    if (data) setEmployees(data);
   };
 
   // Get unique cities from the hubs list
@@ -135,7 +147,6 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         </div>
       </div>
 
-      <div className="form-row-grid">
         <div className="form-group">
           <label>Priority</label>
           <select 
@@ -150,7 +161,24 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         </div>
 
         <div className="form-group">
-          <label>Function</label>
+          <label>Assigned To</label>
+          <select 
+            value={formData.assigned_to}
+            onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
+          >
+            <option value="">N/A (Unassigned)</option>
+            {employees.map(emp => (
+              <option key={emp.id} value={emp.id}>
+                {emp.emp_code ? `[${emp.emp_code}] ` : ''}{emp.full_name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="form-row-grid">
+        <div className="form-group">
+          <label>Function Component</label>
           <select 
             value={formData.function}
             onChange={(e) => setFormData({...formData, function: e.target.value})}
