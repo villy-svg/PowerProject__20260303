@@ -8,6 +8,8 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 
 const HubManagement = () => {
+  console.log('🚀 HubManagement: Component mounting...');
+  
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +22,8 @@ const HubManagement = () => {
     fields: ['name'],
     sortByDuplicates: true
   });
+
+  console.log('🚀 HubManagement: State initialized, calling fetchHubs...');
 
   useEffect(() => {
     fetchHubs();

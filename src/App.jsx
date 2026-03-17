@@ -443,7 +443,10 @@ function App() {
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
             ) : activeVertical === 'hub_management' ? (
-              <HubManagement />
+              <div>
+                {console.log('🚀 App: Rendering HubManagement...')}
+                <HubManagement />
+              </div>
             ) : activeVertical === 'hub_function_management' ? (
               <HubFunctionManagement />
             ) : activeVertical === 'department_management' ? (
