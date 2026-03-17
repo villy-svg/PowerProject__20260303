@@ -95,26 +95,6 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     return false;
   };
 
-    <div className="tile-content">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-        <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
-          {conflict.csvRow.full_name || conflict.csvRow.name}
-        </h5>
-        {conflict.matchMode === 'hard' && (
-          <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
-            Exact Match
-          </span>
-        )}
-      </div>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
-        {conflict.csvRow.email}
-      </p>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
-        {conflict.csvRow.phone || conflict.csvRow.contactNumber || 'No Phone'}
-      </p>
-    </div>
-  );
-
   const handleDataParsed = async (rows) => {
     setImporting(true);
     try {
