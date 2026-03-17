@@ -3,18 +3,19 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - main  # Set this to your default branch name
+      - main
     paths:
-      - 'src/**'           # Trigger on source code changes
-      - 'package.json'       # Trigger on dependency changes
-      - 'vite.config.*'    # Trigger on build config changes
-      - '.github/workflows/gh-pages.yml'  # Trigger on workflow changes
-  workflow_dispatch: # Allow manual trigger
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'vite.config.*'
+      - '.github/workflows/gh-pages.yml'
+  workflow_dispatch:
 
-# Stop redundant running jobs to avoid duplicate artifact conflicts
 concurrency:
   group: "pages"
   cancel-in-progress: true
+
 permissions:
   contents: write
   pages: write
