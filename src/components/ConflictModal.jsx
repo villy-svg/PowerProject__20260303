@@ -26,6 +26,7 @@ const ConflictModal = ({
   conflicts = [],
   strategy = 'REPLACE_ALL_OR_SELECT',
   onResolve,
+  onKeepBoth, // New Callback for Soft Matches
   renderConflictTile,
   entityName = "Records",
   compareFields = [] // [{ key, label }]
@@ -141,14 +142,26 @@ const ConflictModal = ({
                         <div className="tile-main">
                           {renderConflictTile(c)}
                         </div>
-                        {compareFields.length > 0 && (
-                          <button 
-                            className="review-btn" 
-                            onClick={(e) => { e.stopPropagation(); setReviewIdx(idx); }}
-                          >
-                            Review
-                          </button>
-                        )}
+                        <div className="conflict-tile-actions" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                          {compareFields.length > 0 && (
+                            <button 
+                              className="review-btn" 
+                              onClick={(e) => { e.stopPropagation(); setReviewIdx(idx); }}
+                              style={{ flex: 1 }}
+                            >
+                              Review
+                            </button>
+                          )}
+                          {c.matchMode === 'soft' && onKeepBoth && (
+                            <button 
+                              className="halo-button save-btn" 
+                              onClick={(e) => { e.stopPropagation(); onKeepBoth(c); }}
+                              style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--brand-green)' }}
+                            >
+                              Keep Both
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

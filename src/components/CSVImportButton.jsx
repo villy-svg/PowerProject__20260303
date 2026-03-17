@@ -189,11 +189,9 @@ const CSVImportButton = ({
         setStatus('success');
         return;
       }
-      // No DB conflicts — fall through
-      finalize(dedupedRows, { skipped, inFileDups });
+      onDataParsed(nonConflictingRows);
     } else {
-      // No conflict check needed
-      finalize(dedupedRows, { skipped, inFileDups });
+      onDataParsed(dedupedRows);
     }
   };
 
@@ -203,6 +201,22 @@ const CSVImportButton = ({
     const resolvedData = selectedRowsToUpdate.map(c => c.csvRow);
     const finalRows = [...pendingConflicts.nonConflictingRows, ...resolvedData];
     finalize(finalRows, { skipped: 0, inFileDups: 0 });
+  };
+
+  const handleKeepBoth = (conflictToKeep) => {
+    // Remove it from the current conflicts array
+    const updatedConflicts = pendingConflicts.conflicts.filter(c => c !== conflictToKeep);
+    
+    // Add it to the non-conflicting array (it will be inserted as a new row)
+    const updatedNonConflicting = [...pendingConflicts.nonConflictingRows, conflictToKeep.csvRow];
+    
+    setPendingConflicts({ conflicts: updatedConflicts, nonConflictingRows: updatedNonConflicting });
+    
+    // If we've resolved all conflicts this way, finalize automatically
+    if (updatedConflicts.length === 0) {
+      setShowConflicts(false);
+      finalize(updatedNonConflicting, { skipped: 0, inFileDups: 0 });
+    }
   };
 
   const handleCancelConflicts = () => {
@@ -249,6 +263,7 @@ const CSVImportButton = ({
           entityName={entityName}
           conflicts={pendingConflicts.conflicts}
           onResolve={handleResolveConflicts}
+          onKeepBoth={handleKeepBoth}
           renderConflictTile={(c) => renderConflictTile(c)}
           compareFields={compareFields}
         />

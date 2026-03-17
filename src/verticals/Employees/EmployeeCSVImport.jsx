@@ -1,7 +1,7 @@
 import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
 import { supabase } from '../../services/supabaseClient';
-import { normalizeValue } from '../../utils/matchingAlgorithms';
+import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
 import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../../utils/employeeUtils';
 
 /**
@@ -19,7 +19,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
   const [lookupMaps, setLookupMaps] = React.useState(null);
 
   const loadContext = async () => {
-    if (existingEmps) return { existingEmps, ...lookupMaps };
+    if (existingEmps && lookupMaps) return { existingEmps, ...lookupMaps };
     const [{ data: depts }, { data: roles }, { data: hubs }, { data: emps }] = await Promise.all([
       supabase.from('departments').select('id, name, dept_code'),
       supabase.from('employee_roles').select('id, name, role_code'),
@@ -64,18 +64,48 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     }
   };
 
-  // Uniqueness: Name + Phone (normalized)
-  const getConflictKey = (row) => {
-    const name = normalizeValue(row.full_name || row.name || '');
-    const phone = normalizeValue(row.phone || row.contactNumber || '');
-    return `${name}|${phone}`;
+  // Uniqueness (Soft Match): Name fuzzy similarity > 90%
+  const isSoftMatch = (row, existingRecord) => {
+    const rowName = normalizeValue(row.full_name || row.name || '');
+    const extName = normalizeValue(existingRecord.full_name);
+    return calculateSimilarity(rowName, extName) > 0.90;
   };
 
-  const renderConflictTile = (conflict) => (
+  // Uniqueness (Hard Match): Exact Email OR Exact Phone OR (Name+Phone+Email > 85%)
+  const isHardMatch = (row, existingRecord) => {
+    const rowName = normalizeValue(row.full_name || row.name || '');
+    const rowPhone = normalizeValue(row.phone || row.contactNumber || '');
+    const rowEmail = normalizeValue(row.email || '');
+    
+    const extName = normalizeValue(existingRecord.full_name);
+    const extPhone = normalizeValue(existingRecord.phone);
+    const extEmail = normalizeValue(existingRecord.email || '');
+
+    // Condition A: Emails match exactly
+    if (rowEmail && extEmail && rowEmail === extEmail) return true;
+
+    // Condition B: Phones match exactly
+    if (rowPhone && extPhone && rowPhone === extPhone) return true;
+
+    // Condition C: Combined similarity > 85%
+    const combinedRow = `${rowName}|${rowPhone}|${rowEmail}`;
+    const combinedExt = `${extName}|${extPhone}|${extEmail}`;
+    if (calculateSimilarity(combinedRow, combinedExt) > 0.85) return true;
+
+    return false;
+  };
+
     <div className="tile-content">
-      <h5 style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--brand-green)' }}>
-        {conflict.csvRow.full_name || conflict.csvRow.name}
-      </h5>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+        <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
+          {conflict.csvRow.full_name || conflict.csvRow.name}
+        </h5>
+        {conflict.matchMode === 'hard' && (
+          <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+            Exact Match
+          </span>
+        )}
+      </div>
       <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
         {conflict.csvRow.email}
       </p>
@@ -108,8 +138,25 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         const name = row.full_name || row.name || '';
         if (!name.trim()) return null;
 
-        // Find if this row matches an existing record by our conflict key
-        const existingMatch = ctx.existingEmps.find(e => getConflictKey(e) === getConflictKey(row));
+        // Find multiple matches, prioritize Hard over Soft
+        const possibleMatches = ctx.existingEmps.filter(e => 
+          isHardMatch(row, e) || isSoftMatch(row, e)
+        );
+
+        let existingMatch = null;
+        let matchMode = null;
+
+        if (possibleMatches.length > 0) {
+          // Look for hard match first
+          const hard = possibleMatches.find(e => isHardMatch(row, e));
+          if (hard) {
+            existingMatch = hard;
+            matchMode = 'hard';
+          } else {
+            existingMatch = possibleMatches[0]; // Soft match fallback
+            matchMode = 'soft';
+          }
+        }
         
         // Robust Lookup: Clean and normalize input
         const lookup = (val, map) => {
@@ -178,7 +225,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       if (onImportComplete) onImportComplete();
     } catch (err) {
       console.error('Finalize Error:', err);
-      alert(`Import failed: ${err.message}`);
+      alert(`Import failed: ${err.message || String(err)}`);
     } finally {
       setImporting(false);
     }
@@ -189,7 +236,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
       requiredFields={['full_name', 'email']}
-      getConflictKey={getConflictKey}
+      getConflictKey={() => 'bypass'} // Bypass CSVImportButton's internal dedupe logic to rely solely on our fuzzy match logic
       existingData={existingEmps}
       renderConflictTile={renderConflictTile}
       entityName="Employees"
