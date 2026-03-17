@@ -20,30 +20,30 @@ jobs:
 
       - name: Update project_id in config
         run: |
-          echo "Updating project_id in config.toml..."
+          # Update project_id to match the actual Supabase project
           sed -i 's/project_id = "local-dev"/project_id = "${{ secrets.SUPABASE_PROJECT_ID }}"/' supabase/config.toml
-          echo "Updated config:"
-          cat supabase/config.toml | grep project_id
+          echo "Updated project_id in config.toml"
 
-      - name: Validate Supabase connection
+      - name: Sync migrations with remote
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
-          echo "Testing Supabase CLI connection..."
           
-          # Test if we can access the project
-          supabase projects list --output json || echo "Projects list failed"
+          # Link to project
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           
-          # Try to link with verbose output
-          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }} --debug || {
-            echo "Link failed, trying alternative approach..."
-            # Try without existing config
-            rm -f supabase/config.toml
-            supabase init --no-project-id
-            echo "project_id = \"${{ secrets.SUPABASE_PROJECT_ID }}\"" > supabase/config.toml
-            supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-          }
+          # Repair migration history as suggested by Supabase CLI
+          echo "Repairing migration history..."
+          supabase migration repair --status reverted 20260303054353 || echo "Repair 1 failed, continuing..."
+          
+          # Pull existing migrations to sync with remote
+          echo "Syncing migrations with remote database..."
+          supabase db pull || echo "Pull failed, continuing with local migrations..."
+          
+          # Check migrations
+          echo "Current migrations:"
+          ls -la supabase/migrations/
 
       - name: Deploy migrations
         env:
