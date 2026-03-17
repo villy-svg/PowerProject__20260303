@@ -55,10 +55,16 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterA
       
       <h3 className="employee-card-name">{emp.full_name}</h3>
       
-      <div className="employee-card-contact">
-        <span style={{ color: '#007aff', fontWeight: 600 }}>🆔 {emp.badge_id}</span>
-        <span>📞 {emp.phone}</span>
-        {emp.email && <span>✉️ {emp.email}</span>}
+      <div className="employee-card-contact" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <span style={{ fontWeight: 600, color: 'inherit' }}>ID: {emp.badge_id}</span>
+        <span style={{ opacity: 0.3 }}>|</span>
+        <span>📞 {emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
+        {emp.email && (
+          <>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span>✉️ {emp.email}</span>
+          </>
+        )}
       </div>
 
       <div className="employee-card-footer">

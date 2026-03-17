@@ -36,9 +36,16 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMast
           <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
-        <div className="list-contact">
-          <span style={{ color: '#007aff', fontWeight: 600, marginRight: '8px' }}>ID: {emp.badge_id}</span>
-          {emp.phone} {emp.email && `| ${emp.email}`}
+        <div className="list-contact" style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontWeight: 600, color: 'inherit', marginRight: '8px' }}>ID: {emp.badge_id}</span>
+          <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
+          <span style={{ marginRight: '8px' }}>📞 {emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
+          {emp.email && (
+            <>
+              <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
+              <span>✉️ {emp.email}</span>
+            </>
+          )}
         </div>
       </div>
 
