@@ -270,6 +270,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
             accountNumber: editingEmployee.account_number,
             ifscCode: editingEmployee.ifsc_code,
             accountName: editingEmployee.account_name,
+            panNumber: editingEmployee.pan_number,
             emp_code: editingEmployee.emp_code,
             badge_id: editingEmployee.badge_id
           } : {}}

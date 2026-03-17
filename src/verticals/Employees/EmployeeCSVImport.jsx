@@ -2,6 +2,7 @@ import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
 import { supabase } from '../../services/supabaseClient';
 import { normalizeValue } from '../../utils/matchingAlgorithms';
+import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../../utils/employeeUtils';
 
 /**
  * EmployeeCSVImport — Thin Wrapper
