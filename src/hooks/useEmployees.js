@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../utils/employeeUtils';
 
