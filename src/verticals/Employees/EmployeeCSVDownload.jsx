@@ -9,7 +9,7 @@ import { supabase } from '../../services/supabaseClient';
  * Defines: headers, data transformation, and dropdown validation data.
  */
 const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['Full Name', 'Email', 'Phone', 'Gender', 'Date of Birth', 'Primary Hub', 'Department', 'Role', 'Status', 'Date of Joining', 'Account Number', 'IFSC Code', 'Account Name'];
+  const headers = ['Full Name', 'Email', 'Phone', 'Gender', 'Date of Birth', 'Primary Hub', 'Department', 'Role', 'Status', 'Date of Joining', 'Account Number', 'IFSC Code', 'Account Name', 'PAN Number'];
 
   const defaultLabel = isTemplate ? "Download Employee Template" : "Export Employee Data";
   const finalLabel = label || defaultLabel;
@@ -38,7 +38,8 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Date of Joining': new Date().toISOString().split('T')[0],
         'Account Number': '123456789012',
         'IFSC Code': 'SBIN0001234',
-        'Account Name': 'John Doe'
+        'Account Name': 'John Doe',
+        'PAN Number': 'ABCDE1234F'
       }];
     } else {
       return data.map(emp => ({
@@ -54,7 +55,8 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Date of Joining': emp.hire_date || '',
         'Account Number': emp.account_number || '',
         'IFSC Code': emp.ifsc_code || '',
-        'Account Name': emp.account_name || ''
+        'Account Name': emp.account_name || '',
+        'PAN Number': emp.pan_number || ''
       }));
     }
   };

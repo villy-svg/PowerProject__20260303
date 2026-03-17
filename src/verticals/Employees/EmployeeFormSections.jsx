@@ -27,8 +27,8 @@ export const BasicDetailsSection = ({ formData, onChange }) => (
         </select>
       </div>
       <div className="form-group">
-        <label>Date of Birth</label>
-        <input type="date" name="dob" value={formData.dob} onChange={onChange} required />
+        <label>Date of Birth <span className="optional">(Optional)</span></label>
+        <input type="date" name="dob" value={formData.dob} onChange={onChange} />
       </div>
     </div>
   </div>
@@ -87,16 +87,20 @@ export const BankDetailsSection = ({ formData, onChange }) => (
     <h3 className="form-section-header">Bank Details</h3>
     <div className="form-grid">
       <div className="form-group">
-        <label>Account Number</label>
-        <input type="text" name="accountNumber" value={formData.accountNumber} onChange={onChange} placeholder="Enter account number" required />
+        <label>Account Number <span className="optional">(Optional)</span></label>
+        <input type="text" name="accountNumber" value={formData.accountNumber} onChange={onChange} placeholder="Enter account number" />
       </div>
       <div className="form-group">
-        <label>IFSC Code</label>
-        <input type="text" name="ifscCode" value={formData.ifscCode} onChange={onChange} placeholder="e.g. SBIN0001234" required />
+        <label>IFSC Code <span className="optional">(Optional)</span></label>
+        <input type="text" name="ifscCode" value={formData.ifscCode} onChange={onChange} placeholder="e.g. SBIN0001234" />
       </div>
       <div className="form-group">
-        <label>Account Name</label>
-        <input type="text" name="accountName" value={formData.accountName} onChange={onChange} placeholder="Name as per bank records" required />
+        <label>Account Name <span className="optional">(Optional)</span></label>
+        <input type="text" name="accountName" value={formData.accountName} onChange={onChange} placeholder="Name as per bank records" />
+      </div>
+      <div className="form-group">
+        <label>PAN Number <span className="optional">(Optional)</span></label>
+        <input type="text" name="panNumber" value={formData.panNumber} onChange={onChange} placeholder="e.g. ABCDE1234F" />
       </div>
     </div>
   </div>

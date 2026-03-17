@@ -28,8 +28,9 @@
 }
 
 .employee-card.inactive {
-  opacity: 0.6;
-  border-left-color: #ff4444;
+  filter: grayscale(1);
+  opacity: 0.5;
+  border-left-color: #666;
 }
 
 /* Row 1: Badges */
@@ -169,8 +170,9 @@
 }
 
 .employee-list-row.inactive {
-  opacity: 0.6;
-  border-left-color: #ff4444;
+  filter: grayscale(1);
+  opacity: 0.5;
+  border-left-color: #666;
 }
 
 .list-main-info {
@@ -195,4 +197,26 @@
   font-size: 0.85rem;
   opacity: 0.7;
   flex: 1;
+}
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--brand-green);
+  margin-bottom: 1.5rem;
+}
+
+.inactive-section .section-title {
+  color: #888;
+}
+
+.empty-sub-state {
+  padding: 2rem;
+  text-align: center;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.05);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  opacity: 0.5;
 }

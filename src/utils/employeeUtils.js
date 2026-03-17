@@ -73,6 +73,7 @@ export const logEmployeeHistory = async (empId, empData, changeType, changedBy =
     account_number: empData.account_number,
     ifsc_code: empData.ifsc_code,
     account_name: empData.account_name,
+    pan_number: empData.pan_number,
     changed_by: changedBy,
     change_type: changeType
   };

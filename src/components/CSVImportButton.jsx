@@ -114,7 +114,8 @@ const CSVImportButton = ({
       hub_code: ['hub_code', 'primary hub', 'hub', 'location code', 'station'],
       account_number: ['account_number', 'account number', 'bank account', 'acc num'],
       ifsc_code: ['ifsc_code', 'ifsc code', 'ifsc'],
-      account_name: ['account_name', 'account name', 'bank name', 'beneficiary']
+      account_name: ['account_name', 'account name', 'bank name', 'beneficiary'],
+      pan_number: ['pan_number', 'pan number', 'pan', 'pan no', 'pan card']
     };
 
     return data.map(row => {

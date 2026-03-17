@@ -106,6 +106,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
     return matchesStatus && matchesRole && matchesHub && matchesDept;
   });
 
+  const activeEmps = filteredEmployees.filter(emp => emp.status === 'Active');
+  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
+
   const isMasterAdmin = permissions?.roleId === 'master_admin';
 
   return (
@@ -134,7 +137,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
               title={showInactive ? "Hide Inactive" : "Show Inactive"}
               style={{ fontWeight: 600, textDecoration: showInactive ? 'none' : 'line-through' }}
             >
-              INAC
+              INACTIVE
             </button>
           </>
         }
@@ -152,35 +155,83 @@ const EmployeeManagement = ({ permissions, filters }) => {
 
       {loading ? (
         <div className="loading-spinner">Loading Employees...</div>
-      ) : filteredEmployees.length === 0 ? (
+      ) : employees.length === 0 ? (
         <div className="empty-state" style={{ marginTop: '50px' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>👥</div>
           <h3>Personnel Database Empty</h3>
           <p>Click "+ Add Employee" to insert your first structural record.</p>
         </div>
       ) : (
-        <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'} style={{ marginTop: '1rem' }}>
-          {filteredEmployees.map(emp => (
-            viewMode === 'grid' ? (
-              <EmployeeCard 
-                key={emp.id} 
-                emp={emp} 
-                onEdit={openEditModal} 
-                onDelete={handleDelete} 
-                onToggleStatus={toggleStatus} 
-                isMasterAdmin={isMasterAdmin} 
-              />
+        <div style={{ marginTop: '1rem' }}>
+          {/* ACTIVE SECTION */}
+          <div className="status-section">
+            <h4 className="section-title">Active Team ({activeEmps.length})</h4>
+            {activeEmps.length === 0 ? (
+              <p className="empty-sub-state">No active employees found matching filters.</p>
             ) : (
-              <EmployeeListRow 
-                key={emp.id} 
-                emp={emp} 
-                onEdit={openEditModal} 
-                onDelete={handleDelete} 
-                onToggleStatus={toggleStatus} 
-                isMasterAdmin={isMasterAdmin} 
-              />
-            )
-          ))}
+              <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
+                {activeEmps.map(emp => (
+                  viewMode === 'grid' ? (
+                    <EmployeeCard 
+                      key={emp.id} 
+                      emp={emp} 
+                      onEdit={openEditModal} 
+                      onDelete={handleDelete} 
+                      onToggleStatus={toggleStatus} 
+                      isMasterAdmin={isMasterAdmin} 
+                    />
+                  ) : (
+                    <EmployeeListRow 
+                      key={emp.id} 
+                      emp={emp} 
+                      onEdit={openEditModal} 
+                      onDelete={handleDelete} 
+                      onToggleStatus={toggleStatus} 
+                      isMasterAdmin={isMasterAdmin} 
+                    />
+                  )
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* INACTIVE SECTION */}
+          {showInactive && (
+            <div className="status-section inactive-section" style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                <h4 className="section-title" style={{ margin: 0, opacity: 0.5 }}>Inactive / History ({inactiveEmps.length})</h4>
+                <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+              </div>
+              
+              {inactiveEmps.length === 0 ? (
+                <p className="empty-sub-state" style={{ opacity: 0.3 }}>No inactive records.</p>
+              ) : (
+                <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'} style={{ opacity: 0.6 }}>
+                  {inactiveEmps.map(emp => (
+                    viewMode === 'grid' ? (
+                      <EmployeeCard 
+                        key={emp.id} 
+                        emp={emp} 
+                        onEdit={openEditModal} 
+                        onDelete={handleDelete} 
+                        onToggleStatus={toggleStatus} 
+                        isMasterAdmin={isMasterAdmin} 
+                      />
+                    ) : (
+                      <EmployeeListRow 
+                        key={emp.id} 
+                        emp={emp} 
+                        onEdit={openEditModal} 
+                        onDelete={handleDelete} 
+                        onToggleStatus={toggleStatus} 
+                        isMasterAdmin={isMasterAdmin} 
+                      />
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

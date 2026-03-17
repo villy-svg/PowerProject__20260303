@@ -15,6 +15,9 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
         {emp.isDuplicate && (
           <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
         )}
+        {!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number ? (
+          <span className="bank-missing-badge" style={{ backgroundColor: '#ff4444', color: 'white', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800 }}>BANK MISSING</span>
+        ) : null}
         <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
         <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
         <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
@@ -34,10 +37,11 @@ const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) 
           )}
           <button 
             className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-            style={{ padding: '2px 10px', fontSize: '0.7rem', minWidth: 'auto', marginLeft: '4px' }}
+            style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '4px', fontWeight: 900 }}
             onClick={() => onToggleStatus(emp.id, emp.status)}
+            title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
           >
-            {emp.status === 'Active' ? 'OFF' : 'ON'}
+            {emp.status === 'Active' ? '↓' : '↑'}
           </button>
         </div>
       </div>

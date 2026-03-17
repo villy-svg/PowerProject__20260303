@@ -148,6 +148,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           account_number: row.account_number || null,
           ifsc_code: row.ifsc_code || null,
           account_name: row.account_name || null,
+          pan_number: row.pan_number || row.pan || null,
           emp_code,
           badge_id,
           updated_at: new Date().toISOString(),
