@@ -4,24 +4,32 @@ import React from 'react';
  * EmployeeCard
  * Grid/Tile view item for an employee.
  */
-const EmployeeCard = ({ emp, onEdit, onDelete, onToggleStatus, isMasterAdmin }) => {
+const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
   return (
     <div 
       className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''}`}
-      onDoubleClick={() => onEdit(emp)}
-      title="Double-click to edit"
+      onDoubleClick={() => onView(emp)}
+      title="Double-click to view"
     >
       <div className="employee-card-badges">
         {emp.isDuplicate && (
           <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
         )}
         {!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number ? (
-          <span className="bank-missing-badge" style={{ backgroundColor: '#ff4444', color: 'white', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800 }}>BANK MISSING</span>
+          <span className="bank-missing-badge" style={{ 
+            backgroundColor: 'rgba(255, 68, 68, 0.1)', 
+            color: '#ff4444', 
+            border: '1px solid rgba(255, 68, 68, 0.4)',
+            padding: '2px 8px', 
+            borderRadius: '20px', 
+            fontSize: '0.65rem', 
+            fontWeight: 800,
+            textTransform: 'uppercase'
+          }}>Bank Missing</span>
         ) : null}
         <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
         <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
         <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
-        <span className="emp-id-badge" style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', color: 'var(--brand-green)', border: '1px solid var(--brand-green)', padding: '2px 6px', borderRadius: '4px' }}>ID: {emp.emp_code}</span>
         <span className="badge-id-badge" style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.05)', color: '#007aff', border: '1px solid #007aff', padding: '2px 6px', borderRadius: '4px' }}>B: {emp.badge_id}</span>
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
           <button 

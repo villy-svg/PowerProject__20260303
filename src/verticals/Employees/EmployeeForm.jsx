@@ -7,9 +7,9 @@ import { BasicDetailsSection, CompanyDetailsSection, BankDetailsSection } from '
  * EmployeeForm
  * 
  * Form for adding or editing employee records.
- * Features a vertical split layout with Basic and Bank details.
+ * Features a 3-page wizard flow with View-Only support.
  */
-const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
+const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -37,94 +37,112 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {} }) => {
     emailId: initialData.emailId || '',
     gender: initialData.gender || '',
     dob: initialData.dob || '',
-    doj: initialData.doj || new Date().toISOString().split('T')[0], // Default today
+    doj: initialData.doj || new Date().toISOString().split('T')[0],
     hub_id: initialData.hub_id || '',
     role_id: initialData.role_id || '',
     department_id: initialData.department_id || '',
     accountNumber: initialData.accountNumber || '',
     ifscCode: initialData.ifscCode || '',
-    accountName: initialData.accountName || ''
+    accountName: initialData.accountName || '',
+    panNumber: initialData.panNumber || '',
+    emp_code: initialData.emp_code || '',
+    badge_id: initialData.badge_id || ''
   });
 
   const handleChange = (e) => {
+    if (isViewOnly) return;
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const validatePage = (page) => {
+    if (page === 1) {
+      if (!formData.name.trim()) { alert('Name is required'); return false; }
+      
+      let phone = formData.contactNumber.replace(/\s+/g, '');
+      if (phone.startsWith('0')) phone = '+91' + phone.substring(1);
+      else if (phone && !phone.startsWith('+')) phone = '+91' + phone;
+      
+      if (phone && phone.startsWith('+91') && phone.length < 13) {
+        alert('Indian phone numbers must have at least 10 digits after +91.');
+        return false;
+      }
+      setFormData(prev => ({ ...prev, contactNumber: phone }));
+      return true;
+    }
+    return true;
+  };
+
   const handleNext = (e) => {
     e.preventDefault();
-    if (currentPage === 1) {
-      // Validate and format phone number
-      let phone = formData.contactNumber.replace(/\s+/g, '');
-      if (phone.startsWith('0')) {
-        phone = '+91' + phone.substring(1);
-      } else if (!phone.startsWith('+')) {
-        phone = '+91' + phone;
-      }
-      
-      // Length check
-      if (phone.startsWith('+91') && phone.length < 13) {
-        alert('Indian phone numbers must have at least 10 digits after +91.');
-        return;
-      } else if (phone.length < 10) {
-        alert('Phone number must have at least 10 basic digits.');
-        return;
-      }
-
-      // Update state with formatted phone before proceeding
-      setFormData(prev => ({ ...prev, contactNumber: phone }));
-
-      setCurrentPage(2);
+    if (validatePage(currentPage)) {
+      setCurrentPage(prev => Math.min(prev + 1, 3));
     }
   };
 
   const handleBack = (e) => {
     e.preventDefault();
-    if (currentPage === 2) setCurrentPage(1);
+    setCurrentPage(prev => Math.max(prev - 1, 1));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isViewOnly) return;
     onSubmit(formData);
   };
 
   return (
-    <form className="employee-form slide-transition" onSubmit={currentPage === 2 ? handleSubmit : handleNext}>
-      {/* PAGE 1 */}
-      {currentPage === 1 && (
-        <div className="form-page fade-in">
-          <BasicDetailsSection formData={formData} onChange={handleChange} />
-          <CompanyDetailsSection 
-            formData={formData} 
-            onChange={handleChange} 
-            hubs={hubs} 
-            departments={departments} 
-            roles={roles} 
-          />
-        </div>
-      )}
+    <form className={`employee-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`} onSubmit={currentPage === 3 ? handleSubmit : handleNext}>
+      <div className="form-wizard-header">
+        <div className={`step ${currentPage >= 1 ? 'active' : ''}`}>1. Basic Details</div>
+        <div className={`step ${currentPage >= 2 ? 'active' : ''}`}>2. Company Details</div>
+        <div className={`step ${currentPage >= 3 ? 'active' : ''}`}>3. Banking & PAN</div>
+      </div>
 
-      {/* PAGE 2 */}
-      {currentPage === 2 && (
-        <div className="form-page fade-in">
-          <BankDetailsSection formData={formData} onChange={handleChange} />
-        </div>
-      )}
+      <div className="form-content-area">
+        {currentPage === 1 && (
+          <div className="form-page fade-in">
+            <BasicDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
+          </div>
+        )}
+
+        {currentPage === 2 && (
+          <div className="form-page fade-in">
+            <CompanyDetailsSection 
+              formData={formData} 
+              onChange={handleChange} 
+              hubs={hubs} 
+              departments={departments} 
+              roles={roles} 
+              isViewOnly={isViewOnly}
+            />
+          </div>
+        )}
+
+        {currentPage === 3 && (
+          <div className="form-page fade-in">
+            <BankDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
+          </div>
+        )}
+      </div>
 
       <div className="form-footer page-controls">
-        {currentPage === 2 && (
+        {currentPage > 1 && (
           <button type="button" className="halo-button back-btn" onClick={handleBack} disabled={loading}>
             Back
           </button>
         )}
-        {currentPage === 1 ? (
+        
+        {currentPage < 3 ? (
           <button type="submit" className="halo-button next-btn">
-            Next Level ➔
+            {isViewOnly ? 'Next Step ➔' : 'Continue ➔'}
           </button>
         ) : (
-          <button type="submit" className="halo-button save-btn" disabled={loading}>
-            {loading ? 'Processing...' : (initialData.id ? 'Update Record' : 'Add Employee')}
-          </button>
+          !isViewOnly && (
+            <button type="submit" className="halo-button save-btn" disabled={loading}>
+              {loading ? 'Processing...' : (initialData.id ? 'Save Changes' : 'Create Record')}
+            </button>
+          )
         )}
       </div>
     </form>

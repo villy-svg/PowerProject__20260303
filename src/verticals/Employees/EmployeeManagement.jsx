@@ -27,6 +27,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
   const [showInactive, setShowInactive] = useState(true);
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
 
   useEffect(() => {
@@ -92,6 +93,13 @@ const EmployeeManagement = ({ permissions, filters }) => {
 
   const openEditModal = (emp) => {
     setEditingEmployee(emp);
+    setIsViewOnly(false);
+    setIsAddModalOpen(true);
+  };
+
+  const openViewModal = (emp) => {
+    setEditingEmployee(emp);
+    setIsViewOnly(true);
     setIsAddModalOpen(true);
   };
 
@@ -176,6 +184,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                       key={emp.id} 
                       emp={emp} 
                       onEdit={openEditModal} 
+                      onView={openViewModal}
                       onDelete={handleDelete} 
                       onToggleStatus={toggleStatus} 
                       isMasterAdmin={isMasterAdmin} 
@@ -185,6 +194,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                       key={emp.id} 
                       emp={emp} 
                       onEdit={openEditModal} 
+                      onView={openViewModal}
                       onDelete={handleDelete} 
                       onToggleStatus={toggleStatus} 
                       isMasterAdmin={isMasterAdmin} 
@@ -213,6 +223,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         key={emp.id} 
                         emp={emp} 
                         onEdit={openEditModal} 
+                        onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
                         isMasterAdmin={isMasterAdmin} 
@@ -222,6 +233,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         key={emp.id} 
                         emp={emp} 
                         onEdit={openEditModal} 
+                        onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
                         isMasterAdmin={isMasterAdmin} 
@@ -237,12 +249,13 @@ const EmployeeManagement = ({ permissions, filters }) => {
 
       <TaskModal
         isOpen={isAddModalOpen}
-        onClose={() => { setIsAddModalOpen(false); setEditingEmployee(null); }}
-        title={editingEmployee ? "Edit Employee Record" : "Add New Employee Record"}
+        onClose={() => { setIsAddModalOpen(false); setEditingEmployee(null); setIsViewOnly(false); }}
+        title={isViewOnly ? "View Employee Record" : (editingEmployee ? "Edit Employee Record" : "Add New Employee Record")}
         className="large-modal"
       >
         <EmployeeForm 
           onSubmit={handleSave} 
+          isViewOnly={isViewOnly}
           initialData={editingEmployee ? {
             id: editingEmployee.id,
             name: editingEmployee.full_name,

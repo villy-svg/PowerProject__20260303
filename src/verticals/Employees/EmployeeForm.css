@@ -107,11 +107,59 @@
   background: rgba(255, 255, 255, 0.05) !important;
 }
 
+/* Wizard Header */
+.form-wizard-header {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.75rem;
+  justify-content: flex-start;
+}
+
+.step {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.step::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  color: var(--brand-green);
+}
+
+.step.active {
+  opacity: 1;
+  font-weight: 800;
+  color: var(--brand-green);
+}
+
+.step.active::before {
+  content: '●';
+}
+
+/* View-Only Mode */
+.view-only-mode input,
+.view-only-mode select {
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.view-only-mode .optional {
+  display: none;
+}
+
 /* Page Transitions */
 .form-page {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .fade-in {
@@ -119,12 +167,6 @@
 }
 
 @keyframes pageFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

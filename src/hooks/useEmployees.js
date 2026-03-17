@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
 import { supabase } from '../services/supabaseClient';
+import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../utils/employeeUtils';
 
 /**
  * useEmployees Hook
@@ -62,6 +62,7 @@ export const useEmployees = () => {
       account_number: formData.accountNumber,
       ifsc_code: formData.ifscCode,
       account_name: formData.accountName,
+      pan_number: formData.panNumber || null,
       status: 'Active',
       emp_code: empCode,
       badge_id: badgeId,
@@ -76,7 +77,7 @@ export const useEmployees = () => {
     }
 
     if (data?.[0]) {
-      await logHistory(data[0].id, data[0], 'INSERT');
+      await logEmployeeHistory(data[0].id, data[0], 'INSERT');
     }
 
     await fetchEmployees();
@@ -104,6 +105,7 @@ export const useEmployees = () => {
       account_number: formData.accountNumber,
       ifsc_code: formData.ifscCode,
       account_name: formData.accountName,
+      pan_number: formData.panNumber || null,
       badge_id: badgeId,
       updated_at: new Date().toISOString()
     };
@@ -120,7 +122,7 @@ export const useEmployees = () => {
     }
 
     if (data?.[0]) {
-      await logHistory(id, data[0], 'UPDATE');
+      await logEmployeeHistory(id, data[0], 'UPDATE');
     }
 
     await fetchEmployees();
