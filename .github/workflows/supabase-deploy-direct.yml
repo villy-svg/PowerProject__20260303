@@ -1,0 +1,65 @@
+name: Deploy Database to Supabase (Direct)
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy directly with SQL
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_URL: https://${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
+          
+          # Install psql client
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          
+          # Deploy hubs table directly
+          echo "Deploying hubs table..."
+          psql "postgresql://postgres:${{ secrets.SUPABASE_DB_PASSWORD }}@db.${{ secrets.SUPABASE_PROJECT_ID }}.supabase.co:5432/postgres" << 'EOF'
+          DO $$
+          BEGIN
+              IF NOT EXISTS (
+                  SELECT FROM information_schema.tables 
+                  WHERE  table_schema = 'public'
+                  AND    table_name   = 'hubs'
+              ) THEN
+                  CREATE TABLE public.hubs (
+                      id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+                      name text NOT NULL,
+                      hub_code text UNIQUE,
+                      city text,
+                      status text DEFAULT 'active' CHECK (status IN ('active', 'maintenance', 'inactive')),
+                      created_at timestamptz DEFAULT now(),
+                      updated_at timestamptz DEFAULT now()
+                  );
+                  
+                  CREATE INDEX idx_hubs_hub_code ON public.hubs(hub_code);
+                  CREATE INDEX idx_hubs_status ON public.hubs(status);
+                  
+                  INSERT INTO public.hubs (name, hub_code, city, status) VALUES
+                      ('Downtown Fast Chargers', 'DTN-01', '123 Main St, NY', 'active'),
+                      ('Suburban Hub', 'SUB-02', '456 Oak Ave, NJ', 'maintenance'),
+                      ('Airport Station', 'AIR-01', 'JFK International, NY', 'active')
+                  ON CONFLICT DO NOTHING;
+                  
+                  RAISE NOTICE 'Hubs table created successfully';
+              ELSE
+                  RAISE NOTICE 'Hubs table already exists';
+              END IF;
+          END $$;
+          EOF
+          
+          echo "Hubs table deployment completed!"
