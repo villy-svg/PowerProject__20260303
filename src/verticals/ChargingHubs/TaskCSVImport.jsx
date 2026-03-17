@@ -20,7 +20,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
   // Pre-load resolution maps and existing tasks for conflict checking
   const loadImportContext = async () => {
     if (importContext) return importContext;
-    const [{ data: hubs }, { data: functions }, { data: existingTasks }] = await Promise.all([
+    const [{ data: hubs }, { data: functions }, { data: employees }, { data: existingTasks }] = await Promise.all([
       supabase.from('hubs').select('id, hub_code, name'),
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
