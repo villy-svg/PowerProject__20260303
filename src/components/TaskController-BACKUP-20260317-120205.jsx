@@ -183,19 +183,14 @@ const TaskController = ({
   };
 
   const handleDuplicateMergeTrigger = (duplicateTask) => {
-    // Find all duplicates in the same cluster
-    const duplicates = tasks.filter(t => 
-      t.id !== duplicateTask.id && 
-      t.text === duplicateTask.text && 
-      t.priority === duplicateTask.priority &&
-      t.verticalId === duplicateTask.verticalId
-    );
-    
-    // Set up merge cluster with primary task and duplicates
-    setMergeTaskCluster([duplicateTask, ...duplicates]);
+    // Handle duplicate task merge - for now just open edit modal
+    // In the future, this could implement actual merge logic
+    console.log('handleDuplicateMergeTrigger called for task:', duplicateTask);
+    openEditModal(duplicateTask);
   };
 
   const executeMerge = async (primaryTaskId) => {
+    // Find all duplicate tasks in the same cluster
     const primaryTask = tasks.find(t => t.id === primaryTaskId);
     if (!primaryTask) return;
 
