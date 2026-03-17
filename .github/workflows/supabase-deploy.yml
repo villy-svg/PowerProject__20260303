@@ -18,16 +18,56 @@ jobs:
         with:
           version: latest
 
+      - name: Debug - Check environment
+        run: |
+          echo "=== ENVIRONMENT DEBUG ==="
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -la
+          echo "Supabase directory:"
+          ls -la supabase/ || echo "No supabase directory"
+          echo "Migrations directory:"
+          ls -la supabase/migrations/ || echo "No migrations directory"
+
+      - name: Debug - Check secrets
+        run: |
+          echo "=== SECRETS DEBUG ==="
+          echo "SUPABASE_PROJECT_ID length: ${#SUPABASE_PROJECT_ID}"
+          echo "SUPABASE_ACCESS_TOKEN length: ${#SUPABASE_ACCESS_TOKEN}"
+          echo "SUPABASE_PROJECT_ID (first 5 chars): ${SUPABASE_PROJECT_ID:0:5}***"
+          echo "SUPABASE_ACCESS_TOKEN (first 5 chars): ${SUPABASE_ACCESS_TOKEN:0:5}***"
+
       - name: Update project_id in config
         run: |
-          # Update project_id to match the actual Supabase project
+          echo "=== CONFIG UPDATE DEBUG ==="
+          echo "Before update:"
+          cat supabase/config.toml | grep project_id || echo "No project_id found"
+          
           sed -i 's/project_id = "local-dev"/project_id = "${{ secrets.SUPABASE_PROJECT_ID }}"/' supabase/config.toml
-          echo "Updated project_id in config.toml"
+          
+          echo "After update:"
+          cat supabase/config.toml | grep project_id
+          echo "Full config file:"
+          cat supabase/config.toml
+
+      - name: Debug - Check migrations before sync
+        run: |
+          echo "=== MIGRATIONS DEBUG ==="
+          echo "Migrations directory:"
+          ls -la supabase/migrations/
+          echo "Migration file count: $(ls supabase/migrations/*.sql | wc -l)"
+          echo "Migration files:"
+          for file in supabase/migrations/*.sql; do
+            echo "=== $file ==="
+            head -3 "$file" || echo "Could not read file"
+            echo ""
+          done
 
       - name: Sync migrations with remote
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
+          echo "=== SYNC DEBUG ==="
           echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
           
           # Link to project
@@ -36,6 +76,10 @@ jobs:
           # Repair migration history as suggested by Supabase CLI
           echo "Repairing migration history..."
           supabase migration repair --status reverted 20260303054353 || echo "Repair 1 failed, continuing..."
+          supabase migration repair --status applied 20260316020000 || echo "Repair 2 failed, continuing..."
+          supabase migration repair --status applied 20260316030000 || echo "Repair 3 failed, continuing..."
+          supabase migration repair --status applied 20260316040000 || echo "Repair 4 failed, continuing..."
+          supabase migration repair --status applied 20260317080000 || echo "Repair 5 failed, continuing..."
           
           # Pull existing migrations to sync with remote
           echo "Syncing migrations with remote database..."
@@ -45,12 +89,17 @@ jobs:
           echo "Current migrations:"
           ls -la supabase/migrations/
 
-      - name: Deploy migrations
+      - name: Deploy migrations with include-all
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
+          echo "=== FINAL DEPLOY DEBUG ==="
           echo "Checking migrations..."
           ls -la supabase/migrations/
           
-          echo "Deploying to Supabase..."
-          supabase db push --yes --debug
+          echo "Deploying to Supabase with --include-all flag..."
+          echo "This will deploy ALL missing migrations including the hubs table!"
+          
+          supabase db push --yes --debug --include-all
+          
+          echo "🎉 DEPLOYMENT COMPLETED! Check if hubs table was created!"
