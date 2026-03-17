@@ -39,7 +39,8 @@ const CSVImportButton = ({
   accept = '.csv,.xlsx',
   disabled = false,
   onFocus = null,
-  compareFields = []
+  compareFields = [],
+  findConflict = null // (row, existingData) => { csvRow, existingRecord, matchMode } | null
 }) => {
   const inputRef = useRef(null);
   const [status, setStatus] = useState(null); // null | 'success' | 'error'
@@ -169,19 +170,30 @@ const CSVImportButton = ({
     }
 
     // 3. Database conflict detection
-    if (existingData && getConflictKey) {
-      const existingMap = new Map(existingData.map(r => [getConflictKey(r), r]));
+    if (existingData && (findConflict || getConflictKey)) {
       const conflicts = [];
       const nonConflictingRows = [];
 
-      dedupedRows.forEach(row => {
-        const existingRecord = existingMap.get(getConflictKey(row));
-        if (existingRecord) {
-          conflicts.push({ csvRow: row, existingRecord });
-        } else {
-          nonConflictingRows.push(row);
-        }
-      });
+      if (findConflict) {
+        dedupedRows.forEach(row => {
+          const conflict = findConflict(row, existingData);
+          if (conflict) {
+            conflicts.push({ ...conflict, csvRow: row }); // Ensure csvRow is attached
+          } else {
+            nonConflictingRows.push(row);
+          }
+        });
+      } else {
+        const existingMap = new Map(existingData.map(r => [getConflictKey(r), r]));
+        dedupedRows.forEach(row => {
+          const existingRecord = existingMap.get(getConflictKey(row));
+          if (existingRecord) {
+            conflicts.push({ csvRow: row, existingRecord });
+          } else {
+            nonConflictingRows.push(row);
+          }
+        });
+      }
 
       if (conflicts.length > 0) {
         setPendingConflicts({ conflicts, nonConflictingRows });

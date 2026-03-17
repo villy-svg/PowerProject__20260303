@@ -95,6 +95,27 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     return false;
   };
 
+  const renderConflictTile = (conflict) => (
+    <div className="tile-content">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+        <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
+          {conflict.csvRow.full_name || conflict.csvRow.name}
+        </h5>
+        {conflict.matchMode === 'hard' && (
+          <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+            Exact Match
+          </span>
+        )}
+      </div>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
+        {conflict.csvRow.email}
+      </p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>
+        {conflict.csvRow.phone || conflict.csvRow.contactNumber || 'No Phone'}
+      </p>
+    </div>
+  );
+
   const handleDataParsed = async (rows) => {
     setImporting(true);
     try {
@@ -113,31 +134,13 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         return new Date().toISOString().split('T')[0];
       };
 
-
-      const empsToInsert = await Promise.all(rows.map(async (row, idx) => {
+      const empsToInsert = await Promise.all(rows.map(async (row) => {
         const name = row.full_name || row.name || '';
         if (!name.trim()) return null;
 
-        // Find multiple matches, prioritize Hard over Soft
-        const possibleMatches = ctx.existingEmps.filter(e => 
-          isHardMatch(row, e) || isSoftMatch(row, e)
-        );
+        const possibleMatches = ctx.existingEmps.filter(e => isHardMatch(row, e) || isSoftMatch(row, e));
+        const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
-        let existingMatch = null;
-        let matchMode = null;
-
-        if (possibleMatches.length > 0) {
-          // Look for hard match first
-          const hard = possibleMatches.find(e => isHardMatch(row, e));
-          if (hard) {
-            existingMatch = hard;
-            matchMode = 'hard';
-          } else {
-            existingMatch = possibleMatches[0]; // Soft match fallback
-            matchMode = 'soft';
-          }
-        }
-        
         // Robust Lookup: Clean and normalize input
         const lookup = (val, map) => {
           if (!val) return null;
@@ -162,7 +165,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         }
 
         const mapped = {
-          id: existingMatch?.id || crypto.randomUUID(),
+          id: existingMatch?.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11)),
           full_name: name.trim(),
           email: row.email || null,
           phone: row.phone || null,
@@ -216,7 +219,16 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
       requiredFields={['full_name', 'email']}
-      getConflictKey={() => 'bypass'} // Bypass CSVImportButton's internal dedupe logic to rely solely on our fuzzy match logic
+      getConflictKey={(row) => row.email || row.full_name || 'row'} // Proper key for in-file dedup
+      findConflict={(row, existingData) => {
+        const hard = existingData.find(e => isHardMatch(row, e));
+        if (hard) return { existingRecord: hard, matchMode: 'hard' };
+        
+        const soft = existingData.find(e => isSoftMatch(row, e));
+        if (soft) return { existingRecord: soft, matchMode: 'soft' };
+
+        return null;
+      }}
       existingData={existingEmps}
       renderConflictTile={renderConflictTile}
       entityName="Employees"
