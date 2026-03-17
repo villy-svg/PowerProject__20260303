@@ -40,9 +40,13 @@ jobs:
           # Link to project
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           
-          # Pull existing migrations to sync with remote
-          echo "Syncing migrations with remote database..."
-          supabase db pull || echo "Pull failed, continuing..."
+          # Repair migration history as suggested by Supabase CLI
+          echo "Repairing migration history..."
+          supabase migration repair --status reverted 20260303054353 || echo "Repair 1 failed, continuing..."
+          supabase migration repair --status applied 20260316020000 || echo "Repair 2 failed, continuing..."
+          supabase migration repair --status applied 20260316030000 || echo "Repair 3 failed, continuing..."
+          supabase migration repair --status applied 20260316040000 || echo "Repair 4 failed, continuing..."
+          supabase migration repair --status applied 20260317080000 || echo "Repair 5 failed, continuing..."
           
           # Ensure our migrations are still there
           cp -r /tmp/migrations-backup/* supabase/migrations/
