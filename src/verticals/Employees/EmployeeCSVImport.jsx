@@ -147,8 +147,8 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           return map[val.toString().toLowerCase().trim()] || null;
         };
 
-        const role_id = lookup(row.role_code || row.role, ctx.roleMap);
-        const department_id = lookup(row.dept_code || row.department, ctx.deptMap);
+        const role_id = lookup(row.role_code, ctx.roleMap);
+        const department_id = lookup(row.dept_code, ctx.deptMap);
         const hire_date = parseDateForDB(row.hire_date);
 
         // ID & Badge Logic
