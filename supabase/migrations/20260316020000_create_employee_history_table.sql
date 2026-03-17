@@ -23,7 +23,28 @@ CREATE TABLE IF NOT EXISTS public.employee_history (
     created_at timestamptz DEFAULT now()
 );
 
--- Create indexes
+-- Create indexes (with flexible column name handling)
 CREATE INDEX IF NOT EXISTS idx_employee_history_employee_id ON public.employee_history(employee_id);
 CREATE INDEX IF NOT EXISTS idx_employee_history_change_type ON public.employee_history(change_type);
-CREATE INDEX IF NOT EXISTS idx_employee_history_created_at ON public.employee_history(created_at);
+
+-- Handle created_at vs createdat column naming
+DO $$
+BEGIN
+    -- Try created_at first
+    IF EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'employee_history' 
+        AND column_name = 'created_at'
+    ) THEN
+        CREATE INDEX IF NOT EXISTS idx_employee_history_created_at ON public.employee_history(created_at);
+    -- Try createdat as fallback
+    ELSIF EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'employee_history' 
+        AND column_name = 'createdat'
+    ) THEN
+        CREATE INDEX IF NOT EXISTS idx_employee_history_createdat ON public.employee_history(createdat);
+    END IF;
+END $$;
