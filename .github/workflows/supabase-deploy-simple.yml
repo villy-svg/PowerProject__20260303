@@ -21,6 +21,9 @@ jobs:
         run: |
           echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
           
+          # Backup migrations first
+          cp -r supabase/migrations /tmp/migrations-backup
+          
           # Remove existing config and start fresh
           rm -rf supabase
           
@@ -30,9 +33,20 @@ jobs:
           # Update config with project ID
           sed -i 's/^project_id = .*/project_id = "${{ secrets.SUPABASE_PROJECT_ID }}"/' supabase/config.toml
           
-          # Copy migrations back
+          # Restore migrations
           mkdir -p supabase/migrations
+          cp -r /tmp/migrations-backup/* supabase/migrations/
           
-          # Link and deploy
+          # Link to project
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          
+          # Pull existing migrations to sync with remote
+          echo "Syncing migrations with remote database..."
+          supabase db pull || echo "Pull failed, continuing..."
+          
+          # Ensure our migrations are still there
+          cp -r /tmp/migrations-backup/* supabase/migrations/
+          
+          # Deploy our changes
+          echo "Deploying new migrations..."
           supabase db push --yes

@@ -92,8 +92,6 @@ class MasterErrorHandler {
 
   // Show notification to user
   showNotification(notification) {
-    console.log('🔔 Master Error Handler: Showing notification:', notification);
-    
     // Create or update notification element
     let notificationEl = document.getElementById('master-error-notification');
     if (!notificationEl) {
@@ -113,7 +111,6 @@ class MasterErrorHandler {
         font-family: var(--font-main);
       `;
       document.body.appendChild(notificationEl);
-      console.log('✅ Created notification element');
     }
 
     notificationEl.innerHTML = `
@@ -138,25 +135,19 @@ class MasterErrorHandler {
 
   // Test database connection
   async testDatabaseConnection() {
-    console.log('🔍 Master Error Handler: Testing database connection...');
     try {
       const { data, error } = await supabase
         .from('hubs')
         .select('count')
         .limit(1);
       
-      console.log('🔍 Database test result:', { data, error });
-      
       if (error) {
-        console.error('❌ Database connection failed:', error);
         this.handleDatabaseError(error, 'Connection Test');
         return { success: false, error };
       }
       
-      console.log('✅ Database connection successful');
       return { success: true, data };
     } catch (err) {
-      console.error('❌ Database connection exception:', err);
       this.handleDatabaseError(err, 'Connection Test');
       return { success: false, error: err };
     }

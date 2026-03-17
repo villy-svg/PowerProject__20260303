@@ -63,7 +63,6 @@ function App() {
   // src/App.jsx - around line 35
   const fetchTasks = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
-    console.log("🚩 TRACE 1: Starting Fetch...");
     
     try {
       const { data, error, status } = await supabase
@@ -74,14 +73,12 @@ function App() {
       if (error) {
         masterErrorHandler.handleDatabaseError(error, 'Task Fetch');
       } else {
-        console.log("✅ TRACE 1 SUCCESS: Rows received:", data?.length);
         setTasks((data || []).map(normalizeTask));
       }
     } catch (err) {
       masterErrorHandler.handleComponentError(err, 'App', 'Task Fetch');
     } finally {
       if (showLoading) setLoading(false);
-      console.log("🚩 TRACE 1.2: Fetch complete.");
     }
   }, []);
 
@@ -443,10 +440,7 @@ function App() {
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
             ) : activeVertical === 'hub_management' ? (
-              <div>
-                {console.log('🚀 App: Rendering HubManagement...')}
-                <HubManagement />
-              </div>
+              <HubManagement />
             ) : activeVertical === 'hub_function_management' ? (
               <HubFunctionManagement />
             ) : activeVertical === 'department_management' ? (

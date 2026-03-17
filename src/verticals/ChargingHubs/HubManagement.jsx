@@ -8,8 +8,6 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 
 const HubManagement = () => {
-  console.log('🚀 HubManagement: Component mounting...');
-  
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,8 +21,6 @@ const HubManagement = () => {
     sortByDuplicates: true
   });
 
-  console.log('🚀 HubManagement: State initialized, calling fetchHubs...');
-
   useEffect(() => {
     fetchHubs();
   }, []);
@@ -32,8 +28,6 @@ const HubManagement = () => {
   const fetchHubs = async () => {
     setLoading(true);
     try {
-      console.log("🚩 HubManagement: Starting fetchHubs...");
-      
       const { data, error } = await supabase
         .from('hubs')
         .select('*')
@@ -43,7 +37,6 @@ const HubManagement = () => {
         masterErrorHandler.handleDatabaseError(error, 'HubManagement - Fetch Hubs');
         setHubs([]);
       } else {
-        console.log("✅ HubManagement: Successfully fetched hubs:", data?.length);
         setHubs(data || []);
       }
     } catch (err) {
