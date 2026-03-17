@@ -7,6 +7,45 @@ import HubCSVImport from './HubCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 
+// Error boundary component
+class HubManagementErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('HubManagement Error Boundary:', error, errorInfo);
+    masterErrorHandler.handleComponentError(error, 'HubManagement', 'Component Mount');
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <h2>Hub Management Error</h2>
+          <p>Something went wrong loading the Hub Management component.</p>
+          <details style={{ marginTop: '20px' }}>
+            <summary>Error Details</summary>
+            <pre style={{ textAlign: 'left', background: '#f5f5f5', padding: '10px' }}>
+              {this.state.error?.toString()}
+            </pre>
+          </details>
+          <button onClick={() => window.location.reload()} style={{ marginTop: '20px' }}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const HubManagement = () => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,23 +65,31 @@ const HubManagement = () => {
   }, []);
 
   const fetchHubs = async () => {
+    console.log('🚀 HubManagement: fetchHubs called');
     setLoading(true);
     try {
+      console.log('🔍 HubManagement: Querying hubs table...');
       const { data, error } = await supabase
         .from('hubs')
         .select('*')
         .order('created_at', { ascending: false });
 
+      console.log('🔍 HubManagement: Query result:', { data, error });
+
       if (error) {
+        console.error('❌ HubManagement: Database error:', error);
         masterErrorHandler.handleDatabaseError(error, 'HubManagement - Fetch Hubs');
         setHubs([]);
       } else {
+        console.log('✅ HubManagement: Successfully fetched hubs:', data?.length);
         setHubs(data || []);
       }
     } catch (err) {
+      console.error('❌ HubManagement: Exception error:', err);
       masterErrorHandler.handleComponentError(err, 'HubManagement', 'Fetch Hubs');
       setHubs([]);
     } finally {
+      console.log('🏁 HubManagement: fetchHubs completed, setting loading to false');
       setLoading(false);
     }
   };
@@ -248,4 +295,11 @@ const HubManagement = () => {
   );
 };
 
-export default HubManagement;
+// Wrap with error boundary
+const HubManagementWithErrorBoundary = () => (
+  <HubManagementErrorBoundary>
+    <HubManagement />
+  </HubManagementErrorBoundary>
+);
+
+export default HubManagementWithErrorBoundary;
