@@ -183,4 +183,4 @@ jobs:
           echo "Supabase config exists: $(test -f supabase/config.toml && echo 'YES' || echo 'NO')"
           echo "Migrations directory exists: $(test -d supabase/migrations && echo 'YES' || echo 'NO')"
           
-          supabase db push --yes --debug
+          supabase db push --yes --include-all --debug
