@@ -24,9 +24,11 @@ jobs:
           # Remove existing config and start fresh
           rm -rf supabase
           
-          # Initialize new config with project ID
-          supabase init --no-project-id
-          echo "project_id = \"${{ secrets.SUPABASE_PROJECT_ID }}\"" >> supabase/config.toml
+          # Initialize new config
+          supabase init
+          
+          # Update config with project ID
+          sed -i 's/^project_id = .*/project_id = "${{ secrets.SUPABASE_PROJECT_ID }}"/' supabase/config.toml
           
           # Copy migrations back
           mkdir -p supabase/migrations
