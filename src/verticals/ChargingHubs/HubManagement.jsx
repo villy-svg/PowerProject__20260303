@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
+import { masterErrorHandler } from '../../services/masterErrorHandler';
 import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
@@ -26,17 +27,27 @@ const HubManagement = () => {
 
   const fetchHubs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('hubs')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      console.log("🚩 HubManagement: Starting fetchHubs...");
+      
+      const { data, error } = await supabase
+        .from('hubs')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching hubs:', error);
-    } else {
-      setHubs(data || []);
+      if (error) {
+        masterErrorHandler.handleDatabaseError(error, 'HubManagement - Fetch Hubs');
+        setHubs([]);
+      } else {
+        console.log("✅ HubManagement: Successfully fetched hubs:", data?.length);
+        setHubs(data || []);
+      }
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'HubManagement', 'Fetch Hubs');
+      setHubs([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleOpenModal = (hub = null) => {
@@ -61,49 +72,60 @@ const HubManagement = () => {
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
-    const hubData = {
-      ...formData,
-      updated_at: new Date().toISOString()
-    };
+    try {
+      const hubData = {
+        ...formData,
+        updated_at: new Date().toISOString()
+      };
 
-    let error;
-    if (editingHub) {
-      const { error: updateError } = await supabase
-        .from('hubs')
-        .update(hubData)
-        .eq('id', editingHub.id);
-      error = updateError;
-    } else {
-      const { error: insertError } = await supabase
-        .from('hubs')
-        .insert([hubData]);
-      error = insertError;
-    }
+      let result;
+      if (editingHub) {
+        result = await supabase
+          .from('hubs')
+          .update(hubData)
+          .eq('id', editingHub.id)
+          .select();
+      } else {
+        result = await supabase
+          .from('hubs')
+          .insert([hubData])
+          .select();
+      }
 
-    if (error) {
-      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
-    } else {
-      setStatusMsg({ type: 'success', text: `Hub ${editingHub ? 'updated' : 'created'} successfully!` });
-      setTimeout(() => {
-        setIsModalOpen(false);
-        fetchHubs();
-      }, 1000);
+      if (result.error) {
+        masterErrorHandler.handleDatabaseError(result.error, 'HubManagement - Submit Hub');
+      } else {
+        setStatusMsg({ type: 'success', text: `Hub ${editingHub ? 'updated' : 'created'} successfully!` });
+        setTimeout(() => {
+          setIsModalOpen(false);
+          fetchHubs();
+        }, 1000);
+      }
+      
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'HubManagement', 'Submit Hub');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this charging hub?')) return;
 
     setLoading(true);
-    const { error } = await supabase.from('hubs').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('hubs').delete().eq('id', id);
 
-    if (error) {
-      alert(`Delete failed: ${error.message}`);
-    } else {
-      fetchHubs();
+      if (error) {
+        masterErrorHandler.handleDatabaseError(error, 'HubManagement - Delete Hub');
+      } else {
+        fetchHubs();
+      }
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'HubManagement', 'Delete Hub');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

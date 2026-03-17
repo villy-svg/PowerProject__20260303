@@ -5,6 +5,7 @@ import './App.css';
 
 // 1. New Supabase Import
 import { supabase } from './services/supabaseClient';
+import { masterErrorHandler } from './services/masterErrorHandler';
 
 // Constants
 import { VERTICALS } from './constants/verticals';
@@ -62,7 +63,8 @@ function App() {
   // src/App.jsx - around line 35
   const fetchTasks = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
-
+    console.log("🚩 TRACE 1: Starting Fetch...");
+    
     try {
       const { data, error, status } = await supabase
         .from('tasks')
@@ -70,14 +72,16 @@ function App() {
         .order('updatedat', { ascending: true });
 
       if (error) {
-        console.error(`❌ TRACE 1 ERROR [Status ${status}]:`, error.message);
+        masterErrorHandler.handleDatabaseError(error, 'Task Fetch');
       } else {
+        console.log("✅ TRACE 1 SUCCESS: Rows received:", data?.length);
         setTasks((data || []).map(normalizeTask));
       }
     } catch (err) {
-      console.error("❌ TRACE 1 CRASH:", err);
+      masterErrorHandler.handleComponentError(err, 'App', 'Task Fetch');
     } finally {
       if (showLoading) setLoading(false);
+      console.log("🚩 TRACE 1.2: Fetch complete.");
     }
   }, []);
 
@@ -109,6 +113,11 @@ function App() {
   });
 
   const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
+
+  // Test database connection on app start
+  useEffect(() => {
+    masterErrorHandler.testDatabaseConnection();
+  }, []);
 
   // Auth State Listener
   useEffect(() => {
