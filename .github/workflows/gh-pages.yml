@@ -4,10 +4,17 @@ on:
   push:
     branches:
       - main  # Set this to your default branch name
+    paths:
+      - 'src/**'           # Trigger on source code changes
+      - 'package.json'       # Trigger on dependency changes
+      - 'vite.config.*'    # Trigger on build config changes
+      - '.github/workflows/gh-pages.yml'  # Trigger on workflow changes
   workflow_dispatch: # Allow manual trigger
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
@@ -30,8 +37,14 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: dist # Vite projects always build into the 'dist' folder
-          branch: gh-pages # This creates/updates the branch GitHub uses for hosting
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

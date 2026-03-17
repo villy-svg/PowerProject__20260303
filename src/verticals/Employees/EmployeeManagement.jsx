@@ -118,9 +118,14 @@ const EmployeeManagement = ({ permissions, filters }) => {
   
   // Group active employees by role
   const activeEmpsByRole = activeEmps.reduce((acc, emp) => {
-    const role = emp.role_code || emp.role || 'Unassigned Role';
-    if (!acc[role]) acc[role] = [];
-    acc[role].push(emp);
+    // Prefix the key with seniority level (e.g. "09|Senior Developer") for easy sorting
+    // We pad start with 0 so "10" sorts before "09" in a descending sort
+    const roleName = emp.role_code || emp.role || 'Unassigned Role';
+    const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 1;
+    const sortKey = `${String(seniorityNum).padStart(3, '0')}|${roleName}`;
+    
+    if (!acc[sortKey]) acc[sortKey] = { roleName, overrideKey: sortKey, emps: [] };
+    acc[sortKey].emps.push(emp);
     return acc;
   }, {});
 
@@ -187,8 +192,11 @@ const EmployeeManagement = ({ permissions, filters }) => {
               <p className="empty-sub-state">No active employees found matching filters.</p>
             ) : (
               <div className="grouped-employee-sections">
-                {Object.entries(activeEmpsByRole).sort(([a], [b]) => a.localeCompare(b)).map(([role, empsInRole]) => (
-                  <div key={role} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
+                {Object.values(activeEmpsByRole)
+                  // Sort descending by overrideKey (seniority), then alphabetically by role name
+                  .sort((a, b) => b.overrideKey.localeCompare(a.overrideKey))
+                  .map(({ roleName, emps: empsInRole }) => (
+                  <div key={roleName} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
                     <h5 style={{ 
                       margin: '0 0 1rem 0', 
                       fontSize: '1rem', 
@@ -198,7 +206,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                       borderBottom: '1px solid rgba(255,255,255,0.05)', 
                       paddingBottom: '0.5rem' 
                     }}>
-                      {role} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({empsInRole.length})</span>
+                      {roleName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({empsInRole.length})</span>
                     </h5>
                     <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
                       {empsInRole.map(emp => (

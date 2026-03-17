@@ -18,7 +18,7 @@ export const useEmployees = () => {
       const [{ data: emps, error: empErr }, { data: hubs }, { data: roles }, { data: depts }] = await Promise.all([
         supabase.from('employees').select('*').order('full_name', { ascending: true }),
         supabase.from('hubs').select('id, hub_code'),
-        supabase.from('employee_roles').select('id, role_code'),
+        supabase.from('employee_roles').select('id, role_code, seniority_level'),
         supabase.from('departments').select('id, dept_code')
       ]);
 
@@ -26,13 +26,14 @@ export const useEmployees = () => {
 
       // Efficient ID Mapping
       const hubMap = new Map((hubs || []).map(h => [h.id, h.hub_code]));
-      const roleMap = new Map((roles || []).map(r => [r.id, r.role_code]));
+      const roleMap = new Map((roles || []).map(r => [r.id, { role_code: r.role_code, seniority_level: r.seniority_level }]));
       const deptMap = new Map((depts || []).map(d => [d.id, d.dept_code]));
 
       const processed = (emps || []).map(emp => ({
         ...emp,
         hub_code: emp.hub_id ? (hubMap.get(emp.hub_id) || 'NO HUB') : 'ALL',
-        role_code: roleMap.get(emp.role_id) || 'NO ROLE',
+        role_code: roleMap.get(emp.role_id)?.role_code || 'NO ROLE',
+        seniority_level: roleMap.get(emp.role_id)?.seniority_level || 1,
         dept_code: deptMap.get(emp.department_id) || 'NO DEPT'
       }));
 

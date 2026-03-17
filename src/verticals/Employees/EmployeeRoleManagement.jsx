@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
-import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
+import './EmployeeRoleManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 
 const EmployeeRoleManagement = () => {
@@ -8,7 +8,7 @@ const EmployeeRoleManagement = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
-  const [formData, setFormData] = useState({ name: '', role_code: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', role_code: '', description: '', seniority_level: 1 });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -36,11 +36,12 @@ const EmployeeRoleManagement = () => {
       setFormData({ 
         name: role.name, 
         role_code: role.role_code || '',
-        description: role.description || ''
+        description: role.description || '',
+        seniority_level: role.seniority_level || 1
       });
     } else {
       setEditingRole(null);
-      setFormData({ name: '', role_code: '', description: '' });
+      setFormData({ name: '', role_code: '', description: '', seniority_level: 1 });
     }
     setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
@@ -114,6 +115,7 @@ const EmployeeRoleManagement = () => {
         {roles.map(role => (
           <div key={role.id} className="hub-card">
             <div className="hub-code-tag">{role.role_code || 'NO CODE'}</div>
+            <div className="seniority-tag">Level {role.seniority_level || 1}</div>
             <h3>{role.name}</h3>
             <p className="hub-city">{role.description || 'No description provided'}</p>
             <div className="hub-actions">
@@ -157,6 +159,19 @@ const EmployeeRoleManagement = () => {
                     value={formData.role_code} 
                     onChange={(e) => setFormData({...formData, role_code: e.target.value})}
                     placeholder="e.g. SR-DEV, MKT-ASC"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Seniority Level</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="10"
+                    value={formData.seniority_level} 
+                    onChange={(e) => setFormData({...formData, seniority_level: parseInt(e.target.value) || 1})}
+                    placeholder="1-10 (1=lowest, 10=highest)"
+                    required
                   />
                 </div>
               </div>
