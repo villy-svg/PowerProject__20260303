@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Set this to your default branch name
+  workflow_dispatch: # Allow manual trigger
 
 permissions:
   contents: write
@@ -13,10 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
       - name: Install and Build 🔧
-        # We add the 'env' block here to pass GitHub Secrets to Vite
         run: |
           npm install
           npm run build
