@@ -1,4 +1,4 @@
-name: Deploy Database to Supabase (Simple - Debug)
+name: Deploy Database to Supabase (Simple - Debug v2)
 
 on:
   workflow_dispatch: # Manual trigger only
