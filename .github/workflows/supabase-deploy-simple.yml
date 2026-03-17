@@ -1,4 +1,4 @@
-name: Deploy Database to Supabase (Simple)
+name: Deploy Database to Supabase (Simple - Debug)
 
 on:
   workflow_dispatch: # Manual trigger only
@@ -15,42 +15,172 @@ jobs:
         with:
           version: latest
 
-      - name: Deploy directly
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      - name: Debug - Check environment
         run: |
-          echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
+          echo "=== ENVIRONMENT DEBUG ==="
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -la
+          echo "Supabase directory:"
+          ls -la supabase/ || echo "No supabase directory"
+          echo "Migrations directory:"
+          ls -la supabase/migrations/ || echo "No migrations directory"
+
+      - name: Debug - Check secrets
+        run: |
+          echo "=== SECRETS DEBUG ==="
+          echo "SUPABASE_PROJECT_ID length: ${#SUPABASE_PROJECT_ID}"
+          echo "SUPABASE_ACCESS_TOKEN length: ${#SUPABASE_ACCESS_TOKEN}"
+          echo "SUPABASE_PROJECT_ID (first 5 chars): ${SUPABASE_PROJECT_ID:0:5}***"
+          echo "SUPABASE_ACCESS_TOKEN (first 5 chars): ${SUPABASE_ACCESS_TOKEN:0:5}***"
+
+      - name: Debug - Backup migrations
+        run: |
+          echo "=== MIGRATIONS BACKUP DEBUG ==="
+          echo "Before backup:"
+          ls -la supabase/migrations/ || echo "No migrations to backup"
           
-          # Backup migrations first
-          cp -r supabase/migrations /tmp/migrations-backup
+          if [ -d "supabase/migrations" ]; then
+            cp -r supabase/migrations /tmp/migrations-backup
+            echo "Backup created at /tmp/migrations-backup"
+            ls -la /tmp/migrations-backup/
+          else
+            echo "ERROR: No migrations directory to backup"
+            exit 1
+          fi
+
+      - name: Debug - Remove and reinitialize
+        run: |
+          echo "=== REINITIALIZATION DEBUG ==="
+          echo "Before removal:"
+          ls -la supabase/ || echo "No supabase directory"
           
-          # Remove existing config and start fresh
           rm -rf supabase
+          echo "After removal:"
+          ls -la supabase/ || echo "Supabase directory removed successfully"
           
-          # Initialize new config
           supabase init
+          echo "After init:"
+          ls -la supabase/
+          cat supabase/config.toml
+
+      - name: Debug - Update config
+        run: |
+          echo "=== CONFIG UPDATE DEBUG ==="
+          echo "Before update:"
+          cat supabase/config.toml | grep project_id
           
-          # Update config with project ID
           sed -i 's/^project_id = .*/project_id = "${{ secrets.SUPABASE_PROJECT_ID }}"/' supabase/config.toml
           
-          # Restore migrations
+          echo "After update:"
+          cat supabase/config.toml | grep project_id
+          echo "Full config file:"
+          cat supabase/config.toml
+
+      - name: Debug - Restore migrations
+        run: |
+          echo "=== MIGRATIONS RESTORE DEBUG ==="
+          echo "Before restore:"
+          ls -la supabase/migrations/ || echo "No migrations directory"
+          
           mkdir -p supabase/migrations
           cp -r /tmp/migrations-backup/* supabase/migrations/
           
-          # Link to project
+          echo "After restore:"
+          ls -la supabase/migrations/
+          echo "Migration file contents:"
+          for file in supabase/migrations/*.sql; do
+            echo "=== $file ==="
+            head -5 "$file" || echo "Could not read file"
+            echo ""
+          done
+
+      - name: Debug - Link to project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "=== LINK DEBUG ==="
+          echo "Project ID: ${{ secrets.SUPABASE_PROJECT_ID }}"
+          echo "Access token length: ${#SUPABASE_ACCESS_TOKEN}"
+          
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           
-          # Repair migration history as suggested by Supabase CLI
-          echo "Repairing migration history..."
-          supabase migration repair --status reverted 20260303054353 || echo "Repair 1 failed, continuing..."
-          supabase migration repair --status applied 20260316020000 || echo "Repair 2 failed, continuing..."
-          supabase migration repair --status applied 20260316030000 || echo "Repair 3 failed, continuing..."
-          supabase migration repair --status applied 20260316040000 || echo "Repair 4 failed, continuing..."
-          supabase migration repair --status applied 20260317080000 || echo "Repair 5 failed, continuing..."
+          echo "Link completed"
+          ls -la supabase/
+
+      - name: Debug - Check migration status before repair
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "=== MIGRATION STATUS DEBUG ==="
+          echo "Checking current migration status..."
+          
+          # Try to check migration status
+          supabase migration list || echo "Could not list migrations"
+          
+          # Try to pull current state
+          echo "Attempting to pull current migration state..."
+          supabase db pull --debug || echo "Pull failed - this is expected"
+
+      - name: Debug - Migration repair
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "=== MIGRATION REPAIR DEBUG ==="
+          
+          echo "Running repair command 1..."
+          supabase migration repair --status reverted 20260303054353 --debug || {
+            echo "Repair 1 failed with exit code: $?"
+            echo "Continuing..."
+          }
+          
+          echo "Running repair command 2..."
+          supabase migration repair --status applied 20260316020000 --debug || {
+            echo "Repair 2 failed with exit code: $?"
+            echo "Continuing..."
+          }
+          
+          echo "Running repair command 3..."
+          supabase migration repair --status applied 20260316030000 --debug || {
+            echo "Repair 3 failed with exit code: $?"
+            echo "Continuing..."
+          }
+          
+          echo "Running repair command 4..."
+          supabase migration repair --status applied 20260316040000 --debug || {
+            echo "Repair 4 failed with exit code: $?"
+            echo "Continuing..."
+          }
+          
+          echo "Running repair command 5..."
+          supabase migration repair --status applied 20260317080000 --debug || {
+            echo "Repair 5 failed with exit code: $?"
+            echo "Continuing..."
+          }
+
+      - name: Debug - Final migration check
+        run: |
+          echo "=== FINAL MIGRATION CHECK DEBUG ==="
+          echo "Migrations directory before final restore:"
+          ls -la supabase/migrations/
           
           # Ensure our migrations are still there
           cp -r /tmp/migrations-backup/* supabase/migrations/
           
-          # Deploy our changes
-          echo "Deploying new migrations..."
-          supabase db push --yes
+          echo "Migrations directory after final restore:"
+          ls -la supabase/migrations/
+          
+          echo "Migration file count: $(ls supabase/migrations/*.sql | wc -l)"
+          echo "Expected files: $(ls /tmp/migrations-backup/*.sql | wc -l)"
+
+      - name: Debug - Deploy with maximum logging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "=== DEPLOY DEBUG ==="
+          echo "About to run supabase db push with --yes --debug"
+          echo "Current working directory: $(pwd)"
+          echo "Supabase config exists: $(test -f supabase/config.toml && echo 'YES' || echo 'NO')"
+          echo "Migrations directory exists: $(test -d supabase/migrations && echo 'YES' || echo 'NO')"
+          
+          supabase db push --yes --debug
