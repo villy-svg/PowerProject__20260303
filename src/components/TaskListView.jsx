@@ -27,7 +27,19 @@ const TaskListView = ({
           .sort((a, b) => {
             const pA = priorityOrder[a.priority] ?? 99;
             const pB = priorityOrder[b.priority] ?? 99;
-            return pA - pB;
+            if (pA !== pB) return pA - pB;
+            
+            // Secondary: Hub codes (alphabetical)
+            const hubA = a.hub_code || '';
+            const hubB = b.hub_code || '';
+            if (hubA !== hubB) return hubA.localeCompare(hubB);
+            
+            // Tertiary: Function codes (alphabetical)
+            const funcA = a.function || '';
+            const funcB = b.function || '';
+            if (funcA !== funcB) return funcA.localeCompare(funcB);
+            
+            return 0;
           });
 
         if (stageTasks.length === 0) return null;

@@ -182,47 +182,6 @@ const TaskController = ({
     }
   };
 
-  const handleDuplicateMergeTrigger = (duplicateTask) => {
-    // Find all duplicates in the same cluster
-    const duplicates = tasks.filter(t => 
-      t.id !== duplicateTask.id && 
-      t.text === duplicateTask.text && 
-      t.priority === duplicateTask.priority &&
-      t.verticalId === duplicateTask.verticalId
-    );
-    
-    // Set up merge cluster with primary task and duplicates
-    setMergeTaskCluster([duplicateTask, ...duplicates]);
-  };
-
-  const executeMerge = async (primaryTaskId) => {
-    const primaryTask = tasks.find(t => t.id === primaryTaskId);
-    if (!primaryTask) return;
-
-    // Find all duplicates of this task (same text, priority, etc.)
-    const duplicates = tasks.filter(t => 
-      t.id !== primaryTaskId && 
-      t.text === primaryTask.text && 
-      t.priority === primaryTask.priority &&
-      t.verticalId === primaryTask.verticalId
-    );
-
-    if (duplicates.length === 0) return;
-
-    try {
-      // Move all duplicates to DEPRIORITIZED
-      await bulkUpdateTasks(duplicates.map(t => t.id), { stageid: 'DEPRIORITIZED' });
-      
-      // Clear the merge modal
-      setMergeTaskCluster(null);
-      
-      console.log(`Merged ${duplicates.length} duplicate tasks, kept primary: ${primaryTaskId}`);
-    } catch (err) {
-      console.error('Merge failed:', err);
-      alert('Failed to merge duplicate tasks.');
-    }
-  };
-
   const openAddModal = () => {
     setEditingTask(null);
     setIsModalOpen(true);
@@ -472,6 +431,17 @@ const TaskController = ({
                   // Secondary: Duplicates together
                   if (a.isDuplicate && !b.isDuplicate) return -1;
                   if (!a.isDuplicate && b.isDuplicate) return 1;
+                  
+                  // Tertiary: Hub codes (alphabetical)
+                  const hubA = a.hub_code || '';
+                  const hubB = b.hub_code || '';
+                  if (hubA !== hubB) return hubA.localeCompare(hubB);
+                  
+                  // Quaternary: Function codes (alphabetical)
+                  const funcA = a.function || '';
+                  const funcB = b.function || '';
+                  if (funcA !== funcB) return funcA.localeCompare(funcB);
+                  
                   return 0;
                 });
               
