@@ -147,6 +147,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         </div>
       </div>
 
+      <div className="form-row-grid">
         <div className="form-group">
           <label>Priority</label>
           <select 
