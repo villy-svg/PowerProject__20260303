@@ -24,7 +24,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       supabase.from('departments').select('id, name, dept_code'),
       supabase.from('employee_roles').select('id, name, role_code'),
       supabase.from('hubs').select('id, name, hub_code'),
-      supabase.from('employees').select('id, email, full_name, phone'),
+      supabase.from('employees').select('id, email, full_name, phone, emp_code, badge_id'),
     ]);
 
     // Robust Mapping: Support both Names and Codes
@@ -75,13 +75,13 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
   const isHardMatch = (row, existingRecord) => {
     const rowName = normalizeValue(row.full_name || row.name || '');
     const rowPhone = normalizeValue(row.phone || row.contactNumber || '');
-    const rowEmail = normalizeValue(row.email || '');
+    const rowEmail = row.email ? row.email.toLowerCase().trim() : '';
     
     const extName = normalizeValue(existingRecord.full_name);
     const extPhone = normalizeValue(existingRecord.phone);
-    const extEmail = normalizeValue(existingRecord.email || '');
+    const extEmail = existingRecord.email ? existingRecord.email.toLowerCase().trim() : '';
 
-    // Condition A: Emails match exactly
+    // Condition A: Emails match exactly (only if both are present)
     if (rowEmail && extEmail && rowEmail === extEmail) return true;
 
     // Condition B: Phones match exactly
@@ -218,8 +218,13 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     <CSVImportButton
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
-      requiredFields={['full_name', 'email']}
-      getConflictKey={(row) => row.email || row.full_name || 'row'} // Proper key for in-file dedup
+      requiredFields={['full_name']} // email is now optional
+      getConflictKey={(row) => {
+        const name = normalizeValue(row.full_name || row.name || '');
+        const phone = normalizeValue(row.phone || row.contactNumber || '');
+        const email = normalizeValue(row.email || '');
+        return `${name}|${phone}|${email}` || 'new-row';
+      }} 
       findConflict={(row, existingData) => {
         const hard = existingData.find(e => isHardMatch(row, e));
         if (hard) return { existingRecord: hard, matchMode: 'hard' };
