@@ -299,7 +299,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
             gender: editingEmployee.gender,
             dob: editingEmployee.dob,
             doj: editingEmployee.hire_date,
-            hub_id: editingEmployee.hub_id,
+            hub_id: editingEmployee.hub_id || 'ALL',
             role_id: editingEmployee.role_id,
             department_id: editingEmployee.department_id,
             accountNumber: editingEmployee.account_number,

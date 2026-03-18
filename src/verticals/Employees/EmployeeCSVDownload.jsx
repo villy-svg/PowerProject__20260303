@@ -48,7 +48,7 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Phone': emp.phone || '',
         'Gender': emp.gender || '',
         'Date of Birth': emp.dob || '',
-        'Primary Hub': hubMap[emp.hub_id] || '',
+        'Primary Hub': hubMap[emp.hub_id] || 'ALL',
         'Department': deptMap[emp.department_id] || '',
         'Role': roleMap[emp.role_id] || '',
         'Status': emp.status || 'Active',
