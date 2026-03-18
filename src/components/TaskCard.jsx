@@ -73,7 +73,7 @@ const TaskCard = ({
             DUP
           </span>
         )}
-        {task.employees?.full_name && (
+        {task.assigneeName && (
           <span className="assignee-badge" style={{ 
             fontSize: '0.65rem', 
             fontWeight: 700, 
@@ -84,7 +84,7 @@ const TaskCard = ({
             borderRadius: '12px',
             marginLeft: '6px'
           }}>
-            👤 {task.employees.full_name.split(' ')[0]}
+            👤 {task.assigneeName.split(' ')[0]}
           </span>
         )}
         {children}

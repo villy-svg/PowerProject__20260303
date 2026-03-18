@@ -3,10 +3,11 @@ import { supabase } from '../services/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import './Configuration.css';
 
-const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
+const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   
-  const isMasterAdmin = user?.roleId === 'master_admin';
+  const canManageSystem = permissions.canManageRoles;
+  const canClearAll = permissions.canDelete && permissions.scope === 'global';
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
@@ -14,7 +15,7 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
   };
 
   const handleClearAllTasks = async () => {
-    if (!isMasterAdmin) return;
+    if (!canClearAll) return;
     const confirmed = window.confirm("CRITICAL: Delete ALL tasks across ALL verticals?");
     if (confirmed) {
       try {
@@ -108,12 +109,18 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
             const items = verticalConfigs[vertical.id] || [];
             if (items.length === 0) return null;
 
+            // Filter items based on whether user has access to this specific vertical (if scope is assigned)
+            const hasVerticalAccess = permissions.scope === 'global' || user.assignedVerticals?.includes(vertical.id);
+            if (!hasVerticalAccess) return null;
+
             return (
               <div key={vertical.id} className="config-group">
                 <h3 className="group-label">{vertical.label}</h3>
                 <div className="config-items-container">
                   {items.map(item => {
-                    if (item.adminOnly && !isMasterAdmin) return null;
+                    // Vertical admin sections are visible to anyone with canAccessConfig and vertical access
+                    if (item.adminOnly && !permissions.canAccessConfig) return null;
+                    
                     return (
                       <div key={item.id} className="config-tile" onClick={item.action}>
                         {item.icon && <div className="tile-icon">{item.icon}</div>}
@@ -148,7 +155,7 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
           </div>
 
           {/* Master Admin Controls at the Bottom */}
-          {isMasterAdmin && (
+          {canManageSystem && (
             <div className="config-group master-controls">
               <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
               <div className="config-items-container">
@@ -170,12 +177,14 @@ const Configuration = ({ tasks, setTasks, user = {}, setActiveVertical }) => {
                     </button>
                   </div>
                 </div>
-                <div className="config-tile destructive" onClick={handleClearAllTasks}>
-                  <div className="tile-info">
-                    <h4>Factory Reset Tasks</h4>
-                    <p>Wipe all task data across all verticals. (Caution!)</p>
+                {canClearAll && (
+                  <div className="config-tile destructive" onClick={handleClearAllTasks}>
+                    <div className="tile-info">
+                      <h4>Factory Reset Tasks</h4>
+                      <p>Wipe all task data across all verticals. (Caution!)</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}

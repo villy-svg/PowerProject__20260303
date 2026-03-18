@@ -134,6 +134,7 @@ const VerticalWorkspace = ({
         {SidebarComponent ? (
           <SidebarComponent 
             user={user} 
+            permissions={permissions}
             setActiveVertical={setActiveVertical} 
             onFilterChange={handleFilterChange}
             onReset={() => resetFilters()}

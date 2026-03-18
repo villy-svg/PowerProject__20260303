@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VERTICAL_LIST } from '../constants/verticals';
+import { ROLE_LIST } from '../constants/roles';
 import './UserProfile.css';
 
-/**
- * UserProfile Component
- * Handles identity display, role switching, and vertical assignment.
- */
 const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -21,12 +18,7 @@ const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const roles = [
-    { id: 'master_admin', label: 'Master Admin', icon: '👑' },
-    { id: 'vertical_admin', label: 'Vertical Admin', icon: '🏢' },
-    { id: 'master_viewer', label: 'Master Viewer', icon: '👁️' },
-    { id: 'vertical_viewer', label: 'Vertical Viewer', icon: '👤' }
-  ];
+  const roles = ROLE_LIST;
 
   const handleRoleSelect = (roleId) => {
     // If switching to a vertical role, we default to the first vertical if none assigned

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../services/supabaseClient';
 
 /**
  * EmployeeTaskForm
@@ -10,8 +11,23 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   const [formData, setFormData] = useState({
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
-    description: safeData.description || ''
+    description: safeData.description || '',
+    assigned_to: safeData.assigned_to || ''
   });
+  const [employees, setEmployees] = useState([]);
+
+  React.useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    const { data } = await supabase
+      .from('employees')
+      .select('id, full_name, emp_code')
+      .eq('status', 'Active')
+      .order('full_name');
+    if (data) setEmployees(data);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,17 +47,34 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         />
       </div>
 
-      <div className="form-group">
-        <label>Priority</label>
-        <select
-          value={formData.priority}
-          onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-        >
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-          <option value="Urgent">Urgent</option>
-        </select>
+      <div className="form-row-grid">
+        <div className="form-group">
+          <label>Priority</label>
+          <select
+            value={formData.priority}
+            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Assigned To</label>
+          <select 
+            value={formData.assigned_to}
+            onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
+          >
+            <option value="">N/A (Unassigned)</option>
+            {employees.map(emp => (
+              <option key={emp.id} value={emp.id}>
+                {emp.emp_code ? `[${emp.emp_code}] ` : ''}{emp.full_name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="form-group">

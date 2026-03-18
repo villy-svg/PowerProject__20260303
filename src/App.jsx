@@ -49,6 +49,8 @@ const normalizeTask = (row) => ({
   hub_id: row.hub_id,
   city: row.city,
   function: row.function,
+  assigned_to: row.assigned_to,
+  assigneeName: row.employees?.full_name || row.assigneeName, // Support joined data or flat data
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
 });
@@ -67,7 +69,12 @@ function App() {
     try {
       const { data, error, status } = await supabase
         .from('tasks')
-        .select('*')
+        .select(`
+          *,
+          employees:assigned_to (
+            full_name
+          )
+        `)
         .order('updatedat', { ascending: true });
 
       if (error) {
@@ -175,11 +182,12 @@ function App() {
 
     // Public/Special views logic
     const isMasterAdmin = user.roleId === 'master_admin';
+    const isGlobalScope = currentUserPermissions.scope === 'global';
     const isConfigView = ['configuration', 'role_management', 'user_management'].includes(activeVertical);
 
-    // Check if the vertical is strictly assigned OR if they are a Master Admin
+    // Check if the vertical is strictly assigned OR if they have global scope
     const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
-    const hasSpecialAccess = isMasterAdmin; // Only Master Admin can see these
+    const hasSpecialAccess = isMasterAdmin; // Only Master Admin can see these management tools
 
     // Validate access
     if (isSpecialAdminView && !hasSpecialAccess) {
@@ -202,7 +210,7 @@ function App() {
     const verticalKeys = Object.keys(VERTICALS);
     if (verticalKeys.includes(activeVertical)) {
       const isAssigned = user.assignedVerticals?.includes(activeVertical);
-      if (!isAssigned && !isMasterAdmin) {
+      if (!isAssigned && !isGlobalScope) {
         setActiveVertical(null);
       }
     }
@@ -247,6 +255,7 @@ function App() {
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
       city: taskData.city || null,
       function: taskData.function || null,
+      assigned_to: taskData.assigned_to || null,
       createdat: taskData.createdAt,
       updatedat: taskData.updatedAt,
     };
@@ -314,6 +323,7 @@ function App() {
       hub_id: taskData.hub_id === '' ? null : (taskData.hub_id || null),
       city: taskData.city || null,
       function: taskData.function || null,
+      assigned_to: taskData.assigned_to || null,
       updatedat: new Date().toISOString(),
     };
 
@@ -434,7 +444,7 @@ function App() {
             {!activeVertical ? (
               <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'configuration' ? (
-              <Configuration tasks={tasks} setTasks={setTasks} user={user} setActiveVertical={setActiveVertical} />
+              <Configuration tasks={tasks} setTasks={setTasks} user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} />
             ) : activeVertical === 'role_management' ? (
               <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (

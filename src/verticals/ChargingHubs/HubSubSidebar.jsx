@@ -7,8 +7,8 @@ import { supabase } from '../../services/supabaseClient';
  * Vertical-specific sidebar content for Charging Hubs.
  * Contains the Master Admin administrative shortcut and task filters.
  */
-const HubSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
-  const isMasterAdmin = user?.roleId === 'master_admin';
+const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
+  const canAccessAdmin = permissions?.canAccessConfig;
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
   const [expandedGroups, setExpandedGroups] = useState({
@@ -162,7 +162,7 @@ const HubSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange
 
   return (
     <div className="sub-sidebar-body">
-      {isMasterAdmin && (
+      {canAccessAdmin && (
         <div style={{ padding: '12px', marginBottom: '8px' }}>
           <button 
             className="halo-button" 

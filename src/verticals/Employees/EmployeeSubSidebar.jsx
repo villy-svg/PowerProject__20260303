@@ -7,8 +7,8 @@ import { supabase } from '../../services/supabaseClient';
  * Vertical-specific sidebar content for the Employee Manager.
  * Contains filters for employee records.
  */
-const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
-  const isMasterAdmin = user?.roleId === 'master_admin';
+const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
+  const canAccessAdmin = permissions?.canAccessConfig;
 
   const [expandedGroups, setExpandedGroups] = useState({
     role: false,
@@ -160,7 +160,7 @@ const EmployeeSubSidebar = ({ user, activeVertical, setActiveVertical, onFilterC
   return (
     <div className="sub-sidebar-body">
       {/* Admin Quick Links */}
-      {isMasterAdmin && (
+      {canAccessAdmin && (
         <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             className="halo-button"
