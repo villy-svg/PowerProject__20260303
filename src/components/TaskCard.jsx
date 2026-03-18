@@ -42,8 +42,8 @@ const TaskCard = ({
   const canMoveRight = currentIndex < STAGE_LIST.length - 1;
 
   return (
-    <div 
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''}`} 
+    <div
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''}`}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);
@@ -51,7 +51,7 @@ const TaskCard = ({
           openEditModal(task);
         }
       }}
-      style={{ 
+      style={{
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
         '--stage-color': stage?.color || 'var(--brand-green)'
       }}
@@ -74,13 +74,13 @@ const TaskCard = ({
           </span>
         )}
         {task.assigneeName && (
-          <span className="assignee-badge" style={{ 
-            fontSize: '0.65rem', 
-            fontWeight: 700, 
-            backgroundColor: 'rgba(0, 122, 255, 0.1)', 
-            color: '#007aff', 
+          <span className="assignee-badge" style={{
+            fontSize: '0.65rem',
+            fontWeight: 700,
+            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+            color: '#007aff',
             border: '1px solid rgba(0, 122, 255, 0.3)',
-            padding: '2px 6px', 
+            padding: '2px 6px',
             borderRadius: '12px',
             marginLeft: '6px'
           }}>
@@ -100,7 +100,7 @@ const TaskCard = ({
         <div className="card-navigation">
           {canUpdate && (
             <>
-              <button 
+              <button
                 className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
                 onClick={() => handleMove('left')}
                 disabled={!canMoveLeft}
@@ -108,7 +108,7 @@ const TaskCard = ({
               >
                 ←
               </button>
-              <button 
+              <button
                 className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
                 onClick={() => handleMove('right')}
                 disabled={!canMoveRight || task.stageId === 'COMPLETED'}
@@ -122,8 +122,8 @@ const TaskCard = ({
 
         <div className="card-actions">
           {canUpdate && (
-            <button 
-              className="card-edit-button" 
+            <button
+              className="card-edit-button"
               onClick={() => openEditModal(task)}
               title="Edit Task"
             >
@@ -132,8 +132,8 @@ const TaskCard = ({
           )}
 
           {canUpdate && task.stageId === 'DEPRIORITIZED' && (
-            <button 
-              className="card-reprio-button" 
+            <button
+              className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
               title="Move back to Pending"
               style={{ color: 'var(--brand-green)', fontWeight: 800 }}
@@ -143,8 +143,8 @@ const TaskCard = ({
           )}
 
           {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
-            <button 
-              className="card-deprio-button" 
+            <button
+              className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
@@ -153,7 +153,7 @@ const TaskCard = ({
           )}
 
           {canDelete && (
-            <button 
+            <button
               className="card-delete-button"
               onClick={() => deleteTask(task.id)}
               title="Delete Task"

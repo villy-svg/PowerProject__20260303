@@ -1,9 +1,9 @@
 import React from 'react';
 import './TaskListView.css';
 
-const TaskListView = ({ 
-  tasks, 
-  stageList, 
+const TaskListView = ({
+  tasks,
+  stageList,
   activeVertical,
   canUpdate,
   canDelete,
@@ -16,7 +16,7 @@ const TaskListView = ({
   onToggleStageSelection,
   onDuplicateMerge
 }) => {
-  
+
   const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
 
   return (
@@ -28,17 +28,17 @@ const TaskListView = ({
             const pA = priorityOrder[a.priority] ?? 99;
             const pB = priorityOrder[b.priority] ?? 99;
             if (pA !== pB) return pA - pB;
-            
+
             // Secondary: Hub codes (alphabetical)
             const hubA = a.hub_code || '';
             const hubB = b.hub_code || '';
             if (hubA !== hubB) return hubA.localeCompare(hubB);
-            
+
             // Tertiary: Function codes (alphabetical)
             const funcA = a.function || '';
             const funcB = b.function || '';
             if (funcA !== funcB) return funcA.localeCompare(funcB);
-            
+
             return 0;
           });
 
@@ -50,14 +50,14 @@ const TaskListView = ({
               <div className="header-left-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h4 style={{ color: stage.color, fontWeight: 700 }}>{stage.label}</h4>
                 {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
-                  <button 
+                  <button
                     onClick={() => onToggleStageSelection(stage.id, stageTasks)}
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      color: 'var(--brand-green)', 
-                      fontSize: '0.65rem', 
-                      fontWeight: 600, 
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--brand-green)',
+                      fontSize: '0.65rem',
+                      fontWeight: 600,
                       cursor: 'pointer',
                       padding: '0 8px',
                       height: '100%',
@@ -87,8 +87,8 @@ const TaskListView = ({
                 };
 
                 return (
-                  <div 
-                    key={task.id} 
+                  <div
+                    key={task.id}
                     className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''}`}
                     onDoubleClick={() => {
                       if (task.isDuplicate) {
@@ -155,7 +155,7 @@ const TaskListView = ({
                     <div className="list-row-controls">
                       {canUpdate && (
                         <div className="list-nav-group">
-                          <button 
+                          <button
                             className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
                             onClick={() => handleMove('left')}
                             disabled={!canMoveLeft}
@@ -163,7 +163,7 @@ const TaskListView = ({
                           >
                             ←
                           </button>
-                          <button 
+                          <button
                             className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
                             onClick={() => handleMove('right')}
                             disabled={!canMoveRight || task.stageId === 'COMPLETED'}
@@ -176,8 +176,8 @@ const TaskListView = ({
 
                       <div className="list-action-group">
                         {canUpdate && (
-                          <button 
-                            className="card-edit-button" 
+                          <button
+                            className="card-edit-button"
                             onClick={() => openEditModal(task)}
                             title="Edit Task"
                           >
@@ -185,8 +185,8 @@ const TaskListView = ({
                           </button>
                         )}
                         {canUpdate && task.stageId === 'DEPRIORITIZED' && (
-                          <button 
-                            className="card-reprio-button" 
+                          <button
+                            className="card-reprio-button"
                             onClick={() => updateTaskStage(task.id, 'BACKLOG')}
                             title="Move back to Pending"
                             style={{ color: 'var(--brand-green)', fontWeight: 800 }}
@@ -195,8 +195,8 @@ const TaskListView = ({
                           </button>
                         )}
                         {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
-                          <button 
-                            className="card-deprio-button" 
+                          <button
+                            className="card-deprio-button"
                             onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
                             title="Move to Deprioritized"
                           >
@@ -204,7 +204,7 @@ const TaskListView = ({
                           </button>
                         )}
                         {canDelete && (
-                          <button 
+                          <button
                             className="card-delete-button"
                             onClick={() => deleteTask(task.id)}
                             title="Delete Task"

@@ -72,6 +72,11 @@ const HubTaskTile = ({ task }) => {
           {functionCode || task.function}
         </span>
       )}
+      {task.assigneeName && (
+        <span className="tile-assignee-badge halo-type" title={`Assignee: ${task.assigneeName}`}>
+          👤 {task.assigneeName.split(' ')[0]}
+        </span>
+      )}
     </div>
   );
 };

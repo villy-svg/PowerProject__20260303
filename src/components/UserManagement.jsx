@@ -4,6 +4,8 @@ import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LEVELS, ROLE_SCOPES, DEFAULT_ROLE_PERMISSIONS } from '../constants/roles';
 import './UserManagement.css';
 
+const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
+
 const UserManagement = ({ currentUser }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -215,16 +217,24 @@ const UserManagement = ({ currentUser }) => {
                         <div key={v.id} className="vertical-perm-item">
                           <span className="v-name">{v.label}</span>
                           <div className="v-level-selector">
-                            {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => (
-                              <button
-                                key={lvl}
-                                type="button"
-                                className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
-                                onClick={() => updateVerticalLevel(v.id, lvl)}
-                              >
-                                {lvl.toUpperCase()}
-                              </button>
-                            ))}
+                            {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
+                              const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
+                              const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
+
+                              return (
+                                <button
+                                  key={lvl}
+                                  type="button"
+                                  className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                  onClick={() => !isTooHigh && updateVerticalLevel(v.id, lvl)}
+                                  disabled={isTooHigh}
+                                  title={isTooHigh ? `Locked by max capability level (${editRoleLevel.toUpperCase()})` : ''}
+                                  style={{ opacity: isTooHigh ? 0.3 : undefined, cursor: isTooHigh ? 'not-allowed' : undefined }}
+                                >
+                                  {lvl.toUpperCase()}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       );
