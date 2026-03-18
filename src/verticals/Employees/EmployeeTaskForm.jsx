@@ -70,7 +70,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
             <option value="">N/A (Unassigned)</option>
             {employees.map(emp => (
               <option key={emp.id} value={emp.id}>
-                {emp.emp_code ? `[${emp.emp_code}] ` : ''}{emp.full_name}
+                {emp.full_name}
               </option>
             ))}
           </select>

@@ -286,7 +286,7 @@ function App() {
       const { data, error } = await supabase
         .from('tasks')
         .insert([taskRow])
-        .select();
+        .select('*, employees:assigned_to (full_name)');
 
       if (error) throw error;
       if (data) {
@@ -354,7 +354,7 @@ function App() {
         .from('tasks')
         .update(taskRow)
         .eq('id', taskData.id)
-        .select();
+        .select('*, employees:assigned_to (full_name)');
 
       if (error) throw error;
       if (data) {
@@ -376,7 +376,7 @@ function App() {
         .from('tasks')
         .update({ ...updates, updatedat: new Date().toISOString() })
         .in('id', taskIds)
-        .select();
+        .select('*, employees:assigned_to (full_name)');
 
       if (error) throw error;
 
