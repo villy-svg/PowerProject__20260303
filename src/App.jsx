@@ -34,6 +34,8 @@ import ClientSubSidebar from './verticals/Clients/ClientSubSidebar';
 import ClientManagement from './verticals/Clients/ClientManagement';
 import ClientCategoryManagement from './verticals/Clients/ClientCategoryManagement';
 import ClientBillingModelManagement from './verticals/Clients/ClientBillingModelManagement';
+import ClientTaskForm from './verticals/Clients/ClientTaskForm';
+import ClientTaskTile from './verticals/Clients/ClientTaskTile';
 import Login from './components/Login';
 
 // Assets
@@ -515,12 +517,14 @@ function App() {
                 TaskFormComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                      null
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientTaskForm :
+                        null
                 }
                 TaskTileComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
-                      null
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientTaskTile :
+                        null
                 }
                 onHeaderClick={
                   (activeVertical === 'employee_tasks')
@@ -545,6 +549,7 @@ function App() {
                   <ClientManagement
                     user={user}
                     permissions={currentUserPermissions}
+                    tasks={tasks.filter(t => t.verticalId === 'CLIENTS')}
                   />
                 )}
               </VerticalWorkspace>

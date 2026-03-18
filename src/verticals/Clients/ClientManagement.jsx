@@ -18,7 +18,7 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
  * Primary view for the Client Manager vertical.
  * Displays client records grouped by category.
  */
-const ClientManagement = ({ permissions, filters }) => {
+const ClientManagement = ({ permissions, filters, tasks = [] }) => {
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -124,6 +124,7 @@ const ClientManagement = ({ permissions, filters }) => {
   const clientCardProps = (client) => ({
     key: client.id,
     client,
+    tasks: tasks.filter(t => t.assigned_client_id === client.id),
     onEdit: openEditModal,
     onView: openViewModal,
     onDelete: handleDelete,

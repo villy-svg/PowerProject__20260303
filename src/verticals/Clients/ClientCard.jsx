@@ -4,7 +4,9 @@ import React from 'react';
  * ClientCard
  * Grid/Tile view item for a client.
  */
-const ClientCard = ({ client, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+  const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
+
   const formatPhone = (phone) => {
     if (!phone) return 'N/A';
     const p = phone.toString();
@@ -21,6 +23,11 @@ const ClientCard = ({ client, onEdit, onView, onDelete, onToggleStatus, isMaster
       <div className="client-card-badges">
         <span className="dept-badge">{client.category_code || 'NO CAT'}</span>
         <span className="billing-badge">{client.billing_model_code || 'NO MODEL'}</span>
+        {pendingTasksCount > 0 && (
+          <span className="priority-badge" style={{ backgroundColor: '#ff4444', color: 'white', border: 'none' }}>
+            {pendingTasksCount} Task{pendingTasksCount > 1 ? 's' : ''}
+          </span>
+        )}
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
           <button
             className="action-icon-btn edit-pencil"

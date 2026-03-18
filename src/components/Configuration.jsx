@@ -52,7 +52,26 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
       }
     ],
     // Placeholders for other verticals
-    CLIENTS: [],
+    CLIENTS: [
+      {
+        id: 'manage_client_categories',
+        title: 'Client Category Management',
+        desc: 'Define and manage client categories (Enterprise, SME, etc.)',
+        icon: '',
+        action: () => setActiveVertical('client_category_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Categories'
+      },
+      {
+        id: 'manage_billing_models',
+        title: 'Billing Models Management',
+        desc: 'Define global billing models for client contracts.',
+        icon: '',
+        action: () => setActiveVertical('client_billing_model_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Models'
+      }
+    ],
     EMPLOYEES: [
       {
         id: 'manage_departments',

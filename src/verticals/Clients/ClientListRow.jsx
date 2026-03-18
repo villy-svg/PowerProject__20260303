@@ -4,7 +4,9 @@ import React from 'react';
  * ClientListRow
  * Row view item for a client.
  */
-const ClientListRow = ({ client, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+  const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
+
   const formatPhone = (phone) => {
     if (!phone) return 'N/A';
     const p = phone.toString();
@@ -25,6 +27,11 @@ const ClientListRow = ({ client, onEdit, onView, onDelete, onToggleStatus, isMas
         <div className="client-list-badges">
           <span className="dept-badge">{client.category_code || 'NO CAT'}</span>
           <span className="billing-badge">{client.billing_model_code || 'NO MODEL'}</span>
+          {pendingTasksCount > 0 && (
+            <span className="priority-badge" style={{ backgroundColor: '#ff4444', color: 'white', border: 'none', marginLeft: '4px' }}>
+              {pendingTasksCount}
+            </span>
+          )}
         </div>
 
         {/* PoC Contact */}
