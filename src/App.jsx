@@ -30,6 +30,10 @@ import EmployeeTaskTile from './verticals/Employees/EmployeeTaskTile';
 import EmployeeManagement from './verticals/Employees/EmployeeManagement';
 import DepartmentManagement from './verticals/Employees/DepartmentManagement';
 import EmployeeRoleManagement from './verticals/Employees/EmployeeRoleManagement';
+import ClientSubSidebar from './verticals/Clients/ClientSubSidebar';
+import ClientManagement from './verticals/Clients/ClientManagement';
+import ClientCategoryManagement from './verticals/Clients/ClientCategoryManagement';
+import ClientBillingModelManagement from './verticals/Clients/ClientBillingModelManagement';
 import Login from './components/Login';
 
 // Assets
@@ -251,7 +255,7 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views as the default vertical
-      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks'];
+      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
@@ -479,13 +483,21 @@ function App() {
               <DepartmentManagement />
             ) : activeVertical === 'employee_role_management' ? (
               <EmployeeRoleManagement />
+            ) : activeVertical === 'client_category_management' ? (
+              <ClientCategoryManagement />
+            ) : activeVertical === 'client_billing_model_management' ? (
+              <ClientBillingModelManagement />
             ) : (
               <VerticalWorkspace
-                label={(activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? "Employees" : VERTICALS[activeVertical]?.label}
+                label={
+                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
+                  (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? 'Clients' :
+                  VERTICALS[activeVertical]?.label
+                }
                 activeVertical={activeVertical}
                 tasks={tasks}
                 setTasks={addTask}
-                actualSetTasks={setTasks} // Pass raw setter for local updates
+                actualSetTasks={setTasks}
                 refreshTasks={fetchTasks}
                 updateTask={updateTask}
                 bulkUpdateTasks={bulkUpdateTasks}
@@ -497,7 +509,8 @@ function App() {
                 SidebarComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                      null
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientSubSidebar :
+                        null
                 }
                 TaskFormComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
@@ -512,9 +525,11 @@ function App() {
                 onHeaderClick={
                   (activeVertical === 'employee_tasks')
                     ? () => setActiveVertical('EMPLOYEES')
-                    : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS')
-                      ? () => setActiveVertical('hub_management')
-                      : null
+                    : (activeVertical === 'client_tasks')
+                      ? () => setActiveVertical('CLIENTS')
+                      : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS')
+                        ? () => setActiveVertical('hub_management')
+                        : null
                 }
                 user={user}
                 permissions={currentUserPermissions}
@@ -524,6 +539,12 @@ function App() {
                     user={user}
                     permissions={currentUserPermissions}
                     tasks={tasks.filter(t => t.verticalId === 'EMPLOYEES')}
+                  />
+                )}
+                {activeVertical === 'CLIENTS' && (
+                  <ClientManagement
+                    user={user}
+                    permissions={currentUserPermissions}
                   />
                 )}
               </VerticalWorkspace>
