@@ -122,18 +122,7 @@ const TaskListView = ({
                         </span>
                       )}
                       {task.assigneeName && (
-                        <span className="assignee-badge-mini" style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          backgroundColor: 'rgba(0, 122, 255, 0.1)',
-                          color: '#007aff',
-                          border: '1px solid rgba(0, 122, 255, 0.3)',
-                          padding: '1px 5px',
-                          borderRadius: '10px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '3px'
-                        }}>
+                        <span className="assignee-badge-mini" title={`Assignee: ${task.assigneeName}`}>
                           👤 {task.assigneeName.split(' ')[0]}
                         </span>
                       )}

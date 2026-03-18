@@ -69,6 +69,31 @@
 .priority-completed { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
 
 
+.assignee-badge, .assignee-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: 20px;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007aff;
+  border: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.assignee-badge {
+  padding: 2px 8px;
+  margin-left: 6px;
+}
+
+.assignee-badge-mini {
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-size: 0.6rem;
+}
+
 /* Navigation and Actions */
 .card-navigation {
   display: flex;

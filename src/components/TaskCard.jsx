@@ -74,16 +74,7 @@ const TaskCard = ({
           </span>
         )}
         {task.assigneeName && (
-          <span className="assignee-badge" style={{
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            backgroundColor: 'rgba(0, 122, 255, 0.1)',
-            color: '#007aff',
-            border: '1px solid rgba(0, 122, 255, 0.3)',
-            padding: '2px 6px',
-            borderRadius: '12px',
-            marginLeft: '6px'
-          }}>
+          <span className="assignee-badge" title={`Assignee: ${task.assigneeName}`}>
             👤 {task.assigneeName.split(' ')[0]}
           </span>
         )}
