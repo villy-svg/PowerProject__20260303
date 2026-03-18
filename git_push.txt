@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "20260318 Client Manager Unlock 1.0.1"
+git commit -m "20260318 Client Manager Unlock 1.1.0"
 git push origin main

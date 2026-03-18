@@ -156,13 +156,7 @@ const ClientSubSidebar = ({
       {/* Nav Quick Links */}
       {canAccessAdmin && (
         <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: (activeVertical === 'CLIENTS') ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('CLIENTS')}
-          >
-            Clients
-          </button>
+
           <button
             className="halo-button"
             style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
@@ -182,7 +176,25 @@ const ClientSubSidebar = ({
 
       {/* Filters Header */}
       <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Clients</p>
+        <button
+          onClick={() => setActiveVertical('CLIENTS')}
+          style={{
+            margin: 0,
+            fontWeight: 700,
+            fontSize: '1rem',
+            color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
+            letterSpacing: '0.5px',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
+            transition: 'all 0.2s ease'
+          }}
+          className="sidebar-header-nav-btn"
+        >
+          Clients
+        </button>
         <button
           onClick={onReset}
           style={{ background: 'none', border: 'none', color: 'var(--brand-green)', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer', padding: '4px' }}
