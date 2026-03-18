@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 /**
  * EmployeeListRow
  * Row view item for an employee.
  */
-const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin, availableHubs, onUpdateHub }) => {
+  const [isEditingHub, setIsEditingHub] = useState(false);
+  const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
+
+  const handleHubDoubleClick = (e) => {
+    e.stopPropagation();
+    setIsEditingHub(true);
+    setSelectedHubId(emp.hub_id || 'ALL');
+  };
+
+  const handleHubChange = async (e) => {
+    e.stopPropagation();
+    const newHubId = e.target.value;
+    setSelectedHubId(newHubId);
+    setIsEditingHub(false);
+    if (onUpdateHub && newHubId !== (emp.hub_id || 'ALL')) {
+      await onUpdateHub(emp.id, newHubId);
+    }
+  };
+
+  const handleHubBlur = () => {
+    setIsEditingHub(false);
+  };
+
   return (
     <div 
       className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''}`}
@@ -33,7 +56,37 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMast
         </div>
         <div className="list-meta-badges">
           <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
-          <span className="hub-badge">{emp.hub_code || 'NO HUB'}</span>
+          <span 
+            className="hub-badge" 
+            onDoubleClick={handleHubDoubleClick} 
+            title="Double-click to change primary hub"
+            style={{ cursor: 'pointer', padding: isEditingHub ? '0 4px' : undefined }}
+          >
+            {isEditingHub ? (
+              <select 
+                value={selectedHubId} 
+                onChange={handleHubChange} 
+                onBlur={handleHubBlur}
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                  background: 'var(--card-bg, #1a1a1a)', 
+                  color: 'inherit', 
+                  border: 'none', 
+                  outline: 'none', 
+                  cursor: 'pointer',
+                  fontSize: 'inherit',
+                  fontFamily: 'inherit',
+                  fontWeight: 'inherit'
+                }}
+              >
+                <option value="ALL">ALL</option>
+                {availableHubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
+              </select>
+            ) : (
+              emp.hub_code || 'NO HUB'
+            )}
+          </span>
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
         <div className="list-contact" style={{ display: 'flex', alignItems: 'center' }}>

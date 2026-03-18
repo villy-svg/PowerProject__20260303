@@ -20,7 +20,7 @@ import ConflictModal from '../../components/ConflictModal';
  * Displays employee records, profiles, and administrative summaries.
  */
 const EmployeeManagement = ({ permissions, filters }) => {
-  const { employees, loading, fetchEmployees, addEmployee, updateEmployee, toggleStatus, deleteEmployee } = useEmployees();
+  const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee } = useEmployees();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -218,7 +218,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            isMasterAdmin={isMasterAdmin} 
+                            isMasterAdmin={isMasterAdmin}
+                            availableHubs={hubs}
+                            onUpdateHub={updateEmployeeHub}
                           />
                         ) : (
                           <EmployeeListRow 
@@ -228,7 +230,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            isMasterAdmin={isMasterAdmin} 
+                            isMasterAdmin={isMasterAdmin}
+                            availableHubs={hubs}
+                            onUpdateHub={updateEmployeeHub}
                           />
                         )
                       ))}
@@ -261,7 +265,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
-                        isMasterAdmin={isMasterAdmin} 
+                        isMasterAdmin={isMasterAdmin}
+                        availableHubs={hubs}
+                        onUpdateHub={updateEmployeeHub}
                       />
                     ) : (
                       <EmployeeListRow 
@@ -271,7 +277,9 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
-                        isMasterAdmin={isMasterAdmin} 
+                        isMasterAdmin={isMasterAdmin}
+                        availableHubs={hubs}
+                        onUpdateHub={updateEmployeeHub}
                       />
                     )
                   ))}

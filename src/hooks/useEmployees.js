@@ -9,23 +9,25 @@ import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../utils/
  */
 export const useEmployees = () => {
   const [employees, setEmployees] = useState([]);
+  const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
     try {
       // Robust Fetch: Separate requests for data + metadata to avoid fragile joins/400 errors
-      const [{ data: emps, error: empErr }, { data: hubs }, { data: roles }, { data: depts }] = await Promise.all([
+      const [{ data: emps, error: empErr }, { data: hubsData }, { data: roles }, { data: depts }] = await Promise.all([
         supabase.from('employees').select('*').order('full_name', { ascending: true }),
-        supabase.from('hubs').select('id, hub_code'),
+        supabase.from('hubs').select('id, hub_code').order('hub_code'),
         supabase.from('employee_roles').select('id, role_code, seniority_level'),
         supabase.from('departments').select('id, dept_code')
       ]);
 
       if (empErr) throw empErr;
+      if (hubsData) setHubs(hubsData);
 
       // Efficient ID Mapping
-      const hubMap = new Map((hubs || []).map(h => [h.id, h.hub_code]));
+      const hubMap = new Map((hubsData || []).map(h => [h.id, h.hub_code]));
       const roleMap = new Map((roles || []).map(r => [r.id, { role_code: r.role_code, seniority_level: r.seniority_level }]));
       const deptMap = new Map((depts || []).map(d => [d.id, d.dept_code]));
 
@@ -80,6 +82,30 @@ export const useEmployees = () => {
 
     if (data?.[0]) {
       await logEmployeeHistory(data[0].id, data[0], 'INSERT');
+    }
+
+    await fetchEmployees();
+  };
+
+  const updateEmployeeHub = async (id, newHubId) => {
+    const updateData = {
+      hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId,
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('employees')
+      .update(updateData)
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('useEmployees: Update Hub Error:', error);
+      throw error;
+    }
+
+    if (data?.[0]) {
+      await logEmployeeHistory(id, data[0], 'UPDATE_HUB');
     }
 
     await fetchEmployees();
@@ -158,10 +184,12 @@ export const useEmployees = () => {
 
   return {
     employees,
+    hubs,
     loading,
     fetchEmployees,
     addEmployee,
     updateEmployee,
+    updateEmployeeHub,
     toggleStatus,
     deleteEmployee
   };
