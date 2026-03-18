@@ -408,8 +408,15 @@
 .v-lvl-btn.active {
   opacity: 1;
   border-color: var(--brand-green, #10b981);
-  background: var(--brand-green, #10b981);
-  color: white;
+  background: rgba(16, 185, 129, 0.15); /* Subtle green tint */
+  color: var(--brand-green, #10b981);
+  border-width: 2px;
+}
+
+.v-lvl-btn.active.lvl-none {
+  border-color: #7f8c8d;
+  background: rgba(127, 140, 141, 0.15); /* Subtle gray tint */
+  color: #7f8c8d;
 }
 
 /* Table Tags */

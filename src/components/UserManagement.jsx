@@ -132,15 +132,20 @@ const UserManagement = ({ currentUser }) => {
                     {u.role_id?.startsWith('master') ? (
                       <span className="v-tag master">All Verticals (Master)</span>
                     ) : (
-                      u.vertical_permissions && Object.keys(u.vertical_permissions).length > 0 ? (
-                        Object.entries(u.vertical_permissions).map(([vId, level]) => (
-                          <span key={vId} className={`v-tag level-${level}`}>
-                            {vId}: {level}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="v-tag locked">No Access</span>
-                      )
+                      (() => {
+                        const activePerms = Object.entries(u.vertical_permissions || {})
+                          .filter(([_, level]) => level !== 'none');
+                        
+                        return activePerms.length > 0 ? (
+                          activePerms.map(([vId, level]) => (
+                            <span key={vId} className={`v-tag level-${level}`}>
+                              {vId}: {level}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="v-tag locked">No Access</span>
+                        );
+                      })()
                     )}
                   </div>
                 </td>
