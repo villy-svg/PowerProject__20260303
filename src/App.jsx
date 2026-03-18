@@ -257,7 +257,7 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views as the default vertical
-      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks'];
+      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
@@ -493,7 +493,7 @@ function App() {
               <VerticalWorkspace
                 label={
                   (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
-                  (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? 'Clients' :
+                  (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
                   VERTICALS[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
@@ -511,26 +511,26 @@ function App() {
                 SidebarComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientSubSidebar :
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientTaskForm :
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
                   activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks') ? ClientTaskTile :
+                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null
                 }
                 onHeaderClick={
                   (activeVertical === 'employee_tasks')
                     ? () => setActiveVertical('EMPLOYEES')
-                    : (activeVertical === 'client_tasks')
-                      ? () => setActiveVertical('CLIENTS')
+                    : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
+                       ? () => setActiveVertical('CLIENTS')
                       : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS')
                         ? () => setActiveVertical('hub_management')
                         : null

@@ -86,9 +86,17 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (isViewOnly) return;
     onSubmit(formData);
+  };
+
+  const handleSaveAndExit = (e) => {
+    e.preventDefault();
+    if (isViewOnly) return;
+    if (validatePage(currentPage)) {
+      onSubmit(formData);
+    }
   };
 
   return (
@@ -134,9 +142,16 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
         )}
         
         {currentPage < 3 ? (
-          <button type="submit" className="halo-button next-btn">
-            {isViewOnly ? 'Next Step ➔' : 'Continue ➔'}
-          </button>
+          <div className="button-group">
+            {!isViewOnly && initialData.id && (
+              <button type="button" className="halo-button save-btn secondary-action" onClick={handleSaveAndExit} disabled={loading}>
+                {loading ? 'Processing...' : 'Save Changes'}
+              </button>
+            )}
+            <button type="submit" className="halo-button next-btn">
+              {isViewOnly ? 'Next Step ➔' : 'Continue ➔'}
+            </button>
+          </div>
         ) : (
           !isViewOnly && (
             <button type="submit" className="halo-button save-btn" disabled={loading}>

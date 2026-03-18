@@ -166,6 +166,13 @@ const ClientSubSidebar = ({
           </button>
           <button
             className="halo-button"
+            style={{ width: '100%', opacity: activeVertical === 'leads_funnel' ? 1 : 0.7 }}
+            onClick={() => setActiveVertical('leads_funnel')}
+          >
+            Leads Funnel
+          </button>
+          <button
+            className="halo-button"
             style={{ width: '100%', opacity: activeVertical === 'client_category_management' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('client_category_management')}
           >
