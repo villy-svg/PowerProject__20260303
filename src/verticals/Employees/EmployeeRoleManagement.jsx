@@ -100,7 +100,7 @@ const EmployeeRoleManagement = () => {
   };
 
   return (
-    <>
+    <div className="management-view-container">
       <MasterPageHeader
         title="Employee Role Management"
         description="Define and manage specific job roles for the employee vertical."
@@ -259,7 +259,7 @@ const EmployeeRoleManagement = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

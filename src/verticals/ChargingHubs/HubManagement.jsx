@@ -174,7 +174,7 @@ const HubManagement = () => {
   };
 
   return (
-    <>
+    <div className="management-view-container">
       <MasterPageHeader
         title="Hub Management"
         description="Create and manage global charging hub locations."
@@ -350,7 +350,7 @@ const HubManagement = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

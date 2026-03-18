@@ -28,7 +28,7 @@ const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
   ];
 
   return (
-    <div className="role-management-view">
+    <div className="management-view-container">
       <MasterPageHeader
         title="Role Permissions Matrix"
         description="Global overrides for Create, Read, Update, and Delete actions across all system entities."

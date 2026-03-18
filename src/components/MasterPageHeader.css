@@ -8,6 +8,14 @@
   gap: 12px;
 }
 
+/* Standardized container for all Configuration / Management views */
+.management-view-container {
+  padding: 32px clamp(24px, 6vw, 80px); /* Responsive horizontal padding */
+  width: 100%;
+  min-height: calc(100vh - 100px);
+  animation: fadeIn 0.4s ease-out;
+}
+
 .header-row-1 h1 {
   font-size: 1.8rem;
   font-weight: 800;

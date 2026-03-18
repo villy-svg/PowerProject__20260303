@@ -98,7 +98,7 @@ const DepartmentManagement = () => {
   };
 
   return (
-    <>
+    <div className="management-view-container">
       <MasterPageHeader
         title="Department Management"
         description="Define and manage organization departments for employee tracking."
@@ -239,7 +239,7 @@ const DepartmentManagement = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

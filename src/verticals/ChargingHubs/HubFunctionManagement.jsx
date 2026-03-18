@@ -100,7 +100,7 @@ const HubFunctionManagement = () => {
   };
 
   return (
-    <>
+    <div className="management-view-container">
       <MasterPageHeader
         title="Hub Function Management"
         description="Define and manage functional categories for charging hub tasks."
@@ -251,7 +251,7 @@ const HubFunctionManagement = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

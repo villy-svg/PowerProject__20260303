@@ -90,7 +90,7 @@ const UserManagement = ({ currentUser }) => {
   if (loading && users.length === 0) return <div className="user-mgmt-loading">Loading Users...</div>;
 
   return (
-    <div className="user-management-container">
+    <div className="management-view-container">
       <header className="user-mgmt-header">
         <h2>User Management</h2>
         <p>Manage application users, their roles, and vertical access levels.</p>
