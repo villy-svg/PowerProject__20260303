@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import './EmployeeRoleManagement.css';
+import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/MasterPageHeader';
 
 const EmployeeRoleManagement = () => {
@@ -10,6 +11,7 @@ const EmployeeRoleManagement = () => {
   const [editingRole, setEditingRole] = useState(null);
   const [formData, setFormData] = useState({ name: '', role_code: '', description: '', seniority_level: 1 });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchRoles();
@@ -102,6 +104,22 @@ const EmployeeRoleManagement = () => {
       <MasterPageHeader
         title="Employee Role Management"
         description="Define and manage specific job roles for the employee vertical."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
         rightActions={
           <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
             + New Role
@@ -111,25 +129,64 @@ const EmployeeRoleManagement = () => {
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Roles...</div>}
 
-      <div className="hubs-grid">
-        {roles.map(role => (
-          <div key={role.id} className="hub-card">
-            <div className="hub-code-tag">{role.role_code || 'NO CODE'}</div>
-            <div className="seniority-tag">Level {role.seniority_level || 1}</div>
-            <h3>{role.name}</h3>
-            <p className="hub-city">{role.description || 'No description provided'}</p>
-            <div className="hub-actions">
-              <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)}>Edit</button>
-              <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)}>Delete</button>
+      {viewMode === 'grid' ? (
+        <div className="hubs-grid">
+          {roles.map(role => (
+            <div key={role.id} className="hub-card">
+              <div className="hub-code-tag">{role.role_code || 'NO CODE'}</div>
+              <div className="seniority-tag">Level {role.seniority_level || 1}</div>
+              <h3>{role.name}</h3>
+              <p className="hub-city">{role.description || 'No description provided'}</p>
+              <div className="hub-actions">
+                <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)}>Edit</button>
+                <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)}>Delete</button>
+              </div>
             </div>
-          </div>
-        ))}
-        {roles.length === 0 && !loading && (
-          <div className="empty-state">
-            <p>No roles found. Create your first employee role to get started!</p>
-          </div>
-        )}
-      </div>
+          ))}
+          {roles.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No roles found. Create your first employee role to get started!</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="hubs-list-view">
+          <table className="management-table">
+            <thead>
+              <tr>
+                <th>Role Name</th>
+                <th>Code</th>
+                <th>Seniority</th>
+                <th>Description</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {roles.map(role => (
+                <tr key={role.id}>
+                  <td className="name-cell">{role.name}</td>
+                  <td><code className="code-font">{role.role_code || '—'}</code></td>
+                  <td>
+                    <span className="seniority-tag">Level {role.seniority_level || 1}</span>
+                  </td>
+                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{role.description || '—'}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
+                      <button className="icon-btn edit" onClick={() => handleOpenModal(role)} title="Edit">✎</button>
+                      <button className="icon-btn delete" onClick={() => handleDelete(role.id)} title="Delete">×</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {roles.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No roles found.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>

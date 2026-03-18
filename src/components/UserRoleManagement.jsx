@@ -1,13 +1,13 @@
 import React from 'react';
 import { ROLE_LIST } from '../constants/roles';
-import './RoleManagement.css';
+import './UserRoleManagement.css';
 
 /**
- * RoleManagement Component
+ * UserRoleManagement Component
  * Provides a matrix to toggle CRUD capabilities for each role.
  * Only accessible by Master Admin.
  */
-const RoleManagement = ({ permissions, setPermissions, onBack }) => {
+const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
 
   const handleToggle = (roleId, capability) => {
     const updatedPermissions = {
@@ -62,8 +62,8 @@ const RoleManagement = ({ permissions, setPermissions, onBack }) => {
                 {capabilities.map(cap => (
                   <td key={cap.id} className="checkbox-cell">
                     <label className="switch">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={permissions[role.id]?.[cap.id] || false}
                         onChange={() => handleToggle(role.id, cap.id)}
                         disabled={role.id === 'master_admin'} // Safety: Admin cannot lock themselves out
@@ -77,7 +77,7 @@ const RoleManagement = ({ permissions, setPermissions, onBack }) => {
           </tbody>
         </table>
       </div>
-      
+
       <div className="matrix-footer">
         <p>⚠️ Changes are saved automatically to the system load.</p>
       </div>
@@ -85,4 +85,4 @@ const RoleManagement = ({ permissions, setPermissions, onBack }) => {
   );
 };
 
-export default RoleManagement;
+export default UserRoleManagement;

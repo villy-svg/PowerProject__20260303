@@ -34,13 +34,6 @@ jobs:
           echo "📡 Linking to Supabase project..."
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           
-          # Consolidate repair operations to ensure sync
-          echo "🔧 Ensuring migration history consistency..."
-          # Repair problematic migration IDs if they exist in a broken state
-          for m in 20260303054353 20260316020000 20260316030000 20260316040000 20260317080000; do
-            supabase migration repair --status applied $m || echo "⚠️ Skip repair for $m"
-          done
-          
           # Deploy all missing migrations directly (avoids slow db pull)
           echo "📤 Pushing local migrations to remote..."
           supabase db push --yes --include-all

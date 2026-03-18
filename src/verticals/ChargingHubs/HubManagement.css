@@ -37,6 +37,26 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
+  max-height: calc(100vh - 280px); /* Strict height for container scroll */
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 24px;
+}
+
+/* Custom internal scrollbar for grid */
+.hubs-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.hubs-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+.hubs-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.hubs-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-green);
 }
 
 .hub-card {
@@ -124,8 +144,24 @@
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  overflow: hidden;
+  max-height: calc(100vh - 280px); /* Strict height for container scroll */
+  overflow-y: auto;
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom internal scrollbar for list view */
+.hubs-list-view::-webkit-scrollbar {
+  width: 6px;
+}
+.hubs-list-view::-webkit-scrollbar-track {
+  background: transparent;
+}
+.hubs-list-view::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.hubs-list-view::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-green);
 }
 
 .management-table {
@@ -137,14 +173,17 @@
 .management-table th {
   text-align: left;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--panel-bg); /* Use solid color for sticky header */
   border-bottom: 2px solid var(--border-color);
   color: var(--text-color);
-  opacity: 0.6;
+  opacity: 0.9;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .management-table td {

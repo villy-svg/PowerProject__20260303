@@ -17,7 +17,7 @@ import VerticalWorkspace from './components/VerticalWorkspace';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import Configuration from './components/Configuration';
 import UserProfile from './components/UserProfile';
-import RoleManagement from './components/RoleManagement';
+import UserRoleManagement from './components/UserRoleManagement';
 import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
@@ -468,7 +468,7 @@ function App() {
             ) : activeVertical === 'configuration' ? (
               <Configuration tasks={tasks} setTasks={setTasks} user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} />
             ) : activeVertical === 'role_management' ? (
-              <RoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
+              <UserRoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
             ) : activeVertical === 'hub_management' ? (
