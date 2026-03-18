@@ -123,7 +123,7 @@ const TaskListView = ({
                       )}
                       {task.assigneeName && (
                         <span className="assignee-badge-mini" title={`Assignee: ${task.assigneeName}`}>
-                          👤 {task.assigneeName.split(' ')[0]}
+                          {task.assigneeName.split(' ')[0]}
                         </span>
                       )}
 
