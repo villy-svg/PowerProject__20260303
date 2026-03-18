@@ -1,0 +1,70 @@
+.master-page-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.master-page-header .header-row-1 h1 {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-green);
+  line-height: 1.2;
+}
+
+.master-page-header .header-row-2 p {
+  margin: 0;
+  color: var(--text-color);
+  opacity: 0.65;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 900px;
+}
+
+.master-header-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.master-header-left, .master-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Ensure halo buttons have consistent vertical alignment */
+.master-header-actions-row .halo-button {
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Specific fix for view-mode-toggle positioning */
+.master-header-left .view-mode-toggle {
+  margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+  .master-header-actions-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .master-header-right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

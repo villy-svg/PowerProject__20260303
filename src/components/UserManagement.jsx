@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LEVELS, ROLE_SCOPES, DEFAULT_ROLE_PERMISSIONS } from '../constants/roles';
+import MasterPageHeader from './MasterPageHeader';
 import './UserManagement.css';
 
 const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
@@ -91,13 +92,18 @@ const UserManagement = ({ currentUser }) => {
 
   return (
     <div className="management-view-container">
-      <header className="user-mgmt-header">
-        <h2>User Management</h2>
-        <p>Manage application users, their roles, and vertical access levels.</p>
-      </header>
+      <MasterPageHeader
+        title="User Management"
+        description="Manage application users, their roles, and vertical access levels."
+        rightActions={
+          <div className="user-mgmt-actions">
+            {/* Contextual actions could go here, like 'Invite User' if added later */}
+          </div>
+        }
+      />
 
       {status.text && (
-        <div className={`status-banner ${status.type}`}>
+        <div className={`status-banner ${status.type}`} style={{ marginTop: '20px' }}>
           {status.text}
           <button onClick={() => setStatus({ type: '', text: '' })}>×</button>
         </div>

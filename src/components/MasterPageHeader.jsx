@@ -26,11 +26,11 @@ const MasterPageHeader = ({ title, description, leftActions, rightActions }) => 
       )}
       
       {(leftActions || rightActions) && (
-        <div className="header-row-3">
-          <div className="header-left">
+        <div className="master-header-actions-row">
+          <div className="master-header-left">
             {leftActions}
           </div>
-          <div className="header-right">
+          <div className="master-header-right">
             {rightActions}
           </div>
         </div>
