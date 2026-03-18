@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTheme } from './theme/useTheme';
 import ThemeToggle from './theme/themeToggle';
 import './App.css';
@@ -9,7 +9,7 @@ import { masterErrorHandler } from './services/masterErrorHandler';
 
 // Constants
 import { VERTICALS } from './constants/verticals';
-import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
+import { DEFAULT_ROLE_PERMISSIONS, getPermissionsForLevel } from './constants/roles';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -116,7 +116,28 @@ function App() {
     return saved !== null ? saved === 'true' : true;
   });
 
-  const currentUserPermissions = user ? (rolePermissions[user.roleId] || DEFAULT_ROLE_PERMISSIONS[user.roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer']) : {};
+  // Compute current permissions dynamically based on active vertical
+  const currentUserPermissions = useMemo(() => {
+    if (!user) return {};
+    
+    const roleId = user.roleId;
+    const isMasterScope = roleId?.startsWith('master_');
+    
+    if (isMasterScope) {
+      // Global scope: use the static permissions from the roleId
+      return rolePermissions[roleId] || DEFAULT_ROLE_PERMISSIONS[roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer'];
+    } else {
+      // Vertical scope: look up the specific level for this vertical
+      const level = user.verticalPermissions?.[activeVertical] || 'viewer';
+      const baseCaps = getPermissionsForLevel(level);
+      
+      return {
+        ...baseCaps,
+        scope: 'assigned',
+        canAccessConfig: level === 'admin' // Only 'vertical_admin' level has config access
+      };
+    }
+  }, [user, activeVertical, rolePermissions]);
 
   // Test database connection on app start
   useEffect(() => {
@@ -165,7 +186,8 @@ function App() {
         name: data.name || "User",
         role: data.role_id,
         roleId: data.role_id,
-        assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"]
+        assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"],
+        verticalPermissions: data.vertical_permissions || {}
       });
       setProfileError(null);
     }

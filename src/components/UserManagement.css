@@ -353,36 +353,88 @@
   line-height: 1.3;
 }
 
+/* Vertical Permission List in Modal */
 .vertical-assignment-section {
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
 
-.selection-warning {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #f39c12;
+.vertical-permission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.vertical-perm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.vertical-perm-item .v-name {
   font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-color);
 }
 
-.master-scope-notice {
-  margin: 20px 0;
-  padding: 14px;
-  background: rgba(52, 152, 219, 0.1);
-  border: 1px solid rgba(52, 152, 219, 0.3);
-  border-radius: 10px;
-  font-size: 13px;
-  color: #3498db;
+.v-level-selector {
+  display: flex;
+  gap: 4px;
 }
 
-.master-scope-notice strong {
+.v-lvl-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.5;
+}
+
+.v-lvl-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.v-lvl-btn.active {
+  opacity: 1;
+  border-color: var(--accent-color);
+  background: var(--accent-color);
   color: white;
 }
 
+/* Level Specific Colors */
+.v-lvl-btn.lvl-admin.active, .v-tag.level-admin { background: #e74c3c; border-color: #e74c3c; color: white; }
+.v-lvl-btn.lvl-editor.active, .v-tag.level-editor { background: #f39c12; border-color: #f39c12; color: white; }
+.v-lvl-btn.lvl-contributor.active, .v-tag.level-contributor { background: #3498db; border-color: #3498db; color: white; }
+.v-lvl-btn.lvl-viewer.active, .v-tag.level-viewer { background: #2ecc71; border-color: #2ecc71; color: white; }
+.v-lvl-btn.lvl-none.active, .v-tag.locked { background: #7f8c8d; border-color: #7f8c8d; color: white; }
+
+/* Table Tags */
+.v-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
 .v-tag.master {
-  background: rgba(52, 152, 219, 0.2);
-  color: #3498db;
-  border: 1px solid rgba(52, 152, 219, 0.4);
+  background: linear-gradient(135deg, #3498db, #9b59b6);
+  color: white;
+  border: none;
 }
 
 @keyframes fadeIn {

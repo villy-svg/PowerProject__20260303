@@ -13,6 +13,7 @@ const UserManagement = ({ currentUser }) => {
   // Separate state for role components during editing
   const [editRoleScope, setEditRoleScope] = useState('vertical');
   const [editRoleLevel, setEditRoleLevel] = useState('viewer');
+  const [editVerticalPermissions, setEditVerticalPermissions] = useState({});
 
   useEffect(() => {
     fetchUsers();
@@ -38,6 +39,7 @@ const UserManagement = ({ currentUser }) => {
     const [scope, level] = user.role_id?.split('_') || ['vertical', 'viewer'];
     setEditRoleScope(scope);
     setEditRoleLevel(level);
+    setEditVerticalPermissions(user.vertical_permissions || {});
     setEditingUser({ ...user });
   };
 
@@ -50,17 +52,18 @@ const UserManagement = ({ currentUser }) => {
 
     const newRoleId = `${editRoleScope}_${editRoleLevel}`;
     
-    // If scope is master, they should generally have all verticals (though UI might track specific ones)
-    // For now, we keep the assigned_verticals as is unless they were empty
+    // If scope is master, they see all verticals. 
+    // If scope is vertical, assigned_verticals are derived from keys with non-none levels.
     const finalVerticals = editRoleScope === 'master' 
       ? VERTICAL_LIST.map(v => v.id) 
-      : editingUser.assigned_verticals;
+      : Object.keys(editVerticalPermissions).filter(v => editVerticalPermissions[v] !== 'none');
 
     const { data, error } = await supabase
       .from('user_profiles')
       .update({
         role_id: newRoleId,
-        assigned_verticals: finalVerticals
+        assigned_verticals: finalVerticals,
+        vertical_permissions: editRoleScope === 'master' ? {} : editVerticalPermissions
       })
       .eq('id', editingUser.id)
       .select();
@@ -75,15 +78,11 @@ const UserManagement = ({ currentUser }) => {
     }
   };
 
-  const toggleVertical = (vId) => {
-    setEditingUser(prev => {
-      const verticals = [...(prev.assigned_verticals || [])];
-      if (verticals.includes(vId)) {
-        return { ...prev, assigned_verticals: verticals.filter(id => id !== vId) };
-      } else {
-        return { ...prev, assigned_verticals: [...verticals, vId] };
-      }
-    });
+  const updateVerticalLevel = (vId, level) => {
+    setEditVerticalPermissions(prev => ({
+      ...prev,
+      [vId]: level
+    }));
   };
 
   if (loading && users.length === 0) return <div className="user-mgmt-loading">Loading Users...</div>;
@@ -131,9 +130,11 @@ const UserManagement = ({ currentUser }) => {
                     {u.role_id?.startsWith('master') ? (
                       <span className="v-tag master">All Verticals (Master)</span>
                     ) : (
-                      u.assigned_verticals?.length > 0 ? (
-                        u.assigned_verticals.map(vId => (
-                          <span key={vId} className="v-tag">{vId}</span>
+                      u.vertical_permissions && Object.keys(u.vertical_permissions).length > 0 ? (
+                        Object.entries(u.vertical_permissions).map(([vId, level]) => (
+                          <span key={vId} className={`v-tag level-${level}`}>
+                            {vId}: {level}
+                          </span>
                         ))
                       ) : (
                         <span className="v-tag locked">No Access</span>
@@ -203,24 +204,34 @@ const UserManagement = ({ currentUser }) => {
                 </div>
               </div>
 
-              {/* 3. Vertical Selection (Only for Vertical Scope) */}
+              {/* 3. Granular Vertical Permissions (Only for Vertical Scope) */}
               {editRoleScope === 'vertical' && (
                 <div className="form-section vertical-assignment-section">
-                  <label className="section-label">3. Assign Verticals</label>
-                  <div className="vertical-selection-grid">
-                    {VERTICAL_LIST.map(v => (
-                      <button
-                        key={v.id}
-                        type="button"
-                        className={`v-select-btn ${editingUser.assigned_verticals?.includes(v.id) ? 'active' : ''}`}
-                        onClick={() => toggleVertical(v.id)}
-                      >
-                        {v.label}
-                      </button>
-                    ))}
+                  <label className="section-label">3. Configure Vertical Access Levels</label>
+                  <div className="vertical-permission-list">
+                    {VERTICAL_LIST.map(v => {
+                      const currentLevel = editVerticalPermissions[v.id] || 'none';
+                      return (
+                        <div key={v.id} className="vertical-perm-item">
+                          <span className="v-name">{v.label}</span>
+                          <div className="v-level-selector">
+                            {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => (
+                              <button
+                                key={lvl}
+                                type="button"
+                                className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                onClick={() => updateVerticalLevel(v.id, lvl)}
+                              >
+                                {lvl.toUpperCase()}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {(!editingUser.assigned_verticals || editingUser.assigned_verticals.length === 0) && (
-                    <p className="selection-warning">⚠️ No verticals assigned. User will have no workspace access.</p>
+                  {Object.values(editVerticalPermissions).every(lvl => lvl === 'none') && (
+                    <p className="selection-warning">⚠️ No access granted to any vertical.</p>
                   )}
                 </div>
               )}

@@ -58,4 +58,23 @@ export const ROLE_LIST = Object.keys(DEFAULT_ROLE_PERMISSIONS).map(id => ({
   id,
   label: id.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
   icon: id.includes('master') ? '👑' : '🏢'
-}));
+}));
+
+/**
+ * Returns permissions flags for a given capability level.
+ * @param {string} level - 'admin', 'editor', 'contributor', or 'viewer'
+ * @returns {object} CRUD flags
+ */
+export const getPermissionsForLevel = (level) => {
+  switch (level) {
+    case 'admin':
+      return { canCreate: true, canRead: true, canUpdate: true, canDelete: true };
+    case 'editor':
+      return { canCreate: true, canRead: true, canUpdate: true, canDelete: false };
+    case 'contributor':
+      return { canCreate: true, canRead: true, canUpdate: false, canDelete: false };
+    case 'viewer':
+    default:
+      return { canCreate: false, canRead: true, canUpdate: false, canDelete: false };
+  }
+};
