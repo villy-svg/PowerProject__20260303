@@ -1,5 +1,6 @@
 import React from 'react';
 import { ROLE_LIST } from '../constants/roles';
+import MasterPageHeader from './MasterPageHeader';
 import './UserRoleManagement.css';
 
 /**

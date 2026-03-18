@@ -116,6 +116,15 @@ body {
   padding-top: 40px;
 }
 
+/* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
+.management-view-container {
+  padding: 0 40px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.4s ease-out;
+}
+
 /* ==========================================================================
    4. HEADER & BRANDING
    ========================================================================== */

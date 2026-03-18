@@ -1,0 +1,25 @@
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 147 modules transformed.
+[31m✗[39m Build failed in 934ms
+[31merror during build:
+[31msrc/App.jsx (22:7): "default" is not exported by "src/verticals/ChargingHubs/HubManagement.jsx", imported by "src/App.jsx".[31m
+file: [36mC:/Users/villy/OneDrive/Documents/PowerPod New/Coding Practice/PowerProject/src/App.jsx:22:7[31m
+[33m
+20: import UserRoleManagement from './components/UserRoleManagement';
+21: import UserManagement from './components/UserManagement';
+22: import HubManagement from './verticals/ChargingHubs/HubManagement';
+           ^
+23: import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
+24: import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
+[31m
+    at getRollupError (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+    at error (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
+    at Module.error (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
+    at Module.traceVariable (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
+    at ModuleScope.findVariable (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
+    at FunctionScope.findVariable (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at FunctionBodyScope.findVariable (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at Identifier.bind (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:5447:40)
+    at CallExpression.bind (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:2825:28)
+    at CallExpression.bind (file:///C:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/node_modules/rollup/dist/es/shared/node-entry.js:12179:15)[39m
