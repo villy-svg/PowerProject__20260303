@@ -29,15 +29,15 @@ const RoleManagement = ({ permissions, setPermissions, onBack }) => {
 
   return (
     <div className="role-management-view">
-      <header className="config-header">
-        <div className="header-nav">
+      <MasterPageHeader
+        title="Role Permissions Matrix"
+        description="Global overrides for Create, Read, Update, and Delete actions across all system entities."
+        leftActions={
           <button className="halo-button back-link-btn" onClick={onBack}>
             ← Back to Configuration
           </button>
-        </div>
-        <h2>Role Permissions Matrix</h2>
-        <p>Global overrides for Create, Read, Update, and Delete actions.</p>
-      </header>
+        }
+      />
 
       <div className="matrix-container">
         <table className="permissions-table">

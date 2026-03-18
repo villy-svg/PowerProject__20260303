@@ -53,6 +53,7 @@ const HubManagement = () => {
   const [editingHub, setEditingHub] = useState(null);
   const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [viewMode, setViewMode] = useState('grid');
 
   // MASTER-SLAVE: Unified Duplicate Detection
   const hubsWithDuplicateInfo = useDuplicateDetection(hubs, {
@@ -177,6 +178,22 @@ const HubManagement = () => {
       <MasterPageHeader
         title="Hub Management"
         description="Create and manage global charging hub locations."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
         rightActions={
           <>
             <HubCSVDownload 
@@ -196,28 +213,70 @@ const HubManagement = () => {
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
 
-      <div className="hubs-grid">
-        {hubsWithDuplicateInfo.map(hub => (
-          <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
-            {hub.isDuplicate && (
-              <span className="duplicate-badge" style={{ position: 'absolute', top: '10px', right: '10px' }}>DUP</span>
-            )}
-            <div className={`status-badge ${hub.status}`}>{hub.status}</div>
-            <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
-            <h3>{hub.name}</h3>
-            <p className="hub-city">{hub.city || 'No city set'}</p>
-            <div className="hub-actions">
-              <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
-              <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
+      {viewMode === 'grid' ? (
+        <div className="hubs-grid">
+          {hubsWithDuplicateInfo.map(hub => (
+            <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
+              {hub.isDuplicate && (
+                <span className="duplicate-badge" style={{ position: 'absolute', top: '10px', right: '10px' }}>DUP</span>
+              )}
+              <div className={`status-badge ${hub.status}`}>{hub.status}</div>
+              <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
+              <h3>{hub.name}</h3>
+              <p className="hub-city">{hub.city || 'No city set'}</p>
+              <div className="hub-actions">
+                <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
+                <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
+              </div>
             </div>
-          </div>
-        ))}
-        {hubs.length === 0 && !loading && (
-          <div className="empty-state">
-            <p>No hubs found. Create your first charging hub to get started!</p>
-          </div>
-        )}
-      </div>
+          ))}
+          {hubs.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No hubs found. Create your first charging hub to get started!</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="hubs-list-view">
+          <table className="management-table">
+            <thead>
+              <tr>
+                <th>Hub Name</th>
+                <th>Code</th>
+                <th>City/Address</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {hubsWithDuplicateInfo.map(hub => (
+                <tr key={hub.id} className={hub.isDuplicate ? 'is-duplicate' : ''}>
+                  <td className="name-cell">
+                    {hub.name} 
+                    {hub.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
+                  </td>
+                  <td><code className="code-font">{hub.hub_code || '—'}</code></td>
+                  <td>{hub.city || '—'}</td>
+                  <td>
+                    <span className={`status-pill ${hub.status}`}>{hub.status}</span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
+                      <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">✎</button>
+                      <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">×</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {hubs.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No hubs found.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>

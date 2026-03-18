@@ -28,26 +28,21 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          echo "🚀 Starting Supabase deployment..."
+          echo "🚀 Starting optimized Supabase deployment..."
           
           # Link to project
           echo "📡 Linking to Supabase project..."
           supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
           
-          # Repair migration history for specific problematic migrations
-          echo "🔧 Repairing migration history..."
-          supabase migration repair --status reverted 20260303054353 || echo "⚠️ Repair 1 skipped"
-          supabase migration repair --status applied 20260316020000 || echo "⚠️ Repair 2 skipped"
-          supabase migration repair --status applied 20260316030000 || echo "⚠️ Repair 3 skipped"
-          supabase migration repair --status applied 20260316040000 || echo "⚠️ Repair 4 skipped"
-          supabase migration repair --status applied 20260317080000 || echo "⚠️ Repair 5 skipped"
+          # Consolidate repair operations to ensure sync
+          echo "🔧 Ensuring migration history consistency..."
+          # Repair problematic migration IDs if they exist in a broken state
+          for m in 20260303054353 20260316020000 20260316030000 20260316040000 20260317080000; do
+            supabase migration repair --status applied $m || echo "⚠️ Skip repair for $m"
+          done
           
-          # Sync migrations with remote database
-          echo "🔄 Syncing migrations with remote..."
-          supabase db pull || echo "⚠️ Pull skipped, using local migrations"
-          
-          # Deploy all missing migrations
-          echo "📤 Deploying all missing migrations..."
+          # Deploy all missing migrations directly (avoids slow db pull)
+          echo "📤 Pushing local migrations to remote..."
           supabase db push --yes --include-all
           
           echo "🎉 Deployment completed successfully!"

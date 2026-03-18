@@ -87,6 +87,42 @@
   transform: translateY(0);
 }
 
+/* View Mode Toggles (Grid/List) - Matched to TaskController.css */
+.view-mode-toggle {
+  display: flex;
+  gap: 8px;
+  background: var(--halo-bg);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.view-toggle-btn {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.view-toggle-btn:hover:not(.active) {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.view-toggle-btn.active {
+  background: var(--brand-green);
+  color: #000;
+  opacity: 1;
+}
+
 /* Mobile adjustments */
 @media (max-width: 840px) {
   .header-row-3 {

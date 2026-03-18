@@ -10,6 +10,7 @@ const DepartmentManagement = () => {
   const [editingDept, setEditingDept] = useState(null);
   const [formData, setFormData] = useState({ name: '', dept_code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchDepartments();
@@ -101,6 +102,22 @@ const DepartmentManagement = () => {
       <MasterPageHeader
         title="Department Management"
         description="Define and manage organization departments for employee tracking."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
         rightActions={
           <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
             + New Department
@@ -110,24 +127,59 @@ const DepartmentManagement = () => {
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Departments...</div>}
 
-      <div className="hubs-grid">
-        {departments.map(dept => (
-          <div key={dept.id} className="hub-card">
-            <div className="hub-code-tag">{dept.dept_code || 'NO CODE'}</div>
-            <h3>{dept.name}</h3>
-            <p className="hub-city">{dept.description || 'No description provided'}</p>
-            <div className="hub-actions">
-              <button className="halo-button edit-btn" onClick={() => handleOpenModal(dept)}>Edit</button>
-              <button className="halo-button delete-btn" onClick={() => handleDelete(dept.id)}>Delete</button>
+      {viewMode === 'grid' ? (
+        <div className="hubs-grid">
+          {departments.map(dept => (
+            <div key={dept.id} className="hub-card">
+              <div className="hub-code-tag">{dept.dept_code || 'NO CODE'}</div>
+              <h3>{dept.name}</h3>
+              <p className="hub-city">{dept.description || 'No description provided'}</p>
+              <div className="hub-actions">
+                <button className="halo-button edit-btn" onClick={() => handleOpenModal(dept)}>Edit</button>
+                <button className="halo-button delete-btn" onClick={() => handleDelete(dept.id)}>Delete</button>
+              </div>
             </div>
-          </div>
-        ))}
-        {departments.length === 0 && !loading && (
-          <div className="empty-state">
-            <p>No departments found. Create your first department to get started!</p>
-          </div>
-        )}
-      </div>
+          ))}
+          {departments.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No departments found. Create your first department to get started!</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="hubs-list-view">
+          <table className="management-table">
+            <thead>
+              <tr>
+                <th>Department Name</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {departments.map(dept => (
+                <tr key={dept.id}>
+                  <td className="name-cell">{dept.name}</td>
+                  <td><code className="code-font">{dept.dept_code || '—'}</code></td>
+                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{dept.description || '—'}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
+                      <button className="icon-btn edit" onClick={() => handleOpenModal(dept)} title="Edit">✎</button>
+                      <button className="icon-btn delete" onClick={() => handleDelete(dept.id)} title="Delete">×</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {departments.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No departments found.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>

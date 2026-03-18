@@ -12,6 +12,7 @@ const HubFunctionManagement = () => {
   const [editingFunction, setEditingFunction] = useState(null);
   const [formData, setFormData] = useState({ name: '', function_code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchFunctions();
@@ -103,6 +104,22 @@ const HubFunctionManagement = () => {
       <MasterPageHeader
         title="Hub Function Management"
         description="Define and manage functional categories for charging hub tasks."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
         rightActions={
           <>
             <FunctionCSVDownload 
@@ -122,24 +139,59 @@ const HubFunctionManagement = () => {
 
       {loading && !isModalOpen && <div className="loading-spinner">Loading Functions...</div>}
 
-      <div className="hubs-grid">
-        {functions.map(fn => (
-          <div key={fn.id} className="hub-card">
-            <div className="hub-code-tag">{fn.function_code || 'NO CODE'}</div>
-            <h3>{fn.name}</h3>
-            <p className="hub-city">{fn.description || 'No description provided'}</p>
-            <div className="hub-actions">
-              <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>
-              <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>
+      {viewMode === 'grid' ? (
+        <div className="hubs-grid">
+          {functions.map(fn => (
+            <div key={fn.id} className="hub-card">
+              <div className="hub-code-tag">{fn.function_code || 'NO CODE'}</div>
+              <h3>{fn.name}</h3>
+              <p className="hub-city">{fn.description || 'No description provided'}</p>
+              <div className="hub-actions">
+                <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>
+                <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>
+              </div>
             </div>
-          </div>
-        ))}
-        {functions.length === 0 && !loading && (
-          <div className="empty-state">
-            <p>No functional categories found. Create your first function to get started!</p>
-          </div>
-        )}
-      </div>
+          ))}
+          {functions.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No functional categories found. Create your first function to get started!</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="hubs-list-view">
+          <table className="management-table">
+            <thead>
+              <tr>
+                <th>Function Name</th>
+                <th>Code</th>
+                <th>Description</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {functions.map(fn => (
+                <tr key={fn.id}>
+                  <td className="name-cell">{fn.name}</td>
+                  <td><code className="code-font">{fn.function_code || '—'}</code></td>
+                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{fn.description || '—'}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
+                      <button className="icon-btn edit" onClick={() => handleOpenModal(fn)} title="Edit">✎</button>
+                      <button className="icon-btn delete" onClick={() => handleDelete(fn.id)} title="Delete">×</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {functions.length === 0 && !loading && (
+            <div className="empty-state">
+              <p>No functions found.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
