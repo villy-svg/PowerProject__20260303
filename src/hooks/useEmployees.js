@@ -12,8 +12,8 @@ export const useEmployees = () => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchEmployees = useCallback(async () => {
-    setLoading(true);
+  const fetchEmployees = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       // Robust Fetch: Separate requests for data + metadata to avoid fragile joins/400 errors
       const [{ data: emps, error: empErr }, { data: hubsData }, { data: roles }, { data: depts }] = await Promise.all([
@@ -45,7 +45,7 @@ export const useEmployees = () => {
       const { data } = await supabase.from('employees').select('*').order('full_name');
       setEmployees(data || []);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []);
 
@@ -84,10 +84,25 @@ export const useEmployees = () => {
       await logEmployeeHistory(data[0].id, data[0], 'INSERT');
     }
 
-    await fetchEmployees();
+    await fetchEmployees(false);
   };
 
   const updateEmployeeHub = async (id, newHubId) => {
+    // Optimistic UI update
+    setEmployees(prev => prev.map(emp => {
+      if (emp.id === id) {
+        const hubCode = (newHubId === 'ALL' || !newHubId) 
+          ? 'ALL' 
+          : (hubs.find(h => h.id === newHubId)?.hub_code || 'NO HUB');
+        return { 
+          ...emp, 
+          hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId, 
+          hub_code: hubCode 
+        };
+      }
+      return emp;
+    }));
+
     const updateData = {
       hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId,
       updated_at: new Date().toISOString()
@@ -108,7 +123,7 @@ export const useEmployees = () => {
       await logEmployeeHistory(id, data[0], 'UPDATE_HUB');
     }
 
-    await fetchEmployees();
+    await fetchEmployees(false);
   };
 
   const updateEmployee = async (id, formData) => {
@@ -153,7 +168,7 @@ export const useEmployees = () => {
       await logEmployeeHistory(id, data[0], 'UPDATE');
     }
 
-    await fetchEmployees();
+    await fetchEmployees(false);
   };
 
   const toggleStatus = async (id, currentStatus) => {
@@ -171,7 +186,7 @@ export const useEmployees = () => {
 
     if (error) {
       console.error(`Status update failed: ${error.message}`);
-      await fetchEmployees(); // Revert on failure
+      await fetchEmployees(false); // Revert on failure
       throw error;
     }
   };
