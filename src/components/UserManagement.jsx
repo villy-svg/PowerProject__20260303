@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LEVELS, ROLE_SCOPES, DEFAULT_ROLE_PERMISSIONS } from '../constants/roles';
+import './UserManagement.css';
 
 const UserManagement = ({ currentUser }) => {
   const [users, setUsers] = useState([]);
