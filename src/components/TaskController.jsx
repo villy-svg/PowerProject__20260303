@@ -128,11 +128,11 @@ const TaskController = ({
     // 1. Duplicates Only filter
     if (filters.duplicatesOnly && !t.isDuplicate) return false;
 
-    // 2. Metadata filters
-    if (filters.city && !filters.city.includes(t.city)) return false;
-    if (filters.hub && !filters.hub.includes(t.hub_id)) return false;
-    if (filters.priority && !filters.priority.includes(t.priority)) return false;
-    if (filters.function && !filters.function.includes(t.function)) return false;
+    // 2. Metadata filters (Only apply if the filter array is not empty)
+    if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
+    if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
+    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
+    if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
     return true;
   });
 
@@ -282,7 +282,7 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title="Hub Task Manager"
+        title={`${label || 'Hub'} Task Manager`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>
