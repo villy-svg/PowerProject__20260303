@@ -158,7 +158,7 @@ const VerticalWorkspace = ({
 
 
       <main className="workspace-content">
-        {children ? (
+        {React.Children.toArray(children).some(child => !!child) ? (
           React.Children.map(children, child => 
             React.isValidElement(child) 
               ? React.cloneElement(child, { filters, onFilterChange: handleFilterChange })
