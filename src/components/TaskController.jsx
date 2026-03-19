@@ -28,8 +28,11 @@ const TaskController = ({
   deleteTask, 
   updateTaskStage,
   TaskFormComponent, 
-  TaskTileComponent, // New prop for custom tile rendering
-  filters = { city: '', hub: '', priority: '', function: '' },
+  TaskTileComponent,
+  label, // For dynamic title
+  handleFilterChange, // For filter updates
+  resetFilters, // For filter resets
+  filters = { city: [], hub: [], priority: [], function: [] },
   user = {},
   permissions = {} 
 }) => {
