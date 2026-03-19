@@ -6,10 +6,10 @@ import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
 import ClientCategoryCSVImport from './ClientCategoryCSVImport';
 
 /**
- * ClientCategoryManagement
- * CRUD sub-view for client categories (mirrors DepartmentManagement).
+ * ClientServiceManagement
+ * CRUD sub-view for client service categories (mirrors ClientCategoryManagement but for SERVICE type).
  */
-const ClientCategoryManagement = () => {
+const ClientServiceManagement = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,10 +25,10 @@ const ClientCategoryManagement = () => {
     const { data, error } = await supabase
       .from('client_categories')
       .select('*')
-      .eq('category_type', 'VEHICLE')
+      .eq('category_type', 'SERVICE')
       .order('name', { ascending: true });
     if (!error) setCategories(data || []);
-    else console.error('ClientCategory fetch error:', error);
+    else console.error('ClientService fetch error:', error);
     setLoading(false);
   };
 
@@ -51,7 +51,7 @@ const ClientCategoryManagement = () => {
 
     const payload = { 
       ...formData, 
-      category_type: 'VEHICLE',
+      category_type: 'SERVICE',
       updated_at: new Date().toISOString() 
     };
     let error;
@@ -65,14 +65,14 @@ const ClientCategoryManagement = () => {
     if (error) {
       setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
     } else {
-      setStatusMsg({ type: 'success', text: `Category ${editingCat ? 'updated' : 'created'} successfully!` });
+      setStatusMsg({ type: 'success', text: `Service ${editingCat ? 'updated' : 'created'} successfully!` });
       setTimeout(() => { setIsModalOpen(false); fetchCategories(); }, 1000);
     }
     setLoading(false);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this category? Clients using it will be unlinked.')) return;
+    if (!window.confirm('Delete this service category? Clients using it will be unlinked.')) return;
     setLoading(true);
     const { error } = await supabase.from('client_categories').delete().eq('id', id);
     if (error) alert(`Delete failed: ${error.message}`);
@@ -83,8 +83,8 @@ const ClientCategoryManagement = () => {
   return (
     <div className="management-view-container">
       <MasterPageHeader
-        title="Client Category Manager"
-        description="Define and manage client categories for segmenting your client base."
+        title="Client Service Manager"
+        description="Define and manage service categories offered to your clients."
         leftActions={
           <div className="view-mode-toggle">
             {['grid', 'list'].map(mode => (
@@ -100,17 +100,17 @@ const ClientCategoryManagement = () => {
         }
         rightActions={
           <>
-            <ClientCategoryCSVDownload className="master-action-btn" data={categories} label="Export Categories" />
+            <ClientCategoryCSVDownload className="master-action-btn" data={categories} label="Export Services" />
             <ClientCategoryCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <ClientCategoryCSVImport className="master-action-btn" label="Import Categories" onImportComplete={fetchCategories} />
+            <ClientCategoryCSVImport className="master-action-btn" label="Import Services" onImportComplete={fetchCategories} />
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Category
+              + New Service
             </button>
           </>
         }
       />
 
-      {loading && !isModalOpen && <div className="loading-spinner">Loading Categories...</div>}
+      {loading && !isModalOpen && <div className="loading-spinner">Loading Services...</div>}
 
       {viewMode === 'grid' ? (
         <div className="hubs-grid">
@@ -127,7 +127,7 @@ const ClientCategoryManagement = () => {
           ))}
           {categories.length === 0 && !loading && (
             <div className="empty-state">
-              <p>No categories yet. Create your first client category!</p>
+              <p>No service categories yet. Create your first service!</p>
             </div>
           )}
         </div>
@@ -136,7 +136,7 @@ const ClientCategoryManagement = () => {
           <table className="management-table">
             <thead>
               <tr>
-                <th>Category Name</th>
+                <th>Service Name</th>
                 <th>Code</th>
                 <th>Description</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
@@ -159,7 +159,7 @@ const ClientCategoryManagement = () => {
             </tbody>
           </table>
           {categories.length === 0 && !loading && (
-            <div className="empty-state"><p>No categories found.</p></div>
+            <div className="empty-state"><p>No service categories found.</p></div>
           )}
         </div>
       )}
@@ -169,28 +169,28 @@ const ClientCategoryManagement = () => {
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
-              <h2>{editingCat ? 'Edit Category' : 'Create New Category'}</h2>
+              <h2>{editingCat ? 'Edit Service' : 'Create New Service'}</h2>
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
             <form onSubmit={handleSubmit} className="vertical-task-form">
               <div className="form-row-grid">
                 <div className="form-group">
-                  <label>Category Name</label>
+                  <label>Service Name</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Enterprise, SME, Retail"
+                    placeholder="e.g. Full Maintenance, AMC"
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>Category Code</label>
+                  <label>Service Code</label>
                   <input
                     type="text"
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g. ENT, SME, RTL"
+                    placeholder="e.g. MAINT, AMC"
                   />
                 </div>
               </div>
@@ -199,7 +199,7 @@ const ClientCategoryManagement = () => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="What type of clients belong to this category?"
+                  placeholder="What does this service entail?"
                   rows={4}
                 />
               </div>
@@ -220,4 +220,4 @@ const ClientCategoryManagement = () => {
   );
 };
 
-export default ClientCategoryManagement;
+export default ClientServiceManagement;

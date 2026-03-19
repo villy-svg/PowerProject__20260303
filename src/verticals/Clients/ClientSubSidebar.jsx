@@ -21,23 +21,26 @@ const ClientSubSidebar = ({
   const canAccessAdmin = permissions?.canAccessConfig;
 
   const [expandedGroups, setExpandedGroups] = useState({
-    category: false,
+    vehicle: false,
+    service: false,
     billing_model: false,
   });
 
   const [filterOptions, setFilterOptions] = useState({
-    categories: [],
+    vehicleCategories: [],
+    serviceCategories: [],
     billingModels: [],
   });
 
   useEffect(() => {
     const fetchOptions = async () => {
       const [{ data: cats }, { data: models }] = await Promise.all([
-        supabase.from('client_categories').select('id, name, code').order('name'),
+        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
         supabase.from('client_billing_models').select('id, name, code').order('name'),
       ]);
       setFilterOptions({
-        categories: cats || [],
+        vehicleCategories: (cats || []).filter(c => c.category_type === 'VEHICLE'),
+        serviceCategories: (cats || []).filter(c => c.category_type === 'SERVICE'),
         billingModels: models || [],
       });
     };
@@ -176,7 +179,14 @@ const ClientSubSidebar = ({
             style={{ width: '100%', opacity: activeVertical === 'client_category_management' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('client_category_management')}
           >
-            Category Manager
+            Vehicle Manager
+          </button>
+          <button
+            className="halo-button"
+            style={{ width: '100%', opacity: activeVertical === 'client_service_management' ? 1 : 0.7 }}
+            onClick={() => setActiveVertical('client_service_management')}
+          >
+            Service Manager
           </button>
         </div>
       )}
@@ -215,10 +225,19 @@ const ClientSubSidebar = ({
       </div>
 
       <FilterGroup
-        label="Category"
-        options={filterOptions.categories}
-        currentFilters={filters?.category || []}
-        filterKey="category"
+        label="Vehicle Category"
+        options={filterOptions.vehicleCategories}
+        currentFilters={filters?.vehicle || []}
+        filterKey="vehicle"
+        displayKey="code"
+        valueKey="id"
+      />
+
+      <FilterGroup
+        label="Service Category"
+        options={filterOptions.serviceCategories}
+        currentFilters={filters?.service || []}
+        filterKey="service"
         displayKey="code"
         valueKey="id"
       />

@@ -10,16 +10,20 @@ import { supabase } from '../../services/supabaseClient';
  */
 const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [categories, setCategories] = useState([]);
+  const [vehicleCategories, setVehicleCategories] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
   const [billingModels, setBillingModels] = useState([]);
 
   useEffect(() => {
     const fetchDropdowns = async () => {
       const [catRes, modelRes] = await Promise.all([
-        supabase.from('client_categories').select('id, name, code').order('name'),
+        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
         supabase.from('client_billing_models').select('id, name, code').order('name'),
       ]);
-      if (catRes.data) setCategories(catRes.data);
+      if (catRes.data) {
+        setVehicleCategories(catRes.data.filter(c => c.category_type === 'VEHICLE'));
+        setServiceCategories(catRes.data.filter(c => c.category_type === 'SERVICE'));
+      }
       if (modelRes.data) setBillingModels(modelRes.data);
     };
     fetchDropdowns();
@@ -27,8 +31,8 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
 
   const [formData, setFormData] = useState({
     name: initialData.name || '',
-    category_id: initialData.category_id || '',
     billing_model_id: initialData.billing_model_id || '',
+    category_matrix: initialData.category_matrix || {}, // { vehicleId: { serviceId: true } }
     poc_name: initialData.poc_name || '',
     poc_phone: initialData.poc_phone || '',
     poc_email: initialData.poc_email || '',
@@ -150,20 +154,69 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
               />
             </div>
 
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Category</label>
-              <select
-                name="category_id"
-                value={formData.category_id}
-                onChange={handleChange}
-                disabled={isViewOnly}
-                style={selectStyle}
-              >
-                <option value="">— Select Category —</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name} ({cat.code})</option>
-                ))}
-              </select>
+            <div style={{ ...fieldStyle, marginTop: '1.5rem' }}>
+              <label style={labelStyle}>Service Category Matrix</label>
+              <div className="matrix-container" style={{ 
+                background: 'rgba(255,255,255,0.02)', 
+                borderRadius: '12px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                overflow: 'hidden',
+                marginTop: '10px'
+              }}>
+                <table className="permissions-table client-matrix-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', padding: '12px' }}>Vehicle Category</th>
+                      {serviceCategories.map(service => (
+                        <th key={service.id} style={{ textAlign: 'center', padding: '12px', fontSize: '0.75rem' }}>
+                          {service.code || service.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {vehicleCategories.map(vehicle => (
+                      <tr key={vehicle.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '12px', fontSize: '0.85rem', fontWeight: 600 }}>
+                          {vehicle.name} <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({vehicle.code})</span>
+                        </td>
+                        {serviceCategories.map(service => {
+                          const isChecked = formData.category_matrix[vehicle.id]?.[service.id] || false;
+                          return (
+                            <td key={service.id} style={{ textAlign: 'center', padding: '12px' }}>
+                              <label className="switch" style={{ margin: '0 auto' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    if (isViewOnly) return;
+                                    const currentMatrix = { ...formData.category_matrix };
+                                    if (!currentMatrix[vehicle.id]) currentMatrix[vehicle.id] = {};
+                                    currentMatrix[vehicle.id][service.id] = !isChecked;
+                                    setFormData(prev => ({ ...prev, category_matrix: currentMatrix }));
+                                  }}
+                                  disabled={isViewOnly}
+                                />
+                                <span className="slider"></span>
+                              </label>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                    {vehicleCategories.length === 0 && (
+                      <tr>
+                        <td colSpan={serviceCategories.length + 1} style={{ textAlign: 'center', padding: '20px', opacity: 0.5 }}>
+                          No vehicle categories defined.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px' }}>
+                * Select the services applicable for each vehicle category.
+              </p>
             </div>
 
             <div style={fieldStyle}>

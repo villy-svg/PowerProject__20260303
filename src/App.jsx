@@ -36,6 +36,7 @@ import ClientCategoryManagement from './verticals/Clients/ClientCategoryManageme
 import ClientBillingModelManagement from './verticals/Clients/ClientBillingModelManagement';
 import ClientTaskForm from './verticals/Clients/ClientTaskForm';
 import ClientTaskTile from './verticals/Clients/ClientTaskTile';
+import ClientServiceManagement from './verticals/Clients/ClientServiceManagement';
 import Login from './components/Login';
 
 // Assets
@@ -487,6 +488,8 @@ function App() {
               <EmployeeRoleManagement />
             ) : activeVertical === 'client_category_management' ? (
               <ClientCategoryManagement />
+            ) : activeVertical === 'client_service_management' ? (
+              <ClientServiceManagement />
             ) : activeVertical === 'client_billing_model_management' ? (
               <ClientBillingModelManagement />
             ) : (

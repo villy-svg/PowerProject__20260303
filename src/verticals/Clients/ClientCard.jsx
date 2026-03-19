@@ -13,6 +13,20 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
     return p.startsWith('+91') ? p : `+91 ${p.replace(/^\+?91/, '').trim()}`;
   };
 
+  const getMatrixSummary = () => {
+    if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return null;
+    return Object.entries(client.category_matrix).map(([vId, services]) => {
+      const vCode = client.vehicle_categories?.[vId]?.code || '???';
+      const sCodes = Object.entries(services)
+        .filter(([_, checked]) => checked)
+        .map(([sId, _]) => client.service_categories?.[sId]?.code || '???')
+        .join(', ');
+      return sCodes ? `${vCode}: ${sCodes}` : null;
+    }).filter(Boolean).join(' | ');
+  };
+
+  const matrixSummary = getMatrixSummary();
+
   return (
     <div
       className={`client-card ${client.status === 'Inactive' ? 'inactive' : ''}`}
@@ -21,7 +35,11 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
     >
       {/* Badges Row */}
       <div className="client-card-badges">
-        <span className="dept-badge">{client.category_code || 'NO CAT'}</span>
+        {matrixSummary ? (
+          <span className="dept-badge" title={matrixSummary}>{matrixSummary}</span>
+        ) : (
+          <span className="dept-badge">{client.category_code || 'NO CAT'}</span>
+        )}
         <span className="billing-badge">{client.billing_model_code || 'NO MODEL'}</span>
         {pendingTasksCount > 0 && (
           <span className="priority-badge" style={{ backgroundColor: '#ff4444', color: 'white', border: 'none' }}>

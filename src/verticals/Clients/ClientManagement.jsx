@@ -103,9 +103,25 @@ const ClientManagement = ({ permissions, filters, tasks = [] }) => {
   // Apply filters from sub-sidebar
   const filteredClients = clients.filter(c => {
     const matchesStatus = showInactive || c.status === 'Active';
-    const matchesCategory = !filters?.category?.length || filters.category.includes(c.category_id);
+    
+    // Vehicle Category Filter: client is included if ANY of its selected vehicle IDs are in the filter
+    const selectedVehicleIds = Object.keys(c.category_matrix || {}).filter(vId => 
+      Object.values(c.category_matrix[vId] || {}).some(checked => checked)
+    );
+    const matchesVehicle = !filters?.vehicle?.length || filters.vehicle.some(v => selectedVehicleIds.includes(v));
+
+    // Service Category Filter: client is included if ANY of its selected service IDs are in the filter
+    const selectedServiceIds = [];
+    Object.values(c.category_matrix || {}).forEach(services => {
+      Object.entries(services).forEach(([sId, checked]) => {
+        if (checked && !selectedServiceIds.includes(sId)) selectedServiceIds.push(sId);
+      });
+    });
+    const matchesService = !filters?.service?.length || filters.service.some(s => selectedServiceIds.includes(s));
+
     const matchesBilling = !filters?.billing_model?.length || filters.billing_model.includes(c.billing_model_id);
-    return matchesStatus && matchesCategory && matchesBilling;
+    
+    return matchesStatus && matchesVehicle && matchesService && matchesBilling;
   });
 
   const activeClients = filteredClients.filter(c => c.status === 'Active');

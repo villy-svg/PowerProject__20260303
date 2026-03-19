@@ -26,8 +26,16 @@ export const useClients = () => {
 
       if (clientErr) throw clientErr;
 
-      const catMap = new Map((catsData || []).map(c => [c.id, { name: c.name, code: c.code }]));
+      const catMap = new Map((catsData || []).map(c => [c.id, { name: c.name, code: c.code, type: c.category_type }]));
       const modelMap = new Map((modelsData || []).map(m => [m.id, { name: m.name, code: m.code }]));
+
+      // Pre-process category dictionaries for quick lookup in display components
+      const vehicleCats = {};
+      const serviceCats = {};
+      (catsData || []).forEach(c => {
+        if (c.category_type === 'VEHICLE') vehicleCats[c.id] = c;
+        else serviceCats[c.id] = c;
+      });
 
       const processed = (clientsData || []).map(client => ({
         ...client,
@@ -35,6 +43,8 @@ export const useClients = () => {
         category_code: catMap.get(client.category_id)?.code || 'N/A',
         billing_model_name: modelMap.get(client.billing_model_id)?.name || 'N/A',
         billing_model_code: modelMap.get(client.billing_model_id)?.code || 'N/A',
+        vehicle_categories: vehicleCats,
+        service_categories: serviceCats,
       }));
 
       setClients(processed);
@@ -57,6 +67,7 @@ export const useClients = () => {
       poc_name: formData.poc_name || null,
       poc_phone: formData.poc_phone || null,
       poc_email: formData.poc_email || null,
+      category_matrix: formData.category_matrix || {},
       status: 'Active',
       updated_at: new Date().toISOString(),
     };
@@ -79,6 +90,7 @@ export const useClients = () => {
       poc_name: formData.poc_name || null,
       poc_phone: formData.poc_phone || null,
       poc_email: formData.poc_email || null,
+      category_matrix: formData.category_matrix || {},
       updated_at: new Date().toISOString(),
     };
 
