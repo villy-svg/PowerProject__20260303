@@ -279,9 +279,22 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
           </button>
         )}
         {currentPage < 2 ? (
-          <button type="submit" className="halo-button next-btn">
-            {isViewOnly ? 'Next ➔' : 'Continue ➔'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'flex-end' }}>
+            <button type="submit" className="halo-button next-btn">
+              {isViewOnly ? 'Next ➔' : 'Continue ➔'}
+            </button>
+            {initialData.id && !isViewOnly && (
+              <button
+                type="button"
+                className="halo-button save-changes-btn"
+                onClick={handleSubmit}
+                disabled={loading}
+                style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            )}
+          </div>
         ) : (
           !isViewOnly && (
             <button type="submit" className="halo-button save-btn" disabled={loading}>

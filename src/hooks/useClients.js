@@ -20,7 +20,7 @@ export const useClients = () => {
         { data: modelsData }
       ] = await Promise.all([
         supabase.from('clients').select('*').order('name', { ascending: true }),
-        supabase.from('client_categories').select('id, name, code').order('name'),
+        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
         supabase.from('client_billing_models').select('id, name, code').order('name'),
       ]);
 

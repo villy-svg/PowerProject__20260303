@@ -53,15 +53,19 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
     try { await loadContext(); } catch (err) { console.error(err); } finally { setImporting(false); }
   };
 
-  // Soft match: name similarity > 88%
+  // Soft match: name similarity > 92% (raised from 88% to avoid false positives)
   const isSoftMatch = (row, existing) => {
     const rowName = normalizeValue(row.client_name || row.name || '');
     const extName = normalizeValue(existing.name);
-    return calculateSimilarity(rowName, extName) > 0.88;
+    return calculateSimilarity(rowName, extName) > 0.92;
   };
 
-  // Hard match: exact email or phone
+  // Hard match: exact name OR exact email OR exact phone
   const isHardMatch = (row, existing) => {
+    const rowName = normalizeValue(row.client_name || row.name || '');
+    const extName = normalizeValue(existing.name);
+    if (rowName && rowName === extName) return true;
+
     const rowEmail = (row.poc_email || row.email || '').toLowerCase().trim();
     const rowPhone = normalizeValue(row.poc_phone || row.phone || '');
     const extEmail = (existing.poc_email || '').toLowerCase().trim();
