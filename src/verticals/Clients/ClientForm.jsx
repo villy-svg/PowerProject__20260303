@@ -61,12 +61,10 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
       }
     }
     if (page === 2) {
+      // PoC details are now optional.
+      // If phone is provided, we normalize but don't block if it's missing or short.
       if (formData.poc_phone) {
         const p = normalizePhone(formData.poc_phone);
-        if (p.startsWith('+91') && p.length < 13) {
-          alert('Indian phone numbers must have at least 10 digits after +91.');
-          return false;
-        }
         setFormData(prev => ({ ...prev, poc_phone: p }));
       }
     }

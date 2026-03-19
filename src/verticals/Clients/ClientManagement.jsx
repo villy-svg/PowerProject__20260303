@@ -18,7 +18,7 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
  * Primary view for the Client Manager vertical.
  * Displays client records grouped by category.
  */
-const ClientManagement = ({ permissions, filters, tasks = [] }) => {
+const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -135,7 +135,7 @@ const ClientManagement = ({ permissions, filters, tasks = [] }) => {
     return acc;
   }, {});
 
-  const isMasterAdmin = permissions?.roleId === 'master_admin';
+  const isMasterAdmin = user?.roleId === 'master_admin';
 
   const clientCardProps = (client) => ({
     key: client.id,
