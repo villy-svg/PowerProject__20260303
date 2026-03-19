@@ -107,6 +107,13 @@
   width: 100%;
 }
 
+.vertical-task-form select,
+.hub-modal select {
+  color: var(--brand-green);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .vertical-task-form input[type="text"]::placeholder,
 .vertical-task-form textarea::placeholder,
 .hub-modal input[type="text"]::placeholder,

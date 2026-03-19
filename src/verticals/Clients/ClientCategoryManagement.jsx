@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
+import ClientCategoryCSVImport from './ClientCategoryCSVImport';
 
 /**
  * ClientCategoryManagement
@@ -92,9 +94,14 @@ const ClientCategoryManagement = () => {
           </div>
         }
         rightActions={
-          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-            + New Category
-          </button>
+          <>
+            <ClientCategoryCSVDownload className="master-action-btn" data={categories} label="Export Categories" />
+            <ClientCategoryCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            <ClientCategoryCSVImport className="master-action-btn" label="Import Categories" onImportComplete={fetchCategories} />
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Category
+            </button>
+          </>
         }
       />
 

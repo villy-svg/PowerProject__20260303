@@ -61,6 +61,12 @@
   transition: all 0.2s ease;
 }
 
+.employee-form .form-group select {
+  color: var(--brand-green);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .employee-form .form-group input:focus,
 .employee-form .form-group select:focus {
   border-color: var(--brand-green);
@@ -91,13 +97,15 @@
 
 .save-btn.secondary-action {
   background: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: #fff !important;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%) !important;
+  color: var(--brand-green) !important;
+  opacity: 0.8;
 }
 
 .save-btn.secondary-action:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: var(--halo-bg) !important;
+  border-color: var(--brand-green) !important;
+  opacity: 1;
 }
 
 .employee-form .save-btn,

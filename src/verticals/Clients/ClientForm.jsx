@@ -101,6 +101,13 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
     opacity: isViewOnly ? 0.7 : 1,
   };
 
+  const selectStyle = {
+    ...inputStyle,
+    color: 'var(--brand-green)',
+    fontWeight: 600,
+    cursor: 'pointer'
+  };
+
   const labelStyle = {
     display: 'block',
     marginBottom: '6px',
@@ -150,7 +157,7 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 value={formData.category_id}
                 onChange={handleChange}
                 disabled={isViewOnly}
-                style={inputStyle}
+                style={selectStyle}
               >
                 <option value="">— Select Category —</option>
                 {categories.map(cat => (
@@ -166,7 +173,7 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 value={formData.billing_model_id}
                 onChange={handleChange}
                 disabled={isViewOnly}
-                style={inputStyle}
+                style={selectStyle}
               >
                 <option value="">— Select Billing Model —</option>
                 {billingModels.map(model => (
