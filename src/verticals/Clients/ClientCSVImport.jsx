@@ -55,15 +55,15 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
 
   // Soft match: name similarity > 88%
   const isSoftMatch = (row, existing) => {
-    const rowName = normalizeValue(row['Client Name'] || row.name || '');
+    const rowName = normalizeValue(row.client_name || row.name || '');
     const extName = normalizeValue(existing.name);
     return calculateSimilarity(rowName, extName) > 0.88;
   };
 
   // Hard match: exact email or phone
   const isHardMatch = (row, existing) => {
-    const rowEmail = (row['PoC Email'] || row.poc_email || '').toLowerCase().trim();
-    const rowPhone = normalizeValue(row['PoC Phone'] || row.poc_phone || '');
+    const rowEmail = (row.poc_email || row.email || '').toLowerCase().trim();
+    const rowPhone = normalizeValue(row.poc_phone || row.phone || '');
     const extEmail = (existing.poc_email || '').toLowerCase().trim();
     const extPhone = normalizeValue(existing.poc_phone || '');
     if (rowEmail && extEmail && rowEmail === extEmail) return true;
@@ -75,7 +75,7 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
     <div className="tile-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
         <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
-          {conflict.csvRow['Client Name'] || conflict.csvRow.name}
+          {conflict.csvRow.client_name || conflict.csvRow.name}
         </h5>
         {conflict.matchMode === 'hard' && (
           <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
@@ -83,8 +83,8 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
           </span>
         )}
       </div>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>{conflict.csvRow['PoC Email'] || conflict.csvRow.poc_email}</p>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>{conflict.csvRow['PoC Phone'] || conflict.csvRow.poc_phone || 'No Phone'}</p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>{conflict.csvRow.poc_email || conflict.csvRow.email}</p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>{conflict.csvRow.poc_phone || conflict.csvRow.phone || 'No Phone'}</p>
     </div>
   );
 
@@ -95,21 +95,21 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
       const lookup = (val, map) => val ? (map[val.toString().toLowerCase().trim()] || null) : null;
 
       const clientsToInsert = rows
-        .filter(row => (row['Client Name'] || row.name || '').trim())
+        .filter(row => (row.client_name || row.name || '').trim())
         .map(row => {
-          const name = (row['Client Name'] || row.name || '').trim();
+          const name = (row.client_name || row.name || '').trim();
           const possibleMatches = ctx.existingClients.filter(e => isHardMatch(row, e) || isSoftMatch(row, e));
           const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
           return {
             id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
             name,
-            category_id: lookup(row['Category'], ctx.catMap),
-            billing_model_id: lookup(row['Billing Model'], ctx.modelMap),
-            poc_name: row['PoC Name'] || row.poc_name || null,
-            poc_phone: row['PoC Phone'] || row.poc_phone || null,
-            poc_email: row['PoC Email'] || row.poc_email || null,
-            status: row['Status'] || 'Active',
+            category_id: lookup(row.category, ctx.catMap),
+            billing_model_id: lookup(row.billing_model, ctx.modelMap),
+            poc_name: row.poc_name || null,
+            poc_phone: row.poc_phone || row.phone || null,
+            poc_email: row.poc_email || row.email || null,
+            status: row.status || 'Active',
             updated_at: new Date().toISOString(),
           };
         });
@@ -137,10 +137,10 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
     <CSVImportButton
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
-      requiredFields={['Client Name']}
+      requiredFields={['client_name']}
       getConflictKey={(row) => {
-        const name = normalizeValue(row['Client Name'] || row.name || '');
-        const email = normalizeValue(row['PoC Email'] || row.poc_email || '');
+        const name = normalizeValue(row.client_name || row.name || '');
+        const email = normalizeValue(row.poc_email || row.email || '');
         return `${name}|${email}` || 'new-row';
       }}
       findConflict={(row, existingData) => {

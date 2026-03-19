@@ -116,7 +116,18 @@ const CSVImportButton = ({
       account_number: ['account_number', 'account number', 'bank account', 'acc num'],
       ifsc_code: ['ifsc_code', 'ifsc code', 'ifsc'],
       account_name: ['account_name', 'account name', 'bank name', 'beneficiary'],
-      pan_number: ['pan_number', 'pan number', 'pan', 'pan no', 'pan card']
+      pan_number: ['pan_number', 'pan number', 'pan', 'pan no', 'pan card'],
+      // Client-specific mappings
+      client_name: ['client_name', 'client name', 'name', 'client', 'company name'],
+      category: ['category', 'client category', 'client_category', 'type'],
+      billing_model: ['billing_model', 'billing model', 'billing_model_id', 'billing'],
+      poc_name: ['poc_name', 'poc name', 'point of contact', 'contact person', 'poc'],
+      poc_phone: ['poc_phone', 'poc phone', 'phone', 'contact number', 'mobile'],
+      poc_email: ['poc_email', 'poc email', 'email', 'email address'],
+      category_name: ['category_name', 'category name', 'client category name', 'name'],
+      model_name: ['model_name', 'model name', 'billing model name', 'name'],
+      code: ['code', 'identifier', 'short name'],
+      description: ['description', 'details', 'notes', 'about']
     };
 
     return data.map(row => {

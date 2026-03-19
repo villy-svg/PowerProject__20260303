@@ -33,14 +33,14 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
 
   // Soft match: name similarity > 92% (categories are usually short, so higher threshold)
   const isSoftMatch = (row, existing) => {
-    const rowName = normalizeValue(row['Category Name'] || row.name || '');
+    const rowName = normalizeValue(row.category_name || row.name || '');
     const extName = normalizeValue(existing.name);
     return calculateSimilarity(rowName, extName) > 0.92;
   };
 
   // Hard match: exact code
   const isHardMatch = (row, existing) => {
-    const rowCode = (row['Code'] || row.code || '').toUpperCase().trim();
+    const rowCode = (row.code || '').toUpperCase().trim();
     const extCode = (existing.code || '').toUpperCase().trim();
     if (rowCode && extCode && rowCode === extCode) return true;
     return false;
@@ -50,7 +50,7 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
     <div className="tile-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
         <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
-          {conflict.csvRow['Category Name'] || conflict.csvRow.name}
+          {conflict.csvRow.category_name || conflict.csvRow.name}
         </h5>
         {conflict.matchMode === 'hard' && (
           <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
@@ -58,7 +58,7 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
           </span>
         )}
       </div>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>Code: {conflict.csvRow['Code'] || conflict.csvRow.code || 'None'}</p>
+      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>Code: {conflict.csvRow.code || 'None'}</p>
     </div>
   );
 
@@ -68,17 +68,17 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
       const ctx = await loadContext();
 
       const categoriesToUpsert = rows
-        .filter(row => (row['Category Name'] || row.name || '').trim())
+        .filter(row => (row.category_name || row.name || '').trim())
         .map(row => {
-          const name = (row['Category Name'] || row.name || '').trim();
+          const name = (row.category_name || row.name || '').trim();
           const possibleMatches = ctx.existingCategories.filter(e => isHardMatch(row, e) || isSoftMatch(row, e));
           const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
           return {
             id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
             name,
-            code: (row['Code'] || row.code || '').toUpperCase().trim() || null,
-            description: row['Description'] || row.description || null,
+            code: (row.code || '').toUpperCase().trim() || null,
+            description: row.description || null,
             updated_at: new Date().toISOString(),
           };
         });
@@ -106,10 +106,10 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
     <CSVImportButton
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
-      requiredFields={['Category Name']}
+      requiredFields={['category_name']}
       getConflictKey={(row) => {
-        const name = normalizeValue(row['Category Name'] || row.name || '');
-        const code = normalizeValue(row['Code'] || row.code || '');
+        const name = normalizeValue(row.category_name || row.name || '');
+        const code = normalizeValue(row.code || '');
         return `${name}|${code}` || 'new-row';
       }}
       findConflict={(row, existingData) => {
