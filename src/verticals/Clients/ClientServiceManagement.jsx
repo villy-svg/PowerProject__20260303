@@ -23,9 +23,8 @@ const ClientServiceManagement = () => {
   const fetchCategories = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('client_categories')
+      .from('client_services')
       .select('*')
-      .eq('category_type', 'SERVICE')
       .order('name', { ascending: true });
     if (!error) setCategories(data || []);
     else console.error('ClientService fetch error:', error);
@@ -51,15 +50,14 @@ const ClientServiceManagement = () => {
 
     const payload = { 
       ...formData, 
-      category_type: 'SERVICE',
       updated_at: new Date().toISOString() 
     };
     let error;
 
     if (editingCat) {
-      ({ error } = await supabase.from('client_categories').update(payload).eq('id', editingCat.id));
+      ({ error } = await supabase.from('client_services').update(payload).eq('id', editingCat.id));
     } else {
-      ({ error } = await supabase.from('client_categories').insert([payload]));
+      ({ error } = await supabase.from('client_services').insert([payload]));
     }
 
     if (error) {
@@ -74,7 +72,7 @@ const ClientServiceManagement = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this service category? Clients using it will be unlinked.')) return;
     setLoading(true);
-    const { error } = await supabase.from('client_categories').delete().eq('id', id);
+    const { error } = await supabase.from('client_services').delete().eq('id', id);
     if (error) alert(`Delete failed: ${error.message}`);
     else fetchCategories();
     setLoading(false);
@@ -100,9 +98,30 @@ const ClientServiceManagement = () => {
         }
         rightActions={
           <>
-            <ClientCategoryCSVDownload className="master-action-btn" data={categories} label="Export Services" />
-            <ClientCategoryCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <ClientCategoryCSVImport className="master-action-btn" label="Import Services" onImportComplete={fetchCategories} />
+            <ClientCategoryCSVDownload 
+              className="master-action-btn" 
+              data={categories} 
+              label="Export Services" 
+              tableName="client_services"
+              entityName="Client Services"
+              headers={['Service Name', 'Code', 'Description']}
+            />
+            <ClientCategoryCSVDownload 
+              className="master-action-btn" 
+              isTemplate 
+              label="Download Template" 
+              tableName="client_services"
+              entityName="Client Services"
+              headers={['Service Name', 'Code', 'Description']}
+            />
+            <ClientCategoryCSVImport 
+              className="master-action-btn" 
+              label="Import Services" 
+              onImportComplete={fetchCategories} 
+              tableName="client_services"
+              entityName="Client Services"
+              requiredFields={['service_name']}
+            />
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
               + New Service
             </button>

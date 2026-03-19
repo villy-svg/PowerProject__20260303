@@ -274,7 +274,6 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
           initialData={editingClient ? {
             id: editingClient.id,
             name: editingClient.name,
-            category_id: editingClient.category_id || '',
             billing_model_id: editingClient.billing_model_id || '',
             category_matrix: editingClient.category_matrix || {},
             poc_name: editingClient.poc_name || '',

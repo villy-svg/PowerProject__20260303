@@ -20,8 +20,7 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
   const loadContext = async () => {
     if (existingClients && lookupMaps) return { existingClients, ...lookupMaps };
 
-    const [{ data: cats }, { data: models }, { data: clients }] = await Promise.all([
-      supabase.from('client_categories').select('id, name, code'),
+    const [{ data: models }, { data: clients }] = await Promise.all([
       supabase.from('client_billing_models').select('id, name, code'),
       supabase.from('clients').select('id, name, poc_email, poc_phone'),
     ]);
@@ -38,7 +37,6 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
     };
 
     const maps = {
-      catMap: createMap(cats, 'code'),
       modelMap: createMap(models, 'code'),
     };
 
@@ -108,7 +106,6 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
           return {
             id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
             name,
-            category_id: lookup(row.category, ctx.catMap),
             billing_model_id: lookup(row.billing_model, ctx.modelMap),
             poc_name: row.poc_name || null,
             poc_phone: row.poc_phone || row.phone || null,
@@ -163,7 +160,6 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
         { key: 'name', label: 'Client Name' },
         { key: 'poc_email', label: 'PoC Email' },
         { key: 'poc_phone', label: 'PoC Phone' },
-        { key: 'category_code', label: 'Category' },
         { key: 'billing_model_code', label: 'Billing Model' },
       ]}
       onFocus={handleFocus}

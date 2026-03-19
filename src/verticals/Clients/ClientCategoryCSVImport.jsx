@@ -8,37 +8,42 @@ import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorit
  *
  * Defines client category specific import rules.
  */
-const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import Categories' }) => {
+const ClientCategoryCSVImport = ({ 
+  onImportComplete, 
+  className, 
+  label = 'Import Data',
+  tableName = 'client_categories',
+  entityName = 'Client Categories',
+  requiredFields = ['category_name']
+}) => {
   const [importing, setImporting] = React.useState(false);
-  const [existingCategories, setExistingCategories] = React.useState(null);
+  const [existingData, setExistingData] = React.useState(null);
 
   const loadContext = async () => {
-    if (existingCategories) return { existingCategories };
+    if (existingData) return { existingData };
 
-    const { data: categories, error } = await supabase
-      .from('client_categories')
-      .select('id, name, code');
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*');
 
     if (error) throw error;
 
-    setExistingCategories(categories || []);
-    return { existingCategories: categories || [] };
+    setExistingData(data || []);
+    return { existingData: data || [] };
   };
 
   const handleFocus = async () => {
-    if (existingCategories) return;
+    if (existingData) return;
     setImporting(true);
     try { await loadContext(); } catch (err) { console.error(err); } finally { setImporting(false); }
   };
 
-  // Soft match: name similarity > 92% (categories are usually short, so higher threshold)
   const isSoftMatch = (row, existing) => {
-    const rowName = normalizeValue(row.category_name || row.name || '');
+    const rowName = normalizeValue(row.category_name || row.service_name || row.name || '');
     const extName = normalizeValue(existing.name);
     return calculateSimilarity(rowName, extName) > 0.92;
   };
 
-  // Hard match: exact code
   const isHardMatch = (row, existing) => {
     const rowCode = (row.code || '').toUpperCase().trim();
     const extCode = (existing.code || '').toUpperCase().trim();
@@ -50,7 +55,7 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
     <div className="tile-content">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
         <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
-          {conflict.csvRow.category_name || conflict.csvRow.name}
+          {conflict.csvRow.category_name || conflict.csvRow.service_name || conflict.csvRow.name}
         </h5>
         {conflict.matchMode === 'hard' && (
           <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
@@ -67,35 +72,42 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
     try {
       const ctx = await loadContext();
 
-      const categoriesToUpsert = rows
-        .filter(row => (row.category_name || row.name || '').trim())
+      const itemsToUpsert = rows
+        .filter(row => (row.category_name || row.service_name || row.name || '').trim())
         .map(row => {
-          const name = (row.category_name || row.name || '').trim();
-          const possibleMatches = ctx.existingCategories.filter(e => isHardMatch(row, e) || isSoftMatch(row, e));
+          const name = (row.category_name || row.service_name || row.name || '').trim();
+          const possibleMatches = ctx.existingData.filter(e => isHardMatch(row, e) || isSoftMatch(row, e));
           const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
-          return {
+          const payload = {
             id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
             name,
             code: (row.code || '').toUpperCase().trim() || null,
             description: row.description || null,
             updated_at: new Date().toISOString(),
           };
+
+          // If category, add default_service_code if provided
+          if (tableName === 'client_categories' && row.default_service_code) {
+            payload.default_service_code = row.default_service_code;
+          }
+
+          return payload;
         });
 
-      if (categoriesToUpsert.length === 0) throw new Error('No valid category records found.');
+      if (itemsToUpsert.length === 0) throw new Error(`No valid ${entityName} records found.`);
 
       const { error } = await supabase
-        .from('client_categories')
-        .upsert(categoriesToUpsert, { onConflict: 'id' });
+        .from(tableName)
+        .upsert(itemsToUpsert, { onConflict: 'id' });
 
       if (error) throw error;
 
-      alert(`Successfully processed ${categoriesToUpsert.length} categories.`);
-      setExistingCategories(null); // Reset for next import
+      alert(`Successfully processed ${itemsToUpsert.length} ${entityName}.`);
+      setExistingData(null); 
       if (onImportComplete) onImportComplete();
     } catch (err) {
-      console.error('ClientCategoryCSVImport: Finalize Error:', err);
+      console.error(`CSV Import Error [${tableName}]:`, err);
       alert(`Import failed: ${err.message || String(err)}`);
     } finally {
       setImporting(false);
@@ -106,9 +118,9 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
     <CSVImportButton
       label={importing ? 'Importing...' : label}
       onDataParsed={handleDataParsed}
-      requiredFields={['category_name']}
+      requiredFields={requiredFields}
       getConflictKey={(row) => {
-        const name = normalizeValue(row.category_name || row.name || '');
+        const name = normalizeValue(row.category_name || row.service_name || row.name || '');
         const code = normalizeValue(row.code || '');
         return `${name}|${code}` || 'new-row';
       }}
@@ -119,13 +131,13 @@ const ClientCategoryCSVImport = ({ onImportComplete, className, label = 'Import 
         if (soft) return { existingRecord: soft, matchMode: 'soft' };
         return null;
       }}
-      existingData={existingCategories}
+      existingData={existingData}
       renderConflictTile={renderConflictTile}
-      entityName="Client Categories"
+      entityName={entityName}
       className={className}
       disabled={importing}
       compareFields={[
-        { key: 'name', label: 'Category Name' },
+        { key: 'name', label: 'Name' },
         { key: 'code', label: 'Code' },
         { key: 'description', label: 'Description' },
       ]}

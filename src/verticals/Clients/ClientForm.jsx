@@ -18,14 +18,13 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
 
   useEffect(() => {
     const fetchDropdowns = async () => {
-      const [catRes, modelRes] = await Promise.all([
-        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
+      const [catRes, serviceRes, modelRes] = await Promise.all([
+        supabase.from('client_categories').select('id, name, code, default_service_code').order('name'),
+        supabase.from('client_services').select('id, name, code').order('name'),
         supabase.from('client_billing_models').select('id, name, code').order('name'),
       ]);
-      if (catRes.data) {
-        setVehicleCategories(catRes.data.filter(c => c.category_type === 'VEHICLE'));
-        setServiceCategories(catRes.data.filter(c => c.category_type === 'SERVICE'));
-      }
+      if (catRes.data) setVehicleCategories(catRes.data);
+      if (serviceRes.data) setServiceCategories(serviceRes.data);
       if (modelRes.data) setBillingModels(modelRes.data);
     };
     fetchDropdowns();
@@ -33,6 +32,7 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
 
   const [formData, setFormData] = useState({
     name: initialData.name || '',
+    category_id: initialData.category_id || '',
     billing_model_id: initialData.billing_model_id || '',
     category_matrix: initialData.category_matrix || {}, // { vehicleId: { serviceId: true } }
     poc_name: initialData.poc_name || '',
@@ -183,10 +183,30 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                                   checked={isChecked}
                                   onChange={() => {
                                     if (isViewOnly) return;
-                                    const currentMatrix = { ...formData.category_matrix };
-                                    if (!currentMatrix[vehicle.id]) currentMatrix[vehicle.id] = {};
-                                    currentMatrix[vehicle.id][service.id] = !isChecked;
-                                    setFormData(prev => ({ ...prev, category_matrix: currentMatrix }));
+                                    setFormData(prev => {
+                                      const currentMatrix = JSON.parse(JSON.stringify(prev.category_matrix));
+                                      if (!currentMatrix[vehicle.id]) currentMatrix[vehicle.id] = {};
+                                      
+                                      const wasChecked = currentMatrix[vehicle.id][service.id] || false;
+                                      currentMatrix[vehicle.id][service.id] = !wasChecked;
+                                      
+                                      // MATRIX AUTOMATION: If checking ANY service for a vehicle for the first time, 
+                                      // check if that vehicle has a default service to auto-apply.
+                                      if (!wasChecked) {
+                                        // Count how many services are currently checked for this vehicle
+                                        const totalCheckedBefore = Object.values(currentMatrix[vehicle.id]).filter(v => v).length - 1; // -1 because we just checked one
+                                        
+                                        if (totalCheckedBefore === 0 && vehicle.default_service_code) {
+                                          const defaultSvc = serviceCategories.find(s => s.code === vehicle.default_service_code);
+                                          // Apply the default if we found it and it's not the one we just toggled
+                                          if (defaultSvc && defaultSvc.id !== service.id) {
+                                            currentMatrix[vehicle.id][defaultSvc.id] = true;
+                                          }
+                                        }
+                                      }
+
+                                      return { ...prev, category_matrix: currentMatrix };
+                                    });
                                   }}
                                   disabled={isViewOnly}
                                 />

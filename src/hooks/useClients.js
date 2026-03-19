@@ -8,6 +8,7 @@ import { supabase } from '../services/supabaseClient';
 export const useClients = () => {
   const [clients, setClients] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
   const [billingModels, setBillingModels] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -17,30 +18,32 @@ export const useClients = () => {
       const [
         { data: clientsData, error: clientErr },
         { data: catsData },
+        { data: servicesData },
         { data: modelsData }
       ] = await Promise.all([
         supabase.from('clients').select('*').order('name', { ascending: true }),
-        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
+        supabase.from('client_categories').select('*').order('name'),
+        supabase.from('client_services').select('*').order('name'),
         supabase.from('client_billing_models').select('id, name, code').order('name'),
       ]);
 
       if (clientErr) throw clientErr;
 
-      const catMap = new Map((catsData || []).map(c => [c.id, { name: c.name, code: c.code, type: c.category_type }]));
+      const catMap = new Map((catsData || []).map(c => [c.id, { name: c.name, code: c.code }]));
       const modelMap = new Map((modelsData || []).map(m => [m.id, { name: m.name, code: m.code }]));
 
       // Pre-process category dictionaries for quick lookup in display components
       const vehicleCats = {};
       const serviceCats = {};
       (catsData || []).forEach(c => {
-        if (c.category_type === 'VEHICLE') vehicleCats[c.id] = c;
-        else serviceCats[c.id] = c;
+        vehicleCats[c.id] = c;
+      });
+      (servicesData || []).forEach(s => {
+        serviceCats[s.id] = s;
       });
 
       const processed = (clientsData || []).map(client => ({
         ...client,
-        category_name: catMap.get(client.category_id)?.name || 'Uncategorized',
-        category_code: catMap.get(client.category_id)?.code || 'N/A',
         billing_model_name: modelMap.get(client.billing_model_id)?.name || 'N/A',
         billing_model_code: modelMap.get(client.billing_model_id)?.code || 'N/A',
         vehicle_categories: vehicleCats,
@@ -49,6 +52,7 @@ export const useClients = () => {
 
       setClients(processed);
       if (catsData) setCategories(catsData);
+      if (servicesData) setServices(servicesData); // Still need to add setServices to state
       if (modelsData) setBillingModels(modelsData);
     } catch (error) {
       console.error('useClients: Fetch Error:', error);
@@ -62,7 +66,6 @@ export const useClients = () => {
   const addClient = async (formData) => {
     const clientData = {
       name: formData.name,
-      category_id: formData.category_id || null,
       billing_model_id: formData.billing_model_id || null,
       poc_name: formData.poc_name || null,
       poc_phone: formData.poc_phone || null,
@@ -85,7 +88,6 @@ export const useClients = () => {
   const updateClient = async (id, formData) => {
     const updateData = {
       name: formData.name,
-      category_id: formData.category_id || null,
       billing_model_id: formData.billing_model_id || null,
       poc_name: formData.poc_name || null,
       poc_phone: formData.poc_phone || null,
@@ -138,6 +140,7 @@ export const useClients = () => {
   return {
     clients,
     categories,
+    services,
     billingModels,
     loading,
     fetchClients,
