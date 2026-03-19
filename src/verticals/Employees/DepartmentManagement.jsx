@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
 import MasterPageHeader from '../../components/MasterPageHeader';
+import DepartmentCSVDownload from './DepartmentCSVDownload';
+import DepartmentCSVImport from './DepartmentCSVImport';
 
 const DepartmentManagement = () => {
   const [departments, setDepartments] = useState([]);
@@ -119,9 +121,14 @@ const DepartmentManagement = () => {
           </div>
         }
         rightActions={
-          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-            + New Department
-          </button>
+          <>
+            <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
+            <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Department
+            </button>
+          </>
         }
       />
 

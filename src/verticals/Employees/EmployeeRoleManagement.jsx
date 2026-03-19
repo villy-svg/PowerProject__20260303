@@ -3,6 +3,8 @@ import { supabase } from '../../services/supabaseClient';
 import './EmployeeRoleManagement.css';
 import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/MasterPageHeader';
+import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
+import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 
 const EmployeeRoleManagement = () => {
   const [roles, setRoles] = useState([]);
@@ -121,9 +123,14 @@ const EmployeeRoleManagement = () => {
           </div>
         }
         rightActions={
-          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-            + New Role
-          </button>
+          <>
+            <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
+            <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Role
+            </button>
+          </>
         }
       />
 
