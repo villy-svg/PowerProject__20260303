@@ -49,7 +49,34 @@ const [viewMode, setViewMode] = useState('grid');
 
 ---
 
-## 4. Header Styling (Halo Integration)
+## 4. Standardized Action Buttons
+Every management page MUST include Export, Download Template, and Import buttons in the `rightActions` block to ensure consistent bulk data management capabilities.
+
+### Implementation Pattern
+The `rightActions` block should follow this specific order:
+1. **Export Button**: `<Entity>CSVDownload` (full data)
+2. **Download Template**: `<Entity>CSVDownload` (with `isTemplate` prop)
+3. **Import Button**: `<Entity>CSVImport` (with `onImportComplete` callback)
+4. **Primary Action**: Standard `+ New <Entity>` button.
+
+```jsx
+rightActions={
+  <>
+    <EntityCSVDownload className="master-action-btn" data={data} label="Export <Entities>" />
+    <EntityCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+    <EntityCSVImport className="master-action-btn" label="Import <Entities>" onImportComplete={fetchData} />
+    <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+      + New <Entity>
+    </button>
+  </>
+}
+```
+
+**Rule**: All these buttons MUST use the `master-action-btn` class to ensure consistent styling and spacing.
+
+---
+
+## 5. Header Styling (Halo Integration)
 All buttons in the header MUST follow the **PowerProject UI Design System** skill.
 
 ### Toggle Specific Styles
@@ -68,6 +95,6 @@ Selected states use a **solid brand-green fill + dark text** to match the `TaskC
 
 ---
 
-## 5. Sub-sidebar Synergy
+## 6. Sub-sidebar Synergy
 On pages where a sub-sidebar exists (e.g., Hub Tasks), the sub-sidebar handles **Filters** while the header handles **View/Actions**.
 - For simpler management pages (Departments, Roles), keep filters in the header `leftActions` if needed, or omit them for simplicity.

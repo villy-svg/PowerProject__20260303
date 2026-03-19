@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
+import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
 
 /**
  * ClientBillingModelManagement
@@ -92,9 +94,14 @@ const ClientBillingModelManagement = () => {
           </div>
         }
         rightActions={
-          <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-            + New Billing Model
-          </button>
+          <>
+            <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
+            <ClientBillingModelCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Billing Model
+            </button>
+          </>
         }
       />
 
