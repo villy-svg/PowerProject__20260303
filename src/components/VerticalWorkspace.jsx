@@ -35,6 +35,7 @@ const VerticalWorkspace = ({
     priority: [], 
     role: [],
     function: [],
+    assignee: [],
     duplicatesOnly: false 
   });
   const [isInitialized, setIsInitialized] = React.useState(false);
@@ -52,7 +53,8 @@ const VerticalWorkspace = ({
         city: allCities,
         hub: allHubs,
         priority: allPriorities,
-        function: allFunctions
+        function: allFunctions,
+        assignee: [...new Set(tasks.map(t => t.assigneeName).filter(Boolean))]
       }));
       setIsInitialized(true);
     }

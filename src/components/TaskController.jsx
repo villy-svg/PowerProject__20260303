@@ -133,6 +133,7 @@ const TaskController = ({
     if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
     if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
     if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
+    if (filters.assignee?.length > 0 && !filters.assignee.includes(t.assigneeName)) return false;
     return true;
   });
 

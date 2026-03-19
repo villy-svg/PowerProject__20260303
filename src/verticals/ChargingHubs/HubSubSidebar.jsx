@@ -242,6 +242,13 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         valueKey="name"
       />
 
+      <FilterGroup 
+        label="Assignee" 
+        options={[...new Set((tasks || []).map(t => t.assigneeName).filter(Boolean))].sort()} 
+        currentFilters={filters.assignee || []} 
+        filterKey="assignee" 
+      />
+
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
         <div className="sub-nav-text">
           <p>Module Navigation</p>
