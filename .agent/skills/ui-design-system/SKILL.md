@@ -184,3 +184,24 @@ These are the ONLY allowed priority colors.
 | Selected states | ✅ Halo border + subtle tint (no solid fills) |
 | Introducing new color palettes | 🔒 Requires explicit user permission |
 | Assignee badges on generic cards | ❌ Only render in vertical-specific tile components (e.g., `HubTaskTile`) |
+---
+
+## 9. Standard Form Styling
+All forms (Add/Edit wizards) MUST follow these class-based rules to ensure visual parity with the global Halo system. **Avoid inline styles for form inputs.**
+
+### Container Classes
+- **`.form-section`**: Groups related fields with consistent spacing.
+- **`.form-grid`**: Usually a `display: grid` with `template-columns: 1fr 1fr` for side-by-side inputs.
+- **`.form-group`**: Wraps a single label + input pair with `flex-direction: column` and `gap: 0.5rem`.
+
+### Input & Select Styling
+- **Background**: `var(--halo-bg)` — ensures the hallmark subtle teal/green tint.
+- **Border**: `1px solid var(--border-color)`.
+- **Text (Selects)**: `color: var(--brand-green)`, `font-weight: 600`.
+- **Focus State**: `border-color: var(--brand-green)`, `box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2)`.
+
+### View-Only Mode
+- Apply `.view-only-mode` to the parent `<form>`.
+- Inputs should have `cursor: not-allowed`, `opacity: 0.6`, and a darker `rgba(255, 255, 255, 0.02)` background.
+
+**Rule**: New forms should mirror the implementation in `EmployeeForm.css` or `ClientForm.css`. Never use primitive `rgba(255,255,255,0.05)` for input backgrounds; always use `var(--halo-bg)`.

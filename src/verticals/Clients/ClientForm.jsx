@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabaseClient';
+import './ClientForm.css';
+import '../ChargingHubs/HubManagement.css'; // For switch/slider styles
 
 /**
  * ClientForm
@@ -127,7 +128,7 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
 
   return (
     <form
-      className={`employee-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`}
+      className={`client-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`}
       onSubmit={currentPage === 2 ? handleSubmit : handleNext}
     >
       {/* Wizard Step Indicator */}
@@ -140,8 +141,8 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
         {/* PAGE 1: Client Details */}
         {currentPage === 1 && (
           <div className="form-page fade-in">
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Client Name *</label>
+            <div className="form-group">
+              <label>Client Name *</label>
               <input
                 type="text"
                 name="name"
@@ -150,19 +151,12 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 placeholder="e.g. Tata Motors Ltd."
                 required
                 readOnly={isViewOnly}
-                style={inputStyle}
               />
             </div>
 
-            <div style={{ ...fieldStyle, marginTop: '1.5rem' }}>
-              <label style={labelStyle}>Service Category Matrix</label>
-              <div className="matrix-container" style={{ 
-                background: 'rgba(255,255,255,0.02)', 
-                borderRadius: '12px', 
-                border: '1px solid rgba(255,255,255,0.1)',
-                overflow: 'hidden',
-                marginTop: '10px'
-              }}>
+            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <label>Service Category Matrix</label>
+              <div className="matrix-container">
                 <table className="permissions-table client-matrix-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
@@ -219,14 +213,13 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
               </p>
             </div>
 
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Billing Model</label>
+            <div className="form-group" style={{ marginTop: '1rem' }}>
+              <label>Billing Model</label>
               <select
                 name="billing_model_id"
                 value={formData.billing_model_id}
                 onChange={handleChange}
                 disabled={isViewOnly}
-                style={selectStyle}
               >
                 <option value="">— Select Billing Model —</option>
                 {billingModels.map(model => (
@@ -240,8 +233,8 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
         {/* PAGE 2: PoC Details */}
         {currentPage === 2 && (
           <div className="form-page fade-in">
-            <div style={fieldStyle}>
-              <label style={labelStyle}>PoC Name</label>
+            <div className="form-group">
+              <label>PoC Name</label>
               <input
                 type="text"
                 name="poc_name"
@@ -249,12 +242,11 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 onChange={handleChange}
                 placeholder="Point of Contact Name"
                 readOnly={isViewOnly}
-                style={inputStyle}
               />
             </div>
 
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Contact Number</label>
+            <div className="form-group">
+              <label>Contact Number</label>
               <input
                 type="tel"
                 name="poc_phone"
@@ -262,12 +254,11 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 onChange={handleChange}
                 placeholder="+91XXXXXXXXXX"
                 readOnly={isViewOnly}
-                style={inputStyle}
               />
             </div>
 
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Email ID</label>
+            <div className="form-group">
+              <label>Email ID</label>
               <input
                 type="email"
                 name="poc_email"
@@ -275,7 +266,6 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
                 onChange={handleChange}
                 placeholder="poc@client.com"
                 readOnly={isViewOnly}
-                style={inputStyle}
               />
             </div>
           </div>
