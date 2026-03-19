@@ -42,11 +42,12 @@ const VerticalWorkspace = ({
 
   // Auto-populate filters on first load (Select All by default)
   React.useEffect(() => {
-    if (tasks?.length > 0 && !isInitialized) {
-      const allCities = [...new Set(tasks.map(t => t.city))];
-      const allHubs = [...new Set(tasks.map(t => t.hub_id))];
-      const allPriorities = ['Low', 'Medium', 'High', 'Urgent'];
-      const allFunctions = [...new Set(tasks.map(t => t.function))];
+    if (Array.isArray(tasks) && tasks.length > 0 && !isInitialized) {
+      const allCities = [...new Set(tasks.map(t => t.city).filter(Boolean))];
+      const allHubs = [...new Set(tasks.map(t => t.hub_id).filter(Boolean))];
+      const allPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))]; // Dynamically get priorities
+      const allFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
+      const allAssignees = [...new Set(tasks.map(t => t.assigneeName).filter(Boolean))];
 
       setFilters(prev => ({
         ...prev,
@@ -54,7 +55,7 @@ const VerticalWorkspace = ({
         hub: allHubs,
         priority: allPriorities,
         function: allFunctions,
-        assignee: [...new Set(tasks.map(t => t.assigneeName).filter(Boolean))]
+        assignee: allAssignees
       }));
       setIsInitialized(true);
     }
@@ -139,9 +140,14 @@ const VerticalWorkspace = ({
             permissions={permissions}
             activeVertical={activeVertical}
             setActiveVertical={setActiveVertical} 
-            onFilterChange={handleFilterChange}
+            onFilterChange={onFilterChange} // Updated to local onFilterChange
             onReset={() => resetFilters()}
-            onBatchFilter={(key, values) => setFilters(prev => ({ ...prev, [key]: values }))}
+            onBatchFilter={(key, values) => { // Updated to use local onFilterChange
+              setFilters(prev => ({ ...prev, [key]: values }));
+              if (propFilterChange) {
+                propFilterChange(key, values);
+              }
+            }}
             filters={filters}
             tasks={tasks}
           />
@@ -163,7 +169,7 @@ const VerticalWorkspace = ({
         {React.Children.toArray(children).some(child => !!child) ? (
           React.Children.map(children, child => 
             React.isValidElement(child) 
-              ? React.cloneElement(child, { filters, onFilterChange: handleFilterChange })
+              ? React.cloneElement(child, { filters, onFilterChange: onFilterChange }) // Updated to local onFilterChange
               : child
           )
         ) : (
@@ -181,7 +187,7 @@ const VerticalWorkspace = ({
             bulkUpdateTasks={bulkUpdateTasks}
             deleteTask={deleteTask}
             updateTaskStage={updateTaskStage}
-            handleFilterChange={handleFilterChange}
+            handleFilterChange={onFilterChange} // Updated to local onFilterChange
             resetFilters={resetFilters}
             label={label}
             TaskFormComponent={TaskFormComponent}

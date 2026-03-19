@@ -144,13 +144,18 @@ const TaskController = ({
    * Checks the capability flags against the assignedVerticals array.
    */
   const canUserCreate = permissions.canCreate && 
-    (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
 
   const canUserUpdate = permissions.canUpdate && 
-    (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
 
   const canUserDelete = permissions.canDelete && 
-    (permissions.scope === 'global' || user?.assignedVerticals?.includes(activeVertical));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
+
+  // Debugging log for permission issues
+  if (!canUserUpdate && permissions.scope !== 'none') {
+    console.warn(`User ${user?.full_name} lacks update permission for ${activeVertical}. Scope: ${permissions.scope}, Assigned:`, user?.assignedVerticals);
+  }
 
   /**
    * handleSaveTask
