@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "20260319 Client Category Manager Action Buttons 1.1.2"
+git commit -m "20260319 Client Category Manager Action Buttons 1.1.3"
 git push origin main
