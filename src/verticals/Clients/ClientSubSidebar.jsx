@@ -21,7 +21,7 @@ const ClientSubSidebar = ({
   const canAccessAdmin = permissions?.canAccessConfig;
 
   const [expandedGroups, setExpandedGroups] = useState({
-    vehicle: false,
+    category: false,
     service: false,
     billing_model: false,
   });
@@ -179,7 +179,7 @@ const ClientSubSidebar = ({
             style={{ width: '100%', opacity: activeVertical === 'client_category_management' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('client_category_management')}
           >
-            Vehicle Manager
+            Category Manager
           </button>
           <button
             className="halo-button"
@@ -225,7 +225,7 @@ const ClientSubSidebar = ({
       </div>
 
       <FilterGroup
-        label="Vehicle Category"
+        label="Category"
         options={filterOptions.vehicleCategories}
         currentFilters={filters?.vehicle || []}
         filterKey="vehicle"

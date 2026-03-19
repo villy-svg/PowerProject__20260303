@@ -56,11 +56,20 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
       {
         id: 'manage_client_categories',
         title: 'Client Category Management',
-        desc: 'Define and manage client categories (Enterprise, SME, etc.)',
+        desc: 'Define and manage client categories (Vehicle types, Operations, etc.)',
         icon: '',
         action: () => setActiveVertical('client_category_management'),
         adminOnly: true,
         buttonLabel: 'Manage Categories'
+      },
+      {
+        id: 'manage_service_categories',
+        title: 'Client Service Management',
+        desc: 'Define and manage service categories (Maintenance, AMC, etc.)',
+        icon: '',
+        action: () => setActiveVertical('client_service_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Services'
       },
       {
         id: 'manage_billing_models',
