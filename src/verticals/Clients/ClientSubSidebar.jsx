@@ -21,7 +21,7 @@ const ClientSubSidebar = ({
   const canAccessAdmin = permissions?.canAccessConfig;
 
   const [expandedGroups, setExpandedGroups] = useState({
-    category: false,
+    vehicle: false,
     service: false,
     billing_model: false,
   });
@@ -34,15 +34,25 @@ const ClientSubSidebar = ({
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const [{ data: cats }, { data: models }] = await Promise.all([
-        supabase.from('client_categories').select('id, name, code, category_type').order('name'),
-        supabase.from('client_billing_models').select('id, name, code').order('name'),
-      ]);
-      setFilterOptions({
-        vehicleCategories: (cats || []).filter(c => c.category_type === 'VEHICLE'),
-        serviceCategories: (cats || []).filter(c => c.category_type === 'SERVICE'),
-        billingModels: models || [],
-      });
+      try {
+        const [
+          { data: cats },
+          { data: svcs },
+          { data: models }
+        ] = await Promise.all([
+          supabase.from('client_categories').select('id, name, code').order('name'),
+          supabase.from('client_services').select('id, name, code').order('name'),
+          supabase.from('client_billing_models').select('id, name, code').order('name'),
+        ]);
+
+        setFilterOptions({
+          vehicleCategories: cats || [],
+          serviceCategories: svcs || [],
+          billingModels: models || [],
+        });
+      } catch (err) {
+        console.error('ClientSubSidebar: Fetch error:', err);
+      }
     };
     fetchOptions();
   }, []);
@@ -229,7 +239,7 @@ const ClientSubSidebar = ({
         options={filterOptions.vehicleCategories}
         currentFilters={filters?.vehicle || []}
         filterKey="vehicle"
-        displayKey="code"
+        displayKey="name"
         valueKey="id"
       />
 
@@ -238,7 +248,7 @@ const ClientSubSidebar = ({
         options={filterOptions.serviceCategories}
         currentFilters={filters?.service || []}
         filterKey="service"
-        displayKey="code"
+        displayKey="name"
         valueKey="id"
       />
 
@@ -247,7 +257,7 @@ const ClientSubSidebar = ({
         options={filterOptions.billingModels}
         currentFilters={filters?.billing_model || []}
         filterKey="billing_model"
-        displayKey="code"
+        displayKey="name"
         valueKey="id"
       />
 
