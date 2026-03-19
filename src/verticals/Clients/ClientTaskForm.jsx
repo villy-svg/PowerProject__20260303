@@ -56,6 +56,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Priority</label>
           <select
+            className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
           >
@@ -69,6 +70,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Related Client</label>
           <select 
+            className="master-dropdown"
             value={formData.assigned_client_id}
             onChange={(e) => setFormData({...formData, assigned_client_id: e.target.value})}
           >

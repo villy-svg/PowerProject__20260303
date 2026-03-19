@@ -121,6 +121,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Charging Hub City</label>
           <select 
+            className="master-dropdown"
             value={formData.city}
             onChange={handleCityChange}
             required
@@ -135,6 +136,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Charging Hub</label>
           <select 
+            className="master-dropdown"
             value={formData.hub_id}
             onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
             disabled={!formData.city}
@@ -151,6 +153,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Priority</label>
           <select 
+            className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({...formData, priority: e.target.value})}
           >
@@ -164,6 +167,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Assigned To</label>
           <select 
+            className="master-dropdown"
             value={formData.assigned_to}
             onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
           >
@@ -181,6 +185,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Function Component</label>
           <select 
+            className="master-dropdown"
             value={formData.function}
             onChange={(e) => setFormData({...formData, function: e.target.value})}
           >

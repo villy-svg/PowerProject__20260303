@@ -205,3 +205,27 @@ All forms (Add/Edit wizards) MUST follow these class-based rules to ensure visua
 - Inputs should have `cursor: not-allowed`, `opacity: 0.6`, and a darker `rgba(255, 255, 255, 0.02)` background.
 
 **Rule**: New forms should mirror the implementation in `EmployeeForm.css` or `ClientForm.css`. Never use primitive `rgba(255,255,255,0.05)` for input backgrounds; always use `var(--halo-bg)`.
+
+---
+
+## 10. Master Dropdown System (`.master-dropdown`)
+To maintain the premium dark aesthetic, ALL dropdown (`<select>`) elements MUST use the standardized master style for consistency, especially to avoid the default white background on options.
+
+### Stylistic Requirements
+- **Background**: `var(--halo-bg)` with a solid `#0b1314` fallback for the `<option>` list in dark mode.
+- **Text Color**: `var(--brand-green)` for the selected value, `var(--text-color)` for list options.
+- **Border**: `1px solid var(--border-color)`, focuses to `var(--brand-green)`.
+- **Custom Arrow**: Always use the SVG chevron arrow instead of the browser default.
+
+### Implementation
+```css
+/* Import the master system in your component CSS */
+@import '../../styles/DropdownSystem.css';
+
+/* Apply to the select element */
+.my-custom-form select {
+  @extend .master-dropdown; /* Or simply apply the class in JSX */
+}
+```
+
+**Rule**: All dropdowns in management forms (Clients, Employees, Hubs) MUST use `.master-dropdown`. Never leave dropdown options to default browser styling (white background).

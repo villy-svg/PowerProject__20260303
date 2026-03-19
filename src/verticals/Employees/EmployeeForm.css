@@ -1,4 +1,6 @@
-.employee-form {
+@import '../../styles/DropdownSystem.css';
+
+.employee-form-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -61,11 +63,7 @@
   transition: all 0.2s ease;
 }
 
-.employee-form .form-group select {
-  color: var(--brand-green);
-  font-weight: 600;
-  cursor: pointer;
-}
+/* No local select overrides needed, uses .master-dropdown */
 
 .employee-form .form-group input:focus,
 .employee-form .form-group select:focus {

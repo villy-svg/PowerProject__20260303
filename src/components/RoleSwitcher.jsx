@@ -13,7 +13,7 @@ const RoleSwitcher = ({ currentUser, onRoleChange }) => {
       <select 
         value={currentUser.roleId} 
         onChange={(e) => onRoleChange(e.target.value)}
-        className="role-select-dropdown"
+        className="role-select-dropdown master-dropdown"
       >
         {roles.map(role => (
           <option key={role.id} value={role.id}>

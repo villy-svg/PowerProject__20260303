@@ -51,6 +51,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
         <div className="form-group">
           <label>Priority</label>
           <select
+            className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
           >
@@ -63,7 +64,8 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
         <div className="form-group">
           <label>Assigned To</label>
-          <select 
+          <select
+            className="master-dropdown"
             value={formData.assigned_to}
             onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
           >

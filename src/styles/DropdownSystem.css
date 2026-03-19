@@ -1,0 +1,50 @@
+/* ==========================================================================
+   MASTER DROPDOWN SYSTEM
+   Consistent styling for all select elements across PowerProject.
+   ========================================================================== */
+
+.master-dropdown {
+  /* Use standard form input variables */
+  background: var(--halo-bg, rgba(45, 212, 191, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--brand-green);
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.master-dropdown:focus {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 10px var(--halo-glow);
+  outline: none;
+}
+
+/* 
+   OPTION STYLING:
+   Native <option> elements have limited styling support but we can control 
+   the background and text color to match the premium dark theme.
+*/
+.master-dropdown option {
+  /* 
+     Target Color: perceived dark green/gray blackish color (#0b1314)
+     This matches the background of 'Detailed Description' text boxes 
+     which use var(--halo-bg) on top of the black body.
+  */
+  background-color: #0b1314; 
+  color: var(--text-color);
+  padding: 12px;
+  font-weight: normal;
+}
+
+/* Light mode support */
+[data-theme='light'] .master-dropdown option {
+  background-color: #fcfcfd;
+  color: #18181b;
+}

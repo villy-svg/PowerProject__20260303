@@ -1,5 +1,7 @@
 /* ClientForm.css */
-.client-form {
+@import '../../styles/DropdownSystem.css';
+
+.client-form-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -37,11 +39,7 @@
   box-sizing: border-box;
 }
 
-.client-form .form-group select {
-  color: var(--brand-green);
-  font-weight: 600;
-  cursor: pointer;
-}
+/* No local select overrides needed, uses .master-dropdown */
 
 .client-form .form-group input:focus,
 .client-form .form-group select:focus,

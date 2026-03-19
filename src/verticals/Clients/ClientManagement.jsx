@@ -276,6 +276,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
             name: editingClient.name,
             category_id: editingClient.category_id || '',
             billing_model_id: editingClient.billing_model_id || '',
+            category_matrix: editingClient.category_matrix || {},
             poc_name: editingClient.poc_name || '',
             poc_phone: editingClient.poc_phone || '',
             poc_email: editingClient.poc_email || '',

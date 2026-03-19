@@ -216,6 +216,7 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
               <label>Billing Model</label>
               <select
                 name="billing_model_id"
+                className="master-dropdown"
                 value={formData.billing_model_id}
                 onChange={handleChange}
                 disabled={isViewOnly}

@@ -1,4 +1,6 @@
 /* RoleSwitcher.css */
+@import '../styles/DropdownSystem.css';
+
 .role-switcher-container {
   margin-left: 10px;
   display: flex;

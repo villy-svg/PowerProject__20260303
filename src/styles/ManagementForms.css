@@ -1,3 +1,4 @@
+@import './DropdownSystem.css';
 /* Shared sophisticated form styles for all management modals */
 
 .modal-overlay {
@@ -107,12 +108,7 @@
   width: 100%;
 }
 
-.vertical-task-form select,
-.hub-modal select {
-  color: var(--brand-green);
-  font-weight: 700;
-  cursor: pointer;
-}
+/* Inherits from .master-dropdown where applied in JSX */
 
 .vertical-task-form input[type="text"]::placeholder,
 .vertical-task-form textarea::placeholder,

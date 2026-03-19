@@ -395,7 +395,7 @@ body {
 }
 
 .stage-select-dropdown option {
-  background-color: var(--bg-color);
+  background-color: #0b1314;
   color: var(--text-color);
   text-transform: none;
 }
