@@ -127,10 +127,10 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
   const activeClients = filteredClients.filter(c => c.status === 'Active');
   const inactiveClients = filteredClients.filter(c => c.status === 'Inactive');
 
-  // Group active clients by category
-  const activeByCategory = activeClients.reduce((acc, client) => {
-    const key = client.category_name || 'Uncategorized';
-    if (!acc[key]) acc[key] = { categoryName: key, clients: [] };
+  // Group active clients by billing model
+  const activeByBillingModel = activeClients.reduce((acc, client) => {
+    const key = client.billing_model_name || 'No Billing Model';
+    if (!acc[key]) acc[key] = { billingModelName: key, clients: [] };
     acc[key].clients.push(client);
     return acc;
   }, {});
@@ -210,10 +210,10 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
               <p className="client-empty-sub-state">No active clients found matching filters.</p>
             ) : (
               <div className="grouped-employee-sections">
-                {Object.values(activeByCategory)
-                  .sort((a, b) => a.categoryName.localeCompare(b.categoryName))
-                  .map(({ categoryName, clients: clientsInCat }) => (
-                    <div key={categoryName} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
+                {Object.values(activeByBillingModel)
+                  .sort((a, b) => a.billingModelName.localeCompare(b.billingModelName))
+                  .map(({ billingModelName, clients: clientsInModel }) => (
+                    <div key={billingModelName} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
                       <h5 style={{
                         margin: '0 0 1rem 0',
                         fontSize: '1rem',
@@ -223,10 +223,10 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
                         borderBottom: '1px solid rgba(255,255,255,0.05)',
                         paddingBottom: '0.5rem',
                       }}>
-                        {categoryName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInCat.length})</span>
+                        {billingModelName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInModel.length})</span>
                       </h5>
                       <div className={viewMode === 'grid' ? 'client-grid' : 'client-list'}>
-                        {clientsInCat.map(client =>
+                        {clientsInModel.map(client =>
                           viewMode === 'grid'
                             ? <ClientCard {...clientCardProps(client)} />
                             : <ClientListRow {...clientCardProps(client)} />

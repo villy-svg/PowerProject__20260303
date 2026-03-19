@@ -15,14 +15,25 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
 
   const getMatrixSummary = () => {
     if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return null;
-    return Object.entries(client.category_matrix).map(([vId, services]) => {
-      const vCode = client.vehicle_categories?.[vId]?.code || '???';
-      const sCodes = Object.entries(services)
-        .filter(([_, checked]) => checked)
-        .map(([sId, _]) => client.service_categories?.[sId]?.code || '???')
+    
+    // Group vehicles by service
+    const serviceToVehicles = {};
+    Object.entries(client.category_matrix).forEach(([vId, services]) => {
+      Object.entries(services).forEach(([sId, checked]) => {
+        if (checked) {
+          if (!serviceToVehicles[sId]) serviceToVehicles[sId] = [];
+          serviceToVehicles[sId].push(vId);
+        }
+      });
+    });
+
+    return Object.entries(serviceToVehicles).map(([sId, vIds]) => {
+      const sCode = client.service_categories?.[sId]?.code || '???';
+      const vCodes = vIds
+        .map(vId => client.vehicle_categories?.[vId]?.code || '???')
         .join(', ');
-      return sCodes ? `${vCode}: ${sCodes}` : null;
-    }).filter(Boolean).join(' | ');
+      return `${sCode}: ${vCodes}`;
+    }).join(' | ');
   };
 
   const matrixSummary = getMatrixSummary();
