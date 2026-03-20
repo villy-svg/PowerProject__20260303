@@ -167,7 +167,8 @@ const ClientSubSidebar = ({
   return (
     <div className="sub-sidebar-body">
       {canAccessAdmin && (
-        <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {permissions?.canAccessClientTasks && (
           <button
             className="halo-button"
             style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
@@ -175,6 +176,8 @@ const ClientSubSidebar = ({
           >
             Client Tasks
           </button>
+        )}
+        {permissions?.canAccessLeadsFunnel && (
           <button
             className="halo-button"
             style={{ width: '100%', opacity: activeVertical === 'leads_funnel' ? 1 : 0.7 }}
@@ -182,30 +185,35 @@ const ClientSubSidebar = ({
           >
             Leads Funnel
           </button>
-        </div>
+        )}
+      </div>
       )}
 
       {/* Filters Header */}
       <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <button
-          onClick={() => setActiveVertical('CLIENTS')}
-          style={{
-            margin: 0,
-            fontWeight: 700,
-            fontSize: '1rem',
-            color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
-            letterSpacing: '0.5px',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            cursor: 'pointer',
-            opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
-            transition: 'all 0.2s ease'
-          }}
-          className="sidebar-header-nav-btn"
-        >
-          Clients
-        </button>
+        {permissions?.canAccessClients ? (
+          <button
+            onClick={() => setActiveVertical('CLIENTS')}
+            style={{
+              margin: 0,
+              fontWeight: 700,
+              fontSize: '1rem',
+              color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
+              letterSpacing: '0.5px',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
+              opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
+              transition: 'all 0.2s ease'
+            }}
+            className="sidebar-header-nav-btn"
+          >
+            Clients
+          </button>
+        ) : (
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
+        )}
         <button
           onClick={onReset}
           style={{ background: 'none', border: 'none', color: 'var(--brand-green)', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer', padding: '4px' }}

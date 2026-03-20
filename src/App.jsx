@@ -116,6 +116,26 @@ function App() {
     }
   });
 
+  // Fetch roles from DB to override local defaults
+  useEffect(() => {
+    const fetchRolePermissions = async () => {
+      try {
+        const { data, error } = await supabase.from('role_permissions').select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+          const cloudOverrides = {};
+          data.forEach(row => {
+            cloudOverrides[row.role_id] = row.permissions;
+          });
+          setRolePermissions(prev => ({ ...prev, ...cloudOverrides }));
+        }
+      } catch (err) {
+        console.warn("App: Could not sync cloud role permissions, using local/defaults.", err);
+      }
+    };
+    fetchRolePermissions();
+  }, []);
+
   // Persistent UI states
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => localStorage.getItem('sidebar_state') === 'true');
   const [isSubSidebarOpen, setIsSubSidebarOpen] = useState(() => {

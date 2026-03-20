@@ -8,7 +8,6 @@ import { supabase } from '../../services/supabaseClient';
  * Contains filters for employee records.
  */
 const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
-  const canAccessAdmin = permissions?.canAccessConfig;
 
   const [expandedGroups, setExpandedGroups] = useState({
     role: false,
@@ -159,7 +158,7 @@ const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertic
 
   return (
     <div className="sub-sidebar-body">
-      {canAccessAdmin && (
+      {permissions?.canAccessEmployeeTasks && (
         <div style={{ padding: '12px', marginBottom: '8px' }}>
           <button
             className="halo-button"
@@ -173,7 +172,11 @@ const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertic
 
       {/* Filters Header */}
       <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Employees</p>
+        {permissions?.canAccessEmployees ? (
+           <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Employees</p>
+        ) : (
+           <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5, letterSpacing: '0.5px' }}>Employees</p>
+        )}
         <button
           onClick={onReset}
           style={{

@@ -8,37 +8,69 @@ export const DEFAULT_ROLE_PERMISSIONS = {
   // --- MASTER SCOPE (Global Access) ---
   master_admin: {
     canCreate: true, canRead: true, canUpdate: true, canDelete: true,
-    canAccessConfig: true, canManageRoles: true, scope: 'global'
+    canAccessConfig: true, canManageRoles: true,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'global'
   },
   master_editor: {
     canCreate: true, canRead: true, canUpdate: true, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'global'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'global'
   },
   master_contributor: {
     canCreate: true, canRead: true, canUpdate: false, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'global'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'global'
   },
   master_viewer: {
     canCreate: false, canRead: true, canUpdate: false, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'global'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: false, canAccessLeadsFunnel: false,
+    canAccessEmployees: true, canAccessEmployeeTasks: false,
+    canAccessHubTasks: true,
+    scope: 'global'
   },
 
   // --- VERTICAL SCOPE (Assigned Access Only) ---
   vertical_admin: {
     canCreate: true, canRead: true, canUpdate: true, canDelete: true,
-    canAccessConfig: true, canManageRoles: false, scope: 'assigned'
+    canAccessConfig: true, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'assigned'
   },
   vertical_editor: {
     canCreate: true, canRead: true, canUpdate: true, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'assigned'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'assigned'
   },
   vertical_contributor: {
     canCreate: true, canRead: true, canUpdate: false, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'assigned'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+    canAccessEmployees: true, canAccessEmployeeTasks: true,
+    canAccessHubTasks: true,
+    scope: 'assigned'
   },
   vertical_viewer: {
     canCreate: false, canRead: true, canUpdate: false, canDelete: false,
-    canAccessConfig: false, canManageRoles: false, scope: 'assigned'
+    canAccessConfig: false, canManageRoles: false,
+    canAccessClients: true, canAccessClientTasks: false, canAccessLeadsFunnel: false,
+    canAccessEmployees: true, canAccessEmployeeTasks: false,
+    canAccessHubTasks: true,
+    scope: 'assigned'
   }
 };
 
@@ -68,13 +100,33 @@ export const ROLE_LIST = Object.keys(DEFAULT_ROLE_PERMISSIONS).map(id => ({
 export const getPermissionsForLevel = (level) => {
   switch (level) {
     case 'admin':
-      return { canCreate: true, canRead: true, canUpdate: true, canDelete: true };
+      return {
+        canCreate: true, canRead: true, canUpdate: true, canDelete: true,
+        canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+        canAccessEmployees: true, canAccessEmployeeTasks: true,
+        canAccessHubTasks: true
+      };
     case 'editor':
-      return { canCreate: true, canRead: true, canUpdate: true, canDelete: false };
+      return {
+        canCreate: true, canRead: true, canUpdate: true, canDelete: false,
+        canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+        canAccessEmployees: true, canAccessEmployeeTasks: true,
+        canAccessHubTasks: true
+      };
     case 'contributor':
-      return { canCreate: true, canRead: true, canUpdate: false, canDelete: false };
+      return {
+        canCreate: true, canRead: true, canUpdate: false, canDelete: false,
+        canAccessClients: true, canAccessClientTasks: true, canAccessLeadsFunnel: true,
+        canAccessEmployees: true, canAccessEmployeeTasks: true,
+        canAccessHubTasks: true
+      };
     case 'viewer':
     default:
-      return { canCreate: false, canRead: true, canUpdate: false, canDelete: false };
+      return {
+        canCreate: false, canRead: true, canUpdate: false, canDelete: false,
+        canAccessClients: true, canAccessClientTasks: false, canAccessLeadsFunnel: false,
+        canAccessEmployees: true, canAccessEmployeeTasks: false,
+        canAccessHubTasks: true
+      };
   }
-};
+};
