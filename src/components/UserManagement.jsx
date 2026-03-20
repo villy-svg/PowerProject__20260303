@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LEVELS, ROLE_SCOPES, DEFAULT_ROLE_PERMISSIONS } from '../constants/roles';
+import { VERTICAL_FEATURES, getDefaultFeatures } from '../constants/verticalFeatures';
 import MasterPageHeader from './MasterPageHeader';
 import './UserManagement.css';
 
@@ -17,6 +18,7 @@ const UserManagement = ({ currentUser }) => {
   const [editRoleScope, setEditRoleScope] = useState('vertical');
   const [editRoleLevel, setEditRoleLevel] = useState('viewer');
   const [editVerticalPermissions, setEditVerticalPermissions] = useState({});
+  const [expandedFeatures, setExpandedFeatures] = useState(null); // Which vertical's features are being edited
 
   useEffect(() => {
     fetchUsers();
@@ -59,7 +61,10 @@ const UserManagement = ({ currentUser }) => {
     // If scope is vertical, assigned_verticals are derived from keys with non-none levels.
     const finalVerticals = editRoleScope === 'master' 
       ? VERTICAL_LIST.map(v => v.id) 
-      : Object.keys(editVerticalPermissions).filter(v => editVerticalPermissions[v] !== 'none');
+      : Object.keys(editVerticalPermissions).filter(v => {
+          const perm = editVerticalPermissions[v];
+          return typeof perm === 'object' ? perm.level !== 'none' : perm !== 'none';
+        });
 
     const { data, error } = await supabase
       .from('user_profiles')
@@ -99,10 +104,46 @@ const UserManagement = ({ currentUser }) => {
   };
 
   const updateVerticalLevel = (vId, level) => {
-    setEditVerticalPermissions(prev => ({
-      ...prev,
-      [vId]: level
-    }));
+    setEditVerticalPermissions(prev => {
+      const current = prev[vId];
+      if (level === 'none') {
+        const updated = { ...prev };
+        delete updated[vId];
+        return updated;
+      }
+      
+      // If it was already an object, just update the level
+      if (typeof current === 'object') {
+        return {
+          ...prev,
+          [vId]: { ...current, level }
+        };
+      }
+      
+      // If it was a string or missing, upgrade to object with default features
+      return {
+        ...prev,
+        [vId]: { level, features: getDefaultFeatures(vId) }
+      };
+    });
+  };
+
+  const toggleFeature = (vId, featureId) => {
+    setEditVerticalPermissions(prev => {
+      const current = prev[vId];
+      if (typeof current !== 'object') return prev; // Should not happen if level is set
+      
+      return {
+        ...prev,
+        [vId]: {
+          ...current,
+          features: {
+            ...current.features,
+            [featureId]: !current.features[featureId]
+          }
+        }
+      };
+    });
   };
 
   if (loading && users.length === 0) return <div className="user-mgmt-loading">Loading Users...</div>;
@@ -157,14 +198,21 @@ const UserManagement = ({ currentUser }) => {
                     ) : (
                       (() => {
                         const activePerms = Object.entries(u.vertical_permissions || {})
-                          .filter(([_, level]) => level !== 'none');
+                          .filter(([_, levelData]) => {
+                            const lvl = typeof levelData === 'object' ? levelData.level : levelData;
+                            return lvl !== 'none';
+                          });
                         
                         return activePerms.length > 0 ? (
-                          activePerms.map(([vId, level]) => (
-                            <span key={vId} className={`v-tag level-${level}`}>
-                              {vId}: {level}
-                            </span>
-                          ))
+                          activePerms.map(([vId, levelData]) => {
+                            const lvl = typeof levelData === 'object' ? levelData.level : levelData;
+                            const hasCustomFeatures = typeof levelData === 'object' && Object.values(levelData.features || {}).includes(false);
+                            return (
+                              <span key={vId} className={`v-tag level-${lvl}`} title={hasCustomFeatures ? "Custom features set" : ""}>
+                                {vId}: {lvl} {hasCustomFeatures && '⚙️'}
+                              </span>
+                            );
+                          })
                         ) : (
                           <span className="v-tag locked">No Access</span>
                         );
@@ -242,28 +290,65 @@ const UserManagement = ({ currentUser }) => {
                     {VERTICAL_LIST.map(v => {
                       const currentLevel = editVerticalPermissions[v.id] || 'none';
                       return (
-                        <div key={v.id} className="vertical-perm-item">
-                          <span className="v-name">{v.label}</span>
-                          <div className="v-level-selector">
-                            {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
-                              const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
-                              const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
+                        <div key={v.id} className="vertical-perm-item-wrapper">
+                          <div className="vertical-perm-item">
+                            <span className="v-name">{v.label}</span>
+                            <div className="v-level-selector">
+                              {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
+                                const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
+                                const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
+                                const currentLevel = typeof editVerticalPermissions[v.id] === 'object' 
+                                  ? editVerticalPermissions[v.id].level 
+                                  : (editVerticalPermissions[v.id] || 'none');
 
-                              return (
-                                <button
-                                  key={lvl}
-                                  type="button"
-                                  className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
-                                  onClick={() => !isTooHigh && updateVerticalLevel(v.id, lvl)}
-                                  disabled={isTooHigh}
-                                  title={isTooHigh ? `Locked by max capability level (${editRoleLevel.toUpperCase()})` : ''}
-                                  style={{ opacity: isTooHigh ? 0.3 : undefined, cursor: isTooHigh ? 'not-allowed' : undefined }}
-                                >
-                                  {lvl.toUpperCase()}
-                                </button>
-                              );
-                            })}
+                                return (
+                                  <button
+                                    key={lvl}
+                                    type="button"
+                                    className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                    onClick={() => !isTooHigh && updateVerticalLevel(v.id, lvl)}
+                                    disabled={isTooHigh}
+                                    title={isTooHigh ? `Locked by max capability level (${editRoleLevel.toUpperCase()})` : ''}
+                                    style={{ opacity: isTooHigh ? 0.3 : undefined, cursor: isTooHigh ? 'not-allowed' : undefined }}
+                                  >
+                                    {lvl.toUpperCase()}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            
+                            {VERTICAL_FEATURES[v.id] && currentLevel !== 'none' && (
+                              <button
+                                type="button"
+                                className={`features-toggle-btn ${expandedFeatures === v.id ? 'active' : ''}`}
+                                onClick={() => setExpandedFeatures(expandedFeatures === v.id ? null : v.id)}
+                              >
+                                {expandedFeatures === v.id ? 'Close' : 'Features'}
+                              </button>
+                            )}
                           </div>
+
+                          {expandedFeatures === v.id && VERTICAL_FEATURES[v.id] && (
+                            <div className="features-dropdown">
+                              <p className="features-header">Enable individual features for {v.label}:</p>
+                              <div className="features-grid">
+                                {VERTICAL_FEATURES[v.id].map(feature => {
+                                  const isChecked = editVerticalPermissions[v.id]?.features?.[feature.id] ?? true;
+                                  return (
+                                    <label key={feature.id} className="feature-checkbox-label">
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => toggleFeature(v.id, feature.id)}
+                                      />
+                                      <span className="checkmark"></span>
+                                      <span className="feature-text">{feature.label}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}

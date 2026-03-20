@@ -445,8 +445,120 @@
   color: #7f8c8d;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+/* Granular Feature Toggles */
+.vertical-perm-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.vertical-perm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+}
+
+.features-toggle-btn {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid var(--brand-green);
+  color: var(--brand-green);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.features-toggle-btn:hover, .features-toggle-btn.active {
+  background: var(--brand-green);
+  color: white;
+}
+
+.features-dropdown {
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-color);
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.features-header {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-color);
+  opacity: 0.5;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.feature-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color);
+  user-select: none;
+}
+
+.feature-checkbox-label input {
+  display: none;
+}
+
+.feature-checkbox-label .checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.feature-checkbox-label input:checked + .checkmark {
+  background-color: var(--brand-green);
+  border-color: var(--brand-green);
+}
+
+.feature-checkbox-label input:checked + .checkmark::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.feature-text {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.feature-checkbox-label input:checked ~ .feature-text {
+  opacity: 1;
+  color: var(--brand-green);
 }
 

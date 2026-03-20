@@ -83,8 +83,8 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
                 VERTICAL_LIST.map((v) => (
                   <li key={v.id} className="nav-loading-pulse">{v.label}</li>
                 ))
-              ) : VERTICAL_LIST.length > 0 ? (
-                VERTICAL_LIST.map((vertical) => {
+              ) : filteredVerticals.length > 0 ? (
+                filteredVerticals.map((vertical) => {
                   const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
                   const isLocked = vertical.locked || !isAssigned;
                   const isExpanded = expandedVerticals.includes(vertical.id);

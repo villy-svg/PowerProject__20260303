@@ -107,12 +107,18 @@ function App() {
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
-    if (!saved) return DEFAULT_ROLE_PERMISSIONS;
+    const defaults = DEFAULT_ROLE_PERMISSIONS;
+    if (!saved) return defaults;
     try {
       const parsed = JSON.parse(saved);
-      return { ...DEFAULT_ROLE_PERMISSIONS, ...parsed };
+      // Deep merge at the role level to ensure new flags (like canManageRoles, scope) exist
+      const merged = { ...defaults };
+      Object.keys(parsed).forEach(role => {
+        merged[role] = { ...defaults[role], ...parsed[role] };
+      });
+      return merged;
     } catch {
-      return DEFAULT_ROLE_PERMISSIONS;
+      return defaults;
     }
   });
 
@@ -125,23 +131,27 @@ function App() {
 
   // Compute current permissions dynamically based on active vertical
   const currentUserPermissions = useMemo(() => {
-    if (!user) return {};
+    if (!user) return { scope: 'loading' }; // Explicit loading state
     
     const roleId = user.roleId;
     const isMasterScope = roleId?.startsWith('master_');
     
     if (isMasterScope) {
-      // Global scope: use the static permissions from the roleId
-      return rolePermissions[roleId] || DEFAULT_ROLE_PERMISSIONS[roleId] || DEFAULT_ROLE_PERMISSIONS['vertical_viewer'];
+      // Global scope: use merged permissions, fallback to defaults
+      return rolePermissions[roleId] || DEFAULT_ROLE_PERMISSIONS[roleId] || { ...DEFAULT_ROLE_PERMISSIONS['vertical_viewer'], scope: 'global' };
     } else {
       // Vertical scope: look up the specific level for this vertical
-      const level = user.verticalPermissions?.[activeVertical] || 'viewer';
+      const permData = user.verticalPermissions?.[activeVertical] || 'viewer';
+      const level = typeof permData === 'object' ? permData.level : permData;
+      const features = typeof permData === 'object' ? (permData.features || {}) : {};
+      
       const baseCaps = getPermissionsForLevel(level);
       
       return {
         ...baseCaps,
+        ...features, // Overlay granular feature flags
         scope: 'assigned',
-        canAccessConfig: level === 'admin' // Only 'vertical_admin' level has config access
+        canAccessConfig: level === 'admin'
       };
     }
   }, [user, activeVertical, rolePermissions]);
