@@ -110,24 +110,24 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
           <span style={groupLabelStyle}>{label}</span>
           <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{isExpanded ? '▲' : '▼'}</span>
         </div>
-        
+
         {isExpanded && (
           <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
-                onBatchFilter(filterKey, allVals); 
+                onBatchFilter(filterKey, allVals);
               }}
               className="text-action-button"
               style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
             >
               SELECT ALL
             </button>
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                onBatchFilter(filterKey, []); 
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onBatchFilter(filterKey, []);
               }}
               className="text-action-button"
               style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
@@ -143,8 +143,8 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
             const labelText = displayKey ? opt[displayKey] : opt;
             const isSelected = currentFilters.includes(val);
             return (
-              <div 
-                key={val} 
+              <div
+                key={val}
                 style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
                 onClick={() => onFilterChange(filterKey, val)}
               >
@@ -167,14 +167,14 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
+          <button
             onClick={() => onFilterChange('duplicatesOnly', !filters.duplicatesOnly)}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--brand-green)', 
-              fontSize: '0.7rem', 
-              fontWeight: 800, 
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--brand-green)',
+              fontSize: '0.7rem',
+              fontWeight: 800,
               cursor: 'pointer',
               padding: '4px',
               opacity: filters.duplicatesOnly ? 1 : 0.5,
@@ -183,14 +183,14 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
           >
             DUP ONLY
           </button>
-          <button 
+          <button
             onClick={onReset}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              color: 'var(--brand-green)', 
-              fontSize: '0.7rem', 
-              fontWeight: 800, 
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--brand-green)',
+              fontSize: '0.7rem',
+              fontWeight: 800,
               cursor: 'pointer',
               padding: '4px'
             }}
@@ -200,43 +200,43 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         </div>
       </div>
 
-      <FilterGroup 
-        label="City" 
-        options={cities} 
-        currentFilters={filters.city || []} 
-        filterKey="city" 
+      <FilterGroup
+        label="City"
+        options={cities}
+        currentFilters={filters.city || []}
+        filterKey="city"
       />
 
-      <FilterGroup 
-        label="Hub" 
-        options={hubs} 
-        currentFilters={filters.hub || []} 
-        filterKey="hub" 
+      <FilterGroup
+        label="Hub"
+        options={hubs}
+        currentFilters={filters.hub || []}
+        filterKey="hub"
         displayKey="hub_code"
         valueKey="id"
       />
 
-      <FilterGroup 
-        label="Priority" 
-        options={priorities} 
-        currentFilters={filters.priority || []} 
-        filterKey="priority" 
+      <FilterGroup
+        label="Priority"
+        options={priorities}
+        currentFilters={filters.priority || []}
+        filterKey="priority"
       />
 
-      <FilterGroup 
-        label="Function" 
-        options={functions} 
-        currentFilters={filters.function || []} 
-        filterKey="function" 
+      <FilterGroup
+        label="Function"
+        options={functions}
+        currentFilters={filters.function || []}
+        filterKey="function"
         displayKey="function_code"
         valueKey="name"
       />
 
-      <FilterGroup 
-        label="Assignee" 
-        options={[...new Set((tasks || []).map(t => t.assigneeName).filter(Boolean))].sort()} 
-        currentFilters={filters.assignee || []} 
-        filterKey="assignee" 
+      <FilterGroup
+        label="Assignee"
+        options={[...new Set((tasks || []).map(t => t.assigneeName).filter(Boolean))].sort()}
+        currentFilters={filters.assignee || []}
+        filterKey="assignee"
       />
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>

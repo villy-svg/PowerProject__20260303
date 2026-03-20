@@ -497,6 +497,7 @@ function App() {
                 label={
                   (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
                   (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? 'Hubs' :
                   VERTICALS[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
