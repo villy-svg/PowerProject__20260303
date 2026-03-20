@@ -92,14 +92,25 @@ const VerticalWorkspace = ({
    * LAYOUT GUARD
    * Determines if the user has permission to view this vertical or sub-feature.
    */
+  const rootVerticalId = 
+    (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? 'CHARGING_HUBS' :
+    (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'CLIENTS' :
+    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'EMPLOYEES' :
+    activeVertical.toUpperCase();
+
+  const isFeatureView = activeVertical.includes('_');
   const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
-  const isFeatureView = activeVertical.includes('_');
 
   const hasAccess = permissions.scope === 'global' || (
     isFeatureView 
-      ? (permissions[featureAccessFlag] && user?.assignedVerticals?.some(v => activeVertical.toUpperCase().includes(v)))
-      : (permissions.canRead && user?.assignedVerticals?.includes(activeVertical))
+      ? (permissions[featureAccessFlag] && user?.assignedVerticals?.includes(rootVerticalId))
+      : (
+          // SPECIAL CASE: Hub Management List is restricted to Admin-level only
+          activeVertical === 'CHARGING_HUBS' 
+            ? (permissions.canAccessConfig && user?.assignedVerticals?.includes('CHARGING_HUBS'))
+            : (permissions.canRead && user?.assignedVerticals?.includes(activeVertical))
+        )
   );
 
   // Security Interception
