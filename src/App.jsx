@@ -141,6 +141,7 @@ function App() {
       return { 
         ...baseCaps, 
         scope: 'global',
+        canManageRoles: user.roleId === 'master_admin',
         // In Master scope, features are generally enabled by default
         canAccessClients: true,
         canAccessClientTasks: true,
