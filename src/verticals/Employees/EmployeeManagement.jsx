@@ -167,10 +167,14 @@ const EmployeeManagement = ({ permissions, filters }) => {
           <>
             <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
             <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
-            <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
-              + Add Employee
-            </button>
+            {permissions.canCreate && (
+              <>
+                <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
+                <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
+                  + Add Employee
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -218,7 +222,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            isMasterAdmin={isMasterAdmin}
+                            permissions={permissions}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
                           />
@@ -230,7 +234,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            isMasterAdmin={isMasterAdmin}
+                            permissions={permissions}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
                           />
@@ -265,7 +269,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
-                        isMasterAdmin={isMasterAdmin}
+                        permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
                       />
@@ -277,7 +281,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         onView={openViewModal}
                         onDelete={handleDelete} 
                         onToggleStatus={toggleStatus} 
-                        isMasterAdmin={isMasterAdmin}
+                        permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
                       />

@@ -9,7 +9,7 @@ import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
  * ClientBillingModelManagement
  * CRUD sub-view for client billing models.
  */
-const ClientBillingModelManagement = () => {
+const ClientBillingModelManagement = ({ permissions = {} }) => {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,10 +97,14 @@ const ClientBillingModelManagement = () => {
           <>
             <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
             <ClientBillingModelCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Billing Model
-            </button>
+            {permissions.canCreate && (
+              <>
+                <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Billing Model
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -115,8 +119,8 @@ const ClientBillingModelManagement = () => {
               <h3>{model.name}</h3>
               <p className="hub-city">{model.description || 'No description provided'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(model)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(model.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(model)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(model.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -145,8 +149,8 @@ const ClientBillingModelManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{model.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(model)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(model.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(model)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(model.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>

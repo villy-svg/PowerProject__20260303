@@ -9,7 +9,7 @@ import ClientCategoryCSVImport from './ClientCategoryCSVImport';
  * ClientCategoryManagement
  * CRUD sub-view for client categories (mirrors DepartmentManagement).
  */
-const ClientCategoryManagement = () => {
+const ClientCategoryManagement = ({ permissions = {} }) => {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,17 +131,21 @@ const ClientCategoryManagement = () => {
               entityName="Client Categories"
               headers={['Category Name', 'Code', 'Default Service', 'Description']}
             />
-            <ClientCategoryCSVImport 
-              className="master-action-btn" 
-              label="Import Categories" 
-              onImportComplete={fetchCategories} 
-              tableName="client_categories"
-              entityName="Client Categories"
-              requiredFields={['category_name']}
-            />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Category
-            </button>
+            {permissions.canCreate && (
+              <>
+                <ClientCategoryCSVImport 
+                  className="master-action-btn" 
+                  label="Import Categories" 
+                  onImportComplete={fetchCategories} 
+                  tableName="client_categories"
+                  entityName="Client Categories"
+                  requiredFields={['category_name']}
+                />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Category
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -162,8 +166,8 @@ const ClientCategoryManagement = () => {
                 </div>
               )}
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -194,8 +198,8 @@ const ClientCategoryManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{cat.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>

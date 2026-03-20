@@ -46,7 +46,7 @@ class HubManagementErrorBoundary extends React.Component {
   }
 }
 
-const HubManagement = () => {
+const HubManagement = ({ permissions = {} }) => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -203,10 +203,14 @@ const HubManagement = () => {
               filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
             />
             <HubCSVDownload className="master-action-btn" label="Download Template" />
-            <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + Add New Hub
-            </button>
+            {permissions.canCreate && (
+              <>
+                <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + Add New Hub
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -225,8 +229,8 @@ const HubManagement = () => {
               <h3>{hub.name}</h3>
               <p className="hub-city">{hub.city || 'No city set'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -262,8 +266,8 @@ const HubManagement = () => {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>
@@ -355,9 +359,9 @@ const HubManagement = () => {
 };
 
 // Wrap with error boundary
-const HubManagementWithErrorBoundary = () => (
+const HubManagementWithErrorBoundary = ({ permissions }) => (
   <HubManagementErrorBoundary>
-    <HubManagement />
+    <HubManagement permissions={permissions} />
   </HubManagementErrorBoundary>
 );
 

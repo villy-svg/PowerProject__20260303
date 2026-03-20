@@ -4,7 +4,7 @@ import React from 'react';
  * ClientListRow
  * Row view item for a client.
  */
-const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, isMasterAdmin }) => {
+const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, permissions = {} }) => {
   const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
 
   const formatPhone = (phone) => {
@@ -96,25 +96,29 @@ const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleS
         >
           {client.status}
         </div>
-        <button
-          className="action-icon-btn edit-pencil"
-          onClick={() => onEdit(client)}
-          title="Edit Client"
-          style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
-        >
-          ✎
-        </button>
-        {isMasterAdmin && (
+        {permissions.canUpdate && (
+          <button
+            className="action-icon-btn edit-pencil"
+            onClick={() => onEdit(client)}
+            title="Edit Client"
+            style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
+          >
+            ✎
+          </button>
+        )}
+        {permissions.canDelete && (
           <button className="action-icon-btn delete" onClick={() => onDelete(client.id)} title="Delete">×</button>
         )}
-        <button
-          className={`halo-button ${client.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-          style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '8px', fontWeight: 900 }}
-          onClick={() => onToggleStatus(client.id, client.status)}
-          title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-        >
-          {client.status === 'Active' ? '↓' : '↑'}
-        </button>
+        {permissions.canUpdate && (
+          <button
+            className={`halo-button ${client.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
+            style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '8px', fontWeight: 900 }}
+            onClick={() => onToggleStatus(client.id, client.status)}
+            title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+          >
+            {client.status === 'Active' ? '↓' : '↑'}
+          </button>
+        )}
       </div>
     </div>
   );

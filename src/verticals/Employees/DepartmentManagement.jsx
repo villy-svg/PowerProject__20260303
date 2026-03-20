@@ -5,7 +5,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
 
-const DepartmentManagement = () => {
+const DepartmentManagement = ({ permissions = {} }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,10 +124,14 @@ const DepartmentManagement = () => {
           <>
             <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
             <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Department
-            </button>
+            {permissions.canCreate && (
+              <>
+                <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Department
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -142,8 +146,8 @@ const DepartmentManagement = () => {
               <h3>{dept.name}</h3>
               <p className="hub-city">{dept.description || 'No description provided'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(dept)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(dept.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(dept)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(dept.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -172,8 +176,8 @@ const DepartmentManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{dept.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(dept)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(dept.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(dept)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(dept.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>

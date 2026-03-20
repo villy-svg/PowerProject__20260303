@@ -145,7 +145,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
     onView: openViewModal,
     onDelete: handleDelete,
     onToggleStatus: toggleStatus,
-    isMasterAdmin,
+    permissions,
   });
 
   return (
@@ -182,13 +182,17 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
           <>
             <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
             <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
-            <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
-            <button
-              className="halo-button master-action-btn"
-              onClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
-            >
-              + Add Client
-            </button>
+            {permissions.canCreate && (
+              <>
+                <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
+                <button
+                  className="halo-button master-action-btn"
+                  onClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
+                >
+                  + Add Client
+                </button>
+              </>
+            )}
           </>
         }
       />

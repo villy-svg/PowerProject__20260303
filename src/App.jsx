@@ -479,19 +479,19 @@ function App() {
             ) : activeVertical === 'user_management' ? (
               <UserManagement currentUser={user} />
             ) : activeVertical === 'hub_management' ? (
-              <HubManagement />
+              <HubManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'hub_function_management' ? (
-              <HubFunctionManagement />
+              <HubFunctionManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'department_management' ? (
-              <DepartmentManagement />
+              <DepartmentManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'employee_role_management' ? (
-              <EmployeeRoleManagement />
+              <EmployeeRoleManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'client_category_management' ? (
-              <ClientCategoryManagement />
+              <ClientCategoryManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'client_service_management' ? (
-              <ClientServiceManagement />
+              <ClientServiceManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'client_billing_model_management' ? (
-              <ClientBillingModelManagement />
+              <ClientBillingModelManagement user={user} permissions={currentUserPermissions} />
             ) : (
               <VerticalWorkspace
                 label={

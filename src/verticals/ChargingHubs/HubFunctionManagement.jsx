@@ -5,7 +5,7 @@ import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 
-const HubFunctionManagement = () => {
+const HubFunctionManagement = ({ permissions = {} }) => {
   const [functions, setFunctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -129,10 +129,14 @@ const HubFunctionManagement = () => {
               filename={`hub_functions_export_${new Date().toISOString().split('T')[0]}.csv`}
             />
             <FunctionCSVDownload className="halo-button master-action-btn" label="Download Template" />
-            <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Function
-            </button>
+            {permissions.canCreate && (
+              <>
+                <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Function
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -147,8 +151,8 @@ const HubFunctionManagement = () => {
               <h3>{fn.name}</h3>
               <p className="hub-city">{fn.description || 'No description provided'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -177,8 +181,8 @@ const HubFunctionManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{fn.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(fn)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(fn.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(fn)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(fn.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>

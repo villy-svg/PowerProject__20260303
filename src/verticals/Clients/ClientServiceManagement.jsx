@@ -9,7 +9,7 @@ import ClientCategoryCSVImport from './ClientCategoryCSVImport';
  * ClientServiceManagement
  * CRUD sub-view for client service categories (mirrors ClientCategoryManagement but for SERVICE type).
  */
-const ClientServiceManagement = () => {
+const ClientServiceManagement = ({ permissions = {} }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -114,17 +114,21 @@ const ClientServiceManagement = () => {
               entityName="Client Services"
               headers={['Service Name', 'Code', 'Description']}
             />
-            <ClientCategoryCSVImport 
-              className="master-action-btn" 
-              label="Import Services" 
-              onImportComplete={fetchCategories} 
-              tableName="client_services"
-              entityName="Client Services"
-              requiredFields={['service_name']}
-            />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Service
-            </button>
+            {permissions.canCreate && (
+              <>
+                <ClientCategoryCSVImport 
+                  className="master-action-btn" 
+                  label="Import Services" 
+                  onImportComplete={fetchCategories} 
+                  tableName="client_services"
+                  entityName="Client Services"
+                  requiredFields={['service_name']}
+                />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Service
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -139,8 +143,8 @@ const ClientServiceManagement = () => {
               <h3>{cat.name}</h3>
               <p className="hub-city">{cat.description || 'No description provided'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -169,8 +173,8 @@ const ClientServiceManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{cat.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>

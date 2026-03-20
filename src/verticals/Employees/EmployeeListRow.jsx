@@ -4,12 +4,13 @@ import React, { useState } from 'react';
  * EmployeeListRow
  * Row view item for an employee.
  */
-const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMasterAdmin, availableHubs, onUpdateHub }) => {
+const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissions = {}, availableHubs, onUpdateHub }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
 
   const handleHubDoubleClick = (e) => {
     e.stopPropagation();
+    if (!permissions.canUpdate) return;
     setIsEditingHub(true);
     setSelectedHubId(emp.hub_id || 'ALL');
   };
@@ -106,25 +107,29 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, isMast
         <div className="employee-status" style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444', fontSize: '0.75rem', fontWeight: 700, marginRight: '1rem', alignSelf: 'center', opacity: emp.status === 'Active' ? 1 : 0.5 }}>
           {emp.status}
         </div>
-        <button 
-          className="action-icon-btn edit-pencil" 
-          onClick={() => onEdit(emp)} 
-          title="Edit Employee"
-          style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
-        >
-          ✎
-        </button>
-        {isMasterAdmin && (
+        {permissions.canUpdate && (
+          <button 
+            className="action-icon-btn edit-pencil" 
+            onClick={() => onEdit(emp)} 
+            title="Edit Employee"
+            style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
+          >
+            ✎
+          </button>
+        )}
+        {permissions.canDelete && (
           <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
         )}
-        <button 
-          className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-          style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '8px', fontWeight: 900 }}
-          onClick={() => onToggleStatus(emp.id, emp.status)}
-          title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-        >
-          {emp.status === 'Active' ? '↓' : '↑'}
-        </button>
+        {permissions.canUpdate && (
+          <button 
+            className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
+            style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '8px', fontWeight: 900 }}
+            onClick={() => onToggleStatus(emp.id, emp.status)}
+            title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+          >
+            {emp.status === 'Active' ? '↓' : '↑'}
+          </button>
+        )}
       </div>
     </div>
   );

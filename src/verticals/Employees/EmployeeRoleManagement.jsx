@@ -6,7 +6,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 
-const EmployeeRoleManagement = () => {
+const EmployeeRoleManagement = ({ permissions = {} }) => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -126,10 +126,14 @@ const EmployeeRoleManagement = () => {
           <>
             <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
             <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Role
-            </button>
+            {permissions.canCreate && (
+              <>
+                <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
+                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                  + New Role
+                </button>
+              </>
+            )}
           </>
         }
       />
@@ -145,8 +149,8 @@ const EmployeeRoleManagement = () => {
               <h3>{role.name}</h3>
               <p className="hub-city">{role.description || 'No description provided'}</p>
               <div className="hub-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)}>Delete</button>
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)}>Edit</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)}>Delete</button>}
               </div>
             </div>
           ))}
@@ -179,8 +183,8 @@ const EmployeeRoleManagement = () => {
                   <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{role.description || '—'}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(role)} title="Edit">✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(role.id)} title="Delete">×</button>
+                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(role)} title="Edit">✎</button>}
+                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(role.id)} title="Delete">×</button>}
                     </div>
                   </td>
                 </tr>
