@@ -306,7 +306,7 @@ function App() {
     }
 
     // Charging Hubs special CRUD view handling
-    if (activeVertical === 'hub_management' && !isMasterAdmin) {
+    if (activeVertical === 'hub_management' && !isMasterAdmin && !currentUserPermissions.canAccessConfig) {
       setActiveVertical(null);
       return;
     }
@@ -611,7 +611,7 @@ function App() {
                     ? () => setActiveVertical('EMPLOYEES')
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
                        ? () => setActiveVertical('CLIENTS')
-                      : (user?.roleId === 'master_admin' && activeVertical === 'CHARGING_HUBS')
+                      : (currentUserPermissions.canAccessConfig && activeVertical === 'CHARGING_HUBS')
                         ? () => setActiveVertical('hub_management')
                         : null
                 }

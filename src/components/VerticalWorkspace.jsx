@@ -106,9 +106,10 @@ const VerticalWorkspace = ({
     isFeatureView 
       ? (permissions[featureAccessFlag] && user?.assignedVerticals?.includes(rootVerticalId))
       : (
-          // SPECIAL CASE: Hub Management List is restricted to Admin-level only
+          // SPECIAL CASE: Hub Management List is restricted to Admin-level only, 
+          // but the Tasks board should be accessible to all roles with canRead.
           activeVertical === 'CHARGING_HUBS' 
-            ? (permissions.canAccessConfig && user?.assignedVerticals?.includes('CHARGING_HUBS'))
+            ? (permissions.canRead && user?.assignedVerticals?.includes('CHARGING_HUBS'))
             : (permissions.canRead && user?.assignedVerticals?.includes(activeVertical))
         )
   );
