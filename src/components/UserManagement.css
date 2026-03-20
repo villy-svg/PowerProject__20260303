@@ -475,38 +475,44 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
   color: var(--text-color);
-  border-radius: 50%;
+  opacity: 0.5;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
 }
 
-.features-toggle-btn:hover, .features-toggle-btn.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--brand-green);
+.features-toggle-btn:hover {
+  background: var(--halo-bg);
+  opacity: 1;
   color: var(--brand-green);
-  box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+}
+
+.features-toggle-btn.active {
+  opacity: 1;
+  color: var(--brand-green);
+  background: rgba(45, 212, 191, 0.1);
 }
 
 .chevron {
   display: inline-block;
   width: 6px;
   height: 6px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
   transform: rotate(45deg);
-  transition: transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: -2px;
 }
 
 .chevron.up {
   transform: rotate(-135deg);
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .features-dropdown {
