@@ -169,7 +169,7 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
             style={{ width: '100%', opacity: activeVertical === 'hub_tasks' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('hub_tasks')}
           >
-            Hub Tasks Board
+            Hub Task Manager
           </button>
         </div>
       )}
