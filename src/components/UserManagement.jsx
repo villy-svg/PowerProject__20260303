@@ -40,49 +40,101 @@ const UserManagement = ({ currentUser }) => {
     setLoading(false);
   };
 
-  const handleOpenEdit = (user) => {
+  const handleOpenEdit = async (user) => {
+    setLoading(true);
     const [scope, level] = user.role_id?.split('_') || ['vertical', 'viewer'];
     setEditRoleScope(scope);
     setEditRoleLevel(level);
-    setEditVerticalPermissions(user.vertical_permissions || {});
-    setEditingUser({ ...user });
+
+    // Fetch granular permissions from specialized tables
+    try {
+      const { data: vAccess } = await supabase
+        .from('vertical_access')
+        .select('*')
+        .eq('user_id', user.id);
+
+      const { data: fAccess } = await supabase
+        .from('feature_access')
+        .select('*')
+        .eq('user_id', user.id);
+
+      const vPermsMap = {};
+      (vAccess || []).forEach(v => {
+        vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+      });
+      (fAccess || []).forEach(f => {
+        if (vPermsMap[f.vertical_id]) {
+          vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+        }
+      });
+
+      setEditVerticalPermissions(vPermsMap);
+      setEditingUser({ ...user });
+    } catch (err) {
+      console.error("Error loading permissions:", err);
+      setStatus({ type: 'error', text: 'Failed to load granular permissions.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     if (!editingUser) return;
-
     setLoading(true);
     setStatus({ type: '', text: '' });
 
+    const isMaster = editRoleScope === 'master';
     const newRoleId = `${editRoleScope}_${editRoleLevel}`;
-    
-    // If scope is master, they see all verticals. 
-    // If scope is vertical, assigned_verticals are derived from keys with non-none levels.
-    const finalVerticals = editRoleScope === 'master' 
-      ? VERTICAL_LIST.map(v => v.id) 
-      : Object.keys(editVerticalPermissions).filter(v => {
-          const perm = editVerticalPermissions[v];
-          return typeof perm === 'object' ? perm.level !== 'none' : perm !== 'none';
+
+    try {
+      // 1. Update Profile (Base Role)
+      const { error: pError } = await supabase
+        .from('user_profiles')
+        .update({ role_id: newRoleId })
+        .eq('id', editingUser.id);
+      
+      if (pError) throw pError;
+
+      if (!isMaster) {
+        // 2. Clear old vertical/feature access for this user
+        await supabase.from('vertical_access').delete().eq('user_id', editingUser.id);
+        await supabase.from('feature_access').delete().eq('user_id', editingUser.id);
+
+        const vInserts = [];
+        const fInserts = [];
+
+        Object.keys(editVerticalPermissions).forEach(vId => {
+          const vData = editVerticalPermissions[vId];
+          const vLvl = typeof vData === 'object' ? vData.level : vData;
+          
+          if (vLvl !== 'none') {
+            vInserts.push({ user_id: editingUser.id, vertical_id: vId, access_level: vLvl });
+            
+            // Collect features
+            if (typeof vData === 'object' && vData.features) {
+              Object.keys(vData.features).forEach(fId => {
+                const fLvl = vData.features[fId];
+                if (fLvl !== 'none') {
+                  fInserts.push({ user_id: editingUser.id, vertical_id: vId, feature_id: fId, access_level: fLvl });
+                }
+              });
+            }
+          }
         });
 
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .update({
-        role_id: newRoleId,
-        assigned_verticals: finalVerticals,
-        vertical_permissions: editRoleScope === 'master' ? {} : editVerticalPermissions
-      })
-      .eq('id', editingUser.id)
-      .select();
+        if (vInserts.length > 0) await supabase.from('vertical_access').insert(vInserts);
+        if (fInserts.length > 0) await supabase.from('feature_access').insert(fInserts);
+      }
 
-    if (error) {
-      setStatus({ type: 'error', text: `Sync Error: ${error.message}` });
-      setLoading(false);
-    } else {
-      setStatus({ type: 'success', text: 'User permissions synchronized with cloud!' });
+      setStatus({ type: 'success', text: 'Permissions successfully updated in the cloud.' });
       setEditingUser(null);
       await fetchUsers();
+    } catch (err) {
+      console.error("Sync Error:", err);
+      setStatus({ type: 'error', text: `Sync Error: ${err.message}` });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -128,10 +180,10 @@ const UserManagement = ({ currentUser }) => {
     });
   };
 
-  const toggleFeature = (vId, featureId) => {
+  const updateFeatureLevel = (vId, fId, level) => {
     setEditVerticalPermissions(prev => {
       const current = prev[vId];
-      if (typeof current !== 'object') return prev; // Should not happen if level is set
+      if (typeof current !== 'object') return prev; 
       
       return {
         ...prev,
@@ -139,7 +191,7 @@ const UserManagement = ({ currentUser }) => {
           ...current,
           features: {
             ...current.features,
-            [featureId]: !current.features[featureId]
+            [fId]: level
           }
         }
       };
@@ -197,19 +249,15 @@ const UserManagement = ({ currentUser }) => {
                       <span className="v-tag master">All Verticals (Master)</span>
                     ) : (
                       (() => {
-                        const activePerms = Object.entries(u.vertical_permissions || {})
-                          .filter(([_, levelData]) => {
-                            const lvl = typeof levelData === 'object' ? levelData.level : levelData;
-                            return lvl !== 'none';
-                          });
+                        const vPerms = u.verticalPermissions || {}; // This will need App level normalization or fetch logic update
+                        const activePerms = Object.entries(vPerms).filter(([_, data]) => data.level !== 'none');
                         
                         return activePerms.length > 0 ? (
-                          activePerms.map(([vId, levelData]) => {
-                            const lvl = typeof levelData === 'object' ? levelData.level : levelData;
-                            const hasCustomFeatures = typeof levelData === 'object' && Object.values(levelData.features || {}).includes(false);
+                          activePerms.map(([vId, data]) => {
+                            const hasCustomFeatures = Object.values(data.features || {}).some(lvl => lvl !== 'none' && lvl !== data.level);
                             return (
-                              <span key={vId} className={`v-tag level-${lvl}`} title={hasCustomFeatures ? "Custom features set" : ""}>
-                                {vId}: {lvl} {hasCustomFeatures && '⚙️'}
+                              <span key={vId} className={`v-tag level-${data.level}`} title={hasCustomFeatures ? "Custom feature levels" : ""}>
+                                {vId}: {data.level} {hasCustomFeatures && '⚙️'}
                               </span>
                             );
                           })
@@ -330,20 +378,33 @@ const UserManagement = ({ currentUser }) => {
 
                           {expandedFeatures === v.id && VERTICAL_FEATURES[v.id] && (
                             <div className="features-dropdown">
-                              <p className="features-header">Enable individual features for {v.label}:</p>
-                              <div className="features-grid">
+                              <p className="features-header">Configure feature-specific levels for {v.label}:</p>
+                              <div className="features-level-list">
                                 {VERTICAL_FEATURES[v.id].map(feature => {
-                                  const isChecked = editVerticalPermissions[v.id]?.features?.[feature.id] ?? true;
+                                  const fLevel = editVerticalPermissions[v.id]?.features?.[feature.id] || 'viewer';
                                   return (
-                                    <label key={feature.id} className="feature-checkbox-label">
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => toggleFeature(v.id, feature.id)}
-                                      />
-                                      <span className="checkmark"></span>
-                                      <span className="feature-text">{feature.label}</span>
-                                    </label>
+                                    <div key={feature.id} className="feature-level-row">
+                                      <span className="feature-label">{feature.label}</span>
+                                      <div className="v-level-selector mini">
+                                        {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
+                                          const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
+                                          const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
+                                          
+                                          return (
+                                            <button
+                                              key={lvl}
+                                              type="button"
+                                              className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                              onClick={() => !isTooHigh && updateFeatureLevel(v.id, feature.id, lvl)}
+                                              disabled={isTooHigh}
+                                              style={{ opacity: isTooHigh ? 0.3 : 1 }}
+                                            >
+                                              {lvl.charAt(0).toUpperCase()}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
                                   );
                                 })}
                               </div>

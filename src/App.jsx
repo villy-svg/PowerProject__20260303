@@ -131,30 +131,50 @@ function App() {
 
   // Compute current permissions dynamically based on active vertical
   const currentUserPermissions = useMemo(() => {
-    if (!user) return { scope: 'loading' }; // Explicit loading state
+    if (!user) return { scope: 'loading' }; 
     
     const roleId = user.roleId;
     const isMasterScope = roleId?.startsWith('master_');
+    const baseCaps = user.baseCapabilities || {};
     
     if (isMasterScope) {
-      // Global scope: use merged permissions, fallback to defaults
-      return rolePermissions[roleId] || DEFAULT_ROLE_PERMISSIONS[roleId] || { ...DEFAULT_ROLE_PERMISSIONS['vertical_viewer'], scope: 'global' };
+      return { 
+        ...baseCaps, 
+        scope: 'global',
+        // In Master scope, features are generally enabled by default
+        canAccessClients: true,
+        canAccessClientTasks: true,
+        canAccessLeadsFunnel: true,
+        canAccessEmployees: true,
+        canAccessEmployeeTasks: true,
+        canAccessHubTasks: true
+      };
     } else {
-      // Vertical scope: look up the specific level for this vertical
-      const permData = user.verticalPermissions?.[activeVertical] || 'viewer';
-      const level = typeof permData === 'object' ? permData.level : permData;
-      const features = typeof permData === 'object' ? (permData.features || {}) : {};
+      // Vertical scope: look up assignments for active vertical
+      const permData = user.verticalPermissions?.[activeVertical];
+      const level = permData?.level || 'none';
+      const featureLevels = permData?.features || {};
       
-      const baseCaps = getPermissionsForLevel(level);
+      // Calculate effective capability (minimum of Base and Vertical)
+      const verticalCaps = getPermissionsForLevel(level);
       
-      return {
-        ...baseCaps,
-        ...features, // Overlay granular feature flags
+      // Build final permissions
+      const finalPerms = {
+        ...verticalCaps,
         scope: 'assigned',
         canAccessConfig: level === 'admin'
       };
+
+      // Add feature flags (boolean) and potentially feature-specific capabilities
+      Object.keys(featureLevels).forEach(fId => {
+        const fLvl = featureLevels[fId];
+        finalPerms[fId] = fLvl !== 'none';
+        // We could also refine CRUD flags per feature here if needed
+      });
+
+      return finalPerms;
     }
-  }, [user, activeVertical, rolePermissions]);
+  }, [user, activeVertical]);
 
   // Test database connection on app start
   useEffect(() => {
@@ -183,30 +203,63 @@ function App() {
   }, []);
 
   const fetchUserProfile = async (userId) => {
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      // 1. Fetch Profile
+      const { data: profile, error: pError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error("Error fetching user profile:", error);
-      // If code is PGRST116 (0 rows returned), the trigger may not have fired
-      if (error.code === 'PGRST116') {
-        setProfileError("User profile not found in database. Did you run the SQL script or sign in before the trigger was added?");
-      } else {
-        setProfileError(error.message);
+      if (pError) throw pError;
+
+      // 2. Fetch Base Role Permissions (Global Defaults)
+      const { data: rolePerms, error: rError } = await supabase
+        .from('role_permissions')
+        .select('*')
+        .eq('role_id', profile.role_id)
+        .single();
+      
+      // 3. Fetch Vertical Access Assignments
+      const { data: vAccess, error: vError } = await supabase
+        .from('vertical_access')
+        .select('*')
+        .eq('user_id', userId);
+
+      // 4. Fetch Feature Access Assignments
+      const { data: fAccess, error: fError } = await supabase
+        .from('feature_access')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (profile) {
+        // Build vertical permissions map
+        const vPermsMap = {};
+        (vAccess || []).forEach(v => {
+          vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+        });
+        
+        // Add features to the map
+        (fAccess || []).forEach(f => {
+          if (vPermsMap[f.vertical_id]) {
+            vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+          }
+        });
+
+        setUser({
+          id: profile.id,
+          name: profile.name || "User",
+          role: profile.role_id,
+          roleId: profile.role_id,
+          assignedVerticals: (vAccess || []).map(v => v.vertical_id),
+          verticalPermissions: vPermsMap,
+          baseCapabilities: rolePerms?.permissions || {}
+        });
+        setProfileError(null);
       }
-    } else if (data) {
-      setUser({
-        id: data.id,
-        name: data.name || "User",
-        role: data.role_id,
-        roleId: data.role_id,
-        assignedVerticals: data.assigned_verticals || ["CHARGING_HUBS"],
-        verticalPermissions: data.vertical_permissions || {}
-      });
-      setProfileError(null);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setProfileError(error.message);
     }
   };
 

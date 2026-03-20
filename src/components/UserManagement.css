@@ -506,59 +506,38 @@
   letter-spacing: 0.5px;
 }
 
-.features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.features-level-list {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.feature-checkbox-label {
+.feature-level-row {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.feature-level-row:last-child {
+  border-bottom: none;
+}
+
+.feature-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color);
-  user-select: none;
+  opacity: 0.9;
 }
 
-.feature-checkbox-label input {
-  display: none;
+.v-level-selector.mini {
+  gap: 2px;
 }
 
-.feature-checkbox-label .checkmark {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
-  position: relative;
-  transition: all 0.2s;
-}
-
-.feature-checkbox-label input:checked + .checkmark {
-  background-color: var(--brand-green);
-  border-color: var(--brand-green);
-}
-
-.feature-checkbox-label input:checked + .checkmark::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.feature-text {
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-
-.feature-checkbox-label input:checked ~ .feature-text {
-  opacity: 1;
-  color: var(--brand-green);
+.v-level-selector.mini .v-lvl-btn {
+  padding: 4px 6px;
+  min-width: 32px;
+  font-size: 10px;
 }
 
