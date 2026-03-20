@@ -81,6 +81,23 @@ const UserManagement = ({ currentUser }) => {
     }
   };
 
+  const handleLevelChange = (newLevel) => {
+    setEditRoleLevel(newLevel);
+    
+    // CAP: Automatically downgrade any vertical permissions that exceed the new capability level
+    const newMaxRank = LEVEL_RANKS[newLevel];
+    setEditVerticalPermissions(prev => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach(vId => {
+        const currentRank = LEVEL_RANKS[updated[vId]] || 0;
+        if (currentRank > newMaxRank) {
+          updated[vId] = newLevel;
+        }
+      });
+      return updated;
+    });
+  };
+
   const updateVerticalLevel = (vId, level) => {
     setEditVerticalPermissions(prev => ({
       ...prev,
@@ -204,7 +221,7 @@ const UserManagement = ({ currentUser }) => {
                       <div 
                         key={level.id} 
                         className={`level-card ${editRoleLevel === level.id ? 'active' : ''}`}
-                        onClick={() => setEditRoleLevel(level.id)}
+                        onClick={() => handleLevelChange(level.id)}
                       >
                         <div className="radio-circle"></div>
                         <div className="level-info">
