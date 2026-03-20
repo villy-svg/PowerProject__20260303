@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { supabase } from '../services/supabaseClient';
+import React from 'react';
 import { ROLE_LIST } from '../constants/roles';
 import MasterPageHeader from './MasterPageHeader';
 import './UserRoleManagement.css';
@@ -10,53 +9,23 @@ import './UserRoleManagement.css';
  * Only accessible by Master Admin.
  */
 const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
-  const [syncing, setSyncing] = useState(false);
 
-  const handleToggle = async (roleId, capability) => {
-    const updatedRolePerms = {
-      ...permissions[roleId],
-      [capability]: !permissions[roleId][capability]
-    };
-
+  const handleToggle = (roleId, capability) => {
     const updatedPermissions = {
       ...permissions,
-      [roleId]: updatedRolePerms
+      [roleId]: {
+        ...permissions[roleId],
+        [capability]: !permissions[roleId][capability]
+      }
     };
-
-    // Update local state immediately for UI responsiveness
     setPermissions(updatedPermissions);
-
-    // Sync to Cloud
-    setSyncing(true);
-    try {
-      const { error } = await supabase
-        .from('role_permissions')
-        .upsert({ 
-          role_id: roleId, 
-          permissions: updatedRolePerms,
-          updated_at: new Date().toISOString()
-        });
-      
-      if (error) throw error;
-    } catch (err) {
-      console.error("UserRoleManagement: Sync Error:", err.message);
-      // Optional: Rollback local state or show error notification
-    } finally {
-      setSyncing(false);
-    }
   };
 
   const capabilities = [
     { id: 'canCreate', label: 'Create' },
     { id: 'canRead', label: 'Read' },
     { id: 'canUpdate', label: 'Update' },
-    { id: 'canDelete', label: 'Delete' },
-    { id: 'canAccessClients', label: 'Clients' },
-    { id: 'canAccessClientTasks', label: 'Client Tasks' },
-    { id: 'canAccessLeadsFunnel', label: 'Leads Funnel' },
-    { id: 'canAccessEmployees', label: 'Employees' },
-    { id: 'canAccessEmployeeTasks', label: 'Emp Tasks' },
-    { id: 'canAccessHubTasks', label: 'Hub Tasks' },
+    { id: 'canDelete', label: 'Delete' }
   ];
 
   return (
@@ -111,9 +80,7 @@ const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
       </div>
 
       <div className="matrix-footer">
-        <p>
-          {syncing ? '🔄 Synchronizing with cloud...' : '✅ Changes are saved automatically to the system cloud load.'}
-        </p>
+        <p>⚠️ Changes are saved automatically to the system load.</p>
       </div>
     </div>
   );

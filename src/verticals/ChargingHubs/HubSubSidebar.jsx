@@ -162,18 +162,6 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
 
   return (
     <div className="sub-sidebar-body">
-      {permissions?.canAccessHubTasks && (
-        <div style={{ padding: '12px', marginBottom: '8px' }}>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'hub_tasks' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('hub_tasks')}
-          >
-            Hub Tasks Board
-          </button>
-        </div>
-      )}
-
       {/* Admin Quick Links Moved to Main Sidebar */}
 
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
