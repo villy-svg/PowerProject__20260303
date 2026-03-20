@@ -90,13 +90,17 @@ const VerticalWorkspace = ({
   
   /**
    * LAYOUT GUARD
-   * Determines if the user has permission to view this vertical.
+   * Determines if the user has permission to view this vertical or sub-feature.
    */
-  const hasAccess = 
-    permissions.canRead && (
-      permissions.scope === 'global' || 
-      user?.assignedVerticals?.includes(activeVertical)
-    );
+  const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+  const featureAccessFlag = `canAccess${featureBaseName}`;
+  const isFeatureView = activeVertical.includes('_');
+
+  const hasAccess = permissions.scope === 'global' || (
+    isFeatureView 
+      ? (permissions[featureAccessFlag] && user?.assignedVerticals?.some(v => activeVertical.toUpperCase().includes(v)))
+      : (permissions.canRead && user?.assignedVerticals?.includes(activeVertical))
+  );
 
   // Security Interception
   if (!hasAccess) {
@@ -105,8 +109,8 @@ const VerticalWorkspace = ({
         <div className="access-denied-content">
           <span className="lock-icon">🔒</span>
           <h2>Access Denied</h2>
-          <p>You do not have permission to access the <strong>{label}</strong> workspace.</p>
-          <p>This area is restricted to authorized personnel only.</p>
+          <p>You do not have permission to access the <strong>{label}</strong> {isFeatureView ? 'feature' : 'workspace'}.</p>
+          <p>Please contact your administrator if you believe this is an error.</p>
         </div>
       </div>
     );

@@ -102,11 +102,11 @@ const HubManagement = ({ permissions = {} }) => {
   const handleOpenModal = (hub = null) => {
     if (hub) {
       setEditingHub(hub);
-      setFormData({ 
-        name: hub.name, 
-        hub_code: hub.hub_code || '', 
-        city: hub.city || '', 
-        status: hub.status || 'active' 
+      setFormData({
+        name: hub.name,
+        hub_code: hub.hub_code || '',
+        city: hub.city || '',
+        status: hub.status || 'active'
       });
     } else {
       setEditingHub(null);
@@ -150,7 +150,7 @@ const HubManagement = ({ permissions = {} }) => {
           fetchHubs();
         }, 1000);
       }
-      
+
     } catch (err) {
       masterErrorHandler.handleComponentError(err, 'HubManagement', 'Submit Hub');
     } finally {
@@ -184,13 +184,13 @@ const HubManagement = ({ permissions = {} }) => {
         description="Create and manage global charging hub locations."
         leftActions={
           <div className="view-mode-toggle">
-            <button 
+            <button
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               onClick={() => setViewMode('grid')}
             >
               Grid
             </button>
-            <button 
+            <button
               className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
               onClick={() => setViewMode('list')}
             >
@@ -200,10 +200,10 @@ const HubManagement = ({ permissions = {} }) => {
         }
         rightActions={
           <>
-            <HubCSVDownload 
-              className="master-action-btn" 
-              data={hubs} 
-              label="Export Hubs" 
+            <HubCSVDownload
+              className="master-action-btn"
+              data={hubs}
+              label="Export Hubs"
               filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
             />
             <HubCSVDownload className="master-action-btn" label="Download Template" />
@@ -260,7 +260,7 @@ const HubManagement = ({ permissions = {} }) => {
               {hubsWithDuplicateInfo.map(hub => (
                 <tr key={hub.id} className={hub.isDuplicate ? 'is-duplicate' : ''}>
                   <td className="name-cell">
-                    {hub.name} 
+                    {hub.name}
                     {hub.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
                   </td>
                   <td><code className="code-font">{hub.hub_code || '—'}</code></td>
@@ -298,10 +298,10 @@ const HubManagement = ({ permissions = {} }) => {
               <div className="form-row-grid">
                 <div className="form-group">
                   <label>Hub Name</label>
-                  <input 
-                    type="text" 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Downtown Supercharger"
                     required
                   />
@@ -309,10 +309,10 @@ const HubManagement = ({ permissions = {} }) => {
 
                 <div className="form-group">
                   <label>Hub Code (Unique ID)</label>
-                  <input 
-                    type="text" 
-                    value={formData.hub_code} 
-                    onChange={(e) => setFormData({...formData, hub_code: e.target.value})}
+                  <input
+                    type="text"
+                    value={formData.hub_code}
+                    onChange={(e) => setFormData({ ...formData, hub_code: e.target.value })}
                     placeholder="e.g. NYC-001"
                   />
                 </div>
@@ -321,19 +321,19 @@ const HubManagement = ({ permissions = {} }) => {
               <div className="form-row-grid">
                 <div className="form-group">
                   <label>City / Address</label>
-                  <input 
-                    type="text" 
-                    value={formData.city} 
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     placeholder="e.g. 5th Avenue, NY"
                   />
                 </div>
 
                 <div className="form-group">
                   <label>Status</label>
-                  <select 
-                    value={formData.status} 
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   >
                     <option value="active">Active</option>
                     <option value="maintenance">Maintenance</option>
