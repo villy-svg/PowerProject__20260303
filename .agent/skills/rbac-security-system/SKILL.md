@@ -25,29 +25,57 @@ Every management component and data-entry interface MUST use the `permissions` o
 ### Guarding Action Buttons
 Buttons that trigger data modification MUST be conditionally rendered.
 
-```jsx
-// 1. Creation Guard
+// 1. Vertical-Level Guard (Deprecated for specific features)
 {permissions.canCreate && (
   <button onClick={handleAdd}>+ Add New</button>
 )}
 
-// 2. Modification Guard (Update/Toggle)
-{permissions.canUpdate && (
-  <button onClick={handleEdit}>Edit</button>
+// 2. Feature-Level Guard (RECOMMENDED)
+// Use specific flags computed in App.jsx (e.g., canCreateClients, canCreateEmployees)
+{permissions.canCreateClients && (
+  <button onClick={handleAddClient}>+ Add Client</button>
 )}
+```
 
-// 3. Deletion Guard
-{permissions.canDelete && (
-  <button className="delete-btn" onClick={handleDelete}>Delete</button>
-)}
+### Effective Permission Logic
+Effective permissions for a feature are the **intersection** (minimum) of the Vertical-Level access and the Feature-Level access.
+- If Vertical = **Viewer**, all features in that vertical are restricted to Read-Only.
+- If Vertical = **Admin**, but Feature = **Viewer**, that specific feature is restricted to Read-Only.
+
+```javascript
+// App.jsx Logic
+const effectiveCanCreate = verticalCaps.canCreate && featureCaps.canCreate;
 ```
 
 ### Prop Drilling Standard
 Pass the `permissions` object from `App.jsx` down to all management views, cards, and list rows.
 - **Management View**: Receives `{ permissions }`.
 - **Card/Row Component**: Receives `{ permissions }`.
+    - **Note**: When passing to shallow components (Cards/Rows), you can override the generic `canUpdate` with the feature-specific one for legacy compatibility:
+    ```jsx
+    <EmployeeCard 
+      permissions={{ ...permissions, canUpdate: permissions.canUpdateEmployees }} 
+    />
+    ```
 
 ---
+
+## 3. Granular Feature-Level RBAC
+PowerProject supports overrides for individual features within a vertical (e.g., "Clients List", "Client Tasks").
+
+### Feature Flags in App.jsx
+The `permissions` object includes:
+1.  **Visibility Flag**: `canAccessClients` (boolean) - Gating the sidebar/navigation.
+2.  **CRUD Flags**: `canCreateClients`, `canReadClients`, `canUpdateClients`, `canDeleteClients`.
+
+### Guarding Management Views
+At the top of each management component, implement a hard guard:
+```jsx
+const ClientManagement = ({ permissions }) => {
+  if (!permissions.canAccessClients) return <NoAccessMessage />;
+  // ...
+}
+```
 
 ## 3. Database Implementation (RLS Policies)
 Row Level Security (RLS) MUST be enabled on every table. Policies MUST use the `public.get_user_permission_level(vertical_id)` helper function.

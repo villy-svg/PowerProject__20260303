@@ -30,8 +30,20 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
   const [pendingConflict, setPendingConflict] = useState(null);
 
   useEffect(() => {
-    fetchClients();
-  }, [fetchClients]);
+    if (permissions?.canAccessClients) {
+      fetchClients();
+    }
+  }, [fetchClients, permissions?.canAccessClients]);
+
+  if (!permissions?.canAccessClients && !permissions?.scope === 'global') {
+    return (
+      <div className="empty-state" style={{ marginTop: '100px' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>🔒</div>
+        <h3>Access Restricted</h3>
+        <p>You do not have permission to view the Client List.</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     localStorage.setItem('powerpod_client_view', viewMode);
@@ -145,7 +157,11 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
     onView: openViewModal,
     onDelete: handleDelete,
     onToggleStatus: toggleStatus,
-    permissions,
+    permissions: {
+      ...permissions,
+      canUpdate: permissions.canUpdateClients,
+      canDelete: permissions.canDeleteClients
+    },
   });
 
   return (
@@ -182,7 +198,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
           <>
             <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
             <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
-            {permissions.canCreate && (
+            {permissions.canCreateClients && (
               <>
                 <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
                 <button

@@ -31,8 +31,20 @@ const EmployeeManagement = ({ permissions, filters }) => {
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
 
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    if (permissions?.canAccessEmployees) {
+      fetchEmployees();
+    }
+  }, [fetchEmployees, permissions?.canAccessEmployees]);
+
+  if (!permissions?.canAccessEmployees && !permissions?.scope === 'global') {
+    return (
+      <div className="empty-state" style={{ marginTop: '100px' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>🔒</div>
+        <h3>Access Restricted</h3>
+        <p>You do not have permission to view the Employee List.</p>
+      </div>
+    );
+  }
 
   useEffect(() => {
     localStorage.setItem('powerpod_employee_view', viewMode);
@@ -167,7 +179,7 @@ const EmployeeManagement = ({ permissions, filters }) => {
           <>
             <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
             <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            {permissions.canCreate && (
+            {permissions.canCreateEmployees && (
               <>
                 <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
                 <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
@@ -222,7 +234,11 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            permissions={permissions}
+                            permissions={{
+                              ...permissions,
+                              canUpdate: permissions.canUpdateEmployees,
+                              canDelete: permissions.canDeleteEmployees
+                            }}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
                           />
@@ -234,7 +250,11 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             onView={openViewModal}
                             onDelete={handleDelete} 
                             onToggleStatus={toggleStatus} 
-                            permissions={permissions}
+                            permissions={{
+                              ...permissions,
+                              canUpdate: permissions.canUpdateEmployees,
+                              canDelete: permissions.canDeleteEmployees
+                            }}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
                           />

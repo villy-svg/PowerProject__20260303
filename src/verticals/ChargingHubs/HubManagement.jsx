@@ -66,6 +66,10 @@ const HubManagement = ({ permissions = {} }) => {
   }, []);
 
   const fetchHubs = async () => {
+    if (!permissions?.canAccessConfig && permissions?.roleId !== 'master_admin') {
+      setLoading(false);
+      return;
+    }
     console.log('🚀 HubManagement: fetchHubs called');
     setLoading(true);
     try {

@@ -141,16 +141,22 @@ const TaskController = ({
 
   /**
    * PERMISSION LOGIC
-   * Checks the capability flags against the assignedVerticals array.
+   * Resolves feature-specific CRUD flags (e.g. canCreateClientTasks)
+   * Falls back to vertical-level flags if feature-specific ones are missing.
    */
-  const canUserCreate = permissions.canCreate && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
+  const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+  const fCanCreate = permissions[`canCreate${featureBaseName}`] ?? permissions.canCreate;
+  const fCanUpdate = permissions[`canUpdate${featureBaseName}`] ?? permissions.canUpdate;
+  const fCanDelete = permissions[`canDelete${featureBaseName}`] ?? permissions.canDelete;
 
-  const canUserUpdate = permissions.canUpdate && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
+  const canUserCreate = fCanCreate && 
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
 
-  const canUserDelete = permissions.canDelete && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical)));
+  const canUserUpdate = fCanUpdate && 
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
+
+  const canUserDelete = fCanDelete && 
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
 
   // Debugging log for permission issues
   if (!canUserUpdate && permissions.scope !== 'none') {

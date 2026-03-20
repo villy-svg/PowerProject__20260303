@@ -166,11 +166,23 @@ function App() {
         canAccessConfig: level === 'admin'
       };
 
-      // Add feature flags (boolean) and potentially feature-specific capabilities
+      // Add feature flags (boolean) and feature-specific capabilities
       Object.keys(featureLevels).forEach(fId => {
         const fLvl = featureLevels[fId];
+        const featureCaps = getPermissionsForLevel(fLvl);
+        
+        // Feature flag (for sub-sidebar visibility)
         finalPerms[fId] = fLvl !== 'none';
-        // We could also refine CRUD flags per feature here if needed
+        
+        // Granular CRUD flags for this specific feature
+        // Pattern: canCreateClients, canUpdateEmployeeTasks, etc.
+        const featureBaseName = fId.replace('canAccess', ''); 
+        
+        // Effective permission: Minimum of Vertical Cap and Feature Cap
+        finalPerms[`canCreate${featureBaseName}`] = verticalCaps.canCreate && featureCaps.canCreate;
+        finalPerms[`canRead${featureBaseName}`] = verticalCaps.canRead && featureCaps.canRead;
+        finalPerms[`canUpdate${featureBaseName}`] = verticalCaps.canUpdate && featureCaps.canUpdate;
+        finalPerms[`canDelete${featureBaseName}`] = verticalCaps.canDelete && featureCaps.canDelete;
       });
 
       return finalPerms;
