@@ -294,7 +294,7 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title={`${label === 'Hubs' ? 'Hub' : (label || 'Hub')} Task Manager`}
+        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label || 'Hub') + ' Task Manager'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>
