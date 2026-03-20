@@ -98,24 +98,25 @@ const VerticalWorkspace = ({
     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'EMPLOYEES' :
     activeVertical.toUpperCase();
 
-  const isFeatureView = activeVertical.includes('_');
+  const isFeatureView = activeVertical.includes('_') && activeVertical !== 'CHARGING_HUBS';
   const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
 
-  const hasAccess = permissions.scope === 'global' || (
-    isFeatureView 
-      ? (permissions[featureAccessFlag] && user?.assignedVerticals?.includes(rootVerticalId))
-      : (
-          // SPECIAL CASE: Hub Management List is restricted to Admin-level only, 
-          // but the Tasks board should be accessible to all roles with canRead.
-          activeVertical === 'CHARGING_HUBS' 
-            ? (permissions.canRead && user?.assignedVerticals?.includes('CHARGING_HUBS'))
-            : (permissions.canRead && user?.assignedVerticals?.includes(activeVertical))
-        )
+  // Mapping main vertical IDs to their primary feature access flags if they act as feature views
+  const effectiveFeatureFlag = (activeVertical === 'CHARGING_HUBS') ? 'canAccessHubTasks' : featureAccessFlag;
+  const isFeatureAuthorized = permissions[effectiveFeatureFlag] && user?.assignedVerticals?.includes(rootVerticalId);
+
+  // MAIN PERMISSION CHECK
+  // Global scope users (Master Admin/Viewer) have access to everything.
+  // Others need explicit assignment to the vertical AND feature-specific flags if applicable.
+  const isAuthorized = permissions.scope === 'global' || (
+    (isFeatureView || activeVertical === 'CHARGING_HUBS')
+      ? isFeatureAuthorized
+      : (permissions.canRead && user?.assignedVerticals?.includes(rootVerticalId))
   );
 
   // Security Interception
-  if (!hasAccess) {
+  if (!isAuthorized) {
     return (
       <div className="workspace-container access-denied-layout">
         <div className="access-denied-content">
