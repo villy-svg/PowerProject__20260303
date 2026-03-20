@@ -126,15 +126,12 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
                               <li className={(activeVertical === 'client_category_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_category_management')}>Category Manager</li>
                               <li className={(activeVertical === 'client_service_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_service_management')}>Service Manager</li>
                               <li className={(activeVertical === 'client_billing_model_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_billing_model_management')}>Billing Model Manager</li>
-                              <li className={(activeVertical === 'leads_funnel') ? 'active sub-active' : ''} onClick={() => setActiveVertical('leads_funnel')}>Leads Funnel</li>
-                              <li className={(activeVertical === 'client_tasks') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_tasks')}>Client Tasks</li>
                             </>
                           )}
                           {vertical.id === 'EMPLOYEES' && (
                             <>
                               <li className={(activeVertical === 'department_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('department_management')}>Department Manager</li>
                               <li className={(activeVertical === 'employee_role_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_role_management')}>Role Manager</li>
-                              <li className={(activeVertical === 'employee_tasks') ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_tasks')}>Employee Tasks</li>
                             </>
                           )}
                         </ul>
