@@ -152,7 +152,13 @@ function App() {
       };
     } else {
       // Vertical scope: look up assignments for active vertical
-      const permData = user.verticalPermissions?.[activeVertical];
+      const rootVerticalId = 
+        (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? 'CHARGING_HUBS' :
+        (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'CLIENTS' :
+        (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'EMPLOYEES' :
+        activeVertical.toUpperCase();
+
+      const permData = user.verticalPermissions?.[rootVerticalId];
       const level = permData?.level || 'none';
       const featureLevels = permData?.features || {};
       
