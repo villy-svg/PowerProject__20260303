@@ -568,3 +568,107 @@
   font-size: 10px;
 }
 
+/* View Mode Toggle (Master Page System) */
+.view-mode-toggle {
+  display: flex;
+  gap: 8px;
+  background: var(--halo-bg);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.view-toggle-btn {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.view-toggle-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.view-toggle-btn.active {
+  background: var(--brand-green);
+  color: #000;
+  opacity: 1;
+}
+
+/* User Grid View */
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.user-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.user-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.user-card-id {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-card-id .user-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.user-card-id .user-email {
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+.user-card-body label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+.user-card-actions {
+  margin-top: auto;
+}
+
+.user-card-actions .edit-user-btn {
+  width: 100%;
+}
+
+.v-tag.simple {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+

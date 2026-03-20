@@ -14,11 +14,13 @@ const UserManagement = ({ currentUser }) => {
   const [editingUser, setEditingUser] = useState(null);
   const [status, setStatus] = useState({ type: '', text: '' });
 
+  const [viewMode, setViewMode] = useState('list');
+  const [expandedFeatures, setExpandedFeatures] = useState(null); // Which vertical's features are being edited
+
   // Separate state for role components during editing
   const [editRoleScope, setEditRoleScope] = useState('vertical');
   const [editRoleLevel, setEditRoleLevel] = useState('viewer');
   const [editVerticalPermissions, setEditVerticalPermissions] = useState({});
-  const [expandedFeatures, setExpandedFeatures] = useState(null); // Which vertical's features are being edited
 
   useEffect(() => {
     fetchUsers();
@@ -26,17 +28,39 @@ const UserManagement = ({ currentUser }) => {
 
   const fetchUsers = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    // 1. Fetch profiles
+    const { data: profiles, error: pError } = await supabase
       .from('user_profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error("Error fetching users:", error.message);
+    if (pError) {
+      console.error("Error fetching users:", pError.message);
       setStatus({ type: 'error', text: 'Failed to load users.' });
-    } else {
-      setUsers(data || []);
+      setLoading(false);
+      return;
     }
+
+    // 2. Fetch all vertical access records to map permissions
+    const { data: vAccess, error: vError } = await supabase
+      .from('vertical_access')
+      .select('user_id, vertical_id, access_level');
+
+    if (vError) {
+      console.error("Error loading vertical data:", vError.message);
+    }
+
+    // 3. Merge vertical IDs into the profile objects for display
+    const mergedData = (profiles || []).map(u => {
+      const uAccess = (vAccess || []).filter(va => va.user_id === u.id);
+      const vPerms = {};
+      uAccess.forEach(va => {
+        vPerms[va.vertical_id] = { level: va.access_level };
+      });
+      return { ...u, verticalPermissions: vPerms };
+    });
+
+    setUsers(mergedData);
     setLoading(false);
   };
 
@@ -230,9 +254,25 @@ const UserManagement = ({ currentUser }) => {
       <MasterPageHeader
         title="User Management"
         description="Manage application users, their roles, and vertical access levels."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button 
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button 
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
         rightActions={
           <div className="user-mgmt-actions">
-            {/* Contextual actions could go here, like 'Invite User' if added later */}
+            {/* Contextual actions could go here */}
           </div>
         }
       />
@@ -244,65 +284,117 @@ const UserManagement = ({ currentUser }) => {
         </div>
       )}
 
-      <div className="user-list-wrapper">
-        <table className="user-table">
-          <thead>
-            <tr>
-              <th>Name / Email</th>
-              <th>Role</th>
-              <th>Vertical Access</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
-                <td>
-                  <div className="user-identity">
-                    <span className="user-name-cell">{u.name}</span>
-                    <span className="user-email-cell">{u.email}</span>
-                  </div>
-                </td>
-                <td>
-                  <span className={`role-badge ${u.role_id}`}>
-                    {u.role_id?.replace('_', ' ')}
-                  </span>
-                </td>
-                <td>
-                  <div className="vertical-tags">
-                    {u.role_id?.startsWith('master') ? (
-                      <span className="v-tag master">All Verticals (Master)</span>
-                    ) : (
-                      (() => {
-                        const vPerms = u.verticalPermissions || {}; // This will need App level normalization or fetch logic update
-                        const activePerms = Object.entries(vPerms).filter(([_, data]) => data.level !== 'none');
-                        
-                        return activePerms.length > 0 ? (
-                          activePerms.map(([vId, data]) => {
-                            const hasCustomFeatures = Object.values(data.features || {}).some(lvl => lvl !== 'none' && lvl !== data.level);
-                            return (
-                              <span key={vId} className={`v-tag level-${data.level}`} title={hasCustomFeatures ? "Custom feature levels" : ""}>
-                                {vId}: {data.level} {hasCustomFeatures && '⚙️'}
-                              </span>
-                            );
-                          })
-                        ) : (
-                          <span className="v-tag locked">No Access</span>
-                        );
-                      })()
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
-                    Edit Permissions
-                  </button>
-                </td>
+      {viewMode === 'list' ? (
+        <div className="user-list-wrapper">
+          <table className="user-table">
+            <thead>
+              <tr>
+                <th>Name / Email</th>
+                <th>Role</th>
+                <th>Vertical Access</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id}>
+                  <td>
+                    <div className="user-identity">
+                      <span className="user-name-cell">{u.name}</span>
+                      <span className="user-email-cell">{u.email}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`role-badge ${u.role_id}`}>
+                      {u.role_id?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="vertical-tags">
+                      {u.role_id?.startsWith('master') ? (
+                        <span className="v-tag master">All Verticals</span>
+                      ) : (
+                        (() => {
+                          const vPerms = u.verticalPermissions || {}; 
+                          const activeVIds = Object.entries(vPerms)
+                            .filter(([_, data]) => data.level !== 'none')
+                            .map(([vId]) => {
+                              const vInfo = VERTICAL_LIST.find(v => v.id === vId);
+                              return vInfo ? vInfo.label : vId;
+                            });
+                          
+                          return activeVIds.length > 0 ? (
+                            activeVIds.map(vLabel => (
+                              <span key={vLabel} className="v-tag simple">
+                                {vLabel}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="v-tag locked">No Access</span>
+                          );
+                        })()
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="user-grid">
+          {users.map(u => (
+            <div key={u.id} className="user-card">
+              <div className="user-card-header">
+                <div className="user-card-id">
+                  <span className="user-name">{u.name}</span>
+                  <span className="user-email">{u.email}</span>
+                </div>
+                <span className={`role-badge ${u.role_id}`}>
+                  {u.role_id?.replace('_', ' ')}
+                </span>
+              </div>
+              
+              <div className="user-card-body">
+                <label>Access Verticals</label>
+                <div className="vertical-tags">
+                  {u.role_id?.startsWith('master') ? (
+                    <span className="v-tag master">All Verticals</span>
+                  ) : (
+                    (() => {
+                      const vPerms = u.verticalPermissions || {};
+                      const activeVIds = Object.entries(vPerms)
+                        .filter(([_, data]) => data.level !== 'none')
+                        .map(([vId]) => {
+                          const vInfo = VERTICAL_LIST.find(v => v.id === vId);
+                          return vInfo ? vInfo.label : vId;
+                        });
+                      return activeVIds.length > 0 ? (
+                        activeVIds.map(vLabel => (
+                          <span key={vLabel} className="v-tag simple">{vLabel}</span>
+                        ))
+                      ) : (
+                        <span className="v-tag locked">No Access</span>
+                      );
+                    })()
+                  )}
+                </div>
+              </div>
+
+              <div className="user-card-actions">
+                <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
+                  Edit Permissions
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {editingUser && (
         <div className="edit-modal-overlay">
