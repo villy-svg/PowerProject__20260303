@@ -159,25 +159,7 @@ const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertic
 
   return (
     <div className="sub-sidebar-body">
-      {/* Admin Quick Links */}
-      {canAccessAdmin && (
-        <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('employee_tasks')}
-          >
-            Employee Tasks
-          </button>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'department_management' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('department_management')}
-          >
-            Department Manager
-          </button>
-        </div>
-      )}
+      {/* Admin Quick Links Moved to Main Sidebar */}
 
       {/* Filters Header */}
       <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>

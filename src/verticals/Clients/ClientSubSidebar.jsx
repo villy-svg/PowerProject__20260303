@@ -166,40 +166,7 @@ const ClientSubSidebar = ({
 
   return (
     <div className="sub-sidebar-body">
-      {/* Nav Quick Links */}
-      {canAccessAdmin && (
-        <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('client_tasks')}
-          >
-            Client Tasks
-          </button>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'leads_funnel' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('leads_funnel')}
-          >
-            Leads Funnel
-          </button>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'client_category_management' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('client_category_management')}
-          >
-            Category Manager
-          </button>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'client_service_management' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('client_service_management')}
-          >
-            Service Manager
-          </button>
-        </div>
-      )}
+      {/* Nav Quick Links Moved to Main Sidebar */}
 
       {/* Filters Header */}
       <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>

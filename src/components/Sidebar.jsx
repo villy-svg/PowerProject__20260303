@@ -8,6 +8,14 @@ import { VERTICAL_LIST } from '../constants/verticals';
  * Multi-Vertical Update: Refactored to support the 'assignedVerticals' array.
  */
 const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, permissions = {} }) => {
+  const [expandedVerticals, setExpandedVerticals] = React.useState([]);
+
+  const toggleVertical = (e, vId) => {
+    e.stopPropagation();
+    setExpandedVerticals(prev => 
+      prev.includes(vId) ? prev.filter(id => id !== vId) : [...prev, vId]
+    );
+  };
   
   // Identify if we are in the "Credential Loading" phase
   const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
@@ -79,18 +87,59 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
                 VERTICAL_LIST.map((vertical) => {
                   const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
                   const isLocked = vertical.locked || !isAssigned;
+                  const isExpanded = expandedVerticals.includes(vertical.id);
+                  const canManage = permissions?.canAccessConfig;
 
                   return (
-                    <li 
-                      key={vertical.id} 
-                      className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
-                      onClick={() => !isLocked && setActiveVertical(vertical.id)}
-                      title={isLocked ? "Coming Soon / No Access" : ""}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                    >
-                      <span>{vertical.label}</span>
-                      {isLocked && <span className="lock-icon" style={{ fontSize: '12px', opacity: 0.5 }}>🔒</span>}
-                    </li>
+                    <React.Fragment key={vertical.id}>
+                      <li 
+                        className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''} nav-parent-item`}
+                        onClick={() => !isLocked && setActiveVertical(vertical.id)}
+                        title={isLocked ? "Coming Soon / No Access" : ""}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                      >
+                        <span className="v-label-text">{vertical.label}</span>
+                        <div className="v-actions-wrapper">
+                          {isLocked && <span className="lock-icon" style={{ fontSize: '12px', opacity: 0.5 }}>🔒</span>}
+                          {!isLocked && canManage && (vertical.id === 'CHARGING_HUBS' || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
+                            <button 
+                              className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}
+                              onClick={(e) => toggleVertical(e, vertical.id)}
+                            >
+                              {isExpanded ? '▼' : '▶'}
+                            </button>
+                          )}
+                        </div>
+                      </li>
+                      
+                      {/* Sub-navigation Items */}
+                      {!isLocked && isExpanded && canManage && (
+                        <ul className="sub-nav-list">
+                          {vertical.id === 'CHARGING_HUBS' && (
+                            <>
+                              <li className={(activeVertical === 'hub_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('hub_management')}>Hub Administration</li>
+                              <li className={(activeVertical === 'hub_function_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('hub_function_management')}>Function Manager</li>
+                            </>
+                          )}
+                          {vertical.id === 'CLIENTS' && (
+                            <>
+                              <li className={(activeVertical === 'client_category_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_category_management')}>Category Manager</li>
+                              <li className={(activeVertical === 'client_service_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_service_management')}>Service Manager</li>
+                              <li className={(activeVertical === 'client_billing_model_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_billing_model_management')}>Billing Model Manager</li>
+                              <li className={(activeVertical === 'leads_funnel') ? 'active sub-active' : ''} onClick={() => setActiveVertical('leads_funnel')}>Leads Funnel</li>
+                              <li className={(activeVertical === 'client_tasks') ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_tasks')}>Client Tasks</li>
+                            </>
+                          )}
+                          {vertical.id === 'EMPLOYEES' && (
+                            <>
+                              <li className={(activeVertical === 'department_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('department_management')}>Department Manager</li>
+                              <li className={(activeVertical === 'employee_role_management') ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_role_management')}>Role Manager</li>
+                              <li className={(activeVertical === 'employee_tasks') ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_tasks')}>Employee Tasks</li>
+                            </>
+                          )}
+                        </ul>
+                      )}
+                    </React.Fragment>
                   );
                 })
               ) : (

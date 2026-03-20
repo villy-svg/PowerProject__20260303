@@ -162,17 +162,7 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
 
   return (
     <div className="sub-sidebar-body">
-      {canAccessAdmin && (
-        <div style={{ padding: '12px', marginBottom: '8px' }}>
-          <button 
-            className="halo-button" 
-            style={{ width: '100%' }}
-            onClick={() => setActiveVertical('hub_function_management')}
-          >
-            Function Manager
-          </button>
-        </div>
-      )}
+      {/* Admin Quick Links Moved to Main Sidebar */}
 
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
