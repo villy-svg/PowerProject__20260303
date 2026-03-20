@@ -339,8 +339,20 @@ const UserManagement = ({ currentUser }) => {
                       const currentLevel = editVerticalPermissions[v.id] || 'none';
                       return (
                         <div key={v.id} className="vertical-perm-item-wrapper">
-                          <div className="vertical-perm-item">
-                            <span className="v-name">{v.label}</span>
+                            <div className="vertical-perm-item">
+                            <div className="left-side-controls">
+                              {VERTICAL_FEATURES[v.id] && currentLevel !== 'none' && (
+                                <button
+                                  type="button"
+                                  className={`features-toggle-btn ${expandedFeatures === v.id ? 'active' : ''}`}
+                                  onClick={() => setExpandedFeatures(expandedFeatures === v.id ? null : v.id)}
+                                >
+                                  Features <span className={`chevron ${expandedFeatures === v.id ? 'up' : 'down'}`}></span>
+                                </button>
+                              )}
+                              <span className="v-name">{v.label}</span>
+                            </div>
+                            
                             <div className="v-level-selector">
                               {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
                                 const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
@@ -364,16 +376,6 @@ const UserManagement = ({ currentUser }) => {
                                 );
                               })}
                             </div>
-                            
-                            {VERTICAL_FEATURES[v.id] && currentLevel !== 'none' && (
-                              <button
-                                type="button"
-                                className={`features-toggle-btn ${expandedFeatures === v.id ? 'active' : ''}`}
-                                onClick={() => setExpandedFeatures(expandedFeatures === v.id ? null : v.id)}
-                              >
-                                {expandedFeatures === v.id ? 'Close' : 'Features'}
-                              </button>
-                            )}
                           </div>
 
                           {expandedFeatures === v.id && VERTICAL_FEATURES[v.id] && (
