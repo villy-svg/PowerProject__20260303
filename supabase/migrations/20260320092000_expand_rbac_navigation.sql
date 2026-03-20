@@ -14,10 +14,12 @@ ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
 
 -- 3. Policies
 -- SELECT: All authenticated users can read permissions
+DROP POLICY IF EXISTS "Permit SELECT for all users" ON public.role_permissions;
 CREATE POLICY "Permit SELECT for all users" ON public.role_permissions
 FOR SELECT TO authenticated USING (true);
 
 -- ALL: Only master_admin can modify role definitions
+DROP POLICY IF EXISTS "Permit ALL for master_admin" ON public.role_permissions;
 CREATE POLICY "Permit ALL for master_admin" ON public.role_permissions
 FOR ALL TO authenticated
 USING (
