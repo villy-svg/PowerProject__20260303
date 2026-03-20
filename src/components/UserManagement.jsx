@@ -141,14 +141,30 @@ const UserManagement = ({ currentUser }) => {
   const handleLevelChange = (newLevel) => {
     setEditRoleLevel(newLevel);
     
-    // CAP: Automatically downgrade any vertical permissions that exceed the new capability level
+    // CAP: Automatically downgrade any vertical or feature permissions that exceed the new capability level
     const newMaxRank = LEVEL_RANKS[newLevel];
     setEditVerticalPermissions(prev => {
       const updated = { ...prev };
       Object.keys(updated).forEach(vId => {
-        const currentRank = LEVEL_RANKS[updated[vId]] || 0;
-        if (currentRank > newMaxRank) {
-          updated[vId] = newLevel;
+        const current = updated[vId];
+        if (typeof current === 'object') {
+          // Downgrade Vertical Level
+          const updatedLevel = LEVEL_RANKS[current.level] > newMaxRank ? newLevel : current.level;
+          
+          // Downgrade Features
+          const updatedFeatures = { ...current.features };
+          Object.keys(updatedFeatures).forEach(fId => {
+            if (LEVEL_RANKS[updatedFeatures[fId]] > newMaxRank) {
+              updatedFeatures[fId] = newLevel;
+            }
+          });
+          
+          updated[vId] = { ...current, level: updatedLevel, features: updatedFeatures };
+        } else {
+          // Legacy string format
+          if (LEVEL_RANKS[current] > newMaxRank) {
+            updated[vId] = newLevel;
+          }
         }
       });
       return updated;
@@ -164,11 +180,20 @@ const UserManagement = ({ currentUser }) => {
         return updated;
       }
       
-      // If it was already an object, just update the level
+      const newMaxRank = LEVEL_RANKS[level];
+      
+      // If it was already an object, update level and downgrade features
       if (typeof current === 'object') {
+        const updatedFeatures = { ...current.features };
+        Object.keys(updatedFeatures).forEach(fId => {
+          if (LEVEL_RANKS[updatedFeatures[fId]] > newMaxRank) {
+            updatedFeatures[fId] = level;
+          }
+        });
+        
         return {
           ...prev,
-          [vId]: { ...current, level }
+          [vId]: { ...current, level, features: updatedFeatures }
         };
       }
       
@@ -336,18 +361,21 @@ const UserManagement = ({ currentUser }) => {
                   <label className="section-label">3. Configure Vertical Access Levels</label>
                   <div className="vertical-permission-list">
                     {VERTICAL_LIST.map(v => {
-                      const currentLevel = editVerticalPermissions[v.id] || 'none';
+                      const vData = editVerticalPermissions[v.id];
+                      const normalizedVLevel = typeof vData === 'object' ? vData.level : (vData || 'none');
+                      
                       return (
                         <div key={v.id} className="vertical-perm-item-wrapper">
                             <div className="vertical-perm-item">
                             <div className="left-side-controls">
-                              {VERTICAL_FEATURES[v.id] && currentLevel !== 'none' && (
+                              {VERTICAL_FEATURES[v.id] && normalizedVLevel !== 'none' && (
                                 <button
                                   type="button"
                                   className={`features-toggle-btn ${expandedFeatures === v.id ? 'active' : ''}`}
                                   onClick={() => setExpandedFeatures(expandedFeatures === v.id ? null : v.id)}
+                                  title="Toggle Features"
                                 >
-                                  Features <span className={`chevron ${expandedFeatures === v.id ? 'up' : 'down'}`}></span>
+                                  <span className={`chevron ${expandedFeatures === v.id ? 'up' : 'down'}`}></span>
                                 </button>
                               )}
                               <span className="v-name">{v.label}</span>
@@ -357,15 +385,12 @@ const UserManagement = ({ currentUser }) => {
                               {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
                                 const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
                                 const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
-                                const currentLevel = typeof editVerticalPermissions[v.id] === 'object' 
-                                  ? editVerticalPermissions[v.id].level 
-                                  : (editVerticalPermissions[v.id] || 'none');
 
                                 return (
                                   <button
                                     key={lvl}
                                     type="button"
-                                    className={`v-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                    className={`v-lvl-btn ${normalizedVLevel === lvl ? 'active' : ''} lvl-${lvl}`}
                                     onClick={() => !isTooHigh && updateVerticalLevel(v.id, lvl)}
                                     disabled={isTooHigh}
                                     title={isTooHigh ? `Locked by max capability level (${editRoleLevel.toUpperCase()})` : ''}
@@ -389,8 +414,9 @@ const UserManagement = ({ currentUser }) => {
                                       <span className="feature-label">{feature.label}</span>
                                       <div className="v-level-selector mini">
                                         {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
-                                          const maxRank = LEVEL_RANKS[editRoleLevel] || 1;
-                                          const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
+                                          const globalMaxRank = LEVEL_RANKS[editRoleLevel] || 1;
+                                          const verticalMaxRank = LEVEL_RANKS[normalizedVLevel] || 1;
+                                          const isTooHigh = LEVEL_RANKS[lvl] > Math.min(globalMaxRank, verticalMaxRank);
                                           
                                           return (
                                             <button
@@ -399,6 +425,7 @@ const UserManagement = ({ currentUser }) => {
                                               className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
                                               onClick={() => !isTooHigh && updateFeatureLevel(v.id, feature.id, lvl)}
                                               disabled={isTooHigh}
+                                              title={isTooHigh ? `Locked by vertical access level (${normalizedVLevel.toUpperCase()})` : ''}
                                               style={{ opacity: isTooHigh ? 0.3 : 1 }}
                                             >
                                               {lvl.charAt(0).toUpperCase()}
