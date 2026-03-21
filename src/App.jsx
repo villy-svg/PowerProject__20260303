@@ -598,19 +598,19 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
-                  activeVertical === 'CHARGING_HUBS' ? HubSubSidebar :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubSubSidebar :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  activeVertical === 'CHARGING_HUBS' ? HubTaskForm :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubTaskForm :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
-                  activeVertical === 'CHARGING_HUBS' ? HubTaskTile :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubTaskTile :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null
@@ -620,7 +620,7 @@ function App() {
                     ? () => setActiveVertical('EMPLOYEES')
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
                        ? () => setActiveVertical('CLIENTS')
-                      : (currentUserPermissions.canAccessConfig && activeVertical === 'CHARGING_HUBS')
+                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks'))
                         ? () => setActiveVertical('hub_management')
                         : null
                 }
