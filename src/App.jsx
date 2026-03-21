@@ -152,11 +152,14 @@ function App() {
       };
     } else {
       // Vertical scope: look up assignments for active vertical
+      // Default to 'home' if no vertical is active
+      const current = activeVertical || 'home';
+      
       const rootVerticalId = 
-        (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? 'CHARGING_HUBS' :
-        (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'CLIENTS' :
-        (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'EMPLOYEES' :
-        activeVertical.toUpperCase();
+        (current === 'CHARGING_HUBS' || current === 'hub_tasks') ? 'CHARGING_HUBS' :
+        (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
+        (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
+        current.toUpperCase();
 
       const permData = user.verticalPermissions?.[rootVerticalId];
       const level = permData?.level || 'none';
@@ -340,12 +343,12 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views as the default vertical
-      const persistentVerticals = ['CHARGING_HUBS', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
+      const persistentVerticals = ['home', 'CHARGING_HUBS', 'hub_tasks', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
     } else {
-      localStorage.removeItem('power_project_active_vertical');
+      localStorage.setItem('power_project_active_vertical', 'home');
     }
   }, [activeVertical]);
 

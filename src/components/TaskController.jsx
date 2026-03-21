@@ -34,7 +34,8 @@ const TaskController = ({
   resetFilters, // For filter resets
   filters = { city: [], hub: [], priority: [], function: [] },
   user = {},
-  permissions = {} 
+  permissions = {},
+  rootVerticalId // New prop
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -117,7 +118,7 @@ const TaskController = ({
    */
   const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
     fields: ['text', 'priority', 'hub_id', 'function'],
-    activeVertical: activeVertical,
+    activeVertical: rootVerticalId || activeVertical,
     sortByDuplicates: true
   });
 
@@ -182,7 +183,7 @@ const TaskController = ({
       } else {
         // Create new
         const newTask = {
-          ...createInitialTask(formData.text, activeVertical),
+          ...createInitialTask(formData.text, rootVerticalId || activeVertical),
           ...formData
         };
         await setTasks(newTask);
@@ -257,7 +258,8 @@ const TaskController = ({
    * Moves all tasks in this vertical (except deprioritized ones) to DEPRIORITIZED stage.
    */
   const handleClearBoard = async () => {
-    const verticalTasks = (tasks || []).filter(t => t.verticalId === activeVertical && t.stageId !== 'DEPRIORITIZED');
+    const targetVerticalId = rootVerticalId || activeVertical;
+    const verticalTasks = (tasks || []).filter(t => t.verticalId === targetVerticalId && t.stageId !== 'DEPRIORITIZED');
     if (verticalTasks.length === 0) return;
 
     setConfirmDialog({
@@ -339,11 +341,11 @@ const TaskController = ({
         }
         rightActions={
           <>
-            {activeVertical === 'CHARGING_HUBS' && (
+            {(activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') && (
               <>
-                <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => t.verticalId === activeVertical)} label="Export Tasks" />
+                <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-                <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
+                <TaskCSVImport className="master-action-btn" verticalId={rootVerticalId || activeVertical} onImportComplete={() => refreshTasks(false)} />
               </>
             )}
             {canUserCreate && (
@@ -461,7 +463,7 @@ const TaskController = ({
               };
 
               const stageTasks = filteredTasks
-                .filter((t) => t.verticalId === activeVertical && t.stageId === stage.id)
+                .filter((t) => t.verticalId === (rootVerticalId || activeVertical) && t.stageId === stage.id)
                 .sort((a, b) => {
                   const weightA = getPriorityWeight(a.priority);
                   const weightB = getPriorityWeight(b.priority);
@@ -568,7 +570,7 @@ const TaskController = ({
           <TaskListView 
             tasks={filteredTasks}
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
-            activeVertical={activeVertical}
+            activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
             canDelete={canUserDelete}
             updateTaskStage={updateTaskStage}

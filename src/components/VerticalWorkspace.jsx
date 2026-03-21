@@ -192,6 +192,7 @@ const VerticalWorkspace = ({
           */
           <TaskController 
             activeVertical={activeVertical}
+            rootVerticalId={rootVerticalId}
             tasks={tasks}
             filters={filters}
             setTasks={setTasks} 
