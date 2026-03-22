@@ -48,6 +48,7 @@ body {
   color: var(--text-color);
   font-family: var(--font-main);
   transition: background-color 0.3s ease;
+  overflow: hidden; /* Prevents body scroll if app-layout handles it */
 }
 
 
@@ -110,6 +111,7 @@ body {
   /* Standardized: No padding here, sub-components handle it */
   overflow-y: auto;
   transition: all var(--transition-main);
+  background-color: var(--surface-card);
 }
 
 .app-content {
@@ -117,7 +119,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-top: 40px;
+  padding-top: 0; /* Removed gap - belt of pitch black */
 }
 
 /* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
@@ -153,16 +155,31 @@ body {
   align-items: center;
 }
 
-.header-branding {
+.branding-container {
+  position: absolute;
+  left: 2.5rem;
+  top: 0;
+  height: 90px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
+  z-index: 1001;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.header-branding:hover {
-  transform: scale(1.02);
+@media (max-width: 768px) {
+  .branding-container {
+    left: 1.5rem;
+    gap: 0.5rem;
+  }
+  .brand-title {
+    font-size: 1.2rem;
+  }
+  .logo-svg {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .header-center {
@@ -219,9 +236,7 @@ body {
   animation: fadeIn 0.4s ease-out;
   background-color: var(--surface-card);
   padding: 40px;
-  border-radius: 20px;
-  margin-top: 20px;
-  border: 1px solid var(--border-color);
+  border-radius: 0; /* Fully unified with surface */
 }
 
 .summary-header {
