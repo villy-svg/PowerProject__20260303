@@ -155,31 +155,31 @@ body {
   align-items: center;
 }
 
-.branding-container {
+.logo-button {
   position: absolute;
   left: 2.5rem;
-  top: 0;
-  height: 90px;
+  top: 25px; /* (90px - 40px) / 2 */
+  width: 40px;
+  height: 40px;
+  z-index: 1002;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  z-index: 1001;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  justify-content: center;
+  transition: transform 0.2s ease;
 }
 
-@media (max-width: 768px) {
-  .branding-container {
-    left: 1.5rem;
-    gap: 0.5rem;
-  }
-  .brand-title {
-    font-size: 1.2rem;
-  }
-  .logo-svg {
-    width: 30px;
-    height: 30px;
-  }
+.logo-button:hover {
+  transform: scale(1.05);
+}
+
+.logo-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .header-center {
@@ -202,7 +202,12 @@ body {
   object-fit: contain;
 }
 
-.brand-title {
+.brand-title-centered {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 45px; /* Vertical center of 90px header */
+  transform-origin: center;
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
@@ -212,7 +217,9 @@ body {
   -webkit-text-fill-color: transparent;
   letter-spacing: -1px;
   white-space: nowrap;
-  line-height: 1;
+  line-height: 0;
+  z-index: 1001;
+  pointer-events: none; /* Allows clicking through if needed, though header covers it */
 }
 
 .theme-toggle-btn {

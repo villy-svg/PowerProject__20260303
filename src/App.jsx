@@ -247,10 +247,10 @@ function App() {
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
       <div className="app-layout">
-        <div className="branding-container" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        <button className="logo-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
-          <h1 className="brand-title">PowerProject</h1>
-        </div>
+        </button>
+        <h1 className="brand-title-centered">PowerProject</h1>
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
