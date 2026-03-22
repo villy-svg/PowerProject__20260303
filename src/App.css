@@ -18,7 +18,7 @@
   --surface-card: #161B1D;
   --text-color: #E0E3E5;
   --text-muted: #8A9399;
-  --brand-green: #42D46F;
+  --brand-green: #4ADE80;
   --accent-orange: #FF8C00;
   --border-color: #3f3f46;
 }
@@ -30,8 +30,8 @@
 }
 
 [data-theme='dark'] {
-  --halo-glow: rgba(66, 212, 111, 0.15);
-  --halo-bg: rgba(66, 212, 111, 0.05);
+  --halo-glow: rgba(74, 222, 128, 0.15);
+  --halo-bg: rgba(74, 222, 128, 0.05);
 }
 
 /* ==========================================================================
@@ -148,14 +148,25 @@ body {
 }
 
 .header-left {
-  width: 120px;
-  /* Space reserved for the logo */
+  flex: 1;
   display: flex;
   align-items: center;
 }
 
+.header-branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.header-branding:hover {
+  transform: scale(1.02);
+}
+
 .header-center {
-  flex: 2;
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -168,44 +179,23 @@ body {
   align-items: center;
 }
 
-.logo-button {
-  position: absolute;
-  /* FIXED ANCHOR */
-  left: 40px;
-  /* ALIGNED WITH HEADER PADDING */
-  top: 25px;
-  /* Centered vertically in 90px header */
-  z-index: 1001;
-  /* Above sidebar */
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  outline: none;
-  transition: transform 0.2s ease;
-}
-
-.logo-button:hover {
-  transform: scale(1.05);
-}
-
 .logo-svg {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
 .brand-title {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 800;
   background: linear-gradient(135deg, var(--brand-green), #6ef59a);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   white-space: nowrap;
+  line-height: 1;
 }
 
 .theme-toggle-btn {
@@ -227,6 +217,11 @@ body {
    ========================================================================== */
 .home-summary-view {
   animation: fadeIn 0.4s ease-out;
+  background-color: var(--surface-card);
+  padding: 40px;
+  border-radius: 20px;
+  margin-top: 20px;
+  border: 1px solid var(--border-color);
 }
 
 .summary-header {

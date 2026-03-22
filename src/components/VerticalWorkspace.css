@@ -12,7 +12,7 @@
 /* 1. LEFT SUB-SIDEBAR */
 .sub-sidebar {
   width: 260px; 
-  background-color: var(--bg-color);
+  background-color: var(--surface-card);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@
   flex: 1;
   padding: 32px;
   overflow-x: auto;
-  background-color: var(--bg-color);
+  background-color: var(--surface-card);
   min-width: 0;
 }
 
