@@ -16,7 +16,7 @@
 }
 
 .user-list-wrapper {
-  background: var(--panel-bg);
+  background: var(--surface-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
@@ -617,7 +617,7 @@
 }
 
 .user-card {
-  background: var(--panel-bg);
+  background: var(--surface-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;

@@ -3,19 +3,23 @@
    ========================================================================== */
 :root {
   --bg-color: #fcfcfd;
+  --surface-card: #ffffff;
   --text-color: #18181b;
+  --text-muted: #64748b;
   --brand-green: #0d9488;
-  /* Teal 600 */
+  --accent-orange: #f97316;
   --border-color: #e4e4e7;
   --font-main: 'Inter', system-ui, sans-serif;
   --transition-main: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='dark'] {
-  --bg-color: #09090b;
-  --text-color: #f4f4f5;
-  --brand-green: #2dd4bf;
-  /* Teal 400 */
+  --bg-color: #0B0E0F;
+  --surface-card: #161B1D;
+  --text-color: #E0E3E5;
+  --text-muted: #8A9399;
+  --brand-green: #42D46F;
+  --accent-orange: #FF8C00;
   --border-color: #3f3f46;
 }
 
@@ -26,8 +30,8 @@
 }
 
 [data-theme='dark'] {
-  --halo-glow: rgba(45, 212, 191, 0.15);
-  --halo-bg: rgba(45, 212, 191, 0.05);
+  --halo-glow: rgba(66, 212, 111, 0.15);
+  --halo-bg: rgba(66, 212, 111, 0.05);
 }
 
 /* ==========================================================================
@@ -39,7 +43,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  background-color: #09090b;
+  background-color: var(--bg-color);
   /* DARK-FIRST: Prevents white flash even if cache is cleared */
   color: var(--text-color);
   font-family: var(--font-main);
@@ -135,6 +139,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  background-color: var(--surface-card);
   border-bottom: 1px solid var(--border-color);
   padding: 0 40px;
   /* CONSISTENT PADDING AT ALL TIMES */
@@ -195,7 +200,7 @@ body {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--brand-green), #5eead4);
+  background: linear-gradient(135deg, var(--brand-green), #6ef59a);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -254,7 +259,8 @@ body {
 
 .summary-card {
   border-left: 6px solid var(--stage-color);
-  background-color: color-mix(in srgb, var(--stage-color), transparent 95%);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 12px 24px;
   display: flex;
@@ -291,8 +297,8 @@ body {
    6. BREAKDOWN LIST (ABSORBED LOGIC)
    ========================================================================== */
 .vertical-breakdown-list {
-  background-color: color-mix(in srgb, var(--stage-color), transparent 95%);
-  border: 1px solid color-mix(in srgb, var(--stage-color), transparent 80%);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 12px 4px;
   display: flex;
@@ -426,9 +432,10 @@ body {
    ========================================================================== */
 
 .btn-primary {
-  background-color: var(--halo-bg);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
   color: var(--brand-green);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 700;
@@ -436,6 +443,7 @@ body {
   transition: all 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:hover {
@@ -444,10 +452,10 @@ body {
 }
 
 .halo-button {
-  background: var(--halo-bg) !important;
-  /* Force override of default button backgrounds */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+  /* Glass Finish */
   color: var(--brand-green) !important;
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -456,9 +464,8 @@ body {
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 3px var(--halo-glow);
-  /* Further reduced for ultra-subtle look */
-  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -501,9 +508,9 @@ body {
 
 /* Duplicate Styling */
 .duplicate-badge {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: color-mix(in srgb, var(--accent-orange), transparent 90%);
+  color: var(--accent-orange);
+  border: 1px solid color-mix(in srgb, var(--accent-orange), transparent 60%);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.65rem;
@@ -514,9 +521,9 @@ body {
 }
 
 .duplicate-badge-mini {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: color-mix(in srgb, var(--accent-orange), transparent 90%);
+  color: var(--accent-orange);
+  border: 1px solid color-mix(in srgb, var(--accent-orange), transparent 70%);
   padding: 0 4px;
   border-radius: 3px;
   font-size: 0.6rem;

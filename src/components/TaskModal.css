@@ -14,7 +14,7 @@
 }
 
 .task-modal-content {
-  background: var(--bg-color);
+  background: var(--surface-card);
   border: 1px solid var(--border-color);
   border-radius: 20px;
   width: 100%;
