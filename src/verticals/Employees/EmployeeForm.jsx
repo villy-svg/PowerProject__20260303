@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeForm.css';
 import { BasicDetailsSection, CompanyDetailsSection, BankDetailsSection } from './EmployeeFormSections';
 

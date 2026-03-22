@@ -1,0 +1,117 @@
+import { useState, useCallback } from 'react';
+import { taskService } from '../services/tasks/taskService';
+import { masterErrorHandler } from '../services/core/masterErrorHandler';
+
+/**
+ * useTasks Hook
+ * Manages all task state and delegates DB operations to taskService.
+ * Replaces the scattered task CRUD logic that was previously in App.jsx.
+ *
+ * Usage in App.jsx:
+ *   const { tasks, setTasks, loading, fetchTasks, addTask, updateTask,
+ *           updateTaskStage, deleteTask, bulkUpdateTasks } = useTasks();
+ */
+export const useTasks = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ---------------------------------------------------------------------------
+  // READ
+  // ---------------------------------------------------------------------------
+
+  const fetchTasks = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const data = await taskService.getTasks();
+      setTasks(data);
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.fetchTasks');
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // CREATE
+  // ---------------------------------------------------------------------------
+
+  const addTask = async (taskData) => {
+    try {
+      const newTask = await taskService.addTask(taskData);
+      setTasks(prev => [...prev, newTask]);
+      return newTask;
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.addTask');
+      throw err;
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // UPDATE
+  // ---------------------------------------------------------------------------
+
+  const updateTask = async (taskData) => {
+    try {
+      const updated = await taskService.updateTask(taskData);
+      setTasks(prev => prev.map(t => t.id === taskData.id ? updated : t));
+      return updated;
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.updateTask');
+      throw err;
+    }
+  };
+
+  const updateTaskStage = async (taskId, newStageId) => {
+    // Optimistic UI update
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
+    try {
+      await taskService.updateTaskStage(taskId, newStageId);
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.updateTaskStage');
+      // Revert on failure
+      await fetchTasks(false);
+      throw err;
+    }
+  };
+
+  const bulkUpdateTasks = async (taskIds, updates) => {
+    try {
+      const updatedTasks = await taskService.bulkUpdateTasks(taskIds, updates);
+      setTasks(prev => prev.map(t => {
+        const updated = updatedTasks.find(u => u.id === t.id);
+        return updated || t;
+      }));
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.bulkUpdateTasks');
+      throw err;
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // DELETE
+  // ---------------------------------------------------------------------------
+
+  const deleteTask = async (taskId) => {
+    try {
+      await taskService.deleteTask(taskId);
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+    } catch (err) {
+      masterErrorHandler.handleDatabaseError(err, 'useTasks.deleteTask');
+      throw err;
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+
+  return {
+    tasks,
+    setTasks,    // exposed for optimistic updates (e.g. TaskController bulk delete)
+    loading,
+    fetchTasks,
+    addTask,
+    updateTask,
+    updateTaskStage,
+    bulkUpdateTasks,
+    deleteTask,
+  };
+};

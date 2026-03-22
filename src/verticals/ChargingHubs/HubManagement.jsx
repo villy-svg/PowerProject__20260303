@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient';
-import { masterErrorHandler } from '../../services/masterErrorHandler';
+import { supabase } from '../../services/core/supabaseClient';
+import { masterErrorHandler } from '../../services/core/masterErrorHandler';
 import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';

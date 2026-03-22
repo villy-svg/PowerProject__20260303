@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../services/core/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import './Configuration.css';
 

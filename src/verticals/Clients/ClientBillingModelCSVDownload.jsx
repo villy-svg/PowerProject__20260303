@@ -1,6 +1,6 @@
 import React from 'react';
 import CSVDownloadButton from '../../components/CSVDownloadButton';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 
 /**
  * ClientBillingModelCSVDownload — Thin Wrapper

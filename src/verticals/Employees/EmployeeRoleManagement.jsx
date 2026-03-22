@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeRoleManagement.css';
 import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/MasterPageHeader';

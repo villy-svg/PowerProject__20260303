@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../services/core/supabaseClient';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LEVELS, ROLE_SCOPES, DEFAULT_ROLE_PERMISSIONS } from '../constants/roles';
 import { VERTICAL_FEATURES, getDefaultFeatures } from '../constants/verticalFeatures';

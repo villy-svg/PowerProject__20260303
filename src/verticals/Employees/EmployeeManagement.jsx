@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 import '../ChargingHubs/HubManagement.css'; // Use shared styles
 import './EmployeeManagement.css';
 import EmployeeCSVDownload from './EmployeeCSVDownload';

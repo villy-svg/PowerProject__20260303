@@ -1,6 +1,7 @@
 /**
  * Master Error Handler Service
- * Centralized error handling for all vertical components
+ * Centralized error handling for all vertical components.
+ * Canonical location: src/services/core/masterErrorHandler.js
  */
 import { supabase } from './supabaseClient';
 
@@ -92,7 +93,6 @@ class MasterErrorHandler {
 
   // Show notification to user
   showNotification(notification) {
-    // Create or update notification element
     let notificationEl = document.getElementById('master-error-notification');
     if (!notificationEl) {
       notificationEl = document.createElement('div');
@@ -123,7 +123,6 @@ class MasterErrorHandler {
       <p style="margin: 10px 0; font-size: 14px;">${notification.message}</p>
     `;
 
-    // Auto-dismiss if duration is set
     if (notification.duration > 0) {
       setTimeout(() => {
         if (notificationEl.parentElement) {

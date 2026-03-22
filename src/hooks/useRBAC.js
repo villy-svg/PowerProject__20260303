@@ -1,0 +1,88 @@
+import { useMemo } from 'react';
+import { getPermissionsForLevel } from '../constants/roles';
+
+/**
+ * useRBAC Hook
+ * Computes the effective permission set for the current user and active vertical.
+ * Extracted from App.jsx to keep all security/access-control logic in one place.
+ *
+ * @param {Object|null} user         - The normalized user object from profileService.
+ * @param {string|null} activeVertical - The currently selected vertical key.
+ * @returns {Object} permissions     - Flat permissions object passed to all components.
+ */
+export const useRBAC = (user, activeVertical) => {
+  const permissions = useMemo(() => {
+    // Not yet loaded
+    if (!user) return { scope: 'loading' };
+
+    const roleId = user.roleId;
+    const isMasterScope = roleId?.startsWith('master_');
+    const baseCaps = user.baseCapabilities || {};
+
+    // -----------------------------------------------------------------------
+    // Master Scope: global access, all features visible
+    // -----------------------------------------------------------------------
+    if (isMasterScope) {
+      return {
+        ...baseCaps,
+        scope: 'global',
+        roleId,
+        canManageRoles: roleId === 'master_admin',
+        canAccessClients: true,
+        canAccessClientTasks: true,
+        canAccessLeadsFunnel: true,
+        canAccessEmployees: true,
+        canAccessEmployeeTasks: true,
+        canAccessHubTasks: true,
+      };
+    }
+
+    // -----------------------------------------------------------------------
+    // Vertical Scope: derive permissions from vertical + feature assignments
+    // -----------------------------------------------------------------------
+    const current = activeVertical || 'home';
+
+    // Normalize sub-views back to their root vertical ID
+    const rootVerticalId =
+      (current === 'CHARGING_HUBS' || current === 'hub_tasks') ? 'CHARGING_HUBS' :
+      (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
+      (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
+      current.toUpperCase();
+
+    const permData = user.verticalPermissions?.[rootVerticalId];
+    const level = permData?.level || 'none';
+    const featureLevels = permData?.features || {};
+
+    // Base capabilities at the vertical level
+    const verticalCaps = getPermissionsForLevel(level);
+
+    // Build final permissions map
+    const finalPerms = {
+      ...verticalCaps,
+      roleId,
+      scope: 'assigned',
+      canAccessConfig: level === 'admin',
+    };
+
+    // Feature-granular CRUD flags
+    // Pattern: canAccessClients, canCreateClients, canUpdateClients, etc.
+    Object.keys(featureLevels).forEach(fId => {
+      const fLvl = featureLevels[fId];
+      const featureCaps = getPermissionsForLevel(fLvl);
+      const featureName = fId.replace('canAccess', '');
+
+      // Boolean visibility flag (used by sidebar and sub-feature guards)
+      finalPerms[fId] = fLvl !== 'none';
+
+      // Granular CRUD — effective = minimum of vertical and feature access
+      finalPerms[`canCreate${featureName}`] = verticalCaps.canCreate && featureCaps.canCreate;
+      finalPerms[`canRead${featureName}`]   = verticalCaps.canRead   && featureCaps.canRead;
+      finalPerms[`canUpdate${featureName}`] = verticalCaps.canUpdate && featureCaps.canUpdate;
+      finalPerms[`canDelete${featureName}`] = verticalCaps.canDelete && featureCaps.canDelete;
+    });
+
+    return finalPerms;
+  }, [user, activeVertical]);
+
+  return permissions;
+};

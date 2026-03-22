@@ -1,6 +1,6 @@
 import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 
 /**
  * HubCSVImport — Thin Wrapper

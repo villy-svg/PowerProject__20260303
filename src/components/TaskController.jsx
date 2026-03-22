@@ -6,7 +6,7 @@ import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
 import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../services/core/supabaseClient';
 import MasterPageHeader from './MasterPageHeader';
 import ConflictModal from './ConflictModal';
 import { useDuplicateDetection } from '../hooks/useDuplicateDetection';

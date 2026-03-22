@@ -1,4 +1,4 @@
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../services/core/supabaseClient';
 
 /**
  * Generates a unique 6-character permanent employee code.

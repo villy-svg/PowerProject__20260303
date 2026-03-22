@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../services/supabaseClient';
-import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../utils/employeeUtils';
+import { employeeService } from '../services/employees/employeeService';
+import { masterErrorHandler } from '../services/core/masterErrorHandler';
 
 /**
  * useEmployees Hook
- * Encapsulates all data fetching and mutation logic for employee records.
+ * Manages employee state and delegates all DB operations to employeeService.
  * Located in global hooks to allow cross-vertical access (e.g., Task Assignments).
  */
 export const useEmployees = () => {
@@ -12,190 +12,106 @@ export const useEmployees = () => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ---------------------------------------------------------------------------
+  // READ
+  // ---------------------------------------------------------------------------
+
   const fetchEmployees = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      // Robust Fetch: Separate requests for data + metadata to avoid fragile joins/400 errors
-      const [{ data: emps, error: empErr }, { data: hubsData }, { data: roles }, { data: depts }] = await Promise.all([
-        supabase.from('employees').select('*').order('full_name', { ascending: true }),
-        supabase.from('hubs').select('id, hub_code').order('hub_code'),
-        supabase.from('employee_roles').select('id, role_code, seniority_level'),
-        supabase.from('departments').select('id, dept_code')
-      ]);
-
-      if (empErr) throw empErr;
-      if (hubsData) setHubs(hubsData);
-
-      // Efficient ID Mapping
-      const hubMap = new Map((hubsData || []).map(h => [h.id, h.hub_code]));
-      const roleMap = new Map((roles || []).map(r => [r.id, { role_code: r.role_code, seniority_level: r.seniority_level }]));
-      const deptMap = new Map((depts || []).map(d => [d.id, d.dept_code]));
-
-      const processed = (emps || []).map(emp => ({
-        ...emp,
-        hub_code: emp.hub_id ? (hubMap.get(emp.hub_id) || 'NO HUB') : 'ALL',
-        role_code: roleMap.get(emp.role_id)?.role_code || 'NO ROLE',
-        seniority_level: roleMap.get(emp.role_id)?.seniority_level || 1,
-        dept_code: deptMap.get(emp.department_id) || 'NO DEPT'
-      }));
-
-      setEmployees(processed);
+      const { employees: resolved, hubs: hubList } = await employeeService.getEmployees();
+      setEmployees(resolved);
+      setHubs(hubList);
     } catch (error) {
-      console.error('Error fetching employees:', error);
-      const { data } = await supabase.from('employees').select('*').order('full_name');
-      setEmployees(data || []);
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.fetchEmployees');
+      // Graceful fallback: refetch without joins on total failure
+      try {
+        const { data } = await (await import('../services/core/supabaseClient')).supabase
+          .from('employees').select('*').order('full_name');
+        setEmployees(data || []);
+      } catch (_) { /* swallow fallback error */ }
     } finally {
       if (showLoading) setLoading(false);
     }
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // CREATE
+  // ---------------------------------------------------------------------------
+
   const addEmployee = async (formData) => {
-    const empCode = generateEmpCode();
-    const badgeId = await calculateBadgeId(formData, formData.doj);
-
-    const employeeData = {
-      full_name: formData.name,
-      phone: formData.contactNumber,
-      email: formData.emailId || null,
-      gender: formData.gender,
-      dob: formData.dob,
-      hire_date: formData.doj || null,
-      hub_id: (formData.hub_id === 'ALL' || !formData.hub_id) ? null : formData.hub_id,
-      role_id: formData.role_id || null,
-      department_id: formData.department_id || null,
-      account_number: formData.accountNumber,
-      ifsc_code: formData.ifscCode,
-      account_name: formData.accountName,
-      pan_number: formData.panNumber || null,
-      status: 'Active',
-      emp_code: empCode,
-      badge_id: badgeId,
-      updated_at: new Date().toISOString()
-    };
-
-    const { data, error } = await supabase.from('employees').insert([employeeData]).select();
-    
-    if (error) {
-      console.error('useEmployees: Insert Error:', error);
+    try {
+      await employeeService.addEmployee(formData);
+      await fetchEmployees(false);
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.addEmployee');
       throw error;
     }
+  };
 
-    if (data?.[0]) {
-      await logEmployeeHistory(data[0].id, data[0], 'INSERT');
+  // ---------------------------------------------------------------------------
+  // UPDATE
+  // ---------------------------------------------------------------------------
+
+  const updateEmployee = async (id, formData) => {
+    try {
+      await employeeService.updateEmployee(id, formData);
+      await fetchEmployees(false);
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.updateEmployee');
+      throw error;
     }
-
-    await fetchEmployees(false);
   };
 
   const updateEmployeeHub = async (id, newHubId) => {
     // Optimistic UI update
     setEmployees(prev => prev.map(emp => {
-      if (emp.id === id) {
-        const hubCode = (newHubId === 'ALL' || !newHubId) 
-          ? 'ALL' 
-          : (hubs.find(h => h.id === newHubId)?.hub_code || 'NO HUB');
-        return { 
-          ...emp, 
-          hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId, 
-          hub_code: hubCode 
-        };
-      }
-      return emp;
+      if (emp.id !== id) return emp;
+      const hubCode = (newHubId === 'ALL' || !newHubId)
+        ? 'ALL'
+        : (hubs.find(h => h.id === newHubId)?.hub_code || 'NO HUB');
+      return { ...emp, hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId, hub_code: hubCode };
     }));
 
-    const updateData = {
-      hub_id: (newHubId === 'ALL' || !newHubId) ? null : newHubId,
-      updated_at: new Date().toISOString()
-    };
-
-    const { data, error } = await supabase
-      .from('employees')
-      .update(updateData)
-      .eq('id', id)
-      .select();
-
-    if (error) {
-      console.error('useEmployees: Update Hub Error:', error);
-      throw error;
-    }
-
-    if (data?.[0]) {
-      await logEmployeeHistory(id, data[0], 'UPDATE_HUB');
-    }
-
-    await fetchEmployees(false);
-  };
-
-  const updateEmployee = async (id, formData) => {
-    // Check if role or dept changed to re-generate badgeId
-    const { data: current } = await supabase.from('employees').select('role_id, department_id, badge_id, emp_code, hire_date').eq('id', id).single();
-    
-    let badgeId = current?.badge_id;
-    if (current && (current.role_id !== formData.role_id || current.department_id !== formData.department_id)) {
-      badgeId = await calculateBadgeId(formData, current.hire_date);
-    }
-
-    const updateData = {
-      full_name: formData.name,
-      phone: formData.contactNumber,
-      email: formData.emailId || null,
-      gender: formData.gender,
-      dob: formData.dob,
-      hire_date: formData.doj || null,
-      hub_id: (formData.hub_id === 'ALL' || !formData.hub_id) ? null : formData.hub_id,
-      role_id: formData.role_id || null,
-      department_id: formData.department_id || null,
-      account_number: formData.accountNumber,
-      ifsc_code: formData.ifscCode,
-      account_name: formData.accountName,
-      pan_number: formData.panNumber || null,
-      badge_id: badgeId,
-      updated_at: new Date().toISOString()
-    };
-
-    const { data, error } = await supabase
-      .from('employees')
-      .update(updateData)
-      .eq('id', id)
-      .select();
-
-    if (error) {
-      console.error('useEmployees: Update Error:', error);
-      throw error;
-    }
-
-    if (data?.[0]) {
-      await logEmployeeHistory(id, data[0], 'UPDATE');
-    }
-
-    await fetchEmployees(false);
-  };
-
-  const toggleStatus = async (id, currentStatus) => {
-    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-
-    // Optimistic UI update
-    setEmployees(prev => prev.map(emp =>
-      emp.id === id ? { ...emp, status: newStatus } : emp
-    ));
-
-    const { error } = await supabase
-      .from('employees')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) {
-      console.error(`Status update failed: ${error.message}`);
+    try {
+      await employeeService.updateEmployeeHub(id, newHubId);
+      await fetchEmployees(false);
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.updateEmployeeHub');
       await fetchEmployees(false); // Revert on failure
       throw error;
     }
   };
 
-  const deleteEmployee = async (id) => {
-    const { error } = await supabase.from('employees').delete().eq('id', id);
-    if (error) throw error;
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
+  const toggleStatus = async (id, currentStatus) => {
+    // Optimistic UI update
+    const optimisticStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    setEmployees(prev => prev.map(emp => emp.id === id ? { ...emp, status: optimisticStatus } : emp));
+
+    try {
+      await employeeService.toggleStatus(id, currentStatus);
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.toggleStatus');
+      await fetchEmployees(false); // Revert
+      throw error;
+    }
   };
+
+  // ---------------------------------------------------------------------------
+  // DELETE
+  // ---------------------------------------------------------------------------
+
+  const deleteEmployee = async (id) => {
+    try {
+      await employeeService.deleteEmployee(id);
+      setEmployees(prev => prev.filter(emp => emp.id !== id));
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.deleteEmployee');
+      throw error;
+    }
+  };
+
+  // ---------------------------------------------------------------------------
 
   return {
     employees,
@@ -206,6 +122,6 @@ export const useEmployees = () => {
     updateEmployee,
     updateEmployeeHub,
     toggleStatus,
-    deleteEmployee
+    deleteEmployee,
   };
 };

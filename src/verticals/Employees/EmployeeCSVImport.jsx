@@ -1,6 +1,6 @@
 import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
 import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../../utils/employeeUtils';
 
