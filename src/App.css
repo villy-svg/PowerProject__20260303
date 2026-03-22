@@ -205,21 +205,23 @@ body {
 .brand-title-centered {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
-  top: 45px; /* Vertical center of 90px header */
-  transform-origin: center;
+  top: 45px;
+  transform: translate(-50%, -50%);
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   background: linear-gradient(135deg, var(--brand-green), #6ef59a);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: var(--brand-green); /* Fallback */
   letter-spacing: -1px;
   white-space: nowrap;
-  line-height: 0;
-  z-index: 1001;
-  pointer-events: none; /* Allows clicking through if needed, though header covers it */
+  line-height: 1;
+  z-index: 2000; /* Extremely high to stay above header */
+  pointer-events: none;
+  font-family: var(--font-main);
+  text-transform: none;
 }
 
 .theme-toggle-btn {

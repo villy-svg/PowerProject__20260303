@@ -250,7 +250,6 @@ function App() {
         <button className="logo-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
         </button>
-        <h1 className="brand-title-centered">PowerProject</h1>
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -367,6 +366,7 @@ function App() {
 
           </main>
         </div>
+        <h1 className="brand-title-centered">PowerProject</h1>
       </div>
     </div>
   );
