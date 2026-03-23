@@ -3,6 +3,7 @@
  * Specialized service for managing the `daily_task_templates` table.
  */
 import { supabase } from '../core/supabaseClient';
+import { VERTICALS } from '../../constants/verticals';
 import { dailyTaskService } from './dailyTaskService';
 
 const normalizeTemplate = (row) => ({
@@ -38,7 +39,7 @@ const mapTemplateToRow = (template) => {
   const row = {
     title: template.title || 'Untitled Template',
     description: template.description || null,
-    vertical_id: template.verticalId || 'CHARGING_HUBS',
+    vertical_id: template.verticalId || VERTICALS.CHARGING_HUBS.id,
     frequency: template.frequency || 'DAILY',
     frequency_details: template.frequencyDetails || null,
     time_of_day: template.timeOfDay || '08:00:00',

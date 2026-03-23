@@ -27,6 +27,7 @@ const VerticalWorkspace = ({
   TaskTileComponent, // New prop
   user = {}, 
   permissions = {},
+  verticals = {}, // Passed from App.jsx
   children
 }) => {
   const [filters, setFilters] = React.useState({ 
@@ -93,24 +94,24 @@ const VerticalWorkspace = ({
    * Determines if the user has permission to view this vertical or sub-feature.
    */
   const rootVerticalId = 
-    (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? 'CHARGING_HUBS' :
-    (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'CLIENTS' :
-    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'EMPLOYEES' :
+    (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? verticals.CHARGING_HUBS?.id :
+    (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? verticals.CLIENTS?.id :
+    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? verticals.EMPLOYEES?.id :
     activeVertical.toUpperCase();
 
-  const isFeatureView = activeVertical.includes('_') && activeVertical !== 'CHARGING_HUBS';
+  const isFeatureView = activeVertical.includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;
   const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
 
   // Mapping main vertical IDs to their primary feature access flags if they act as feature views
-  const effectiveFeatureFlag = (activeVertical === 'CHARGING_HUBS') ? 'canAccessHubTasks' : featureAccessFlag;
+  const effectiveFeatureFlag = (activeVertical === verticals.CHARGING_HUBS?.id) ? 'canAccessHubTasks' : featureAccessFlag;
   const isFeatureAuthorized = permissions[effectiveFeatureFlag] && user?.assignedVerticals?.includes(rootVerticalId);
 
   // MAIN PERMISSION CHECK
   // Global scope users (Master Admin/Viewer) have access to everything.
   // Others need explicit assignment to the vertical AND feature-specific flags if applicable.
   const isAuthorized = permissions.scope === 'global' || (
-    (isFeatureView || activeVertical === 'CHARGING_HUBS')
+    (isFeatureView || activeVertical === verticals.CHARGING_HUBS?.id)
       ? isFeatureAuthorized
       : (permissions.canRead && user?.assignedVerticals?.includes(rootVerticalId))
   );
@@ -209,6 +210,7 @@ const VerticalWorkspace = ({
             TaskTileComponent={TaskTileComponent}
             user={user} 
             permissions={permissions} 
+            verticals={verticals}
           />
         )}
       </main>

@@ -3,6 +3,8 @@
  * Specialized service for the `daily_tasks` table with audit tracking.
  */
 import { supabase } from '../core/supabaseClient';
+import { auditService } from '../core/auditService';
+import { VERTICALS } from '../../constants/verticals';
 
 const normalizeDailyTask = (row) => ({
   id: row.id,
@@ -36,7 +38,7 @@ const mapDailyTaskToRow = (task) => {
     stage_id: task.stageId, // Keep stage_id from original mapping
     city: task.city || null,
     function_name: task.function || null,
-    vertical_id: task.verticalId || 'CHARGING_HUBS', 
+    vertical_id: task.verticalId || VERTICALS.CHARGING_HUBS.id, 
     assigned_to: task.assigned_to || null,
     scheduled_date: task.scheduled_date || new Date().toISOString().split('T')[0],
     is_recurring: !!task.is_recurring,
@@ -68,11 +70,8 @@ export const dailyTaskService = {
   },
 
   async addTask(taskData, userId) {
-    const row = {
-      ...mapDailyTaskToRow(taskData),
-      created_by: userId,
-      last_updated_by: userId,
-    };
+    let row = mapDailyTaskToRow(taskData);
+    row = auditService.stamp(row, userId, { isNew: true, useUnderscore: true });
 
     const { data, error } = await supabase
       .from('daily_tasks')
@@ -84,10 +83,8 @@ export const dailyTaskService = {
   },
 
   async updateTask(taskData, userId) {
-    const row = {
-      ...mapDailyTaskToRow(taskData),
-      last_updated_by: userId,
-    };
+    let row = mapDailyTaskToRow(taskData);
+    row = auditService.stamp(row, userId, { useUnderscore: true });
     
     // If moving to REVIEW stage, capture submission_by
     if (taskData.stageId === 'REVIEW') {
@@ -105,10 +102,8 @@ export const dailyTaskService = {
   },
 
   async updateTaskStage(taskId, newStageId, userId) {
-    const updates = { 
-        stage_id: newStageId, 
-        last_updated_by: userId 
-    };
+    let updates = { stage_id: newStageId };
+    updates = auditService.stamp(updates, userId, { useUnderscore: true });
     
     if (newStageId === 'REVIEW') {
       updates.submission_by = userId;
@@ -123,15 +118,18 @@ export const dailyTaskService = {
   },
 
   async bulkUpdateTasks(taskIds, updates, userId) {
-    const dbUpdates = { ...updates, last_updated_by: userId };
+    let dbUpdates = { ...updates };
     
     // Remap stageId if present in bulk updates
     if (updates.stageId) {
         dbUpdates.stage_id = updates.stageId;
         delete dbUpdates.stageId;
-        if (dbUpdates.stage_id === 'REVIEW') {
-            dbUpdates.submission_by = userId;
-        }
+    }
+
+    dbUpdates = auditService.stamp(dbUpdates, userId, { useUnderscore: true });
+
+    if (dbUpdates.stage_id === 'REVIEW') {
+        dbUpdates.submission_by = userId;
     }
 
     const { data, error } = await supabase

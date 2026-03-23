@@ -36,7 +36,8 @@ const TaskController = ({
   filters = { city: [], hub: [], priority: [], function: [] },
   user = {},
   permissions = {},
-  rootVerticalId // New prop
+  rootVerticalId, // New prop
+  verticals = {} // Passed from VerticalWorkspace
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -124,7 +125,7 @@ const TaskController = ({
   /**
    * HIERARCHY FILTER: Enforce seniority-based visibility rules
    */
-  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical);
+  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical, verticals);
 
   /**
    * FILTER LOGIC
@@ -145,7 +146,6 @@ const TaskController = ({
   const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
 
   /**
-   * PERMISSION LOGIC
    * Resolves feature-specific CRUD flags (e.g. canCreateClientTasks)
    * Falls back to vertical-level flags if feature-specific ones are missing.
    */
@@ -344,7 +344,7 @@ const TaskController = ({
         }
         rightActions={
           <>
-            {(activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') && (
+            {(activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') && (
               <>
                 <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />

@@ -10,7 +10,7 @@ import { getPermissionsForLevel } from '../constants/roles';
  * @param {string|null} activeVertical - The currently selected vertical key.
  * @returns {Object} permissions     - Flat permissions object passed to all components.
  */
-export const useRBAC = (user, activeVertical) => {
+export const useRBAC = (user, activeVertical, verticals = {}) => {
   const permissions = useMemo(() => {
     // Not yet loaded
     if (!user) return { scope: 'loading' };
@@ -59,11 +59,11 @@ export const useRBAC = (user, activeVertical) => {
     const current = activeVertical || 'home';
 
     // Normalize sub-views back to their root vertical ID
-    const rootVerticalId =
-      (current === 'CHARGING_HUBS' || current === 'hub_tasks' || current === 'daily_hub_tasks') ? 'CHARGING_HUBS' :
-        (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
-          (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
-            current.toUpperCase();
+    const rootVerticalId = 
+      (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks') ? verticals.CHARGING_HUBS?.id :
+      (current === verticals.CLIENTS?.id || current === 'client_tasks' || current === 'leads_funnel') ? verticals.CLIENTS?.id :
+      (current === verticals.EMPLOYEES?.id || current === 'employee_tasks') ? verticals.EMPLOYEES?.id :
+      current.toUpperCase();
 
     const permData = user.verticalPermissions?.[rootVerticalId];
     const level = permData?.level || 'none';
@@ -98,7 +98,7 @@ export const useRBAC = (user, activeVertical) => {
     });
 
     return finalPerms;
-  }, [user, activeVertical]);
+  }, [user, activeVertical, verticals]);
 
   return permissions;
 };

@@ -29,9 +29,10 @@ export const hierarchyService = {
    * @param {Object} user - The current normalized user object.
    * @param {Array} tasks - Pre-filtered tasks (by vertical/status).
    * @param {string} activeVertical - The current UI vertical context.
+   * @param {Object} verticals - Map of dynamic verticals from backend.
    * @returns {Array} Subset of tasks the user is allowed to see.
    */
-  filterTasksByHierarchy(user, tasks, activeVertical) {
+  filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}) {
     if (!user || user.roleId === 'master_admin') return tasks;
 
     const seniority = user.seniority ?? 100;
@@ -39,7 +40,12 @@ export const hierarchyService = {
 
     // HUB VISIBILITY RULE:
     // Seniority <= 2 (e.g., junior field staff) only see tasks assigned to them.
-    const isHubVertical = ['CHARGING_HUBS', 'hub_tasks', 'daily_hub_tasks'].includes(activeVertical);
+    // NOTE: This can be expanded to other VERTICALS as needed.
+    const isHubVertical = [
+      verticals.CHARGING_HUBS?.id, 
+      'hub_tasks', 
+      'daily_hub_tasks'
+    ].includes(activeVertical);
     
     if (isHubVertical && seniority <= 2) {
       // If no employeeId is linked, they see nothing (security fallback)

@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
 import { supabase } from '../services/core/supabaseClient';
-import { VERTICAL_LIST } from '../constants/verticals';
 import './Configuration.css';
 
-const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical }) => {
+const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, verticals = {}, verticalList = [] }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   
   const canManageSystem = permissions.canManageRoles;
@@ -31,7 +29,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
 
   // Define config items for each vertical
   const verticalConfigs = {
-    CHARGING_HUBS: [
+    [verticals.CHARGING_HUBS?.id]: [
       {
         id: 'manage_hubs',
         title: 'Hub Administration',
@@ -52,7 +50,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
       }
     ],
     // Placeholders for other verticals
-    CLIENTS: [
+    [verticals.CLIENTS?.id]: [
       {
         id: 'manage_client_categories',
         title: 'Client Category Management',
@@ -81,7 +79,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
         buttonLabel: 'Manage Models'
       }
     ],
-    EMPLOYEES: [
+    [verticals.EMPLOYEES?.id]: [
       {
         id: 'manage_departments',
         title: 'Department Management',
@@ -101,8 +99,8 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
         buttonLabel: 'Manage Roles'
       }
     ],
-    PARTNERS: [],
-    VENDORS: []
+    [verticals.PARTNERS?.id]: [],
+    [verticals.VENDORS?.id]: []
   };
 
   return (
@@ -133,7 +131,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
 
         <div className="config-content">
           {/* Render Sections by Vertical Order */}
-          {VERTICAL_LIST.map(vertical => {
+          {verticalList.map(vertical => {
             const items = verticalConfigs[vertical.id] || [];
             if (items.length === 0) return null;
 

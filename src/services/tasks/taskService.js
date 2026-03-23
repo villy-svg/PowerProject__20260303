@@ -6,6 +6,7 @@
  * Consuming hook: src/hooks/useTasks.js
  */
 import { supabase } from '../core/supabaseClient';
+import { auditService } from '../core/auditService';
 
 // ---------------------------------------------------------------------------
 // Internal Utilities
@@ -29,6 +30,8 @@ const normalizeTask = (row) => ({
   assigneeName: row.employees?.full_name || row.assigneeName,
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
+  createdBy: row.created_by,
+  lastUpdatedBy: row.last_updated_by,
 });
 
 /**
@@ -44,6 +47,7 @@ const mapTaskToRow = (task) => ({
   city: task.city || null,
   function: task.function || null,
   assigned_to: task.assigned_to || null,
+  last_updated_by: task.lastUpdatedBy || null,
 });
 
 /** Standard select string: includes employee name join. */
@@ -73,13 +77,13 @@ export const taskService = {
    * @param {Object} taskData - camelCase task shape.
    * @returns {Object} The normalized, newly created task.
    */
-  async addTask(taskData) {
-    const row = {
+  async addTask(taskData, userId) {
+    let row = {
       id: taskData.id,
       ...mapTaskToRow(taskData),
-      createdat: taskData.createdAt,
-      updatedat: taskData.updatedAt,
     };
+
+    row = auditService.stamp(row, userId, { isNew: true });
 
     const { data, error } = await supabase
       .from('tasks')
@@ -95,11 +99,9 @@ export const taskService = {
    * @param {Object} taskData - camelCase task shape with `id`.
    * @returns {Object} The normalized, updated task.
    */
-  async updateTask(taskData) {
-    const row = {
-      ...mapTaskToRow(taskData),
-      updatedat: new Date().toISOString(),
-    };
+  async updateTask(taskData, userId) {
+    let row = mapTaskToRow(taskData);
+    row = auditService.stamp(row, userId);
 
     const { data, error } = await supabase
       .from('tasks')
@@ -116,10 +118,12 @@ export const taskService = {
    * @param {string} taskId
    * @param {string} newStageId
    */
-  async updateTaskStage(taskId, newStageId) {
+  async updateTaskStage(taskId, newStageId, userId) {
+    const row = auditService.stamp({ stageid: newStageId }, userId);
+
     const { error } = await supabase
       .from('tasks')
-      .update({ stageid: newStageId, updatedat: new Date().toISOString() })
+      .update(row)
       .eq('id', taskId);
 
     if (error) throw error;
@@ -132,10 +136,12 @@ export const taskService = {
    * @param {Object} updates - Supabase column-name shape (e.g. { stageid: 'DEPRIORITIZED' }).
    * @returns {Array} Normalized updated tasks.
    */
-  async bulkUpdateTasks(taskIds, updates) {
+  async bulkUpdateTasks(taskIds, updates, userId) {
+    const row = auditService.stamp(updates, userId);
+
     const { data, error } = await supabase
       .from('tasks')
-      .update({ ...updates, updatedat: new Date().toISOString() })
+      .update(row)
       .in('id', taskIds)
       .select(TASK_SELECT);
 

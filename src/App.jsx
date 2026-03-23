@@ -5,7 +5,10 @@ import './App.css';
 
 // Services — Core
 import { masterErrorHandler } from './services/core/masterErrorHandler';
+import { verticalService } from './services/core/verticalService';
 // Services — Auth
+import { taskService } from './services/tasks/taskService';
+import { dailyTaskService } from './services/tasks/dailyTaskService';
 import { authService } from './services/auth/authService';
 import { profileService } from './services/auth/profileService';
 // Hooks
@@ -14,7 +17,7 @@ import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
 
 // Constants
-import { VERTICALS } from './constants/verticals';
+import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 
 // Components
@@ -51,12 +54,14 @@ import powerLogo from './assets/logo.svg';
 
 function App() {
   const { darkMode, toggleTheme } = useTheme();
-  const [activeVertical, setActiveVertical] = useState(() => localStorage.getItem('power_project_active_vertical'));
+  const [activeVertical, setActiveVertical] = useState(null);
 
   // 1. Auth and User Identity
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [profileError, setProfileError] = useState(null);
+  const [verticals, setVerticals] = useState(STATIC_VERTICALS);
+  const [verticalList, setVerticalList] = useState(STATIC_VERTICAL_LIST);
 
   // 2. Main Task state
   const {
@@ -69,11 +74,23 @@ function App() {
     updateTaskStage,
     bulkUpdateTasks,
     deleteTask,
-  } = useTasks();
+  } = useTasks(user);
 
   // Combined Initial Data Load
   useEffect(() => {
     const initData = async () => {
+      // Load Dynamic Verticals first
+      try {
+        const { list, map } = await verticalService.getVerticals();
+        if (list && list.length > 0) {
+          setVerticals(map);
+          setVerticalList(list);
+          updateStaticVerticals(list); // Sync the static registry for non-React services
+        }
+      } catch (err) {
+        console.warn('Falling back to static verticals.', err);
+      }
+
       // Start fetching global tasks immediately
       const tasksPromise = fetchTasks();
       
@@ -133,7 +150,7 @@ function App() {
   });
 
   // Compute current permissions via dedicated RBAC hook
-  const currentUserPermissions = useRBAC(user, activeVertical);
+  const currentUserPermissions = useRBAC(user, activeVertical, verticals);
 
   // Test database connection on app start
   useEffect(() => {
@@ -206,14 +223,14 @@ function App() {
     }
 
     // Standard Vertical validation
-    const verticalKeys = Object.keys(VERTICALS);
+    const verticalKeys = Object.keys(verticals);
     if (verticalKeys.includes(activeVertical)) {
       const isAssigned = user.assignedVerticals?.includes(activeVertical);
       if (!isAssigned && !isGlobalScope) {
         setActiveVertical(null);
       }
     }
-  }, [user, activeVertical, currentUserPermissions]);
+  }, [user, activeVertical, currentUserPermissions, verticals]);
 
   const handleLogout = async () => {
     await authService.signOut();
@@ -227,15 +244,15 @@ function App() {
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
   useEffect(() => {
     if (activeVertical) {
-      // Don't save transient management sub-views as the default vertical
-      const persistentVerticals = ['home', 'CHARGING_HUBS', 'hub_tasks', 'daily_hub_tasks', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
+      // Don't save transient management sub-views
+      const persistentVerticals = ['home', verticals.CHARGING_HUBS?.id, 'hub_tasks', 'daily_hub_tasks', verticals.EMPLOYEES?.id, 'employee_tasks', verticals.CLIENTS?.id, 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
     } else {
       localStorage.setItem('power_project_active_vertical', 'home');
     }
-  }, [activeVertical]);
+  }, [activeVertical, verticals]);
 
 
   // Loading Screen for initial fetch
@@ -292,6 +309,7 @@ function App() {
           activeVertical={activeVertical}
           user={user}
           permissions={currentUserPermissions}
+          verticalList={verticalList}
         />
         <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
           <header className="app-header">
@@ -313,7 +331,15 @@ function App() {
             {!activeVertical ? (
               <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'configuration' ? (
-              <Configuration tasks={tasks} setTasks={setTasks} user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} />
+              <Configuration
+                tasks={tasks}
+                setTasks={setTasks}
+                user={user}
+                permissions={currentUserPermissions}
+                setActiveVertical={setActiveVertical}
+                verticals={verticals}
+                verticalList={verticalList}
+              />
             ) : activeVertical === 'role_management' ? (
               <UserRoleManagement permissions={rolePermissions} setPermissions={setRolePermissions} onBack={() => setActiveVertical('configuration')} />
             ) : activeVertical === 'user_management' ? (
@@ -335,10 +361,10 @@ function App() {
             ) : (
               <VerticalWorkspace
                 label={
-                  (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? 'Hubs List' :
-                  (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
-                  (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
-                  VERTICALS[activeVertical]?.label
+                  (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? 'Hubs List' :
+                  (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
+                  (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
+                  verticals[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
@@ -353,47 +379,48 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
-                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
+                  (activeVertical === VERTICALS.CHARGING_HUBS.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
+                    (activeVertical === VERTICALS.EMPLOYEES.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
+                      (activeVertical === VERTICALS.CLIENTS.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
-                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
+                  (activeVertical === VERTICALS.CHARGING_HUBS.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
+                    (activeVertical === VERTICALS.EMPLOYEES.id || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
+                      (activeVertical === VERTICALS.CLIENTS.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskTile :
-                    (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
-                      (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskTile :
+                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
+                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null
                 }
                 onHeaderClick={
                   (activeVertical === 'employee_tasks')
-                    ? () => setActiveVertical('EMPLOYEES')
+                    ? () => setActiveVertical(verticals.EMPLOYEES?.id)
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
-                       ? () => setActiveVertical('CLIENTS')
-                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates'))
+                       ? () => setActiveVertical(verticals.CLIENTS?.id)
+                      : (currentUserPermissions.canAccessConfig && (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates'))
                         ? () => setActiveVertical('hub_management')
                         : null
                 }
                 user={user}
                 permissions={currentUserPermissions}
+                verticals={verticals}
               >
-                {activeVertical === 'EMPLOYEES' && (
+                {activeVertical === verticals.EMPLOYEES?.id && (
                   <EmployeeManagement
                     user={user}
                     permissions={currentUserPermissions}
-                    tasks={tasks.filter(t => t.verticalId === 'EMPLOYEES')}
+                    tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)}
                   />
                 )}
-                {activeVertical === 'CLIENTS' && (
+                {activeVertical === verticals.CLIENTS?.id && (
                   <ClientManagement
                     user={user}
                     permissions={currentUserPermissions}
-                    tasks={tasks.filter(t => t.verticalId === 'CLIENTS')}
+                    tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)}
                   />
                 )}
                 {activeVertical === 'daily_task_templates' && (

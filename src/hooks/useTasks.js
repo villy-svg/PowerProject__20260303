@@ -11,7 +11,7 @@ import { masterErrorHandler } from '../services/core/masterErrorHandler';
  *   const { tasks, setTasks, loading, fetchTasks, addTask, updateTask,
  *           updateTaskStage, deleteTask, bulkUpdateTasks } = useTasks();
  */
-export const useTasks = () => {
+export const useTasks = (user) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +37,7 @@ export const useTasks = () => {
 
   const addTask = async (taskData) => {
     try {
-      const newTask = await taskService.addTask(taskData);
+      const newTask = await taskService.addTask(taskData, user?.id);
       setTasks(prev => [...prev, newTask]);
       return newTask;
     } catch (err) {
@@ -52,7 +52,7 @@ export const useTasks = () => {
 
   const updateTask = async (taskData) => {
     try {
-      const updated = await taskService.updateTask(taskData);
+      const updated = await taskService.updateTask(taskData, user?.id);
       setTasks(prev => prev.map(t => t.id === taskData.id ? updated : t));
       return updated;
     } catch (err) {
@@ -65,7 +65,7 @@ export const useTasks = () => {
     // Optimistic UI update
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
     try {
-      await taskService.updateTaskStage(taskId, newStageId);
+      await taskService.updateTaskStage(taskId, newStageId, user?.id);
     } catch (err) {
       masterErrorHandler.handleDatabaseError(err, 'useTasks.updateTaskStage');
       // Revert on failure
@@ -76,7 +76,7 @@ export const useTasks = () => {
 
   const bulkUpdateTasks = async (taskIds, updates) => {
     try {
-      const updatedTasks = await taskService.bulkUpdateTasks(taskIds, updates);
+      const updatedTasks = await taskService.bulkUpdateTasks(taskIds, updates, user?.id);
       setTasks(prev => prev.map(t => {
         const updated = updatedTasks.find(u => u.id === t.id);
         return updated || t;
