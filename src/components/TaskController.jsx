@@ -460,7 +460,7 @@ const TaskController = ({
               };
 
               const stageTasks = filteredTasks
-                .filter((t) => (activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical)) && t.stageId === stage.id)
+                .filter((t) => t.verticalId === (rootVerticalId || activeVertical) && t.stageId === stage.id)
                 .sort((a, b) => {
                   const weightA = getPriorityWeight(a.priority);
                   const weightB = getPriorityWeight(b.priority);

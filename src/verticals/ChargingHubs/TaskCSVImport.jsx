@@ -120,7 +120,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           getConflictKey({ 
             text: t.text, 
             hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || '', 
-            function_code: (t.function || t.function_name) || '' 
+            function_code: (t.function || t.function_name) || '',
+            vertical_id: t.verticalId || t.vertical_id || verticalId
           }) === getConflictKey(row)
         );
 
@@ -139,6 +140,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         if (isDaily) {
           taskRow.stage_id = row.stageid || 'BACKLOG';
           taskRow.function_name = resolvedFunc;
+          taskRow.vertical_id = verticalId; // Crucial for multi-vertical daily tasks
         } else {
           taskRow.verticalid = verticalId;
           taskRow.stageid = row.stageid || 'BACKLOG';

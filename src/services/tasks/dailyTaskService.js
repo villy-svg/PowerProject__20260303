@@ -13,6 +13,7 @@ const normalizeDailyTask = (row) => ({
   hub_id: row.hub_id,
   city: row.city,
   function: row.function_name, // Mapping function_name DB to function UI
+  verticalId: row.vertical_id, // New column for multi-vertical support
   assigned_to: row.assigned_to,
   scheduled_date: row.scheduled_date,
   is_recurring: row.is_recurring,
@@ -32,6 +33,7 @@ const mapDailyTaskToRow = (task) => ({
   hub_id: task.hub_id === '' ? null : (task.hub_id || null),
   city: task.city || null,
   function_name: task.function || null,
+  vertical_id: task.verticalId || 'CHARGING_HUBS', 
   assigned_to: task.assigned_to || null,
   scheduled_date: task.scheduled_date || new Date().toISOString().split('T')[0],
   is_recurring: !!task.is_recurring,
