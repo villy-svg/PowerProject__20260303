@@ -28,6 +28,7 @@ import UserManagement from './components/UserManagement';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
 import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
+import DailyTasksManagement from './verticals/ChargingHubs/DailyTasksManagement';
 import HubTaskForm from './verticals/ChargingHubs/HubTaskForm';
 import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
 import EmployeeSubSidebar from './verticals/Employees/EmployeeSubSidebar';
@@ -331,6 +332,8 @@ function App() {
               <ClientServiceManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'client_billing_model_management' ? (
               <ClientBillingModelManagement user={user} permissions={currentUserPermissions} />
+            ) : activeVertical === 'daily_task_templates' ? (
+              <DailyTasksManagement permissions={currentUserPermissions} />
             ) : (
               <VerticalWorkspace
                 label={

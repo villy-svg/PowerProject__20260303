@@ -1,0 +1,391 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../services/core/supabaseClient';
+import { masterErrorHandler } from '../../services/core/masterErrorHandler';
+import { dailyTaskTemplateService } from '../../services/tasks/dailyTaskTemplateService';
+import MasterPageHeader from '../../components/MasterPageHeader';
+import './DailyTasksManagement.css';
+
+const DailyTasksManagement = ({ permissions = {} }) => {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState(null);
+  
+  // Reference Data
+  const [hubs, setHubs] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [clients, setClients] = useState([]);
+  
+  const [viewMode, setViewMode] = useState('grid');
+  const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    verticalId: 'CHARGING_HUBS',
+    subjectId: '',
+    frequency: 'DAILY',
+    timeOfDay: '08:00',
+    assignedTo: '',
+    isActive: true,
+    uploadLink: ''
+  });
+
+  useEffect(() => {
+    fetchTemplates();
+    fetchReferenceData();
+  }, []);
+
+  const fetchReferenceData = async () => {
+    try {
+      const [hubRes, empRes, clientRes] = await Promise.all([
+        supabase.from('hubs').select('id, name'),
+        supabase.from('employees').select('id, full_name, email'),
+        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] }))
+      ]);
+      setHubs(hubRes.data || []);
+      setEmployees(empRes.data || []);
+      // Some clients might not exist depending on schemas, so gracefully fallback
+      setClients(clientRes?.data || []);
+    } catch (err) {
+      console.error('Error fetching reference data', err);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    setLoading(true);
+    try {
+      const data = await dailyTaskTemplateService.getTemplates();
+      setTemplates(data || []);
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Fetch Templates');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenModal = (template = null) => {
+    if (template) {
+      setEditingTemplate(template);
+      setFormData({
+        title: template.title,
+        description: template.description || '',
+        verticalId: template.verticalId || 'CHARGING_HUBS',
+        subjectId: template.subjectId || '',
+        frequency: template.frequency || 'DAILY',
+        timeOfDay: template.timeOfDay || '08:00',
+        assignedTo: template.assignedTo || '',
+        isActive: template.isActive,
+        uploadLink: template.uploadLink || ''
+      });
+    } else {
+      setEditingTemplate(null);
+      setFormData({ 
+        title: '', description: '', verticalId: 'CHARGING_HUBS', 
+        subjectId: '', frequency: 'DAILY', timeOfDay: '08:00', 
+        assignedTo: '', isActive: true, uploadLink: '' 
+      });
+    }
+    setIsModalOpen(true);
+    setStatusMsg({ type: '', text: '' });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (editingTemplate) {
+        await dailyTaskTemplateService.updateTemplate({ ...formData, id: editingTemplate.id }, user.id);
+        setStatusMsg({ type: 'success', text: 'Template updated successfully!' });
+      } else {
+        await dailyTaskTemplateService.addTemplate(formData, user.id);
+        setStatusMsg({ type: 'success', text: 'Template created successfully!' });
+      }
+      setTimeout(() => {
+        setIsModalOpen(false);
+        fetchTemplates();
+      }, 1000);
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Submit Template');
+      setStatusMsg({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this template?')) return;
+    setLoading(true);
+    try {
+      await dailyTaskTemplateService.deleteTemplate(id);
+      fetchTemplates();
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Delete Template');
+      setLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (template) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await dailyTaskTemplateService.toggleStatus(template.id, !template.isActive, user.id);
+      fetchTemplates();
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Toggle Status');
+    }
+  };
+
+  // Determine which subjects to show based on vertical
+  const subjectOptions = formData.verticalId.includes('CLIENT') ? clients :
+                         formData.verticalId.includes('EMPLOYEE') ? employees.map(e => ({id: e.id, name: e.full_name})) : hubs;
+
+  return (
+    <>
+      <MasterPageHeader
+        title="Daily Tasks Management"
+        description="Create and manage recurring task templates that automatically generate on the Task Board."
+        leftActions={
+          <div className="view-mode-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              Grid
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              List
+            </button>
+          </div>
+        }
+        rightActions={
+          <>
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Template
+            </button>
+          </>
+        }
+      />
+
+      {loading && !isModalOpen && <div className="loading-spinner">Loading Templates...</div>}
+
+      {viewMode === 'grid' ? (
+        <div className="templates-grid">
+          {templates.map(template => (
+            <div key={template.id} className={`template-card ${!template.isActive ? 'inactive' : ''}`}>
+              <div className="template-header">
+                <span className={`status-badge ${template.isActive ? 'active' : 'inactive'}`}>
+                  {template.isActive ? 'Active' : 'Paused'}
+                </span>
+                <button 
+                  className="icon-btn toggle" 
+                  onClick={() => handleToggleStatus(template)}
+                  title={template.isActive ? "Pause Generation" : "Resume Generation"}
+                >
+                  {template.isActive ? '⏸' : '▶'}
+                </button>
+              </div>
+              <div className="template-frequency halo-type">{template.frequency}</div>
+              <h3 className="template-title">{template.title}</h3>
+              <p className="template-desc">{template.description || 'No description provided.'}</p>
+              
+              <div className="template-meta">
+                <span><strong>Vertical:</strong> {template.verticalId.replace(/_/g, ' ')}</span>
+                <span><strong>Assignee:</strong> {template.assigneeName || 'Unassigned'}</span>
+              </div>
+              
+              <div className="template-actions">
+                <button className="halo-button edit-btn" onClick={() => handleOpenModal(template)}>Edit</button>
+                <button className="halo-button delete-btn" onClick={() => handleDelete(template.id)}>Delete</button>
+              </div>
+            </div>
+          ))}
+          {templates.length === 0 && !loading && (
+             <div className="empty-state">
+               <p>No templates found. Create a new recurring task to get started!</p>
+             </div>
+          )}
+        </div>
+      ) : (
+        <div className="templates-list-view">
+          <table className="management-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Frequency</th>
+                <th>Vertical</th>
+                <th>Default Assignee</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {templates.map(template => (
+                <tr key={template.id} className={!template.isActive ? 'is-inactive' : ''}>
+                  <td className="name-cell">{template.title}</td>
+                  <td><span className="v-tag master">{template.frequency}</span></td>
+                  <td>{template.verticalId.replace(/_/g, ' ')}</td>
+                  <td>{template.assigneeName || '—'}</td>
+                  <td>
+                    <span className={`status-pill ${template.isActive ? 'active' : 'inactive'}`}>
+                      {template.isActive ? 'Active' : 'Paused'}
+                    </span>
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div className="table-actions">
+                      <button className="icon-btn" onClick={() => handleToggleStatus(template)}>{template.isActive ? '⏸' : '▶'}</button>
+                      <button className="icon-btn edit" onClick={() => handleOpenModal(template)}>✎</button>
+                      <button className="icon-btn delete" onClick={() => handleDelete(template.id)}>×</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content template-modal" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-header">
+              <h2>{editingTemplate ? 'Edit Task Template' : 'Create Task Template'}</h2>
+              <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
+            </header>
+
+            <form onSubmit={handleSubmit} className="vertical-task-form">
+              
+              {/* Basic Info */}
+              <div className="form-row-grid">
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Task Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g., Clean Hub Connectors"
+                  />
+                </div>
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Description</label>
+                  <textarea
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Detailed instructions..."
+                  />
+                </div>
+              </div>
+
+              {/* Rules */}
+              <div className="form-row-grid">
+                <div className="form-group">
+                  <label>Vertical</label>
+                  <select
+                    className="master-dropdown"
+                    value={formData.verticalId}
+                    onChange={(e) => setFormData({ ...formData, verticalId: e.target.value, subjectId: '' })}
+                  >
+                    <option value="CHARGING_HUBS">Charging Hubs</option>
+                    <option value="CLIENT_MANAGEMENT">Client Management</option>
+                    <option value="EMPLOYEE_MANAGEMENT">Employee Management</option>
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label>Subject (Hub/Client/Etc)</label>
+                  <select
+                    className="master-dropdown"
+                    value={formData.subjectId}
+                    onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
+                  >
+                    <option value="">-- Generic Task --</option>
+                    {subjectOptions.map(sub => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Frequency</label>
+                  <select
+                    className="master-dropdown"
+                    value={formData.frequency}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  >
+                    <option value="DAILY">Daily</option>
+                    <option value="WEEKLY">Weekly</option>
+                    <option value="MONTHLY">Monthly</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Default Assignee</label>
+                  <select
+                    className="master-dropdown"
+                    value={formData.assignedTo}
+                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                  >
+                    <option value="">-- Auto-Assign System Default --</option>
+                    {employees.map(emp => (
+                      <option key={emp.id} value={emp.id}>{emp.full_name || emp.email}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Template Status</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '100%' }}>
+                     <label style={{display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer'}}>
+                       <input 
+                         type="checkbox" 
+                         checked={formData.isActive}
+                         onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                         style={{width: '20px', height: '20px'}}
+                       />
+                       {formData.isActive ? 'Active (Generating)' : 'Paused'}
+                     </label>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Upload Link (Future feature)</label>
+                  <input
+                    type="url"
+                    value={formData.uploadLink}
+                    onChange={(e) => setFormData({ ...formData, uploadLink: e.target.value })}
+                    placeholder="https://"
+                    disabled
+                    title="Reserved for future attachments"
+                  />
+                </div>
+              </div>
+
+              {statusMsg.text && (
+                <div className={`status-message ${statusMsg.type}`}>
+                  {statusMsg.text}
+                </div>
+              )}
+
+              <div className="modal-footer">
+                <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="halo-button save-btn" disabled={loading}>
+                  {loading ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Create Template')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default DailyTasksManagement;

@@ -175,15 +175,27 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
       )}
 
       {permissions?.canAccessDailyHubTasks && (
-        <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
-          <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('daily_hub_tasks')}
-          >
-            Daily Task Board
-          </button>
-        </div>
+        <>
+          <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+            <button
+              className="halo-button"
+              style={{ width: '100%', opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('daily_hub_tasks')}
+            >
+              Daily Task Board
+            </button>
+          </div>
+          
+          <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+            <button
+              className="halo-button"
+              style={{ width: '100%', opacity: activeVertical === 'daily_task_templates' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('daily_task_templates')}
+            >
+              Daily Task Templates
+            </button>
+          </div>
+        </>
       )}
 
       {/* Admin Quick Links Moved to Main Sidebar */}

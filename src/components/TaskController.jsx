@@ -345,7 +345,7 @@ const TaskController = ({
                 <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
               </>
             )}
-            {canUserCreate && (
+            {canUserCreate && !activeVertical.includes('daily') && (
               <button 
                 className="halo-button master-action-btn" 
                 onClick={openAddModal}
