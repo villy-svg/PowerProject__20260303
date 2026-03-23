@@ -94,6 +94,31 @@
   font-size: 0.6rem;
 }
 
+.assignee-none, .assignee-none-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border-radius: 20px;
+  color: #ef4444; 
+  background: rgba(239, 68, 68, 0.1); 
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.assignee-none {
+  padding: 2px 8px;
+  margin-left: 6px;
+}
+
+.assignee-none-mini {
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-size: 0.6rem;
+}
+
 /* Navigation and Actions */
 .card-navigation {
   display: flex;

@@ -121,9 +121,13 @@ const TaskListView = ({
                           DUP
                         </span>
                       )}
-                      {task.assigneeName && (
+                      {task.assigneeName ? (
                         <span className="assignee-badge-mini" title={`Assignee: ${task.assigneeName}`}>
                           {task.assigneeName.split(' ')[0]}
+                        </span>
+                      ) : (
+                        <span className="assignee-none-mini" title="No assignee">
+                          NULL
                         </span>
                       )}
 

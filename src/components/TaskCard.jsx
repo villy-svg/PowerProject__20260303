@@ -73,9 +73,13 @@ const TaskCard = ({
             DUP
           </span>
         )}
-        {task.assigneeName && (
+        {task.assigneeName ? (
           <span className="assignee-badge" title={`Assignee: ${task.assigneeName}`}>
             {task.assigneeName.split(' ')[0]}
+          </span>
+        ) : (
+          <span className="assignee-none" title="No assignee">
+            NULL
           </span>
         )}
         {children}
