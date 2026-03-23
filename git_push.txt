@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "260323 Daily Task Manager 1.6.3"
+git commit -m "260323 Daily Task Manager 1.6.4"
 git push origin main

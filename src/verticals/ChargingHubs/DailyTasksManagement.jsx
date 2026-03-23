@@ -40,18 +40,20 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
 
   const fetchReferenceData = async () => {
     try {
-      const [hubRes, empRes, clientRes] = await Promise.all([
+      const [hubRes, empRes, clientRes, rolesRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code'),
-        supabase.from('employees').select('id, full_name, email, role_id, employee_roles(seniority_level)'),
-        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] }))
+        supabase.from('employees').select('id, full_name, email, role_id'),
+        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] })),
+        supabase.from('employee_roles').select('id, seniority_level')
       ]);
+
+      const roleSeniorityMap = new Map((rolesRes.data || []).map(r => [r.id, r.seniority_level || 1]));
 
       const allEmps = empRes.data || [];
       const seniorEmps = allEmps.filter(e => {
-        // Handle array or object from Supabase join
-        const roles = e.employee_roles;
-        const lvl = Array.isArray(roles) ? roles[0]?.seniority_level : roles?.seniority_level;
-        return (lvl || 1) >= 3;
+        // Safe check using Map built from separate query, avoiding join issues
+        const lvl = roleSeniorityMap.get(e.role_id) || 1;
+        return lvl >= 3;
       });
 
       setHubs(hubRes.data || []);
@@ -166,9 +168,9 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
   };
 
   // Determine which subjects to show based on vertical
-  const subjectOptions = formData.verticalId === 'CLIENTS' 
+  const subjectOptions = formData.verticalId === 'CLIENTS' || formData.verticalId === 'CLIENT_MANAGEMENT'
     ? clients.map(c => ({ id: c.id, label: c.name })) :
-    formData.verticalId === 'EMPLOYEES' 
+    formData.verticalId === 'EMPLOYEES' || formData.verticalId === 'EMPLOYEE_MANAGEMENT'
     ? employees.map(e => ({ id: e.id, label: e.full_name })) : 
     hubs.map(h => ({ id: h.id, label: h.hub_code || h.name }));
 
