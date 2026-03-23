@@ -34,7 +34,7 @@ export const BasicDetailsSection = ({ formData, onChange, isViewOnly = false }) 
   </div>
 );
 
-export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, roles, isViewOnly = false }) => (
+export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, roles, employees = [], isViewOnly = false }) => (
   <div className="form-section" style={{ marginTop: '2rem' }}>
     <h3 className="form-section-header">Company Details</h3>
     <div className="form-grid">
@@ -76,6 +76,18 @@ export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, r
           {departments.map(d => (
             <option key={d.id} value={d.id}>{d.dept_code ? `[${d.dept_code}] ` : ''}{d.name}</option>
           ))}
+        </select>
+      </div>
+      <div className="form-group">
+        <label>Reporting Manager <span className="optional">(Optional)</span></label>
+        <select name="manager_id" value={formData.manager_id} onChange={onChange} disabled={isViewOnly}>
+          <option value="">Select Manager</option>
+          {employees
+            .filter(e => e.id !== formData.id && e.status === 'Active')
+            .map(e => (
+              <option key={e.id} value={e.id}>{e.full_name} ({e.role_code || 'No Role'})</option>
+            ))
+          }
         </select>
       </div>
     </div>

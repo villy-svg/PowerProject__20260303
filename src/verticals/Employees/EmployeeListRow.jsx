@@ -106,7 +106,13 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, permis
           {emp.email && (
             <>
               <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
-              <span>✉️ {emp.email}</span>
+              <span style={{ marginRight: '8px' }}>✉️ {emp.email}</span>
+            </>
+          )}
+          {emp.manager_name && emp.manager_name !== 'None' && (
+            <>
+              <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
+              <span style={{ fontWeight: 500, color: 'var(--brand-green)', fontSize: '0.75rem' }}>👤 Mgr: {emp.manager_name}</span>
             </>
           )}
         </div>

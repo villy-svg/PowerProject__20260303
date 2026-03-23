@@ -132,6 +132,12 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissio
             <span>✉️ {emp.email}</span>
           </>
         )}
+        {emp.manager_name && emp.manager_name !== 'None' && (
+          <>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span style={{ fontWeight: 500, color: 'var(--brand-green)' }}>👤 Mgr: {emp.manager_name}</span>
+          </>
+        )}
       </div>
 
       <div className="employee-card-footer">

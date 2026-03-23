@@ -44,7 +44,8 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     const maps = {
       deptMap: createMap(depts, 'dept_code'),
       roleMap: createMap(roles, 'role_code'),
-      hubMap: createMap(hubs, 'hub_code')
+      hubMap: createMap(hubs, 'hub_code'),
+      managerMap: Object.fromEntries(emps?.map(e => [e.full_name.toLowerCase().trim(), e.id]) || [])
     };
 
     setExistingEmps(emps || []);
@@ -149,6 +150,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
 
         const role_id = lookup(row.role_code, ctx.roleMap);
         const department_id = lookup(row.dept_code, ctx.deptMap);
+        const manager_id = lookup(row.manager || row.Manager, ctx.managerMap);
         const hire_date = parseDateForDB(row.hire_date);
 
         // ID & Badge Logic
@@ -173,6 +175,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
           dob: parseDateForDB(row.dob),
           department_id,
           role_id,
+          manager_id,
           hub_id: lookup(row.hub_code || row.hub, ctx.hubMap),
           status: row.status || 'Active',
           hire_date,

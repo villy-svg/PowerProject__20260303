@@ -14,19 +14,30 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
 
-  // Fetch Hubs, Departments, and Roles for Company Details dropdowns
+  // Fetch Hubs, Departments, Roles, and Employees for dropdowns
   useEffect(() => {
     const fetchCompanyData = async () => {
-      const [hubsRes, deptRes, roleRes] = await Promise.all([
+      const [hubsRes, deptRes, roleRes, empRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code').order('name'),
         supabase.from('departments').select('id, name, dept_code').order('name'),
-        supabase.from('employee_roles').select('id, name, role_code').order('name')
+        supabase.from('employee_roles').select('id, name, role_code').order('name'),
+        supabase.from('employees').select('id, full_name, role_id, status').order('full_name')
       ]);
       
       if (hubsRes.data) setHubs(hubsRes.data);
       if (deptRes.data) setDepartments(deptRes.data);
       if (roleRes.data) setRoles(roleRes.data);
+      
+      if (empRes.data) {
+        const roleSubset = roleRes.data || [];
+        const enrichedEmps = empRes.data.map(e => ({
+          ...e,
+          role_code: roleSubset.find(r => r.id === e.role_id)?.role_code || ''
+        }));
+        setAllEmployees(enrichedEmps);
+      }
     };
     fetchCompanyData();
   }, []);
@@ -41,6 +52,7 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
     hub_id: initialData.hub_id || '',
     role_id: initialData.role_id || '',
     department_id: initialData.department_id || '',
+    manager_id: initialData.manager_id || '',
     accountNumber: initialData.accountNumber || '',
     ifscCode: initialData.ifscCode || '',
     accountName: initialData.accountName || '',
@@ -122,6 +134,7 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
               hubs={hubs} 
               departments={departments} 
               roles={roles} 
+              employees={allEmployees}
               isViewOnly={isViewOnly}
             />
           </div>

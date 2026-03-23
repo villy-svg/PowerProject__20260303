@@ -9,7 +9,7 @@ import { supabase } from '../../services/core/supabaseClient';
  * Defines: headers, data transformation, and dropdown validation data.
  */
 const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['Full Name', 'Email', 'Phone', 'Gender', 'Date of Birth', 'Primary Hub', 'Department', 'Role', 'Status', 'Date of Joining', 'Account Number', 'IFSC Code', 'Account Name', 'PAN Number'];
+  const headers = ['Full Name', 'Email', 'Phone', 'Gender', 'Date of Birth', 'Primary Hub', 'Department', 'Role', 'Status', 'Date of Joining', 'Manager', 'Account Number', 'IFSC Code', 'Account Name', 'PAN Number'];
 
   const defaultLabel = isTemplate ? "Download Employee Template" : "Export Employee Data";
   const finalLabel = label || defaultLabel;
@@ -36,6 +36,7 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Role': Object.values(roleMap)[0] || 'SR-DEV',
         'Status': 'Active',
         'Date of Joining': new Date().toISOString().split('T')[0],
+        'Manager': '',
         'Account Number': '123456789012',
         'IFSC Code': 'SBIN0001234',
         'Account Name': 'John Doe',
@@ -53,6 +54,7 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Role': roleMap[emp.role_id] || '',
         'Status': emp.status || 'Active',
         'Date of Joining': emp.hire_date || '',
+        'Manager': emp.manager_name || '',
         'Account Number': emp.account_number || '',
         'IFSC Code': emp.ifsc_code || '',
         'Account Name': emp.account_name || '',
