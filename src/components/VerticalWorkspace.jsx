@@ -47,7 +47,7 @@ const VerticalWorkspace = ({
       const allHubs = [...new Set(tasks.map(t => t.hub_id).filter(Boolean))];
       const allPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))]; // Dynamically get priorities
       const allFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
-      const allAssignees = [...new Set(tasks.map(t => t.assigneeName).filter(Boolean))];
+      const allAssignees = [...new Set(tasks.map(t => t.assigneeName || 'Unassigned'))];
 
       setFilters(prev => ({
         ...prev,

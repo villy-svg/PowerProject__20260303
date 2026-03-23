@@ -258,7 +258,7 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
 
       <FilterGroup
         label="Assignee"
-        options={[...new Set((tasks || []).map(t => t.assigneeName).filter(Boolean))].sort()}
+        options={[...new Set((tasks || []).map(t => t.assigneeName || 'Unassigned'))].sort()}
         currentFilters={filters.assignee || []}
         filterKey="assignee"
       />
