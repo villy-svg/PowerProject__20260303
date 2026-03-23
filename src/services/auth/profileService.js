@@ -53,12 +53,38 @@ export const profileService = {
       }
     });
 
-    // 5. Return normalized user object
+    // 5. Fetch linked employee and their seniority (over-and-above RBAC)
+    let employeeData = null;
+    let seniority = 100; // Default high seniority
+    
+    if (profile.employee_id) {
+      const { data: emp } = await supabase
+        .from('employees')
+        .select('id, role_id')
+        .eq('id', profile.employee_id)
+        .single();
+      
+      if (emp && emp.role_id) {
+        const { data: role } = await supabase
+          .from('employee_roles')
+          .select('seniority_level')
+          .eq('id', emp.role_id)
+          .single();
+        
+        employeeData = emp;
+        seniority = role?.seniority_level || 100;
+      }
+    }
+
+    // 6. Return normalized user object
     return {
       id: profile.id,
       name: profile.name || 'User',
+      email: profile.email,
       role: profile.role_id,
       roleId: profile.role_id,
+      employeeId: employeeData?.id || null,
+      seniority: seniority,
       assignedVerticals: (vAccess || []).map(v => v.vertical_id),
       verticalPermissions: vPermsMap,
       baseCapabilities: rolePerms?.permissions || {},

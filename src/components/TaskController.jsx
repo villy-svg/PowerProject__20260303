@@ -10,6 +10,7 @@ import { supabase } from '../services/core/supabaseClient';
 import MasterPageHeader from './MasterPageHeader';
 import ConflictModal from './ConflictModal';
 import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
+import { hierarchyService } from '../services/core/hierarchyService';
 import './TaskController.css';
 
 /**
@@ -121,9 +122,14 @@ const TaskController = ({
   });
 
   /**
+   * HIERARCHY FILTER: Enforce seniority-based visibility rules
+   */
+  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical);
+
+  /**
    * FILTER LOGIC
    */
-  const filteredTasks = tasksWithDuplicateInfo.filter(t => {
+  const filteredTasks = hierarchyFilteredTasks.filter(t => {
     // 1. Duplicates Only filter
     if (filters.duplicatesOnly && !t.isDuplicate) return false;
 

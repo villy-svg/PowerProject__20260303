@@ -67,7 +67,10 @@ const UserManagement = ({ currentUser }) => {
         vPerms[va.vertical_id] = { level: va.access_level };
       });
       
-      const linkedEmployee = (empData || []).find(e => e.email && u.email && e.email.toLowerCase() === u.email.toLowerCase()) || null;
+      // Prefer direct database link (employee_id) over email matching
+      const linkedEmployee = u.employee_id 
+        ? (empData || []).find(e => e.id === u.employee_id) 
+        : (empData || []).find(e => e.email && u.email && e.email.toLowerCase() === u.email.toLowerCase()) || null;
 
       return { ...u, verticalPermissions: vPerms, linkedEmployee };
     });
