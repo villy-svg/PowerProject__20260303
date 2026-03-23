@@ -16,7 +16,8 @@ export const VERTICAL_FEATURES = {
     { id: 'canAccessEmployeeTasks', label: 'Employee Tasks Board' }
   ],
   CHARGING_HUBS: [
-    { id: 'canAccessHubTasks', label: 'Hub Tasks Board' }
+    { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },
+    { id: 'canAccessDailyHubTasks', label: 'Daily Task Board' }
   ]
 };
 
