@@ -53,10 +53,16 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissio
         ) : null}
         <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
         <span 
-          className="hub-badge" 
+          className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''}`} 
           onDoubleClick={handleHubDoubleClick} 
           title="Double-click to change primary hub"
-          style={{ cursor: 'pointer', padding: isEditingHub ? '0 4px' : undefined }}
+          style={{ 
+            cursor: 'pointer', 
+            padding: isEditingHub ? '0 4px' : undefined,
+            backgroundColor: !emp.hub_id ? 'rgba(255, 68, 68, 0.1)' : undefined,
+            color: !emp.hub_id ? '#ff4444' : undefined,
+            border: !emp.hub_id ? '1px solid rgba(255, 68, 68, 0.4)' : undefined
+          }}
         >
           {isEditingHub ? (
             <select 

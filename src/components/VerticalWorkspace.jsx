@@ -44,7 +44,7 @@ const VerticalWorkspace = ({
   React.useEffect(() => {
     if (Array.isArray(tasks) && tasks.length > 0 && !isInitialized) {
       const allCities = [...new Set(tasks.map(t => t.city).filter(Boolean))];
-      const allHubs = [...new Set(tasks.map(t => t.hub_id).filter(Boolean))];
+      const allHubs = [...new Set(tasks.map(t => t.hub_id))];
       const allPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))]; // Dynamically get priorities
       const allFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
       const allAssignees = [...new Set(tasks.map(t => t.assigneeName || 'Unassigned'))];

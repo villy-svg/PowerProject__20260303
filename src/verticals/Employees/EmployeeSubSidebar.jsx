@@ -30,10 +30,16 @@ const EmployeeSubSidebar = ({ user, permissions, activeVertical, setActiveVertic
         supabase.from('departments').select('name, dept_code').order('name')
       ]);
 
+      const hubsList = hubs || [];
+      // Explicitly add "NULL" as a selectable hub if any unassigned exist (or just always for filter ease)
+      if (!hubsList.some(h => h.id === null)) {
+        hubsList.unshift({ id: null, hub_code: 'NULL' });
+      }
+
       setFilterOptions({
-        hubs: hubs || [],
+        hubs: hubsList,
         roles: roles || [],
-        departments: depts || []
+        departments: depts || [],
       });
     };
     fetchOptions();

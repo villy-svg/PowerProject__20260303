@@ -23,7 +23,7 @@ import { generateEmpCode, calculateBadgeId, logEmployeeHistory } from '../../uti
 const resolveEmployeeCodes = (employees, hubMap, roleMap, deptMap) =>
   employees.map(emp => ({
     ...emp,
-    hub_code: emp.hub_id ? (hubMap.get(emp.hub_id) || 'NO HUB') : 'ALL',
+    hub_code: emp.hub_id ? (hubMap.get(emp.hub_id) || 'NO HUB') : 'NULL',
     role_code: roleMap.get(emp.role_id)?.role_code || 'NO ROLE',
     seniority_level: roleMap.get(emp.role_id)?.seniority_level || 1,
     dept_code: deptMap.get(emp.department_id) || 'NO DEPT',
