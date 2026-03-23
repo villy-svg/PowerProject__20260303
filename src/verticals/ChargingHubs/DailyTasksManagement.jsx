@@ -43,7 +43,11 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
       const [hubRes, empRes, clientRes, rolesRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code'),
         supabase.from('employees').select('id, full_name, email, role_id'),
-        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] })),
+        // Await the client fetch separately or inside an async IIFE to avoid the .catch() prototype error on PostgrestBuilder
+        (async () => {
+          const { data, error } = await supabase.from('clients').select('id, name').limit(100);
+          return { data: error ? [] : data };
+        })(),
         supabase.from('employee_roles').select('id, seniority_level')
       ]);
 
