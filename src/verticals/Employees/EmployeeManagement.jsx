@@ -21,6 +21,12 @@ import ConflictModal from '../../components/ConflictModal';
  * Displays employee records, profiles, and administrative summaries.
  */
 const EmployeeManagement = ({ permissions, filters }) => {
+  const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
+  
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
+  const [showInactive, setShowInactive] = useState(true);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
@@ -29,7 +35,6 @@ const EmployeeManagement = ({ permissions, filters }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
-  const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
