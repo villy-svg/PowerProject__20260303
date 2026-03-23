@@ -64,35 +64,41 @@
   position: relative;
 }
 
-/* Toggle Button */
-.tree-toggle-btn {
-  position: absolute;
-  left: -12px;
-  top: 25px;
+/* Tree Toggle */
+.tree-toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #2a2a2a;
-  border: 1px solid var(--brand-green);
+}
+
+.tree-toggle-spacer {
+  width: 22px;
+}
+
+.tree-toggle-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
   color: var(--brand-green);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 20;
   padding: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   transition: all 0.2s;
 }
 
 .tree-toggle-btn:hover {
-  background: var(--brand-green);
-  color: #000;
-  transform: scale(1.1);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-color: var(--brand-green);
+  box-shadow: 0 0 8px var(--halo-glow);
 }
 
 .toggle-icon {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1;
   display: block;
@@ -100,13 +106,13 @@
 
 /* Compact Tree Card */
 .employee-tree-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   min-width: 320px;
   transition: all 0.2s;
   position: relative;

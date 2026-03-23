@@ -13,15 +13,33 @@ const EmployeeTreeCard = ({
   permissions = {},
   isSelected = false,
   onSelect,
-  className = ''
+  className = '',
+  hasChildren,
+  isExpanded,
+  onToggle
 }) => {
   const isCurrentUser = emp.email === user?.email || emp.user_id === user?.id;
 
   return (
     <div 
       className={`employee-tree-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'is-current-user' : ''} ${className}`}
-      title="Double-click to view"
+      onDoubleClick={() => onEdit(emp)}
     >
+      {/* Tree Toggle */}
+      <div className="tree-toggle-container">
+        {hasChildren ? (
+          <button 
+            className="tree-toggle-btn" 
+            onClick={(e) => { e.stopPropagation(); onToggle(); }}
+            title={isExpanded ? 'Collapse' : 'Expand'}
+          >
+            <span className="toggle-icon">{isExpanded ? '−' : '+'}</span>
+          </button>
+        ) : (
+          <div className="tree-toggle-spacer" />
+        )}
+      </div>
+
       <div className="card-selection" onClick={(e) => e.stopPropagation()}>
         <input 
           type="checkbox" 

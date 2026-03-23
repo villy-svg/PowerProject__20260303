@@ -39,8 +39,8 @@ const EmployeeTree = ({
       if (currentUser) {
         const ancestors = hierarchyUtils.getAncestors(employees, currentUser.id, 'id', 'manager_id');
         const ancestorIds = ancestors.map(a => a.id);
-        // Expand ancestors so the user is visible, and expand the user's node to see their immediate subordinates/buttons
-        setExpandedIds(new Set([...ancestorIds, currentUser.id]));
+        // Only expand ancestors to show the management line, keep the user's own reportees collapsed
+        setExpandedIds(new Set(ancestorIds));
       }
     }
   }, [user, employees]);
@@ -64,15 +64,6 @@ const EmployeeTree = ({
     return (
       <div key={node.id} className={`tree-node-wrapper ${hasChildren ? (isExpanded ? 'is-expanded' : 'is-collapsed') : 'is-leaf'}`}>
         <div className="card-container" style={{ position: 'relative' }}>
-          {hasChildren && (
-            <button 
-              className="tree-toggle-btn" 
-              onClick={() => toggleNode(node.id)}
-              title={isExpanded ? 'Collapse' : 'Expand'}
-            >
-              <span className="toggle-icon">{isExpanded ? '−' : '+'}</span>
-            </button>
-          )}
           <EmployeeTreeCard 
             emp={node}
             user={user}
@@ -81,6 +72,9 @@ const EmployeeTree = ({
             permissions={permissions}
             isSelected={selectedIds.includes(node.id)}
             onSelect={onSelect}
+            hasChildren={hasChildren}
+            isExpanded={isExpanded}
+            onToggle={() => toggleNode(node.id)}
           />
         </div>
         
