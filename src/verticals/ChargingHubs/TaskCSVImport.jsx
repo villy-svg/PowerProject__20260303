@@ -24,7 +24,9 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       supabase.from('hubs').select('id, hub_code, name'),
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
-      supabase.from('tasks').select('id, text, hub_id, function').eq('verticalid', verticalId)
+      verticalId === 'daily_hub_tasks' 
+        ? supabase.from('daily_tasks').select('id, text, hub_id, function_name')
+        : supabase.from('tasks').select('id, text, hub_id, function').eq('verticalid', verticalId)
     ]);
 
     const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
@@ -115,27 +117,39 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
         // Attach existing ID if this row came from conflict resolution
         const existingMatch = ctx.existingTasks.find(t =>
-          getConflictKey({ text: t.text, hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || '', function_code: t.function || '' }) ===
-          getConflictKey(row)
+          getConflictKey({ 
+            text: t.text, 
+            hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || '', 
+            function_code: (t.function || t.function_name) || '' 
+          }) === getConflictKey(row)
         );
 
-        return {
+        const isDaily = verticalId === 'daily_hub_tasks';
+        const taskRow = {
           id: existingMatch?.id || row.id || crypto.randomUUID(),
           text: finalTaskText,
-          verticalid: verticalId,
-          stageid: row.stageid || 'BACKLOG',
-          priority: row.priority || 'Medium',
           description: row.description || null,
+          priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
-          function: resolvedFunc,
-          assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
           city: row.city || null,
-          updatedat: new Date().toISOString(),
+          assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
+          updated_at: new Date().toISOString(),
         };
+
+        if (isDaily) {
+          taskRow.stage_id = row.stageid || 'BACKLOG';
+          taskRow.function_name = resolvedFunc;
+        } else {
+          taskRow.verticalid = verticalId;
+          taskRow.stageid = row.stageid || 'BACKLOG';
+          taskRow.function = resolvedFunc;
+        }
+
+        return taskRow;
       });
 
       const { error } = await supabase
-        .from('tasks')
+        .from(verticalId === 'daily_hub_tasks' ? 'daily_tasks' : 'tasks')
         .upsert(tasksToInsert, { onConflict: 'id' });
 
       if (error) throw error;
