@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeForm.css';
 import { BasicDetailsSection, CompanyDetailsSection, BankDetailsSection } from './EmployeeFormSections';
+import { hierarchyUtils } from '../../utils/hierarchyUtils';
 
 /**
  * EmployeeForm
@@ -80,6 +81,16 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
         return false;
       }
       setFormData(prev => ({ ...prev, contactNumber: phone }));
+      return true;
+    }
+    if (page === 2) {
+      if (formData.manager_id && initialData.id) {
+        const isCycle = hierarchyUtils.detectCycle(allEmployees, initialData.id, formData.manager_id);
+        if (isCycle) {
+          alert('Circular Reporting Error: This manager reports to this employee (directly or indirectly). Please select a different manager.');
+          return false;
+        }
+      }
       return true;
     }
     return true;
