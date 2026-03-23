@@ -342,7 +342,7 @@ const TaskController = ({
               <>
                 <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-                <TaskCSVImport className="master-action-btn" verticalId={rootVerticalId || activeVertical} onImportComplete={() => refreshTasks(false)} />
+                <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
               </>
             )}
             {canUserCreate && (
