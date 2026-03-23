@@ -26,24 +26,28 @@ const EmployeeTree = ({
   onSelect
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
+  const [showOthersIds, setShowOthersIds] = useState(new Set());
 
   // Build tree from flat data
   const treeData = useMemo(() => {
     return hierarchyUtils.buildTree(employees, 'id', 'manager_id');
   }, [employees]);
 
-  // Initial setup: Expand the upstream path (ancestors) for the current user
-  useEffect(() => {
-    if (user && employees.length > 0) {
-      const currentUser = employees.find(e => e.email === user.email || e.user_id === user.id);
-      if (currentUser) {
-        const ancestors = hierarchyUtils.getAncestors(employees, currentUser.id, 'id', 'manager_id');
-        const ancestorIds = ancestors.map(a => a.id);
-        // Only expand ancestors to show the management line, keep the user's own reportees collapsed
-        setExpandedIds(new Set(ancestorIds));
-      }
-    }
+  // Identify the "Management Line" (Path from Roots to Current User)
+  const pathIds = useMemo(() => {
+    if (!user || !employees.length) return new Set();
+    const currentUser = employees.find(e => e.email === user.email || e.user_id === user.id);
+    if (!currentUser) return new Set();
+    const ancestors = hierarchyUtils.getAncestors(employees, currentUser.id, 'id', 'manager_id');
+    return new Set([...ancestors.map(a => a.id), currentUser.id]);
   }, [user, employees]);
+
+  // Default behavior: Expand the management line to ensure the path is visible
+  useEffect(() => {
+    if (pathIds.size > 0) {
+      setExpandedIds(new Set(pathIds));
+    }
+  }, [pathIds]);
 
   const toggleNode = (nodeId) => {
     setExpandedIds(prev => {
@@ -57,9 +61,36 @@ const EmployeeTree = ({
     });
   };
 
+  const toggleShowOthers = (parentId) => {
+    setShowOthersIds(prev => {
+      const next = new Set(prev);
+      if (next.has(parentId)) next.delete(parentId);
+      else next.add(parentId);
+      return next;
+    });
+  };
+
   const renderNode = (node) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedIds.has(node.id);
+    const isOnPath = pathIds.has(node.id);
+    const isShowingOthers = showOthersIds.has(node.id);
+
+    // Focused View Logic: On the management line, only show the next child on the path by default
+    let visibleChildren = node.children || [];
+    let hiddenCount = 0;
+
+    if (isOnPath && !isShowingOthers) {
+      const pathChild = (node.children || []).find(c => pathIds.has(c.id));
+      if (pathChild) {
+        visibleChildren = [pathChild];
+        hiddenCount = (node.children || []).length - 1;
+      } else {
+        // This node is the User (terminal point of path); hide all reportees by default
+        visibleChildren = [];
+        hiddenCount = (node.children || []).length;
+      }
+    }
 
     return (
       <div key={node.id} className={`tree-node-wrapper ${hasChildren ? (isExpanded ? 'is-expanded' : 'is-collapsed') : 'is-leaf'}`}>
@@ -80,7 +111,33 @@ const EmployeeTree = ({
         
         {hasChildren && isExpanded && (
           <div className="tree-children">
-            {node.children.map(child => renderNode(child))}
+            {/* Render direct line or current visible children */}
+            {visibleChildren.map(child => renderNode(child))}
+            
+            {/* Show "Show Others" button if siblings are hidden */}
+            {hiddenCount > 0 && !isShowingOthers && (
+              <div className="show-others-item">
+                <button 
+                  className="show-others-btn" 
+                  onClick={() => toggleShowOthers(node.id)}
+                >
+                  <span className="others-count">+{hiddenCount}</span> other reportees
+                </button>
+              </div>
+            )}
+
+            {/* Render others if toggled */}
+            {isShowingOthers && (
+              <>
+                <div className="others-header">
+                  <span className="others-label">Other Reportees</span>
+                  <button className="hide-others-link" onClick={() => toggleShowOthers(node.id)}>Collapse</button>
+                </div>
+                {(node.children || [])
+                  .filter(c => !visibleChildren.includes(c))
+                  .map(child => renderNode(child))}
+              </>
+            )}
           </div>
         )}
       </div>

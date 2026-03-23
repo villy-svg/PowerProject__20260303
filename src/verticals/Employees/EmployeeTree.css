@@ -200,6 +200,77 @@
   cursor: pointer;
 }
 
+/* Show Others Section */
+.show-others-item {
+  margin: 0.5rem 0;
+}
+
+.show-others-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed var(--border-color);
+  color: var(--brand-green);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: fit-content;
+}
+
+.show-others-btn:hover {
+  background: var(--halo-bg);
+  border-color: var(--brand-green);
+  border-style: solid;
+}
+
+.others-count {
+  background: var(--brand-green);
+  color: #000;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.others-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.5rem 0 0.75rem 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.others-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+  opacity: 0.4;
+  color: var(--text-color);
+}
+
+.hide-others-link {
+  background: transparent;
+  border: none;
+  color: #ff4444;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.hide-others-link:hover {
+  background: rgba(255, 68, 68, 0.1);
+}
+
 /* Animation */
 .tree-node-wrapper {
   animation: fadeInTree 0.4s ease-out forwards;
