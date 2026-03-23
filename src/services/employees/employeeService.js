@@ -200,4 +200,34 @@ export const employeeService = {
     const { error } = await supabase.from('employees').delete().eq('id', id);
     if (error) throw error;
   },
+
+  /**
+   * Bulk update multiple employee records.
+   * @param {string[]} ids - Array of employee IDs to update.
+   * @param {Object} updates - Object containing fields to update.
+   */
+  async bulkUpdateEmployees(ids, updates) {
+    if (!ids || ids.length === 0) return;
+    
+    const row = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('employees')
+      .update(row)
+      .in('id', ids)
+      .select();
+
+    if (error) throw error;
+
+    // Log history for each updated employee
+    if (data) {
+      for (const emp of data) {
+        await logEmployeeHistory(emp.id, emp, 'BULK_UPDATE');
+      }
+    }
+    return data;
+  },
 };

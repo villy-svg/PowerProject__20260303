@@ -4,7 +4,18 @@ import React, { useState } from 'react';
  * EmployeeCard
  * Grid/Tile view item for an employee.
  */
-const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissions = {}, availableHubs, onUpdateHub }) => {
+const EmployeeCard = ({ 
+  emp, 
+  onEdit, 
+  onView, 
+  onDelete, 
+  onToggleStatus, 
+  permissions = {}, 
+  availableHubs, 
+  onUpdateHub,
+  isSelected = false,
+  onSelect
+}) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
 
@@ -31,10 +42,18 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissio
 
   return (
     <div 
-      className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''}`}
+      className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
     >
+      <div className="card-selection" onClick={(e) => e.stopPropagation()}>
+        <input 
+          type="checkbox" 
+          checked={isSelected} 
+          onChange={() => onSelect(emp.id)} 
+          className="selection-checkbox"
+        />
+      </div>
       <div className="employee-card-badges">
         {emp.is_app_user && (
           <span className="app-user-badge" style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }} title="Has App Access">APP USER</span>

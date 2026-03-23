@@ -9,6 +9,7 @@ import TaskModal from '../../components/TaskModal';
 import EmployeeForm from './EmployeeForm';
 import EmployeeCard from './EmployeeCard';
 import EmployeeListRow from './EmployeeListRow';
+import EmployeeBulkUpdateModal from './EmployeeBulkUpdateModal';
 import { useEmployees } from '../../hooks/useEmployees';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import ConflictModal from '../../components/ConflictModal';
@@ -20,15 +21,15 @@ import ConflictModal from '../../components/ConflictModal';
  * Displays employee records, profiles, and administrative summaries.
  */
 const EmployeeManagement = ({ permissions, filters }) => {
-  const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee } = useEmployees();
-  
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
-  const [showInactive, setShowInactive] = useState(true);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
+  
+  // Bulk Selection State
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
@@ -113,6 +114,37 @@ const EmployeeManagement = ({ permissions, filters }) => {
     setEditingEmployee(emp);
     setIsViewOnly(true);
     setIsAddModalOpen(true);
+  };
+
+  const handleSelectIndividual = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (filteredEmps) => {
+    const allFilteredIds = filteredEmps.map(e => e.id);
+    const areAllSelected = allFilteredIds.every(id => selectedIds.includes(id));
+    
+    if (areAllSelected) {
+      setSelectedIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
+    } else {
+      setSelectedIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
+    }
+  };
+
+  const handleBulkUpdate = async (updates) => {
+    setIsBulkUpdating(true);
+    try {
+      await bulkUpdateEmployees(selectedIds, updates);
+      setIsBulkUpdateModalOpen(false);
+      setSelectedIds([]);
+      alert(`Successfully updated ${selectedIds.length} employees.`);
+    } catch (err) {
+      alert(`Bulk update failed: ${err.message}`);
+    } finally {
+      setIsBulkUpdating(false);
+    }
   };
 
   const filteredEmployees = employees.filter(emp => {
@@ -224,9 +256,21 @@ const EmployeeManagement = ({ permissions, filters }) => {
                       color: 'var(--brand-green)', 
                       opacity: 0.9, 
                       borderBottom: '1px solid rgba(255,255,255,0.05)', 
-                      paddingBottom: '0.5rem' 
+                      paddingBottom: '0.5rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
                     }}>
-                      {roleName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({empsInRole.length})</span>
+                      <span>
+                        {roleName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({empsInRole.length})</span>
+                      </span>
+                      <button 
+                        className="halo-button" 
+                        style={{ fontSize: '0.7rem', padding: '2px 8px', minWidth: 'auto', background: 'rgba(255,255,255,0.05)' }}
+                        onClick={() => handleSelectAll(empsInRole)}
+                      >
+                        {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
+                      </button>
                     </h5>
                     <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
                       {empsInRole.map(emp => (
@@ -245,6 +289,8 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             }}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
+                            isSelected={selectedIds.includes(emp.id)}
+                            onSelect={handleSelectIndividual}
                           />
                         ) : (
                           <EmployeeListRow 
@@ -261,6 +307,8 @@ const EmployeeManagement = ({ permissions, filters }) => {
                             }}
                             availableHubs={hubs}
                             onUpdateHub={updateEmployeeHub}
+                            isSelected={selectedIds.includes(emp.id)}
+                            onSelect={handleSelectIndividual}
                           />
                         )
                       ))}
@@ -308,6 +356,8 @@ const EmployeeManagement = ({ permissions, filters }) => {
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
+                        isSelected={selectedIds.includes(emp.id)}
+                        onSelect={handleSelectIndividual}
                       />
                     )
                   ))}
@@ -315,6 +365,23 @@ const EmployeeManagement = ({ permissions, filters }) => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Floating Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="bulk-action-toolbar">
+          <div className="bulk-info">
+            {selectedIds.length} Selected
+          </div>
+          <div className="bulk-actions">
+            <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)}>
+              Bulk Update
+            </button>
+            <button className="bulk-btn secondary" onClick={() => setSelectedIds([])}>
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
@@ -371,6 +438,19 @@ const EmployeeManagement = ({ permissions, filters }) => {
           </div>
         )}
       />
+
+      {/* Bulk Update Modal */}
+      <TaskModal
+        isOpen={isBulkUpdateModalOpen}
+        onClose={() => setIsBulkUpdateModalOpen(false)}
+        title="Bulk Update Employees"
+      >
+        <EmployeeBulkUpdateModal 
+          selectedCount={selectedIds.length}
+          onUpdate={handleBulkUpdate}
+          loading={isBulkUpdating}
+        />
+      </TaskModal>
     </>
   );
 };

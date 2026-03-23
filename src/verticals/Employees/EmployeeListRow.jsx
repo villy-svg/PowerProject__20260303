@@ -4,7 +4,18 @@ import React, { useState } from 'react';
  * EmployeeListRow
  * Row view item for an employee.
  */
-const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissions = {}, availableHubs, onUpdateHub }) => {
+const EmployeeListRow = ({ 
+  emp, 
+  onEdit, 
+  onView, 
+  onDelete, 
+  onToggleStatus, 
+  permissions = {}, 
+  availableHubs, 
+  onUpdateHub,
+  isSelected = false,
+  onSelect
+}) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
 
@@ -31,10 +42,18 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, permis
 
   return (
     <div 
-      className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''}`}
+      className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
     >
+      <div className="list-selection" onClick={(e) => e.stopPropagation()}>
+        <input 
+          type="checkbox" 
+          checked={isSelected} 
+          onChange={() => onSelect(emp.id)} 
+          className="selection-checkbox"
+        />
+      </div>
       <div className="list-main-info">
         <div className="list-name">
           {emp.full_name}

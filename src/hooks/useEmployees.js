@@ -121,6 +121,19 @@ export const useEmployees = () => {
     }
   };
 
+  const bulkUpdateEmployees = async (ids, updates) => {
+    try {
+      setLoading(true);
+      await employeeService.bulkUpdateEmployees(ids, updates);
+      await fetchEmployees(false);
+    } catch (error) {
+      masterErrorHandler.handleDatabaseError(error, 'useEmployees.bulkUpdateEmployees');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ---------------------------------------------------------------------------
 
   return {
@@ -133,5 +146,6 @@ export const useEmployees = () => {
     updateEmployeeHub,
     toggleStatus,
     deleteEmployee,
+    bulkUpdateEmployees,
   };
 };
