@@ -1,0 +1,98 @@
+/* EmployeeTree.css */
+
+.employee-tree-container {
+  padding: 2rem 1rem;
+  overflow-x: auto;
+  min-height: 500px;
+}
+
+.tree-root-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.tree-node-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  padding-left: 2rem;
+}
+
+/* Vertical Connecting Line */
+.tree-node-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Small horizontal branch to the card */
+.tree-node-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 40px;
+  width: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-node-wrapper:last-child::before {
+  height: 40px; /* Only go down to the last branch */
+}
+
+/* Root nodes (top level) don't need connecting lines */
+.tree-root > .tree-node-wrapper {
+  padding-left: 0;
+}
+.tree-root > .tree-node-wrapper::before,
+.tree-root > .tree-node-wrapper::after {
+  display: none;
+}
+
+.tree-children {
+  margin-left: 3rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
+}
+
+/* Current User Highlight */
+.employee-card.is-current-user {
+  border: 2px solid var(--brand-green);
+  background: rgba(0, 255, 135, 0.08);
+  box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+  z-index: 10;
+}
+
+.current-user-marker {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  background: var(--brand-green);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  z-index: 11;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* Animation */
+.tree-node-wrapper {
+  animation: fadeInTree 0.4s ease-out forwards;
+}
+
+@keyframes fadeInTree {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}

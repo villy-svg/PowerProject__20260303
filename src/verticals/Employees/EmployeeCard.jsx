@@ -14,7 +14,8 @@ const EmployeeCard = ({
   availableHubs, 
   onUpdateHub,
   isSelected = false,
-  onSelect
+  onSelect,
+  className = ''
 }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
@@ -42,7 +43,7 @@ const EmployeeCard = ({
 
   return (
     <div 
-      className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''}`}
+      className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${className}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
     >

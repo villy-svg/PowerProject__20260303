@@ -9,6 +9,7 @@ import TaskModal from '../../components/TaskModal';
 import EmployeeForm from './EmployeeForm';
 import EmployeeCard from './EmployeeCard';
 import EmployeeListRow from './EmployeeListRow';
+import EmployeeTree from './EmployeeTree';
 import EmployeeBulkUpdateModal from './EmployeeBulkUpdateModal';
 import { useEmployees } from '../../hooks/useEmployees';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
@@ -20,7 +21,7 @@ import ConflictModal from '../../components/ConflictModal';
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = ({ permissions, filters }) => {
+const EmployeeManagement = ({ user, permissions, filters }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -194,14 +195,14 @@ const EmployeeManagement = ({ permissions, filters }) => {
         leftActions={
           <>
             <div className="view-mode-toggle">
-              {['grid', 'list'].map(mode => (
+              {['grid', 'list', 'tree'].map(mode => (
                 <button 
                   key={mode}
                   className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
                   onClick={() => setViewMode(mode)}
                   title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
                 >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  {mode === 'tree' ? 'Hierarchy' : mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </button>
               ))}
             </div>
@@ -240,6 +241,20 @@ const EmployeeManagement = ({ permissions, filters }) => {
           <h3>Personnel Database Empty</h3>
           <p>Click "+ Add Employee" to insert your first structural record.</p>
         </div>
+      ) : viewMode === 'tree' ? (
+        <EmployeeTree 
+          employees={filteredEmployees}
+          user={user}
+          onEdit={openEditModal}
+          onView={openViewModal}
+          onDelete={handleDelete}
+          onToggleStatus={toggleStatus}
+          permissions={permissions}
+          availableHubs={hubs}
+          onUpdateHub={updateEmployeeHub}
+          selectedIds={selectedIds}
+          onSelect={handleSelectIndividual}
+        />
       ) : (
         <div style={{ marginTop: '1rem' }}>
           {/* ACTIVE SECTION */}
