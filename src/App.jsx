@@ -193,7 +193,7 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views as the default vertical
-      const persistentVerticals = ['home', 'CHARGING_HUBS', 'hub_tasks', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
+      const persistentVerticals = ['home', 'CHARGING_HUBS', 'hub_tasks', 'daily_hub_tasks', 'EMPLOYEES', 'employee_tasks', 'CLIENTS', 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
@@ -301,6 +301,7 @@ function App() {
               <VerticalWorkspace
                 label={
                   (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS') ? 'Hubs List' :
+                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
                   (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
                   (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
                   VERTICALS[activeVertical]?.label
@@ -318,19 +319,19 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubSubSidebar :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubSubSidebar :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubTaskForm :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubTaskForm :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') ? HubTaskTile :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubTaskTile :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null
@@ -340,7 +341,7 @@ function App() {
                     ? () => setActiveVertical('EMPLOYEES')
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
                        ? () => setActiveVertical('CLIENTS')
-                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks'))
+                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks'))
                         ? () => setActiveVertical('hub_management')
                         : null
                 }

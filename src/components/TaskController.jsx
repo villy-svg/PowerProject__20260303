@@ -40,17 +40,16 @@ const TaskController = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_task_view') || 'list');
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem(`powerpod_task_view_${activeVertical}`) || localStorage.getItem('powerpod_task_view') || 'list');
   const [showDeprioritized, setShowDeprioritized] = useState(true);
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
 
   // Custom Confirmation Modal State
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
-  // Persist view mode choice
   useEffect(() => {
-    localStorage.setItem('powerpod_task_view', viewMode);
-  }, [viewMode]);
+    localStorage.setItem(`powerpod_task_view_${activeVertical}`, viewMode);
+  }, [viewMode, activeVertical]);
 
   const clearSelection = () => setSelectedTaskIds([]);
   const toggleTaskSelection = (taskId) => {
@@ -296,7 +295,7 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label || 'Hub') + ' Task Manager'}`}
+        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Manager'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>
@@ -341,7 +340,7 @@ const TaskController = ({
         }
         rightActions={
           <>
-            {(activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks') && (
+            {(activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') && (
               <>
                 <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />

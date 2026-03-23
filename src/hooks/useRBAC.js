@@ -34,6 +34,7 @@ export const useRBAC = (user, activeVertical) => {
         canAccessEmployees: true,
         canAccessEmployeeTasks: true,
         canAccessHubTasks: true,
+        canAccessDailyHubTasks: true,
       };
     }
 
@@ -44,7 +45,7 @@ export const useRBAC = (user, activeVertical) => {
 
     // Normalize sub-views back to their root vertical ID
     const rootVerticalId =
-      (current === 'CHARGING_HUBS' || current === 'hub_tasks') ? 'CHARGING_HUBS' :
+      (current === 'CHARGING_HUBS' || current === 'hub_tasks' || current === 'daily_hub_tasks') ? 'CHARGING_HUBS' :
       (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
       (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
       current.toUpperCase();
