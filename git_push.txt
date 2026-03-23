@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "260323 Map User to Employee 1.0.5"
+git commit -m "260323 Map User to Employee 1.0.6"
 git push origin main

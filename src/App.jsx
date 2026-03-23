@@ -379,15 +379,15 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
-                  (activeVertical === VERTICALS.CHARGING_HUBS.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
-                    (activeVertical === VERTICALS.EMPLOYEES.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                      (activeVertical === VERTICALS.CLIENTS.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
+                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
+                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  (activeVertical === VERTICALS.CHARGING_HUBS.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
-                    (activeVertical === VERTICALS.EMPLOYEES.id || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                      (activeVertical === VERTICALS.CLIENTS.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
+                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
+                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
