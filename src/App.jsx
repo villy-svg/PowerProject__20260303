@@ -306,7 +306,7 @@ function App() {
                   VERTICALS[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
-                tasks={tasks}
+                tasks={activeVertical === 'daily_hub_tasks' ? [] : tasks}
                 setTasks={addTask}
                 actualSetTasks={setTasks}
                 refreshTasks={fetchTasks}
