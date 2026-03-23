@@ -78,8 +78,7 @@ const TaskController = ({
           setSaving(true);
           try {
             for (const id of selectedTaskIds) {
-              const { error } = await supabase.from('tasks').delete().eq('id', id);
-              if (error) throw error;
+              await deleteTask(id);
             }
             actualSetTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
             clearSelection();
@@ -239,8 +238,7 @@ const TaskController = ({
       onConfirm: async () => {
         setSaving(true);
         try {
-          const { error } = await supabase.from('tasks').delete().eq('id', taskId);
-          if (error) throw error;
+          await deleteTask(taskId);
           setTasks(prev => prev.filter(t => t.id !== taskId));
         } catch (err) {
           alert("Delete failed.");
@@ -462,7 +460,7 @@ const TaskController = ({
               };
 
               const stageTasks = filteredTasks
-                .filter((t) => t.verticalId === (rootVerticalId || activeVertical) && t.stageId === stage.id)
+                .filter((t) => (activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical)) && t.stageId === stage.id)
                 .sort((a, b) => {
                   const weightA = getPriorityWeight(a.priority);
                   const weightB = getPriorityWeight(b.priority);

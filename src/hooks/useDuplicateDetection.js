@@ -24,7 +24,7 @@ export const useDuplicateDetection = (items = [], config = {}) => {
     const clusters = {};
     const processed = items.map(item => {
       // Logic for Slave identification
-      const targetList = activeVertical 
+      const targetList = (activeVertical && activeVertical !== 'daily_hub_tasks')
         ? items.filter(i => i.verticalId === activeVertical) 
         : items;
 
