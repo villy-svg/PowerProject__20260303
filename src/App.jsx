@@ -10,6 +10,7 @@ import { authService } from './services/auth/authService';
 import { profileService } from './services/auth/profileService';
 // Hooks
 import { useTasks } from './hooks/useTasks';
+import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
 
 // Constants
@@ -67,6 +68,23 @@ function App() {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // 2b. Daily Task state
+  const {
+    tasks: dailyTasks,
+    setTasks: setDailyTasks,
+    loading: dailyLoading,
+    fetchTasks: fetchDailyTasks,
+    addTask: addDailyTask,
+    updateTask: updateDailyTask,
+    updateTaskStage: updateDailyTaskStage,
+    bulkUpdateTasks: bulkUpdateDailyTasks,
+    deleteTask: deleteDailyTask,
+  } = useDailyTasks(user);
+
+  useEffect(() => {
+    if (user) fetchDailyTasks();
+  }, [user, fetchDailyTasks]);
 
   // 3. Auth and User Identity
   const [session, setSession] = useState(null);
@@ -204,7 +222,7 @@ function App() {
 
 
   // Loading Screen for initial fetch
-  if (loading) {
+  if (loading || dailyLoading) {
     return (
       <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <h2>Connecting to Cloud Database...</h2>
@@ -306,14 +324,14 @@ function App() {
                   VERTICALS[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
-                tasks={activeVertical === 'daily_hub_tasks' ? [] : tasks}
-                setTasks={addTask}
-                actualSetTasks={setTasks}
-                refreshTasks={fetchTasks}
-                updateTask={updateTask}
-                bulkUpdateTasks={bulkUpdateTasks}
-                deleteTask={deleteTask}
-                updateTaskStage={updateTaskStage}
+                tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
+                setTasks={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
+                actualSetTasks={activeVertical === 'daily_hub_tasks' ? setDailyTasks : setTasks}
+                refreshTasks={activeVertical === 'daily_hub_tasks' ? fetchDailyTasks : fetchTasks}
+                updateTask={activeVertical === 'daily_hub_tasks' ? updateDailyTask : updateTask}
+                bulkUpdateTasks={activeVertical === 'daily_hub_tasks' ? bulkUpdateDailyTasks : bulkUpdateTasks}
+                deleteTask={activeVertical === 'daily_hub_tasks' ? deleteDailyTask : deleteTask}
+                updateTaskStage={activeVertical === 'daily_hub_tasks' ? updateDailyTaskStage : updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
