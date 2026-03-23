@@ -15,7 +15,7 @@ export const verticalService = {
     const { data, error } = await supabase
       .from('verticals')
       .select('*')
-      .order('display_order', { ascending: true });
+      .order('order', { ascending: true });
 
     if (error) {
       console.error('VerticalService Error:', error);
@@ -24,20 +24,20 @@ export const verticalService = {
 
     // Convert array to a lookup object indexed by ID (matches frontend VERTICALS constant)
     const verticalMap = {};
-    data.forEach(v => {
+    (data || []).forEach(v => {
       verticalMap[v.id] = {
         id: v.id,
         label: v.label,
-        locked: !!v.is_locked,
-        displayOrder: v.display_order
+        locked: !!v.locked,
+        order: v.order
       };
     });
 
     return {
-      list: data.map(v => ({
+      list: (data || []).map(v => ({
         id: v.id,
         label: v.label,
-        locked: !!v.is_locked
+        locked: !!v.locked
       })),
       map: verticalMap
     };

@@ -16,6 +16,8 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
     );
   };
 
+  const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
+
   /**
    * NAVIGATION FILTERING LOGIC
    * Refactored: Uses .includes() to support multiple assigned verticals.
