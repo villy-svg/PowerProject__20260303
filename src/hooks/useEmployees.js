@@ -20,7 +20,17 @@ export const useEmployees = () => {
     if (showLoading) setLoading(true);
     try {
       const { employees: resolved, hubs: hubList } = await employeeService.getEmployees();
-      setEmployees(resolved);
+      
+      // Fetch users to map App Access status
+      const { data: usersData } = await (await import('../services/core/supabaseClient')).supabase
+        .from('user_profiles').select('id, email');
+
+      const finalEmployees = resolved.map(emp => {
+        const matchingUser = (usersData || []).find(u => u.email && emp.email && u.email.toLowerCase() === emp.email.toLowerCase());
+        return { ...emp, is_app_user: !!matchingUser, app_user_id: matchingUser?.id };
+      });
+
+      setEmployees(finalEmployees);
       setHubs(hubList);
     } catch (error) {
       masterErrorHandler.handleDatabaseError(error, 'useEmployees.fetchEmployees');

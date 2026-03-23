@@ -38,6 +38,9 @@ const EmployeeListRow = ({ emp, onEdit, onView, onDelete, onToggleStatus, permis
       <div className="list-main-info">
         <div className="list-name">
           {emp.full_name}
+          {emp.is_app_user && (
+            <span className="app-user-badge-mini" style={{ marginLeft: '8px', backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase' }} title="Has App Access">APP USER</span>
+          )}
           {emp.isDuplicate && (
             <span className="duplicate-badge-mini" style={{ marginLeft: '8px' }} title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
           )}

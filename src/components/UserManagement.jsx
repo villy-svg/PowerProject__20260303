@@ -50,14 +50,26 @@ const UserManagement = ({ currentUser }) => {
       console.error("Error loading vertical data:", vError.message);
     }
 
-    // 3. Merge vertical IDs into the profile objects for display
+    // 3. Fetch employees to map to users by email
+    const { data: empData, error: eError } = await supabase
+      .from('employees')
+      .select('id, full_name, email, emp_code, status');
+
+    if (eError) {
+      console.error("Error loading employee data:", eError.message);
+    }
+
+    // 4. Merge vertical IDs and employee data into the profile objects for display
     const mergedData = (profiles || []).map(u => {
       const uAccess = (vAccess || []).filter(va => va.user_id === u.id);
       const vPerms = {};
       uAccess.forEach(va => {
         vPerms[va.vertical_id] = { level: va.access_level };
       });
-      return { ...u, verticalPermissions: vPerms };
+      
+      const linkedEmployee = (empData || []).find(e => e.email && u.email && e.email.toLowerCase() === u.email.toLowerCase()) || null;
+
+      return { ...u, verticalPermissions: vPerms, linkedEmployee };
     });
 
     setUsers(mergedData);
@@ -292,6 +304,7 @@ const UserManagement = ({ currentUser }) => {
                 <th>Name / Email</th>
                 <th>Role</th>
                 <th>Vertical Access</th>
+                <th>Employee Link</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -335,6 +348,17 @@ const UserManagement = ({ currentUser }) => {
                         })()
                       )}
                     </div>
+                  </td>
+                  <td>
+                    {u.linkedEmployee ? (
+                      <div className="employee-link-badge">
+                        <span className="v-tag simple linked" style={{background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)'}}>
+                          ✓ Linked: {u.linkedEmployee.full_name} ({u.linkedEmployee.emp_code})
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="v-tag locked" style={{opacity: 0.6}}>Not an Employee</span>
+                    )}
                   </td>
                   <td>
                     <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
@@ -382,6 +406,17 @@ const UserManagement = ({ currentUser }) => {
                         <span className="v-tag locked">No Access</span>
                       );
                     })()
+                  )}
+                </div>
+                
+                <label style={{marginTop: '12px'}}>Employee Profile</label>
+                <div className="employee-link-status" style={{marginTop: '4px'}}>
+                  {u.linkedEmployee ? (
+                    <span className="v-tag simple linked" style={{background: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)'}}>
+                      ✓ {u.linkedEmployee.full_name} ({u.linkedEmployee.emp_code})
+                    </span>
+                  ) : (
+                    <span className="v-tag locked" style={{opacity: 0.6}}>Not an Employee</span>
                   )}
                 </div>
               </div>

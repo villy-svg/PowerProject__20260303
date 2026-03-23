@@ -36,6 +36,9 @@ const EmployeeCard = ({ emp, onEdit, onView, onDelete, onToggleStatus, permissio
       title="Double-click to view"
     >
       <div className="employee-card-badges">
+        {emp.is_app_user && (
+          <span className="app-user-badge" style={{ backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase' }} title="Has App Access">APP USER</span>
+        )}
         {emp.isDuplicate && (
           <span className="duplicate-badge" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
         )}
