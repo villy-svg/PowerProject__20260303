@@ -70,8 +70,24 @@ function App() {
     deleteTask,
   } = useTasks();
 
+  // Combined Initial Data Load
   useEffect(() => {
-    fetchTasks();
+    const initData = async () => {
+      // Start fetching global tasks immediately
+      const tasksPromise = fetchTasks();
+      
+      // Get session and start profile fetch if session exists
+      const session = await authService.getSession();
+      setSession(session);
+      
+      if (session) {
+        await fetchUserProfile(session.user.id);
+      }
+      
+      await tasksPromise;
+    };
+    
+    initData();
   }, [fetchTasks]);
 
   // 3. Daily Task state

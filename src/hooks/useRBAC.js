@@ -23,7 +23,7 @@ export const useRBAC = (user, activeVertical) => {
     // Master Scope: global access, all features visible
     // -----------------------------------------------------------------------
     if (isMasterScope) {
-      return {
+      const masterPerms = {
         ...baseCaps,
         scope: 'global',
         roleId,
@@ -36,6 +36,21 @@ export const useRBAC = (user, activeVertical) => {
         canAccessHubTasks: true,
         canAccessDailyHubTasks: true,
       };
+
+      // Ensure feature-specific CRUD flags match global CRUD flags for master roles
+      const features = [
+        'Clients', 'ClientTasks', 'LeadsFunnel', 
+        'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks'
+      ];
+
+      features.forEach(feat => {
+        masterPerms[`canCreate${feat}`] = !!baseCaps.canCreate;
+        masterPerms[`canRead${feat}`]   = !!baseCaps.canRead;
+        masterPerms[`canUpdate${feat}`] = !!baseCaps.canUpdate;
+        masterPerms[`canDelete${feat}`] = !!baseCaps.canDelete;
+      });
+
+      return masterPerms;
     }
 
     // -----------------------------------------------------------------------
@@ -46,9 +61,9 @@ export const useRBAC = (user, activeVertical) => {
     // Normalize sub-views back to their root vertical ID
     const rootVerticalId =
       (current === 'CHARGING_HUBS' || current === 'hub_tasks' || current === 'daily_hub_tasks') ? 'CHARGING_HUBS' :
-      (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
-      (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
-      current.toUpperCase();
+        (current === 'CLIENTS' || current === 'client_tasks' || current === 'leads_funnel') ? 'CLIENTS' :
+          (current === 'EMPLOYEES' || current === 'employee_tasks') ? 'EMPLOYEES' :
+            current.toUpperCase();
 
     const permData = user.verticalPermissions?.[rootVerticalId];
     const level = permData?.level || 'none';
@@ -77,7 +92,7 @@ export const useRBAC = (user, activeVertical) => {
 
       // Granular CRUD — effective = minimum of vertical and feature access
       finalPerms[`canCreate${featureName}`] = verticalCaps.canCreate && featureCaps.canCreate;
-      finalPerms[`canRead${featureName}`]   = verticalCaps.canRead   && featureCaps.canRead;
+      finalPerms[`canRead${featureName}`] = verticalCaps.canRead && featureCaps.canRead;
       finalPerms[`canUpdate${featureName}`] = verticalCaps.canUpdate && featureCaps.canUpdate;
       finalPerms[`canDelete${featureName}`] = verticalCaps.canDelete && featureCaps.canDelete;
     });

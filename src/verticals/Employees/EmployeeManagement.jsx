@@ -118,10 +118,14 @@ const EmployeeManagement = ({ permissions, filters }) => {
   const filteredEmployees = employees.filter(emp => {
     const matchesStatus = showInactive || emp.status === 'Active';
     
-    // Apply Subsidebar Filters
-    const matchesRole = !filters?.role?.length || filters.role.includes(emp.role_code);
+    // Apply Subsidebar Filters - Defensive Matching
+    const matchesRole = !filters?.role?.length || filters.role.some(r => 
+      r?.trim().toUpperCase() === emp.role_code?.trim().toUpperCase()
+    );
     const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
-    const matchesDept = !filters?.department?.length || filters.department.includes(emp.dept_code);
+    const matchesDept = !filters?.department?.length || filters.department.some(d => 
+      d?.trim().toUpperCase() === emp.dept_code?.trim().toUpperCase()
+    );
 
     return matchesStatus && matchesRole && matchesHub && matchesDept;
   });
