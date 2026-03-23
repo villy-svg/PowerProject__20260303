@@ -3,6 +3,7 @@
  * Specialized service for managing the `daily_task_templates` table.
  */
 import { supabase } from '../core/supabaseClient';
+import { dailyTaskService } from './dailyTaskService';
 
 const normalizeTemplate = (row) => ({
   id: row.id,
@@ -122,4 +123,20 @@ export const dailyTaskTemplateService = {
 
     if (error) throw error;
   },
+  
+  async generateSampleTask(template, userId) {
+    const taskData = {
+      text: `[SAMPLE] ${template.title}`,
+      description: template.description,
+      priority: 'Medium',
+      stageId: 'TODO',
+      verticalId: template.verticalId,
+      hub_id: template.subjectId, // dailyTaskService.addTask handles the mapping to hub_id/client_id etc
+      assigned_to: template.assignedTo,
+      is_recurring: true,
+      scheduled_date: new Date().toISOString().split('T')[0],
+      is_sample: true // Adding a flag for UI identification if needed
+    };
+    return dailyTaskService.addTask(taskData, userId);
+  }
 };

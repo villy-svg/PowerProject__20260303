@@ -147,6 +147,21 @@ const DailyTasksManagement = ({ permissions = {} }) => {
     }
   };
 
+  const handleCreateSample = async (template) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await dailyTaskTemplateService.generateSampleTask(template, user.id);
+      setStatusMsg({ type: 'success', text: `Sample task created for "${template.title}"! Check the Daily Board.` });
+      setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+    } catch (err) {
+      masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Create Sample Task');
+      setStatusMsg({ type: 'error', text: 'Failed to create sample task.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Determine which subjects to show based on vertical
   const subjectOptions = formData.verticalId === 'CLIENT_MANAGEMENT' 
     ? clients.map(c => ({ id: c.id, label: c.name })) :
@@ -177,6 +192,11 @@ const DailyTasksManagement = ({ permissions = {} }) => {
         }
         rightActions={
           <>
+            {statusMsg.text && !isModalOpen && (
+              <span className={`status-pill ${statusMsg.type}`} style={{ marginRight: '1rem' }}>
+                {statusMsg.text}
+              </span>
+            )}
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
               + New Template
             </button>
@@ -184,7 +204,7 @@ const DailyTasksManagement = ({ permissions = {} }) => {
         }
       />
 
-      {loading && !isModalOpen && <div className="loading-spinner">Loading Templates...</div>}
+      {loading && !isModalOpen && <div className="loading-spinner">Processing...</div>}
 
       {viewMode === 'grid' ? (
         <div className="templates-grid">
@@ -194,13 +214,22 @@ const DailyTasksManagement = ({ permissions = {} }) => {
                 <span className={`status-badge ${template.isActive ? 'active' : 'inactive'}`}>
                   {template.isActive ? 'Active' : 'Paused'}
                 </span>
-                <button 
-                  className="icon-btn toggle" 
-                  onClick={() => handleToggleStatus(template)}
-                  title={template.isActive ? "Pause Generation" : "Resume Generation"}
-                >
-                  {template.isActive ? '⏸' : '▶'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    className="icon-btn test" 
+                    onClick={() => handleCreateSample(template)}
+                    title="Create Sample Task (Test Play)"
+                  >
+                    🧪
+                  </button>
+                  <button 
+                    className="icon-btn toggle" 
+                    onClick={() => handleToggleStatus(template)}
+                    title={template.isActive ? "Pause Generation" : "Resume Generation"}
+                  >
+                    {template.isActive ? '⏸' : '▶'}
+                  </button>
+                </div>
               </div>
               <div className="template-frequency halo-type">{template.frequency}</div>
               <h3 className="template-title">{template.title}</h3>
@@ -250,6 +279,7 @@ const DailyTasksManagement = ({ permissions = {} }) => {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
+                      <button className="icon-btn test" onClick={() => handleCreateSample(template)} title="Create Sample">🧪</button>
                       <button className="icon-btn" onClick={() => handleToggleStatus(template)}>{template.isActive ? '⏸' : '▶'}</button>
                       <button className="icon-btn edit" onClick={() => handleOpenModal(template)}>✎</button>
                       <button className="icon-btn delete" onClick={() => handleDelete(template.id)}>×</button>
