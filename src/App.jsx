@@ -332,12 +332,10 @@ function App() {
               <ClientServiceManagement user={user} permissions={currentUserPermissions} />
             ) : activeVertical === 'client_billing_model_management' ? (
               <ClientBillingModelManagement user={user} permissions={currentUserPermissions} />
-            ) : activeVertical === 'daily_task_templates' ? (
-              <DailyTasksManagement permissions={currentUserPermissions} />
             ) : (
               <VerticalWorkspace
                 label={
-                  (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS' || activeVertical === 'daily_hub_tasks') ? 'Hubs List' :
+                  (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? 'Hubs List' :
                   (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
                   (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
                   VERTICALS[activeVertical]?.label
@@ -355,19 +353,19 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 SidebarComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubSubSidebar :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubTaskForm :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
-                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? HubTaskTile :
+                  (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskTile :
                     (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
                       (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null
@@ -377,7 +375,7 @@ function App() {
                     ? () => setActiveVertical('EMPLOYEES')
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
                        ? () => setActiveVertical('CLIENTS')
-                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks'))
+                      : (currentUserPermissions.canAccessConfig && (activeVertical === 'CHARGING_HUBS' || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates'))
                         ? () => setActiveVertical('hub_management')
                         : null
                 }
@@ -396,6 +394,12 @@ function App() {
                     user={user}
                     permissions={currentUserPermissions}
                     tasks={tasks.filter(t => t.verticalId === 'CLIENTS')}
+                  />
+                )}
+                {activeVertical === 'daily_task_templates' && (
+                  <DailyTasksManagement 
+                    permissions={currentUserPermissions} 
+                    refreshTasks={fetchDailyTasks}
                   />
                 )}
               </VerticalWorkspace>

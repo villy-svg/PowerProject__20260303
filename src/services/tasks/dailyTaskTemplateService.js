@@ -129,7 +129,7 @@ export const dailyTaskTemplateService = {
       text: `[SAMPLE] ${template.title}`,
       description: template.description,
       priority: 'Medium',
-      stageId: 'TODO',
+      stageId: 'BACKLOG',
       verticalId: template.verticalId,
       hub_id: template.subjectId, // dailyTaskService.addTask handles the mapping to hub_id/client_id etc
       assigned_to: template.assignedTo,

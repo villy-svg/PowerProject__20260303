@@ -5,7 +5,7 @@ import { dailyTaskTemplateService } from '../../services/tasks/dailyTaskTemplate
 import MasterPageHeader from '../../components/MasterPageHeader';
 import './DailyTasksManagement.css';
 
-const DailyTasksManagement = ({ permissions = {} }) => {
+const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,17 +40,19 @@ const DailyTasksManagement = ({ permissions = {} }) => {
 
   const fetchReferenceData = async () => {
     try {
-      const [hubRes, empRes, clientRes, rolesRes] = await Promise.all([
+      const [hubRes, empRes, clientRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code'),
-        supabase.from('employees').select('id, full_name, email, role_id'),
-        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] })),
-        supabase.from('employee_roles').select('id, seniority_level')
+        supabase.from('employees').select('id, full_name, email, role_id, employee_roles(seniority_level)'),
+        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] }))
       ]);
-      
-      const roleSeniorityMap = new Map((rolesRes.data || []).map(r => [r.id, r.seniority_level || 1]));
 
       const allEmps = empRes.data || [];
-      const seniorEmps = allEmps.filter(e => (roleSeniorityMap.get(e.role_id) || 1) >= 3);
+      const seniorEmps = allEmps.filter(e => {
+        // Handle array or object from Supabase join
+        const roles = e.employee_roles;
+        const lvl = Array.isArray(roles) ? roles[0]?.seniority_level : roles?.seniority_level;
+        return (lvl || 1) >= 3;
+      });
 
       setHubs(hubRes.data || []);
       setEmployees(allEmps);
@@ -152,6 +154,7 @@ const DailyTasksManagement = ({ permissions = {} }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       await dailyTaskTemplateService.generateSampleTask(template, user.id);
+      if (refreshTasks) refreshTasks(); // Fetch the new task so it's ready in the board
       setStatusMsg({ type: 'success', text: `Sample task created for "${template.title}"! Check the Daily Board.` });
       setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
     } catch (err) {
@@ -163,9 +166,9 @@ const DailyTasksManagement = ({ permissions = {} }) => {
   };
 
   // Determine which subjects to show based on vertical
-  const subjectOptions = formData.verticalId === 'CLIENT_MANAGEMENT' 
+  const subjectOptions = formData.verticalId === 'CLIENTS' 
     ? clients.map(c => ({ id: c.id, label: c.name })) :
-    formData.verticalId === 'EMPLOYEE_MANAGEMENT' 
+    formData.verticalId === 'EMPLOYEES' 
     ? employees.map(e => ({ id: e.id, label: e.full_name })) : 
     hubs.map(h => ({ id: h.id, label: h.hub_code || h.name }));
 
@@ -335,8 +338,8 @@ const DailyTasksManagement = ({ permissions = {} }) => {
                     onChange={(e) => setFormData({ ...formData, verticalId: e.target.value, subjectId: '' })}
                   >
                     <option value="CHARGING_HUBS">Charging Hubs</option>
-                    <option value="CLIENT_MANAGEMENT">Client Management</option>
-                    <option value="EMPLOYEE_MANAGEMENT">Employee Management</option>
+                    <option value="CLIENTS">Client Management</option>
+                    <option value="EMPLOYEES">Employee Management</option>
                   </select>
                 </div>
                 
