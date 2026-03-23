@@ -60,9 +60,9 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
   // Defines task uniqueness for in-file AND db dedup: same text + hub + function
   const getConflictKey = (row) => {
-    const hub = row.hub_code || row.hub_id || '';
+    const subject = row.hub_code || row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id || '';
     const func = row.function_code || row.function || '';
-    return `${(row.text || '').toLowerCase().trim()}|${hub}|${func}`;
+    return `${(row.text || '').toLowerCase().trim()}|${subject}|${func}`;
   };
 
   // Renders a conflict tile in the modal
@@ -119,7 +119,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         const existingMatch = ctx.existingTasks.find(t =>
           getConflictKey({ 
             text: t.text, 
-            hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || '', 
+            hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || 
+                       t.client_id || t.employee_id || t.partner_id || t.vendor_id || '', 
             function_code: (t.function || t.function_name) || '',
             vertical_id: t.verticalId || t.vertical_id || verticalId
           }) === getConflictKey(row)
@@ -140,7 +141,15 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         if (isDaily) {
           taskRow.stage_id = row.stageid || 'BACKLOG';
           taskRow.function_name = resolvedFunc;
-          taskRow.vertical_id = verticalId; // Crucial for multi-vertical daily tasks
+          taskRow.vertical_id = verticalId;
+
+          // Multi-Subject Mapping during Import
+          const vid = verticalId.toUpperCase();
+          if (vid.includes('CLIENT')) taskRow.client_id = resolvedHubId;
+          else if (vid.includes('EMPLOYEE')) taskRow.employee_id = resolvedHubId;
+          else if (vid.includes('PARTNER')) taskRow.partner_id = resolvedHubId;
+          else if (vid.includes('VENDOR')) taskRow.vendor_id = resolvedHubId;
+          else taskRow.hub_id = resolvedHubId;
         } else {
           taskRow.verticalid = verticalId;
           taskRow.stageid = row.stageid || 'BACKLOG';

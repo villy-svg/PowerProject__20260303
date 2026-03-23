@@ -10,10 +10,10 @@ const normalizeDailyTask = (row) => ({
   description: row.description,
   priority: row.priority,
   stageId: row.stage_id, // Mapping snake_case DB to camelCase UI
-  hub_id: row.hub_id,
+  hub_id: row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id, // Unified subject ID for UI
   city: row.city,
-  function: row.function_name, // Mapping function_name DB to function UI
-  verticalId: row.vertical_id, // New column for multi-vertical support
+  function: row.function_name, 
+  verticalId: row.vertical_id,
   assigned_to: row.assigned_to,
   scheduled_date: row.scheduled_date,
   is_recurring: row.is_recurring,
@@ -25,21 +25,34 @@ const normalizeDailyTask = (row) => ({
   submissionBy: row.submission_by,
 });
 
-const mapDailyTaskToRow = (task) => ({
-  text: task.text,
-  description: task.description || null,
-  priority: task.priority || 'Medium',
-  stage_id: task.stageId,
-  hub_id: task.hub_id === '' ? null : (task.hub_id || null),
-  city: task.city || null,
-  function_name: task.function || null,
-  vertical_id: task.verticalId || 'CHARGING_HUBS', 
-  assigned_to: task.assigned_to || null,
-  scheduled_date: task.scheduled_date || new Date().toISOString().split('T')[0],
-  is_recurring: !!task.is_recurring,
-  last_updated_by: task.lastUpdatedBy || null,
-  submission_by: task.submissionBy || null,
-});
+const mapDailyTaskToRow = (task) => {
+  const vid = (task.verticalId || '').toUpperCase();
+  const subjectId = task.hub_id === '' ? null : (task.hub_id || null);
+
+  const row = {
+    text: task.text || 'Untitled Task',
+    description: task.description || null,
+    priority: task.priority || 'Medium',
+    stage_id: task.stageId, // Keep stage_id from original mapping
+    city: task.city || null,
+    function_name: task.function || null,
+    vertical_id: task.verticalId || 'CHARGING_HUBS', 
+    assigned_to: task.assigned_to || null,
+    scheduled_date: task.scheduled_date || new Date().toISOString().split('T')[0],
+    is_recurring: !!task.is_recurring,
+    last_updated_by: task.lastUpdatedBy || null,
+    submission_by: task.submissionBy || null,
+  };
+
+  // Intelligent Subject Mapping
+  if (vid.includes('CLIENT')) row.client_id = subjectId;
+  else if (vid.includes('EMPLOYEE')) row.employee_id = subjectId;
+  else if (vid.includes('PARTNER')) row.partner_id = subjectId;
+  else if (vid.includes('VENDOR')) row.vendor_id = subjectId;
+  else row.hub_id = subjectId; // Fallback to Hubs
+
+  return row;
+};
 
 const DAILY_TASK_SELECT = '*, employees:assigned_to (full_name)';
 
