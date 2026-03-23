@@ -52,6 +52,11 @@ const EmployeeTreeCard = ({
       <div className="tree-card-content">
         <div className="tree-card-header">
           <h3 className="employee-card-name">{emp.full_name}</h3>
+          {hasChildren && (
+            <span className="reportee-count-badge" title={`${emp.children?.length || 0} Direct Reportees`}>
+              {emp.children?.length || 0}
+            </span>
+          )}
           {isCurrentUser && <span className="current-user-badge">YOU</span>}
         </div>
         
