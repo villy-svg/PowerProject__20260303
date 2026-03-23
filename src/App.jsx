@@ -300,8 +300,7 @@ function App() {
             ) : (
               <VerticalWorkspace
                 label={
-                  (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS') ? 'Hubs List' :
-                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
+                  (activeVertical === 'hub_tasks' || activeVertical === 'CHARGING_HUBS' || activeVertical === 'daily_hub_tasks') ? 'Hubs List' :
                   (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') ? 'Employees' :
                   (activeVertical === 'CLIENTS' || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
                   VERTICALS[activeVertical]?.label
