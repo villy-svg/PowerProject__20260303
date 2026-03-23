@@ -28,7 +28,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Small horizontal branch to the card */
@@ -36,14 +36,14 @@
   content: '';
   position: absolute;
   left: 0;
-  top: 40px;
+  top: 35px; /* Aligned with card center height approx */
   width: 20px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .tree-node-wrapper:last-child::before {
-  height: 40px; /* Only go down to the last branch */
+  height: 35px; /* Only go down to the last branch */
 }
 
 /* Root nodes (top level) don't need connecting lines */
@@ -60,31 +60,138 @@
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   position: relative;
 }
 
-/* Current User Highlight */
-.employee-card.is-current-user {
-  border: 2px solid var(--brand-green);
-  background: rgba(0, 255, 135, 0.08);
-  box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
-  z-index: 10;
+/* Toggle Button */
+.tree-toggle-btn {
+  position: absolute;
+  left: -12px;
+  top: 25px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  border: 1px solid var(--brand-green);
+  color: var(--brand-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: all 0.2s;
 }
 
-.current-user-marker {
-  position: absolute;
-  top: -10px;
-  right: 10px;
+.tree-toggle-btn:hover {
   background: var(--brand-green);
   color: #000;
-  font-size: 0.6rem;
+  transform: scale(1.1);
+}
+
+.toggle-icon {
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+  display: block;
+}
+
+/* Compact Tree Card */
+.employee-tree-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 320px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.employee-tree-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.employee-tree-card.is-current-user {
+  border: 2px solid var(--brand-green);
+  background: rgba(0, 255, 135, 0.05);
+  box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
+}
+
+.tree-card-content {
+  flex: 1;
+}
+
+.tree-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.employee-card-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.current-user-badge {
+  background: var(--brand-green);
+  color: #000;
+  font-size: 0.65rem;
   font-weight: 900;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: 4px;
   text-transform: uppercase;
-  z-index: 11;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.tree-card-details {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tree-card-details .role-badge,
+.tree-card-details .hub-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tree-card-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0; /* Hide by default, show on hover */
+  transition: opacity 0.2s;
+}
+
+.employee-tree-card:hover .tree-card-actions {
+  opacity: 1;
+}
+
+/* Status variants */
+.employee-tree-card.inactive {
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.employee-tree-card.selected {
+  border-color: var(--brand-green);
+  background: rgba(0, 255, 135, 0.03);
+}
+
+/* Selection Checkbox */
+.selection-checkbox {
+  cursor: pointer;
 }
 
 /* Animation */

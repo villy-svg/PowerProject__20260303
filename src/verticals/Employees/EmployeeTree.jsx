@@ -1,12 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
-import EmployeeCard from './EmployeeCard';
+import EmployeeTreeCard from './EmployeeTreeCard';
 import './EmployeeTree.css';
 
 /**
  * EmployeeTree
  * 
  * Visualizes the organizational structure as a nested tree.
+ * Features:
+ * - Simplified compact cards (Name, Role, Hub).
+ * - Collapsible branches with +/- toggles.
+ * - Defaults to showing current user's upstream path.
  */
 const EmployeeTree = ({ 
   employees, 
@@ -21,38 +25,66 @@ const EmployeeTree = ({
   selectedIds,
   onSelect
 }) => {
+  const [expandedIds, setExpandedIds] = useState(new Set());
+
   // Build tree from flat data
   const treeData = useMemo(() => {
     return hierarchyUtils.buildTree(employees, 'id', 'manager_id');
   }, [employees]);
 
-  // Determine if a node is the current user
-  const isUser = (emp) => emp.email === user.email || emp.user_id === user.id;
+  // Initial setup: Expand the upstream path (ancestors) for the current user
+  useEffect(() => {
+    if (user && employees.length > 0) {
+      const currentUser = employees.find(e => e.email === user.email || e.user_id === user.id);
+      if (currentUser) {
+        const ancestors = hierarchyUtils.getAncestors(employees, currentUser.id, 'id', 'manager_id');
+        const ancestorIds = ancestors.map(a => a.id);
+        // Expand ancestors so the user is visible, and expand the user's node to see their immediate subordinates/buttons
+        setExpandedIds(new Set([...ancestorIds, currentUser.id]));
+      }
+    }
+  }, [user, employees]);
+
+  const toggleNode = (nodeId) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(nodeId)) {
+        next.delete(nodeId);
+      } else {
+        next.add(nodeId);
+      }
+      return next;
+    });
+  };
 
   const renderNode = (node) => {
     const hasChildren = node.children && node.children.length > 0;
-    const isCurrentUser = isUser(node);
+    const isExpanded = expandedIds.has(node.id);
 
     return (
-      <div key={node.id} className="tree-node-wrapper">
+      <div key={node.id} className={`tree-node-wrapper ${hasChildren ? (isExpanded ? 'is-expanded' : 'is-collapsed') : 'is-leaf'}`}>
         <div className="card-container" style={{ position: 'relative' }}>
-          {isCurrentUser && <div className="current-user-marker">YOU</div>}
-          <EmployeeCard 
+          {hasChildren && (
+            <button 
+              className="tree-toggle-btn" 
+              onClick={() => toggleNode(node.id)}
+              title={isExpanded ? 'Collapse' : 'Expand'}
+            >
+              <span className="toggle-icon">{isExpanded ? '−' : '+'}</span>
+            </button>
+          )}
+          <EmployeeTreeCard 
             emp={node}
+            user={user}
             onEdit={onEdit}
-            onView={onView}
             onDelete={onDelete}
-            onToggleStatus={onToggleStatus}
             permissions={permissions}
-            availableHubs={availableHubs}
-            onUpdateHub={onUpdateHub}
             isSelected={selectedIds.includes(node.id)}
             onSelect={onSelect}
-            className={isCurrentUser ? 'is-current-user' : ''}
           />
         </div>
         
-        {hasChildren && (
+        {hasChildren && isExpanded && (
           <div className="tree-children">
             {node.children.map(child => renderNode(child))}
           </div>
