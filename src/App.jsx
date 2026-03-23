@@ -52,7 +52,12 @@ function App() {
   const { darkMode, toggleTheme } = useTheme();
   const [activeVertical, setActiveVertical] = useState(() => localStorage.getItem('power_project_active_vertical'));
 
-  // Task state and all CRUD operations via the useTasks hook
+  // 1. Auth and User Identity
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const [profileError, setProfileError] = useState(null);
+
+  // 2. Main Task state
   const {
     tasks,
     setTasks,
@@ -69,7 +74,7 @@ function App() {
     fetchTasks();
   }, [fetchTasks]);
 
-  // 2b. Daily Task state
+  // 3. Daily Task state
   const {
     tasks: dailyTasks,
     setTasks: setDailyTasks,
@@ -85,11 +90,6 @@ function App() {
   useEffect(() => {
     if (user) fetchDailyTasks();
   }, [user, fetchDailyTasks]);
-
-  // 3. Auth and User Identity
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [profileError, setProfileError] = useState(null);
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
