@@ -14,6 +14,7 @@ const DailyTasksManagement = ({ permissions = {} }) => {
   // Reference Data
   const [hubs, setHubs] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [seniorEmployees, setSeniorEmployees] = useState([]);
   const [clients, setClients] = useState([]);
   
   const [viewMode, setViewMode] = useState('grid');
@@ -39,14 +40,21 @@ const DailyTasksManagement = ({ permissions = {} }) => {
 
   const fetchReferenceData = async () => {
     try {
-      const [hubRes, empRes, clientRes] = await Promise.all([
-        supabase.from('hubs').select('id, name'),
-        supabase.from('employees').select('id, full_name, email'),
-        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] }))
+      const [hubRes, empRes, clientRes, rolesRes] = await Promise.all([
+        supabase.from('hubs').select('id, name, hub_code'),
+        supabase.from('employees').select('id, full_name, email, role_id'),
+        supabase.from('clients').select('id, name').limit(100).catch(() => ({ data: [] })),
+        supabase.from('employee_roles').select('id, seniority_level')
       ]);
+      
+      const roleSeniorityMap = new Map((rolesRes.data || []).map(r => [r.id, r.seniority_level || 1]));
+
+      const allEmps = empRes.data || [];
+      const seniorEmps = allEmps.filter(e => (roleSeniorityMap.get(e.role_id) || 1) >= 3);
+
       setHubs(hubRes.data || []);
-      setEmployees(empRes.data || []);
-      // Some clients might not exist depending on schemas, so gracefully fallback
+      setEmployees(allEmps);
+      setSeniorEmployees(seniorEmps);
       setClients(clientRes?.data || []);
     } catch (err) {
       console.error('Error fetching reference data', err);
@@ -140,8 +148,11 @@ const DailyTasksManagement = ({ permissions = {} }) => {
   };
 
   // Determine which subjects to show based on vertical
-  const subjectOptions = formData.verticalId.includes('CLIENT') ? clients :
-                         formData.verticalId.includes('EMPLOYEE') ? employees.map(e => ({id: e.id, name: e.full_name})) : hubs;
+  const subjectOptions = formData.verticalId === 'CLIENT_MANAGEMENT' 
+    ? clients.map(c => ({ id: c.id, label: c.name })) :
+    formData.verticalId === 'EMPLOYEE_MANAGEMENT' 
+    ? employees.map(e => ({ id: e.id, label: e.full_name })) : 
+    hubs.map(h => ({ id: h.id, label: h.hub_code || h.name }));
 
   return (
     <>
@@ -307,8 +318,8 @@ const DailyTasksManagement = ({ permissions = {} }) => {
                     onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
                   >
                     <option value="">-- Generic Task --</option>
-                    {subjectOptions.map(sub => (
-                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    {subjectOptions.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
                     ))}
                   </select>
                 </div>
@@ -334,7 +345,7 @@ const DailyTasksManagement = ({ permissions = {} }) => {
                     onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
                   >
                     <option value="">-- Auto-Assign System Default --</option>
-                    {employees.map(emp => (
+                    {seniorEmployees.map(emp => (
                       <option key={emp.id} value={emp.id}>{emp.full_name || emp.email}</option>
                     ))}
                   </select>
