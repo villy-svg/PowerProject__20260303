@@ -97,7 +97,7 @@ function App() {
   useEffect(() => {
     const initAppData = async () => {
       try {
-        // Parallel Step 1: Verticals and Session
+        // Parallel Step 1: Critical infrastructure (Verticals and Session)
         const [vResult, sessionData] = await Promise.all([
           verticalService.getVerticals().catch(err => {
             console.warn('Falling back to static verticals.', err);
@@ -113,14 +113,14 @@ function App() {
         }
         setSession(sessionData);
 
-        // Sequential Step 2: Fetch Profile and Tasks if logged in
+        // Step 2: Fetch Identity (Blocking)
         if (sessionData) {
-          // Parallel Profile and Daily Tasks (Daily tasks often don't need profile data immediately)
-          await Promise.all([
-            fetchUserProfile(sessionData.user.id),
-            fetchTasks(),
-            fetchDailyTasks()
-          ]);
+          await fetchUserProfile(sessionData.user.id);
+          
+          // Step 3: Trigger Data (Non-blocking / Progressive)
+          // We don't 'await' these here so the app can start showing the UI immediately
+          fetchTasks();
+          fetchDailyTasks();
         }
       } catch (err) {
         console.error('App Initialization Error:', err);
@@ -344,7 +344,7 @@ function App() {
           </header>
           <main className="app-content">
             {!activeVertical ? (
-              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} verticalList={verticalList} />
+              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} verticalList={verticalList} loading={tasksLoading} />
             ) : activeVertical === 'configuration' ? (
               <Configuration
                 tasks={tasks}

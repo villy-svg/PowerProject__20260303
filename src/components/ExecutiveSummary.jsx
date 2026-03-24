@@ -8,7 +8,7 @@ import { hierarchyService } from '../services/rules/hierarchyService';
  * Displays task aggregates based on user permissions.
  * Multi-Vertical Update: Aggregates data from all assigned verticals in the array.
  */
-const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [] }) => {
+const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false }) => {
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -56,8 +56,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               style={{ '--stage-color': stage.color }}
             >
               <div className="summary-card">
-                  <span className="summary-count">{stageCount}</span>
-                  <span className="summary-label">{stage.label}</span>
+                  <span className="summary-count">
+                    {loading ? <span className="counting-placeholder">...</span> : stageCount}
+                  </span>
+                  <span className="summary-label">
+                    {loading ? 'Calculating...' : stage.label}
+                  </span>
               </div>
 
               {/* Breakdown list is gated by the scope permission */}
