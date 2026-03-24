@@ -3,7 +3,7 @@
  * Centralizes complex user-employee mapping rules and task visibility hierarchies.
  * Standardizes "over-and-above" RBAC logic for seniority-based restrictions.
  *
- * Canonical location: src/services/core/hierarchyService.js
+ * Canonical location: src/services/rules/hierarchyService.js
  */
 
 export const hierarchyService = {
@@ -29,34 +29,39 @@ export const hierarchyService = {
    * @param {Object} user - The current normalized user object.
    * @param {Array} tasks - Pre-filtered tasks (by vertical/status).
    * @param {string} activeVertical - The current UI vertical context.
-   * @param {Object} verticals - Map of dynamic verticals from backend.
+   * @param {Object} verticals - Map of dynamic verticals from backend (optional).
    * @returns {Array} Subset of tasks the user is allowed to see.
    */
   filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}) {
+    // Master Admin or Global Scope bypasses hierarchy filters
     if (!user || user.roleId === 'master_admin') return tasks;
 
     const seniority = user.seniority ?? 100;
     const employeeId = user.employeeId;
 
-    // HUB VISIBILITY RULE:
-    // Seniority <= 2 (e.g., junior field staff) only see tasks assigned to them.
-    // NOTE: This can be expanded to other VERTICALS as needed.
-    const isHubVertical = [
-      verticals.CHARGING_HUBS?.id, 
-      'hub_tasks', 
-      'daily_hub_tasks'
-    ].includes(activeVertical);
-    
-    if (isHubVertical && seniority <= 2) {
+    // RULE: Seniority <= 5
+    // User can only see and work on:
+    // 1. Tasks Assigned to them
+    // 2. Tasks Created by their reportees or members in their tree
+    if (seniority <= 5) {
       // If no employeeId is linked, they see nothing (security fallback)
       if (!employeeId) return [];
       
+      const reporteeUserIds = user.reporteeUserIds || [];
+
       return (tasks || []).filter(task => {
-        // Strict assignment check
-        return task.assigned_to === employeeId;
+        // 1. Tasks Assigned to them
+        const isAssignedToMe = task.assigned_to === employeeId;
+        
+        // 2. Tasks Created by their reportees or members in their tree
+        // Note: reporteeUserIds is expected to include the user's own ID as the root of the tree
+        const isCreatedByTreeMember = reporteeUserIds.includes(task.created_by) || task.created_by === user.id;
+
+        return isAssignedToMe || isCreatedByTreeMember;
       });
     }
 
+    // Default: Seniority > 5 sees all tasks in the vertical (provided they have RBAC access)
     return tasks;
   }
 };

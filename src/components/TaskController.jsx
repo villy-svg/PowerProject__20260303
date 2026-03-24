@@ -10,7 +10,7 @@ import { supabase } from '../services/core/supabaseClient';
 import MasterPageHeader from './MasterPageHeader';
 import ConflictModal from './ConflictModal';
 import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
-import { hierarchyService } from '../services/core/hierarchyService';
+import { hierarchyService } from '../services/rules/hierarchyService';
 import './TaskController.css';
 
 /**

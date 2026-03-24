@@ -9,6 +9,7 @@
  *   const user = await profileService.fetchUserProfile(userId);
  */
 import { supabase } from '../core/supabaseClient';
+import { hierarchyUtils } from '../../utils/hierarchyUtils';
 
 export const profileService = {
   /**
@@ -56,8 +57,11 @@ export const profileService = {
     // 5. Fetch linked employee and their seniority (over-and-above RBAC)
     let employeeData = null;
     let seniority = 100; // Default high seniority
+    let reporteeUserIds = [];
+    let reporteeEmployeeIds = [];
     
     if (profile.employee_id) {
+      // Fetch employee and their role level
       const { data: emp } = await supabase
         .from('employees')
         .select('id, role_id')
@@ -73,6 +77,24 @@ export const profileService = {
         
         employeeData = emp;
         seniority = role?.seniority_level || 100;
+
+        // FETCH REPORTING TREE (Only if seniority <= 5, to save resources)
+        if (seniority <= 5) {
+          const { data: allEmps } = await supabase.from('employees').select('id, manager_id');
+          if (allEmps) {
+            const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
+            const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
+            
+            // Map Employee IDs to User IDs (Auth IDs) via user_profiles
+            const { data: treeProfiles } = await supabase
+              .from('user_profiles')
+              .select('id, employee_id')
+              .in('employee_id', treeEmployeeIds);
+            
+            reporteeEmployeeIds = treeEmployeeIds;
+            reporteeUserIds = (treeProfiles || []).map(p => p.id);
+          }
+        }
       }
     }
 
@@ -85,6 +107,8 @@ export const profileService = {
       roleId: profile.role_id,
       employeeId: employeeData?.id || null,
       seniority: seniority,
+      reporteeUserIds: reporteeUserIds,
+      reporteeEmployeeIds: reporteeEmployeeIds,
       assignedVerticals: (vAccess || []).map(v => v.vertical_id),
       verticalPermissions: vPermsMap,
       baseCapabilities: rolePerms?.permissions || {},
