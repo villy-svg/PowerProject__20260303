@@ -12,7 +12,8 @@ const VerticalWorkspace = ({
   label, 
   activeVertical, 
   tasks, 
-  setTasks, // This now receives the 'addTask' async helper from App.jsx
+  setTasks, 
+  addTask,
   actualSetTasks,
   refreshTasks,
   deleteTask,
