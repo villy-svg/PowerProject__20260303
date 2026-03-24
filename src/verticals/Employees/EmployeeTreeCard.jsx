@@ -54,11 +54,6 @@ const EmployeeTreeCard = ({
         <div className="tree-card-header">
           <h3 className="employee-card-name">
             {emp.full_name}
-            {isAccessibleReportee && !isCurrentUser && (
-              <span className="visibility-indicator" title="Tasks created by this employee are visible to you due to hierarchy seniority.">
-                👁️
-              </span>
-            )}
           </h3>
           {hasChildren && (
             <span className="reportee-count-badge" title={`${emp.children?.length || 0} Direct Reportees`}>
