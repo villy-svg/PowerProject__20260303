@@ -1,6 +1,7 @@
 import React from 'react';
 import AssigneeBadge from './AssigneeBadge';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { hierarchyService } from '../services/rules/hierarchyService';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import './TaskListView.css';
 

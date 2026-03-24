@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { hierarchyService } from '../services/rules/hierarchyService';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { TASK_STAGES, STAGE_LIST } from '../constants/stages';
 import AssigneeBadge from './AssigneeBadge';
