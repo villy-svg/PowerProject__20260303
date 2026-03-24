@@ -116,7 +116,7 @@ function App() {
         // Step 2: Fetch Identity (Blocking)
         if (sessionData) {
           await fetchUserProfile(sessionData.user.id);
-          
+
           // Step 3: Trigger Data (Non-blocking / Progressive)
           // We don't 'await' these here so the app can start showing the UI immediately
           fetchTasks();
@@ -383,12 +383,12 @@ function App() {
               <VerticalWorkspace
                 label={
                   (activeVertical === 'daily_task_templates') ? 'Daily Task Templates' :
-                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
-                  (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
-                  (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
-                  (activeVertical === verticals.CLIENTS?.id) ? 'Clients' :
-                  (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client' :
-                  verticals[activeVertical]?.label
+                    (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
+                      (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
+                        (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
+                          (activeVertical === verticals.CLIENTS?.id) ? 'Clients' :
+                          (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
+                              verticals[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
@@ -425,7 +425,7 @@ function App() {
                   (activeVertical === 'employee_tasks')
                     ? () => setActiveVertical(verticals.EMPLOYEES?.id)
                     : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
-                       ? () => setActiveVertical(verticals.CLIENTS?.id)
+                      ? () => setActiveVertical(verticals.CLIENTS?.id)
                       : (currentUserPermissions.canAccessConfig && (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates'))
                         ? () => setActiveVertical('hub_management')
                         : null
@@ -449,8 +449,8 @@ function App() {
                   />
                 )}
                 {activeVertical === 'daily_task_templates' && (
-                  <DailyTasksManagement 
-                    permissions={currentUserPermissions} 
+                  <DailyTasksManagement
+                    permissions={currentUserPermissions}
                     refreshTasks={fetchDailyTasks}
                     currentUser={user}
                   />

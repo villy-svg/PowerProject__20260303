@@ -21,18 +21,18 @@ import './TaskController.css';
  * Functional engine of the workspace.
  * Supabase Update: Integrated async handling for Cloud CRUD operations.
  */
-const TaskController = ({ 
-  activeVertical, 
-  tasks = [], 
+const TaskController = ({
+  activeVertical,
+  tasks = [],
   setTasks,
   actualSetTasks,
   refreshTasks,
   updateTask,
   addTask,
   bulkUpdateTasks,
-  deleteTask, 
+  deleteTask,
   updateTaskStage,
-  TaskFormComponent, 
+  TaskFormComponent,
   TaskTileComponent,
   label, // For dynamic title
   handleFilterChange, // For filter updates
@@ -63,18 +63,18 @@ const TaskController = ({
   };
 
   // Determine stage consistency of selection
-  const selectedTasks = React.useMemo(() => 
-    (tasks || []).filter(t => selectedTaskIds.includes(t.id)), 
+  const selectedTasks = React.useMemo(() =>
+    (tasks || []).filter(t => selectedTaskIds.includes(t.id)),
     [tasks, selectedTaskIds]
   );
-  
-  const sameStage = selectedTasks.length > 0 && 
+
+  const sameStage = selectedTasks.length > 0 &&
     selectedTasks.every(t => t.stageId === selectedTasks[0].stageId);
   const commonStageId = sameStage ? selectedTasks[0].stageId : null;
 
   const handleBulkAction = async (action) => {
     if (selectedTaskIds.length === 0) return;
-    
+
     if (action === 'delete') {
       setConfirmDialog({
         isOpen: true,
@@ -120,7 +120,7 @@ const TaskController = ({
         let newIndex = currentIndex;
         if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
         if (action === 'backward' && currentIndex > 0) newIndex--;
-        
+
         if (newIndex !== currentIndex) {
           await bulkUpdateTasks(targetIds, { stageid: STAGE_LIST[newIndex].id });
         }
@@ -180,23 +180,23 @@ const TaskController = ({
   const fCanUpdate = permissions[`canUpdate${featureBaseName}`] ?? permissions.canUpdate;
   const fCanDelete = permissions[`canDelete${featureBaseName}`] ?? permissions.canDelete;
 
-  const canUserCreate = fCanCreate && 
+  const canUserCreate = fCanCreate &&
     (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(rootVerticalId) ||
       user.assignedVerticals.includes(activeVertical) ||
       user.assignedVerticals.includes(activeVertical.toUpperCase())
     )));
 
-  const canUserUpdate = fCanUpdate && 
+  const canUserUpdate = fCanUpdate &&
     (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(rootVerticalId) ||
       user.assignedVerticals.includes(activeVertical) ||
       user.assignedVerticals.includes(activeVertical.toUpperCase())
     )));
 
-  const canUserDelete = fCanDelete && 
+  const canUserDelete = fCanDelete &&
     (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(rootVerticalId) ||
       user.assignedVerticals.includes(activeVertical) ||
       user.assignedVerticals.includes(activeVertical.toUpperCase())
     )));
@@ -215,7 +215,7 @@ const TaskController = ({
     if (!task) return false;
     if (task.isContextOnly) return false;
     if (user.seniority > 5) return true;
-    
+
     const isCreator = (task.createdBy || task.created_by) === user.id;
     // Note: merely being assignee does NOT grant hierarchy management rights
     return isCreator;
@@ -277,9 +277,9 @@ const TaskController = ({
     const isEditing = !!(editingTask && editingTask.id);
     if (isEditing && (editingTask.isContextOnly || !canUserUpdate)) return;
     if (!isEditing && !canUserCreate) return;
-    
+
     setSaving(true);
-    
+
     try {
       if (isEditing) {
         // Full update
@@ -405,7 +405,7 @@ const TaskController = ({
   const toggleStageSelection = (stageId, stageTasks) => {
     const stageTaskIds = stageTasks.map(t => t.id);
     const allInStageSelected = stageTaskIds.every(id => selectedTaskIds.includes(id));
-    
+
     if (allInStageSelected) {
       // Deselect all in stage
       setSelectedTaskIds(prev => prev.filter(id => !stageTaskIds.includes(id)));
@@ -418,26 +418,26 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
+        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>
             <div className="view-mode-toggle">
-              <button 
+              <button
                 className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
                 onClick={() => setViewMode('kanban')}
                 style={{ fontWeight: viewMode === 'kanban' ? 600 : 400 }}
               >
                 Kanban
               </button>
-              <button 
+              <button
                 className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
                 onClick={() => setViewMode('list')}
                 style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
               >
                 List
               </button>
-              <button 
+              <button
                 className={`view-toggle-btn ${viewMode === 'tree' ? 'active' : ''}`}
                 onClick={() => setViewMode('tree')}
                 style={{ fontWeight: viewMode === 'tree' ? 600 : 400 }}
@@ -446,7 +446,7 @@ const TaskController = ({
               </button>
             </div>
 
-            <button 
+            <button
               className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
               onClick={() => setShowDeprioritized(!showDeprioritized)}
               title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
@@ -456,8 +456,8 @@ const TaskController = ({
             </button>
 
             {permissions.roleId === 'master_admin' && (
-              <button 
-                className="halo-button clear-board-btn" 
+              <button
+                className="halo-button clear-board-btn"
                 onClick={handleClearBoard}
                 disabled={saving}
                 title="Move all active tasks to Deprioritized"
@@ -478,8 +478,8 @@ const TaskController = ({
               </>
             )}
             {canUserCreate && !activeVertical.includes('daily') && (
-              <button 
-                className="halo-button master-action-btn" 
+              <button
+                className="halo-button master-action-btn"
                 onClick={openAddModal}
               >
                 + Add Task
@@ -489,16 +489,16 @@ const TaskController = ({
         }
       />
 
-      <TaskModal 
-        isOpen={isModalOpen} 
+      <TaskModal
+        isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
         title={editingTask ? `Edit Task` : `Add New ${activeVertical.replace('_', ' ')} Task`}
       >
         {TaskFormComponent ? (
-          <TaskFormComponent 
-            initialData={editingTask} 
-            onSubmit={handleSaveTask} 
-            loading={saving} 
+          <TaskFormComponent
+            initialData={editingTask}
+            onSubmit={handleSaveTask}
+            loading={saving}
             currentUser={user}
             availableTasks={(tasks || []).filter(t => {
               if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
@@ -516,18 +516,18 @@ const TaskController = ({
           }}>
             <div className="form-group">
               <label>Task Details</label>
-              <input 
-                name="taskText" 
-                type="text" 
-                placeholder="What needs to be done?" 
+              <input
+                name="taskText"
+                type="text"
+                placeholder="What needs to be done?"
                 defaultValue={editingTask?.text || ''}
-                required 
+                required
               />
             </div>
             <div className="form-group" style={{ marginTop: '1rem' }}>
               <label>Parent Task</label>
-              <select 
-                name="parentTask" 
+              <select
+                name="parentTask"
                 className="master-dropdown"
                 defaultValue={editingTask?.parentTask || ''}
               >
@@ -590,16 +590,16 @@ const TaskController = ({
         <div className="confirm-modal-body">
           <p className="confirm-message">{confirmDialog.message}</p>
           <div className="confirm-actions">
-            <button 
-              className="halo-button confirm-btn" 
+            <button
+              className="halo-button confirm-btn"
               onClick={confirmDialog.onConfirm}
               disabled={saving}
               style={{ fontWeight: 700 }}
             >
               {saving ? 'Working...' : 'Confirm'}
             </button>
-            <button 
-              className="halo-button cancel-btn" 
+            <button
+              className="halo-button cancel-btn"
               onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
               style={{ opacity: 0.6, fontWeight: 600 }}
             >
@@ -628,48 +628,48 @@ const TaskController = ({
                   const weightA = getPriorityWeight(a.priority);
                   const weightB = getPriorityWeight(b.priority);
                   if (weightA !== weightB) return weightB - weightA;
-                  
+
                   // Secondary: Duplicates together
                   if (a.isDuplicate && !b.isDuplicate) return -1;
                   if (!a.isDuplicate && b.isDuplicate) return 1;
-                  
+
                   // Tertiary: Hub codes (alphabetical)
                   const hubA = a.hub_code || '';
                   const hubB = b.hub_code || '';
                   if (hubA !== hubB) return hubA.localeCompare(hubB);
-                  
+
                   // Quaternary: Function codes (alphabetical)
                   const funcA = a.function || '';
                   const funcB = b.function || '';
                   if (funcA !== funcB) return funcA.localeCompare(funcB);
-                  
+
                   return 0;
                 });
-              
+
               const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
 
               return (
-                <div 
-                  key={stage.id} 
+                <div
+                  key={stage.id}
                   className="kanban-stage-halo"
-                  style={{ 
+                  style={{
                     borderTop: `4px solid ${stage.color}`,
                     borderColor: `${stage.color}44`,
-                    backgroundColor: `${stage.color}08` 
+                    backgroundColor: `${stage.color}08`
                   }}
                 >
                   <div className="stage-header">
                     <div className="header-left-group">
                       <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
                       {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
-                        <button 
+                        <button
                           onClick={() => toggleStageSelection(stage.id, stageTasks)}
-                          style={{ 
-                            background: 'none', 
-                            border: 'none', 
-                            color: 'var(--brand-green)', 
-                            fontSize: '0.65rem', 
-                            fontWeight: 600, 
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--brand-green)',
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
                             cursor: 'pointer',
                             padding: '0 8px',
                             marginLeft: '4px',
@@ -681,7 +681,7 @@ const TaskController = ({
                         </button>
                       )}
                     </div>
-                    <span 
+                    <span
                       className="task-count-badge"
                       style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
                     >
@@ -691,8 +691,8 @@ const TaskController = ({
 
                   <div className="task-drop-zone">
                     {stageTasks.map((task) => (
-                      <div 
-                        key={task.id} 
+                      <div
+                        key={task.id}
                         className="task-card-container"
                       >
                         <TaskCard
@@ -713,15 +713,15 @@ const TaskController = ({
                           currentUser={user}
                         >
                           {TaskTileComponent && (
-                            <TaskTileComponent 
-                              task={task} 
+                            <TaskTileComponent
+                              task={task}
                               stage={stage}
                             />
                           )}
                         </TaskCard>
                       </div>
                     ))}
-                    
+
                     {stageTasks.length === 0 && (
                       <p className="empty-msg">No tasks yet</p>
                     )}
@@ -731,7 +731,7 @@ const TaskController = ({
             })}
           </div>
         ) : viewMode === 'list' ? (
-          <TaskListView 
+          <TaskListView
             tasks={filteredTasks}
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={rootVerticalId || activeVertical}
