@@ -538,7 +538,7 @@ const UserManagement = ({ currentUser }) => {
                               <p className="features-header">Configure feature-specific levels for {v.label}:</p>
                               <div className="features-level-list">
                                 {VERTICAL_FEATURES[v.id].map(feature => {
-                                  const fLevel = editVerticalPermissions[v.id]?.features?.[feature.id] || 'viewer';
+                                  const fLevel = editVerticalPermissions[v.id]?.features?.[feature.id] || 'none';
                                   return (
                                     <div key={feature.id} className="feature-level-row">
                                       <span className="feature-label">{feature.label}</span>

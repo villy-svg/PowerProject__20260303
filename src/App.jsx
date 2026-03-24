@@ -229,6 +229,12 @@ function App() {
       return;
     }
 
+    // Daily Task Templates security guard
+    if (activeVertical === 'daily_task_templates' && !currentUserPermissions.canAccessDailyTaskTemplates) {
+      setActiveVertical(null);
+      return;
+    }
+
     // Standard Vertical validation
     const verticalKeys = Object.keys(verticals);
     if (verticalKeys.includes(activeVertical)) {

@@ -61,7 +61,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
 
     // Normalize sub-views back to their root vertical ID
     const rootVerticalId = 
-      (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks') ? verticals.CHARGING_HUBS?.id :
+      (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks' || current === 'daily_task_templates') ? verticals.CHARGING_HUBS?.id :
       (current === verticals.CLIENTS?.id || current === 'client_tasks' || current === 'leads_funnel') ? verticals.CLIENTS?.id :
       (current === verticals.EMPLOYEES?.id || current === 'employee_tasks') ? verticals.EMPLOYEES?.id :
       current.toUpperCase();
