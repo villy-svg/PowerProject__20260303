@@ -449,6 +449,7 @@ function App() {
                   <DailyTasksManagement 
                     permissions={currentUserPermissions} 
                     refreshTasks={fetchDailyTasks}
+                    currentUser={user}
                   />
                 )}
               </VerticalWorkspace>

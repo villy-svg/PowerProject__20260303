@@ -4,9 +4,11 @@ import { masterErrorHandler } from '../../services/core/masterErrorHandler';
 import { dailyTaskTemplateService } from '../../services/tasks/dailyTaskTemplateService';
 import { VERTICALS } from '../../constants/verticals';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import AssigneeSelector from '../../components/AssigneeSelector';
+import { taskUtils } from '../../utils/taskUtils';
 import './DailyTasksManagement.css';
 
-const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
+const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,29 +43,16 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
 
   const fetchReferenceData = async () => {
     try {
-      const [hubRes, empRes, clientRes, rolesRes] = await Promise.all([
+      const [hubRes, clientRes] = await Promise.all([
         supabase.from('hubs').select('id, name, hub_code'),
-        supabase.from('employees').select('id, full_name, email, role_id'),
         // Await the client fetch separately or inside an async IIFE to avoid the .catch() prototype error on PostgrestBuilder
         (async () => {
           const { data, error } = await supabase.from('clients').select('id, name').limit(100);
           return { data: error ? [] : data };
-        })(),
-        supabase.from('employee_roles').select('id, seniority_level')
+        })()
       ]);
 
-      const roleSeniorityMap = new Map((rolesRes.data || []).map(r => [r.id, r.seniority_level || 1]));
-
-      const allEmps = empRes.data || [];
-      const seniorEmps = allEmps.filter(e => {
-        // Safe check using Map built from separate query, avoiding join issues
-        const lvl = roleSeniorityMap.get(e.role_id) || 1;
-        return lvl >= 3;
-      });
-
       setHubs(hubRes.data || []);
-      setEmployees(allEmps);
-      setSeniorEmployees(seniorEmps);
       setClients(clientRes?.data || []);
     } catch (err) {
       console.error('Error fetching reference data', err);
@@ -175,8 +164,6 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
   // Determine which subjects to show based on vertical
   const subjectOptions = formData.verticalId === VERTICALS.CLIENTS.id
     ? clients.map(c => ({ id: c.id, label: c.name })) :
-    formData.verticalId === VERTICALS.EMPLOYEES.id
-    ? employees.map(e => ({ id: e.id, label: e.full_name })) : 
     hubs.map(h => ({ id: h.id, label: h.hub_code || h.name }));
 
   return (
@@ -253,7 +240,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
               
               <div className="template-meta">
                 <span><strong>Vertical:</strong> {template.verticalId.replace(/_/g, ' ')}</span>
-                <span><strong>Assignee:</strong> {template.assigneeName || 'Unassigned'}</span>
+                <span><strong>Assignee:</strong> {taskUtils.formatAssigneeForList(template.assignedTo, template.assigneeName, currentUser)}</span>
               </div>
               
               <div className="template-actions">
@@ -291,7 +278,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
                   <td className="name-cell">{template.title}</td>
                   <td><span className="v-tag master">{template.frequency}</span></td>
                   <td>{template.verticalId.replace(/_/g, ' ')}</td>
-                  <td>{template.assigneeName || '—'}</td>
+                  <td>{taskUtils.formatAssigneeForList(template.assignedTo, template.assigneeName, currentUser)}</td>
                   <td>
                     <span className={`status-pill ${template.isActive ? 'active' : 'inactive'}`}>
                       {template.isActive ? 'Active' : 'Paused'}
@@ -395,16 +382,11 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
 
                 <div className="form-group">
                   <label>Default Assignee</label>
-                  <select
-                    className="master-dropdown"
+                  <AssigneeSelector
                     value={formData.assignedTo}
-                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  >
-                    <option value="">-- Auto-Assign System Default --</option>
-                    {seniorEmployees.map(emp => (
-                      <option key={emp.id} value={emp.id}>{emp.full_name || emp.email}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormData({...formData, assignedTo: val})}
+                    currentUser={currentUser}
+                  />
                 </div>
 
                 <div className="form-group">

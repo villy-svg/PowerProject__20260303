@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import AssigneeSelector from '../../components/AssigneeSelector';
 import './HubTaskForm.css';
 
 /**
@@ -20,12 +21,10 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   });
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
-  const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     fetchHubs();
     fetchFunctions();
-    fetchEmployees();
   }, []);
 
   const fetchHubs = async () => {
@@ -53,15 +52,6 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
   const fetchFunctions = async () => {
     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
     if (data) setFunctions(data);
-  };
-
-  const fetchEmployees = async () => {
-    const { data } = await supabase
-      .from('employees')
-      .select('id, full_name, emp_code')
-      .eq('status', 'Active')
-      .order('full_name');
-    if (data) setEmployees(data);
   };
 
   // Get unique cities from the hubs list
@@ -166,18 +156,12 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
         <div className="form-group">
           <label>Assigned To</label>
-          <select 
-            className="master-dropdown"
+          <AssigneeSelector
             value={formData.assigned_to}
-            onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
-          >
-            <option value="">N/A (Unassigned)</option>
-            {employees.map(emp => (
-              <option key={emp.id} value={emp.id}>
-                {emp.full_name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFormData({...formData, assigned_to: val})}
+            // Assuming currentUser is not passed to this form currently,
+            // we'll leave it undefined so it defaults to just name.
+          />
         </div>
       </div>
 

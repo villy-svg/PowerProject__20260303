@@ -1,4 +1,5 @@
 import React from 'react';
+import AssigneeBadge from './AssigneeBadge';
 import './TaskCard.css';
 
 /**
@@ -20,7 +21,8 @@ const TaskCard = ({
   STAGE_LIST,
   isSelected = false,
   onSelect,
-  children // Vertical-specific metadata
+  children, // Vertical-specific metadata
+  currentUser
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -73,15 +75,7 @@ const TaskCard = ({
             DUP
           </span>
         )}
-        {task.assigneeName ? (
-          <span className="assignee-badge" title={`Assignee: ${task.assigneeName}`}>
-            {task.assigneeName.split(' ')[0]}
-          </span>
-        ) : (
-          <span className="assignee-none" title="No assignee">
-            NULL
-          </span>
-        )}
+        <AssigneeBadge task={task} currentUser={currentUser} />
         {children}
       </div>
 

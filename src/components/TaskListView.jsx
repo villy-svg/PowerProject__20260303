@@ -1,4 +1,5 @@
 import React from 'react';
+import AssigneeBadge from './AssigneeBadge';
 import './TaskListView.css';
 
 const TaskListView = ({
@@ -14,7 +15,8 @@ const TaskListView = ({
   selectedTaskIds = [],
   onSelect,
   onToggleStageSelection,
-  onDuplicateMerge
+  onDuplicateMerge,
+  currentUser
 }) => {
 
   const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
@@ -121,15 +123,8 @@ const TaskListView = ({
                           DUP
                         </span>
                       )}
-                      {task.assigneeName ? (
-                        <span className="assignee-badge-mini" title={`Assignee: ${task.assigneeName}`}>
-                          {task.assigneeName.split(' ')[0]}
-                        </span>
-                      ) : (
-                        <span className="assignee-none-mini" title="No assignee">
-                          NULL
-                        </span>
-                      )}
+                      
+                      <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
 
                       {/* 4. Hub Code & 5. Function Code (Vertical Specific) */}
                       {TaskTileComponent && (

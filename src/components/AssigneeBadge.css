@@ -1,0 +1,35 @@
+/* AssigneeBadge.css */
+
+.assignee-badge-base {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  /* Default style (for other users) matches previous brand-green/alpha */
+  background: var(--brand-green-alpha, rgba(0, 255, 170, 0.15));
+  color: var(--brand-green, #00C88C);
+}
+
+.assignee-you {
+  /* Standout styling for "YOU" to make it pop */
+  background: var(--brand-green, #00C88C);
+  color: #0d1117; /* Dark text for contrast */
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(0, 255, 170, 0.4);
+}
+
+.assignee-none {
+  background: rgba(139, 148, 158, 0.1);
+  color: rgba(139, 148, 158, 0.7);
+  font-weight: 600;
+}
+
+/* Optional mini variant if passed via className */
+.assignee-badge-base.mini {
+  padding: 2px 6px;
+  font-size: 0.65rem;
+  border-radius: 4px;
+}

@@ -562,6 +562,7 @@ const TaskController = ({
                           STAGE_LIST={STAGE_LIST}
                           isSelected={selectedTaskIds.includes(task.id)}
                           onSelect={() => toggleTaskSelection(task.id)}
+                          currentUser={user}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent 
@@ -596,6 +597,7 @@ const TaskController = ({
             selectedTaskIds={selectedTaskIds}
             onSelect={toggleTaskSelection}
             onToggleStageSelection={toggleStageSelection}
+            currentUser={user}
           />
         )}
       </div>
