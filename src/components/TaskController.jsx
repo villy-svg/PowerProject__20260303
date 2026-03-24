@@ -169,7 +169,7 @@ const TaskController = ({
     if (viewMode === 'kanban') {
       if (!permissions.canViewKanbanHierarchy) {
         // Low Seniority (Assignee View): Only show tasks assigned to them, ignore hierarchy
-        const isAssignedToUser = t.employee_id === user.id || t.assignedTo === user.id;
+        const isAssignedToUser = t.employee_id === user.employeeId || t.assignedTo === user.employeeId || t.assigned_to === user.employeeId;
         if (!isAssignedToUser) return false;
       } else {
         // High Seniority (Manager View): Respect Drill-Down Hierarchy

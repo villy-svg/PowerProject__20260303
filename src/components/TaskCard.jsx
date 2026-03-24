@@ -173,19 +173,20 @@ const TaskCard = ({
                       onClick={() => {
                         const parent = tasks.find(t => t.id === task.parentTask);
                         if (parent) onMoveToParent(task.id, parent.parentTask);
+                        if (parent) onPromote(task.id, parent.parentTask);
                       }}
                       title="Promote to Parent's Sibling (Promote to Grandparent)"
                     >
                       ↖
                     </button>
                   )}
-                  <button
-                    className="card-promote-button"
-                    onClick={() => onMoveToParent(task.id, null)}
-                    title="Promote to Top Level"
-                  >
-                    ↑
-                  </button>
+                  <button 
+                  className="promotion-btn" 
+                  onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
+                  title="Promote to Top Level"
+                >
+                  ↑
+                </button>
                 </div>
               )}
               <button
