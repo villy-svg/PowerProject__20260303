@@ -17,6 +17,7 @@ const TaskCard = ({
   updateTaskStage,
   deleteTask,
   openEditModal,
+  openAddSubtaskModal,
   onDuplicateMerge,
   STAGE_LIST,
   isSelected = false,
@@ -43,19 +44,24 @@ const TaskCard = ({
   const canMoveLeft = currentIndex > 0;
   const canMoveRight = currentIndex < STAGE_LIST.length - 1;
 
+  const effectiveCanUpdate = canUpdate && !task.isContextOnly;
+  const effectiveCanDelete = canDelete && !task.isContextOnly;
+
   return (
     <div
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''}`}
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''}`}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);
-        } else if (canUpdate) {
+        } else if (effectiveCanUpdate) {
           openEditModal(task);
         }
       }}
       style={{
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
-        '--stage-color': stage?.color || 'var(--brand-green)'
+        '--stage-color': stage?.color || 'var(--brand-green)',
+        opacity: task.isContextOnly ? 0.7 : 1,
+        cursor: task.isContextOnly ? 'default' : undefined
       }}
     >
       <div className="task-selection-area" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
@@ -65,6 +71,11 @@ const TaskCard = ({
       </div>
       {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
+        {task.isContextOnly && (
+          <span className="card-priority" title="Context Only (View Only)" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+            VIEWER
+          </span>
+        )}
         {task.parentTask && (
           <span className="card-priority" title="Subtask" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
             ↳ Sub
@@ -92,7 +103,7 @@ const TaskCard = ({
       {/* Row 3: Controls */}
       <div className="card-row-3">
         <div className="card-navigation">
-          {canUpdate && (
+          {effectiveCanUpdate && (
             <>
               <button
                 className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
@@ -115,7 +126,18 @@ const TaskCard = ({
         </div>
 
         <div className="card-actions">
-          {canUpdate && (
+          {effectiveCanUpdate && (
+            <button
+              className="card-add-sub-button"
+              onClick={() => openAddSubtaskModal(task.id)}
+              title="Add Subtask Under This"
+              style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
+            >
+              +
+            </button>
+          )}
+
+          {effectiveCanUpdate && (
             <button
               className="card-edit-button"
               onClick={() => openEditModal(task)}
@@ -125,7 +147,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {canUpdate && task.stageId === 'DEPRIORITIZED' && (
+          {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
             <button
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -136,7 +158,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
+          {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
             <button
               className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
@@ -146,7 +168,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {canDelete && (
+          {effectiveCanDelete && (
             <button
               className="card-delete-button"
               onClick={() => deleteTask(task.id)}

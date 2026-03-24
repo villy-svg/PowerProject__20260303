@@ -94,10 +94,54 @@
 /* Reusing existing halo styles but ensuring vertical centering */
 .list-task-row .card-nav-button,
 .list-task-row .card-edit-button,
-.list-task-row .card-delete-button {
+.list-task-row .card-delete-button,
+.list-task-row .card-add-sub-button {
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
 }
+
+.list-task-row .card-add-sub-button:hover {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+/* Tree Specific */
+.tree-row {
+  margin-bottom: 4px;
+}
+
+.tree-expander {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.tree-expander:hover {
+  color: var(--brand-green);
+}
+
+.stage-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tree-node-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+

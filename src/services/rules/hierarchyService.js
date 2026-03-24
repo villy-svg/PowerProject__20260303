@@ -49,18 +49,37 @@ export const hierarchyService = {
       if (!employeeId) return [];
       
       const reporteeUserIds = user.reporteeUserIds || [];
+      const taskMap = new Map((tasks || []).map(t => [t.id, t]));
 
-      return (tasks || []).filter(task => {
+      // 1. Identify tasks directly visible to the user
+      const directMatches = (tasks || []).filter(task => {
         const creatorId = task.createdBy || task.created_by;
-        
-        // 1. Tasks Assigned to them
         const isAssignedToMe = task.assigned_to === employeeId;
-        
-        // 2. Tasks Created by their reportees or members in their tree
         const isCreatedByTreeMember = reporteeUserIds.includes(creatorId) || (creatorId === user.id);
-
         return isAssignedToMe || isCreatedByTreeMember;
       });
+
+      const directMatchIds = new Set(directMatches.map(t => t.id));
+      const allVisibleTaskIds = new Set(directMatchIds);
+
+      // 2. Identify and include all ancestors of direct matches to provide context
+      directMatches.forEach(task => {
+        let curr = task;
+        // Ascend the tree
+        while (curr.parentTask && taskMap.has(curr.parentTask)) {
+          curr = taskMap.get(curr.parentTask);
+          if (allVisibleTaskIds.has(curr.id)) break; // Already processed this path
+          allVisibleTaskIds.add(curr.id);
+        }
+      });
+
+      // 3. Return the union, marking non-direct matches as context-only
+      return (tasks || [])
+        .filter(t => allVisibleTaskIds.has(t.id))
+        .map(t => ({
+          ...t,
+          isContextOnly: !directMatchIds.has(t.id)
+        }));
     }
 
     // Default: Seniority > 5 sees all tasks in the vertical

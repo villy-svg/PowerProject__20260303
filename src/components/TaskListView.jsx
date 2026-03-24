@@ -12,6 +12,7 @@ const TaskListView = ({
   deleteTask,
   updateTaskStage,
   openEditModal,
+  openAddSubtaskModal,
   TaskTileComponent, // To render vertical-specific metadata
   selectedTaskIds = [],
   onSelect,
@@ -84,6 +85,9 @@ const TaskListView = ({
                 const canMoveLeft = currentIndex > 0;
                 const canMoveRight = currentIndex < stageList.length - 1;
 
+                const effectiveCanUpdate = canUpdate && !task.isContextOnly;
+                const effectiveCanDelete = canDelete && !task.isContextOnly;
+
                 const handleMove = (direction) => {
                   let newIndex = currentIndex;
                   if (direction === 'left' && canMoveLeft) newIndex--;
@@ -94,15 +98,18 @@ const TaskListView = ({
                 return (
                   <div
                     key={task.id}
-                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''}`}
+                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''}`}
                     onDoubleClick={() => {
                       if (task.isDuplicate) {
                         onDuplicateMerge(task);
-                      } else if (canUpdate) {
+                      } else if (effectiveCanUpdate) {
                         openEditModal(task);
                       }
                     }}
-                    style={{ '--stage-color': stage.color }}
+                    style={{ 
+                      '--stage-color': stage.color,
+                      opacity: task.isContextOnly ? 0.7 : 1,
+                    }}
                   >
                     {/* LEFT SIDE: Identity & Content */}
                     <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
@@ -117,6 +124,11 @@ const TaskListView = ({
                       </div>
 
                       {/* 2. Priority */}
+                      {task.isContextOnly && (
+                        <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+                          VIEWER
+                        </span>
+                      )}
                       {task.priority && (
                         <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
                           {task.priority}
@@ -147,7 +159,7 @@ const TaskListView = ({
 
                     {/* RIGHT SIDE: Controls (Wrappable) */}
                     <div className="list-row-controls">
-                      {canUpdate && (
+                      {effectiveCanUpdate && (
                         <div className="list-nav-group">
                           <button
                             className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
@@ -169,7 +181,17 @@ const TaskListView = ({
                       )}
 
                       <div className="list-action-group">
-                        {canUpdate && (
+                        {effectiveCanUpdate && (
+                          <button 
+                            className="card-add-sub-button"
+                            onClick={() => openAddSubtaskModal(task.id)}
+                            title="Add Subtask Under This"
+                            style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
+                          >
+                            +
+                          </button>
+                        )}
+                        {effectiveCanUpdate && (
                           <button
                             className="card-edit-button"
                             onClick={() => openEditModal(task)}
@@ -178,7 +200,7 @@ const TaskListView = ({
                             ✎
                           </button>
                         )}
-                        {canUpdate && task.stageId === 'DEPRIORITIZED' && (
+                        {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
                           <button
                             className="card-reprio-button"
                             onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -188,7 +210,7 @@ const TaskListView = ({
                             ⬆
                           </button>
                         )}
-                        {canUpdate && task.stageId !== 'DEPRIORITIZED' && (
+                        {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
                           <button
                             className="card-deprio-button"
                             onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
@@ -197,7 +219,7 @@ const TaskListView = ({
                             ⬇
                           </button>
                         )}
-                        {canDelete && (
+                        {effectiveCanDelete && (
                           <button
                             className="card-delete-button"
                             onClick={() => deleteTask(task.id)}

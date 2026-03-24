@@ -13,6 +13,7 @@ import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { taskUtils } from '../utils/taskUtils';
+import TaskTreeView from './TaskTreeView';
 import './TaskController.css';
 
 /**
@@ -95,23 +96,35 @@ const TaskController = ({
           }
         }
       });
-    } else if (action === 'deprio') {
-      await bulkUpdateTasks(selectedTaskIds, { stageid: 'DEPRIORITIZED' });
-      clearSelection();
-    } else if (action === 'restore') {
-      await bulkUpdateTasks(selectedTaskIds, { stageid: 'BACKLOG' });
-      clearSelection();
-    } else if (action === 'forward' || action === 'backward') {
-      if (!sameStage) return;
-      const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
-      let newIndex = currentIndex;
-      if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
-      if (action === 'backward' && currentIndex > 0) newIndex--;
-      
-      if (newIndex !== currentIndex) {
-        await bulkUpdateTasks(selectedTaskIds, { stageid: STAGE_LIST[newIndex].id });
+    } else if (action === 'deprio' || action === 'restore' || action === 'forward' || action === 'backward') {
+      // Filter out context-only tasks from bulk actions
+      const targetIds = selectedTasks
+        .filter(t => !t.isContextOnly)
+        .map(t => t.id);
+
+      if (targetIds.length === 0) {
+        clearSelection();
+        return;
       }
-      clearSelection();
+
+      if (action === 'deprio') {
+        await bulkUpdateTasks(targetIds, { stageid: 'DEPRIORITIZED' });
+        clearSelection();
+      } else if (action === 'restore') {
+        await bulkUpdateTasks(targetIds, { stageid: 'BACKLOG' });
+        clearSelection();
+      } else if (action === 'forward' || action === 'backward') {
+        if (!sameStage) return;
+        const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
+        let newIndex = currentIndex;
+        if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
+        if (action === 'backward' && currentIndex > 0) newIndex--;
+        
+        if (newIndex !== currentIndex) {
+          await bulkUpdateTasks(targetIds, { stageid: STAGE_LIST[newIndex].id });
+        }
+        clearSelection();
+      }
     }
   };
 
@@ -187,12 +200,27 @@ const TaskController = ({
   }
 
   /**
+   * Internal WRAPPERS for task updates to respect isContextOnly
+   */
+  const handleInternalUpdateStage = (taskId, newStageId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task?.isContextOnly) return;
+    updateTaskStage(taskId, newStageId);
+  };
+
+  const handleInternalDelete = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task?.isContextOnly) return;
+    handleSingleDelete(taskId);
+  };
+
+  /**
    * handleSaveTask
    * Combined handler for both Add and Edit operations.
    */
   const handleSaveTask = async (formData) => {
-    const isEditing = !!editingTask;
-    if (isEditing && !canUserUpdate) return;
+    const isEditing = !!(editingTask && editingTask.id);
+    if (isEditing && (editingTask.isContextOnly || !canUserUpdate)) return;
     if (!isEditing && !canUserCreate) return;
     
     setSaving(true);
@@ -254,12 +282,20 @@ const TaskController = ({
     setIsModalOpen(true);
   };
 
+  const handleAddSubtask = (parentId) => {
+    setEditingTask({ parentTask: parentId });
+    setIsModalOpen(true);
+  };
+
   const handleSingleDelete = (taskId) => {
     setConfirmDialog({
       isOpen: true,
       title: 'Confirm Delete',
       message: 'Are you sure you want to permanently delete this task?',
       onConfirm: async () => {
+        const task = tasks.find(t => t.id === taskId);
+        if (task?.isContextOnly) return;
+
         setSaving(true);
         try {
           await deleteTask(taskId);
@@ -335,6 +371,13 @@ const TaskController = ({
                 style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
               >
                 List
+              </button>
+              <button 
+                className={`view-toggle-btn ${viewMode === 'tree' ? 'active' : ''}`}
+                onClick={() => setViewMode('tree')}
+                style={{ fontWeight: viewMode === 'tree' ? 600 : 400 }}
+              >
+                Tree
               </button>
             </div>
 
@@ -592,9 +635,10 @@ const TaskController = ({
                           stage={stage}
                           canUpdate={canUserUpdate}
                           canDelete={canUserDelete}
-                          updateTaskStage={updateTaskStage}
-                          deleteTask={handleSingleDelete}
+                          updateTaskStage={handleInternalUpdateStage}
+                          deleteTask={handleInternalDelete}
                           openEditModal={openEditModal}
+                          openAddSubtaskModal={handleAddSubtask}
                           onDuplicateMerge={handleDuplicateMergeTrigger}
                           STAGE_LIST={STAGE_LIST}
                           isSelected={selectedTaskIds.includes(task.id)}
@@ -619,21 +663,35 @@ const TaskController = ({
               );
             })}
           </div>
-        ) : (
+        ) : viewMode === 'list' ? (
           <TaskListView 
             tasks={filteredTasks}
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
             canDelete={canUserDelete}
-            updateTaskStage={updateTaskStage}
-            deleteTask={handleSingleDelete}
+            updateTaskStage={handleInternalUpdateStage}
+            deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
+            openAddSubtaskModal={handleAddSubtask}
             onDuplicateMerge={handleDuplicateMergeTrigger}
             TaskTileComponent={TaskTileComponent}
             selectedTaskIds={selectedTaskIds}
             onSelect={toggleTaskSelection}
             onToggleStageSelection={toggleStageSelection}
+            currentUser={user}
+          />
+        ) : (
+          <TaskTreeView
+            tasks={filteredTasks}
+            activeVertical={rootVerticalId || activeVertical}
+            canUpdate={canUserUpdate}
+            canDelete={canUserDelete}
+            updateTaskStage={handleInternalUpdateStage}
+            deleteTask={handleInternalDelete}
+            openEditModal={openEditModal}
+            openAddSubtaskModal={handleAddSubtask}
+            TaskTileComponent={TaskTileComponent}
             currentUser={user}
           />
         )}
