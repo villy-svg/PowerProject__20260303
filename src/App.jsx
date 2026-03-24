@@ -54,7 +54,10 @@ import powerLogo from './assets/logo.svg';
 
 function App() {
   const { darkMode, toggleTheme } = useTheme();
-  const [activeVertical, setActiveVertical] = useState(null);
+  const [activeVertical, setActiveVertical] = useState(() => {
+    const saved = localStorage.getItem('power_project_active_vertical');
+    return (saved === 'home' || !saved) ? null : saved;
+  });
 
   // 1. Auth and User Identity
   const [session, setSession] = useState(null);
@@ -329,7 +332,7 @@ function App() {
           </header>
           <main className="app-content">
             {!activeVertical ? (
-              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} />
+              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} verticalList={verticalList} />
             ) : activeVertical === 'configuration' ? (
               <Configuration
                 tasks={tasks}

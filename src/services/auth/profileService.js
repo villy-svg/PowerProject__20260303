@@ -61,50 +61,37 @@ export const profileService = {
     let reporteeEmployeeIds = [];
     
     if (profile.employee_id) {
-      // Fetch employee and their role level
-      const { data: emp } = await supabase
-        .from('employees')
-        .select('id, role_id')
-        .eq('id', profile.employee_id)
-        .single();
-      
+      // 5. Fetch employee, their role seniority, and the full list of employees for the tree in parallel
+      const [empResult, allEmpsResult] = await Promise.all([
+        supabase
+          .from('employees')
+          .select('id, role_id, employee_roles(seniority_level)')
+          .eq('id', profile.employee_id)
+          .single(),
+        supabase.from('employees').select('id, manager_id')
+      ]);
+
+      const emp = empResult.data;
+      const allEmps = allEmpsResult.data;
+
       if (emp) {
         employeeData = emp;
-        
-        if (emp.role_id) {
-          const { data: role } = await supabase
-            .from('employee_roles')
-            .select('seniority_level')
-            .eq('id', emp.role_id)
-            .single();
+        seniority = emp.employee_roles?.seniority_level || 1;
+
+        // FETCH REPORTING TREE
+        if (seniority <= 5 && allEmps) {
+          const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
+          const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
           
-          seniority = role?.seniority_level || 1; // Default to 1 if role exists but has no level
-        } else {
-          seniority = 1; // Default to 1 for employees without roles
-        }
-        
-        // FETCH REPORTING TREE (Only if seniority <= 5, to save resources)
-        if (seniority <= 5) {
-          console.log(`[ProfileService] Fetching reporting tree for ${profile.name} (Seniority: ${seniority})`);
-          const { data: allEmps } = await supabase.from('employees').select('id, manager_id');
-          if (allEmps) {
-            const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
-            const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
-            
-            console.log(`[ProfileService] ${profile.name}'s Employee Tree IDs:`, treeEmployeeIds);
+          // Map Employee IDs to User IDs (Auth IDs) via user_profiles
+          const { data: treeProfiles } = await supabase
+            .from('user_profiles')
+            .select('id, employee_id')
+            .in('employee_id', treeEmployeeIds);
 
-            // Map Employee IDs to User IDs (Auth IDs) via user_profiles
-            const { data: treeProfiles } = await supabase
-              .from('user_profiles')
-              .select('id, employee_id')
-              .in('employee_id', treeEmployeeIds);
-            
-            console.log(`[ProfileService] Found ${treeProfiles?.length || 0} matching User Profiles for this tree.`);
-
+          if (treeProfiles) {
             reporteeEmployeeIds = treeEmployeeIds;
-            reporteeUserIds = (treeProfiles || []).map(p => p.id);
-            
-            console.log(`[ProfileService] Final reporteeUserIds for ${profile.name}:`, reporteeUserIds);
+            reporteeUserIds = treeProfiles.map(p => p.id);
           }
         }
       }

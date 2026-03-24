@@ -8,7 +8,7 @@ import { hierarchyService } from '../services/rules/hierarchyService';
  * Displays task aggregates based on user permissions.
  * Multi-Vertical Update: Aggregates data from all assigned verticals in the array.
  */
-const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {} }) => {
+const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [] }) => {
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -24,8 +24,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {} }
     ? hierarchyFiltered 
     : hierarchyFiltered.filter(t => user?.assignedVerticals?.includes(t.verticalId));
 
-  // Vertical breakdown is restricted to those with global oversight
-  const showVerticalBreakdown = hasGlobalScope;
+  /**
+   * ACCESSIBLE BREAKDOWN
+   * Previously only master admins (global scope) saw the breakdown.
+   * Now, anyone can see the breakdown of their own authorized tasks.
+   */
+  const showVerticalBreakdown = true;
 
   return (
     <div className="home-summary-view">
@@ -38,9 +42,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {} }
           // Calculate count based on the multi-vertical scoped visibleTasks
           const stageCount = visibleTasks.filter(t => t.stageId === stage.id).length;
 
-          // Only calculate breakdown list if the user has global scope
+          // Only calculate breakdown list if the user has visible tasks in this stage
           const activeVerticalsInStage = showVerticalBreakdown 
-            ? VERTICAL_LIST.filter(v => 
+            ? (verticalList.length > 0 ? verticalList : VERTICAL_LIST).filter(v => 
                 visibleTasks.some(t => t.verticalId === v.id && t.stageId === stage.id)
               )
             : [];
