@@ -245,7 +245,7 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views
-      const persistentVerticals = ['home', verticals.CHARGING_HUBS?.id, 'hub_tasks', 'daily_hub_tasks', verticals.EMPLOYEES?.id, 'employee_tasks', verticals.CLIENTS?.id, 'client_tasks', 'leads_funnel'];
+      const persistentVerticals = ['home', verticals.CHARGING_HUBS?.id, 'hub_tasks', 'daily_hub_tasks', 'daily_task_templates', verticals.EMPLOYEES?.id, 'employee_tasks', verticals.CLIENTS?.id, 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }

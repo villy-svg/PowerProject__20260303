@@ -35,12 +35,13 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessEmployeeTasks: true,
         canAccessHubTasks: true,
         canAccessDailyHubTasks: true,
+        canAccessDailyTaskTemplates: true,
       };
 
       // Ensure feature-specific CRUD flags match global CRUD flags for master roles
       const features = [
         'Clients', 'ClientTasks', 'LeadsFunnel', 
-        'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks'
+        'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks', 'DailyTaskTemplates'
       ];
 
       features.forEach(feat => {

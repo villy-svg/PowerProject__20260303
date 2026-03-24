@@ -207,9 +207,11 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
                 {statusMsg.text}
               </span>
             )}
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Template
-            </button>
+            {permissions?.canCreateDailyTaskTemplates && (
+              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                + New Template
+              </button>
+            )}
           </>
         }
       />
@@ -225,20 +227,24 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
                   {template.isActive ? 'Active' : 'Paused'}
                 </span>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button 
-                    className="icon-btn test" 
-                    onClick={() => handleCreateSample(template)}
-                    title="Create Sample Task (Test Play)"
-                  >
-                    🧪
-                  </button>
-                  <button 
-                    className="icon-btn toggle" 
-                    onClick={() => handleToggleStatus(template)}
-                    title={template.isActive ? "Pause Generation" : "Resume Generation"}
-                  >
-                    {template.isActive ? '⏸' : '▶'}
-                  </button>
+                  {permissions?.canUpdateDailyTaskTemplates && (
+                    <>
+                      <button 
+                        className="icon-btn test" 
+                        onClick={() => handleCreateSample(template)}
+                        title="Create Sample Task (Test Play)"
+                      >
+                        🧪
+                      </button>
+                      <button 
+                        className="icon-btn toggle" 
+                        onClick={() => handleToggleStatus(template)}
+                        title={template.isActive ? "Pause Generation" : "Resume Generation"}
+                      >
+                        {template.isActive ? '⏸' : '▶'}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="template-frequency halo-type">{template.frequency}</div>
@@ -251,8 +257,12 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
               </div>
               
               <div className="template-actions">
-                <button className="halo-button edit-btn" onClick={() => handleOpenModal(template)}>Edit</button>
-                <button className="halo-button delete-btn" onClick={() => handleDelete(template.id)}>Delete</button>
+                {permissions?.canUpdateDailyTaskTemplates && (
+                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(template)}>Edit</button>
+                )}
+                {permissions?.canDeleteDailyTaskTemplates && (
+                  <button className="halo-button delete-btn" onClick={() => handleDelete(template.id)}>Delete</button>
+                )}
               </div>
             </div>
           ))}
@@ -289,10 +299,16 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks }) => {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      <button className="icon-btn test" onClick={() => handleCreateSample(template)} title="Create Sample">🧪</button>
-                      <button className="icon-btn" onClick={() => handleToggleStatus(template)}>{template.isActive ? '⏸' : '▶'}</button>
-                      <button className="icon-btn edit" onClick={() => handleOpenModal(template)}>✎</button>
-                      <button className="icon-btn delete" onClick={() => handleDelete(template.id)}>×</button>
+                      {permissions?.canUpdateDailyTaskTemplates && (
+                        <>
+                          <button className="icon-btn test" onClick={() => handleCreateSample(template)} title="Create Sample">🧪</button>
+                          <button className="icon-btn" onClick={() => handleToggleStatus(template)}>{template.isActive ? '⏸' : '▶'}</button>
+                          <button className="icon-btn edit" onClick={() => handleOpenModal(template)}>✎</button>
+                        </>
+                      )}
+                      {permissions?.canDeleteDailyTaskTemplates && (
+                        <button className="icon-btn delete" onClick={() => handleDelete(template.id)}>×</button>
+                      )}
                     </div>
                   </td>
                 </tr>
