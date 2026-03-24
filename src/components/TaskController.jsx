@@ -215,6 +215,39 @@ const TaskController = ({
   };
 
   /**
+   * handleMoveToParent
+   * Logic for nesting tasks via Drag & Drop or other shortcuts.
+   */
+  const handleMoveToParent = async (childId, parentId) => {
+    if (!canUserUpdate) return;
+    if (childId === parentId) return;
+
+    const childTask = tasks.find(t => t.id === childId);
+    const parentTask = tasks.find(t => t.id === parentId);
+
+    if (!childTask || childTask.isContextOnly) return;
+    if (parentTask && parentTask.isContextOnly) return;
+
+    // Cycle detection
+    if (parentId && hierarchyUtils.detectCycle(tasks, childId, parentId)) {
+      alert("Cannot move: This would create a circular dependency.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateTask({ ...childTask, parentTask: parentId }, user.id);
+      // Actual update is handled by refreshTasks/setTasks via VerticalWorkspace or local state
+      setTasks(prev => prev.map(t => t.id === childId ? { ...t, parentTask: parentId } : t));
+    } catch (err) {
+      console.error('Failed to move task:', err);
+      alert('Failed to update task relationship.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /**
    * handleSaveTask
    * Combined handler for both Add and Edit operations.
    */
@@ -639,6 +672,7 @@ const TaskController = ({
                           deleteTask={handleInternalDelete}
                           openEditModal={openEditModal}
                           openAddSubtaskModal={handleAddSubtask}
+                          onMoveToParent={handleMoveToParent}
                           onDuplicateMerge={handleDuplicateMergeTrigger}
                           STAGE_LIST={STAGE_LIST}
                           isSelected={selectedTaskIds.includes(task.id)}
@@ -691,6 +725,7 @@ const TaskController = ({
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
+            onMoveToParent={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}
             currentUser={user}
           />

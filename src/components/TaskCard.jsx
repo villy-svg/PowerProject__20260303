@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AssigneeBadge from './AssigneeBadge';
+import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import './TaskCard.css';
 
 /**
@@ -18,6 +19,7 @@ const TaskCard = ({
   deleteTask,
   openEditModal,
   openAddSubtaskModal,
+  onMoveToParent,
   onDuplicateMerge,
   STAGE_LIST,
   isSelected = false,
@@ -47,9 +49,17 @@ const TaskCard = ({
   const effectiveCanUpdate = canUpdate && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
 
+  const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
+    itemId: task.id,
+    onDrop: onMoveToParent,
+    disabled: task.isContextOnly || !canUpdate
+  });
+
   return (
     <div
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''}`}
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      {...dragProps}
+      {...dropProps}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);

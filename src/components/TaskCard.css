@@ -19,6 +19,13 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
+.task-card-master.drop-target {
+  border: 2px dashed var(--brand-green) !important;
+  background: rgba(16, 185, 129, 0.05) !important;
+  transform: scale(1.02) !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) !important;
+}
+
 .card-row-1 {
   width: 100%;
   display: flex;
