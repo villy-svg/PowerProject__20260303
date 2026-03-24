@@ -151,3 +151,20 @@
   flex-direction: column;
 }
 
+.tree-group-section {
+  margin-bottom: 24px;
+}
+
+.tree-group-header {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--brand-green);
+  text-transform: uppercase;
+}
+

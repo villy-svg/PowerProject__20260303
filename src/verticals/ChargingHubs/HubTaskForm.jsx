@@ -85,10 +85,13 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
       }
     } else if (funcLower === 'facility' && formData.hub_id) {
       const selectedHub = hubs.find(h => h.id === formData.hub_id);
-      const hubName = selectedHub?.hub_code || selectedHub?.name || 'Hub';
-      const prefix = `${hubName} : `;
-      if (!finalTaskText.startsWith(prefix)) {
+      const hubCode = selectedHub?.hub_code || 'HUB';
+      const prefix = `${hubCode} : `;
+      if (!finalTaskText.includes(" : ")) { // Force if no prefix at all
         finalTaskText = `${prefix}${finalTaskText}`;
+      } else if (!finalTaskText.startsWith(prefix)) { // Or if wrong prefix
+        // Replace wrong prefix if it's a hub prefix attempt
+        finalTaskText = `${prefix}${finalTaskText.split(" : ")[1] || finalTaskText}`;
       }
     }
 

@@ -200,6 +200,21 @@ const TaskController = ({
   }
 
   /**
+   * canManageHierarchy
+   * Replaces generic canUserUpdate for hierarchy-mutating actions (DND, add subtask shortcut).
+   * Restricts pure assignees from reorganizing the structure.
+   */
+  const canManageHierarchy = (task) => {
+    if (!task) return false;
+    if (task.isContextOnly) return false;
+    if (user.seniority > 5) return true;
+    
+    const isCreator = (task.createdBy || task.created_by) === user.id;
+    // Note: merely being assignee does NOT grant hierarchy management rights
+    return isCreator;
+  };
+
+  /**
    * Internal WRAPPERS for task updates to respect isContextOnly
    */
   const handleInternalUpdateStage = (taskId, newStageId) => {
@@ -316,6 +331,11 @@ const TaskController = ({
   };
 
   const handleAddSubtask = (parentId) => {
+    const parentTask = tasks.find(t => t.id === parentId);
+    if (!canManageHierarchy(parentTask)) {
+      alert("Permission Denied: Only creators or senior management can add subtasks.");
+      return;
+    }
     setEditingTask({ parentTask: parentId });
     setIsModalOpen(true);
   };
@@ -668,6 +688,7 @@ const TaskController = ({
                           stage={stage}
                           canUpdate={canUserUpdate}
                           canDelete={canUserDelete}
+                          canManageHierarchy={canManageHierarchy(task)}
                           updateTaskStage={handleInternalUpdateStage}
                           deleteTask={handleInternalDelete}
                           openEditModal={openEditModal}
@@ -703,11 +724,13 @@ const TaskController = ({
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
+            canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
             updateTaskStage={handleInternalUpdateStage}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
+            onMoveToParent={handleMoveToParent}
             onDuplicateMerge={handleDuplicateMergeTrigger}
             TaskTileComponent={TaskTileComponent}
             selectedTaskIds={selectedTaskIds}
@@ -720,6 +743,7 @@ const TaskController = ({
             tasks={filteredTasks}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
+            canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
             updateTaskStage={handleInternalUpdateStage}
             deleteTask={handleInternalDelete}

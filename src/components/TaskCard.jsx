@@ -15,6 +15,7 @@ const TaskCard = ({
   stage,
   canUpdate,
   canDelete,
+  canManageHierarchy = false,
   updateTaskStage,
   deleteTask,
   openEditModal,
@@ -52,7 +53,7 @@ const TaskCard = ({
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
     itemId: task.id,
     onDrop: onMoveToParent,
-    disabled: task.isContextOnly || !canUpdate
+    disabled: task.isContextOnly || !canManageHierarchy
   });
 
   return (
@@ -136,7 +137,7 @@ const TaskCard = ({
         </div>
 
         <div className="card-actions">
-          {effectiveCanUpdate && (
+          {!task.isContextOnly && canManageHierarchy && (
             <button
               className="card-add-sub-button"
               onClick={() => openAddSubtaskModal(task.id)}

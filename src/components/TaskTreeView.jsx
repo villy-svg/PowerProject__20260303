@@ -9,6 +9,7 @@ const TaskTreeView = ({
   tasks,
   activeVertical,
   canUpdate,
+  canManageHierarchy,
   canDelete,
   deleteTask,
   updateTaskStage,
@@ -27,15 +28,48 @@ const TaskTreeView = ({
     setExpandedIds(newExpanded);
   };
 
+  // Sort by latest created first
+  const sortFn = (a, b) => {
+    const dateA = new Date(a.created_at || a.createdAt || 0);
+    const dateB = new Date(b.created_at || b.createdAt || 0);
+    return dateB - dateA;
+  };
+
   // Build the full tree regardless of stage
   const verticalTasks = tasks.filter(t => t.verticalId === activeVertical);
-  const treeTasks = hierarchyUtils.sortByHierarchy(verticalTasks, 'id', 'parentTask');
+  const treeTasks = hierarchyUtils.sortByHierarchy(verticalTasks, 'id', 'parentTask', sortFn);
+
+  // Identify root-level tasks that HAVE children
+  const topLevelTasksWithChildren = new Set(
+    verticalTasks
+      .filter(t => !t.parentTask && verticalTasks.some(child => child.parentTask === t.id))
+      .map(t => t.id)
+  );
+
+  // Split tasks into two groups while preserving tree order
+  const projectTreeTasks = [];
+  const standaloneTasks = [];
+
+  treeTasks.forEach(task => {
+    // Find the root of this task's branch
+    let root = task;
+    const taskMap = new Map(verticalTasks.map(t => [t.id, t]));
+    while (root.parentTask && taskMap.has(root.parentTask)) {
+      root = taskMap.get(root.parentTask);
+    }
+
+    if (topLevelTasksWithChildren.has(root.id)) {
+      projectTreeTasks.push(task);
+    } else {
+      standaloneTasks.push(task);
+    }
+  });
 
   const TreeRow = ({ task, stage }) => {
     const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
       itemId: task.id,
       onDrop: onMoveToParent,
-      disabled: task.isContextOnly || !canUpdate
+      disabled: task.isContextOnly || !canManageHierarchy(task)
     });
 
     return (
@@ -82,7 +116,7 @@ const TaskTreeView = ({
 
         <div className="list-row-controls">
           <div className="list-action-group">
-            {!task.isContextOnly && canUpdate && (
+            {!task.isContextOnly && canManageHierarchy(task) && (
               <>
                 <button 
                   className="card-add-sub-button"
@@ -100,6 +134,15 @@ const TaskTreeView = ({
                   ✎
                 </button>
               </>
+            )}
+            {!task.isContextOnly && !canManageHierarchy(task) && canUpdate && (
+              <button
+                className="card-edit-button"
+                onClick={() => openEditModal(task)}
+                title="Edit Task"
+              >
+                ✎
+              </button>
             )}
             {!task.isContextOnly && canDelete && (
               <button
@@ -142,9 +185,30 @@ const TaskTreeView = ({
   return (
     <div className="task-tree-view">
       <div className="list-task-container">
-        {visibleTasks.length > 0 ? (
-          visibleTasks.map(renderNode)
-        ) : (
+        {projectTreeTasks.length > 0 && (
+          <div className="tree-group-section">
+            <h5 className="tree-group-header">INTEGRATED PROJECT TREES</h5>
+            {projectTreeTasks.filter(t => {
+              let curr = t;
+              const taskMap = new Map(tasks.map(t => [t.id, t]));
+              while (curr.parentTask) {
+                if (!expandedIds.has(curr.parentTask)) return false;
+                curr = taskMap.get(curr.parentTask);
+                if (!curr) break;
+              }
+              return true;
+            }).map(renderNode)}
+          </div>
+        )}
+
+        {standaloneTasks.length > 0 && (
+          <div className="tree-group-section">
+            <h5 className="tree-group-header">STANDALONE TASKS</h5>
+            {standaloneTasks.map(renderNode)}
+          </div>
+        )}
+
+        {projectTreeTasks.length === 0 && standaloneTasks.length === 0 && (
           <p className="empty-msg" style={{ padding: '2rem', textAlign: 'center' }}>No tasks found in this vertical.</p>
         )}
       </div>

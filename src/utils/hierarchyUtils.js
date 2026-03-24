@@ -104,9 +104,24 @@ export const hierarchyUtils = {
   /**
    * Sort a flat array based on hierarchy (DFS order).
    * Useful for indented lists.
+   * @param {Array} data
+   * @param {string} idKey
+   * @param {string} parentIdKey
+   * @param {function} sortFn - Optional compare function for siblings.
    */
-  sortByHierarchy(data, idKey = 'id', parentIdKey = 'parent_id') {
+  sortByHierarchy(data, idKey = 'id', parentIdKey = 'parent_id', sortFn = null) {
     const tree = this.buildTree(data, idKey, parentIdKey);
+    
+    if (sortFn) {
+      const recursiveSort = (nodes) => {
+        nodes.sort(sortFn);
+        nodes.forEach(node => {
+          if (node.children?.length > 0) recursiveSort(node.children);
+        });
+      };
+      recursiveSort(tree);
+    }
+
     const result = [];
     
     const flatten = (nodes, level = 0) => {

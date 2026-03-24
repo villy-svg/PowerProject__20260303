@@ -1,6 +1,7 @@
 import React from 'react';
 import AssigneeBadge from './AssigneeBadge';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import './TaskListView.css';
 
 const TaskListView = ({
@@ -8,11 +9,13 @@ const TaskListView = ({
   stageList,
   activeVertical,
   canUpdate,
+  canManageHierarchy,
   canDelete,
   deleteTask,
   updateTaskStage,
   openEditModal,
   openAddSubtaskModal,
+  onMoveToParent,
   TaskTileComponent, // To render vertical-specific metadata
   selectedTaskIds = [],
   onSelect,
@@ -26,8 +29,19 @@ const TaskListView = ({
   return (
     <div className="task-list-view">
       {stageList.map((stage) => {
+        // Find tasks that belong to this stage section based on their top-level ancestor
+        const rawStageRootTasks = tasks.filter(t => !t.parentTask && t.stageId === stage.id);
+        
+        // Find all descendants of these roots
+        const allMemberIds = new Set();
+        rawStageRootTasks.forEach(root => {
+          allMemberIds.add(root.id);
+          const descendants = hierarchyUtils.getDescendants(tasks, root.id, 'id', 'parentTask');
+          descendants.forEach(d => allMemberIds.add(d.id));
+        });
+
         const rawStageTasks = tasks
-          .filter(t => t.verticalId === activeVertical && t.stageId === stage.id)
+          .filter(t => allMemberIds.has(t.id))
           .sort((a, b) => {
             const pA = priorityOrder[a.priority] ?? 99;
             const pB = priorityOrder[b.priority] ?? 99;
@@ -87,6 +101,17 @@ const TaskListView = ({
 
                 const effectiveCanUpdate = canUpdate && !task.isContextOnly;
                 const effectiveCanDelete = canDelete && !task.isContextOnly;
+                const canManage = canManageHierarchy(task);
+
+                // Use task's own stage for color coding
+                const taskStage = stageList.find(s => s.id === task.stageId) || stage;
+
+                // DND Configuration
+                const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
+                  itemId: task.id,
+                  onDrop: onMoveToParent,
+                  disabled: task.isContextOnly || !canManage
+                });
 
                 const handleMove = (direction) => {
                   let newIndex = currentIndex;
@@ -98,7 +123,9 @@ const TaskListView = ({
                 return (
                   <div
                     key={task.id}
-                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''}`}
+                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+                    {...dragProps}
+                    {...dropProps}
                     onDoubleClick={() => {
                       if (task.isDuplicate) {
                         onDuplicateMerge(task);
@@ -107,7 +134,7 @@ const TaskListView = ({
                       }
                     }}
                     style={{ 
-                      '--stage-color': stage.color,
+                      '--stage-color': taskStage.color,
                       opacity: task.isContextOnly ? 0.7 : 1,
                     }}
                   >
@@ -181,7 +208,7 @@ const TaskListView = ({
                       )}
 
                       <div className="list-action-group">
-                        {effectiveCanUpdate && (
+                        {!task.isContextOnly && canManage && (
                           <button 
                             className="card-add-sub-button"
                             onClick={() => openAddSubtaskModal(task.id)}
