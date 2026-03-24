@@ -4,6 +4,189 @@ import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import './TaskListView.css';
 
+const ListViewRow = ({ 
+  task, 
+  stage, 
+  stageList, 
+  canUpdate, 
+  canManageHierarchy, 
+  canDelete, 
+  deleteTask, 
+  updateTaskStage, 
+  openEditModal, 
+  openAddSubtaskModal, 
+  onMoveToParent, 
+  TaskTileComponent, 
+  selectedTaskIds, 
+  onSelect, 
+  onDuplicateMerge, 
+  currentUser 
+}) => {
+  const currentIndex = stageList.findIndex(s => s.id === task.stageId);
+  const canMoveLeft = currentIndex > 0;
+  const canMoveRight = currentIndex < stageList.length - 1;
+
+  const effectiveCanUpdate = canUpdate && !task.isContextOnly;
+  const effectiveCanDelete = canDelete && !task.isContextOnly;
+  const canManage = canManageHierarchy(task);
+
+  // Use task's own stage for color coding
+  const taskStage = stageList.find(s => s.id === task.stageId) || stage;
+
+  // DND Configuration
+  const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
+    itemId: task.id,
+    onDrop: onMoveToParent,
+    disabled: task.isContextOnly || !canManage
+  });
+
+  const handleMove = (direction) => {
+    let newIndex = currentIndex;
+    if (direction === 'left' && canMoveLeft) newIndex--;
+    else if (direction === 'right' && canMoveRight) newIndex++;
+    if (newIndex !== currentIndex) updateTaskStage(task.id, stageList[newIndex].id);
+  };
+
+  return (
+    <div
+      className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      {...dragProps}
+      {...dropProps}
+      onDoubleClick={() => {
+        if (task.isDuplicate) {
+          onDuplicateMerge(task);
+        } else if (effectiveCanUpdate) {
+          openEditModal(task);
+        }
+      }}
+      style={{ 
+        '--stage-color': taskStage.color,
+        opacity: task.isContextOnly ? 0.7 : 1,
+      }}
+    >
+      {/* LEFT SIDE: Identity & Content */}
+      <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
+        {task.depth > 0 && (
+          <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
+        )}
+        {/* 1. Select Checkbox */}
+        <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
+          <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
+            {selectedTaskIds.includes(task.id) && '✓'}
+          </div>
+        </div>
+
+        {/* 2. Priority */}
+        {task.isContextOnly && (
+          <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+            VIEWER
+          </span>
+        )}
+        {task.priority && (
+          <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
+            {task.priority}
+          </span>
+        )}
+
+        {/* 3. Dup Tag */}
+        {task.isDuplicate && (
+          <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
+            DUP
+          </span>
+        )}
+        
+        <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
+
+        {/* 4. Hub Code & 5. Function Code (Vertical Specific) */}
+        {TaskTileComponent && (
+          <div className="list-row-vertical-meta">
+            <TaskTileComponent task={task} stage={taskStage} />
+          </div>
+        )}
+
+        {/* 6. Task Summary */}
+        <div className="list-row-content" title={task.text}>
+          {task.text}
+        </div>
+      </div>
+
+      {/* RIGHT SIDE: Controls (Wrappable) */}
+      <div className="list-row-controls">
+        {effectiveCanUpdate && (
+          <div className="list-nav-group">
+            <button
+              className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+              onClick={() => handleMove('left')}
+              disabled={!canMoveLeft}
+              title="Move Back"
+            >
+              ←
+            </button>
+            <button
+              className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
+              onClick={() => handleMove('right')}
+              disabled={!canMoveRight || task.stageId === 'COMPLETED'}
+              title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+            >
+              →
+            </button>
+          </div>
+        )}
+
+        <div className="list-action-group">
+          {!task.isContextOnly && canManage && (
+            <button 
+              className="card-add-sub-button"
+              onClick={() => openAddSubtaskModal(task.id)}
+              title="Add Subtask Under This"
+              style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
+            >
+              +
+            </button>
+          )}
+          {effectiveCanUpdate && (
+            <button
+              className="card-edit-button"
+              onClick={() => openEditModal(task)}
+              title="Edit Task"
+            >
+              ✎
+            </button>
+          )}
+          {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
+            <button
+              className="card-reprio-button"
+              onClick={() => updateTaskStage(task.id, 'BACKLOG')}
+              title="Move back to Pending"
+              style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+            >
+              ⬆
+            </button>
+          )}
+          {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
+            <button
+              className="card-deprio-button"
+              onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
+              title="Move to Deprioritized"
+            >
+              ⬇
+            </button>
+          )}
+          {effectiveCanDelete && (
+            <button
+              className="card-delete-button"
+              onClick={() => deleteTask(task.id)}
+              title="Delete Task"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TaskListView = ({
   tasks,
   stageList,
@@ -94,172 +277,27 @@ const TaskListView = ({
             </header>
 
             <div className="list-task-container">
-              {stageTasks.map((task) => {
-                const currentIndex = stageList.findIndex(s => s.id === task.stageId);
-                const canMoveLeft = currentIndex > 0;
-                const canMoveRight = currentIndex < stageList.length - 1;
-
-                const effectiveCanUpdate = canUpdate && !task.isContextOnly;
-                const effectiveCanDelete = canDelete && !task.isContextOnly;
-                const canManage = canManageHierarchy(task);
-
-                // Use task's own stage for color coding
-                const taskStage = stageList.find(s => s.id === task.stageId) || stage;
-
-                // DND Configuration
-                const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
-                  itemId: task.id,
-                  onDrop: onMoveToParent,
-                  disabled: task.isContextOnly || !canManage
-                });
-
-                const handleMove = (direction) => {
-                  let newIndex = currentIndex;
-                  if (direction === 'left' && canMoveLeft) newIndex--;
-                  else if (direction === 'right' && canMoveRight) newIndex++;
-                  if (newIndex !== currentIndex) updateTaskStage(task.id, stageList[newIndex].id);
-                };
-
-                return (
-                  <div
-                    key={task.id}
-                    className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
-                    {...dragProps}
-                    {...dropProps}
-                    onDoubleClick={() => {
-                      if (task.isDuplicate) {
-                        onDuplicateMerge(task);
-                      } else if (effectiveCanUpdate) {
-                        openEditModal(task);
-                      }
-                    }}
-                    style={{ 
-                      '--stage-color': taskStage.color,
-                      opacity: task.isContextOnly ? 0.7 : 1,
-                    }}
-                  >
-                    {/* LEFT SIDE: Identity & Content */}
-                    <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
-                      {task.depth > 0 && (
-                        <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
-                      )}
-                      {/* 1. Select Checkbox */}
-                      <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
-                        <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
-                          {selectedTaskIds.includes(task.id) && '✓'}
-                        </div>
-                      </div>
-
-                      {/* 2. Priority */}
-                      {task.isContextOnly && (
-                        <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
-                          VIEWER
-                        </span>
-                      )}
-                      {task.priority && (
-                        <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
-                          {task.priority}
-                        </span>
-                      )}
-
-                      {/* 3. Dup Tag */}
-                      {task.isDuplicate && (
-                        <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
-                          DUP
-                        </span>
-                      )}
-                      
-                      <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
-
-                      {/* 4. Hub Code & 5. Function Code (Vertical Specific) */}
-                      {TaskTileComponent && (
-                        <div className="list-row-vertical-meta">
-                          <TaskTileComponent task={task} stage={stage} />
-                        </div>
-                      )}
-
-                      {/* 6. Task Summary */}
-                      <div className="list-row-content" title={task.text}>
-                        {task.text}
-                      </div>
-                    </div>
-
-                    {/* RIGHT SIDE: Controls (Wrappable) */}
-                    <div className="list-row-controls">
-                      {effectiveCanUpdate && (
-                        <div className="list-nav-group">
-                          <button
-                            className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
-                            onClick={() => handleMove('left')}
-                            disabled={!canMoveLeft}
-                            title="Move Back"
-                          >
-                            ←
-                          </button>
-                          <button
-                            className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
-                            onClick={() => handleMove('right')}
-                            disabled={!canMoveRight || task.stageId === 'COMPLETED'}
-                            title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
-                          >
-                            →
-                          </button>
-                        </div>
-                      )}
-
-                      <div className="list-action-group">
-                        {!task.isContextOnly && canManage && (
-                          <button 
-                            className="card-add-sub-button"
-                            onClick={() => openAddSubtaskModal(task.id)}
-                            title="Add Subtask Under This"
-                            style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
-                          >
-                            +
-                          </button>
-                        )}
-                        {effectiveCanUpdate && (
-                          <button
-                            className="card-edit-button"
-                            onClick={() => openEditModal(task)}
-                            title="Edit Task"
-                          >
-                            ✎
-                          </button>
-                        )}
-                        {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
-                          <button
-                            className="card-reprio-button"
-                            onClick={() => updateTaskStage(task.id, 'BACKLOG')}
-                            title="Move back to Pending"
-                            style={{ color: 'var(--brand-green)', fontWeight: 800 }}
-                          >
-                            ⬆
-                          </button>
-                        )}
-                        {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
-                          <button
-                            className="card-deprio-button"
-                            onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
-                            title="Move to Deprioritized"
-                          >
-                            ⬇
-                          </button>
-                        )}
-                        {effectiveCanDelete && (
-                          <button
-                            className="card-delete-button"
-                            onClick={() => deleteTask(task.id)}
-                            title="Delete Task"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {stageTasks.map((task) => (
+                <ListViewRow 
+                  key={task.id} 
+                  task={task} 
+                  stage={stage}
+                  stageList={stageList}
+                  canUpdate={canUpdate}
+                  canManageHierarchy={canManageHierarchy}
+                  canDelete={canDelete}
+                  deleteTask={deleteTask}
+                  updateTaskStage={updateTaskStage}
+                  openEditModal={openEditModal}
+                  openAddSubtaskModal={openAddSubtaskModal}
+                  onMoveToParent={onMoveToParent}
+                  TaskTileComponent={TaskTileComponent}
+                  selectedTaskIds={selectedTaskIds}
+                  onSelect={onSelect}
+                  onDuplicateMerge={onDuplicateMerge}
+                  currentUser={currentUser}
+                />
+              ))}
             </div>
           </section>
         );
