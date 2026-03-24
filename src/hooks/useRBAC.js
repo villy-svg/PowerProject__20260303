@@ -19,6 +19,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     const roleId = user.roleId;
     const isMasterScope = roleId?.startsWith('master_');
     const baseCaps = user.baseCapabilities || {};
+    const canViewKanbanHierarchy = hierarchyService.canViewKanbanHierarchy(user);
 
     // -----------------------------------------------------------------------
     // Master Scope: global access, all features visible
@@ -37,6 +38,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessHubTasks: true,
         canAccessDailyHubTasks: true,
         canAccessDailyTaskTemplates: true,
+        canViewKanbanHierarchy,
       };
 
       // Ensure feature-specific CRUD flags match global CRUD flags for master roles
@@ -80,6 +82,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       roleId,
       scope: 'assigned',
       canAccessConfig: level === 'admin',
+      canViewKanbanHierarchy,
     };
 
     // Feature-granular CRUD flags
@@ -99,7 +102,6 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       finalPerms[`canDelete${featureName}`] = verticalCaps.canDelete && featureCaps.canDelete;
     });
 
-    finalPerms.canViewKanbanHierarchy = hierarchyService.canViewKanbanHierarchy(user);
 
      return finalPerms;
   }, [user, activeVertical, verticals]);

@@ -13,6 +13,7 @@ import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { taskUtils } from '../utils/taskUtils';
+import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 import TaskTreeView from './TaskTreeView';
 import './TaskController.css';
 
@@ -242,7 +243,7 @@ const TaskController = ({
   const canManageHierarchy = (task) => {
     if (!task) return false;
     if (task.isContextOnly) return false;
-    if (user.seniority > 5) return true;
+    if (user.seniority > MANAGER_SENIORITY_THRESHOLD) return true;
 
     const isCreator = (task.createdBy || task.created_by) === user.id;
     // Note: merely being assignee does NOT grant hierarchy management rights
