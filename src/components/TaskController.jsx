@@ -47,7 +47,20 @@ const TaskController = ({
   const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem(`powerpod_task_view_${activeVertical}`) || localStorage.getItem('powerpod_task_view') || 'list');
-  const [showDeprioritized, setShowDeprioritized] = useState(true);
+  const [showDeprioritized, setShowDeprioritized] = React.useState(false);
+  const [drillDownId, setDrillDownId] = React.useState(null);
+
+  // Derive Breadcrumb path
+  const drillPath = React.useMemo(() => {
+    if (!drillDownId) return [];
+    const path = [];
+    let curr = (tasks || []).find(t => t.id === drillDownId);
+    while (curr) {
+      path.unshift(curr);
+      curr = (tasks || []).find(t => t.id === curr.parentTask);
+    }
+    return path;
+  }, [drillDownId, tasks]);
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
 
   // Custom Confirmation Modal State
@@ -147,11 +160,26 @@ const TaskController = ({
    * FILTER LOGIC
    */
   const filteredTasks = hierarchyFilteredTasks.filter(t => {
-    // 0. Strict Vertical Filter (Crucial for List/Tree views)
+    // 0. Strict Vertical Filter
     const targetVerticalId = rootVerticalId || activeVertical;
     if (t.verticalId !== targetVerticalId && activeVertical !== 'daily_hub_tasks') return false;
-    // Special case for daily hub tasks which might have a different vertical ID structure
     if (activeVertical === 'daily_hub_tasks' && t.verticalId !== 'daily_hub_tasks') return false;
+
+    // 0.1 Kanban-Specific Visibility (ONLY for Kanban view)
+    if (viewMode === 'kanban') {
+      if (user.seniority <= 5) {
+        // Low Seniority: Only show tasks assigned to them, ignore hierarchy
+        const isAssignedToUser = t.employee_id === user.id || t.assignedTo === user.id;
+        if (!isAssignedToUser) return false;
+      } else {
+        // High Seniority: Respect Drill-Down Hierarchy
+        if (drillDownId === null) {
+          if (t.parentTask) return false; // Show only root tasks
+        } else {
+          if (t.parentTask !== drillDownId) return false; // Show only children of drill-down task
+        }
+      }
+    }
 
     // 1. Duplicates Only filter
     if (filters.duplicatesOnly && !t.isDuplicate) return false;
@@ -712,6 +740,7 @@ const TaskController = ({
                           onSelect={() => toggleTaskSelection(task.id)}
                           currentUser={user}
                           tasks={filteredTasks}
+                          onDrillDown={setDrillDownId}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent

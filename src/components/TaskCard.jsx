@@ -27,7 +27,8 @@ const TaskCard = ({
   onSelect,
   children, // Vertical-specific metadata
   currentUser,
-  tasks = []
+  tasks = [],
+  onDrillDown
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -88,10 +89,33 @@ const TaskCard = ({
             VIEWER
           </span>
         )}
-        {task.parentTask && (
+        {task.parentTask && currentUser.seniority > 5 && (
           <span className="subtask-tag" title="Subtask">
             |_ SUBTASK
           </span>
+        )}
+        {currentUser.seniority > 5 && tasks.some(t => t.parentTask === task.id) && (
+          <div 
+            className="subtask-progress-badge" 
+            title="View Project Children"
+            onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              fontSize: '0.65rem', 
+              fontWeight: 700, 
+              backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+              color: 'var(--brand-green)', 
+              padding: '2px 8px', 
+              borderRadius: '12px',
+              cursor: 'pointer',
+              border: '1px solid rgba(16, 185, 129, 0.2)'
+            }}
+          >
+            {tasks.filter(t => t.parentTask === task.id && t.stageId === 'COMPLETED').length} / {tasks.filter(t => t.parentTask === task.id).length} TASKS
+            <span style={{ fontSize: '0.8rem', marginLeft: '2px' }}>🔍</span>
+          </div>
         )}
         {task.priority && (
           <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
@@ -138,7 +162,7 @@ const TaskCard = ({
         </div>
 
         <div className="card-actions">
-          {!task.isContextOnly && canManageHierarchy && (
+          {!task.isContextOnly && canManageHierarchy && currentUser.seniority > 5 && (
             <>
               {task.parentTask && (
                 <div style={{ display: 'flex', gap: '4px' }}>

@@ -96,6 +96,26 @@
 }
 
 /* 2. KANBAN BOARD LAYOUT */
+ 
+ .drill-breadcrumb {
+   display: flex;
+   align-items: center;
+   background: var(--bg-elevated, #1a1a1a);
+   border-bottom: 1px solid var(--border-color);
+   margin-bottom: 16px;
+   animation: fadeIn 0.3s ease;
+ }
+ 
+ .drill-breadcrumb button:hover {
+   color: white !important;
+   text-decoration: underline;
+ }
+ 
+ @keyframes fadeIn {
+   from { opacity: 0; transform: translateY(-5px); }
+   to { opacity: 1; transform: translateY(0); }
+ }
+ 
 .kanban-board {
   display: flex;
   gap: 20px;
