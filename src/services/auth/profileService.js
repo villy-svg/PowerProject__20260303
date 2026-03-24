@@ -60,13 +60,34 @@ export const profileService = {
     let reporteeUserIds = [];
     let reporteeEmployeeIds = [];
     
-    if (profile.employee_id) {
-      // 5. Fetch employee, their role seniority, and the full list of employees for the tree in parallel
+    // 5. SELF-HEALING: If employee_id is missing, try to link by email
+    let effectiveEmployeeId = profile.employee_id;
+    if (!effectiveEmployeeId && profile.email) {
+      const { data: matchedEmp } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('email', profile.email)
+        .eq('status', 'Active')
+        .maybeSingle();
+      
+      if (matchedEmp) {
+        effectiveEmployeeId = matchedEmp.id;
+        // Persist the link for next time
+        await supabase
+          .from('user_profiles')
+          .update({ employee_id: effectiveEmployeeId })
+          .eq('id', userId);
+        console.log(`Self-healed employee link for user ${userId} -> ${effectiveEmployeeId}`);
+      }
+    }
+
+    if (effectiveEmployeeId) {
+      // 5b. Fetch employee, their role seniority, and the full list of employees for the tree in parallel
       const [empResult, allEmpsResult] = await Promise.all([
         supabase
           .from('employees')
           .select('id, role_id, employee_roles(seniority_level)')
-          .eq('id', profile.employee_id)
+          .eq('id', effectiveEmployeeId)
           .single(),
         supabase.from('employees').select('id, manager_id')
       ]);

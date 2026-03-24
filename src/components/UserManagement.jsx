@@ -127,10 +127,17 @@ const UserManagement = ({ currentUser }) => {
     const newRoleId = `${editRoleScope}_${editRoleLevel}`;
 
     try {
-      // 1. Update Profile (Base Role)
+      // 1. Update Profile (Base Role + Employee Link)
+      const updatePayload = { role_id: newRoleId };
+      
+      // If the user was linked to an employee (via email or existing ID), persist it
+      if (editingUser.linkedEmployee?.id && !editingUser.employee_id) {
+        updatePayload.employee_id = editingUser.linkedEmployee.id;
+      }
+
       const { error: pError } = await supabase
         .from('user_profiles')
-        .update({ role_id: newRoleId })
+        .update(updatePayload)
         .eq('id', editingUser.id);
       
       if (pError) throw pError;
