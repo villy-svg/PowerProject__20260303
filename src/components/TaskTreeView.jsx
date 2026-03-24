@@ -124,19 +124,41 @@ const TaskTreeView = ({
             title={stage.label}
           />
 
-          {task.isContextOnly && (
-            <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px', marginRight: '8px' }}>
-              VIEWER
-            </span>
-          )}
+          <div className="list-row-badges">
+            {task.isContextOnly && (
+              <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+                VIEWER
+              </span>
+            )}
 
-          <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
+            <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
 
-          {TaskTileComponent && (
-            <div className="list-row-vertical-meta">
-              <TaskTileComponent task={task} stage={stage} />
-            </div>
-          )}
+            {TaskTileComponent && (
+              <div className="list-row-vertical-meta">
+                <TaskTileComponent task={task} stage={stage} />
+              </div>
+            )}
+
+            {/* Hierarchy Progress Badges (Same as TaskCard/ListView) */}
+            {tasks.some(t => t.parentTask === task.id) && (() => {
+              const directTasks = tasks.filter(t => t.parentTask === task.id);
+              const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
+              const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
+              
+              return (
+                <div className="list-hierarchy-badges">
+                  <span className="subtask-progress-badge mini" title="Direct Children Progress">
+                    {completedDirect}/{directTasks.length} D
+                  </span>
+                  {recursiveStats.total > directTasks.length && (
+                    <span className="recursive-progress-badge mini" title="Total Recursive Progress">
+                      {recursiveStats.completed}/{recursiveStats.total} T
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
 
           <div className="list-row-content" title={task.text}>
             {task.text}

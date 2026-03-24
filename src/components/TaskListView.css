@@ -69,6 +69,57 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+}
+
+.list-row-badges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.list-hierarchy-badges {
+  display: flex;
+  gap: 4px;
+}
+
+.list-hierarchy-badges .mini {
+  padding: 1px 4px;
+  font-size: 0.65rem;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.subtask-progress-badge.mini {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.recursive-progress-badge.mini {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+@media (max-width: 768px) {
+  .list-row-main {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .list-row-content {
+    width: 100%;
+    order: -1;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+  }
+
+  .list-row-badges {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-left: 20px; /* Align with expander area */
+  }
 }
 
 .list-row-controls {

@@ -1,4 +1,4 @@
 npm run build
 git add .
-git commit -m "260324 Parent Task Relationship 1.2.3"
+git commit -m "260324 Parent Task Relationship 1.2.4"
 git push origin main

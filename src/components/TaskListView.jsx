@@ -94,27 +94,47 @@ const ListViewRow = ({
             VIEWER
           </span>
         )}
-        {task.priority && (
-          <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
-            {task.priority}
-          </span>
-        )}
+        <div className="list-row-badges">
+          {task.priority && (
+            <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
+              {task.priority}
+            </span>
+          )}
 
-        {/* 3. Dup Tag */}
-        {task.isDuplicate && (
-          <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
-            DUP
-          </span>
-        )}
-        
-        <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
+          {task.isDuplicate && (
+            <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
+              DUP
+            </span>
+          )}
+          
+          <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
 
-        {/* 4. Hub Code & 5. Function Code (Vertical Specific) */}
-        {TaskTileComponent && (
-          <div className="list-row-vertical-meta">
-            <TaskTileComponent task={task} stage={taskStage} />
-          </div>
-        )}
+          {TaskTileComponent && (
+            <div className="list-row-vertical-meta">
+              <TaskTileComponent task={task} stage={taskStage} />
+            </div>
+          )}
+
+          {/* Hierarchy Progress Badges (Same as TaskCard) */}
+          {tasks?.some(t => t.parentTask === task.id) && (() => {
+            const directTasks = tasks.filter(t => t.parentTask === task.id);
+            const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
+            const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
+            
+            return (
+              <div className="list-hierarchy-badges">
+                <span className="subtask-progress-badge mini" title="Direct Children Progress">
+                  {completedDirect}/{directTasks.length} D
+                </span>
+                {recursiveStats.total > directTasks.length && (
+                  <span className="recursive-progress-badge mini" title="Total Recursive Progress">
+                    {recursiveStats.completed}/{recursiveStats.total} T
+                  </span>
+                )}
+              </div>
+            );
+          })()}
+        </div>
 
         {/* 6. Task Summary */}
         <div className="list-row-content" title={task.text}>
