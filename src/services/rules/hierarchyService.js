@@ -51,12 +51,13 @@ export const hierarchyService = {
       const reporteeUserIds = user.reporteeUserIds || [];
 
       return (tasks || []).filter(task => {
+        const creatorId = task.createdBy || task.created_by;
+        
         // 1. Tasks Assigned to them
         const isAssignedToMe = task.assigned_to === employeeId;
         
         // 2. Tasks Created by their reportees or members in their tree
-        // Note: reporteeUserIds contains user.id if linked correctly
-        const isCreatedByTreeMember = reporteeUserIds.includes(task.created_by) || task.created_by === user.id;
+        const isCreatedByTreeMember = reporteeUserIds.includes(creatorId) || (creatorId === user.id);
 
         return isAssignedToMe || isCreatedByTreeMember;
       });
