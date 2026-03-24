@@ -33,10 +33,11 @@ export const hierarchyService = {
    * @returns {Array} Subset of tasks the user is allowed to see.
    */
   filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}) {
-    // Master Admin or Global Scope bypasses hierarchy filters
-    if (!user || user.roleId === 'master_admin') return tasks;
+    // Master Admin or Global Scope bypasses hierarchy filters IF they don't have a restricted seniority
+    if (!user) return tasks;
+    if (user.roleId === 'master_admin' && (user.seniority > 5 || !user.seniority)) return tasks;
 
-    const seniority = user.seniority ?? 100;
+    const seniority = Number(user.seniority ?? 100);
     const employeeId = user.employeeId;
 
     // RULE: Seniority <= 5
@@ -49,19 +50,21 @@ export const hierarchyService = {
       
       const reporteeUserIds = user.reporteeUserIds || [];
 
+      console.log(`[HierarchyService] Applying restrictions for ${user.name} (Sr: ${seniority}). Reportees: ${reporteeUserIds.length}`);
+
       return (tasks || []).filter(task => {
         // 1. Tasks Assigned to them
         const isAssignedToMe = task.assigned_to === employeeId;
         
         // 2. Tasks Created by their reportees or members in their tree
-        // Note: reporteeUserIds is expected to include the user's own ID as the root of the tree
+        // Note: reporteeUserIds contains user.id if linked correctly
         const isCreatedByTreeMember = reporteeUserIds.includes(task.created_by) || task.created_by === user.id;
 
         return isAssignedToMe || isCreatedByTreeMember;
       });
     }
 
-    // Default: Seniority > 5 sees all tasks in the vertical (provided they have RBAC access)
+    // Default: Seniority > 5 sees all tasks in the vertical
     return tasks;
   }
 };

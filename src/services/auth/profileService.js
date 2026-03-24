@@ -68,18 +68,26 @@ export const profileService = {
         .eq('id', profile.employee_id)
         .single();
       
-      if (emp && emp.role_id) {
-        const { data: role } = await supabase
-          .from('employee_roles')
-          .select('seniority_level')
-          .eq('id', emp.role_id)
-          .single();
-        
+      if (emp) {
         employeeData = emp;
-        seniority = role?.seniority_level || 100;
+        
+        if (emp.role_id) {
+          const { data: role } = await supabase
+            .from('employee_roles')
+            .select('seniority_level')
+            .eq('id', emp.role_id)
+            .single();
+          
+          seniority = role?.seniority_level || 1; // Default to 1 if role exists but has no level
+        } else {
+          seniority = 1; // Default to 1 for employees without roles
+        }
+        
+        console.log(`[ProfileService] Resolved Seniority for ${profile.name}:`, seniority);
 
         // FETCH REPORTING TREE (Only if seniority <= 5, to save resources)
         if (seniority <= 5) {
+          console.log(`[ProfileService] Fetching reporting tree for ${profile.name} (Seniority: ${seniority})`);
           const { data: allEmps } = await supabase.from('employees').select('id, manager_id');
           if (allEmps) {
             const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
@@ -93,6 +101,9 @@ export const profileService = {
             
             reporteeEmployeeIds = treeEmployeeIds;
             reporteeUserIds = (treeProfiles || []).map(p => p.id);
+            console.log(`[ProfileService] Tree Fetched for ${profile.name}:`, { 
+              userCount: reporteeUserIds.length 
+            });
           }
         }
       }
