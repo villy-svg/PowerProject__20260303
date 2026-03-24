@@ -19,10 +19,11 @@ const EmployeeTreeCard = ({
   onToggle
 }) => {
   const isCurrentUser = emp.email === user?.email || emp.user_id === user?.id;
+  const isAccessibleReportee = user?.reporteeUserIds?.includes(emp.user_id);
 
   return (
     <div 
-      className={`employee-tree-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'is-current-user' : ''} ${className}`}
+      className={`employee-tree-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isCurrentUser ? 'is-current-user' : ''} ${isAccessibleReportee ? 'is-accessible-reportee' : ''} ${className}`}
       onDoubleClick={() => onEdit(emp)}
     >
       {/* Tree Toggle */}
@@ -51,7 +52,14 @@ const EmployeeTreeCard = ({
 
       <div className="tree-card-content">
         <div className="tree-card-header">
-          <h3 className="employee-card-name">{emp.full_name}</h3>
+          <h3 className="employee-card-name">
+            {emp.full_name}
+            {isAccessibleReportee && !isCurrentUser && (
+              <span className="visibility-indicator" title="Tasks created by this employee are visible to you due to hierarchy seniority.">
+                👁️
+              </span>
+            )}
+          </h3>
           {hasChildren && (
             <span className="reportee-count-badge" title={`${emp.children?.length || 0} Direct Reportees`}>
               {emp.children?.length || 0}

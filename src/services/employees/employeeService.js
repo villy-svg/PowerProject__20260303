@@ -50,7 +50,7 @@ export const employeeService = {
       { data: roles },
       { data: depts },
     ] = await Promise.all([
-      supabase.from('employees').select('*').order('full_name', { ascending: true }),
+      supabase.from('employees').select('*, user_profiles(id)').order('full_name', { ascending: true }),
       supabase.from('hubs').select('id, hub_code').order('hub_code'),
       supabase.from('employee_roles').select('id, role_code, seniority_level'),
       supabase.from('departments').select('id, dept_code'),
@@ -62,8 +62,14 @@ export const employeeService = {
     const roleMap = new Map((roles    || []).map(r => [r.id, { role_code: r.role_code, seniority_level: r.seniority_level }]));
     const deptMap = new Map((depts    || []).map(d => [d.id, d.dept_code]));
 
+    // Flatten user_profiles(id) to user_id
+    const processedEmps = (emps || []).map(e => ({
+      ...e,
+      user_id: e.user_profiles?.[0]?.id || e.user_profiles?.id || null
+    }));
+
     return {
-      employees: resolveEmployeeCodes(emps || [], hubMap, roleMap, deptMap),
+      employees: resolveEmployeeCodes(processedEmps, hubMap, roleMap, deptMap),
       hubs: hubsData || [],
     };
   },
@@ -184,6 +190,42 @@ export const employeeService = {
    */
   async toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    
+    // HIERARCHY REPAIR: If inactivating an employee, move their reportees up the tree
+    if (newStatus === 'Inactive') {
+      try {
+        // 1. Get the current manager of the person being inactivated
+        const { data: emp, error: fetchErr } = await supabase
+          .from('employees')
+          .select('manager_id, full_name')
+          .eq('id', id)
+          .single();
+        
+        if (emp) {
+          const newManagerId = emp.manager_id || null;
+          
+          // 2. Identify and reassign all direct reportees
+          const { data: reportees, error: repErr } = await supabase
+            .from('employees')
+            .update({ manager_id: newManagerId, updated_at: new Date().toISOString() })
+            .eq('manager_id', id)
+            .select('id, full_name');
+          
+          if (repErr) {
+            console.error(`[HierarchyRepair] Failed to reassign reportees for ${emp.full_name}:`, repErr);
+          } else if (reportees && reportees.length > 0) {
+            console.log(`[HierarchyRepair] Reassigned ${reportees.length} reportees of ${emp.full_name} to manager ${newManagerId || 'None (Root)'}`);
+            // Log history for each reassigned reportee
+            for (const rep of reportees) {
+              await logEmployeeHistory(rep.id, { ...rep, manager_id: newManagerId }, 'HIERARCHY_REPAIR_INACTIVATION');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[HierarchyRepair] Critical logical error during inactivation:', err);
+      }
+    }
+
     const { error } = await supabase
       .from('employees')
       .update({ status: newStatus, updated_at: new Date().toISOString() })

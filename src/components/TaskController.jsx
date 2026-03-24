@@ -155,13 +155,25 @@ const TaskController = ({
   const fCanDelete = permissions[`canDelete${featureBaseName}`] ?? permissions.canDelete;
 
   const canUserCreate = fCanCreate && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
+      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(activeVertical) ||
+      user.assignedVerticals.includes(activeVertical.toUpperCase())
+    )));
 
   const canUserUpdate = fCanUpdate && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
+      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(activeVertical) ||
+      user.assignedVerticals.includes(activeVertical.toUpperCase())
+    )));
 
   const canUserDelete = fCanDelete && 
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && user.assignedVerticals.includes(activeVertical.toUpperCase()) || user.assignedVerticals.includes(activeVertical)));
+    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
+      user.assignedVerticals.includes(rootVerticalId) || 
+      user.assignedVerticals.includes(activeVertical) ||
+      user.assignedVerticals.includes(activeVertical.toUpperCase())
+    )));
 
   // Debugging log for permission issues
   if (!canUserUpdate && permissions.scope !== 'none') {
@@ -298,6 +310,30 @@ const TaskController = ({
 
   return (
     <div className="task-controller">
+      {/* Hierarchy Diagnostics (Only shown if seniority <= 5 AND in debug/admin context) */}
+      {user.seniority <= 5 && (
+        <div className="hierarchy-diag-banner no-print" style={{ 
+          background: 'rgba(0, 255, 135, 0.05)', 
+          borderBottom: '1px solid rgba(0, 255, 135, 0.2)', 
+          padding: '8px 16px', 
+          fontSize: '0.75rem', 
+          display: 'flex', 
+          gap: '20px',
+          alignItems: 'center',
+          color: 'var(--brand-green)',
+          opacity: 0.8
+        }}>
+          <span><strong>Hierarchy Diagnostic:</strong></span>
+          <span>Seniority: {user.seniority}</span>
+          <span>Reportees: {user.reporteeUserIds?.length || 0}</span>
+          <span style={{ fontSize: '0.65rem', opacity: 0.6 }}>
+            IDs: {user.reporteeUserIds?.slice(0, 3).join(', ')}{user.reporteeUserIds?.length > 3 ? '...' : ''}
+          </span>
+          {user.reporteeUserIds?.length === 0 && (
+            <span style={{ color: '#ff4444' }}>⚠️ No reportees found. Ensure reportee profiles are linked to employee records!</span>
+          )}
+        </div>
+      )}
       <MasterPageHeader
         title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Manager'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."

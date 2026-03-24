@@ -85,19 +85,26 @@ export const profileService = {
         
         // FETCH REPORTING TREE (Only if seniority <= 5, to save resources)
         if (seniority <= 5) {
+          console.log(`[ProfileService] Fetching reporting tree for ${profile.name} (Seniority: ${seniority})`);
           const { data: allEmps } = await supabase.from('employees').select('id, manager_id');
           if (allEmps) {
             const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
             const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
             
+            console.log(`[ProfileService] ${profile.name}'s Employee Tree IDs:`, treeEmployeeIds);
+
             // Map Employee IDs to User IDs (Auth IDs) via user_profiles
             const { data: treeProfiles } = await supabase
               .from('user_profiles')
               .select('id, employee_id')
               .in('employee_id', treeEmployeeIds);
             
+            console.log(`[ProfileService] Found ${treeProfiles?.length || 0} matching User Profiles for this tree.`);
+
             reporteeEmployeeIds = treeEmployeeIds;
             reporteeUserIds = (treeProfiles || []).map(p => p.id);
+            
+            console.log(`[ProfileService] Final reporteeUserIds for ${profile.name}:`, reporteeUserIds);
           }
         }
       }
