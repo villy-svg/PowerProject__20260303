@@ -16,15 +16,16 @@ const ListViewRow = ({
   openEditModal, 
   openAddSubtaskModal, 
   onMoveToParent, 
-  TaskTileComponent, 
-  selectedTaskIds, 
-  onSelect, 
-  onDuplicateMerge, 
+  TaskTileComponent,
+  selectedTaskIds,
+  onSelect,
+  onDuplicateMerge,
   currentUser,
   canCreate,
   isExpanded,
   onToggleExpand,
-  hasChildren
+  hasChildren,
+  tasks
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
   const canMoveLeft = currentIndex > 0;
@@ -145,15 +146,47 @@ const ListViewRow = ({
         )}
 
         <div className="list-action-group">
-          {canCreate && !task.isContextOnly && canManage && (
-            <button 
-              className="card-add-sub-button"
-              onClick={() => openAddSubtaskModal(task.id)}
-              title="Add Subtask Under This"
-              style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
-            >
-              +
-            </button>
+          {!task.isContextOnly && canManage && (
+            <>
+              {task.parentTask && (
+                <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
+                  {tasks?.find(t => t.id === task.parentTask)?.parentTask && (
+                    <button
+                      className="card-nav-button promote-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const parent = tasks.find(t => t.id === task.parentTask);
+                        if (parent) onMoveToParent(task.id, parent.parentTask);
+                      }}
+                      title="Promote to Parent's Sibling (Promote to Grandparent)"
+                      style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                    >
+                      ↖
+                    </button>
+                  )}
+                  <button
+                    className="card-nav-button promote-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMoveToParent(task.id, null);
+                    }}
+                    title="Make Top Level Task"
+                    style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                  >
+                    ↑
+                  </button>
+                </div>
+              )}
+              {canCreate && (
+                <button 
+                  className="card-add-sub-button"
+                  onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
+                  title="Add Subtask Under This"
+                >
+                  +
+                </button>
+              )}
+            </>
           )}
           {effectiveCanUpdate && (
             <button
@@ -333,6 +366,7 @@ const TaskListView = ({
                   isExpanded={expandedIds.has(task.id)}
                   onToggleExpand={() => toggleExpand(task.id)}
                   hasChildren={tasks.some(child => child.parentTask === task.id)}
+                  tasks={tasks}
                 />
               ))}
             </div>

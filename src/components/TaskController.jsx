@@ -711,6 +711,7 @@ const TaskController = ({
                           isSelected={selectedTaskIds.includes(task.id)}
                           onSelect={() => toggleTaskSelection(task.id)}
                           currentUser={user}
+                          tasks={filteredTasks}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent

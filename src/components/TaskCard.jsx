@@ -26,7 +26,8 @@ const TaskCard = ({
   isSelected = false,
   onSelect,
   children, // Vertical-specific metadata
-  currentUser
+  currentUser,
+  tasks = []
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -88,8 +89,8 @@ const TaskCard = ({
           </span>
         )}
         {task.parentTask && (
-          <span className="card-priority" title="Subtask" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
-            ↳ Sub
+          <span className="subtask-tag" title="Subtask">
+            |_ SUBTASK
           </span>
         )}
         {task.priority && (
@@ -138,14 +139,38 @@ const TaskCard = ({
 
         <div className="card-actions">
           {!task.isContextOnly && canManageHierarchy && (
-            <button
-              className="card-add-sub-button"
-              onClick={() => openAddSubtaskModal(task.id)}
-              title="Add Subtask Under This"
-              style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
-            >
-              +
-            </button>
+            <>
+              {task.parentTask && (
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {tasks.find(t => t.id === task.parentTask)?.parentTask && (
+                    <button
+                      className="card-promote-button"
+                      onClick={() => {
+                        const parent = tasks.find(t => t.id === task.parentTask);
+                        if (parent) onMoveToParent(task.id, parent.parentTask);
+                      }}
+                      title="Promote to Parent's Sibling (Promote to Grandparent)"
+                    >
+                      ↖
+                    </button>
+                  )}
+                  <button
+                    className="card-promote-button"
+                    onClick={() => onMoveToParent(task.id, null)}
+                    title="Promote to Top Level"
+                  >
+                    ↑
+                  </button>
+                </div>
+              )}
+              <button
+                className="card-add-sub-button"
+                onClick={() => openAddSubtaskModal(task.id)}
+                title="Add Subtask Under This"
+              >
+                +
+              </button>
+            </>
           )}
 
           {effectiveCanUpdate && (
