@@ -8,7 +8,11 @@ export const taskUtils = {
    */
   getAssigneeLabel(task, currentUser) {
     if (!task?.assigned_to) return 'NULL';
-    if (currentUser?.id && task.assigned_to === currentUser.id) return 'YOU';
+    
+    const isMe = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || 
+                 (currentUser?.id && task.assigned_to === currentUser.id);
+                 
+    if (isMe) return 'YOU';
     
     // Fallback to formatting the name
     if (task.assigneeName) {
@@ -37,7 +41,11 @@ export const taskUtils = {
    */
   formatAssigneeForList(assigneeId, assigneeName, currentUser) {
     if (!assigneeName) return 'Unassigned';
-    if (currentUser?.id && assigneeId === currentUser.id) {
+    
+    const isMe = (currentUser?.employeeId && assigneeId === currentUser.employeeId) || 
+                 (currentUser?.id && assigneeId === currentUser.id);
+
+    if (isMe) {
       return `YOU (${assigneeName})`;
     }
     return assigneeName;
