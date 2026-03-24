@@ -769,6 +769,7 @@ const TaskController = ({
                           onSelect={() => toggleTaskSelection(task.id)}
                           currentUser={user}
                           tasks={hierarchyFilteredTasks}
+                          onPromote={handleMoveToParent}
                           onDrillDown={setDrillDownId}
                           showHierarchy={permissions.canViewKanbanHierarchy}
                         >

@@ -87,6 +87,28 @@
    align-items: center;
    gap: 4px;
  }
+ 
+ .subtask-progress-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--brand-green);
+    padding: 2px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    transition: all 0.2s;
+    white-space: nowrap;
+ }
+ 
+ .subtask-progress-badge:hover {
+    background-color: rgba(16, 185, 129, 0.2);
+    transform: scale(1.05);
+ }
+ 
 
 
 .assignee-badge, .assignee-badge-mini {

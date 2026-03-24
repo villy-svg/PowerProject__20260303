@@ -29,6 +29,7 @@ const TaskCard = ({
   currentUser,
   tasks = [],
   onDrillDown,
+  onPromote,
   showHierarchy = false
 }) => {
   const handleMove = (direction) => {
