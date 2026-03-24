@@ -147,6 +147,12 @@ const TaskController = ({
    * FILTER LOGIC
    */
   const filteredTasks = hierarchyFilteredTasks.filter(t => {
+    // 0. Strict Vertical Filter (Crucial for List/Tree views)
+    const targetVerticalId = rootVerticalId || activeVertical;
+    if (t.verticalId !== targetVerticalId && activeVertical !== 'daily_hub_tasks') return false;
+    // Special case for daily hub tasks which might have a different vertical ID structure
+    if (activeVertical === 'daily_hub_tasks' && t.verticalId !== 'daily_hub_tasks') return false;
+
     // 1. Duplicates Only filter
     if (filters.duplicatesOnly && !t.isDuplicate) return false;
 
@@ -412,7 +418,7 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Manager'}`}
+        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>

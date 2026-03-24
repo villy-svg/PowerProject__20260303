@@ -383,9 +383,10 @@ function App() {
               <VerticalWorkspace
                 label={
                   (activeVertical === 'daily_task_templates') ? 'Daily Task Templates' :
-                  (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'daily_hub_tasks') ? 'Hubs List' :
+                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
+                  (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
                   (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
-                  (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
+                  (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
                   verticals[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
