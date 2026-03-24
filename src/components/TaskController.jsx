@@ -174,12 +174,21 @@ const TaskController = ({
         // (This includes their assignments and their reportees' tasks)
         // No additional filtering needed here!
       } else {
-        // High Seniority (Manager View): Respect Drill-Down Hierarchy
+        // High Seniority (Manager View): Respect Drill-Down Hierarchy AND Hide Parents
         if (drillDownId === null) {
+          // Top level: Show ONLY top-level tasks that are LEAVES (no children)
+          // Actually, if we hide all parents at top level, you can't drill down.
+          // The user said "do NOT show them the parent tasks".
+          // If we show only leaf tasks across the whole vertical, it becomes a flat board.
+          // But if we want to keep drill-down, we should hide parent cards in the current view.
           if (t.parentTask !== null && t.parentTask !== undefined && t.parentTask !== "") return false;
         } else {
           if (t.parentTask !== drillDownId) return false;
         }
+
+        // Final Filter: If it's a parent (has children), do not show it as a tile in Kanban
+        const isParent = tasks.some(child => child.parentTask === t.id);
+        if (isParent) return false;
       }
     }
 

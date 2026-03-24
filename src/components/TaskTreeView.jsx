@@ -21,6 +21,34 @@ const TaskTreeView = ({
   canCreate
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
+
+  // Auto-expand tree to show current user's tasks
+  React.useEffect(() => {
+    if (!currentUser || !tasks || tasks.length === 0) return;
+    
+    const newExpanded = new Set();
+    const taskMap = new Map(tasks.map(t => [t.id, t]));
+    
+    // Find tasks assigned to "YOU"
+    const myTasks = tasks.filter(t => 
+      (currentUser.employeeId && t.assigned_to === currentUser.employeeId) || 
+      (currentUser.id && t.assigned_to === currentUser.id)
+    );
+    
+    // Trace back all ancestors for each of my tasks
+    myTasks.forEach(task => {
+      let curr = task;
+      while (curr.parentTask && taskMap.has(curr.parentTask)) {
+        newExpanded.add(curr.parentTask);
+        curr = taskMap.get(curr.parentTask);
+      }
+    });
+    
+    if (newExpanded.size > 0) {
+      setExpandedIds(prev => new Set([...prev, ...newExpanded]));
+    }
+  }, [currentUser, tasks]);
+
   const toggleExpand = (id, e) => {
     e.stopPropagation();
     const newExpanded = new Set(expandedIds);

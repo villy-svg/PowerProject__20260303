@@ -63,6 +63,9 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
         <div className="sidebar-top-section">
           <div className="sidebar-header">
             {/* Header space maintained for alignment with external logo */}
+            <button className="mobile-close-btn" onClick={onClose} aria-label="Close Sidebar">
+              ✕
+            </button>
           </div>
 
           <nav className="sidebar-nav">

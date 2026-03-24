@@ -678,3 +678,57 @@
   color: var(--text-color);
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .user-mgmt-header h2 {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .user-list-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .user-table {
+    min-width: 800px; /* Ensure table doesn't squash too much */
+  }
+
+  .user-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .user-card {
+    padding: 16px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .user-mgmt-header {
+    margin-bottom: 24px;
+  }
+
+  .user-mgmt-header h2 {
+    font-size: 20px;
+  }
+
+  .user-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-modal {
+    padding: 20px;
+    width: 95%;
+  }
+
+  .role-config-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+

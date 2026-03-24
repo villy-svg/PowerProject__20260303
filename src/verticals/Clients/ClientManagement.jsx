@@ -245,7 +245,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
                       }}>
                         {billingModelName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInModel.length})</span>
                       </h5>
-                      <div className={viewMode === 'grid' ? 'client-grid' : 'client-list'}>
+                      <div className={`responsive-table-wrapper ${viewMode === 'grid' ? 'client-grid' : 'client-list'}`}>
                         {clientsInModel.map(client =>
                           viewMode === 'grid'
                             ? <ClientCard {...clientCardProps(client)} />

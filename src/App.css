@@ -513,64 +513,141 @@ body {
   align-items: center;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Duplicate Styling */
-.duplicate-badge {
-  background: color-mix(in srgb, var(--accent-orange), transparent 90%);
-  color: var(--accent-orange);
-  border: 1px solid color-mix(in srgb, var(--accent-orange), transparent 60%);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  margin-left: 6px;
-  text-transform: uppercase;
-}
-
-.duplicate-badge-mini {
-  background: color-mix(in srgb, var(--accent-orange), transparent 90%);
-  color: var(--accent-orange);
-  border: 1px solid color-mix(in srgb, var(--accent-orange), transparent 70%);
-  padding: 0 4px;
-  border-radius: 3px;
-  font-size: 0.6rem;
-  font-weight: 800;
-  margin-left: 4px;
-}
-
-.task-card-master.is-duplicate-stacked {
-  box-shadow:
-    3px 3px 0 -1px var(--bg-color),
-    3px 3px 0 0 var(--border-color),
-    6px 6px 0 -2px var(--bg-color),
-    6px 6px 0 0 var(--border-color);
-  margin-bottom: 24px;
-  /* More space for the stack shadow */
-}
-
 /* ==========================================================================
-   9. GLOBAL ANIMATIONS (Existing)
+   9. GLOBAL ANIMATIONS
    ========================================================================== */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ==========================================================================
+   10. RESPONSIVE DESIGN & MEDIA QUERIES
+   ========================================================================== */
+
+/* 10.1 SMALL LAPTOPS (11" - 13") & TABLETS (LANDSCAPE) */
+@media screen and (max-width: 1280px) {
+  .app-header {
+    padding: 0 24px;
+    height: 70px;
+  }
+
+  .logo-button {
+    left: 1.5rem;
+    top: 15px; /* (70px - 40px) / 2 */
+  }
+
+  .brand-title-centered {
+    font-size: 1.3rem;
+    top: 35px;
+  }
+
+  .management-view-container,
+  .home-summary-view {
+    padding: 24px;
+  }
+
+  .summary-header {
+    margin-bottom: 24px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* 10.2 TABLETS (PORTRAIT) */
+@media screen and (max-width: 1024px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .logo-button {
+    left: 1rem;
+  }
+
+  .brand-title-centered {
+    display: none; /* Hide centered title if it clashes with user profile/settings */
+  }
+
+  .management-view-container,
+  .home-summary-view {
+    padding: 16px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 10.3 MOBILE DEVICES */
+@media screen and (max-width: 768px) {
+  .app-header {
+    height: 60px;
+    padding: 0 12px;
+  }
+
+  .logo-button {
+    top: 10px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-card {
+    min-height: 80px;
+    padding: 12px 16px;
+  }
+
+  .summary-count {
+    font-size: 1.8rem;
+  }
+
+  .summary-label {
+    font-size: 0.75rem;
+  }
+
+  /* Force hide sidebar by default unless sidebar-open is present */
+  .app-layout:not(.sidebar-open) .sidebar {
+    transform: translateX(-100%);
+    position: absolute;
+    z-index: 1001;
+  }
+}
+
+/* 10.4 ULTRA SMALL DEVICES */
+@media screen and (max-width: 480px) {
+  .header-right .user-profile-name {
+    display: none; /* Hide name, keep avatar */
+  }
+}
+
+/* ==========================================================================
+   11. UTILITIES
+   ========================================================================== */
+.responsive-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-card);
+  margin-top: 1rem;
+}
+
+.responsive-table-wrapper table {
+  min-width: 800px;
 }

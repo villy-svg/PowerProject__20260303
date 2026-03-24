@@ -260,7 +260,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
           )}
         </div>
       ) : (
-        <div className="templates-list-view">
+        <div className="templates-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>

@@ -305,3 +305,70 @@
   background: rgba(255,255,255,0.1);
   color: #fff;
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .employee-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .employee-list-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .list-main-info {
+    width: 100%;
+    order: 1;
+    gap: 12px;
+  }
+
+  .list-meta-badges {
+    width: 100%;
+    order: 3;
+    min-width: 0;
+  }
+
+  .list-contact {
+    width: 100%;
+    order: 2;
+  }
+
+  .employee-actions {
+    width: 100%;
+    justify-content: flex-end;
+    order: 4;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .bulk-action-toolbar {
+    bottom: 1rem;
+    padding: 0.5rem 1.5rem;
+    gap: 1rem;
+    width: 90%;
+    flex-direction: column;
+    border-radius: 20px;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .employee-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-card {
+    padding: 1rem;
+  }
+
+  .list-selection {
+    margin-right: 0.5rem;
+  }
+}

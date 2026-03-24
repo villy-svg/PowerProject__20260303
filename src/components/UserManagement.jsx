@@ -307,7 +307,7 @@ const UserManagement = ({ currentUser }) => {
       )}
 
       {viewMode === 'list' ? (
-        <div className="user-list-wrapper">
+        <div className="user-list-wrapper responsive-table-wrapper">
           <table className="user-table">
             <thead>
               <tr>

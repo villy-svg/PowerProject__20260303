@@ -226,3 +226,47 @@ input:checked + .slider:before {
   font-size: 0.9rem;
   opacity: 0.5;
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .client-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .client-list-row {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .client-list-main-info {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .client-list-badges {
+    width: 100%;
+    order: 3;
+    min-width: 0;
+  }
+
+  .client-list-poc {
+    width: 100%;
+    order: 2;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .client-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .client-card {
+    padding: 1rem;
+  }
+}

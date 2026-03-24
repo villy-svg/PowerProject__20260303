@@ -115,13 +115,46 @@
   min-width: 0;
 }
 
+@media (max-width: 1280px) {
+  .workspace-content {
+    padding: 24px;
+  }
+
+  .sub-sidebar {
+    width: 240px;
+  }
+}
+
 @media (max-width: 1024px) {
+  .workspace-content {
+    padding: 16px;
+  }
+
   .sub-sidebar {
     position: fixed;
-    z-index: 100;
+    z-index: 1001; /* Above main sidebar but below dropdowns? No, needs to be accessible */
     height: 100%;
     left: 0;
     transform: translateX(-100%);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+  }
+
+  .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
+    transform: translateX(0);
+  }
+
+  .sub-sidebar-toggle {
+    display: flex; /* Ensure toggle is always visible on mobile if needed */
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace-content {
+    padding: 12px;
+  }
+
+  .sub-sidebar {
+    width: 240px;
   }
 }
 

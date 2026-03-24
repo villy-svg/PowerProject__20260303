@@ -114,3 +114,28 @@
   color: #ef4444;
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media screen and (max-width: 1024px) {
+  .hubs-list-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .management-table {
+    min-width: 800px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .management-view-header {
+    margin-bottom: 24px;
+  }
+  
+  .management-table th, .management-table td {
+    padding: 12px 16px;
+  }
+}
+

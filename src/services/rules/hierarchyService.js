@@ -98,6 +98,43 @@ export const hierarchyService = {
   },
 
   /**
+   * Calculates the total and completed recursive descendants for a given task.
+   * Useful for progress badges in the Kanban board.
+   * 
+   * @param {string} taskId 
+   * @param {Array} tasks 
+   * @returns {{ total: number, completed: number }}
+   */
+  getRecursiveTaskStats(taskId, tasks) {
+    if (!taskId || !tasks || tasks.length === 0) return { total: 0, completed: 0 };
+
+    const taskMap = new Map();
+    tasks.forEach(t => {
+      const parentId = t.parentTask;
+      if (parentId) {
+        if (!taskMap.has(parentId)) taskMap.set(parentId, []);
+        taskMap.get(parentId).push(t);
+      }
+    });
+
+    const countRecursive = (id) => {
+      const children = taskMap.get(id) || [];
+      let total = children.length;
+      let completed = children.filter(c => c.stageId === 'COMPLETED').length;
+      
+      children.forEach(child => {
+        const stats = countRecursive(child.id);
+        total += stats.total;
+        completed += stats.completed;
+      });
+      
+      return { total, completed };
+    };
+
+    return countRecursive(taskId);
+  },
+
+  /**
    * Determines if the user should see the project-level drill-down board or the flat assignee board.
    * @param {Object} user 
    * @returns {boolean}

@@ -163,7 +163,7 @@ const HubFunctionManagement = ({ permissions = {} }) => {
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -189,11 +189,6 @@ const HubFunctionManagement = ({ permissions = {} }) => {
               ))}
             </tbody>
           </table>
-          {functions.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>No functions found.</p>
-            </div>
-          )}
         </div>
       )}
 

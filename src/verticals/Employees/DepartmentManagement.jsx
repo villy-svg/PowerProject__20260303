@@ -158,7 +158,7 @@ const DepartmentManagement = ({ permissions = {} }) => {
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -184,11 +184,6 @@ const DepartmentManagement = ({ permissions = {} }) => {
               ))}
             </tbody>
           </table>
-          {departments.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>No departments found.</p>
-            </div>
-          )}
         </div>
       )}
 

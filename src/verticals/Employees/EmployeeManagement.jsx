@@ -292,7 +292,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
                         {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
                       </button>
                     </h5>
-                    <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
+                    <div className={`responsive-table-wrapper ${viewMode === 'grid' ? 'employee-grid' : 'employee-list'}`}>
                       {empsInRole.map(emp => (
                         viewMode === 'grid' ? (
                           <EmployeeCard 

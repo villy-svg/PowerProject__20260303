@@ -256,3 +256,52 @@
   border-radius: 4px;
 }
 
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .hub-management-container {
+    padding: 24px;
+  }
+  
+  .hubs-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    max-height: calc(100vh - 240px);
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .hubs-list-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .management-table {
+    min-width: 900px;
+  }
+
+  .hubs-grid {
+    max-height: none; /* Allow natural scrolling on touch devices if container scrolls */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .hub-management-container {
+    padding: 16px;
+  }
+
+  .hubs-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hub-card {
+    padding: 20px;
+  }
+
+  .hub-card h3 {
+    font-size: 1.1rem;
+  }
+}
+

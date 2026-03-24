@@ -245,7 +245,7 @@ const HubManagement = ({ permissions = {} }) => {
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -278,11 +278,6 @@ const HubManagement = ({ permissions = {} }) => {
               ))}
             </tbody>
           </table>
-          {hubs.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>No hubs found.</p>
-            </div>
-          )}
         </div>
       )}
 

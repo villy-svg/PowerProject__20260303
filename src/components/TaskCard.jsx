@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AssigneeBadge from './AssigneeBadge';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { hierarchyService } from '../services/rules/hierarchyService';
 import './TaskCard.css';
 
 /**
@@ -87,29 +88,33 @@ const TaskCard = ({
           </div>
         </div>
 
-        {showHierarchy && tasks.some(t => t.parentTask === task.id) && (
-          <div 
-            className="subtask-progress-badge" 
-            title="View Project Children"
-            onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '4px', 
-              fontSize: '0.65rem', 
-              fontWeight: 700, 
-              backgroundColor: 'rgba(16, 185, 129, 0.1)', 
-              color: 'var(--brand-green)', 
-              padding: '2px 8px', 
-              borderRadius: '12px',
-              cursor: 'pointer',
-              border: '1px solid rgba(16, 185, 129, 0.2)'
-            }}
-          >
-            {tasks.filter(t => t.parentTask === task.id && t.stageId === 'COMPLETED').length} / {tasks.filter(t => t.parentTask === task.id).length} TASKS
-            <span style={{ fontSize: '0.8rem', marginLeft: '2px' }}>🔍</span>
-          </div>
-        )}
+        {showHierarchy && (tasks.some(t => t.parentTask === task.id)) && (() => {
+          const directTasks = tasks.filter(t => t.parentTask === task.id);
+          const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
+          const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
+          
+          return (
+            <div className="task-hierarchy-badges">
+              <div 
+                className="subtask-progress-badge" 
+                title="Direct Children Progress"
+                onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
+              >
+                {completedDirect} / {directTasks.length} DIRECT
+              </div>
+
+              {recursiveStats.total > directTasks.length && (
+                <div 
+                  className="recursive-progress-badge" 
+                  title={`Total recursive descendants: ${recursiveStats.total} (${recursiveStats.completed} completed)`}
+                  onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
+                >
+                  {recursiveStats.completed} / {recursiveStats.total} TOTAL
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Row 1: Metadata (Priority + Tags + Assignee) */}

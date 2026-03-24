@@ -332,6 +332,10 @@ function App() {
           permissions={currentUserPermissions}
           verticalList={verticalList}
         />
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
         <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
           <header className="app-header">
             <div className="header-left">

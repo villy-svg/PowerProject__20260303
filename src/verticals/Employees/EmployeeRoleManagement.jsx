@@ -161,7 +161,7 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -191,11 +191,6 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
               ))}
             </tbody>
           </table>
-          {roles.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>No roles found.</p>
-            </div>
-          )}
         </div>
       )}
 
