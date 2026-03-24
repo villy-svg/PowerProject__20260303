@@ -79,13 +79,12 @@ const TaskCard = ({
         cursor: task.isContextOnly ? 'default' : undefined
       }}
     >
-      <div className="task-selection-area" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
-        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
-          {isSelected && '✓'}
-        </div>
-      </div>
-      {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
+        <div className="task-selection-area" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
+          <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+            {isSelected && '✓'}
+          </div>
+        </div>
         {task.isContextOnly && (
           <span className="card-priority" title="Context Only (View Only)" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
             VIEWER
@@ -93,7 +92,7 @@ const TaskCard = ({
         )}
         {task.parentTask && showHierarchy && (
           <span className="subtask-tag" title="Subtask">
-            |_ SUBTASK
+            ↳ Subtask
           </span>
         )}
         {showHierarchy && tasks.some(t => t.parentTask === task.id) && (

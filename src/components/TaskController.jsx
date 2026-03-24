@@ -42,7 +42,8 @@ const TaskController = ({
   user = {},
   permissions = {},
   rootVerticalId, // New prop
-  verticals = {} // Passed from VerticalWorkspace
+  verticals = {}, // Passed from VerticalWorkspace
+  boardLabel
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -647,7 +648,7 @@ const TaskController = ({
                   onClick={() => setDrillDownId(null)}
                   style={{ background: 'none', border: 'none', color: 'var(--brand-green)', cursor: 'pointer', padding: 0, fontWeight: 600 }}
                 >
-                  {label || 'Board'}
+                  {boardLabel || label || 'Board'}
                 </button>
                 {drillPath.map((node, idx) => (
                   <React.Fragment key={node.id}>

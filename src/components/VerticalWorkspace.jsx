@@ -30,6 +30,7 @@ const VerticalWorkspace = ({
   user = {}, 
   permissions = {},
   verticals = {}, // Passed from App.jsx
+  boardLabel, // New prop
   children
 }) => {
   const [filters, setFilters] = React.useState({ 
@@ -217,6 +218,7 @@ const VerticalWorkspace = ({
             user={user} 
             permissions={permissions} 
             verticals={verticals}
+            boardLabel={boardLabel}
           />
         )}
       </main>

@@ -382,13 +382,19 @@ function App() {
             ) : (
               <VerticalWorkspace
                 label={
+                  (activeVertical === 'daily_task_templates' || activeVertical === 'daily_hub_tasks' || activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
+                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
+                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
+                        verticals[activeVertical]?.label
+                }
+                boardLabel={
                   (activeVertical === 'daily_task_templates') ? 'Daily Task Templates' :
                     (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
-                      (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
-                        (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
-                          (activeVertical === verticals.CLIENTS?.id) ? 'Clients' :
-                          (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
-                              verticals[activeVertical]?.label
+                      (activeVertical === 'hub_tasks') ? 'Hub Task Board' :
+                        (activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs Management' :
+                          (activeVertical === 'employee_tasks') ? 'Employee Task Board' :
+                            (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
+                              verticals[activeVertical]?.label || 'Board'
                 }
                 activeVertical={activeVertical}
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}

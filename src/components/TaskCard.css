@@ -31,6 +31,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
+  min-height: 24px;
 }
 
 .card-task-name {
@@ -78,7 +80,7 @@
  .subtask-tag {
    font-size: 0.6rem;
    font-weight: 700;
-   padding: 2px 6px;
+   padding: 1px 6px;
    border-radius: 4px;
    background: var(--bg-elevated);
    color: var(--text-secondary);
@@ -86,6 +88,8 @@
    display: flex;
    align-items: center;
    gap: 4px;
+   text-transform: uppercase;
+   letter-spacing: 0.3px;
  }
  
  .subtask-progress-badge {
