@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { TASK_STAGES } from '../constants/stages';
+import { TASK_STAGES, STAGE_LIST } from '../constants/stages';
 import AssigneeBadge from './AssigneeBadge';
 import './TaskListView.css'; // Reusing some list styles for consistency
 
@@ -115,12 +115,70 @@ const TaskTreeView = ({
         </div>
 
         <div className="list-row-controls">
+          {canUpdate && !task.isContextOnly && (
+            <div className="list-nav-group">
+              <button
+                className={`card-nav-button ${STAGE_LIST.findIndex(s => s.id === task.stageId) <= 0 ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const idx = STAGE_LIST.findIndex(s => s.id === task.stageId);
+                  if (idx > 0) updateTaskStage(task.id, STAGE_LIST[idx - 1].id);
+                }}
+                disabled={STAGE_LIST.findIndex(s => s.id === task.stageId) <= 0}
+                title="Move Back"
+              >
+                ←
+              </button>
+              <button
+                className={`card-nav-button ${STAGE_LIST.findIndex(s => s.id === task.stageId) >= STAGE_LIST.length - 1 || task.stageId === 'COMPLETED' ? 'disabled' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const idx = STAGE_LIST.findIndex(s => s.id === task.stageId);
+                  if (idx < STAGE_LIST.length - 1) updateTaskStage(task.id, STAGE_LIST[idx + 1].id);
+                }}
+                disabled={STAGE_LIST.findIndex(s => s.id === task.stageId) >= STAGE_LIST.length - 1 || task.stageId === 'COMPLETED'}
+                title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+              >
+                →
+              </button>
+            </div>
+          )}
+
           <div className="list-action-group">
             {!task.isContextOnly && canManageHierarchy(task) && (
               <>
+                {task.parentTask && (
+                  <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
+                    {tasks.find(t => t.id === task.parentTask)?.parentTask && (
+                      <button
+                        className="card-nav-button promote-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const parent = tasks.find(t => t.id === task.parentTask);
+                          if (parent) onMoveToParent(task.id, parent.parentTask);
+                        }}
+                        title="Move to Parent's Sibling (Promote to Grandparent)"
+                        style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                      >
+                        ↖
+                      </button>
+                    )}
+                    <button
+                      className="card-nav-button promote-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMoveToParent(task.id, null);
+                      }}
+                      title="Make Top Level Task"
+                      style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                    >
+                      ↑
+                    </button>
+                  </div>
+                )}
                 <button 
                   className="card-add-sub-button"
-                  onClick={() => openAddSubtaskModal(task.id)}
+                  onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
                   title="Add Subtask Under This"
                   style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
                 >
@@ -128,7 +186,7 @@ const TaskTreeView = ({
                 </button>
                 <button
                   className="card-edit-button"
-                  onClick={() => openEditModal(task)}
+                  onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
                   title="Edit Task"
                 >
                   ✎
@@ -138,7 +196,7 @@ const TaskTreeView = ({
             {!task.isContextOnly && !canManageHierarchy(task) && canUpdate && (
               <button
                 className="card-edit-button"
-                onClick={() => openEditModal(task)}
+                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
                 title="Edit Task"
               >
                 ✎
@@ -147,7 +205,7 @@ const TaskTreeView = ({
             {!task.isContextOnly && canDelete && (
               <button
                 className="card-delete-button"
-                onClick={() => deleteTask(task.id)}
+                onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
                 title="Delete Task"
               >
                 ×

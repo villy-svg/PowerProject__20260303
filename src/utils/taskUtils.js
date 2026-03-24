@@ -49,5 +49,47 @@ export const taskUtils = {
       return `YOU (${assigneeName})`;
     }
     return assigneeName;
+  },
+
+  /**
+   * Universal Task Prefixing Principle
+   * Applies "CODE : Summary" formatting based on vertical context.
+   * @param {string} text - The raw task summary.
+   * @param {Object} options - Contextual metadata (assetCode, functionName, forcePrefix).
+   * @returns {string} Formatted task text.
+   */
+  formatTaskText(text, options = {}) {
+    let finalTaskText = (text || '').trim();
+    const funcLower = (options.functionName || '').toLowerCase();
+
+    // 1. Hiring tasks always get "Hire : " prefix
+    if (funcLower === 'hiring') {
+      const prefix = "Hire : ";
+      if (!finalTaskText.startsWith(prefix)) {
+         // If it has another prefix, replace it? No, just ensure Hire: is leading
+         finalTaskText = `${prefix}${finalTaskText}`;
+      }
+    } 
+    // 2. Asset-based tasks (Hubs, Clients, etc) get the Asset Code prefix
+    else if (options.assetCode && (funcLower === 'facility' || options.forcePrefix)) {
+      const code = options.assetCode;
+      const prefix = `${code} : `;
+      
+      if (!finalTaskText.includes(" : ")) {
+        // No prefix at all, add it
+        finalTaskText = `${prefix}${finalTaskText}`;
+      } else if (!finalTaskText.startsWith(prefix)) {
+        // Has a different prefix, replace the code part if it looks like a code
+        // Generic approach: split by " : " and replace first part
+        const parts = finalTaskText.split(" : ");
+        if (parts.length > 1) {
+          finalTaskText = `${prefix}${parts.slice(1).join(" : ")}`;
+        } else {
+          finalTaskText = `${prefix}${finalTaskText}`;
+        }
+      }
+    }
+
+    return finalTaskText;
   }
 };

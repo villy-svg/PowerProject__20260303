@@ -28,6 +28,7 @@ const TaskController = ({
   actualSetTasks,
   refreshTasks,
   updateTask,
+  addTask,
   bulkUpdateTasks,
   deleteTask, 
   updateTaskStage,
@@ -140,7 +141,7 @@ const TaskController = ({
   /**
    * HIERARCHY FILTER: Enforce seniority-based visibility rules
    */
-  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical, verticals);
+  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical, verticals, permissions);
 
   /**
    * FILTER LOGIC
@@ -249,11 +250,11 @@ const TaskController = ({
       return;
     }
 
-    setSaving(true);
     try {
-      await updateTask({ ...childTask, parentTask: parentId }, user.id);
-      // Actual update is handled by refreshTasks/setTasks via VerticalWorkspace or local state
-      setTasks(prev => prev.map(t => t.id === childId ? { ...t, parentTask: parentId } : t));
+      // Ensure we send the required ID and the parent update
+      await updateTask({ ...childTask, parentTask: parentId });
+      // UI update is handled by the hook's local state update inside updateTask, 
+      // but we can also rely on refreshTasks if needed.
     } catch (err) {
       console.error('Failed to move task:', err);
       alert('Failed to update task relationship.');
@@ -284,7 +285,12 @@ const TaskController = ({
           ...createInitialTask(formData.text, rootVerticalId || activeVertical),
           ...formData
         };
-        await setTasks(newTask);
+        if (addTask) {
+          await addTask(newTask);
+        } else {
+          console.error("addTask prop missing in TaskController");
+          await setTasks(prev => [...prev, newTask]); // Fallback but not persisted
+        }
       }
       setIsModalOpen(false);
       setEditingTask(null);

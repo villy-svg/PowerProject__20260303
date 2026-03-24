@@ -20,7 +20,10 @@ const ListViewRow = ({
   selectedTaskIds, 
   onSelect, 
   onDuplicateMerge, 
-  currentUser 
+  currentUser,
+  isExpanded,
+  onToggleExpand,
+  hasChildren
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
   const canMoveLeft = currentIndex > 0;
@@ -66,6 +69,13 @@ const ListViewRow = ({
     >
       {/* LEFT SIDE: Identity & Content */}
       <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
+        <div 
+          className="tree-expander" 
+          onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
+          style={{ width: '20px', display: 'flex', justifyContent: 'center', cursor: 'pointer', opacity: hasChildren ? 1 : 0 }}
+        >
+          {hasChildren ? (isExpanded ? '▼' : '▶') : ''}
+        </div>
         {task.depth > 0 && (
           <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
         )}
@@ -206,6 +216,17 @@ const TaskListView = ({
   onDuplicateMerge,
   currentUser
 }) => {
+  const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
+  // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
+  // Conventionally, project boards start expanded but let's just use an empty set and they can expand.
+  
+  const toggleExpand = (id, e) => {
+    if (e) e.stopPropagation();
+    const newExpanded = new Set(expandedIds);
+    if (newExpanded.has(id)) newExpanded.delete(id);
+    else newExpanded.add(id);
+    setExpandedIds(newExpanded);
+  };
 
   const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
 
@@ -277,7 +298,17 @@ const TaskListView = ({
             </header>
 
             <div className="list-task-container">
-              {stageTasks.map((task) => (
+              {stageTasks.filter(t => {
+                // Visibility filter: ancestors must be expanded
+                let curr = t;
+                const taskMap = new Map(tasks.map(item => [item.id, item]));
+                while (curr.parentTask) {
+                  if (!expandedIds.has(curr.parentTask)) return false;
+                  curr = taskMap.get(curr.parentTask);
+                  if (!curr) break;
+                }
+                return true;
+              }).map((task) => (
                 <ListViewRow 
                   key={task.id} 
                   task={task} 
@@ -296,6 +327,9 @@ const TaskListView = ({
                   onSelect={onSelect}
                   onDuplicateMerge={onDuplicateMerge}
                   currentUser={currentUser}
+                  isExpanded={expandedIds.has(task.id)}
+                  onToggleExpand={() => toggleExpand(task.id)}
+                  hasChildren={tasks.some(child => child.parentTask === task.id)}
                 />
               ))}
             </div>

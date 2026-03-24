@@ -30,21 +30,23 @@ export const hierarchyService = {
    * @param {Array} tasks - Pre-filtered tasks (by vertical/status).
    * @param {string} activeVertical - The current UI vertical context.
    * @param {Object} verticals - Map of dynamic verticals from backend (optional).
+   * @param {Object} permissions - Computed permission set for the current user.
    * @returns {Array} Subset of tasks the user is allowed to see.
    */
-  filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}) {
+  filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}, permissions = {}) {
     // Master Admin or Global Scope bypasses hierarchy filters IF they don't have a restricted seniority
     if (!user) return tasks;
     if (user.roleId === 'master_admin' && (user.seniority > 5 || !user.seniority)) return tasks;
 
     const seniority = Number(user.seniority ?? 100);
     const employeeId = user.employeeId;
+    const isRestrictedScope = permissions.scope === 'assigned' || seniority <= 5;
 
-    // RULE: Seniority <= 5
+    // RULE: Assigned Scope or Seniority <= 5
     // User can only see and work on:
     // 1. Tasks Assigned to them
     // 2. Tasks Created by their reportees or members in their tree
-    if (seniority <= 5) {
+    if (isRestrictedScope) {
       // If no employeeId is linked, they see nothing (security fallback)
       if (!employeeId) return [];
       

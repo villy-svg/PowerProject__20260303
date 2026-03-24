@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
+import TaskHierarchySelector from '../../components/TaskHierarchySelector';
+import { taskUtils } from '../../utils/taskUtils';
 
 /**
  * EmployeeTaskForm
@@ -23,7 +25,15 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // For employees, we'll check for "hiring" keywords in the text as a simple principle
+    const isHiring = formData.text.toLowerCase().includes('hire') || formData.text.toLowerCase().includes('onboard');
+    
+    const finalTaskText = taskUtils.formatTaskText(formData.text, {
+      functionName: isHiring ? 'hiring' : ''
+    });
+
+    onSubmit({ ...formData, text: finalTaskText });
   };
 
   return (
@@ -63,21 +73,11 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
           />
         </div>
 
-        <div className="form-group">
-          <label>Parent Task</label>
-          <select 
-            className="master-dropdown"
-            value={formData.parentTask}
-            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
-          >
-            <option value="">None (Top-level task)</option>
-            {availableTasks.map(task => (
-              <option key={task.id} value={task.id}>
-                {task.text}
-              </option>
-            ))}
-          </select>
-        </div>
+        <TaskHierarchySelector 
+          value={formData.parentTask}
+          onChange={(val) => setFormData({...formData, parentTask: val})}
+          availableTasks={availableTasks}
+        />
       </div>
 
       <div className="form-group">

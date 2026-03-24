@@ -391,6 +391,7 @@ function App() {
                 activeVertical={activeVertical}
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
                 setTasks={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
+                addTask={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
                 actualSetTasks={activeVertical === 'daily_hub_tasks' ? setDailyTasks : setTasks}
                 refreshTasks={activeVertical === 'daily_hub_tasks' ? fetchDailyTasks : fetchTasks}
                 updateTask={activeVertical === 'daily_hub_tasks' ? updateDailyTask : updateTask}

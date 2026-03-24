@@ -204,6 +204,7 @@ const VerticalWorkspace = ({
             actualSetTasks={actualSetTasks}
             refreshTasks={refreshTasks}
             updateTask={updateTask}
+            addTask={addTask}
             bulkUpdateTasks={bulkUpdateTasks}
             deleteTask={deleteTask}
             updateTaskStage={updateTaskStage}

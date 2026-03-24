@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
+import TaskHierarchySelector from '../../components/TaskHierarchySelector';
+import { taskUtils } from '../../utils/taskUtils';
 import './HubTaskForm.css';
 
 /**
@@ -75,25 +77,12 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let finalTaskText = formData.text.trim();
-    const funcLower = formData.function?.toLowerCase();
-
-    if (funcLower === 'hiring') {
-      const prefix = "Hire : ";
-      if (!finalTaskText.startsWith(prefix)) {
-        finalTaskText = `${prefix}${finalTaskText}`;
-      }
-    } else if (funcLower === 'facility' && formData.hub_id) {
-      const selectedHub = hubs.find(h => h.id === formData.hub_id);
-      const hubCode = selectedHub?.hub_code || 'HUB';
-      const prefix = `${hubCode} : `;
-      if (!finalTaskText.includes(" : ")) { // Force if no prefix at all
-        finalTaskText = `${prefix}${finalTaskText}`;
-      } else if (!finalTaskText.startsWith(prefix)) { // Or if wrong prefix
-        // Replace wrong prefix if it's a hub prefix attempt
-        finalTaskText = `${prefix}${finalTaskText.split(" : ")[1] || finalTaskText}`;
-      }
-    }
+    const selectedHub = hubs.find(h => h.id === formData.hub_id);
+    const finalTaskText = taskUtils.formatTaskText(formData.text, {
+      assetCode: selectedHub?.hub_code,
+      functionName: formData.function,
+      forcePrefix: !!formData.hub_id
+    });
 
     onSubmit({ ...formData, text: finalTaskText });
   };
@@ -186,21 +175,11 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
           </select>
         </div>
 
-        <div className="form-group">
-          <label>Parent Task</label>
-          <select 
-            className="master-dropdown"
-            value={formData.parentTask}
-            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
-          >
-            <option value="">None (Top-level task)</option>
-            {availableTasks.map(task => (
-              <option key={task.id} value={task.id}>
-                {task.text}
-              </option>
-            ))}
-          </select>
-        </div>
+        <TaskHierarchySelector 
+          value={formData.parentTask}
+          onChange={(val) => setFormData({...formData, parentTask: val})}
+          availableTasks={availableTasks}
+        />
       </div>
 
       <div className="form-group">

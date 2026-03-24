@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
+import TaskHierarchySelector from '../../components/TaskHierarchySelector';
+import { taskUtils } from '../../utils/taskUtils';
 
 /**
  * ClientTaskForm
@@ -34,11 +36,16 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    const selectedClient = clients.find(c => c.id === formData.assigned_client_id);
+    const finalTaskText = taskUtils.formatTaskText(formData.text, {
+      assetCode: selectedClient?.name,
+      forcePrefix: !!formData.assigned_client_id
+    });
+
     onSubmit({
       ...formData,
-      // We map the client selection to a data field that the backend can handle.
-      // In this app, tasks often use metadata or specific columns for assignments.
-      // For now, we'll just pass it through as assigned_client_id.
+      text: finalTaskText
     });
   };
 
@@ -95,21 +102,11 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
           />
         </div>
 
-        <div className="form-group">
-          <label>Parent Task</label>
-          <select 
-            className="master-dropdown"
-            value={formData.parentTask}
-            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
-          >
-            <option value="">None (Top-level task)</option>
-            {availableTasks.map(task => (
-              <option key={task.id} value={task.id}>
-                {task.text}
-              </option>
-            ))}
-          </select>
-        </div>
+        <TaskHierarchySelector 
+          value={formData.parentTask}
+          onChange={(val) => setFormData({...formData, parentTask: val})}
+          availableTasks={availableTasks}
+        />
       </div>
 
       <div className="form-group">
