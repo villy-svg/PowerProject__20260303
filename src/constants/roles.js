@@ -3,7 +3,9 @@
  * Central permission schema for PowerProject.
  * Defines Create, Read, Update, and Delete (CRUD) capabilities per role.
  */
-
+ 
+export const MANAGER_SENIORITY_THRESHOLD = 6;
+ 
 export const DEFAULT_ROLE_PERMISSIONS = {
   // --- MASTER SCOPE (Global Access) ---
   master_admin: {

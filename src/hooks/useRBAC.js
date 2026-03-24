@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { getPermissionsForLevel } from '../constants/roles';
+ import { getPermissionsForLevel } from '../constants/roles';
+ import { hierarchyService } from '../services/rules/hierarchyService';
 
 /**
  * useRBAC Hook
@@ -98,7 +99,9 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       finalPerms[`canDelete${featureName}`] = verticalCaps.canDelete && featureCaps.canDelete;
     });
 
-    return finalPerms;
+    finalPerms.canViewKanbanHierarchy = hierarchyService.canViewKanbanHierarchy(user);
+
+     return finalPerms;
   }, [user, activeVertical, verticals]);
 
   return permissions;

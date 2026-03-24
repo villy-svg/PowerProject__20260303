@@ -1,3 +1,5 @@
+import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
+
 /**
  * Hierarchy Service
  * Centralizes complex user-employee mapping rules and task visibility hierarchies.
@@ -36,13 +38,13 @@ export const hierarchyService = {
   filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}, permissions = {}) {
     // Master Admin or Global Scope bypasses hierarchy filters IF they don't have a restricted seniority
     if (!user) return tasks;
-    if (user.roleId === 'master_admin' && (user.seniority > 5 || !user.seniority)) return tasks;
+    if (user.roleId === 'master_admin' && (user.seniority > MANAGER_SENIORITY_THRESHOLD || !user.seniority)) return tasks;
 
     const seniority = Number(user.seniority ?? 100);
     const employeeId = user.employeeId;
-    const isRestrictedScope = permissions.scope === 'assigned' || seniority <= 5;
+    const isRestrictedScope = permissions.scope === 'assigned' || seniority <= MANAGER_SENIORITY_THRESHOLD;
 
-    // RULE: Assigned Scope or Seniority <= 5
+    // RULE: Assigned Scope or Seniority <= MANAGER_SENIORITY_THRESHOLD
     // User can only see and work on:
     // 1. Tasks Assigned to them
     // 2. Tasks Created by their reportees or members in their tree
@@ -84,7 +86,17 @@ export const hierarchyService = {
         }));
     }
 
-    // Default: Seniority > 5 sees all tasks in the vertical
+    // Default: Seniority > MANAGER_SENIORITY_THRESHOLD sees all tasks in the vertical
     return tasks;
+  },
+
+  /**
+   * Determines if the user should see the project-level drill-down board or the flat assignee board.
+   * @param {Object} user 
+   * @returns {boolean}
+   */
+  canViewKanbanHierarchy(user) {
+    if (!user) return false;
+    return (user.seniority || 0) > MANAGER_SENIORITY_THRESHOLD;
   }
 };

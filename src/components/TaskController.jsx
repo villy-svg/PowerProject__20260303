@@ -167,12 +167,12 @@ const TaskController = ({
 
     // 0.1 Kanban-Specific Visibility (ONLY for Kanban view)
     if (viewMode === 'kanban') {
-      if (user.seniority <= 5) {
-        // Low Seniority: Only show tasks assigned to them, ignore hierarchy
+      if (!permissions.canViewKanbanHierarchy) {
+        // Low Seniority (Assignee View): Only show tasks assigned to them, ignore hierarchy
         const isAssignedToUser = t.employee_id === user.id || t.assignedTo === user.id;
         if (!isAssignedToUser) return false;
       } else {
-        // High Seniority: Respect Drill-Down Hierarchy
+        // High Seniority (Manager View): Respect Drill-Down Hierarchy
         if (drillDownId === null) {
           if (t.parentTask) return false; // Show only root tasks
         } else {
@@ -639,7 +639,36 @@ const TaskController = ({
 
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
-          <div className="kanban-board">
+          <>
+            {permissions.canViewKanbanHierarchy && (drillDownId || drillPath.length > 0) && (
+              <div className="drill-breadcrumb" style={{ padding: '0 24px 12px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <button 
+                  onClick={() => setDrillDownId(null)}
+                  style={{ background: 'none', border: 'none', color: 'var(--brand-green)', cursor: 'pointer', padding: 0, fontWeight: 600 }}
+                >
+                  {label || 'Board'}
+                </button>
+                {drillPath.map((node, idx) => (
+                  <React.Fragment key={node.id}>
+                    <span>/</span>
+                    <button 
+                      onClick={() => setDrillDownId(node.id)}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: idx === drillPath.length - 1 ? 'var(--text-color)' : 'var(--brand-green)', 
+                        cursor: 'pointer', 
+                        padding: 0,
+                        fontWeight: idx === drillPath.length - 1 ? 700 : 500
+                      }}
+                    >
+                      {node.text}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+            <div className="kanban-board">
             {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
               const getPriorityWeight = (p) => {
                 if (!p) return 0;
@@ -739,8 +768,9 @@ const TaskController = ({
                           isSelected={selectedTaskIds.includes(task.id)}
                           onSelect={() => toggleTaskSelection(task.id)}
                           currentUser={user}
-                          tasks={filteredTasks}
+                          tasks={hierarchyFilteredTasks}
                           onDrillDown={setDrillDownId}
+                          showHierarchy={permissions.canViewKanbanHierarchy}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent
@@ -759,7 +789,8 @@ const TaskController = ({
                 </div>
               );
             })}
-          </div>
+            </div>
+          </>
         ) : viewMode === 'list' ? (
           <TaskListView
             tasks={filteredTasks}

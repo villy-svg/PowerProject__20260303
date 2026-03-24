@@ -28,7 +28,8 @@ const TaskCard = ({
   children, // Vertical-specific metadata
   currentUser,
   tasks = [],
-  onDrillDown
+  onDrillDown,
+  showHierarchy = false
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -89,12 +90,12 @@ const TaskCard = ({
             VIEWER
           </span>
         )}
-        {task.parentTask && currentUser.seniority > 5 && (
+        {task.parentTask && showHierarchy && (
           <span className="subtask-tag" title="Subtask">
             |_ SUBTASK
           </span>
         )}
-        {currentUser.seniority > 5 && tasks.some(t => t.parentTask === task.id) && (
+        {showHierarchy && tasks.some(t => t.parentTask === task.id) && (
           <div 
             className="subtask-progress-badge" 
             title="View Project Children"
@@ -162,7 +163,7 @@ const TaskCard = ({
         </div>
 
         <div className="card-actions">
-          {!task.isContextOnly && canManageHierarchy && currentUser.seniority > 5 && (
+          {!task.isContextOnly && canManageHierarchy && showHierarchy && (
             <>
               {task.parentTask && (
                 <div style={{ display: 'flex', gap: '4px' }}>
