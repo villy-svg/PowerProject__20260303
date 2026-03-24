@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import AssigneeSelector from '../../components/AssigneeSelector';
 
 /**
  * ClientTaskForm
  * Vertical-specific form for Client Manager tasks.
  * Allows assigning a task to a specific Client.
  */
-const ClientTaskForm = ({ onSubmit, loading, initialData = {} }) => {
+const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
     description: safeData.description || '',
-    assigned_client_id: safeData.assigned_client_id || ''
+    assigned_client_id: safeData.assigned_client_id || '',
+    assigned_to: safeData.assigned_to || ''
   });
   const [clients, setClients] = useState([]);
 
@@ -81,6 +83,15 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {} }) => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-group">
+          <label>Assigned To</label>
+          <AssigneeSelector
+            value={formData.assigned_to}
+            onChange={(val) => setFormData({...formData, assigned_to: val})}
+            currentUser={currentUser}
+          />
         </div>
       </div>
 

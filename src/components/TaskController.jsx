@@ -11,6 +11,7 @@ import MasterPageHeader from './MasterPageHeader';
 import ConflictModal from './ConflictModal';
 import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
 import { hierarchyService } from '../services/rules/hierarchyService';
+import { taskUtils } from '../utils/taskUtils';
 import './TaskController.css';
 
 /**
@@ -138,8 +139,12 @@ const TaskController = ({
     if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
     if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
     if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
+    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
     if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
-    if (filters.assignee?.length > 0 && !filters.assignee.includes(t.assigneeName || 'Unassigned')) return false;
+    if (filters.assignee?.length > 0) {
+      const formattedAssignee = taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user);
+      if (!filters.assignee.includes(formattedAssignee)) return false;
+    }
     return true;
   });
 
@@ -385,6 +390,7 @@ const TaskController = ({
             initialData={editingTask} 
             onSubmit={handleSaveTask} 
             loading={saving} 
+            currentUser={user}
           />
         ) : (
           <form className="simple-task-form" onSubmit={(e) => {

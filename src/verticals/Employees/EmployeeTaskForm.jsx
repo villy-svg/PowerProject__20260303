@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import AssigneeSelector from '../../components/AssigneeSelector';
 
 /**
  * EmployeeTaskForm
  * Vertical-specific form for Employee Manager tasks.
  * Basic fields for now — will be extended with employee-specific data in future prompts.
  */
-const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
+const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -14,20 +15,10 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
     description: safeData.description || '',
     assigned_to: safeData.assigned_to || ''
   });
-  const [employees, setEmployees] = useState([]);
 
-  React.useEffect(() => {
-    fetchEmployees();
+  useEffect(() => {
+    // Other ref data could go here
   }, []);
-
-  const fetchEmployees = async () => {
-    const { data } = await supabase
-      .from('employees')
-      .select('id, full_name, emp_code')
-      .eq('status', 'Active')
-      .order('full_name');
-    if (data) setEmployees(data);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,18 +55,11 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {} }) => {
 
         <div className="form-group">
           <label>Assigned To</label>
-          <select
-            className="master-dropdown"
+          <AssigneeSelector
             value={formData.assigned_to}
-            onChange={(e) => setFormData({...formData, assigned_to: e.target.value})}
-          >
-            <option value="">N/A (Unassigned)</option>
-            {employees.map(emp => (
-              <option key={emp.id} value={emp.id}>
-                {emp.full_name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setFormData({...formData, assigned_to: val})}
+            currentUser={currentUser}
+          />
         </div>
       </div>
 
