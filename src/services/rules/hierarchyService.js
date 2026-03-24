@@ -38,28 +38,35 @@ export const hierarchyService = {
   filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}, permissions = {}) {
     // Master Admin or Global Scope bypasses hierarchy filters IF they don't have a restricted seniority
     if (!user) return tasks;
-    if (user.roleId === 'master_admin' && (user.seniority > MANAGER_SENIORITY_THRESHOLD || !user.seniority)) return tasks;
-
+    
     const seniority = Number(user.seniority ?? 100);
     const employeeId = user.employeeId;
-    const isRestrictedScope = permissions.scope === 'assigned' || seniority <= MANAGER_SENIORITY_THRESHOLD;
+    
+    // Core Restricted Rule: Seniority-based only (future-proof)
+    const isRestrictedScope = seniority <= MANAGER_SENIORITY_THRESHOLD;
 
-    // RULE: Assigned Scope or Seniority <= MANAGER_SENIORITY_THRESHOLD
+    // RULE: Assigned Scope AND Seniority <= MANAGER_SENIORITY_THRESHOLD
     // User can only see and work on:
     // 1. Tasks Assigned to them
     // 2. Tasks Created by their reportees or members in their tree
     if (isRestrictedScope) {
-      // If no employeeId is linked, they see nothing (security fallback)
-      if (!employeeId) return [];
+      // If no employeeId is linked for a restricted user, they can only see tasks they created
+      // previously we returned [], which hid their own created tasks if they weren't linked yet.
+      // if (!employeeId) return []; 
       
       const reporteeUserIds = user.reporteeUserIds || [];
       const taskMap = new Map((tasks || []).map(t => [t.id, t]));
 
-      // 1. Identify tasks directly visible to the user
       const directMatches = (tasks || []).filter(task => {
         const creatorId = task.createdBy || task.created_by;
-        const isAssignedToMe = task.assigned_to === employeeId;
-        const isCreatedByTreeMember = reporteeUserIds.includes(creatorId) || (creatorId === user.id);
+        const assigneeId = task.assigned_to || task.employee_id;
+        
+        const isAssignedToMe = (assigneeId === employeeId) || (assigneeId === user.id);
+        const isCreatedByMe = (creatorId === user.id) || (creatorId === user.employeeId);
+        const isCreatedByTreeMember = (reporteeUserIds || []).includes(creatorId) || 
+                                      (user.reporteeEmployeeIds || []).includes(creatorId) || 
+                                      isCreatedByMe;
+        
         return isAssignedToMe || isCreatedByTreeMember;
       });
 

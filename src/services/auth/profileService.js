@@ -10,6 +10,7 @@
  */
 import { supabase } from '../core/supabaseClient';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
+import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
 
 export const profileService = {
   /**
@@ -104,8 +105,8 @@ export const profileService = {
         employeeData = emp;
         seniority = emp.employee_roles?.seniority_level || 1;
 
-        // FETCH REPORTING TREE
-        if (seniority <= 5 && allEmps) {
+        // FETCH REPORTING TREE for all users (ensures reporteeUserIds populated for both managers and assignees)
+        if (allEmps) {
           const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
           const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
           
