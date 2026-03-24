@@ -1,35 +1,39 @@
 /* AssigneeBadge.css */
 
 .assignee-badge-base {
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   white-space: nowrap;
-  /* Default style (for other users) matches previous brand-green/alpha */
-  background: var(--brand-green-alpha, rgba(0, 255, 170, 0.15));
+  background: var(--halo-bg, rgba(0, 255, 170, 0.05));
   color: var(--brand-green, #00C88C);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  transition: all 0.2s ease;
 }
 
 .assignee-you {
-  /* Standout styling for "YOU" to make it pop */
-  background: var(--brand-green, #00C88C);
-  color: #0d1117; /* Dark text for contrast */
-  font-weight: 800;
-  box-shadow: 0 0 8px rgba(0, 255, 170, 0.4);
+  /* Match other badges but with darker, more prominent text */
+  background: var(--halo-bg, rgba(0, 255, 170, 0.05));
+  color: #008F64; /* A slightly darker, richer green than brand-green */
+  border: 1px solid color-mix(in srgb, #008F64, transparent 60%);
+  font-weight: 900; /* Extra bold to distinguish "YOU" without needing a loud color */
 }
 
 .assignee-none {
-  background: rgba(139, 148, 158, 0.1);
-  color: rgba(139, 148, 158, 0.7);
-  font-weight: 600;
+  color: #ef4444; 
+  background: rgba(239, 68, 68, 0.1); 
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-weight: 800;
 }
 
-/* Optional mini variant if passed via className */
+/* Mini variant for list view */
 .assignee-badge-base.mini {
-  padding: 2px 6px;
-  font-size: 0.65rem;
-  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.6rem;
+  border-radius: 10px;
 }
