@@ -430,7 +430,8 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
             accountName: editingEmployee.account_name,
             panNumber: editingEmployee.pan_number,
             emp_code: editingEmployee.emp_code,
-            badge_id: editingEmployee.badge_id
+            badge_id: editingEmployee.badge_id,
+            manager_id: editingEmployee.manager_id
           } : {}}
           loading={isSaving} 
         />

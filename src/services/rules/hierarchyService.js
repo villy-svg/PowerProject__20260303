@@ -50,8 +50,6 @@ export const hierarchyService = {
       
       const reporteeUserIds = user.reporteeUserIds || [];
 
-      console.log(`[HierarchyService] Applying restrictions for ${user.name} (Sr: ${seniority}). Reportees: ${reporteeUserIds.length}`);
-
       return (tasks || []).filter(task => {
         // 1. Tasks Assigned to them
         const isAssignedToMe = task.assigned_to === employeeId;
