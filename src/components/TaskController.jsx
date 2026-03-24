@@ -186,9 +186,8 @@ const TaskController = ({
           if (t.parentTask !== drillDownId) return false;
         }
 
-        // Final Filter: If it's a parent (has children), do not show it as a tile in Kanban
-        const isParent = tasks.some(child => child.parentTask === t.id);
-        if (isParent) return false;
+        // Parent tasks (folders) are now visible again so they can be drilled into
+        return true;
       }
     }
 
