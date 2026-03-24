@@ -7,14 +7,15 @@ import AssigneeSelector from '../../components/AssigneeSelector';
  * Vertical-specific form for Client Manager tasks.
  * Allows assigning a task to a specific Client.
  */
-const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) => {
+const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
     description: safeData.description || '',
     assigned_client_id: safeData.assigned_client_id || '',
-    assigned_to: safeData.assigned_to || ''
+    assigned_to: safeData.assigned_to || '',
+    parentTask: safeData.parentTask || ''
   });
   const [clients, setClients] = useState([]);
 
@@ -92,6 +93,22 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) =>
             onChange={(val) => setFormData({...formData, assigned_to: val})}
             currentUser={currentUser}
           />
+        </div>
+
+        <div className="form-group">
+          <label>Parent Task</label>
+          <select 
+            className="master-dropdown"
+            value={formData.parentTask}
+            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
+          >
+            <option value="">None (Top-level task)</option>
+            {availableTasks.map(task => (
+              <option key={task.id} value={task.id}>
+                {task.text}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

@@ -65,6 +65,11 @@ const TaskCard = ({
       </div>
       {/* Row 1: Metadata (Priority + Custom Children) */}
       <div className="card-row-1">
+        {task.parentTask && (
+          <span className="card-priority" title="Subtask" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' }}>
+            ↳ Sub
+          </span>
+        )}
         {task.priority && (
           <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
             {task.priority}

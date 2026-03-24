@@ -11,6 +11,7 @@ import MasterPageHeader from './MasterPageHeader';
 import ConflictModal from './ConflictModal';
 import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
 import { hierarchyService } from '../services/rules/hierarchyService';
+import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { taskUtils } from '../utils/taskUtils';
 import './TaskController.css';
 
@@ -391,12 +392,19 @@ const TaskController = ({
             onSubmit={handleSaveTask} 
             loading={saving} 
             currentUser={user}
+            availableTasks={(tasks || []).filter(t => {
+              if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
+              if (!editingTask) return true;
+              if (t.id === editingTask.id) return false;
+              return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
+            })}
           />
         ) : (
           <form className="simple-task-form" onSubmit={(e) => {
             e.preventDefault();
             const text = e.target.elements.taskText.value;
-            if (text) handleSaveTask({ text });
+            const parentTask = e.target.elements.parentTask?.value || null;
+            if (text) handleSaveTask({ text, parentTask });
           }}>
             <div className="form-group">
               <label>Task Details</label>
@@ -407,6 +415,29 @@ const TaskController = ({
                 defaultValue={editingTask?.text || ''}
                 required 
               />
+            </div>
+            <div className="form-group" style={{ marginTop: '1rem' }}>
+              <label>Parent Task</label>
+              <select 
+                name="parentTask" 
+                className="master-dropdown"
+                defaultValue={editingTask?.parentTask || ''}
+              >
+                <option value="">None (Top-level)</option>
+                {(tasks || [])
+                  .filter(t => {
+                    if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
+                    if (!editingTask) return true;
+                    // Prevent selecting self as parent
+                    if (t.id === editingTask.id) return false;
+                    // Prevent selecting a descendant as parent (Cycle Prevention)
+                    return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
+                  })
+                  .map(t => (
+                    <option key={t.id} value={t.id}>{t.text}</option>
+                  ))
+                }
+              </select>
             </div>
             <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
               {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}

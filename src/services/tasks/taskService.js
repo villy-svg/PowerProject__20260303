@@ -28,6 +28,7 @@ const normalizeTask = (row) => ({
   function: row.function,
   assigned_to: row.assigned_to,
   assigneeName: row.employees?.full_name || row.assigneeName,
+  parentTask: row.parent_task || null,
   createdAt: row.createdat ?? row.createdAt,
   updatedAt: row.updatedat ?? row.updatedAt,
   createdBy: row.created_by,
@@ -47,6 +48,7 @@ const mapTaskToRow = (task) => ({
   city: task.city || null,
   function: task.function || null,
   assigned_to: task.assigned_to || null,
+  parent_task: task.parentTask || null,
   last_updated_by: task.lastUpdatedBy || null,
 });
 

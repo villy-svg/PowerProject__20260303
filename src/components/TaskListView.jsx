@@ -1,5 +1,6 @@
 import React from 'react';
 import AssigneeBadge from './AssigneeBadge';
+import { hierarchyUtils } from '../utils/hierarchyUtils';
 import './TaskListView.css';
 
 const TaskListView = ({
@@ -24,7 +25,7 @@ const TaskListView = ({
   return (
     <div className="task-list-view">
       {stageList.map((stage) => {
-        const stageTasks = tasks
+        const rawStageTasks = tasks
           .filter(t => t.verticalId === activeVertical && t.stageId === stage.id)
           .sort((a, b) => {
             const pA = priorityOrder[a.priority] ?? 99;
@@ -43,6 +44,8 @@ const TaskListView = ({
 
             return 0;
           });
+
+        const stageTasks = hierarchyUtils.sortByHierarchy(rawStageTasks, 'id', 'parentTask');
 
         if (stageTasks.length === 0) return null;
 
@@ -102,7 +105,10 @@ const TaskListView = ({
                     style={{ '--stage-color': stage.color }}
                   >
                     {/* LEFT SIDE: Identity & Content */}
-                    <div className="list-row-main">
+                    <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
+                      {task.depth > 0 && (
+                        <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
+                      )}
                       {/* 1. Select Checkbox */}
                       <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
                         <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>

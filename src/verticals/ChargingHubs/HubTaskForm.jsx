@@ -8,7 +8,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Includes text, priority, and link to a specific hub.
  */
-const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
+const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -17,7 +17,8 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
     city: safeData.city || '',
     function: safeData.function || '',
     description: safeData.description || '',
-    assigned_to: safeData.assigned_to || ''
+    assigned_to: safeData.assigned_to || '',
+    parentTask: safeData.parentTask || ''
   });
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
@@ -177,6 +178,22 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {} }) => {
             {functions.map(fn => (
               <option key={fn.name} value={fn.name}>
                 {fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Parent Task</label>
+          <select 
+            className="master-dropdown"
+            value={formData.parentTask}
+            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
+          >
+            <option value="">None (Top-level task)</option>
+            {availableTasks.map(task => (
+              <option key={task.id} value={task.id}>
+                {task.text}
               </option>
             ))}
           </select>

@@ -7,13 +7,14 @@ import AssigneeSelector from '../../components/AssigneeSelector';
  * Vertical-specific form for Employee Manager tasks.
  * Basic fields for now — will be extended with employee-specific data in future prompts.
  */
-const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) => {
+const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
     description: safeData.description || '',
-    assigned_to: safeData.assigned_to || ''
+    assigned_to: safeData.assigned_to || '',
+    parentTask: safeData.parentTask || ''
   });
 
   useEffect(() => {
@@ -60,6 +61,22 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser }) 
             onChange={(val) => setFormData({...formData, assigned_to: val})}
             currentUser={currentUser}
           />
+        </div>
+
+        <div className="form-group">
+          <label>Parent Task</label>
+          <select 
+            className="master-dropdown"
+            value={formData.parentTask}
+            onChange={(e) => setFormData({...formData, parentTask: e.target.value})}
+          >
+            <option value="">None (Top-level task)</option>
+            {availableTasks.map(task => (
+              <option key={task.id} value={task.id}>
+                {task.text}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
