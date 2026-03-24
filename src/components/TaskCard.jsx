@@ -79,22 +79,14 @@ const TaskCard = ({
         cursor: task.isContextOnly ? 'default' : undefined
       }}
     >
-      <div className="card-row-1">
+      {/* Row 0: Header (Selection + Drill Down) */}
+      <div className="card-header-row">
         <div className="task-selection-area" onClick={(e) => { e.stopPropagation(); onSelect(); }}>
           <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
             {isSelected && '✓'}
           </div>
         </div>
-        {task.isContextOnly && (
-          <span className="card-priority" title="Context Only (View Only)" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
-            VIEWER
-          </span>
-        )}
-        {task.parentTask && showHierarchy && (
-          <span className="subtask-tag" title="Subtask">
-            ↳ Subtask
-          </span>
-        )}
+
         {showHierarchy && tasks.some(t => t.parentTask === task.id) && (
           <div 
             className="subtask-progress-badge" 
@@ -117,6 +109,20 @@ const TaskCard = ({
             {tasks.filter(t => t.parentTask === task.id && t.stageId === 'COMPLETED').length} / {tasks.filter(t => t.parentTask === task.id).length} TASKS
             <span style={{ fontSize: '0.8rem', marginLeft: '2px' }}>🔍</span>
           </div>
+        )}
+      </div>
+
+      {/* Row 1: Metadata (Priority + Tags + Assignee) */}
+      <div className="card-row-1">
+        {task.isContextOnly && (
+          <span className="card-priority" title="Context Only (View Only)" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+            VIEWER
+          </span>
+        )}
+        {task.parentTask && showHierarchy && (
+          <span className="subtask-tag" title="Subtask">
+            ↳ SUBTASK
+          </span>
         )}
         {task.priority && (
           <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
