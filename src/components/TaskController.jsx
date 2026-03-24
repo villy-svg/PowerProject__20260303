@@ -168,15 +168,15 @@ const TaskController = ({
     // 0.1 Kanban-Specific Visibility (ONLY for Kanban view)
     if (viewMode === 'kanban') {
       if (!permissions.canViewKanbanHierarchy) {
-        // Low Seniority (Assignee View): Only show tasks assigned to them, ignore hierarchy
-        const isAssignedToUser = t.employee_id === user.employeeId || t.assignedTo === user.employeeId || t.assigned_to === user.employeeId;
-        if (!isAssignedToUser) return false;
+        // Low Seniority (Assignee View): Show a flat list of everything returned by hierarchyService
+        // (This includes their assignments and their reportees' tasks)
+        // No additional filtering needed here!
       } else {
         // High Seniority (Manager View): Respect Drill-Down Hierarchy
         if (drillDownId === null) {
-          if (t.parentTask) return false; // Show only root tasks
+          if (t.parentTask !== null && t.parentTask !== undefined && t.parentTask !== "") return false;
         } else {
-          if (t.parentTask !== drillDownId) return false; // Show only children of drill-down task
+          if (t.parentTask !== drillDownId) return false;
         }
       }
     }
@@ -680,7 +680,7 @@ const TaskController = ({
               };
 
               const stageTasks = filteredTasks
-                .filter((t) => t.verticalId === (rootVerticalId || activeVertical) && t.stageId === stage.id)
+                .filter((t) => t.stageId === stage.id)
                 .sort((a, b) => {
                   const weightA = getPriorityWeight(a.priority);
                   const weightB = getPriorityWeight(b.priority);
