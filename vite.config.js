@@ -13,11 +13,11 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Split heavy libraries into their own chunks
+            // Split heavy libraries that are stable and don't change often
             if (id.includes('@supabase')) return 'vendor-supabase';
             if (id.includes('exceljs')) return 'vendor-excel';
-            if (id.includes('react')) return 'vendor-react';
-            return 'vendor'; // everything else in node_modules
+            // Group others into a single vendor chunk to avoid circularity
+            return 'vendor';
           }
         }
       }

@@ -60,6 +60,7 @@ function App() {
   });
 
   // 1. Auth and User Identity
+  const [isAppInitializing, setIsAppInitializing] = useState(true);
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [profileError, setProfileError] = useState(null);
@@ -70,7 +71,7 @@ function App() {
   const {
     tasks,
     setTasks,
-    loading,
+    loading: tasksLoading,
     fetchTasks,
     addTask,
     updateTask,
@@ -79,43 +80,11 @@ function App() {
     deleteTask,
   } = useTasks(user);
 
-  // Combined Initial Data Load
-  useEffect(() => {
-    const initData = async () => {
-      // Load Dynamic Verticals first
-      try {
-        const { list, map } = await verticalService.getVerticals();
-        if (list && list.length > 0) {
-          setVerticals(map);
-          setVerticalList(list);
-          updateStaticVerticals(list); // Sync the static registry for non-React services
-        }
-      } catch (err) {
-        console.warn('Falling back to static verticals.', err);
-      }
-
-      // Start fetching global tasks immediately
-      const tasksPromise = fetchTasks();
-      
-      // Get session and start profile fetch if session exists
-      const session = await authService.getSession();
-      setSession(session);
-      
-      if (session) {
-        await fetchUserProfile(session.user.id);
-      }
-      
-      await tasksPromise;
-    };
-    
-    initData();
-  }, [fetchTasks]);
-
   // 3. Daily Task state
   const {
     tasks: dailyTasks,
     setTasks: setDailyTasks,
-    loading: dailyLoading,
+    loading: dailyTasksLoading,
     fetchTasks: fetchDailyTasks,
     addTask: addDailyTask,
     updateTask: updateDailyTask,
@@ -124,9 +93,44 @@ function App() {
     deleteTask: deleteDailyTask,
   } = useDailyTasks(user);
 
+  // Unified Initial Data Load
   useEffect(() => {
-    if (user) fetchDailyTasks();
-  }, [user, fetchDailyTasks]);
+    const initAppData = async () => {
+      try {
+        // Parallel Step 1: Verticals and Session
+        const [vResult, sessionData] = await Promise.all([
+          verticalService.getVerticals().catch(err => {
+            console.warn('Falling back to static verticals.', err);
+            return { list: null, map: null };
+          }),
+          authService.getSession()
+        ]);
+
+        if (vResult.list && vResult.list.length > 0) {
+          setVerticals(vResult.map);
+          setVerticalList(vResult.list);
+          updateStaticVerticals(vResult.list);
+        }
+        setSession(sessionData);
+
+        // Sequential Step 2: Fetch Profile and Tasks if logged in
+        if (sessionData) {
+          // Parallel Profile and Daily Tasks (Daily tasks often don't need profile data immediately)
+          await Promise.all([
+            fetchUserProfile(sessionData.user.id),
+            fetchTasks(),
+            fetchDailyTasks()
+          ]);
+        }
+      } catch (err) {
+        console.error('App Initialization Error:', err);
+      } finally {
+        setIsAppInitializing(false);
+      }
+    };
+
+    initAppData();
+  }, [fetchTasks, fetchDailyTasks]);
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
@@ -258,15 +262,19 @@ function App() {
   }, [activeVertical, verticals]);
 
 
-  // Loading Screen for initial fetch
-  if (loading || dailyLoading) {
+  // Unified Loading Screen for initial boot
+  if (isAppInitializing) {
     return (
-      <div className="loading-screen" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <h2>Connecting to Cloud Database...</h2>
+      <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
+        <div className="loading-screen" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <img src={powerLogo} className="loading-logo" alt="logo" style={{ width: '80px', marginBottom: '1rem' }} />
+          <h2>Connecting to Cloud Database...</h2>
+        </div>
       </div>
     );
   }
 
+  // Not Logged In
   if (!session) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
@@ -275,6 +283,7 @@ function App() {
     );
   }
 
+  // Profile Error or Missing Profile
   if (!user) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
@@ -291,7 +300,10 @@ function App() {
               </button>
             </>
           ) : (
-            <h2>Loading User Profile...</h2>
+            <>
+              <h2>Finalizing Profile...</h2>
+              <p>Just a moment while we set up your workspace.</p>
+            </>
           )}
         </div>
       </div>
