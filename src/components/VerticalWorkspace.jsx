@@ -94,7 +94,7 @@ const VerticalWorkspace = ({
    * Determines if the user has permission to view this vertical or sub-feature.
    */
   const rootVerticalId = 
-    (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') ? verticals.CHARGING_HUBS?.id :
+    (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? verticals.CHARGING_HUBS?.id :
     (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? verticals.CLIENTS?.id :
     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? verticals.EMPLOYEES?.id :
     activeVertical.toUpperCase();
