@@ -1,25 +1,28 @@
 import React from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { VERTICAL_LIST } from '../constants/verticals';
+import { hierarchyService } from '../services/rules/hierarchyService';
 
 /**
  * ExecutiveSummary Component
  * Displays task aggregates based on user permissions.
  * Multi-Vertical Update: Aggregates data from all assigned verticals in the array.
  */
-const ExecutiveSummary = ({ tasks = [], user, permissions = {} }) => {
+const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {} }) => {
   
   /**
-   * REFACTORED SCOPE LOGIC
-   * 'global' = sees all tasks across the company.
-   * 'assigned' = sees tasks for all verticals in the assignedVerticals array.
-   */
+    * REFACTORED SCOPE LOGIC
+    * 1. First, apply Hierarchy Rules (Seniority, Reportees, etc.)
+    * 2. Then, restrict to Assigned Verticals (unless Global Scope)
+    */
+  const hierarchyFiltered = hierarchyService.filterTasksByHierarchy(user, tasks, null, verticals);
+
   const hasGlobalScope = permissions.scope === 'global';
   
-  // Scoped tasks based on the permissions matrix and assigned array
+  // Final visibility: respects both organizational hierarchy AND vertical access bounds
   const visibleTasks = hasGlobalScope 
-    ? tasks 
-    : tasks.filter(t => user?.assignedVerticals?.includes(t.verticalId));
+    ? hierarchyFiltered 
+    : hierarchyFiltered.filter(t => user?.assignedVerticals?.includes(t.verticalId));
 
   // Vertical breakdown is restricted to those with global oversight
   const showVerticalBreakdown = hasGlobalScope;

@@ -329,7 +329,7 @@ function App() {
           </header>
           <main className="app-content">
             {!activeVertical ? (
-              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} />
+              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} />
             ) : activeVertical === 'configuration' ? (
               <Configuration
                 tasks={tasks}
