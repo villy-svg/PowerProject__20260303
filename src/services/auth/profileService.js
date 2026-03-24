@@ -73,11 +73,16 @@ export const profileService = {
       if (matchedEmp) {
         effectiveEmployeeId = matchedEmp.id;
         // Persist the link for next time
-        await supabase
+        const { error: healError } = await supabase
           .from('user_profiles')
           .update({ employee_id: effectiveEmployeeId })
           .eq('id', userId);
-        console.log(`Self-healed employee link for user ${userId} -> ${effectiveEmployeeId}`);
+        
+        if (healError) {
+          console.error(`FAILED self-heal for user ${userId}:`, healError.message);
+        } else {
+          console.log(`Self-healed employee link for user ${userId} -> ${effectiveEmployeeId}`);
+        }
       }
     }
 

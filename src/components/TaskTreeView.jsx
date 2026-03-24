@@ -17,7 +17,8 @@ const TaskTreeView = ({
   openAddSubtaskModal,
   onMoveToParent,
   TaskTileComponent,
-  currentUser
+  currentUser,
+  canCreate
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const toggleExpand = (id, e) => {
@@ -145,7 +146,7 @@ const TaskTreeView = ({
           )}
 
           <div className="list-action-group">
-            {!task.isContextOnly && canManageHierarchy(task) && (
+            {!task.isContextOnly && canUpdate && canManageHierarchy(task) && (
               <>
                 {task.parentTask && (
                   <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
@@ -176,14 +177,16 @@ const TaskTreeView = ({
                     </button>
                   </div>
                 )}
-                <button 
-                  className="card-add-sub-button"
-                  onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
-                  title="Add Subtask Under This"
-                  style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
-                >
-                  +
-                </button>
+                {canCreate && (
+                  <button 
+                    className="card-add-sub-button"
+                    onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
+                    title="Add Subtask Under This"
+                    style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
+                  >
+                    +
+                  </button>
+                )}
                 <button
                   className="card-edit-button"
                   onClick={(e) => { e.stopPropagation(); openEditModal(task); }}

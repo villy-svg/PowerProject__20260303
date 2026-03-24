@@ -743,6 +743,7 @@ const TaskController = ({
             onSelect={toggleTaskSelection}
             onToggleStageSelection={toggleStageSelection}
             currentUser={user}
+            canCreate={canUserCreate}
           />
         ) : (
           <TaskTreeView
@@ -758,6 +759,7 @@ const TaskController = ({
             onMoveToParent={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}
             currentUser={user}
+            canCreate={canUserCreate}
           />
         )}
       </div>

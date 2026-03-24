@@ -21,6 +21,7 @@ const ListViewRow = ({
   onSelect, 
   onDuplicateMerge, 
   currentUser,
+  canCreate,
   isExpanded,
   onToggleExpand,
   hasChildren
@@ -144,7 +145,7 @@ const ListViewRow = ({
         )}
 
         <div className="list-action-group">
-          {!task.isContextOnly && canManage && (
+          {canCreate && !task.isContextOnly && canManage && (
             <button 
               className="card-add-sub-button"
               onClick={() => openAddSubtaskModal(task.id)}
@@ -214,7 +215,8 @@ const TaskListView = ({
   onSelect,
   onToggleStageSelection,
   onDuplicateMerge,
-  currentUser
+  currentUser,
+  canCreate
 }) => {
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
@@ -327,6 +329,7 @@ const TaskListView = ({
                   onSelect={onSelect}
                   onDuplicateMerge={onDuplicateMerge}
                   currentUser={currentUser}
+                  canCreate={canCreate}
                   isExpanded={expandedIds.has(task.id)}
                   onToggleExpand={() => toggleExpand(task.id)}
                   hasChildren={tasks.some(child => child.parentTask === task.id)}
