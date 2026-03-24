@@ -173,7 +173,7 @@ const ClientSubSidebar = ({
           style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
           onClick={() => setActiveVertical('client_tasks')}
         >
-          Client Tasks
+          Client Task Board
         </button>
       )}
       {permissions?.canAccessLeadsFunnel && (

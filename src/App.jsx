@@ -386,7 +386,8 @@ function App() {
                   (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
                   (activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
                   (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
-                  (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
+                  (activeVertical === verticals.CLIENTS?.id) ? 'Clients' :
+                  (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client' :
                   verticals[activeVertical]?.label
                 }
                 activeVertical={activeVertical}
