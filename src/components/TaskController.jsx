@@ -462,7 +462,7 @@ const TaskController = ({
   return (
     <div className="task-controller">
       <MasterPageHeader
-        title={`${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
+        title={boardLabel || `${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
         leftActions={
           <>
