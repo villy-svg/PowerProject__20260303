@@ -50,6 +50,9 @@ const EmployeeListRow = ({
         {/* ROW 1: Identity -> Departmental -> Management -> Execution */}
         <div className="list-row-top">
           <div className="list-section identity-section">
+            <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`} onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
+              {isSelected && '✓'}
+            </div>
             <span className="list-name">{emp.full_name}</span>
             {emp.isDuplicate && (
               <span className="duplicate-badge-mini" title={`${emp.duplicateCount} duplicates`}>DUP</span>
@@ -128,12 +131,6 @@ const EmployeeListRow = ({
           <div className="list-section communication-section">
             <span className="contact-item">{emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
             {emp.email && <span className="contact-item">{emp.email}</span>}
-          </div>
-
-          <div className="list-section selection-section" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
-            <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
-              {isSelected && '✓'}
-            </div>
           </div>
         </div>
       </div>

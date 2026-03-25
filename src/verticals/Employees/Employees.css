@@ -157,6 +157,35 @@
   color: #ef4444;
 }
 
+/* Status Toggle Button (Blended Version) */
+.status-toggle-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: auto !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 1.1rem !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.status-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--brand-green) !important;
+  transform: translateY(-1px);
+}
+
+.status-toggle-btn.delete-btn:hover {
+  color: #ef4444 !important;
+}
+
 .edit-pencil-btn {
   font-size: 0.9rem;
 }
@@ -221,7 +250,11 @@
 }
 
 /* Specific Section Adjustments for Vertical Alignment */
-.identity-section, .warnings-section { min-width: 200px; }
+.identity-section { 
+  min-width: 230px; 
+  gap: 16px !important; /* Spacing between checkbox and name */
+}
+.warnings-section { min-width: 200px; }
 .departmental-section, .communication-section { flex: 1; }
 .management-section { min-width: 180px; }
 .execution-section { min-width: 150px; justify-content: flex-end; }
@@ -239,12 +272,34 @@
   color: #fff;
 }
 
-.selection-section {
+/* Selection Toggle Styling */
+.selection-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%; /* Circle style */
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  min-width: 100px;
+  justify-content: center;
   cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.7rem;
+  color: var(--brand-green);
+  flex-shrink: 0;
+}
+
+.selection-checkbox:hover {
+  border-color: var(--brand-green);
+  background: rgba(var(--brand-green-rgb), 0.05);
+  box-shadow: 0 0 10px rgba(var(--brand-green-rgb), 0.2);
+}
+
+.selection-checkbox.checked {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #000;
+  box-shadow: 0 0 15px rgba(var(--brand-green-rgb), 0.3);
 }
 
 .select-label {
