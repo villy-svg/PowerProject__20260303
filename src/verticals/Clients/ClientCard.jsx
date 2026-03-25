@@ -53,8 +53,8 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
         )}
         <span className="billing-badge">{client.billing_model_code || 'NO MODEL'}</span>
         {pendingTasksCount > 0 && (
-          <span className="priority-badge" style={{ backgroundColor: '#ff4444', color: 'white', border: 'none' }}>
-            {pendingTasksCount} Task{pendingTasksCount > 1 ? 's' : ''}
+          <span className="pending-tasks-badge">
+            {pendingTasksCount} Tasks
           </span>
         )}
         <div style={{ marginLeft: 'auto' }} className="employee-actions">
