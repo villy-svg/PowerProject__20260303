@@ -9,5 +9,5 @@ git push origin staging:main
 # Staging Runs
 npm run build
 git add .
-git commit -m "260325 Setup staging workflows 1.0.8"
+git commit -m "260325 Setup staging workflows 1.0.9"
 git push origin staging
