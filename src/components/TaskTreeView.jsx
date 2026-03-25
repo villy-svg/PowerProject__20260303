@@ -20,7 +20,8 @@ const TaskTreeView = ({
   onMoveToParent,
   TaskTileComponent,
   currentUser,
-  canCreate
+  canCreate,
+  permissions = {}
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
 
@@ -103,7 +104,7 @@ const TaskTreeView = ({
       disabled: task.isContextOnly || !canManageHierarchy(task)
     });
 
-    const permsWithUpdate = { ...currentUser.permissions, ...canUpdate ? { canUpdate } : {} };
+    const permsWithUpdate = { ...permissions, ...canUpdate ? { canUpdate } : {} };
     const canEditDescription = taskUtils.canUserEditField(task, 'description', permsWithUpdate, currentUser);
 
     return (

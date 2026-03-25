@@ -789,6 +789,7 @@ const TaskController = ({
                           onPromote={handleMoveToParent}
                           onDrillDown={setDrillDownId}
                           showHierarchy={permissions.canViewKanbanHierarchy}
+                          permissions={permissions}
                         >
                           {TaskTileComponent && (
                             <TaskTileComponent
@@ -829,6 +830,7 @@ const TaskController = ({
             onToggleStageSelection={toggleStageSelection}
             currentUser={user}
             canCreate={canUserCreate}
+            permissions={permissions}
           />
         ) : (
           <TaskTreeView
@@ -845,6 +847,7 @@ const TaskController = ({
             TaskTileComponent={TaskTileComponent}
             currentUser={user}
             canCreate={canUserCreate}
+            permissions={permissions}
           />
         )}
       </div>

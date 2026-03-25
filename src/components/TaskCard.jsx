@@ -32,7 +32,8 @@ const TaskCard = ({
   tasks = [],
   onDrillDown,
   onPromote,
-  showHierarchy = false
+  showHierarchy = false,
+  permissions = {}
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -46,7 +47,7 @@ const TaskCard = ({
 
     if (newIndex !== currentIndex) {
       const targetStageId = STAGE_LIST[newIndex].id;
-      if (taskUtils.canUserMoveTask(task, targetStageId, { ...currentUser.permissions, ...permissions }, currentUser)) {
+      if (taskUtils.canUserMoveTask(task, targetStageId, permissions, currentUser)) {
         updateTaskStage(task.id, targetStageId);
       }
     }
@@ -58,8 +59,8 @@ const TaskCard = ({
   const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
   const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
   
-  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, { ...currentUser.permissions, ...permissions }, currentUser);
-  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, { ...currentUser.permissions, ...permissions }, currentUser);
+  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
+  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
   const effectiveCanUpdate = canUpdate && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
@@ -229,7 +230,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', { ...currentUser.permissions, ...permissions }, currentUser) && (
+          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
             <button
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -240,7 +241,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', { ...currentUser.permissions, ...permissions }, currentUser) && (
+          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
             <button
               className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}

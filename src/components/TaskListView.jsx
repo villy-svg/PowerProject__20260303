@@ -27,7 +27,8 @@ const ListViewRow = ({
   isExpanded,
   onToggleExpand,
   hasChildren,
-  tasks
+  tasks,
+  permissions = {}
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
 
@@ -282,7 +283,8 @@ const TaskListView = ({
   onToggleStageSelection,
   onDuplicateMerge,
   currentUser,
-  canCreate
+  canCreate,
+  permissions = {}
 }) => {
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
@@ -400,6 +402,7 @@ const TaskListView = ({
                   onToggleExpand={() => toggleExpand(task.id)}
                   hasChildren={tasks.some(child => child.parentTask === task.id)}
                   tasks={tasks}
+                  permissions={permissions}
                 />
               ))}
             </div>
