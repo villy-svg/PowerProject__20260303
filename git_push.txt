@@ -1,8 +1,9 @@
 # Main Runs
-#git add .
-#npm run build
-#git commit -m "260325 Restyling the Employee Records Manager List View 1.0.9"
-#git push origin main
+
+npm run build
+git add .
+git commit -m "260325 Restyling the Employee Records Manager List View 1.0.9"
+git push origin main
 
 
 # Staging Runs
