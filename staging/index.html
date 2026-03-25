@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+     <link rel="icon" type="image/svg+xml" href="/PowerPod Transparent Background.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PowerPod-Project-Manager</title>
+    <script>
+      // DARK-FIRST STRATEGY: 
+      // Prevents the white "flash" on refresh by applying the theme before the first paint.
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('power_project_theme');
+          var theme = savedTheme || 'dark'; // Default to dark if no cache exists
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-DpLQ7YNz.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-C5DUWAxX.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-supabase-BhnVctNR.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-excel-BA1OYeNj.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CcZaD83v.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
