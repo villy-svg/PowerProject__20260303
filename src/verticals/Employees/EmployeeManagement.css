@@ -99,12 +99,76 @@
 }
 
 /* Row 3: Contact */
-.employee-card-contact {
+.employee-card-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.employee-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-main-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.card-status-actions {
+  display: flex;
+  align-items: center;
+}
+
+.employee-card-name {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--brand-green);
+  line-height: 1.2;
+}
+
+.employee-card-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   font-size: 0.85rem;
   opacity: 0.8;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+
+.employee-card-contact span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.contact-label {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.employee-card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.join-date {
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 /* Row 4: Footer Meta */
@@ -130,9 +194,88 @@
 }
 
 /* Controls */
-.employee-actions {
+.hub-badge.editing {
+  padding: 0 4px;
+}
+
+.hub-badge.null-hub {
+  background-color: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+  border: 1px solid rgba(255, 68, 68, 0.4);
+}
+
+.hub-select-mini {
+  background: var(--panel-bg);
+  color: inherit;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+.list-contact {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contact-item, .contact-item-id, .manager-info {
+  display: flex;
+  align-items: center;
+}
+
+.contact-item-id {
+  font-weight: 600;
+  color: inherit;
+}
+
+.contact-divider {
+  opacity: 0.3;
+}
+
+.manager-info {
+  font-weight: 500;
+  color: var(--brand-green);
+  font-size: 0.75rem;
+}
+
+.employee-status-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 1rem;
+  align-self: center;
+}
+
+.employee-status-indicator.active {
+  color: var(--brand-green);
+  opacity: 1;
+}
+
+.employee-status-indicator.inactive {
+  color: #ff4444;
+  opacity: 0.5;
+}
+
+.edit-pencil-btn {
+  opacity: 0.5;
+  filter: grayscale(1);
+  margin-right: 4px;
+}
+
+.edit-pencil-btn:hover {
+  opacity: 1;
+  filter: none;
+}
+
+.status-toggle-btn {
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  min-width: auto;
+  margin-left: 8px;
+  font-weight: 900;
 }
 
 .action-icon-btn {
@@ -176,6 +319,7 @@
   padding: 0.75rem 1.25rem;
   transition: all 0.2s;
   border-left: 3px solid var(--brand-green);
+  min-height: 64px; /* Ensure consistent row height */
 }
 
 .employee-list-row:hover {
@@ -276,6 +420,53 @@
 .bulk-actions {
   display: flex;
   gap: 1rem;
+}
+
+.role-badge {
+  padding: 2px 10px;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-color);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* System Badges */
+.app-user-badge-mini {
+  margin-left: 8px;
+  background-color: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bank-missing-badge-mini {
+  margin-left: 8px;
+  background-color: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.duplicate-badge-mini {
+  margin-left: 8px;
+  background: #f59e0b;
+  color: white;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 800;
 }
 
 .bulk-btn {

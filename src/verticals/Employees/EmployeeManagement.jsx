@@ -23,7 +23,7 @@ import ConflictModal from '../../components/ConflictModal';
  */
 const EmployeeManagement = ({ user, permissions, filters }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
@@ -31,7 +31,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
-  
+
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
@@ -43,37 +43,35 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
     }
   }, [fetchEmployees, permissions?.canAccessEmployees]);
 
+  useEffect(() => {
+    localStorage.setItem('powerpod_employee_view', viewMode);
+  }, [viewMode]);
+
   if (!permissions?.canAccessEmployees && !permissions?.scope === 'global') {
     return (
-      <div className="empty-state" style={{ marginTop: '100px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>🔒</div>
+      <div className="empty-state-container">
+        <div className="empty-state-icon">🔒</div>
         <h3>Access Restricted</h3>
         <p>You do not have permission to view the Employee List.</p>
       </div>
     );
   }
 
-  useEffect(() => {
-    localStorage.setItem('powerpod_employee_view', viewMode);
-  }, [viewMode]);
-
   const handleSave = async (formData, force = false) => {
     if (!force) {
-      // MASTER-SLAVE: Use master criteria logic
-      // MASTER-SLAVE: Map form fields to match DB criteria
       const matchingProbe = {
         full_name: formData.name,
         phone: formData.contactNumber,
         email: formData.emailId
       };
 
-      const existingMatch = employees.find(emp => 
-        emp.id !== (editingEmployee?.id) && 
-        matchesCriteria(matchingProbe, emp, { 
-          fields: ['full_name'], 
-          useFuzzy: true, 
-          threshold: 0.85, 
-          exactFields: ['phone'] 
+      const existingMatch = employees.find(emp =>
+        emp.id !== (editingEmployee?.id) &&
+        matchesCriteria(matchingProbe, emp, {
+          fields: ['full_name'],
+          useFuzzy: true,
+          threshold: 0.85,
+          exactFields: ['phone']
         })
       );
 
@@ -123,7 +121,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
   };
 
   const handleSelectIndividual = (id) => {
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
@@ -131,7 +129,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
   const handleSelectAll = (filteredEmps) => {
     const allFilteredIds = filteredEmps.map(e => e.id);
     const areAllSelected = allFilteredIds.every(id => selectedIds.includes(id));
-    
+
     if (areAllSelected) {
       setSelectedIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
     } else {
@@ -155,13 +153,12 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
 
   const filteredEmployees = employees.filter(emp => {
     const matchesStatus = showInactive || emp.status === 'Active';
-    
-    // Apply Subsidebar Filters - Defensive Matching
-    const matchesRole = !filters?.role?.length || filters.role.some(r => 
+
+    const matchesRole = !filters?.role?.length || filters.role.some(r =>
       r?.trim().toUpperCase() === emp.role_code?.trim().toUpperCase()
     );
     const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
-    const matchesDept = !filters?.department?.length || filters.department.some(d => 
+    const matchesDept = !filters?.department?.length || filters.department.some(d =>
       d?.trim().toUpperCase() === emp.dept_code?.trim().toUpperCase()
     );
 
@@ -169,23 +166,18 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
   });
 
   const activeEmps = filteredEmployees.filter(emp => emp.status === 'Active');
-  
-  // Group active employees by role
+
   const activeEmpsByRole = activeEmps.reduce((acc, emp) => {
-    // Prefix the key with seniority level (e.g. "09|Senior Developer") for easy sorting
-    // We pad start with 0 so "10" sorts before "09" in a descending sort
     const roleName = emp.role_code || emp.role || 'Unassigned Role';
     const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 1;
     const sortKey = `${String(seniorityNum).padStart(3, '0')}|${roleName}`;
-    
+
     if (!acc[sortKey]) acc[sortKey] = { roleName, overrideKey: sortKey, emps: [] };
     acc[sortKey].emps.push(emp);
     return acc;
   }, {});
 
   const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
-
-  const isMasterAdmin = permissions?.roleId === 'master_admin';
 
   return (
     <>
@@ -196,7 +188,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
           <>
             <div className="view-mode-toggle">
               {['grid', 'list', 'tree'].map(mode => (
-                <button 
+                <button
                   key={mode}
                   className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
                   onClick={() => setViewMode(mode)}
@@ -207,11 +199,10 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
               ))}
             </div>
 
-            <button 
-              className={`halo-button toggle-depri-btn ${!showInactive ? 'active' : ''}`}
+            <button
+              className={`halo-button toggle-inactive-btn ${showInactive ? '' : 'hidden'}`}
               onClick={() => setShowInactive(!showInactive)}
               title={showInactive ? "Hide Inactive" : "Show Inactive"}
-              style={{ fontWeight: 600, textDecoration: showInactive ? 'none' : 'line-through' }}
             >
               INACTIVE
             </button>
@@ -236,13 +227,13 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
       {loading ? (
         <div className="loading-spinner">Loading Employees...</div>
       ) : employees.length === 0 ? (
-        <div className="empty-state" style={{ marginTop: '50px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>👥</div>
+        <div className="empty-state-container">
+          <div className="empty-state-icon">👥</div>
           <h3>Personnel Database Empty</h3>
           <p>Click "+ Add Employee" to insert your first structural record.</p>
         </div>
       ) : viewMode === 'tree' ? (
-        <EmployeeTree 
+        <EmployeeTree
           employees={filteredEmployees}
           user={user}
           onEdit={openEditModal}
@@ -256,7 +247,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
           onSelect={handleSelectIndividual}
         />
       ) : (
-        <div style={{ marginTop: '1rem' }}>
+        <div className="employees-container">
           {/* ACTIVE SECTION */}
           <div className="status-section">
             <h4 className="section-title">Active Team ({activeEmps.length})</h4>
@@ -265,114 +256,100 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
             ) : (
               <div className="grouped-employee-sections">
                 {Object.values(activeEmpsByRole)
-                  // Sort descending by overrideKey (seniority), then alphabetically by role name
                   .sort((a, b) => b.overrideKey.localeCompare(a.overrideKey))
                   .map(({ roleName, emps: empsInRole }) => (
-                  <div key={roleName} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
-                    <h5 style={{ 
-                      margin: '0 0 1rem 0', 
-                      fontSize: '1rem', 
-                      fontWeight: 600, 
-                      color: 'var(--brand-green)', 
-                      opacity: 0.9, 
-                      borderBottom: '1px solid rgba(255,255,255,0.05)', 
-                      paddingBottom: '0.5rem',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <span>
-                        {roleName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({empsInRole.length})</span>
-                      </span>
-                      <button 
-                        className="halo-button" 
-                        style={{ fontSize: '0.7rem', padding: '2px 8px', minWidth: 'auto', background: 'rgba(255,255,255,0.05)' }}
-                        onClick={() => handleSelectAll(empsInRole)}
-                      >
-                        {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
-                      </button>
-                    </h5>
-                    <div className={`responsive-table-wrapper ${viewMode === 'grid' ? 'employee-grid' : 'employee-list'}`}>
-                      {empsInRole.map(emp => (
-                        viewMode === 'grid' ? (
-                          <EmployeeCard 
-                            key={emp.id} 
-                            emp={emp} 
-                            onEdit={openEditModal} 
-                            onView={openViewModal}
-                            onDelete={handleDelete} 
-                            onToggleStatus={toggleStatus} 
-                            permissions={{
-                              ...permissions,
-                              canUpdate: permissions.canUpdateEmployees,
-                              canDelete: permissions.canDeleteEmployees
-                            }}
-                            availableHubs={hubs}
-                            onUpdateHub={updateEmployeeHub}
-                            isSelected={selectedIds.includes(emp.id)}
-                            onSelect={handleSelectIndividual}
-                          />
-                        ) : (
-                          <EmployeeListRow 
-                            key={emp.id} 
-                            emp={emp} 
-                            onEdit={openEditModal} 
-                            onView={openViewModal}
-                            onDelete={handleDelete} 
-                            onToggleStatus={toggleStatus} 
-                            permissions={{
-                              ...permissions,
-                              canUpdate: permissions.canUpdateEmployees,
-                              canDelete: permissions.canDeleteEmployees
-                            }}
-                            availableHubs={hubs}
-                            onUpdateHub={updateEmployeeHub}
-                            isSelected={selectedIds.includes(emp.id)}
-                            onSelect={handleSelectIndividual}
-                          />
-                        )
-                      ))}
+                    <div key={roleName} className="role-group-section">
+                      <h5 className="role-group-header">
+                        <span>
+                          {roleName} <span className="role-count">({empsInRole.length})</span>
+                        </span>
+                        <button
+                          className="halo-button role-select-btn"
+                          onClick={() => handleSelectAll(empsInRole)}
+                        >
+                          {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
+                        </button>
+                      </h5>
+                      <div className={`responsive-table-wrapper ${viewMode === 'grid' ? 'employee-grid' : 'employee-list'}`}>
+                        {empsInRole.map(emp => (
+                          viewMode === 'grid' ? (
+                            <EmployeeCard
+                              key={emp.id}
+                              emp={emp}
+                              onEdit={openEditModal}
+                              onView={openViewModal}
+                              onDelete={handleDelete}
+                              onToggleStatus={toggleStatus}
+                              permissions={{
+                                ...permissions,
+                                canUpdate: permissions.canUpdateEmployees,
+                                canDelete: permissions.canDeleteEmployees
+                              }}
+                              availableHubs={hubs}
+                              onUpdateHub={updateEmployeeHub}
+                              isSelected={selectedIds.includes(emp.id)}
+                              onSelect={handleSelectIndividual}
+                            />
+                          ) : (
+                            <EmployeeListRow
+                              key={emp.id}
+                              emp={emp}
+                              onEdit={openEditModal}
+                              onView={openViewModal}
+                              onDelete={handleDelete}
+                              onToggleStatus={toggleStatus}
+                              permissions={{
+                                ...permissions,
+                                canUpdate: permissions.canUpdateEmployees,
+                                canDelete: permissions.canDeleteEmployees
+                              }}
+                              availableHubs={hubs}
+                              onUpdateHub={updateEmployeeHub}
+                              isSelected={selectedIds.includes(emp.id)}
+                              onSelect={handleSelectIndividual}
+                            />
+                          )
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
-
           </div>
 
           {/* INACTIVE SECTION */}
           {showInactive && (
-            <div className="status-section inactive-section" style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                <h4 className="section-title" style={{ margin: 0, opacity: 0.5 }}>Inactive / History ({inactiveEmps.length})</h4>
-                <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.05)' }}></div>
+            <div className="status-section inactive-section">
+              <div className="section-header-row">
+                <h4 className="section-title inactive-title">Inactive / History ({inactiveEmps.length})</h4>
+                <div className="section-divider"></div>
               </div>
-              
+
               {inactiveEmps.length === 0 ? (
-                <p className="empty-sub-state" style={{ opacity: 0.3 }}>No inactive records.</p>
+                <p className="empty-sub-state faded">No inactive records.</p>
               ) : (
-                <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'} style={{ opacity: 0.6 }}>
+                <div className={`inactive-records-wrapper ${viewMode === 'grid' ? 'employee-grid' : 'employee-list'}`}>
                   {inactiveEmps.map(emp => (
                     viewMode === 'grid' ? (
-                      <EmployeeCard 
-                        key={emp.id} 
-                        emp={emp} 
-                        onEdit={openEditModal} 
+                      <EmployeeCard
+                        key={emp.id}
+                        emp={emp}
+                        onEdit={openEditModal}
                         onView={openViewModal}
-                        onDelete={handleDelete} 
-                        onToggleStatus={toggleStatus} 
+                        onDelete={handleDelete}
+                        onToggleStatus={toggleStatus}
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
                       />
                     ) : (
-                      <EmployeeListRow 
-                        key={emp.id} 
-                        emp={emp} 
-                        onEdit={openEditModal} 
+                      <EmployeeListRow
+                        key={emp.id}
+                        emp={emp}
+                        onEdit={openEditModal}
                         onView={openViewModal}
-                        onDelete={handleDelete} 
-                        onToggleStatus={toggleStatus} 
+                        onDelete={handleDelete}
+                        onToggleStatus={toggleStatus}
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
@@ -411,8 +388,8 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
         title={isViewOnly ? "View Employee Record" : (editingEmployee ? "Edit Employee Record" : "Add New Employee Record")}
         className="large-modal"
       >
-        <EmployeeForm 
-          onSubmit={handleSave} 
+        <EmployeeForm
+          onSubmit={handleSave}
           isViewOnly={isViewOnly}
           initialData={editingEmployee ? {
             id: editingEmployee.id,
@@ -433,11 +410,10 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
             badge_id: editingEmployee.badge_id,
             manager_id: editingEmployee.manager_id
           } : {}}
-          loading={isSaving} 
+          loading={isSaving}
         />
       </TaskModal>
 
-      {/* Unified Conflict Resolution Modal */}
       <ConflictModal
         isOpen={!!pendingConflict}
         onClose={() => setPendingConflict(null)}
@@ -460,13 +436,12 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
         )}
       />
 
-      {/* Bulk Update Modal */}
       <TaskModal
         isOpen={isBulkUpdateModalOpen}
         onClose={() => setIsBulkUpdateModalOpen(false)}
         title="Bulk Update Employees"
       >
-        <EmployeeBulkUpdateModal 
+        <EmployeeBulkUpdateModal
           selectedCount={selectedIds.length}
           onUpdate={handleBulkUpdate}
           loading={isBulkUpdating}

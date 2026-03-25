@@ -77,13 +77,13 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
 
       <div className="form-grid" style={{ gap: '1.5rem' }}>
         {/* Hub */}
-        <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <div className="selection-area" onClick={() => handleFieldToggle('hub_id')} style={{ marginTop: '28px' }}>
+        <div className="bulk-field-row">
+          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('hub_id')}>
             <div className={`selection-checkbox ${activeFields.hub_id ? 'checked' : ''}`}>
               {activeFields.hub_id && '✓'}
             </div>
           </div>
-          <div className="form-group" style={{ flex: 1, opacity: activeFields.hub_id ? 1 : 0.4 }}>
+          <div className={`form-group bulk-form-group ${!activeFields.hub_id ? 'disabled' : ''}`}>
             <label>Primary Hub</label>
             <select 
               className="master-dropdown"
@@ -99,13 +99,13 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
         </div>
 
         {/* Role */}
-        <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <div className="selection-area" onClick={() => handleFieldToggle('role_id')} style={{ marginTop: '28px' }}>
+        <div className="bulk-field-row">
+          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('role_id')}>
             <div className={`selection-checkbox ${activeFields.role_id ? 'checked' : ''}`}>
               {activeFields.role_id && '✓'}
             </div>
           </div>
-          <div className="form-group" style={{ flex: 1, opacity: activeFields.role_id ? 1 : 0.4 }}>
+          <div className={`form-group bulk-form-group ${!activeFields.role_id ? 'disabled' : ''}`}>
             <label>Role</label>
             <select 
               className="master-dropdown"
@@ -120,13 +120,13 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
         </div>
 
         {/* Department */}
-        <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <div className="selection-area" onClick={() => handleFieldToggle('department_id')} style={{ marginTop: '28px' }}>
+        <div className="bulk-field-row">
+          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('department_id')}>
             <div className={`selection-checkbox ${activeFields.department_id ? 'checked' : ''}`}>
               {activeFields.department_id && '✓'}
             </div>
           </div>
-          <div className="form-group" style={{ flex: 1, opacity: activeFields.department_id ? 1 : 0.4 }}>
+          <div className={`form-group bulk-form-group ${!activeFields.department_id ? 'disabled' : ''}`}>
             <label>Department</label>
             <select 
               className="master-dropdown"
@@ -141,13 +141,13 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
         </div>
 
         {/* Manager */}
-        <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <div className="selection-area" onClick={() => handleFieldToggle('manager_id')} style={{ marginTop: '28px' }}>
+        <div className="bulk-field-row">
+          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('manager_id')}>
             <div className={`selection-checkbox ${activeFields.manager_id ? 'checked' : ''}`}>
               {activeFields.manager_id && '✓'}
             </div>
           </div>
-          <div className="form-group" style={{ flex: 1, opacity: activeFields.manager_id ? 1 : 0.4 }}>
+          <div className={`form-group bulk-form-group ${!activeFields.manager_id ? 'disabled' : ''}`}>
             <label>Reporting Manager</label>
             <select 
               className="master-dropdown"

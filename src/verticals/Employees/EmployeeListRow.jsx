@@ -4,14 +4,14 @@ import React, { useState } from 'react';
  * EmployeeListRow
  * Row view item for an employee.
  */
-const EmployeeListRow = ({ 
-  emp, 
-  onEdit, 
-  onView, 
-  onDelete, 
-  onToggleStatus, 
-  permissions = {}, 
-  availableHubs, 
+const EmployeeListRow = ({
+  emp,
+  onEdit,
+  onView,
+  onDelete,
+  onToggleStatus,
+  permissions = {},
+  availableHubs,
   onUpdateHub,
   isSelected = false,
   onSelect
@@ -41,7 +41,7 @@ const EmployeeListRow = ({
   };
 
   return (
-    <div 
+    <div
       className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
@@ -55,56 +55,30 @@ const EmployeeListRow = ({
         <div className="list-name">
           {emp.full_name}
           {emp.is_app_user && (
-            <span className="app-user-badge-mini" style={{ marginLeft: '8px', backgroundColor: 'rgba(52, 211, 153, 0.15)', color: '#34d399', border: '1px solid rgba(52, 211, 153, 0.3)', padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase' }} title="Has App Access">APP USER</span>
+            <span className="app-user-badge-mini" title="Has App Access">APP USER</span>
           )}
           {emp.isDuplicate && (
-            <span className="duplicate-badge-mini" style={{ marginLeft: '8px' }} title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
+            <span className="duplicate-badge-mini" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
           )}
           {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
-            <span className="bank-missing-badge-mini" style={{ 
-              marginLeft: '8px', 
-              backgroundColor: 'rgba(255, 68, 68, 0.1)', 
-              color: '#ff4444', 
-              border: '1px solid rgba(255, 68, 68, 0.4)',
-              padding: '1px 6px', 
-              borderRadius: '20px', 
-              fontSize: '0.6rem', 
-              fontWeight: 800,
-              textTransform: 'uppercase'
-            }}>Bank Missing</span>
+            <span className="bank-missing-badge-mini">Bank Missing</span>
           )}
         </div>
         <div className="list-meta-badges">
           <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
-          <span 
-            className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''}`} 
-            onDoubleClick={handleHubDoubleClick} 
+          <span
+            className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
+            onDoubleClick={handleHubDoubleClick}
             title="Double-click to change primary hub"
-            style={{ 
-              cursor: 'pointer', 
-              padding: isEditingHub ? '0 4px' : undefined,
-              backgroundColor: !emp.hub_id ? 'rgba(255, 68, 68, 0.1)' : undefined,
-              color: !emp.hub_id ? '#ff4444' : undefined,
-              border: !emp.hub_id ? '1px solid rgba(255, 68, 68, 0.4)' : undefined
-            }}
           >
             {isEditingHub ? (
-              <select 
-                value={selectedHubId} 
-                onChange={handleHubChange} 
+              <select
+                className="hub-select-mini"
+                value={selectedHubId}
+                onChange={handleHubChange}
                 onBlur={handleHubBlur}
                 autoFocus
                 onClick={(e) => e.stopPropagation()}
-                style={{ 
-                  background: 'var(--card-bg, #1a1a1a)', 
-                  color: 'inherit', 
-                  border: 'none', 
-                  outline: 'none', 
-                  cursor: 'pointer',
-                  fontSize: 'inherit',
-                  fontFamily: 'inherit',
-                  fontWeight: 'inherit'
-                }}
               >
                 <option value="ALL">ALL</option>
                 {availableHubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
@@ -115,35 +89,34 @@ const EmployeeListRow = ({
           </span>
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
-        <div className="list-contact" style={{ display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontWeight: 600, color: 'inherit', marginRight: '8px' }}>ID: {emp.badge_id}</span>
-          <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
-          <span style={{ marginRight: '8px' }}>📞 {emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
+        <div className="list-contact">
+          <span className="contact-item-id">ID: {emp.badge_id}</span>
+          <span className="contact-divider">|</span>
+          <span className="contact-item">📞 {emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
           {emp.email && (
             <>
-              <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
-              <span style={{ marginRight: '8px' }}>✉️ {emp.email}</span>
+              <span className="contact-divider">|</span>
+              <span className="contact-item">✉️ {emp.email}</span>
             </>
           )}
           {emp.manager_name && emp.manager_name !== 'None' && (
             <>
-              <span style={{ opacity: 0.3, marginRight: '8px' }}>|</span>
-              <span style={{ fontWeight: 500, color: 'var(--brand-green)', fontSize: '0.75rem' }}>👤 Mgr: {emp.manager_name}</span>
+              <span className="contact-divider">|</span>
+              <span className="contact-item manager-info">👤 Mgr: {emp.manager_name}</span>
             </>
           )}
         </div>
       </div>
 
       <div className="employee-actions">
-        <div className="employee-status" style={{ color: emp.status === 'Active' ? 'var(--brand-green)' : '#ff4444', fontSize: '0.75rem', fontWeight: 700, marginRight: '1rem', alignSelf: 'center', opacity: emp.status === 'Active' ? 1 : 0.5 }}>
+        <div className={`employee-status-indicator ${emp.status === 'Active' ? 'active' : 'inactive'}`}>
           {emp.status}
         </div>
         {permissions.canUpdate && (
-          <button 
-            className="action-icon-btn edit-pencil" 
-            onClick={() => onEdit(emp)} 
+          <button
+            className="action-icon-btn edit-pencil edit-pencil-btn"
+            onClick={() => onEdit(emp)}
             title="Edit Employee"
-            style={{ opacity: 0.5, filter: 'grayscale(1)', marginRight: '4px' }}
           >
             ✎
           </button>
@@ -152,9 +125,8 @@ const EmployeeListRow = ({
           <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
         )}
         {permissions.canUpdate && (
-          <button 
-            className={`halo-button ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-            style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '8px', fontWeight: 900 }}
+          <button
+            className={`halo-button status-toggle-btn ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
             onClick={() => onToggleStatus(emp.id, emp.status)}
             title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
           >
