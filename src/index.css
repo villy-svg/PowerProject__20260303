@@ -1,32 +1,4 @@
-/* ==========================================================================
-   CORE DESIGN SYSTEM & THEME VARIABLES
-   ========================================================================== */
-:root {
-  --bg-color: #fcfcfd;
-  --surface-card: #ffffff;
-  --text-color: #18181b;
-  --text-muted: #64748b;
-  --brand-green: #0d9488;
-  --accent-orange: #f97316;
-  --border-color: #e4e4e7;
-  --font-main: 'Inter', system-ui, sans-serif;
-  --transition-main: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* HALO VARIABLES */
-  --halo-glow: rgba(13, 148, 136, 0.2);
-  --halo-bg: rgba(13, 148, 136, 0.05);
-}
-
-[data-theme='dark'] {
-  --bg-color: #0B0E0F;
-  --surface-card: #161B1D;
-  --text-color: #E0E3E5;
-  --text-muted: #8A9399;
-  --brand-green: #4ADE80;
-  --accent-orange: #FF8C00;
-  --border-color: #3f3f46;
-  --halo-glow: rgba(74, 222, 128, 0.15);
-  --halo-bg: rgba(74, 222, 128, 0.05);
-}
+@import './styles/globalTheme.css';
 
 /* ==========================================================================
    GLOBAL RESET & BASE STYLES

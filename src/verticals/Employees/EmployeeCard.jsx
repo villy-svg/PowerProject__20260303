@@ -47,13 +47,10 @@ const EmployeeCard = ({
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
     >
-      <div className="card-selection" onClick={(e) => e.stopPropagation()}>
-        <input 
-          type="checkbox" 
-          checked={isSelected} 
-          onChange={() => onSelect(emp.id)} 
-          className="selection-checkbox"
-        />
+      <div className="selection-area card-selection" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
+        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+          {isSelected && '✓'}
+        </div>
       </div>
       <div className="employee-card-badges">
         {emp.is_app_user && (

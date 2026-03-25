@@ -1,0 +1,93 @@
+/* globalTheme.css - Shared Design Tokens and Global UI Components */
+
+/* ==========================================================================
+   1. THEME VARIABLES (Centralized Source of Truth)
+   ========================================================================== */
+
+:root {
+  /* Core Palette */
+  --bg-color: #fcfcfd;
+  --text-color: #18181b;
+  --brand-green: #0d9488;
+  --border-color: #e4e4e7;
+  --panel-bg: #ffffff;
+  --surface-card: #f9f9fb;
+  
+  /* Halo Glow System */
+  --halo-glow: rgba(13, 148, 136, 0.2);
+  --halo-bg: rgba(13, 148, 136, 0.05);
+
+  /* Status Colors */
+  --priority-urgent: #ef4444;
+  --priority-high: #f97316;
+  --priority-medium: #eab308;
+  --priority-low: #22c55e;
+}
+
+[data-theme='dark'] {
+  --bg-color: #09090b;
+  --text-color: #f4f4f5;
+  --brand-green: #2dd4bf;
+  --border-color: #27272a;
+  --panel-bg: #111113;
+  --surface-card: #18181b;
+  
+  --halo-glow: rgba(45, 212, 191, 0.15);
+  --halo-bg: rgba(45, 212, 191, 0.05);
+}
+
+/* ==========================================================================
+   2. UNIVERSAL SELECTION SYSTEM (Halo Pattern)
+   ========================================================================== */
+
+/* The interactive area around the checkbox */
+.selection-area {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+/* The circular checkbox itself */
+.selection-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: var(--surface-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #000;
+  font-weight: 900;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hover state for the container */
+.selection-area:hover .selection-checkbox {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 8px var(--halo-glow);
+}
+
+/* Checked state */
+.selection-checkbox.checked {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #000; /* Contrast for the checkmark */
+}
+
+/* Global alignment helper for selection columns in lists */
+.list-selection-col {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}

@@ -392,15 +392,14 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
                 <div className="form-group">
                   <label>Template Status</label>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '100%' }}>
-                     <label style={{display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer'}}>
-                       <input 
-                         type="checkbox" 
-                         checked={formData.isActive}
-                         onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                         style={{width: '20px', height: '20px'}}
-                       />
-                       {formData.isActive ? 'Active (Generating)' : 'Paused'}
-                     </label>
+                     <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}} onClick={() => setFormData({...formData, isActive: !formData.isActive})}>
+                        <div className={`selection-checkbox ${formData.isActive ? 'checked' : ''}`}>
+                          {formData.isActive && '✓'}
+                        </div>
+                        <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>
+                          {formData.isActive ? 'Active (Generating)' : 'Paused'}
+                        </span>
+                      </label>
                   </div>
                 </div>
 

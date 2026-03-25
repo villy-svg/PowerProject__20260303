@@ -46,13 +46,10 @@ const EmployeeListRow = ({
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
     >
-      <div className="list-selection" onClick={(e) => e.stopPropagation()}>
-        <input 
-          type="checkbox" 
-          checked={isSelected} 
-          onChange={() => onSelect(emp.id)} 
-          className="selection-checkbox"
-        />
+      <div className="list-selection-col" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
+        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+          {isSelected && '✓'}
+        </div>
       </div>
       <div className="list-main-info">
         <div className="list-name">

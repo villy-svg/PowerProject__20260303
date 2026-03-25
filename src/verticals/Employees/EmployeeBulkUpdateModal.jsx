@@ -78,15 +78,15 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
       <div className="form-grid" style={{ gap: '1.5rem' }}>
         {/* Hub */}
         <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <input 
-            type="checkbox" 
-            checked={activeFields.hub_id} 
-            onChange={() => handleFieldToggle('hub_id')}
-            style={{ marginTop: '30px' }}
-          />
+          <div className="selection-area" onClick={() => handleFieldToggle('hub_id')} style={{ marginTop: '28px' }}>
+            <div className={`selection-checkbox ${activeFields.hub_id ? 'checked' : ''}`}>
+              {activeFields.hub_id && '✓'}
+            </div>
+          </div>
           <div className="form-group" style={{ flex: 1, opacity: activeFields.hub_id ? 1 : 0.4 }}>
             <label>Primary Hub</label>
             <select 
+              className="master-dropdown"
               value={values.hub_id} 
               onChange={(e) => handleValueChange('hub_id', e.target.value)}
               disabled={!activeFields.hub_id}
@@ -100,15 +100,15 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
 
         {/* Role */}
         <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <input 
-            type="checkbox" 
-            checked={activeFields.role_id} 
-            onChange={() => handleFieldToggle('role_id')}
-            style={{ marginTop: '30px' }}
-          />
+          <div className="selection-area" onClick={() => handleFieldToggle('role_id')} style={{ marginTop: '28px' }}>
+            <div className={`selection-checkbox ${activeFields.role_id ? 'checked' : ''}`}>
+              {activeFields.role_id && '✓'}
+            </div>
+          </div>
           <div className="form-group" style={{ flex: 1, opacity: activeFields.role_id ? 1 : 0.4 }}>
             <label>Role</label>
             <select 
+              className="master-dropdown"
               value={values.role_id} 
               onChange={(e) => handleValueChange('role_id', e.target.value)}
               disabled={!activeFields.role_id}
@@ -121,15 +121,15 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
 
         {/* Department */}
         <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <input 
-            type="checkbox" 
-            checked={activeFields.department_id} 
-            onChange={() => handleFieldToggle('department_id')}
-            style={{ marginTop: '30px' }}
-          />
+          <div className="selection-area" onClick={() => handleFieldToggle('department_id')} style={{ marginTop: '28px' }}>
+            <div className={`selection-checkbox ${activeFields.department_id ? 'checked' : ''}`}>
+              {activeFields.department_id && '✓'}
+            </div>
+          </div>
           <div className="form-group" style={{ flex: 1, opacity: activeFields.department_id ? 1 : 0.4 }}>
             <label>Department</label>
             <select 
+              className="master-dropdown"
               value={values.department_id} 
               onChange={(e) => handleValueChange('department_id', e.target.value)}
               disabled={!activeFields.department_id}
@@ -142,15 +142,15 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
 
         {/* Manager */}
         <div className="bulk-field-row" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <input 
-            type="checkbox" 
-            checked={activeFields.manager_id} 
-            onChange={() => handleFieldToggle('manager_id')}
-            style={{ marginTop: '30px' }}
-          />
+          <div className="selection-area" onClick={() => handleFieldToggle('manager_id')} style={{ marginTop: '28px' }}>
+            <div className={`selection-checkbox ${activeFields.manager_id ? 'checked' : ''}`}>
+              {activeFields.manager_id && '✓'}
+            </div>
+          </div>
           <div className="form-group" style={{ flex: 1, opacity: activeFields.manager_id ? 1 : 0.4 }}>
             <label>Reporting Manager</label>
             <select 
+              className="master-dropdown"
               value={values.manager_id} 
               onChange={(e) => handleValueChange('manager_id', e.target.value)}
               disabled={!activeFields.manager_id}

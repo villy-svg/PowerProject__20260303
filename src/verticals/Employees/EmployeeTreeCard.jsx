@@ -41,13 +41,10 @@ const EmployeeTreeCard = ({
         )}
       </div>
 
-      <div className="card-selection" onClick={(e) => e.stopPropagation()}>
-        <input 
-          type="checkbox" 
-          checked={isSelected} 
-          onChange={() => onSelect(emp.id)} 
-          className="selection-checkbox"
-        />
+      <div className="selection-area" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
+        <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+          {isSelected && '✓'}
+        </div>
       </div>
 
       <div className="tree-card-content">
