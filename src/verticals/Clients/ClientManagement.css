@@ -315,13 +315,16 @@ input:checked + .slider:before {
   }
   
   .list-name { font-size: 0.95rem; }
-  .matrix-summary-mini, .category-code-mini, .poc-name-mini { font-size: 0.75rem; }
+  .matrix-summary-mini, .category-code-mini, .poc-name-mini, .billing-badge, .pending-tasks-badge { 
+    font-size: 0.65rem; 
+    padding: 2px 4px; /* Tighter padding */
+    letter-spacing: -0.2px; /* Slight compression */
+  }
   .contact-item { font-size: 0.8rem; }
   .email-id { font-size: 0.75rem; }
-  .billing-badge, .pending-tasks-badge { font-size: 0.65rem; }
   
   .col-identity { flex-basis: 220px; }
-  .col-business { flex-basis: 160px; }
+  .col-business { flex-basis: 170px; flex-grow: 1.2; } /* Give more space to badges */
 }
 
 @media screen and (max-width: 1280px) {

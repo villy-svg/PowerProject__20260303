@@ -546,6 +546,7 @@
   text-transform: uppercase;
   height: 18px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 
@@ -776,12 +777,17 @@
   }
   
   .list-name { font-size: 0.95rem; }
-  .manager-info, .dept-badge, .hub-badge, .role-badge, .app-user-badge-mini { font-size: 0.7rem; }
+  .manager-info, .dept-badge, .hub-badge, .role-badge, .app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini { 
+    font-size: 0.65rem; 
+    padding: 2px 4px; /* Tighter padding */
+    letter-spacing: -0.2px; /* Slight compression */
+  }
   .contact-item, .contact-item-id { font-size: 0.8rem; }
   .email-id { font-size: 0.75rem; }
   
   .col-identity { flex-basis: 220px; }
   .col-contact { flex-basis: 180px; }
+  .col-org { flex-grow: 1.2; } /* Give more space to badges */
 }
 
 @media screen and (max-width: 1024px) {
