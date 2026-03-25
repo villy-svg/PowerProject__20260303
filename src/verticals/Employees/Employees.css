@@ -198,13 +198,13 @@
   font-size: 0.9rem;
 }
 
-.employee-actions, .card-actions {
+.employee-actions, .employee-card-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.card-actions {
+.employee-card-actions {
   position: absolute;
   top: 12px;
   right: 45px; /* Leave space for selection checkbox */
@@ -213,7 +213,7 @@
   transition: opacity 0.2s;
 }
 
-.employee-card:hover .card-actions {
+.employee-card:hover .employee-card-actions {
   opacity: 1;
 }
 

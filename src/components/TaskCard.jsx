@@ -183,7 +183,7 @@ const TaskCard = ({
           )}
         </div>
 
-        <div className="card-actions">
+        <div className="task-management-actions">
           {!task.isContextOnly && canManageHierarchy && showHierarchy && (
             <>
               {task.parentTask && (

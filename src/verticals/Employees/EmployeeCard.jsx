@@ -55,7 +55,7 @@ const EmployeeCard = ({
       </div>
 
       {/* Floating Card Actions */}
-      <div className="card-actions">
+      <div className="employee-card-actions">
         {permissions.canUpdate && (
           <button 
             className="action-icon-btn edit-pencil edit-pencil-btn" 

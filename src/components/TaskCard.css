@@ -229,8 +229,10 @@
   cursor: not-allowed;
 }
 
-.card-actions {
-  display: flex;
+.task-management-actions {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   align-items: center;
   gap: 8px;
   border-left: 1px solid var(--border-color);
@@ -254,8 +256,9 @@
 }
 
 .card-edit-button {
+  background: transparent;
   color: var(--text-color);
-  opacity: 0.8; /* Increased from 0.5 */
+  opacity: 1 !important;
 }
 
 .card-edit-button:hover {
@@ -264,7 +267,7 @@
 }
 
 .card-delete-button {
-  opacity: 0.8; /* Increased from 0.4 */
+  opacity: 1 !important;
   font-size: 1.2rem;
   color: var(--text-color);
 }
@@ -290,7 +293,7 @@
   justify-content: center;
   line-height: 1;
   color: #f59e0b;
-  opacity: 0.8; /* Increased from 0.5 */
+  opacity: 1 !important;
 }
 
 .card-deprio-button:hover {
