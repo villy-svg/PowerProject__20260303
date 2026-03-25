@@ -216,7 +216,7 @@
   cursor: pointer;
   font-size: 1.1rem;
   transition: all 0.2s;
-  opacity: 0.6;
+  opacity: 0.8; /* Increased from 0.6 */
 }
 
 .card-nav-button:hover:not(:disabled) {
@@ -255,7 +255,7 @@
 
 .card-edit-button {
   color: var(--text-color);
-  opacity: 0.5;
+  opacity: 0.8; /* Increased from 0.5 */
 }
 
 .card-edit-button:hover {
@@ -264,7 +264,7 @@
 }
 
 .card-delete-button {
-  opacity: 0.4;
+  opacity: 0.8; /* Increased from 0.4 */
   font-size: 1.2rem;
   color: var(--text-color);
 }
@@ -290,7 +290,7 @@
   justify-content: center;
   line-height: 1;
   color: #f59e0b;
-  opacity: 0.5;
+  opacity: 0.8; /* Increased from 0.5 */
 }
 
 .card-deprio-button:hover {
@@ -312,7 +312,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  opacity: 0.6;
+  opacity: 0.8; /* Increased from 0.6 */
 }
 
 .card-add-sub-button:hover {
@@ -334,7 +334,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  opacity: 0.6;
+  opacity: 0.8; /* Increased from 0.6 */
 }
 
 .card-promote-button:hover {
