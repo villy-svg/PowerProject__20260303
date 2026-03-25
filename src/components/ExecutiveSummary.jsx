@@ -2,6 +2,7 @@ import React from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { hierarchyService } from '../services/rules/hierarchyService';
+import './ExecutiveSummary.css';
 
 /**
  * ExecutiveSummary Component

@@ -1,0 +1,156 @@
+/* ==========================================================================
+   HEADER & BRANDING STYLES
+   ========================================================================== */
+.app-header {
+  height: 90px;
+  /* Consistent height */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: var(--surface-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 40px;
+  /* CONSISTENT PADDING AT ALL TIMES */
+  position: relative;
+  flex-shrink: 0;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.logo-button {
+  position: absolute;
+  left: 2.5rem;
+  top: 25px; /* (90px - 40px) / 2 */
+  width: 40px;
+  height: 40px;
+  z-index: 1002;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.logo-button:hover {
+  transform: scale(1.05);
+}
+
+.logo-svg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.brand-title-centered {
+  position: absolute;
+  left: 50%;
+  top: 45px;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--brand-green), #6ef59a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--brand-green); /* Fallback */
+  letter-spacing: -1px;
+  white-space: nowrap;
+  line-height: 1;
+  z-index: 2000; /* Extremely high to stay above header */
+  pointer-events: none;
+  font-family: var(--font-main);
+  text-transform: none;
+}
+
+.theme-toggle-btn {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 0.1px solid var(--border-color);
+  background-color: transparent;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--border-color);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (HEADER)
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .app-header {
+    padding: 0 24px;
+    height: 70px;
+  }
+
+  .logo-button {
+    left: 1.5rem;
+    top: 15px; /* (70px - 40px) / 2 */
+  }
+
+  .brand-title-centered {
+    font-size: 1.3rem;
+    top: 35px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .app-header {
+    padding: 0 16px;
+  }
+
+  .logo-button {
+    left: 1rem;
+  }
+
+  .brand-title-centered {
+    display: none; 
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .app-header {
+    height: 60px;
+    padding: 0 12px;
+  }
+
+  .logo-button {
+    top: 10px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .header-right .user-profile-name {
+    display: none; 
+  }
+}

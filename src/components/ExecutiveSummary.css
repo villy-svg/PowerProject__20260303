@@ -1,0 +1,169 @@
+/* ==========================================================================
+   EXECUTIVE SUMMARY STYLES
+   ========================================================================== */
+.home-summary-view {
+  animation: fadeIn 0.4s ease-out;
+  background-color: var(--surface-card);
+  padding: 40px;
+  border-radius: 0; /* Fully unified with surface */
+}
+
+.summary-header {
+  margin-bottom: 40px;
+  border-left: 3px solid var(--brand-green);
+  padding-left: 15px;
+}
+
+.summary-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-color);
+  opacity: 0.9;
+  margin: 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.summary-column-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-card {
+  border-left: 6px solid var(--stage-color);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 90px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.summary-count {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: color-mix(in srgb, var(--stage-color), transparent 50%);
+  -webkit-text-stroke: 1.5px var(--stage-color);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  text-align: right;
+}
+
+/* BREAKDOWN LIST */
+.vertical-breakdown-list {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 4px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.vertical-mini-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.vertical-mini-row:last-child {
+  border-bottom: none;
+}
+
+.v-mini-label {
+  opacity: 0.6;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.v-mini-count {
+  font-weight: 800;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--stage-color);
+  -webkit-text-stroke: 0.8px var(--stage-color);
+}
+
+.summary-column-group:hover .vertical-breakdown-list {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (EXECUTIVE SUMMARY)
+   ========================================================================== */
+
+@media screen and (max-width: 1280px) {
+  .home-summary-view {
+    padding: 24px;
+  }
+
+  .summary-header {
+    margin-bottom: 24px;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .home-summary-view {
+    padding: 16px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-card {
+    min-height: 80px;
+    padding: 12px 16px;
+  }
+
+  .summary-count {
+    font-size: 1.8rem;
+  }
+
+  .summary-label {
+    font-size: 0.75rem;
+  }
+}
