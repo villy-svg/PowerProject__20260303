@@ -36,6 +36,7 @@ jobs:
           # Use Staging Secrets
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_STAGING_ANON_KEY }}
+          VITE_BASE_URL: /staging/
 
       - name: Deploy to GitHub Pages (Staging)
         uses: peaceiris/actions-gh-pages@v3
