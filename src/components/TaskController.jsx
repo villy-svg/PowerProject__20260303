@@ -1,463 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { STAGE_LIST } from '../constants/stages';
-import { createInitialTask } from '../constants/taskSchema';
-import TaskModal from './TaskModal';
-import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
+import TaskKanbanView from './TaskKanbanView';
+import TaskActionModals from './TaskActionModals';
 import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
-import { supabase } from '../services/core/supabaseClient';
 import MasterPageHeader from './MasterPageHeader';
-import ConflictModal from './ConflictModal';
-import { useDuplicateDetection } from '../hooks/useDuplicateDetection';
-import { hierarchyService } from '../services/rules/hierarchyService';
-import { hierarchyUtils } from '../utils/hierarchyUtils';
-import { taskUtils } from '../utils/taskUtils';
-import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 import TaskTreeView from './TaskTreeView';
+import { useTaskController } from '../hooks/useTaskController';
 import './TaskController.css';
 
 /**
  * TaskController Component
  * Functional engine of the workspace.
- * Supabase Update: Integrated async handling for Cloud CRUD operations.
+ * Now refactored to use useTaskController hook for business logic.
  */
-const TaskController = ({
-  activeVertical,
-  tasks = [],
-  setTasks,
-  actualSetTasks,
-  refreshTasks,
-  updateTask,
-  addTask,
-  bulkUpdateTasks,
-  deleteTask,
-  updateTaskStage,
-  TaskFormComponent,
-  TaskTileComponent,
-  label, // For dynamic title
-  handleFilterChange, // For filter updates
-  resetFilters, // For filter resets
-  filters = { city: [], hub: [], priority: [], function: [] },
-  user = {},
-  permissions = {},
-  rootVerticalId, // New prop
-  verticals = {}, // Passed from VerticalWorkspace
-  boardLabel
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem(`powerpod_task_view_${activeVertical}`) || localStorage.getItem('powerpod_task_view') || 'list');
-  const [showDeprioritized, setShowDeprioritized] = React.useState(false);
-  const [drillDownId, setDrillDownId] = React.useState(null);
+const TaskController = (props) => {
+  const {
+    activeVertical,
+    tasks,
+    refreshTasks,
+    TaskFormComponent,
+    TaskTileComponent,
+    label,
+    permissions,
+    rootVerticalId,
+    verticals,
+    boardLabel
+  } = props;
 
-  // Derive Breadcrumb path
-  const drillPath = React.useMemo(() => {
-    if (!drillDownId) return [];
-    const path = [];
-    let curr = (tasks || []).find(t => t.id === drillDownId);
-    while (curr) {
-      path.unshift(curr);
-      curr = (tasks || []).find(t => t.id === curr.parentTask);
-    }
-    return path;
-  }, [drillDownId, tasks]);
-  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+  const controller = useTaskController(props);
 
-  // Custom Confirmation Modal State
-  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
-
-  useEffect(() => {
-    localStorage.setItem(`powerpod_task_view_${activeVertical}`, viewMode);
-  }, [viewMode, activeVertical]);
-
-  const clearSelection = () => setSelectedTaskIds([]);
-  const toggleTaskSelection = (taskId) => {
-    setSelectedTaskIds(prev => prev.includes(taskId) ? prev.filter(id => id !== taskId) : [...prev, taskId]);
-  };
-
-  // Determine stage consistency of selection
-  const selectedTasks = React.useMemo(() =>
-    (tasks || []).filter(t => selectedTaskIds.includes(t.id)),
-    [tasks, selectedTaskIds]
-  );
-
-  const sameStage = selectedTasks.length > 0 &&
-    selectedTasks.every(t => t.stageId === selectedTasks[0].stageId);
-  const commonStageId = sameStage ? selectedTasks[0].stageId : null;
-
-  const handleBulkAction = async (action) => {
-    if (selectedTaskIds.length === 0) return;
-
-    if (action === 'delete') {
-      setConfirmDialog({
-        isOpen: true,
-        title: 'Confirm Bulk Delete',
-        message: `Are you sure you want to permanently delete these ${selectedTaskIds.length} tasks? This cannot be undone.`,
-        onConfirm: async () => {
-          setSaving(true);
-          try {
-            for (const id of selectedTaskIds) {
-              await deleteTask(id);
-            }
-            actualSetTasks(prev => prev.filter(t => !selectedTaskIds.includes(t.id)));
-            clearSelection();
-          } catch (err) {
-            console.error("Bulk Delete Failed:", err);
-            alert("Some tasks could not be deleted.");
-          } finally {
-            setSaving(false);
-            setConfirmDialog({ ...confirmDialog, isOpen: false });
-          }
-        }
-      });
-    } else if (action === 'deprio' || action === 'restore' || action === 'forward' || action === 'backward') {
-      // Filter out context-only tasks from bulk actions
-      const targetIds = selectedTasks
-        .filter(t => !t.isContextOnly)
-        .map(t => t.id);
-
-      if (targetIds.length === 0) {
-        clearSelection();
-        return;
-      }
-
-      if (action === 'deprio') {
-        await bulkUpdateTasks(targetIds, { stageid: 'DEPRIORITIZED' });
-        clearSelection();
-      } else if (action === 'restore') {
-        await bulkUpdateTasks(targetIds, { stageid: 'BACKLOG' });
-        clearSelection();
-      } else if (action === 'forward' || action === 'backward') {
-        if (!sameStage) return;
-        const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
-        let newIndex = currentIndex;
-        if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
-        if (action === 'backward' && currentIndex > 0) newIndex--;
-
-        if (newIndex !== currentIndex) {
-          await bulkUpdateTasks(targetIds, { stageid: STAGE_LIST[newIndex].id });
-        }
-        clearSelection();
-      }
-    }
-  };
-
-  /**
-   * MASTER-SLAVE: Unified Duplicate Detection
-   */
-  const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
-    fields: ['text', 'priority', 'hub_id', 'function'],
-    activeVertical: rootVerticalId || activeVertical,
-    sortByDuplicates: true
-  });
-
-  /**
-   * HIERARCHY FILTER: Enforce seniority-based visibility rules
-   */
-  const hierarchyFilteredTasks = hierarchyService.filterTasksByHierarchy(user, tasksWithDuplicateInfo, activeVertical, verticals, permissions);
-
-  /**
-   * FILTER LOGIC
-   */
-  const filteredTasks = hierarchyFilteredTasks.filter(t => {
-    // 0. Strict Vertical Filter
-    const targetVerticalId = rootVerticalId || activeVertical;
-    if (t.verticalId !== targetVerticalId && activeVertical !== 'daily_hub_tasks') return false;
-    if (activeVertical === 'daily_hub_tasks' && t.verticalId !== 'daily_hub_tasks') return false;
-
-    // 0.1 Kanban-Specific Visibility (ONLY for Kanban view)
-    if (viewMode === 'kanban') {
-      if (!permissions.canViewKanbanHierarchy) {
-        // Low Seniority (Assignee View): Show a flat list of everything returned by hierarchyService
-        // (This includes their assignments and their reportees' tasks)
-        // No additional filtering needed here!
-      } else {
-        // High Seniority (Manager View): Respect Drill-Down Hierarchy AND Hide Parents
-        if (drillDownId === null) {
-          // Top level: Show ONLY top-level tasks that are LEAVES (no children)
-          // Actually, if we hide all parents at top level, you can't drill down.
-          // The user said "do NOT show them the parent tasks".
-          // If we show only leaf tasks across the whole vertical, it becomes a flat board.
-          // But if we want to keep drill-down, we should hide parent cards in the current view.
-          if (t.parentTask !== null && t.parentTask !== undefined && t.parentTask !== "") return false;
-        } else {
-          if (t.parentTask !== drillDownId) return false;
-        }
-
-        // Parent tasks (folders) are now visible again so they can be drilled into
-        return true;
-      }
-    }
-
-    // 1. Duplicates Only filter
-    if (filters.duplicatesOnly && !t.isDuplicate) return false;
-
-    // 2. Metadata filters (Only apply if the filter array is not empty)
-    if (filters.city?.length > 0 && !filters.city.includes(t.city)) return false;
-    if (filters.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
-    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
-    if (filters.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
-    if (filters.function?.length > 0 && !filters.function.includes(t.function)) return false;
-    if (filters.assignee?.length > 0) {
-      const formattedAssignee = taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user);
-      if (!filters.assignee.includes(formattedAssignee)) return false;
-    }
-    return true;
-  });
-
-  const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
-
-  /**
-   * Resolves feature-specific CRUD flags (e.g. canCreateClientTasks)
-   * Falls back to vertical-level flags if feature-specific ones are missing.
-   */
-  const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-  const fCanCreate = permissions[`canCreate${featureBaseName}`] ?? permissions.canCreate;
-  const fCanUpdate = permissions[`canUpdate${featureBaseName}`] ?? permissions.canUpdate;
-  const fCanDelete = permissions[`canDelete${featureBaseName}`] ?? permissions.canDelete;
-
-  const canUserCreate = fCanCreate &&
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) ||
-      user.assignedVerticals.includes(activeVertical) ||
-      user.assignedVerticals.includes(activeVertical.toUpperCase())
-    )));
-
-  const canUserUpdate = fCanUpdate &&
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) ||
-      user.assignedVerticals.includes(activeVertical) ||
-      user.assignedVerticals.includes(activeVertical.toUpperCase())
-    )));
-
-  const canUserDelete = fCanDelete &&
-    (permissions.scope === 'global' || (Array.isArray(user?.assignedVerticals) && (
-      user.assignedVerticals.includes(rootVerticalId) ||
-      user.assignedVerticals.includes(activeVertical) ||
-      user.assignedVerticals.includes(activeVertical.toUpperCase())
-    )));
-
-  // Debugging log for permission issues
-  if (!canUserUpdate && permissions.scope !== 'none') {
-    console.warn(`User ${user?.full_name} lacks update permission for ${activeVertical}. Scope: ${permissions.scope}, Assigned:`, user?.assignedVerticals);
-  }
-
-  /**
-   * canManageHierarchy
-   * Replaces generic canUserUpdate for hierarchy-mutating actions (DND, add subtask shortcut).
-   * Restricts pure assignees from reorganizing the structure.
-   */
-  const canManageHierarchy = (task) => {
-    if (!task) return false;
-    if (task.isContextOnly) return false;
-    if (user.seniority > MANAGER_SENIORITY_THRESHOLD) return true;
-
-    const isCreator = (task.createdBy || task.created_by) === user.id;
-    // Note: merely being assignee does NOT grant hierarchy management rights
-    return isCreator;
-  };
-
-  /**
-   * Internal WRAPPERS for task updates to respect isContextOnly
-   */
-  const handleInternalUpdateStage = (taskId, newStageId) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task || task.isContextOnly) return;
-    
-    if (!taskUtils.canUserMoveTask(task, newStageId, permissions, user)) {
-      alert("Permission Denied: You do not have permission to move this task to this stage.");
-      return;
-    }
-    
-    updateTaskStage(taskId, newStageId);
-  };
-
-  const handleInternalDelete = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task?.isContextOnly) return;
-    handleSingleDelete(taskId);
-  };
-
-  /**
-   * handleMoveToParent
-   * Logic for nesting tasks via Drag & Drop or other shortcuts.
-   */
-  const handleMoveToParent = async (childId, parentId) => {
-    if (!canUserUpdate) return;
-    if (childId === parentId) return;
-
-    const childTask = tasks.find(t => t.id === childId);
-    const parentTask = tasks.find(t => t.id === parentId);
-
-    if (!childTask || childTask.isContextOnly) return;
-    if (parentTask && parentTask.isContextOnly) return;
-
-    // Cycle detection
-    if (parentId && hierarchyUtils.detectCycle(tasks, childId, parentId)) {
-      alert("Cannot move: This would create a circular dependency.");
-      return;
-    }
-
-    try {
-      // Ensure we send the required ID and the parent update
-      await updateTask({ ...childTask, parentTask: parentId });
-      // UI update is handled by the hook's local state update inside updateTask, 
-      // but we can also rely on refreshTasks if needed.
-    } catch (err) {
-      console.error('Failed to move task:', err);
-      alert('Failed to update task relationship.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  /**
-   * handleSaveTask
-   * Combined handler for both Add and Edit operations.
-   */
-  const handleSaveTask = async (formData) => {
-    const isEditing = !!(editingTask && editingTask.id);
-    if (isEditing && (editingTask.isContextOnly || !canUserUpdate)) return;
-    if (!isEditing && !canUserCreate) return;
-
-    setSaving(true);
-
-    try {
-      if (isEditing) {
-        // Full update
-        const updatedData = { ...editingTask, ...formData };
-        await updateTask(updatedData);
-      } else {
-        // Create new
-        const newTask = {
-          ...createInitialTask(formData.text, rootVerticalId || activeVertical),
-          ...formData
-        };
-        if (addTask) {
-          await addTask(newTask);
-        } else {
-          console.error("addTask prop missing in TaskController");
-          await setTasks(prev => [...prev, newTask]); // Fallback but not persisted
-        }
-      }
-      setIsModalOpen(false);
-      setEditingTask(null);
-    } catch (err) {
-      console.error("Cloud Sync Error:", err);
-      alert(`Failed to save task: ${err.message || err.details || JSON.stringify(err)}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDuplicateMergeTrigger = (duplicateTask) => {
-    // Opens edit modal for the duplicate task so the user can review/merge manually
-    openEditModal(duplicateTask);
-  };
-
-  const executeMerge = async (primaryTaskId) => {
-    const primaryTask = tasks.find(t => t.id === primaryTaskId);
-    if (!primaryTask) return;
-    const duplicates = tasks.filter(t =>
-      t.id !== primaryTaskId &&
-      t.text === primaryTask.text &&
-      t.priority === primaryTask.priority &&
-      t.verticalId === primaryTask.verticalId
-    );
-    if (duplicates.length === 0) return;
-    try {
-      await bulkUpdateTasks(duplicates.map(t => t.id), { stageid: 'DEPRIORITIZED' });
-      setMergeTaskCluster(null);
-    } catch (err) {
-      console.error('Merge failed:', err);
-      alert('Failed to merge duplicate tasks.');
-    }
-  };
-
-  const openAddModal = () => {
-    setEditingTask(null);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (task) => {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  };
-
-  const handleAddSubtask = (parentId) => {
-    const parentTask = tasks.find(t => t.id === parentId);
-    if (!canManageHierarchy(parentTask)) {
-      alert("Permission Denied: Only creators or senior management can add subtasks.");
-      return;
-    }
-    setEditingTask({ parentTask: parentId });
-    setIsModalOpen(true);
-  };
-
-  const handleSingleDelete = (taskId) => {
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Confirm Delete',
-      message: 'Are you sure you want to permanently delete this task?',
-      onConfirm: async () => {
-        const task = tasks.find(t => t.id === taskId);
-        if (task?.isContextOnly) return;
-
-        setSaving(true);
-        try {
-          await deleteTask(taskId);
-          setTasks(prev => prev.filter(t => t.id !== taskId));
-        } catch (err) {
-          alert("Delete failed.");
-        } finally {
-          setSaving(false);
-          setConfirmDialog({ ...confirmDialog, isOpen: false });
-        }
-      }
-    });
-  };
-
-  /**
-   * handleClearBoard
-   * Moves all tasks in this vertical (except deprioritized ones) to DEPRIORITIZED stage.
-   */
-  const handleClearBoard = async () => {
-    const targetVerticalId = rootVerticalId || activeVertical;
-    const verticalTasks = (tasks || []).filter(t => t.verticalId === targetVerticalId && t.stageId !== 'DEPRIORITIZED');
-    if (verticalTasks.length === 0) return;
-
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Clear Board',
-      message: `Move all ${verticalTasks.length} active tasks to Deprioritized?`,
-      onConfirm: async () => {
-        setSaving(true);
-        try {
-          await bulkUpdateTasks(verticalTasks.map(t => t.id), { stageid: 'DEPRIORITIZED' });
-        } catch (err) {
-          alert("Failed to clear board.");
-        } finally {
-          setSaving(false);
-          setConfirmDialog({ ...confirmDialog, isOpen: false });
-        }
-      }
-    });
-  };
-
-  const toggleStageSelection = (stageId, stageTasks) => {
-    const stageTaskIds = stageTasks.map(t => t.id);
-    const allInStageSelected = stageTaskIds.every(id => selectedTaskIds.includes(id));
-
-    if (allInStageSelected) {
-      // Deselect all in stage
-      setSelectedTaskIds(prev => prev.filter(id => !stageTaskIds.includes(id)));
-    } else {
-      // Select all in stage
-      setSelectedTaskIds(prev => [...new Set([...prev, ...stageTaskIds])]);
-    }
-  };
+  const {
+    isModalOpen, setIsModalOpen,
+    editingTask, setEditingTask,
+    saving,
+    viewMode, setViewMode,
+    showDeprioritized, setShowDeprioritized,
+    drillDownId, setDrillDownId,
+    drillPath,
+    selectedTaskIds,
+    clearSelection,
+    toggleTaskSelection,
+    sameStage, commonStageId,
+    confirmDialog, setConfirmDialog,
+    mergeTaskCluster, setMergeTaskCluster,
+    hierarchyFilteredTasks,
+    filteredTasks,
+    canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy,
+    handleBulkAction,
+    handleInternalUpdateStage,
+    handleInternalDelete,
+    handleMoveToParent,
+    handleSaveTask,
+    executeMerge,
+    handleClearBoard,
+    openAddModal, openEditModal, handleAddSubtask,
+    toggleStageSelection
+  } = controller;
 
   return (
     <div className="task-controller">
@@ -467,27 +67,16 @@ const TaskController = ({
         leftActions={
           <>
             <div className="view-mode-toggle">
-              <button
-                className={`view-toggle-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                onClick={() => setViewMode('kanban')}
-                style={{ fontWeight: viewMode === 'kanban' ? 600 : 400 }}
-              >
-                Kanban
-              </button>
-              <button
-                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-                style={{ fontWeight: viewMode === 'list' ? 600 : 400 }}
-              >
-                List
-              </button>
-              <button
-                className={`view-toggle-btn ${viewMode === 'tree' ? 'active' : ''}`}
-                onClick={() => setViewMode('tree')}
-                style={{ fontWeight: viewMode === 'tree' ? 600 : 400 }}
-              >
-                Tree
-              </button>
+              {['kanban', 'list', 'tree'].map((mode) => (
+                <button
+                  key={mode}
+                  className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
+                  onClick={() => setViewMode(mode)}
+                  style={{ fontWeight: viewMode === mode ? 600 : 400, textTransform: 'capitalize' }}
+                >
+                  {mode}
+                </button>
+              ))}
             </div>
 
             <button
@@ -533,283 +122,55 @@ const TaskController = ({
         }
       />
 
-      <TaskModal
-        isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
-        title={editingTask ? `Edit Task` : `Add New ${activeVertical.replace('_', ' ')} Task`}
-      >
-        {TaskFormComponent ? (
-          <TaskFormComponent
-            initialData={editingTask}
-            onSubmit={handleSaveTask}
-            loading={saving}
-            currentUser={user}
-            permissions={permissions}
-            availableTasks={(tasks || []).filter(t => {
-              if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
-              if (!editingTask) return true;
-              if (t.id === editingTask.id) return false;
-              return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
-            })}
-          />
-        ) : (
-          <form className="simple-task-form" onSubmit={(e) => {
-            e.preventDefault();
-            const text = e.target.elements.taskText.value;
-            const parentTask = e.target.elements.parentTask?.value || null;
-            if (text) handleSaveTask({ text, parentTask });
-          }}>
-            <div className="form-group">
-              <label>Task Details</label>
-              <input
-                name="taskText"
-                type="text"
-                placeholder="What needs to be done?"
-                defaultValue={editingTask?.text || ''}
-                required
-              />
-            </div>
-            <div className="form-group" style={{ marginTop: '1rem' }}>
-              <label>Parent Task</label>
-              <select
-                name="parentTask"
-                className="master-dropdown"
-                defaultValue={editingTask?.parentTask || ''}
-              >
-                <option value="">None (Top-level)</option>
-                {(tasks || [])
-                  .filter(t => {
-                    if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
-                    if (!editingTask) return true;
-                    // Prevent selecting self as parent
-                    if (t.id === editingTask.id) return false;
-                    // Prevent selecting a descendant as parent (Cycle Prevention)
-                    return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
-                  })
-                  .map(t => (
-                    <option key={t.id} value={t.id}>{t.text}</option>
-                  ))
-                }
-              </select>
-            </div>
-            <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
-              {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
-            </button>
-          </form>
-        )}
-      </TaskModal>
-
-      {/* Unified Duplicate Merge Modal */}
-      <ConflictModal
-        isOpen={!!mergeTaskCluster}
-        onClose={() => setMergeTaskCluster(null)}
-        title="Consolidate Duplicate Tasks"
-        description={`We found ${mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.`}
-        conflicts={mergeTaskCluster || []}
-        strategy="PICK_ONE"
-        entityName="Tasks"
-        onResolve={(selection) => executeMerge(selection[0].id)}
-        renderConflictTile={(task) => {
-          const stageInfo = STAGE_LIST.find(s => s.id === task.stageId);
-          return (
-            <div className="merge-body">
-              <span className="merge-stage-tag" style={{ border: `1px solid ${stageInfo?.color}`, color: stageInfo?.color, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
-                {stageInfo?.label || task.stageId}
-              </span>
-              <p className="merge-summary" style={{ margin: '8px 0', fontSize: '0.9rem' }}>{task.text}</p>
-              <div className="merge-meta" style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-                <span>Priority: {task.priority}</span>
-                {task.city && <span style={{ marginLeft: '8px' }}>City: {task.city}</span>}
-              </div>
-            </div>
-          );
-        }}
+      <TaskActionModals
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        editingTask={editingTask}
+        setEditingTask={setEditingTask}
+        saving={saving}
+        activeVertical={activeVertical}
+        TaskFormComponent={TaskFormComponent}
+        handleSaveTask={handleSaveTask}
+        user={props.user}
+        permissions={permissions}
+        tasks={tasks}
+        rootVerticalId={rootVerticalId}
+        mergeTaskCluster={mergeTaskCluster}
+        setMergeTaskCluster={setMergeTaskCluster}
+        executeMerge={executeMerge}
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
       />
-
-      {/* Custom Confirmation Modal */}
-      <TaskModal
-        isOpen={confirmDialog.isOpen}
-        onClose={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-        title={confirmDialog.title}
-      >
-        <div className="confirm-modal-body">
-          <p className="confirm-message">{confirmDialog.message}</p>
-          <div className="confirm-actions">
-            <button
-              className="halo-button confirm-btn"
-              onClick={confirmDialog.onConfirm}
-              disabled={saving}
-              style={{ fontWeight: 700 }}
-            >
-              {saving ? 'Working...' : 'Confirm'}
-            </button>
-            <button
-              className="halo-button cancel-btn"
-              onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-              style={{ opacity: 0.6, fontWeight: 600 }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </TaskModal>
 
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
-          <>
-            {permissions.canViewKanbanHierarchy && (drillDownId || drillPath.length > 0) && (
-              <div className="drill-breadcrumb" style={{ padding: '0 24px 12px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                <button 
-                  onClick={() => setDrillDownId(null)}
-                  style={{ background: 'none', border: 'none', color: 'var(--brand-green)', cursor: 'pointer', padding: 0, fontWeight: 600 }}
-                >
-                  {boardLabel || label || 'Board'}
-                </button>
-                {drillPath.map((node, idx) => (
-                  <React.Fragment key={node.id}>
-                    <span>/</span>
-                    <button 
-                      onClick={() => setDrillDownId(node.id)}
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        color: idx === drillPath.length - 1 ? 'var(--text-color)' : 'var(--brand-green)', 
-                        cursor: 'pointer', 
-                        padding: 0,
-                        fontWeight: idx === drillPath.length - 1 ? 700 : 500
-                      }}
-                    >
-                      {node.text}
-                    </button>
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
-            <div className="kanban-board">
-            {STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
-              const getPriorityWeight = (p) => {
-                if (!p) return 0;
-                const lowerP = p.toLowerCase();
-                if (lowerP === 'high') return 3;
-                if (lowerP === 'medium') return 2;
-                if (lowerP === 'low') return 1;
-                return 0;
-              };
-
-              const stageTasks = filteredTasks
-                .filter((t) => t.stageId === stage.id)
-                .sort((a, b) => {
-                  const weightA = getPriorityWeight(a.priority);
-                  const weightB = getPriorityWeight(b.priority);
-                  if (weightA !== weightB) return weightB - weightA;
-
-                  // Secondary: Duplicates together
-                  if (a.isDuplicate && !b.isDuplicate) return -1;
-                  if (!a.isDuplicate && b.isDuplicate) return 1;
-
-                  // Tertiary: Hub codes (alphabetical)
-                  const hubA = a.hub_code || '';
-                  const hubB = b.hub_code || '';
-                  if (hubA !== hubB) return hubA.localeCompare(hubB);
-
-                  // Quaternary: Function codes (alphabetical)
-                  const funcA = a.function || '';
-                  const funcB = b.function || '';
-                  if (funcA !== funcB) return funcA.localeCompare(funcB);
-
-                  return 0;
-                });
-
-              const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
-
-              return (
-                <div
-                  key={stage.id}
-                  className="kanban-stage-halo"
-                  style={{
-                    borderTop: `4px solid ${stage.color}`,
-                    borderColor: `${stage.color}44`,
-                    backgroundColor: `${stage.color}08`
-                  }}
-                >
-                  <div className="stage-header">
-                    <div className="header-left-group">
-                      <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
-                      {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
-                        <button
-                          onClick={() => toggleStageSelection(stage.id, stageTasks)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--brand-green)',
-                            fontSize: '0.65rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            padding: '0 8px',
-                            marginLeft: '4px',
-                            height: '100%',
-                            opacity: 0.8
-                          }}
-                        >
-                          {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
-                        </button>
-                      )}
-                    </div>
-                    <span
-                      className="task-count-badge"
-                      style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
-                    >
-                      {stageTasks.length}
-                    </span>
-                  </div>
-
-                  <div className="task-drop-zone">
-                    {stageTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="task-card-container"
-                      >
-                        <TaskCard
-                          task={task}
-                          stage={stage}
-                          canUpdate={canUserUpdate}
-                          canDelete={canUserDelete}
-                          canManageHierarchy={canManageHierarchy(task)}
-                          updateTaskStage={handleInternalUpdateStage}
-                          deleteTask={handleInternalDelete}
-                          openEditModal={openEditModal}
-                          openAddSubtaskModal={handleAddSubtask}
-                          onMoveToParent={handleMoveToParent}
-                          onDuplicateMerge={handleDuplicateMergeTrigger}
-                          STAGE_LIST={STAGE_LIST}
-                          isSelected={selectedTaskIds.includes(task.id)}
-                          onSelect={() => toggleTaskSelection(task.id)}
-                          currentUser={user}
-                          tasks={hierarchyFilteredTasks}
-                          onPromote={handleMoveToParent}
-                          onDrillDown={setDrillDownId}
-                          showHierarchy={permissions.canViewKanbanHierarchy}
-                          permissions={permissions}
-                        >
-                          {TaskTileComponent && (
-                            <TaskTileComponent
-                              task={task}
-                              stage={stage}
-                            />
-                          )}
-                        </TaskCard>
-                      </div>
-                    ))}
-
-                    {stageTasks.length === 0 && (
-                      <p className="empty-msg">No tasks yet</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            </div>
-          </>
+          <TaskKanbanView
+            tasks={hierarchyFilteredTasks}
+            filteredTasks={filteredTasks}
+            stageList={STAGE_LIST}
+            showDeprioritized={showDeprioritized}
+            permissions={permissions}
+            user={props.user}
+            drillDownId={drillDownId}
+            setDrillDownId={setDrillDownId}
+            drillPath={drillPath}
+            boardLabel={boardLabel}
+            label={label}
+            selectedTaskIds={selectedTaskIds}
+            toggleTaskSelection={toggleTaskSelection}
+            toggleStageSelection={toggleStageSelection}
+            canUserUpdate={canUserUpdate}
+            canUserDelete={canUserDelete}
+            canManageHierarchy={canManageHierarchy}
+            updateTaskStage={handleInternalUpdateStage}
+            deleteTask={handleInternalDelete}
+            openEditModal={openEditModal}
+            openAddSubtaskModal={handleAddSubtask}
+            onMoveToParent={handleMoveToParent}
+            onDuplicateMerge={openEditModal}
+            onPromote={handleMoveToParent}
+            TaskTileComponent={TaskTileComponent}
+          />
         ) : viewMode === 'list' ? (
           <TaskListView
             tasks={filteredTasks}
@@ -823,12 +184,12 @@ const TaskController = ({
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
             onMoveToParent={handleMoveToParent}
-            onDuplicateMerge={handleDuplicateMergeTrigger}
+            onDuplicateMerge={openEditModal}
             TaskTileComponent={TaskTileComponent}
             selectedTaskIds={selectedTaskIds}
             onSelect={toggleTaskSelection}
             onToggleStageSelection={toggleStageSelection}
-            currentUser={user}
+            currentUser={props.user}
             canCreate={canUserCreate}
             permissions={permissions}
           />
@@ -845,7 +206,7 @@ const TaskController = ({
             openAddSubtaskModal={handleAddSubtask}
             onMoveToParent={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}
-            currentUser={user}
+            currentUser={props.user}
             canCreate={canUserCreate}
             permissions={permissions}
           />
