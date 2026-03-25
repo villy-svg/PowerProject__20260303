@@ -221,22 +221,22 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  padding: 1rem 1.75rem; /* Adjusted padding for better balance */
-  background: linear-gradient(90deg, rgba(45, 212, 191, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-left: 3px solid var(--brand-green); /* The Halo Edge */
-  border-radius: 8px 12px 12px 8px; /* Asymmetric radius for the edge */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1rem 1.75rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--brand-green); /* Matching Task Stage Edge */
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: auto;
-  box-shadow: -5px 0 20px rgba(45, 212, 191, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .employee-list-row:hover {
-  background: linear-gradient(90deg, rgba(45, 212, 191, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-color: rgba(255, 255, 255, 0.1);
-  border-left-color: var(--brand-green);
-  box-shadow: -8px 0 25px rgba(45, 211, 191, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1);
-  transform: translateX(4px); /* Minimal slide effect */
+  background: color-mix(in srgb, var(--panel-bg), white 2%);
+  border-color: var(--brand-green); /* Matching Task Hover Pattern */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--brand-green-rgb), 0.1);
+  transform: translateX(4px);
 }
 
 .list-row-inner {
