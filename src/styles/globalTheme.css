@@ -205,3 +205,64 @@
   opacity: 0.5;
   line-height: 1.6;
 }
+
+/* ==========================================================================
+   4. SHARED VERTICAL TOKENS (Badges & Indicators)
+   ========================================================================== */
+
+.dept-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--brand-green);
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 135, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: capitalize;
+  opacity: 0.8;
+}
+
+.hub-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(0, 122, 255, 0.1);
+  color: #007aff;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hub-badge.null-hub {
+  background-color: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+  border: 1px solid rgba(255, 68, 68, 0.4);
+}
+
+.employee-status-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  align-self: center;
+}
+
+.employee-status-indicator.active {
+  color: var(--brand-green);
+}
+
+.employee-status-indicator.inactive {
+  color: #ff4444;
+  opacity: 0.5;
+}

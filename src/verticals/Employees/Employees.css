@@ -1,5 +1,6 @@
-/* EmployeeManagement.css - Styling for Employee Tiles and List View */
+/* Employees.css - Optimized Consolidated Styling */
 
+/* Grid Layout */
 .employee-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -7,36 +8,41 @@
   padding: 1rem 0;
 }
 
-.employee-card {
+/* Base Card & Row Styles (Halo Pattern) */
+.employee-card, .employee-list-row {
   position: relative;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 1.25rem;
   transition: all 0.2s ease;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
   border-left: 4px solid var(--brand-green);
 }
 
-.employee-card:hover {
+.employee-card:hover, .employee-list-row:hover {
   background: rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.employee-card.inactive {
+.employee-card.inactive, .employee-list-row.inactive {
   filter: grayscale(1);
   opacity: 0.5;
   border-left-color: #666;
 }
 
-.employee-card.selected {
+.employee-card.selected, .employee-list-row.selected {
   border-color: var(--brand-green);
   background: rgba(0, 255, 135, 0.05);
   box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
+}
+
+/* Card Specifics */
+.employee-card {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .card-selection {
@@ -46,59 +52,6 @@
   z-index: 5;
 }
 
-/* Row 1: Badges */
-.employee-card-badges {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.dept-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--brand-green);
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 255, 135, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.role-badge {
-  font-size: 0.65rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-transform: capitalize;
-  opacity: 0.8;
-}
-
-.hub-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: rgba(0, 122, 255, 0.1);
-  color: #007aff;
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 122, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Row 2: Name */
-.employee-card-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-}
-
-/* Row 3: Contact */
 .employee-card-badges {
   position: absolute;
   top: 12px;
@@ -112,7 +65,7 @@
 }
 
 .employee-card-badges span {
-  margin-left: 0 !important; /* Reset specific badge margins */
+  margin-left: 0 !important;
 }
 
 .employee-card-header {
@@ -164,21 +117,6 @@
 
 .employee-card-footer {
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.join-date {
-  font-size: 0.7rem;
-  opacity: 0.5;
-}
-
-/* Row 4: Footer Meta */
-.employee-card-footer {
-  margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -191,122 +129,7 @@
   opacity: 0.6;
 }
 
-.employee-status {
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-}
-
-/* Controls */
-.hub-badge.editing {
-  padding: 0 4px;
-}
-
-.hub-badge.null-hub {
-  background-color: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid rgba(255, 68, 68, 0.4);
-}
-
-.hub-select-mini {
-  background: var(--panel-bg);
-  color: inherit;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  font-size: inherit;
-  font-family: inherit;
-  font-weight: inherit;
-}
-
-.list-contact {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.contact-item, .contact-item-id, .manager-info {
-  display: flex;
-  align-items: center;
-}
-
-.contact-item-id {
-  font-weight: 600;
-  color: inherit;
-}
-
-.contact-divider {
-  opacity: 0.3;
-}
-
-.manager-info {
-  font-weight: 500;
-  color: var(--brand-green);
-  font-size: 0.75rem;
-}
-
-.employee-status-indicator {
-  font-size: 0.75rem;
-  font-weight: 700;
-  margin-right: 1rem;
-  align-self: center;
-}
-
-.employee-status-indicator.active {
-  color: var(--brand-green);
-  opacity: 1;
-}
-
-.employee-status-indicator.inactive {
-  color: #ff4444;
-  opacity: 0.5;
-}
-
-.edit-pencil-btn {
-  opacity: 0.5;
-  filter: grayscale(1);
-  margin-right: 4px;
-}
-
-.edit-pencil-btn:hover {
-  opacity: 1;
-  filter: none;
-}
-
-.status-toggle-btn {
-  padding: 2px 10px;
-  font-size: 0.8rem;
-  min-width: auto;
-  margin-left: 8px;
-  font-weight: 900;
-}
-
-.action-icon-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  opacity: 0.4;
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-icon-btn:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.action-icon-btn.edit:hover { color: var(--brand-green); }
-.action-icon-btn.delete:hover { color: #ff4444; }
-
-/* List View Styling */
+/* List Row Specifics */
 .employee-list {
   display: flex;
   flex-direction: column;
@@ -318,34 +141,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
   padding: 0.75rem 1.25rem;
-  transition: all 0.2s;
-  border-left: 3px solid var(--brand-green);
-  min-height: 64px; /* Ensure consistent row height */
-}
-
-.employee-list-row:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.employee-list-row.inactive {
-  filter: grayscale(1);
-  opacity: 0.5;
-  border-left-color: #666;
-}
-
-.employee-list-row.selected {
-  background: rgba(0, 255, 135, 0.05);
-  border-color: rgba(0, 255, 135, 0.3);
+  min-height: 64px;
 }
 
 .list-selection {
   margin-right: 1rem;
 }
-
 
 .list-main-info {
   display: flex;
@@ -369,7 +171,38 @@
   font-size: 0.85rem;
   opacity: 0.7;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
+
+/* Shared Components & Helpers */
+.hub-select-mini {
+  background: var(--panel-bg);
+  color: inherit;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+}
+
+.manager-info {
+  font-weight: 500;
+  color: var(--brand-green);
+  font-size: 0.75rem;
+}
+
+.status-toggle-btn {
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  min-width: auto;
+  margin-left: 8px;
+  font-weight: 900;
+}
+
 .section-title {
   font-size: 0.8rem;
   font-weight: 700;
@@ -377,10 +210,6 @@
   letter-spacing: 1px;
   color: var(--brand-green);
   margin-bottom: 1.5rem;
-}
-
-.inactive-section .section-title {
-  color: #888;
 }
 
 .empty-sub-state {
@@ -427,140 +256,31 @@
   gap: 1rem;
 }
 
-.role-badge {
-  padding: 2px 10px;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+/* System Badges (Mini) */
+.app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini {
+  padding: 1px 6px;
   border-radius: 4px;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  color: var(--text-color);
-  opacity: 0.8;
-  white-space: nowrap;
+  text-transform: uppercase;
 }
 
-/* System Badges */
 .app-user-badge-mini {
-  margin-left: 8px;
   background-color: rgba(52, 211, 153, 0.15);
   color: #34d399;
   border: 1px solid rgba(52, 211, 153, 0.3);
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .bank-missing-badge-mini {
-  margin-left: 8px;
   background-color: rgba(255, 68, 68, 0.1);
   color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.4);
-  padding: 1px 6px;
   border-radius: 20px;
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .duplicate-badge-mini {
-  margin-left: 8px;
   background: #f59e0b;
   color: white;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 0.6rem;
-  font-weight: 800;
-}
-
-.bulk-btn {
-  background: var(--brand-green);
-  color: #000;
-  border: none;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: 800;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s;
-}
-
-.bulk-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(0, 255, 135, 0.3);
-}
-
-.bulk-btn.secondary {
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-}
-
-/* ==========================================================================
-   RESPONSIVE DESIGN
-   ========================================================================== */
-
-@media screen and (max-width: 1280px) {
-  .employee-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-  }
-}
-
-@media screen and (max-width: 1024px) {
-  .employee-list-row {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .list-main-info {
-    width: 100%;
-    order: 1;
-    gap: 12px;
-  }
-
-  .list-meta-badges {
-    width: 100%;
-    order: 3;
-    min-width: 0;
-  }
-
-  .list-contact {
-    width: 100%;
-    order: 2;
-  }
-
-  .employee-actions {
-    width: 100%;
-    justify-content: flex-end;
-    order: 4;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .bulk-action-toolbar {
-    bottom: 1rem;
-    padding: 0.5rem 1.5rem;
-    gap: 1rem;
-    width: 90%;
-    flex-direction: column;
-    border-radius: 20px;
-    text-align: center;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .employee-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .employee-card {
-    padding: 1rem;
-  }
-
-  .list-selection {
-    margin-right: 0.5rem;
-  }
 }
 
 /* Hierarchy (Tree) Styles */
@@ -582,38 +302,32 @@
   align-items: flex-start;
   position: relative;
   padding-left: 2rem;
+  animation: fadeInTree 0.4s ease-out forwards;
 }
 
-/* Vertical Connecting Line */
-.tree-node-wrapper::before {
+.tree-node-wrapper::before, .tree-node-wrapper::after {
   content: '';
   position: absolute;
   left: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tree-node-wrapper::before {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 255, 255, 0.1);
 }
 
-/* Small horizontal branch to the card */
 .tree-node-wrapper::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 35px; /* Aligned with card center height approx */
+  top: 35px;
   width: 20px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .tree-node-wrapper:last-child::before {
-  height: 35px; /* Only go down to the last branch */
+  height: 35px;
 }
 
-/* Root nodes (top level) don't need connecting lines */
-.tree-root > .tree-node-wrapper {
-  padding-left: 0;
-}
 .tree-root > .tree-node-wrapper::before,
 .tree-root > .tree-node-wrapper::after {
   display: none;
@@ -628,18 +342,6 @@
   position: relative;
 }
 
-/* Tree Toggle */
-.tree-toggle-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-}
-
-.tree-toggle-spacer {
-  width: 22px;
-}
-
 .tree-toggle-btn {
   width: 20px;
   height: 20px;
@@ -651,7 +353,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0;
   transition: all 0.2s;
 }
 
@@ -661,14 +362,6 @@
   box-shadow: 0 0 8px var(--halo-glow);
 }
 
-.toggle-icon {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-  display: block;
-}
-
-/* Compact Tree Card */
 .employee-tree-card {
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
@@ -692,16 +385,6 @@
   border: 2px solid var(--brand-green);
   background: rgba(0, 255, 135, 0.05);
   box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
-}
-
-.tree-card-content {
-  flex: 1;
-}
-
-.tree-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 .tree-card-name {
@@ -731,7 +414,6 @@
   min-width: 18px;
   text-align: center;
   opacity: 0.5;
-  cursor: help;
 }
 
 .current-user-badge {
@@ -741,7 +423,6 @@
   font-weight: 900;
   padding: 2px 8px;
   border-radius: 4px;
-  text-transform: uppercase;
 }
 
 .tree-card-details {
@@ -752,44 +433,18 @@
 
 .tree-card-details .role-badge,
 .tree-card-details .hub-badge {
-  font-size: 0.75rem;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tree-card-actions {
   display: flex;
   gap: 4px;
-  opacity: 0; /* Hide by default, show on hover */
+  opacity: 0;
   transition: opacity 0.2s;
 }
 
 .employee-tree-card:hover .tree-card-actions {
   opacity: 1;
-}
-
-/* Status variants */
-.employee-tree-card.inactive {
-  opacity: 0.6;
-  filter: grayscale(0.5);
-}
-
-.employee-tree-card.selected {
-  border-color: var(--brand-green);
-  background: rgba(0, 255, 135, 0.03);
-}
-
-/* Selection Checkbox */
-.selection-checkbox {
-  cursor: pointer;
-}
-
-/* Show Others Section */
-.show-others-item {
-  margin: 0.5rem 0;
 }
 
 .show-others-btn {
@@ -805,7 +460,6 @@
   align-items: center;
   gap: 8px;
   transition: all 0.2s;
-  width: fit-content;
 }
 
 .show-others-btn:hover {
@@ -823,47 +477,13 @@
   font-weight: 900;
 }
 
-.others-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 1.5rem 0 0.75rem 0;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.others-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 800;
-  opacity: 0.4;
-  color: var(--text-color);
-}
-
-.hide-others-link {
-  background: transparent;
-  border: none;
-  color: #ff4444;
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  font-weight: 800;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.hide-others-link:hover {
-  background: rgba(255, 68, 68, 0.1);
-}
-
-/* Animation */
-.tree-node-wrapper {
-  animation: fadeInTree 0.4s ease-out forwards;
-}
-
 @keyframes fadeInTree {
   from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1024px) {
+  .employee-list-row { flex-wrap: wrap; gap: 12px; }
+  .list-main-info, .list-meta-badges, .list-contact { width: 100%; }
 }
