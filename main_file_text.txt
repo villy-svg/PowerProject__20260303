@@ -1,0 +1,1085 @@
+-- Supabase Schema for PowerProject: Users & Authentication
+
+-- 1. Create custom user profiles table in the public schema
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    email TEXT UNIQUE,
+    name TEXT,
+    role_id TEXT DEFAULT 'vertical_viewer',
+    assigned_verticals TEXT[] DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Enable Row Level Security
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- 2b. CLEANUP: Drop any old versions to avoid conflicts
+DROP POLICY IF EXISTS "Users can view their own profile." ON public.user_profiles;
+DROP POLICY IF EXISTS "Admins can update all profiles." ON public.user_profiles;
+DROP POLICY IF EXISTS "Profiles are viewable by owner or master_admin." ON public.user_profiles;
+DROP POLICY IF EXISTS "Profiles can be updated by master_admin." ON public.user_profiles;
+DROP POLICY IF EXISTS "Allow authenticated users to read all profiles" ON public.user_profiles;
+
+-- 3. Define Helper Function (Bypasses RLS to check admin status)
+CREATE OR REPLACE FUNCTION is_master_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.user_profiles 
+    WHERE id = auth.uid() AND role_id = 'master_admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 4. Define Final Policies
+
+-- SELECT: All users can read profiles (Needed to find users in list)
+-- If you want privacy, change this back to: (auth.uid() = id) OR is_master_admin()
+CREATE POLICY "Allow authenticated users to view all profiles"
+ON public.user_profiles FOR SELECT
+USING (auth.role() = 'authenticated');
+
+-- UPDATE: Only Master Admin can update
+CREATE POLICY "Allow master_admin to update all profiles"
+ON public.user_profiles FOR UPDATE
+USING ( is_master_admin() )
+WITH CHECK ( is_master_admin() );
+
+-- VERIFICATION QUERY: Run this to see your current role info
+-- SELECT id, email, role_id FROM public.user_profiles WHERE id = auth.uid();
+
+
+-- 4. Create Trigger Function to handle Auth -> Profile sync
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
+    VALUES (
+        NEW.id, 
+        NEW.email, 
+        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
+        ARRAY[]::TEXT[] -- Start with NO access to any verticals
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 5. Attach Trigger to auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 6. BACKFILL: Run this to create profiles for any users created BEFORE the trigger
+INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
+SELECT 
+    id, 
+    email, 
+    COALESCE(raw_user_meta_data->>'name', split_part(email, '@', 1)), 
+    ARRAY[]::TEXT[]
+FROM auth.users
+ON CONFLICT (id) DO NOTHING;
+-- 7. TASKS TABLE SCHEMA & SECURITY
+-- This ensures Master Admin can see ALL tasks, while others only see their own.
+
+-- 7a. Ensure the table and columns exist
+CREATE TABLE IF NOT EXISTS public.tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    text TEXT NOT NULL,
+    verticalid TEXT,
+    stageid TEXT,
+    createdat TIMESTAMPTZ DEFAULT NOW(),
+    updatedat TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ADD MISSING COLUMN: if user_id doesn't exist yet
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tasks' AND column_name='user_id') THEN
+        ALTER TABLE public.tasks ADD COLUMN user_id UUID DEFAULT auth.uid();
+    END IF;
+END $$;
+
+-- 7b. Enable RLS
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+
+-- 3. Define Helper Functions (Bypasses RLS to check roles)
+CREATE OR REPLACE FUNCTION is_master_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.user_profiles 
+    WHERE id = auth.uid() AND role_id = 'master_admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION is_elevated_role()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.user_profiles 
+    WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ... (Rest of user_profiles policies remain the same, using is_master_admin)
+
+-- 7c. Task Policies
+DROP POLICY IF EXISTS "Tasks are viewable by owner or master_admin." ON public.tasks;
+CREATE POLICY "Tasks are viewable by owner, admin, or vertical_admin."
+ON public.tasks FOR SELECT
+USING ( (auth.uid() = user_id) OR is_elevated_role() OR (user_id IS NULL) );
+
+DROP POLICY IF EXISTS "Tasks can be modified by owner or master_admin." ON public.tasks;
+CREATE POLICY "Tasks can be modified by owner, admin, or vertical_admin."
+ON public.tasks FOR ALL
+USING ( (auth.uid() = user_id) OR is_elevated_role() )
+WITH CHECK ( (auth.uid() = user_id) OR is_elevated_role() );
+
+-- 8. CHARGING HUBS SCHEMA & SECURITY
+CREATE OR UPDATE TABLE IF NOT EXISTS public.hubs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    hub_code TEXT UNIQUE, -- New Field for unique identification
+    location TEXT,
+    status TEXT DEFAULT 'active',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- Enable RLS
+ALTER TABLE public.hubs ENABLE ROW LEVEL SECURITY;
+-- 8a. Select Policy: Anyone authenticated can see hubs (standard vertical behavior)
+DROP POLICY IF EXISTS "Hubs are viewable by authenticated users." ON public.hubs;
+CREATE POLICY "Hubs are viewable by authenticated users."
+ON public.hubs FOR SELECT
+USING ( auth.role() = 'authenticated' );
+-- 8b. All other actions: Master Admin only
+DROP POLICY IF EXISTS "Hubs can be managed by master_admin." ON public.hubs;
+CREATE POLICY "Hubs can be managed by master_admin."
+ON public.hubs FOR ALL
+USING ( is_master_admin() )
+WITH CHECK ( is_master_admin() );
+
+-- Run this in your Supabase SQL Editor
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='hubs' AND column_name='hub_code') THEN
+        ALTER TABLE public.hubs ADD COLUMN hub_code TEXT UNIQUE;
+    END IF;
+END $$;
+
+-- SAFE MIGRATION: Add new feature columns to existing Tasks table
+DO $$ 
+BEGIN 
+    -- 1. Add Priority field
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tasks' AND column_name='priority') THEN
+        ALTER TABLE public.tasks ADD COLUMN priority TEXT;
+    END IF;
+    -- 2. Add Detailed Description field
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tasks' AND column_name='description') THEN
+        ALTER TABLE public.tasks ADD COLUMN description TEXT;
+    END IF;
+    -- 3. Link Tasks to Hubs (UUID Foreign Key)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tasks' AND column_name='hub_id') THEN
+        ALTER TABLE public.tasks ADD COLUMN hub_id UUID REFERENCES public.hubs(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
+-- 1. Add the 'city' column to the tasks table
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS city TEXT;
+
+-- 2. Rename the 'location' column to 'city' in the hubs table
+ALTER TABLE public.hubs RENAME COLUMN location TO city;
+
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS function TEXT
+
+CREATE TABLE IF NOT EXISTS public.hub_functions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.hub_functions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Hub functions are viewable by authenticated users."
+ON public.hub_functions FOR SELECT USING ( auth.role() = 'authenticated' );
+
+CREATE POLICY "Hub functions can be managed by master_admin."
+ON public.hub_functions FOR ALL USING (
+  EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id = 'master_admin')
+);
+
+ALTER TABLE public.hub_functions ADD COLUMN IF NOT EXISTS function_code TEXT UNIQUE
+
+-- Helper for global viewers
+CREATE OR REPLACE FUNCTION is_global_reader() 
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM user_profiles 
+    WHERE id = auth.uid() 
+    AND role_id IN ('master_admin', 'master_viewer')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Finalized Tasks SELECT Policy
+-- Finalized Tasks SELECT Policy
+DROP POLICY IF EXISTS "Users can see tasks in their verticals" ON tasks;
+CREATE POLICY "Users can see tasks in their verticals" ON tasks
+FOR SELECT TO authenticated
+USING (
+  is_master_admin() 
+  OR is_global_reader()
+  OR (verticalid = ANY (
+      SELECT unnest(assigned_verticals) FROM user_profiles WHERE id = auth.uid()
+  ))
+  OR (user_id = auth.uid())
+);
+
+-- 10. DEPARTMENTS SCHEMA
+CREATE TABLE IF NOT EXISTS public.departments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    dept_code TEXT UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Departments viewable by authenticated" ON public.departments FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Departments managed by master_admin" ON public.departments FOR ALL USING (is_master_admin()) WITH CHECK (is_master_admin());
+
+-- 11. EMPLOYEE ROLES SCHEMA
+CREATE TABLE IF NOT EXISTS public.employee_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    role_code TEXT UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.employee_roles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Employee roles viewable by authenticated" ON public.employee_roles FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Employee roles managed by master_admin" ON public.employee_roles FOR ALL USING (is_master_admin()) WITH CHECK (is_master_admin());
+
+
+-- 12. EMPLOYEES SCHEMA
+CREATE TABLE IF NOT EXISTS public.employees (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    phone TEXT,
+    department_id UUID REFERENCES public.departments(id),
+    role_id UUID REFERENCES public.employee_roles(id),
+    hire_date DATE DEFAULT CURRENT_DATE,
+    status TEXT DEFAULT 'Active',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.employees ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Employees viewable by authenticated" ON public.employees FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Employees managed by master_admin" ON public.employees FOR ALL USING (is_master_admin()) WITH CHECK (is_master_admin());
+
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS gender TEXT, ADD COLUMN IF NOT EXISTS dob DATE, ADD COLUMN IF NOT EXISTS doj DATE, ADD COLUMN IF NOT EXISTS hub_id UUID REFERENCES hubs(id) ON DELETE SET NULL, ADD COLUMN IF NOT EXISTS department TEXT, ADD COLUMN IF NOT EXISTS role TEXT, ADD COLUMN IF NOT EXISTS account_number TEXT, ADD COLUMN IF NOT EXISTS ifsc_code TEXT, ADD COLUMN IF NOT EXISTS account_name TEXT;
+
+-- Drop constraints if you are storing names instead of IDs for departments and roles briefly, -- or map them properly. The above assumes department and role are stored as TEXT (names) directly for now, -- which mirrors your current form implementation.
+
+
+-- ============================================================
+-- POWERPOD: Employee History & Dual ID System Migration
+-- Run this in Supabase SQL Editor
+-- ============================================================
+
+-- STEP 1: Add emp_code and badge_id to the employees table
+-- emp_code : 6-char alphanumeric, fixed for employee's lifetime
+-- badge_id : 11-char code, changes on role/dept/year changes
+
+ALTER TABLE employees
+  ADD COLUMN IF NOT EXISTS emp_code  VARCHAR(6)  UNIQUE,
+  ADD COLUMN IF NOT EXISTS badge_id  VARCHAR(20);
+
+-- STEP 2: Create the employee_history audit table
+-- Mirrors all columns of employees + audit metadata
+
+CREATE TABLE IF NOT EXISTS employee_history (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  employee_id      UUID NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+
+  -- Snapshot of the record AT THE TIME of change
+  full_name        TEXT,
+  email            TEXT,
+  phone            TEXT,
+  gender           TEXT,
+  dob              DATE,
+  hub_id           UUID REFERENCES hubs(id) ON DELETE SET NULL,
+  role_id          UUID REFERENCES employee_roles(id) ON DELETE SET NULL,
+  department_id    UUID REFERENCES departments(id) ON DELETE SET NULL,
+  emp_code         VARCHAR(6),
+  badge_id         VARCHAR(20),
+  status           TEXT,
+  hire_date        DATE,
+  account_number   TEXT,
+  ifsc_code        TEXT,
+  account_name     TEXT,
+
+  -- Audit metadata
+  changed_by       TEXT NOT NULL,   -- user email / display name
+  changed_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  change_type      TEXT NOT NULL    -- 'INSERT' | 'UPDATE'
+);
+
+-- STEP 3: Index for fast lookup by employee
+CREATE INDEX IF NOT EXISTS idx_employee_history_employee_id
+  ON employee_history (employee_id, changed_at DESC);
+
+-- STEP 4: (Optional) Auto-generate emp_code for existing employees
+-- Backfill any employees that don't yet have an emp_code.
+-- Each code is a random 6-char uppercase alphanumeric string.
+-- Run this ONCE; it only fills rows where emp_code IS NULL.
+UPDATE employees
+SET emp_code = UPPER(
+  SUBSTRING(
+    MD5(RANDOM()::TEXT || id::TEXT),
+    1, 6
+  )
+)
+WHERE emp_code IS NULL;
+
+-- ============================================================
+-- VERIFICATION QUERIES (run these to check the result)
+-- ============================================================
+-- SELECT id, full_name, emp_code, badge_id FROM employees LIMIT 10;
+-- SELECT * FROM employee_history LIMIT 5;
+
+-- SQL Migration: Add PAN Number field to Employee Records
+-- Run this in your Supabase SQL Editor
+
+-- 1. Add pan_number to the main employees table
+ALTER TABLE employees 
+ADD COLUMN IF NOT EXISTS pan_number VARCHAR(20) DEFAULT NULL;
+
+-- 2. Add pan_number to the employee_history table for audit tracking
+ALTER TABLE employee_history 
+ADD COLUMN IF NOT EXISTS pan_number VARCHAR(20) DEFAULT NULL;
+
+-- Optional: If you want to index it for searching
+-- CREATE INDEX IF NOT EXISTS idx_employees_pan ON employees(pan_number);
+
+-- Nullable Email Migration for Employees Table
+
+-- 1. Remove the NOT NULL constraint from the email column
+ALTER TABLE employees ALTER COLUMN email DROP NOT NULL;
+
+-- 2. (Optional but Recommended) Ensure the unique constraint on email still gracefully handles nulls
+-- In PostgreSQL, standard UNIQUE constraints already consider NULLs as distinct values, 
+-- meaning you can have multiple NULL emails without violating the unique constraint. 
+-- You do not need to drop the unique constraint, just the NOT NULL constraint!
+
+-- Add Assigned To field to Hub Tasks
+-- This column will store the UUID of an employee from the employees table
+
+ALTER TABLE hub_tasks
+ADD COLUMN assigned_to UUID REFERENCES employees(id) ON DELETE SET NULL;
+
+-- Optional: Create an index for faster lookups when filtering tasks by assignee
+CREATE INDEX idx_hub_tasks_assigned_to ON hub_tasks(assigned_to);
+
+-- Create hubs table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE  table_schema = 'public'
+        AND    table_name   = 'hubs'
+    ) THEN
+        CREATE TABLE public.hubs (
+            id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+            name text NOT NULL,
+            hub_code text UNIQUE,
+            city text,
+            status text DEFAULT 'active' CHECK (status IN ('active', 'maintenance', 'inactive')),
+            created_at timestamptz DEFAULT now(),
+            updated_at timestamptz DEFAULT now()
+        );
+        
+        CREATE INDEX idx_hubs_hub_code ON public.hubs(hub_code);
+        CREATE INDEX idx_hubs_status ON public.hubs(status);
+        
+        INSERT INTO public.hubs (name, hub_code, city, status) VALUES
+            ('Downtown Fast Chargers', 'DTN-01', '123 Main St, NY', 'active'),
+            ('Suburban Hub', 'SUB-02', '456 Oak Ave, NJ', 'maintenance'),
+            ('Airport Station', 'AIR-01', 'JFK International, NY', 'active')
+        ON CONFLICT DO NOTHING;
+        
+        RAISE NOTICE 'Hubs table created successfully';
+    ELSE
+        RAISE NOTICE 'Hubs table already exists';
+    END IF;
+END $$;
+
+
+-- Add seniority_level column to employee_roles table
+-- Default is set to 1 (lowest seniority)
+ALTER TABLE employee_roles
+ADD COLUMN seniority_level integer DEFAULT 1;
+
+ALTER TABLE user_profiles 
+ADD CONSTRAINT chk_valid_role_id CHECK (
+  role_id IN (
+    'master_admin','master_editor','master_contributor','master_viewer',
+    'vertical_admin','vertical_editor','vertical_contributor','vertical_viewer'
+  )
+);
+
+-- Add the column with FK to employees
+ALTER TABLE tasks
+ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES employees(id) ON DELETE SET NULL;
+
+-- Index for performance
+CREATE INDEX IF NOT EXISTS idx_tasks_assigned_to ON tasks(assigned_to);
+
+
+
+
+-- ==========================================
+-- ADD vertical_permissions TO user_profiles
+-- PowerProject — Run in Supabase SQL Editor
+-- ==========================================
+
+-- 1. Add the JSONB column
+ALTER TABLE user_profiles 
+ADD COLUMN IF NOT EXISTS vertical_permissions JSONB DEFAULT '{}'::jsonb;
+
+-- 2. Data Migration: Populate defaults for existing users
+-- Map existing role level to all currently assigned verticals
+-- This ensures no one loses access during the upgrade.
+UPDATE user_profiles
+SET vertical_permissions = (
+  SELECT jsonb_object_agg(v, split_part(role_id, '_', 2))
+  FROM unnest(assigned_verticals) v
+)
+WHERE assigned_verticals IS NOT NULL 
+  AND array_length(assigned_verticals, 1) > 0
+  AND vertical_permissions = '{}'::jsonb
+  AND role_id LIKE 'vertical_%';
+
+-- 3. Verify the migration
+SELECT id, email, role_id, assigned_verticals, vertical_permissions
+FROM user_profiles
+LIMIT 10;
+
+
+
+
+CREATE TABLE client_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  code TEXT UNIQUE, -- e.g. ENT, SME, RTL
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE client_billing_models (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  code TEXT UNIQUE, -- e.g. PER-SES, MNT-RET
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE clients (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category_id UUID REFERENCES client_categories(id) ON DELETE SET NULL,
+  billing_model_id UUID REFERENCES client_billing_models(id) ON DELETE SET NULL,
+  poc_name TEXT,
+  poc_phone TEXT,
+  poc_email TEXT,
+  status TEXT DEFAULT 'Active', -- Active / Inactive
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+
+-- ==========================================
+-- ENABLE RLS FOR CLIENT AND HISTORY TABLES
+-- ==========================================
+
+-- 1. Helper Function to get permission level for a vertical
+-- Use security definer to allow checking user_profiles which might have its own RLS
+CREATE OR REPLACE FUNCTION public.get_user_permission_level(v_id text)
+RETURNS text AS $$
+DECLARE
+    v_role_id text;
+    v_vertical_perms jsonb;
+    v_level text;
+BEGIN
+    -- Fetch the profile for the current authenticated user
+    SELECT role_id, vertical_permissions INTO v_role_id, v_vertical_perms
+    FROM public.user_profiles
+    WHERE id = auth.uid();
+
+    -- Check Master roles first
+    IF v_role_id = 'master_admin' THEN RETURN 'admin'; END IF;
+    IF v_role_id = 'master_editor' THEN RETURN 'editor'; END IF;
+    IF v_role_id = 'master_contributor' THEN RETURN 'contributor'; END IF;
+    IF v_role_id = 'master_viewer' THEN RETURN 'viewer'; END IF;
+
+    -- Check Vertical roles
+    -- If role_id starts with 'vertical_', check the specific vertical_permissions object
+    IF v_role_id LIKE 'vertical_%' THEN
+        v_level := v_vertical_perms->>v_id;
+        IF v_level IS NOT NULL THEN
+            RETURN v_level;
+        END IF;
+    END IF;
+
+    -- Default fallback
+    RETURN 'viewer';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 2. ENABLE RLS FOR TABLES
+ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.client_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.employee_history ENABLE ROW LEVEL SECURITY;
+
+-- Handle plural/singular naming for billing models
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'client_billing_models') THEN
+        ALTER TABLE public.client_billing_models ENABLE ROW LEVEL SECURITY;
+    ELSIF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'client_billing_model') THEN
+        ALTER TABLE public.client_billing_model ENABLE ROW LEVEL SECURITY;
+    END IF;
+END $$;
+
+
+-- 3. DEFINE POLICIES
+
+-- ==========================================
+-- CLIENTS VERTICAL TABLES
+-- ==========================================
+-- TABLES: clients, client_categories, client_billing_models
+
+DO $$
+DECLARE
+    t text;
+    tables_to_policy text[] := ARRAY['clients', 'client_categories', 'client_billing_models', 'client_billing_model'];
+BEGIN
+    FOREACH t IN ARRAY tables_to_policy
+    LOOP
+        -- Check if table exists before applying
+        IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t) THEN
+            
+            -- Drop existing policies if any (to avoid conflicts)
+            EXECUTE format('DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.%I', t);
+
+            -- SELECT: Viewer, Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit SELECT based on role" ON public.%I FOR SELECT USING (public.get_user_permission_level(''CLIENTS'') IN (''viewer'', ''contributor'', ''editor'', ''admin''))', t);
+
+            -- INSERT: Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit INSERT based on role" ON public.%I FOR INSERT WITH CHECK (public.get_user_permission_level(''CLIENTS'') IN (''contributor'', ''editor'', ''admin''))', t);
+
+            -- UPDATE: Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit UPDATE based on role" ON public.%I FOR UPDATE USING (public.get_user_permission_level(''CLIENTS'') IN (''editor'', ''admin'')) WITH CHECK (public.get_user_permission_level(''CLIENTS'') IN (''editor'', ''admin''))', t);
+
+            -- DELETE: Admin ONLY
+            EXECUTE format('CREATE POLICY "Permit DELETE based on role" ON public.%I FOR DELETE USING (public.get_user_permission_level(''CLIENTS'') = ''admin'')', t);
+            
+        END IF;
+    END LOOP;
+END $$;
+
+
+-- ==========================================
+-- EMPLOYEES VERTICAL TABLES
+-- ==========================================
+-- TABLE: employee_history (Restricted: No UD for any role)
+
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.employee_history;
+DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.employee_history;
+DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.employee_history;
+DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.employee_history;
+
+-- SELECT: All roles
+CREATE POLICY "Permit SELECT based on role" ON public.employee_history 
+FOR SELECT USING (public.get_user_permission_level('EMPLOYEES') IN ('viewer', 'contributor', 'editor', 'admin'));
+
+-- INSERT: Contributor, Editor, Admin (Audit logs are created during actions)
+CREATE POLICY "Permit INSERT based on role" ON public.employee_history 
+FOR INSERT WITH CHECK (public.get_user_permission_level('EMPLOYEES') IN ('contributor', 'editor', 'admin'));
+
+-- UPDATE: DISABLED (No policy = denied)
+-- DELETE: DISABLED (No policy = denied)
+
+
+-- ==========================================
+-- TEST QUERY (Optional: Use to verify)
+-- ==========================================
+-- SELECT public.get_user_permission_level('CLIENTS');
+
+
+-- Upgrade Client Categories to support VEHICLE vs SERVICE types
+ALTER TABLE IF EXISTS public.client_categories 
+ADD COLUMN IF NOT EXISTS category_type text DEFAULT 'VEHICLE' CHECK (category_type IN ('VEHICLE', 'SERVICE'));
+
+-- Add matrix storage for clients to store selections without a join table temporarily
+ALTER TABLE IF EXISTS public.clients
+ADD COLUMN IF NOT EXISTS category_matrix jsonb DEFAULT '{}';
+
+-- Seed initial Service Categories
+INSERT INTO public.client_categories (name, code, category_type, description) 
+VALUES 
+    ('Full Maintenance', 'MAINT', 'SERVICE', 'Complete vehicle maintenance service'),
+    ('Annual Maintenance Contract', 'AMC', 'SERVICE', 'AMC based servicing'),
+    ('Breakdown Support', 'BD', 'SERVICE', 'Emergency breakdown services'),
+    ('General Checkup', 'GC', 'SERVICE', 'Routine vehicle checkups')
+ON CONFLICT (id) DO NOTHING; -- Assuming id is PK and name/code might not be unique in some schemas, but usually we want to avoid duplicates.
+-- Better to use a unique constraint check if we had one.
+
+-- Update RLS (Policies already cover the tables, so no changes needed there if they use get_user_permission_level)
+
+-- 1. Create client_services table
+CREATE TABLE client_services (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    code TEXT,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. Migrate existing service data
+INSERT INTO client_services (id, name, code, description, updated_at)
+SELECT id, name, code, description, updated_at
+FROM client_categories
+WHERE category_type = 'SERVICE';
+
+-- 3. Cleanup client_categories
+DELETE FROM client_categories WHERE category_type = 'SERVICE';
+
+-- 4. Drop redundant discriminator column from client_categories
+ALTER TABLE client_categories DROP COLUMN category_type;
+
+-- 5. Add default_service_code to client_categories (Step 2 of user request)
+ALTER TABLE client_categories 
+ADD COLUMN default_service_code TEXT;
+
+-- 1. Ensure the 'code' column in client_services is unique
+ALTER TABLE client_services 
+ADD CONSTRAINT client_services_code_unique UNIQUE (code);
+
+-- 2. Add the foreign key constraint to client_categories
+-- This ensures 'default_service_code' must exist in 'client_services(code)'
+ALTER TABLE client_categories
+ADD CONSTRAINT fk_default_service_code
+FOREIGN KEY (default_service_code)
+REFERENCES client_services(code)
+ON UPDATE CASCADE
+ON DELETE SET NULL;
+
+-- ==========================================
+-- ENABLE RLS FOR CLIENT SERVICES TABLE
+-- ==========================================
+
+-- 1. Enable RLS
+ALTER TABLE public.client_services ENABLE ROW LEVEL SECURITY;
+
+-- 2. Drop existing policies (if any) to avoid conflicts
+DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.client_services;
+DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.client_services;
+DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.client_services;
+DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.client_services;
+
+-- 3. Define Policies based on CLIENTS vertical permissions
+
+-- SELECT: Viewer, Contributor, Editor, Admin
+CREATE POLICY "Permit SELECT based on role" ON public.client_services 
+FOR SELECT USING (public.get_user_permission_level('CLIENTS') IN ('viewer', 'contributor', 'editor', 'admin'));
+
+-- INSERT: Contributor, Editor, Admin
+CREATE POLICY "Permit INSERT based on role" ON public.client_services 
+FOR INSERT WITH CHECK (public.get_user_permission_level('CLIENTS') IN ('contributor', 'editor', 'admin'));
+
+-- UPDATE: Editor, Admin
+CREATE POLICY "Permit UPDATE based on role" ON public.client_services 
+FOR UPDATE USING (public.get_user_permission_level('CLIENTS') IN ('editor', 'admin')) 
+WITH CHECK (public.get_user_permission_level('CLIENTS') IN ('editor', 'admin'));
+
+-- DELETE: Admin ONLY
+CREATE POLICY "Permit DELETE based on role" ON public.client_services 
+FOR DELETE USING (public.get_user_permission_level('CLIENTS') = 'admin');
+
+-- ==========================================
+-- VERIFICATION
+-- ==========================================
+-- SELECT public.get_user_permission_level('CLIENTS');
+-- ==========================================
+-- ENABLE RLS FOR ALL REMAINING TABLES
+-- ==========================================
+
+-- 1. Enable RLS
+ALTER TABLE IF EXISTS public.employees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.employee_roles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.hubs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.hub_functions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.tasks ENABLE ROW LEVEL SECURITY;
+
+-- 2. Drop existing policies (if any) to avoid conflicts
+DO $$
+DECLARE
+    t text;
+    tables_to_policy text[] := ARRAY['employees', 'employee_roles', 'departments', 'hubs', 'hub_functions', 'tasks'];
+BEGIN
+    FOREACH t IN ARRAY tables_to_policy
+    LOOP
+        IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t) THEN
+            EXECUTE format('DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.%I', t);
+            EXECUTE format('DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.%I', t);
+        END IF;
+    END LOOP;
+END $$;
+
+
+-- 3. Define Policies for EMPLOYEES vertical
+-- TABLES: employees, employee_roles, departments
+
+DO $$
+DECLARE
+    t text;
+    tables_to_policy text[] := ARRAY['employees', 'employee_roles', 'departments'];
+BEGIN
+    FOREACH t IN ARRAY tables_to_policy
+    LOOP
+        IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t) THEN
+            -- SELECT: Viewer, Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit SELECT based on role" ON public.%I FOR SELECT USING (public.get_user_permission_level(''EMPLOYEES'') IN (''viewer'', ''contributor'', ''editor'', ''admin''))', t);
+
+            -- INSERT: Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit INSERT based on role" ON public.%I FOR INSERT WITH CHECK (public.get_user_permission_level(''EMPLOYEES'') IN (''contributor'', ''editor'', ''admin''))', t);
+
+            -- UPDATE: Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit UPDATE based on role" ON public.%I FOR UPDATE USING (public.get_user_permission_level(''EMPLOYEES'') IN (''editor'', ''admin'')) WITH CHECK (public.get_user_permission_level(''EMPLOYEES'') IN (''editor'', ''admin''))', t);
+
+            -- DELETE: Admin ONLY
+            EXECUTE format('CREATE POLICY "Permit DELETE based on role" ON public.%I FOR DELETE USING (public.get_user_permission_level(''EMPLOYEES'') = ''admin'')', t);
+        END IF;
+    END LOOP;
+END $$;
+
+
+-- 4. Define Policies for CHARGING_HUBS vertical
+-- TABLES: hubs, hub_functions
+
+DO $$
+DECLARE
+    t text;
+    tables_to_policy text[] := ARRAY['hubs', 'hub_functions'];
+BEGIN
+    FOREACH t IN ARRAY tables_to_policy
+    LOOP
+        IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = t) THEN
+            -- SELECT: Viewer, Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit SELECT based on role" ON public.%I FOR SELECT USING (public.get_user_permission_level(''CHARGING_HUBS'') IN (''viewer'', ''contributor'', ''editor'', ''admin''))', t);
+
+            -- INSERT: Contributor, Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit INSERT based on role" ON public.%I FOR INSERT WITH CHECK (public.get_user_permission_level(''CHARGING_HUBS'') IN (''contributor'', ''editor'', ''admin''))', t);
+
+            -- UPDATE: Editor, Admin
+            EXECUTE format('CREATE POLICY "Permit UPDATE based on role" ON public.%I FOR UPDATE USING (public.get_user_permission_level(''CHARGING_HUBS'') IN (''editor'', ''admin'')) WITH CHECK (public.get_user_permission_level(''CHARGING_HUBS'') IN (''editor'', ''admin''))', t);
+
+            -- DELETE: Admin ONLY
+            EXECUTE format('CREATE POLICY "Permit DELETE based on role" ON public.%I FOR DELETE USING (public.get_user_permission_level(''CHARGING_HUBS'') = ''admin'')', t);
+        END IF;
+    END LOOP;
+END $$;
+
+
+-- 5. Define Policies for TASKS table (Dynamic Vertical)
+-- The 'verticalid' column contains the vertical name (e.g., 'CHARGING_HUBS', 'EMPLOYEES', 'CLIENTS')
+
+-- SELECT: Viewer, Contributor, Editor, Admin
+CREATE POLICY "Permit SELECT based on role" ON public.tasks 
+FOR SELECT USING (public.get_user_permission_level(verticalid) IN ('viewer', 'contributor', 'editor', 'admin'));
+
+-- INSERT: Contributor, Editor, Admin
+CREATE POLICY "Permit INSERT based on role" ON public.tasks 
+FOR INSERT WITH CHECK (public.get_user_permission_level(verticalid) IN ('contributor', 'editor', 'admin'));
+
+-- UPDATE: Editor, Admin
+CREATE POLICY "Permit UPDATE based on role" ON public.tasks 
+FOR UPDATE USING (public.get_user_permission_level(verticalid) IN ('editor', 'admin'))
+WITH CHECK (public.get_user_permission_level(verticalid) IN ('editor', 'admin'));
+
+-- DELETE: Admin ONLY
+CREATE POLICY "Permit DELETE based on role" ON public.tasks 
+FOR DELETE USING (public.get_user_permission_level(verticalid) = 'admin');
+
+
+-- Migration: Add role_permissions table and navigation flags
+-- Description: Moves role capability definitions to the database and adds granular navigation access flags.
+
+-- 1. Create role_permissions table
+CREATE TABLE IF NOT EXISTS public.role_permissions (
+    role_id text PRIMARY KEY,
+    permissions jsonb NOT NULL,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- 2. Enable RLS
+ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
+
+-- 3. Policies
+-- SELECT: All authenticated users can read permissions
+CREATE POLICY "Permit SELECT for all users" ON public.role_permissions
+FOR SELECT TO authenticated USING (true);
+
+-- ALL: Only master_admin can modify role definitions
+CREATE POLICY "Permit ALL for master_admin" ON public.role_permissions
+FOR ALL TO authenticated
+USING (
+    EXISTS (
+        SELECT 1 FROM public.user_profiles
+        WHERE id = auth.uid() AND role_id = 'master_admin'
+    )
+);
+
+-- 4. Seed initial permissions with new navigation flags
+INSERT INTO public.role_permissions (role_id, permissions) VALUES
+('master_admin', '{
+    "canCreate": true, "canRead": true, "canUpdate": true, "canDelete": true,
+    "canAccessConfig": true, "canManageRoles": true,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('master_editor', '{
+    "canCreate": true, "canRead": true, "canUpdate": true, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('master_contributor', '{
+    "canCreate": true, "canRead": true, "canUpdate": false, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('master_viewer', '{
+    "canCreate": false, "canRead": true, "canUpdate": false, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": false, "canAccessLeadsFunnel": false,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": false,
+    "canAccessHubTasks": true
+}'),
+('vertical_admin', '{
+    "canCreate": true, "canRead": true, "canUpdate": true, "canDelete": true,
+    "canAccessConfig": true, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('vertical_editor', '{
+    "canCreate": true, "canRead": true, "canUpdate": true, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('vertical_contributor', '{
+    "canCreate": true, "canRead": true, "canUpdate": false, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": true, "canAccessLeadsFunnel": true,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": true,
+    "canAccessHubTasks": true
+}'),
+('vertical_viewer', '{
+    "canCreate": false, "canRead": true, "canUpdate": false, "canDelete": false,
+    "canAccessConfig": false, "canManageRoles": false,
+    "canAccessClients": true, "canAccessClientTasks": false, "canAccessLeadsFunnel": false,
+    "canAccessEmployees": true, "canAccessEmployeeTasks": false,
+    "canAccessHubTasks": true
+}')
+ON CONFLICT (role_id) DO UPDATE SET permissions = EXCLUDED.permissions;
+
+
+CREATE OR REPLACE FUNCTION public.get_user_permission_level(v_id text)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_role_id text;
+    v_level text;
+BEGIN
+    SELECT role_id INTO v_role_id
+    FROM public.user_profiles
+    WHERE id = auth.uid();
+
+    IF v_role_id = 'master_admin' THEN RETURN 'admin';
+    ELSIF v_role_id = 'master_editor' THEN RETURN 'editor';
+    ELSIF v_role_id = 'master_contributor' THEN RETURN 'contributor';
+    ELSIF v_role_id = 'master_viewer' THEN RETURN 'viewer';
+    END IF;
+
+    SELECT access_level INTO v_level
+    FROM public.vertical_access
+    WHERE user_id = auth.uid() AND vertical_id = v_id;
+    
+    RETURN COALESCE(v_level, 'none');
+END;
+$$;
+
+-- Migration: Create daily_tasks table with audit trails and RLS
+-- Date: 2026-03-23
+
+--------------------------------------------------------------------------------
+-- 1. Helper Function (Ensuring it exists)
+--------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+--------------------------------------------------------------------------------
+-- 2. Table Definition (Idempotent)
+--------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.daily_tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    text TEXT NOT NULL,
+    description TEXT,
+    priority TEXT DEFAULT 'Medium',
+    stage_id TEXT DEFAULT 'BACKLOG',
+    hub_id UUID REFERENCES public.hubs(id),
+    city TEXT,
+    function_name TEXT,
+    assigned_to UUID REFERENCES public.employees(id),
+    scheduled_date DATE DEFAULT CURRENT_DATE,
+    is_recurring BOOLEAN DEFAULT FALSE,
+    
+    -- Audit Trails
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    created_by UUID REFERENCES auth.users(id),
+    last_updated_by UUID REFERENCES auth.users(id),
+    submission_by UUID REFERENCES auth.users(id)
+);
+
+--------------------------------------------------------------------------------
+-- 3. Triggers & Labels
+--------------------------------------------------------------------------------
+-- Automatically update 'updated_at' on every edit (Idempotent Trigger)
+DROP TRIGGER IF EXISTS update_daily_tasks_modtime ON public.daily_tasks;
+CREATE TRIGGER update_daily_tasks_modtime
+    BEFORE UPDATE ON public.daily_tasks
+    FOR EACH ROW EXECUTE FUNCTION public.update_modified_column();
+
+--------------------------------------------------------------------------------
+-- 4. Row Level Security (RLS) - Idempotent Policy Creation
+--------------------------------------------------------------------------------
+ALTER TABLE public.daily_tasks ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist before creating
+DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.daily_tasks;
+DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.daily_tasks;
+DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.daily_tasks;
+DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.daily_tasks;
+
+-- SELECT: All roles with vertical access
+CREATE POLICY "Permit SELECT based on role" ON public.daily_tasks 
+FOR SELECT USING (public.get_user_permission_level('CHARGING_HUBS') IN ('viewer', 'contributor', 'editor', 'admin'));
+
+-- INSERT: Contributor and above
+CREATE POLICY "Permit INSERT based on role" ON public.daily_tasks 
+FOR INSERT WITH CHECK (public.get_user_permission_level('CHARGING_HUBS') IN ('contributor', 'editor', 'admin'));
+
+-- UPDATE: Editor and above
+CREATE POLICY "Permit UPDATE based on role" ON public.daily_tasks 
+FOR UPDATE USING (public.get_user_permission_level('CHARGING_HUBS') IN ('editor', 'admin'))
+WITH CHECK (public.get_user_permission_level('CHARGING_HUBS') IN ('editor', 'admin'));
+
+-- DELETE: Admin only
+CREATE POLICY "Permit DELETE based on role" ON public.daily_tasks 
+FOR DELETE USING (public.get_user_permission_level('CHARGING_HUBS') = 'admin');
+
+
+-- 1. Add employee_id column to user_profiles
+ALTER TABLE user_profiles ADD COLUMN employee_id UUID REFERENCES employees(id);
+
+-- 2. Populate employee_id by matching emails
+UPDATE user_profiles up
+SET employee_id = e.id
+FROM employees e
+WHERE LOWER(up.email) = LOWER(e.email);
+
+-- 3. Add an index for performance
+CREATE INDEX IF NOT EXISTS idx_user_profiles_employee_id ON user_profiles(employee_id);
+
+-- 1. Add audit columns to the standard tasks table
+ALTER TABLE tasks ADD COLUMN created_by UUID REFERENCES user_profiles(id);
+ALTER TABLE tasks ADD COLUMN last_updated_by UUID REFERENCES user_profiles(id);
+
+-- 2. (Optional) Populate existing tasks with the current user's ID or a default
+-- UPDATE tasks SET created_by = 'your-user-id', last_updated_by = 'your-user-id';
+
+-- 3. Add an index for faster filtering/auditing
+CREATE INDEX IF NOT EXISTS idx_tasks_created_by ON tasks(created_by);
+
+-- 1. Create the verticals table
+CREATE TABLE IF NOT EXISTS public.verticals (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    locked BOOLEAN DEFAULT false,
+    "order" INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. Populate with current verticals
+INSERT INTO public.verticals (id, label, "order", locked)
+VALUES 
+    ('CHARGING_HUBS', 'Hub Manager', 1, false),
+    ('CLIENTS', 'Client Manager', 2, false),
+    ('EMPLOYEES', 'Employee Manager', 3, false),
+    ('PARTNERS', 'Partner Manager', 4, true),
+    ('VENDORS', 'Vendor Manager', 5, true),
+    ('DATA_MANAGER', 'Data Manager', 6, true)
+ON CONFLICT (id) DO UPDATE SET 
+    label = EXCLUDED.label,
+    "order" = EXCLUDED."order",
+    locked = EXCLUDED.locked;
+
+-- 3. Enable RLS and add Policies
+ALTER TABLE public.verticals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read-only access to verticals"
+ON public.verticals FOR SELECT
+TO authenticated
+USING (true);
+
+
+ALTER TABLE employees ADD COLUMN manager_id UUID REFERENCES employees(id) ON DELETE SET NULL;
+
+
+ALTER TABLE tasks ADD COLUMN parent_task UUID REFERENCES tasks(id) ON DELETE SET NULL;
