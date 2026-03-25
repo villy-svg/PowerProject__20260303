@@ -79,7 +79,7 @@ const EmployeeCard = ({
       {/* Row 1: System Badges (App User, Bank Missing, Duplicate) */}
       <div className="card-system-rows">
         {emp.is_app_user && (
-          <span className="app-user-badge-mini" title="Has App Access">APP USER</span>
+          <span className="app-user-badge-mini" title="Has App Access">USER</span>
         )}
         {emp.isDuplicate && (
           <span className="duplicate-badge-mini" title={`${emp.duplicateCount} potential duplicates found`}>DUP</span>
