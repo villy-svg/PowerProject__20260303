@@ -101,7 +101,7 @@
   color: #3B82F6;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .list-row-main {
     flex-wrap: wrap;
     gap: 8px 16px;
@@ -110,6 +110,7 @@
   /* Summary wraps to its own row below primary info */
   .list-row-content {
     width: 100%;
+    flex: 1 1 100%; /* Ensure it takes full width and wraps */
     order: 2;
     padding-left: 72px; /* Align after checkbox/expander area */
     white-space: normal;
