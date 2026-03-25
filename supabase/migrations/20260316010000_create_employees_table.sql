@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Create employees table
 CREATE TABLE IF NOT EXISTS public.employees (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -26,3 +27,5 @@ CREATE INDEX IF NOT EXISTS idx_employees_emp_code ON public.employees(emp_code);
 CREATE INDEX IF NOT EXISTS idx_employees_badge_id ON public.employees(badge_id);
 CREATE INDEX IF NOT EXISTS idx_employees_status ON public.employees(status);
 CREATE INDEX IF NOT EXISTS idx_employees_hub_id ON public.employees(hub_id);
+
+ */

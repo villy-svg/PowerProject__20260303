@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- ==========================================
 -- ENABLE RLS FOR ALL REMAINING TABLES
 -- ==========================================
@@ -101,3 +102,5 @@ WITH CHECK (public.get_user_permission_level(verticalid) IN ('editor', 'admin'))
 -- DELETE: Admin ONLY
 CREATE POLICY "Permit DELETE based on role" ON public.tasks 
 FOR DELETE USING (public.get_user_permission_level(verticalid) = 'admin');
+
+ */

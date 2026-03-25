@@ -1,2 +1,5 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Legacy file. Content moved to 20260315000000_unified_master_init.sql 
 -- to force execution on environments with broken timelines.
+
+ */

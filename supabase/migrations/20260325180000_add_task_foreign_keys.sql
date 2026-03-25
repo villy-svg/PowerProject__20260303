@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Add Foreign Key Constraints to Tasks table
 -- This is run late in the migration timeline to ensure hubs and employees already exist.
 
@@ -10,3 +11,5 @@ ALTER TABLE IF EXISTS public.tasks
   ADD CONSTRAINT fk_tasks_assignee
   FOREIGN KEY (assigned_to) 
   REFERENCES public.employees(id);
+
+ */

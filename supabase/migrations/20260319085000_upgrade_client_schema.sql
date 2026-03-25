@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Upgrade Client Categories to support VEHICLE vs SERVICE types
 ALTER TABLE IF EXISTS public.client_categories 
 ADD COLUMN IF NOT EXISTS category_type text DEFAULT 'VEHICLE' CHECK (category_type IN ('VEHICLE', 'SERVICE'));
@@ -17,3 +18,5 @@ ON CONFLICT (id) DO NOTHING; -- Assuming id is PK and name/code might not be uni
 -- Better to use a unique constraint check if we had one.
 
 -- Update RLS (Policies already cover the tables, so no changes needed there if they use get_user_permission_level)
+
+ */

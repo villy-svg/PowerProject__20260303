@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration script for hubs table
 -- Run this in Supabase SQL editor if table doesn't exist
 
@@ -32,3 +33,5 @@ BEGIN
         RAISE NOTICE 'Hubs table already exists';
     END IF;
 END $$;
+
+ */

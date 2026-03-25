@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Create hub_functions table
 CREATE TABLE IF NOT EXISTS public.hub_functions (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -18,3 +19,5 @@ INSERT INTO public.hub_functions (name, function_code) VALUES
     ('Technical Support', 'TECH'),
     ('Facility Management', 'FAC')
 ON CONFLICT (function_code) DO NOTHING;
+
+ */

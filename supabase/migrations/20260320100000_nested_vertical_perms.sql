@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Update get_user_permission_level to handle nested JSON structure
 -- New Structure: {"VERTICAL_ID": {"level": "admin", "features": {...}}}
 -- Old Structure: {"VERTICAL_ID": "admin"}
@@ -43,3 +44,5 @@ BEGIN
     RETURN v_target_perm#>>'{}';
 END;
 $$;
+
+ */

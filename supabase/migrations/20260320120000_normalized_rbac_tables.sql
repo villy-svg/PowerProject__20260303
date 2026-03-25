@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration: Normalized RBAC Tables
 -- Description: Creates vertical_access and feature_access tables and migrates data out of user_profiles JSONB.
 
@@ -81,3 +82,5 @@ END $$;
 -- Remove navigation/feature flags from global role templates
 UPDATE public.role_permissions
 SET permissions = permissions - '{canAccessClients,canAccessClientTasks,canAccessLeadsFunnel,canAccessEmployees,canAccessEmployeeTasks,canAccessHubTasks,canManageRoles}'::text[];
+
+ */

@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration: Add vertical_id to daily_tasks and update RLS to be dynamic
 -- Date: 2026-03-23
 
@@ -40,3 +41,5 @@ WITH CHECK (public.get_user_permission_level(vertical_id) IN ('editor', 'admin')
 -- DELETE: Admin only
 CREATE POLICY "Permit DELETE based on role" ON public.daily_tasks 
 FOR DELETE USING (public.get_user_permission_level(vertical_id) = 'admin');
+
+ */

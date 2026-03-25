@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- ==========================================
 -- ENABLE RLS FOR CLIENT AND HISTORY TABLES
 -- ==========================================
@@ -119,3 +120,5 @@ FOR INSERT WITH CHECK (public.get_user_permission_level('EMPLOYEES') IN ('contri
 -- TEST QUERY (Optional: Use to verify)
 -- ==========================================
 -- SELECT public.get_user_permission_level('CLIENTS');
+
+ */

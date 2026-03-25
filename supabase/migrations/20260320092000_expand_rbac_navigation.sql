@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration: Add role_permissions table and navigation flags
 -- Description: Moves role capability definitions to the database and adds granular navigation access flags.
 
@@ -88,3 +89,5 @@ INSERT INTO public.role_permissions (role_id, permissions) VALUES
     "canAccessHubTasks": true
 }')
 ON CONFLICT (role_id) DO UPDATE SET permissions = EXCLUDED.permissions;
+
+ */

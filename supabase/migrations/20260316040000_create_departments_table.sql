@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Create departments table
 CREATE TABLE IF NOT EXISTS public.departments (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -20,3 +21,5 @@ INSERT INTO public.departments (name, dept_code) VALUES
     ('Finance', 'FIN'),
     ('Technical Support', 'TECH')
 ON CONFLICT (dept_code) DO NOTHING;
+
+ */

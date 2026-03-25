@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Rename hub_location column to city in hubs table (if it exists)
 DO $$
 BEGIN
@@ -12,3 +13,5 @@ BEGIN
         RAISE NOTICE 'hub_location column does not exist';
     END IF;
 END $$;
+
+ */

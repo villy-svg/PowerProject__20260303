@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Create employee_history table for audit trail
 CREATE TABLE IF NOT EXISTS public.employee_history (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -48,3 +49,5 @@ BEGIN
         CREATE INDEX IF NOT EXISTS idx_employee_history_createdat ON public.employee_history(createdat);
     END IF;
 END $$;
+
+ */

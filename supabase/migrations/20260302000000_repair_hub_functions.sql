@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Repair Hub Functions (Splitting from tasks to ensure it runs now)
 DO $$
 BEGIN
@@ -14,3 +15,5 @@ BEGIN
         RAISE NOTICE 'INFO: Table public.hub_functions already exists.';
     END IF;
 END $$;
+
+ */

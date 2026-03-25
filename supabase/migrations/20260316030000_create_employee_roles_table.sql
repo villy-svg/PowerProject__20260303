@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Create employee_roles table
 CREATE TABLE IF NOT EXISTS public.employee_roles (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -20,3 +21,5 @@ INSERT INTO public.employee_roles (name, role_code) VALUES
     ('Operations Staff', 'OPS'),
     ('Maintenance Staff', 'MAINT')
 ON CONFLICT (role_code) DO NOTHING;
+
+ */

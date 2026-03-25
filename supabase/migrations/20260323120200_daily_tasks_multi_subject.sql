@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration: Add multi-subject columns to daily_tasks
 -- Date: 2026-03-23
 
@@ -11,3 +12,5 @@ COMMENT ON COLUMN public.daily_tasks.client_id IS 'Reference to specific client 
 COMMENT ON COLUMN public.daily_tasks.employee_id IS 'Reference to specific employee for daily tasks in EMPLOYEES vertical';
 COMMENT ON COLUMN public.daily_tasks.partner_id IS 'Reference to specific partner for daily tasks in PARTNERS vertical';
 COMMENT ON COLUMN public.daily_tasks.vendor_id IS 'Reference to specific vendor for daily tasks in VENDORS vertical';
+
+ */

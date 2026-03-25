@@ -1,3 +1,4 @@
+/* SUPERSEDED BY MASTER MIGRATION (20260315000000_unified_master_init.sql) 
 -- Migration: Create Daily Task Templates and Generation Job
 -- Date: 2026-03-23
 
@@ -144,3 +145,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 --------------------------------------------------------------------------------
 -- CREATE EXTENSION IF NOT EXISTS pg_cron;
 -- SELECT cron.schedule('generate_daily_tasks_job', '30 2 * * *', 'SELECT public.generate_daily_tasks();');
+
+ */
