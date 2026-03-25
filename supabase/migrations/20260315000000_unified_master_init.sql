@@ -423,7 +423,7 @@ DECLARE
     client_tables text[] := ARRAY['clients', 'client_categories', 'client_billing_models', 'client_services'];
     hub_tables text[] := ARRAY['hubs', 'hub_functions'];
 BEGIN
-    FOR t IN ARRAY emp_tables LOOP
+    FOREACH t IN ARRAY emp_tables LOOP
         IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t) THEN
             EXECUTE format('DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.%I', t);
             EXECUTE format('CREATE POLICY "Permit SELECT based on role" ON public.%I FOR SELECT USING (public.get_user_permission_level(''EMPLOYEES'') IN (''viewer'', ''contributor'', ''editor'', ''admin''))', t);
@@ -434,7 +434,7 @@ BEGIN
         END IF;
     END LOOP;
 
-    FOR t IN ARRAY client_tables LOOP
+    FOREACH t IN ARRAY client_tables LOOP
         IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t) THEN
             EXECUTE format('DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.%I', t);
             EXECUTE format('CREATE POLICY "Permit SELECT based on role" ON public.%I FOR SELECT USING (public.get_user_permission_level(''CLIENTS'') IN (''viewer'', ''contributor'', ''editor'', ''admin''))', t);
