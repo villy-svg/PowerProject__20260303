@@ -90,20 +90,13 @@ const EmployeeListRow = ({
           <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
         </div>
         <div className="list-contact">
-          <span className="contact-item-id">ID: {emp.badge_id}</span>
-          <span className="contact-divider">|</span>
-          <span className="contact-item">📞 {emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
+          <span className="contact-item-id">{emp.badge_id}</span>
+          <span className="contact-item">{emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
           {emp.email && (
-            <>
-              <span className="contact-divider">|</span>
-              <span className="contact-item">✉️ {emp.email}</span>
-            </>
+            <span className="contact-item">{emp.email}</span>
           )}
           {emp.manager_name && emp.manager_name !== 'None' && (
-            <>
-              <span className="contact-divider">|</span>
-              <span className="contact-item manager-info">👤 Mgr: {emp.manager_name}</span>
-            </>
+            <span className="contact-item manager-info">👤 {emp.manager_name}</span>
           )}
         </div>
       </div>

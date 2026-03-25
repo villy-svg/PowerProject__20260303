@@ -131,6 +131,57 @@
   opacity: 0.4;
 }
 
+/* Action Icons (Standardized) */
+.action-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+}
+
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+  transform: scale(1.05);
+}
+
+.action-icon-btn.delete:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.edit-pencil-btn {
+  font-size: 0.9rem;
+}
+
+.employee-actions, .card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-actions {
+  position: absolute;
+  top: 12px;
+  right: 45px; /* Leave space for selection checkbox */
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.employee-card:hover .card-actions {
+  opacity: 1;
+}
+
 /* --- List Row Specifics --- */
 .employee-list {
   display: flex;
@@ -145,6 +196,7 @@
   justify-content: space-between;
   padding: 0.75rem 1.25rem;
   min-height: 64px;
+  gap: 1.5rem;
 }
 
 .list-selection {
@@ -165,8 +217,9 @@
 
 .list-meta-badges {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  min-width: 250px;
+  min-width: 200px;
 }
 
 .list-contact {
@@ -177,6 +230,12 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.contact-item-id {
+  font-weight: 700;
+  color: var(--brand-green);
+  opacity: 1;
 }
 
 /* Badge Refinement (Scoped to Employees) */
@@ -308,7 +367,49 @@
   gap: 1rem;
 }
 
+.bulk-btn {
+  background: var(--halo-bg);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  padding: 8px 22px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 5px var(--halo-glow);
+}
+
+.bulk-btn:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-color: var(--brand-green);
+  border-width: 2px;
+  padding: 7px 21px; /* Adjust for border width change */
+  box-shadow: 0 0 20px var(--halo-glow);
+  transform: translateY(-2px);
+}
+
+.bulk-btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bulk-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 /* System Badges (Mini) */
+.card-system-rows {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini {
   display: inline-flex;
   align-items: center;

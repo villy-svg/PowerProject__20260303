@@ -54,6 +54,28 @@ const EmployeeCard = ({
         </div>
       </div>
 
+      {/* Floating Card Actions */}
+      <div className="card-actions">
+        {permissions.canUpdate && (
+          <button 
+            className="action-icon-btn edit-pencil edit-pencil-btn" 
+            onClick={(e) => { e.stopPropagation(); onEdit(emp); }}
+            title="Edit Employee"
+          >
+            ✎
+          </button>
+        )}
+        {permissions.canDelete && (
+          <button 
+            className="action-icon-btn delete" 
+            onClick={(e) => { e.stopPropagation(); onDelete(emp.id); }}
+            title="Delete"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
       {/* Row 1: System Badges (App User, Bank Missing, Duplicate) */}
       <div className="card-system-rows">
         {emp.is_app_user && (
