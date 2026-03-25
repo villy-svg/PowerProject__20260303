@@ -300,4 +300,7 @@ INSERT INTO public.hub_functions (name, function_code) VALUES
     ('Operations', 'OPS'), ('Maintenance', 'MAINT'), ('Customer Service', 'CS')
 ON CONFLICT (function_code) DO NOTHING;
 
-RAISE NOTICE 'SUCCESS: Unified Master Schema Repair Established Successfully.';
+DO $$ 
+BEGIN 
+    RAISE NOTICE 'SUCCESS: Unified Master Schema Repair established Successfully.'; 
+END $$;
