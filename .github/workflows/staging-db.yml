@@ -1,0 +1,41 @@
+name: Staging - Deploy Database
+
+on:
+  push:
+    branches:
+      - staging
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Update project_id in config
+        run: |
+          echo "🔧 Updating staging project configuration..."
+          sed -i 's/project_id = "local-dev"/project_id = "${{ secrets.SUPABASE_STAGING_PROJECT_ID }}"/' supabase/config.toml
+          echo "✅ Staging Project ID updated"
+
+      - name: Sync and deploy migrations to Staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo "🚀 Starting Staging Supabase deployment..."
+          
+          # Link to project
+          echo "📡 Linking to Staging Supabase project..."
+          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }} --password ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          
+          # Deploy all migrations
+          echo "📤 Pushing local migrations to staging..."
+          supabase db push --yes --include-all
+          
+          echo "🎉 Staging Database Deployment completed!"
