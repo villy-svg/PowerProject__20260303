@@ -68,15 +68,16 @@ export const ROLE_LIST = Object.keys(DEFAULT_ROLE_PERMISSIONS).map(id => ({
  * @returns {object} CRUD flags
  */
 export const getPermissionsForLevel = (level) => {
+  const base = { level };
   switch (level) {
     case 'admin':
-      return { canCreate: true, canRead: true, canUpdate: true, canDelete: true };
+      return { ...base, canCreate: true, canRead: true, canUpdate: true, canDelete: true };
     case 'editor':
-      return { canCreate: true, canRead: true, canUpdate: true, canDelete: false };
+      return { ...base, canCreate: true, canRead: true, canUpdate: true, canDelete: false };
     case 'contributor':
-      return { canCreate: true, canRead: true, canUpdate: false, canDelete: false };
+      return { ...base, canCreate: true, canRead: true, canUpdate: false, canDelete: false };
     case 'viewer':
     default:
-      return { canCreate: false, canRead: true, canUpdate: false, canDelete: false };
+      return { ...base, canCreate: false, canRead: true, canUpdate: false, canDelete: false };
   }
 };

@@ -29,6 +29,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         ...baseCaps,
         scope: 'global',
         roleId,
+        level: roleId.replace('master_', ''),
         canManageRoles: roleId === 'master_admin',
         canAccessClients: true,
         canAccessClientTasks: true,

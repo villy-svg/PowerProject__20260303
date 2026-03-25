@@ -9,7 +9,7 @@ import { taskUtils } from '../../utils/taskUtils';
  * Vertical-specific form for Client Manager tasks.
  * Allows assigning a task to a specific Client.
  */
-const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, availableTasks = [] }) => {
+const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -59,6 +59,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
           onChange={(e) => setFormData({ ...formData, text: e.target.value })}
           placeholder="e.g. Renew retainer, Schedule quarterly review"
           required
+          disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
         />
       </div>
 
@@ -69,6 +70,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
             className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -83,6 +85,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
             className="master-dropdown"
             value={formData.assigned_client_id}
             onChange={(e) => setFormData({...formData, assigned_client_id: e.target.value})}
+            disabled={!taskUtils.canUserEditField(initialData, 'assigned_client_id', permissions, currentUser)}
           >
             <option value="">N/A (General Client Task)</option>
             {clients.map(client => (
@@ -99,6 +102,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
             value={formData.assigned_to}
             onChange={(val) => setFormData({...formData, assigned_to: val})}
             currentUser={currentUser}
+            disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
           />
         </div>
 
@@ -106,6 +110,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
           value={formData.parentTask}
           onChange={(val) => setFormData({...formData, parentTask: val})}
           availableTasks={availableTasks}
+          disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
         />
       </div>
 
@@ -116,6 +121,7 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, avai
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           placeholder="Enter task details..."
           rows={4}
+          disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
         />
       </div>
 

@@ -91,5 +91,67 @@ export const taskUtils = {
     }
 
     return finalTaskText;
+  },
+
+  /**
+   * RBAC: Can the user move this task to a specific stage?
+   */
+  canUserMoveTask(task, targetStageId, permissions, user) {
+    if (!task || task.isContextOnly) return false;
+    
+    // Admin/Editor can do anything
+    if (permissions.canUpdate) return true;
+    
+    const isCreator = (task.createdBy || task.created_by) === user.id;
+    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+
+    // Contributor logic
+    if (permissions.level === 'contributor') {
+      // Forbidden for all Contributors
+      if (targetStageId === 'DEPRIORITIZED') return false;
+
+      if (isCreator) {
+        // Can move till COMPLETED
+        return true; 
+      }
+
+      if (isAssignee) {
+        // Can move till REVIEW (Forbidden: COMPLETED)
+        return targetStageId !== 'COMPLETED';
+      }
+    }
+
+    // Viewer-as-Assignee logic
+    if (permissions.level === 'viewer' && isAssignee) {
+      // Can move till REVIEW (Forbidden: COMPLETED, DEPRIORITIZED)
+      return targetStageId !== 'COMPLETED' && targetStageId !== 'DEPRIORITIZED';
+    }
+
+    return false;
+  },
+
+  /**
+   * RBAC: Can the user edit a specific field in the modal?
+   */
+  canUserEditField(task, fieldName, permissions, user) {
+    if (!task) return true; // Add mode
+    if (task.isContextOnly) return false;
+
+    // Admin/Editor can edit everything
+    if (permissions.canUpdate) return true;
+
+    const isCreator = (task.createdBy || task.created_by) === user.id;
+    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+
+    // Contributor (Creator/Assignee) OR Viewer (Assignee)
+    const hasDescriptionRights = (permissions.level === 'contributor' && (isCreator || isAssignee)) ||
+                                 (permissions.level === 'viewer' && isAssignee);
+
+    if (hasDescriptionRights) {
+      // ONLY description is editable
+      return fieldName === 'description';
+    }
+
+    return false;
   }
 };

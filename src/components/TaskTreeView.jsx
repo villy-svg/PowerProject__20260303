@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { TASK_STAGES, STAGE_LIST } from '../constants/stages';
+import { STAGE_LIST, TASK_STAGES } from '../constants/stages';
+import { taskUtils } from '../utils/taskUtils';
 import AssigneeBadge from './AssigneeBadge';
 import './TaskListView.css'; // Reusing some list styles for consistency
 
@@ -102,6 +103,9 @@ const TaskTreeView = ({
       disabled: task.isContextOnly || !canManageHierarchy(task)
     });
 
+    const permsWithUpdate = { ...currentUser.permissions, ...canUpdate ? { canUpdate } : {} };
+    const canEditDescription = taskUtils.canUserEditField(task, 'description', permsWithUpdate, currentUser);
+
     return (
       <div 
         className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
@@ -112,7 +116,7 @@ const TaskTreeView = ({
         }}
         {...dragProps}
         {...dropProps}
-        onDoubleClick={() => !task.isContextOnly && canUpdate && openEditModal(task)}
+        onDoubleClick={() => !task.isContextOnly && (canUpdate || canEditDescription) && openEditModal(task)}
       >
         <div className="list-row-main">
           <div className="tree-expander" onClick={(e) => toggleExpand(task.id, e)}>
@@ -140,7 +144,7 @@ const TaskTreeView = ({
               </div>
             )}
 
-            {/* Hierarchy Progress Badges (Same as TaskCard/ListView) */}
+            {/* Hierarchy Progress Badges */}
             {tasks.some(t => t.parentTask === task.id) && (() => {
               const directTasks = tasks.filter(t => t.parentTask === task.id);
               const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
@@ -167,38 +171,47 @@ const TaskTreeView = ({
         </div>
 
         <div className="list-row-controls">
-          {canUpdate && !task.isContextOnly && (
-            <div className="list-nav-group">
-              <button
-                className={`card-nav-button ${STAGE_LIST.findIndex(s => s.id === task.stageId) <= 0 ? 'disabled' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const idx = STAGE_LIST.findIndex(s => s.id === task.stageId);
-                  if (idx > 0) updateTaskStage(task.id, STAGE_LIST[idx - 1].id);
-                }}
-                disabled={STAGE_LIST.findIndex(s => s.id === task.stageId) <= 0}
-                title="Move Back"
-              >
-                ←
-              </button>
-              <button
-                className={`card-nav-button ${STAGE_LIST.findIndex(s => s.id === task.stageId) >= STAGE_LIST.length - 1 || task.stageId === 'COMPLETED' ? 'disabled' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const idx = STAGE_LIST.findIndex(s => s.id === task.stageId);
-                  if (idx < STAGE_LIST.length - 1) updateTaskStage(task.id, STAGE_LIST[idx + 1].id);
-                }}
-                disabled={STAGE_LIST.findIndex(s => s.id === task.stageId) >= STAGE_LIST.length - 1 || task.stageId === 'COMPLETED'}
-                title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
-              >
-                →
-              </button>
-            </div>
-          )}
+          {(() => {
+            const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+            const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
+            const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
+
+            const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permsWithUpdate, currentUser);
+            const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permsWithUpdate, currentUser);
+
+            if (!canMoveLeft && !canMoveRight) return null;
+
+            return (
+              <div className="list-nav-group">
+                <button
+                  className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (canMoveLeft) updateTaskStage(task.id, leftStageId);
+                  }}
+                  disabled={!canMoveLeft}
+                  title="Move Back"
+                >
+                  ←
+                </button>
+                <button
+                  className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (canMoveRight) updateTaskStage(task.id, rightStageId);
+                  }}
+                  disabled={!canMoveRight}
+                  title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+                >
+                  →
+                </button>
+              </div>
+            );
+          })()}
 
           <div className="list-action-group">
             {!task.isContextOnly && canUpdate && canManageHierarchy(task) && (
-              <>
+              <React.Fragment>
                 {task.parentTask && (
                   <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
                     {tasks.find(t => t.id === task.parentTask)?.parentTask && (
@@ -238,16 +251,10 @@ const TaskTreeView = ({
                     +
                   </button>
                 )}
-                <button
-                  className="card-edit-button"
-                  onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                  title="Edit Task"
-                >
-                  ✎
-                </button>
-              </>
+              </React.Fragment>
             )}
-            {!task.isContextOnly && !canManageHierarchy(task) && canUpdate && (
+            
+            {!task.isContextOnly && (canUpdate || canEditDescription) && (
               <button
                 className="card-edit-button"
                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
@@ -256,6 +263,27 @@ const TaskTreeView = ({
                 ✎
               </button>
             )}
+
+            {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permsWithUpdate, currentUser) && (
+              <button
+                className="card-reprio-button"
+                onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'BACKLOG'); }}
+                title="Move back to Pending"
+                style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+              >
+                ⬆
+              </button>
+            )}
+            {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permsWithUpdate, currentUser) && (
+              <button
+                className="card-deprio-button"
+                onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'DEPRIORITIZED'); }}
+                title="Move to Deprioritized"
+              >
+                ⬇
+              </button>
+            )}
+
             {!task.isContextOnly && canDelete && (
               <button
                 className="card-delete-button"

@@ -29,8 +29,6 @@ const ListViewRow = ({
   tasks
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
-  const canMoveLeft = currentIndex > 0;
-  const canMoveRight = currentIndex < stageList.length - 1;
 
   const effectiveCanUpdate = canUpdate && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
@@ -50,8 +48,21 @@ const ListViewRow = ({
     let newIndex = currentIndex;
     if (direction === 'left' && canMoveLeft) newIndex--;
     else if (direction === 'right' && canMoveRight) newIndex++;
-    if (newIndex !== currentIndex) updateTaskStage(task.id, stageList[newIndex].id);
+
+    if (newIndex !== currentIndex) {
+      const targetStageId = stageList[newIndex].id;
+      if (taskUtils.canUserMoveTask(task, targetStageId, permissions, currentUser)) {
+        updateTaskStage(task.id, targetStageId);
+      }
+    }
   };
+
+  // Dynamic Check for buttons
+  const leftStageId = currentIndex > 0 ? stageList[currentIndex - 1].id : null;
+  const rightStageId = currentIndex < stageList.length - 1 ? stageList[currentIndex + 1].id : null;
+
+  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
+  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
   return (
     <div
@@ -145,7 +156,7 @@ const ListViewRow = ({
 
       {/* RIGHT SIDE: Controls (Wrappable) */}
       <div className="list-row-controls">
-        {effectiveCanUpdate && (
+        {(canMoveLeft || canMoveRight) && (
           <div className="list-nav-group">
             <button
               className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
@@ -156,9 +167,9 @@ const ListViewRow = ({
               ←
             </button>
             <button
-              className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
+              className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
               onClick={() => handleMove('right')}
-              disabled={!canMoveRight || task.stageId === 'COMPLETED'}
+              disabled={!canMoveRight}
               title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
             >
               →
@@ -209,7 +220,7 @@ const ListViewRow = ({
               )}
             </>
           )}
-          {effectiveCanUpdate && (
+          {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
               className="card-edit-button"
               onClick={() => openEditModal(task)}
@@ -218,7 +229,7 @@ const ListViewRow = ({
               ✎
             </button>
           )}
-          {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
+          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
             <button
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -228,7 +239,7 @@ const ListViewRow = ({
               ⬆
             </button>
           )}
-          {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
+          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
             <button
               className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}

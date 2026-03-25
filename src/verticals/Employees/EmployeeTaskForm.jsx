@@ -9,7 +9,7 @@ import { taskUtils } from '../../utils/taskUtils';
  * Vertical-specific form for Employee Manager tasks.
  * Basic fields for now — will be extended with employee-specific data in future prompts.
  */
-const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, availableTasks = [] }) => {
+const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -46,6 +46,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
           onChange={(e) => setFormData({ ...formData, text: e.target.value })}
           placeholder="e.g. Onboard new hire, Conduct performance review"
           required
+          disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
         />
       </div>
 
@@ -56,6 +57,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
             className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -70,6 +72,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
             value={formData.assigned_to}
             onChange={(val) => setFormData({...formData, assigned_to: val})}
             currentUser={currentUser}
+            disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
           />
         </div>
 
@@ -77,6 +80,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
           value={formData.parentTask}
           onChange={(val) => setFormData({...formData, parentTask: val})}
           availableTasks={availableTasks}
+          disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
         />
       </div>
 
@@ -87,6 +91,7 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser, av
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           placeholder="Enter task details..."
           rows={4}
+          disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
         />
       </div>
 

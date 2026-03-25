@@ -264,7 +264,13 @@ const TaskController = ({
    */
   const handleInternalUpdateStage = (taskId, newStageId) => {
     const task = tasks.find(t => t.id === taskId);
-    if (task?.isContextOnly) return;
+    if (!task || task.isContextOnly) return;
+    
+    if (!taskUtils.canUserMoveTask(task, newStageId, permissions, user)) {
+      alert("Permission Denied: You do not have permission to move this task to this stage.");
+      return;
+    }
+    
     updateTaskStage(taskId, newStageId);
   };
 
@@ -538,6 +544,7 @@ const TaskController = ({
             onSubmit={handleSaveTask}
             loading={saving}
             currentUser={user}
+            permissions={permissions}
             availableTasks={(tasks || []).filter(t => {
               if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
               if (!editingTask) return true;

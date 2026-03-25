@@ -44,13 +44,21 @@ const TaskCard = ({
     }
 
     if (newIndex !== currentIndex) {
-      updateTaskStage(task.id, STAGE_LIST[newIndex].id);
+      const targetStageId = STAGE_LIST[newIndex].id;
+      if (taskUtils.canUserMoveTask(task, targetStageId, { ...currentUser.permissions, ...permissions }, currentUser)) {
+        updateTaskStage(task.id, targetStageId);
+      }
     }
   };
 
   const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
-  const canMoveLeft = currentIndex > 0;
-  const canMoveRight = currentIndex < STAGE_LIST.length - 1;
+  
+  // Dynamic Check for buttons
+  const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
+  const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
+  
+  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, { ...currentUser.permissions, ...permissions }, currentUser);
+  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, { ...currentUser.permissions, ...permissions }, currentUser);
 
   const effectiveCanUpdate = canUpdate && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
@@ -151,7 +159,7 @@ const TaskCard = ({
       {/* Row 3: Controls */}
       <div className="card-row-3">
         <div className="card-navigation">
-          {effectiveCanUpdate && (
+          {(canMoveLeft || canMoveRight) && (
             <>
               <button
                 className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
@@ -220,7 +228,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {effectiveCanUpdate && task.stageId === 'DEPRIORITIZED' && (
+          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', { ...currentUser.permissions, ...permissions }, currentUser) && (
             <button
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -231,7 +239,7 @@ const TaskCard = ({
             </button>
           )}
 
-          {effectiveCanUpdate && task.stageId !== 'DEPRIORITIZED' && (
+          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', { ...currentUser.permissions, ...permissions }, currentUser) && (
             <button
               className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}

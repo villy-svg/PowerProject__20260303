@@ -10,7 +10,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Includes text, priority, and link to a specific hub.
  */
-const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] }) => {
+const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {} }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -97,6 +97,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
           onChange={(e) => setFormData({...formData, text: e.target.value})}
           placeholder="e.g. Inspect Station 4"
           required
+          disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
         />
       </div>
 
@@ -108,6 +109,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
             value={formData.city}
             onChange={handleCityChange}
             required
+            disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
           >
             <option value="">Select City...</option>
             {uniqueCities.map(city => (
@@ -122,7 +124,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
             className="master-dropdown"
             value={formData.hub_id}
             onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
-            disabled={!formData.city}
+            disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
           >
             <option value="">N/A (No Hub Linked)</option>
             {filteredHubs.map(hub => (
@@ -139,6 +141,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
             className="master-dropdown"
             value={formData.priority}
             onChange={(e) => setFormData({...formData, priority: e.target.value})}
+            disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
           >
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
@@ -152,8 +155,8 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
           <AssigneeSelector
             value={formData.assigned_to}
             onChange={(val) => setFormData({...formData, assigned_to: val})}
-            // Assuming currentUser is not passed to this form currently,
-            // we'll leave it undefined so it defaults to just name.
+            currentUser={currentUser}
+            disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
           />
         </div>
       </div>
@@ -165,6 +168,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
             className="master-dropdown"
             value={formData.function}
             onChange={(e) => setFormData({...formData, function: e.target.value})}
+            disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
           >
             <option value="">N/A (General)</option>
             {functions.map(fn => (
@@ -179,6 +183,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
           value={formData.parentTask}
           onChange={(val) => setFormData({...formData, parentTask: val})}
           availableTasks={availableTasks}
+          disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
         />
       </div>
 
@@ -189,6 +194,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [] 
           onChange={(e) => setFormData({...formData, description: e.target.value})}
           placeholder="Enter task details..."
           rows={4}
+          disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
         />
       </div>
 
