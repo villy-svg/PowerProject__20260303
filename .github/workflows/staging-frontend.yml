@@ -44,3 +44,4 @@ jobs:
           publish_dir: ./dist
           destination_dir: staging
           publish_branch: gh-pages
+          keep_files: true

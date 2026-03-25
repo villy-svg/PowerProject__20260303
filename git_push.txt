@@ -1,12 +1,12 @@
 npm run build
 
 # Main Runs
-#git add .
-#git commit -m "260325 Restyling the Employee Records Manager List View 1.0.9"
-#git push origin main
+git add .
+git commit -m "260325 Restyling the Employee Records Manager List View 1.0.9"
+git push origin main
 
 
 # Staging Runs
-git add .
-git commit -m "260325 Setup staging workflows 1.0.0"
-git push origin staging
+#git add .
+#git commit -m "260325 Setup staging workflows 1.0.0"
+#git push origin staging
