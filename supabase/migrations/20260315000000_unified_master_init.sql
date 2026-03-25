@@ -20,6 +20,11 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     employee_id UUID -- References employees(id) (Added late)
 );
 
+-- REPAIR: If table existed but is missing new columns
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS assigned_verticals TEXT[] DEFAULT '{}';
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS vertical_permissions JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS employee_id UUID;
+
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 -- 1B. RBAC HELPER FUNCTIONS
@@ -112,6 +117,11 @@ CREATE TABLE IF NOT EXISTS public.hubs (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- REPAIR Hubs
+ALTER TABLE public.hubs ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.hubs ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active' CHECK (status IN ('active', 'maintenance', 'inactive'));
+ALTER TABLE public.hubs ADD COLUMN IF NOT EXISTS hub_code TEXT UNIQUE;
+
 CREATE TABLE IF NOT EXISTS public.departments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL UNIQUE,
@@ -176,10 +186,31 @@ CREATE TABLE IF NOT EXISTS public.employees (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Update profiles with employee link backfill
-ALTER TABLE public.user_profiles 
-  ADD CONSTRAINT fk_user_profile_employee 
-  FOREIGN KEY (employee_id) REFERENCES public.employees(id);
+-- REPAIR Employees
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS email TEXT UNIQUE;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS emp_code VARCHAR(10) UNIQUE;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS manager_id UUID REFERENCES public.employees(id);
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS pan_number TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS account_number TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS ifsc_code TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS account_name TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Active';
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS gender TEXT;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS dob DATE;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS hire_date DATE DEFAULT CURRENT_DATE;
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS hub_id UUID REFERENCES public.hubs(id);
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES public.departments(id);
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS role_id UUID REFERENCES public.employee_roles(id);
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS badge_id VARCHAR(20);
+
+-- Update profiles link backfill
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_user_profile_employee') THEN
+        ALTER TABLE public.user_profiles ADD CONSTRAINT fk_user_profile_employee FOREIGN KEY (employee_id) REFERENCES public.employees(id);
+    END IF;
+END $$;
 
 -- TASKS (The Master Task Table)
 CREATE TABLE IF NOT EXISTS public.tasks (
@@ -201,22 +232,39 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     updatedat TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- REPAIR Tasks
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) DEFAULT auth.uid();
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'Medium';
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS hub_id UUID REFERENCES public.hubs(id);
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS function TEXT;
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES public.employees(id);
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS parent_task UUID REFERENCES public.tasks(id);
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES public.user_profiles(id);
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS last_updated_by UUID REFERENCES public.user_profiles(id);
+
 -- -------------------------------------------------------------------------
 -- 4. SECURITY & POLICIES (Consolidated)
 -- -------------------------------------------------------------------------
 
 -- Hubs RLS
 ALTER TABLE public.hubs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow select for auth" ON public.hubs;
 CREATE POLICY "Allow select for auth" ON public.hubs FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Hubs managed by master_admin" ON public.hubs;
 CREATE POLICY "Hubs managed by master_admin" ON public.hubs FOR ALL USING (is_master_admin());
 
 -- Departments RLS
 ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow select for auth" ON public.departments;
 CREATE POLICY "Allow select for auth" ON public.departments FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Departments managed by master_admin" ON public.departments;
 CREATE POLICY "Departments managed by master_admin" ON public.departments FOR ALL USING (is_master_admin());
 
 -- Tasks RLS (Dynamic)
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.tasks;
 CREATE POLICY "Permit SELECT based on role" ON public.tasks 
 FOR SELECT USING (
   is_master_admin() 
@@ -224,10 +272,13 @@ FOR SELECT USING (
   OR (user_id = auth.uid())
   OR (public.get_user_permission_level(verticalid) IN ('viewer', 'contributor', 'editor', 'admin'))
 );
+DROP POLICY IF EXISTS "Permit INSERT based on role" ON public.tasks;
 CREATE POLICY "Permit INSERT based on role" ON public.tasks 
 FOR INSERT WITH CHECK (public.get_user_permission_level(verticalid) IN ('contributor', 'editor', 'admin'));
+DROP POLICY IF EXISTS "Permit UPDATE based on role" ON public.tasks;
 CREATE POLICY "Permit UPDATE based on role" ON public.tasks 
 FOR UPDATE USING (public.get_user_permission_level(verticalid) IN ('editor', 'admin'));
+DROP POLICY IF EXISTS "Permit DELETE based on role" ON public.tasks;
 CREATE POLICY "Permit DELETE based on role" ON public.tasks 
 FOR DELETE USING (public.get_user_permission_level(verticalid) = 'admin');
 
@@ -249,4 +300,4 @@ INSERT INTO public.hub_functions (name, function_code) VALUES
     ('Operations', 'OPS'), ('Maintenance', 'MAINT'), ('Customer Service', 'CS')
 ON CONFLICT (function_code) DO NOTHING;
 
-RAISE NOTICE 'SUCCESS: Unified Master Schema established Successfully.';
+RAISE NOTICE 'SUCCESS: Unified Master Schema Repair Established Successfully.';
