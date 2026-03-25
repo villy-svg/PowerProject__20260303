@@ -158,6 +158,34 @@ CREATE TABLE IF NOT EXISTS public.verticals (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- CLIENTS VERTICAL INFRA
+CREATE TABLE IF NOT EXISTS public.client_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    code TEXT UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.client_billing_models (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    code TEXT UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.client_services (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    code TEXT UNIQUE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- -------------------------------------------------------------------------
 -- 3. DEPENDENT DATA TABLES
 -- -------------------------------------------------------------------------
@@ -203,6 +231,25 @@ ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS hub_id UUID REFERENCES pub
 ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES public.departments(id);
 ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS role_id UUID REFERENCES public.employee_roles(id);
 ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS badge_id VARCHAR(20);
+
+-- CLIENTS
+CREATE TABLE IF NOT EXISTS public.clients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    category_id UUID REFERENCES public.client_categories(id) ON DELETE SET NULL,
+    billing_model_id UUID REFERENCES public.client_billing_models(id) ON DELETE SET NULL,
+    poc_name TEXT,
+    poc_phone TEXT,
+    poc_email TEXT,
+    status TEXT DEFAULT 'Active',
+    category_matrix JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- REPAIR Clients
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS category_matrix JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Active';
 
 -- Update profiles link backfill
 DO $$ 
@@ -302,5 +349,5 @@ ON CONFLICT (function_code) DO NOTHING;
 
 DO $$ 
 BEGIN 
-    RAISE NOTICE 'SUCCESS: Unified Master Schema Repair established Successfully.'; 
+    RAISE NOTICE 'SUCCESS: Unified Master Schema Repair Established Successfully.'; 
 END $$;
