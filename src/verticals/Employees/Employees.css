@@ -237,7 +237,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 3rem; /* Large gap between vertical columns */
+  gap: 1.5rem; /* Reduced gap for better responsiveness */
   padding: 0.5rem 0;
 }
 
@@ -256,11 +256,11 @@
 }
 
 /* Column Specific Adjustments */
-.col-identity { min-width: 230px; }
-.col-org { flex: 1; }
-.col-contact { min-width: 200px; }
+.col-identity { flex: 0 1 230px; }
+.col-org { flex: 1 1 auto; min-width: 150px; }
+.col-contact { flex: 0 1 200px; }
 .col-actions { 
-  min-width: 100px; 
+  flex: 0 0 100px; 
   align-items: flex-end; /* Align actions and status to the right */
 }
 
@@ -770,6 +770,20 @@
 }
 
 /* Responsive Adjustments */
+@media screen and (max-width: 1400px) {
+  .list-row-inner {
+    gap: 1.25rem;
+  }
+  
+  .list-name { font-size: 0.95rem; }
+  .manager-info, .dept-badge, .hub-badge, .role-badge, .app-user-badge-mini { font-size: 0.7rem; }
+  .contact-item, .contact-item-id { font-size: 0.8rem; }
+  .email-id { font-size: 0.75rem; }
+  
+  .col-identity { flex-basis: 220px; }
+  .col-contact { flex-basis: 180px; }
+}
+
 @media screen and (max-width: 1024px) {
   .employee-list-row { flex-wrap: wrap; gap: 12px; }
   .list-main-info, .list-meta-badges, .list-contact { width: 100%; }

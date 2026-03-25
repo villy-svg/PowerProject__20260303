@@ -100,7 +100,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 3rem;
+  gap: 1.5rem; /* Reduced gap for better responsiveness */
   padding: 0.5rem 0;
 }
 
@@ -118,11 +118,11 @@
   min-height: 22px;
 }
 
-.col-identity { min-width: 250px; }
-.col-business { min-width: 180px; }
-.col-contact { flex: 1; }
+.col-identity { flex: 0 1 250px; }
+.col-business { flex: 0 1 180px; }
+.col-contact { flex: 1 1 auto; min-width: 150px; }
 .col-actions { 
-  min-width: 100px; 
+  flex: 0 0 100px; 
   align-items: flex-end;
 }
 
@@ -308,6 +308,21 @@ input:checked + .slider:before {
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
+
+@media screen and (max-width: 1400px) {
+  .list-row-inner {
+    gap: 1.25rem;
+  }
+  
+  .list-name { font-size: 0.95rem; }
+  .matrix-summary-mini, .category-code-mini, .poc-name-mini { font-size: 0.75rem; }
+  .contact-item { font-size: 0.8rem; }
+  .email-id { font-size: 0.75rem; }
+  .billing-badge, .pending-tasks-badge { font-size: 0.65rem; }
+  
+  .col-identity { flex-basis: 220px; }
+  .col-business { flex-basis: 160px; }
+}
 
 @media screen and (max-width: 1280px) {
   .client-grid {
