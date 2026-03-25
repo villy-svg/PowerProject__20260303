@@ -8,11 +8,11 @@ CREATE TABLE IF NOT EXISTS public.tasks (
     verticalid TEXT,
     stageid TEXT,
     priority TEXT,
-    hub_id UUID REFERENCES public.hubs(id),
+    hub_id UUID, -- References hubs(id)
     city TEXT,
     function TEXT,
-    assigned_to UUID REFERENCES public.employees(id),
-    parent_task UUID REFERENCES public.tasks(id),
+    assigned_to UUID, -- References employees(id)
+    parent_task UUID, -- References tasks(id)
     created_by UUID,
     last_updated_by UUID,
     createdat TIMESTAMPTZ DEFAULT now(),
