@@ -115,7 +115,12 @@ The System Configuration panel and its management tiles MUST be restricted.
 
 ---
 
-## 5. Deployment Checklist
+## 5. Refined Access (Sphere of Influence)
+Standard RBAC defines *what* a user can do. The [Sphere of Influence & Hierarchy Security](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/sphere-of-influence-security/SKILL.md) skill defines *which* records they can do it to based on seniority and reporting structure.
+
+---
+
+## 6. Deployment Checklist
 When building a new vertical or feature:
 1. [ ] Enable RLS on the new table(s).
 2. [ ] Apply the 4 standard policies (SELECT, INSERT, UPDATE, DELETE).

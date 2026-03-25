@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AssigneeBadge from './AssigneeBadge';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { hierarchyService } from '../services/rules/hierarchyService';
+import { taskUtils } from '../utils/taskUtils';
 import './TaskCard.css';
 
 /**

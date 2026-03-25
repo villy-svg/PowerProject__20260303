@@ -3,6 +3,7 @@ import AssigneeBadge from './AssigneeBadge';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { taskUtils } from '../utils/taskUtils';
 import './TaskListView.css';
 
 const ListViewRow = ({ 
