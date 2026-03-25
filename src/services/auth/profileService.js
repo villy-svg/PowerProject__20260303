@@ -22,14 +22,38 @@ export const profileService = {
    * @throws {Error} If the user_profiles fetch fails.
    */
   async fetchUserProfile(userId) {
-    // 1. Fetch the user's base profile first (we need role_id from it)
-    const { data: profile, error: pError } = await supabase
+    // 1. Fetch the user's base profile (using maybeSingle to avoid crash)
+    let { data: profile, error: pError } = await supabase
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (pError) throw pError;
+
+    // 1b. AUTO-HEALING: If profile is missing, create one on the fly
+    if (!profile) {
+      console.log(`Profile missing for user ${userId}, creating on the fly...`);
+      const { data: newUser } = await supabase.auth.getUser();
+      const user = newUser?.user;
+      
+      const { data: newProfile, error: createError } = await supabase
+        .from('user_profiles')
+        .insert({
+          id: userId,
+          email: user?.email,
+          name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+          role_id: 'vertical_viewer'
+        })
+        .select()
+        .single();
+      
+      if (createError) {
+        console.error("Critical: Failed to auto-create profile:", createError.message);
+        throw new Error("Your profile is being initialized. Please sign out and sign back in.");
+      }
+      profile = newProfile;
+    }
 
     // 2. Fetch role permissions, vertical access, and feature access in parallel
     const [
