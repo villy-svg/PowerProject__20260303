@@ -221,12 +221,22 @@
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem 1.75rem; /* Adjusted padding for better balance */
+  background: linear-gradient(90deg, rgba(45, 212, 191, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border-left: 3px solid var(--brand-green); /* The Halo Edge */
+  border-radius: 8px 12px 12px 8px; /* Asymmetric radius for the edge */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: auto;
+  box-shadow: -5px 0 20px rgba(45, 212, 191, 0.05);
+}
+
+.employee-list-row:hover {
+  background: linear-gradient(90deg, rgba(45, 212, 191, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-left-color: var(--brand-green);
+  box-shadow: -8px 0 25px rgba(45, 211, 191, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px); /* Minimal slide effect */
 }
 
 .list-row-inner {
