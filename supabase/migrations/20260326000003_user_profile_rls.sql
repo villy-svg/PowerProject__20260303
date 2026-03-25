@@ -16,4 +16,4 @@ DROP POLICY IF EXISTS "Users can insert their own profile" ON public.user_profil
 CREATE POLICY "Users can insert their own profile" ON public.user_profiles 
 FOR INSERT WITH CHECK (auth.uid() = id);
 
-RAISE NOTICE 'SUCCESS: user_profiles RLS policies established.';
+DO $$ BEGIN RAISE NOTICE 'SUCCESS: user_profiles RLS policies established.'; END $$;
