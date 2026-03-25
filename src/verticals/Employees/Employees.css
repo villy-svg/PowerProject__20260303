@@ -37,7 +37,7 @@
   box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
 }
 
-/* Card Specifics */
+/* --- Card Row-Based System --- */
 .employee-card {
   padding: 1.25rem;
   display: flex;
@@ -45,91 +45,93 @@
   gap: 0.75rem;
 }
 
+/* Absolute Selection Corner (Stays consistent) */
 .card-selection {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 5;
-}
-
-.employee-card-badges {
-  position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+/* Row 1: System Indicators (App User, Bank Missing, DUP) */
+.card-system-rows {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  pointer-events: none;
-  z-index: 2;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 20px; /* Preserve space even if empty */
 }
 
-.employee-card-badges span {
-  margin-left: 0 !important;
-}
-
-.employee-card-header {
+/* Row 2: Header (Name & Status) */
+.card-header-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.card-main-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.card-status-actions {
-  display: flex;
-  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
 }
 
 .employee-card-name {
-  margin: 0 0 12px 0;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 800;
-  color: var(--brand-green);
+  color: #fff; /* Changed to white for better contrast as primary info */
   line-height: 1.2;
+  flex: 1;
 }
 
+.card-status-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Row 3: Metadata Row (Dept, Hub, Role) */
+.card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+/* Row 4: Contact Details */
 .employee-card-contact {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   font-size: 0.85rem;
-  opacity: 0.8;
+  opacity: 0.7;
   line-height: 1.4;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-.employee-card-contact span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.id-line {
+  font-weight: 600;
+  color: var(--brand-green);
+  opacity: 1 !important;
 }
 
 .contact-label {
-  font-weight: 600;
-  color: var(--text-color);
+  opacity: 0.5;
+  font-weight: 400;
+  margin-right: 4px;
 }
 
+/* Row 5: Footer */
 .employee-card-footer {
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .join-date {
-  opacity: 0.6;
+  opacity: 0.4;
 }
 
-/* List Row Specifics */
+/* --- List Row Specifics --- */
 .employee-list {
   display: flex;
   flex-direction: column;
@@ -199,7 +201,6 @@
   padding: 2px 10px;
   font-size: 0.8rem;
   min-width: auto;
-  margin-left: 8px;
   font-weight: 900;
 }
 
@@ -258,10 +259,10 @@
 
 /* System Badges (Mini) */
 .app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini {
-  padding: 1px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.6rem;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
@@ -275,7 +276,6 @@
   background-color: rgba(255, 68, 68, 0.1);
   color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.4);
-  border-radius: 20px;
 }
 
 .duplicate-badge-mini {
