@@ -47,19 +47,28 @@ const EmployeeListRow = ({
       title="Double-click to view"
     >
       <div className="list-row-inner">
-        {/* ROW 1: Identity -> Departmental -> Management -> Execution */}
-        <div className="list-row-top">
-          <div className="list-section identity-section">
+        {/* COLUMN 1: Identity & Management */}
+        <div className="list-col col-identity">
+          <div className="col-row-1">
             <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`} onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
               {isSelected && '✓'}
             </div>
             <span className="list-name">{emp.full_name}</span>
+          </div>
+          <div className="col-row-2 management-info">
+            <span className="contact-item-id">{emp.badge_id}</span>
+            {emp.manager_name && emp.manager_name !== 'None' && (
+              <span className="manager-info">👤 {emp.manager_name}</span>
+            )}
             {emp.isDuplicate && (
               <span className="duplicate-badge-mini" title={`${emp.duplicateCount} duplicates`}>DUP</span>
             )}
           </div>
-          
-          <div className="list-section departmental-section">
+        </div>
+
+        {/* COLUMN 2: Organization & User/Badges */}
+        <div className="list-col col-org">
+          <div className="col-row-1">
             <span className="dept-badge">{emp.dept_code || 'NO DEPT'}</span>
             <span
               className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
@@ -83,54 +92,48 @@ const EmployeeListRow = ({
             </span>
             <span className="role-badge">{emp.role_code || 'NO ROLE'}</span>
           </div>
-
-          <div className="list-section management-section">
-            <span className="contact-item-id">{emp.badge_id}</span>
-            {emp.manager_name && emp.manager_name !== 'None' && (
-              <span className="manager-info">👤 {emp.manager_name}</span>
-            )}
-          </div>
-
-          <div className="list-section execution-section">
-            {emp.status === 'Inactive' && (
-              <div className="employee-status-indicator inactive">
-                {emp.status}
-              </div>
-            )}
-            <div className="list-actions">
-              {permissions.canUpdate && (
-                <button className="action-icon-btn edit-pencil-btn" onClick={() => onEdit(emp)} title="Edit">✎</button>
-              )}
-              {permissions.canDelete && (
-                <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
-              )}
-              {permissions.canUpdate && (
-                <button
-                  className={`halo-button status-toggle-btn ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-                  onClick={() => onToggleStatus(emp.id, emp.status)}
-                  title={emp.status === 'Active' ? 'Inactive' : 'Active'}
-                >
-                  {emp.status === 'Active' ? '↓' : '↑'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ROW 2: Warnings -> Communication -> Selection */}
-        <div className="list-row-bottom">
-          <div className="list-section warnings-section">
-            {emp.is_app_user && (
-              <span className="app-user-badge-mini">USER</span>
-            )}
+          <div className="col-row-2 system-badges">
+            {emp.is_app_user && <span className="app-user-badge-mini">USER</span>}
             {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
               <span className="bank-missing-badge-mini">Bank Missing</span>
             )}
           </div>
+        </div>
 
-          <div className="list-section communication-section">
+        {/* COLUMN 3: Contact */}
+        <div className="list-col col-contact">
+          <div className="col-row-1">
             <span className="contact-item">{emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
-            {emp.email && <span className="contact-item">{emp.email}</span>}
+          </div>
+          <div className="col-row-2">
+            {emp.email && <span className="contact-item email-id">{emp.email}</span>}
+          </div>
+        </div>
+
+        {/* COLUMN 4: Actions & Status */}
+        <div className="list-col col-actions">
+          <div className="col-row-1 actions-row">
+            {permissions.canUpdate && (
+              <button className="action-icon-btn edit-pencil-btn" onClick={() => onEdit(emp)} title="Edit">✎</button>
+            )}
+            {permissions.canDelete && (
+              <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
+            )}
+          </div>
+          <div className="col-row-2 status-row">
+            {emp.status === 'Inactive' ? (
+              <div className="employee-status-indicator inactive">{emp.status}</div>
+            ) : (
+              permissions.canUpdate && (
+                <button
+                  className="status-toggle-btn"
+                  onClick={() => onToggleStatus(emp.id, emp.status)}
+                  title="Move to Inactive"
+                >
+                  ↓
+                </button>
+              )
+            )}
           </div>
         </div>
       </div>

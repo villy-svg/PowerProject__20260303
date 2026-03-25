@@ -232,38 +232,50 @@
 .list-row-inner {
   flex: 1;
   display: flex;
+  align-items: center;
+  gap: 3rem; /* Large gap between vertical columns */
+  padding: 0.5rem 0;
+}
+
+.list-col {
+  display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 12px; /* Gap between row 1 and row 2 in each column */
+}
+
+.col-row-1, .col-row-2 {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  min-height: 22px;
 }
 
-.list-row-top, .list-row-bottom {
-  display: flex;
-  align-items: center;
-  gap: 32px; /* Large gap between logical sections */
+/* Column Specific Adjustments */
+.col-identity { min-width: 230px; }
+.col-org { flex: 1; }
+.col-contact { min-width: 200px; }
+.col-actions { 
+  min-width: 100px; 
+  align-items: flex-end; /* Align actions and status to the right */
 }
 
-.list-section {
-  display: flex;
-  align-items: center;
-  gap: 14px; /* Internal gap within sections */
+.management-info {
+  padding-left: 36px; /* Align row 2 with name (after checkbox) */
 }
 
-/* Specific Section Adjustments for Vertical Alignment */
-.identity-section { 
-  min-width: 230px; 
-  gap: 16px !important; /* Spacing between checkbox and name */
+.actions-row, .status-row {
+  justify-content: flex-end;
+  width: 100%;
 }
-.warnings-section { min-width: 200px; }
-.departmental-section, .communication-section { flex: 1; }
-.management-section { min-width: 180px; }
-.execution-section { min-width: 150px; justify-content: flex-end; }
 
-.list-actions {
-  display: flex;
-  align-items: center;
+.email-id {
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+
+.system-badges {
   gap: 8px;
-  margin-left: 12px;
 }
 
 .list-name {
