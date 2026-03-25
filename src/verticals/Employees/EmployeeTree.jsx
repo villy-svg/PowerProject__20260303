@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import EmployeeTreeCard from './EmployeeTreeCard';
-import './EmployeeTree.css';
+import './Employees.css';
 
 /**
  * EmployeeTree

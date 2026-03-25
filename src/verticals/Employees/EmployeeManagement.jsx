@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import '../ChargingHubs/HubManagement.css'; // Use shared styles
-import './EmployeeManagement.css';
+import './Employees.css';
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';

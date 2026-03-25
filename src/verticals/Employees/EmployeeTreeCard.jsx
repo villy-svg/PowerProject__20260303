@@ -49,7 +49,7 @@ const EmployeeTreeCard = ({
 
       <div className="tree-card-content">
         <div className="tree-card-header">
-          <h3 className="employee-card-name">
+          <h3 className="tree-card-name">
             {emp.full_name}
           </h3>
           {hasChildren && (
