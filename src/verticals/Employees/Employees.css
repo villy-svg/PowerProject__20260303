@@ -131,31 +131,29 @@
   opacity: 0.4;
 }
 
-/* Action Icons (Standardized) */
+/* Action Icons (Standardized & Blended) */
 .action-icon-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
-  width: 32px;
-  height: 32px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 1.1rem;
 }
 
 .action-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--brand-green);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--brand-green);
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 
 .action-icon-btn.delete:hover {
-  border-color: #ef4444;
   color: #ef4444;
 }
 
@@ -222,13 +220,11 @@
   gap: 14px; /* Internal gap within sections */
 }
 
-/* Specific Section Adjustments */
-.identity-section { min-width: 200px; }
-.departmental-section { min-width: 250px; }
+/* Specific Section Adjustments for Vertical Alignment */
+.identity-section, .warnings-section { min-width: 200px; }
+.departmental-section, .communication-section { flex: 1; }
 .management-section { min-width: 180px; }
-.execution-section { flex: 1; justify-content: flex-end; }
-.warnings-section { min-width: 100px; }
-.communication-section { flex: 1; }
+.execution-section { min-width: 150px; justify-content: flex-end; }
 
 .list-actions {
   display: flex;
@@ -246,18 +242,9 @@
 .selection-section {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 12px;
-  border-radius: 20px;
+  justify-content: flex-end;
+  min-width: 100px;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
-}
-
-.selection-section:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .select-label {
@@ -268,15 +255,49 @@
   opacity: 0.5;
 }
 
-/* Badge Refinement (Scoped to Employees) */
-.dept-badge, .role-badge, .hub-badge {
+/* Badge Refinement (Halo Glass Language) */
+.dept-badge, .role-badge, .hub-badge, .app-user-badge-mini, .duplicate-badge-mini {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   vertical-align: middle;
   line-height: 1;
-  padding: 3px 8px; /* Standardize padding */
-  height: 22px;     /* Fixed height for perfect centering */
+  padding: 3px 10px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.dept-badge { 
+  border-color: rgba(45, 212, 191, 0.3); 
+  color: #2dd4bf; 
+}
+.role-badge { 
+  border-color: rgba(255, 255, 255, 0.2); 
+  color: rgba(255, 255, 255, 0.6); 
+}
+.hub-badge { 
+  border-color: rgba(59, 130, 246, 0.4); 
+  color: #60a5fa; 
+}
+.app-user-badge-mini { 
+  border-color: rgba(52, 211, 153, 0.4); 
+  color: #34d399; 
+  background: rgba(52, 211, 153, 0.05);
+}
+.duplicate-badge-mini {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.dept-badge:hover, .hub-badge:hover, .app-user-badge-mini:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 10px var(--halo-glow);
 }
 
 /* Role Group Headers & Select Button */
@@ -454,10 +475,7 @@
 }
 
 .app-user-badge-mini {
-  background-color: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  min-width: 45px; /* Adjusted for "USER" text */
+  /* Inherits from standard halo badge logic above */
 }
 
 .bank-missing-badge-mini {

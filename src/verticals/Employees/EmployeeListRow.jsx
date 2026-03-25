@@ -51,9 +51,6 @@ const EmployeeListRow = ({
         <div className="list-row-top">
           <div className="list-section identity-section">
             <span className="list-name">{emp.full_name}</span>
-            {emp.is_app_user && (
-              <span className="app-user-badge-mini">USER</span>
-            )}
             {emp.isDuplicate && (
               <span className="duplicate-badge-mini" title={`${emp.duplicateCount} duplicates`}>DUP</span>
             )}
@@ -92,9 +89,11 @@ const EmployeeListRow = ({
           </div>
 
           <div className="list-section execution-section">
-            <div className={`employee-status-indicator ${emp.status === 'Active' ? 'active' : 'inactive'}`}>
-              {emp.status}
-            </div>
+            {emp.status === 'Inactive' && (
+              <div className="employee-status-indicator inactive">
+                {emp.status}
+              </div>
+            )}
             <div className="list-actions">
               {permissions.canUpdate && (
                 <button className="action-icon-btn edit-pencil-btn" onClick={() => onEdit(emp)} title="Edit">✎</button>
@@ -118,6 +117,9 @@ const EmployeeListRow = ({
         {/* ROW 2: Warnings -> Communication -> Selection */}
         <div className="list-row-bottom">
           <div className="list-section warnings-section">
+            {emp.is_app_user && (
+              <span className="app-user-badge-mini">USER</span>
+            )}
             {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
               <span className="bank-missing-badge-mini">Bank Missing</span>
             )}
@@ -129,7 +131,6 @@ const EmployeeListRow = ({
           </div>
 
           <div className="list-section selection-section" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
-            <span className="select-label">Select</span>
             <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
               {isSelected && '✓'}
             </div>
