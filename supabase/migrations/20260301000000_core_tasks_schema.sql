@@ -1,5 +1,13 @@
--- Core Tasks Schema (Reconstructed from application services)
--- This migration fills the gap for the missing 'tasks' table in the automated setup.
+-- Core Schema (Reconstructed from application services)
+-- This migration fills the gaps in the automated setup for tables with broken timelines.
+
+CREATE TABLE IF NOT EXISTS public.hub_functions (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    name text NOT NULL,
+    function_code text UNIQUE,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
 
 CREATE TABLE IF NOT EXISTS public.tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
