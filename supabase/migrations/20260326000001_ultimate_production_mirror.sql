@@ -5,80 +5,6 @@
 -- =========================================================================
 
 -- -------------------------------------------------------------------------
--- 0. SECURITY & HELPER FUNCTIONS
--- -------------------------------------------------------------------------
-
--- 0A. Trigger for updated_at column
-CREATE OR REPLACE FUNCTION public.update_modified_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = now();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- 0B. RBAC Helper: Get user permission level for a vertical
--- (Using the most recent version from manual log)
-CREATE OR REPLACE FUNCTION public.get_user_permission_level(v_id text)
-RETURNS text
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-    v_role_id text;
-    v_level text;
-BEGIN
-    SELECT role_id INTO v_role_id
-    FROM public.user_profiles
-    WHERE id = auth.uid();
-
-    -- Master Admin overrides
-    IF v_role_id = 'master_admin' THEN RETURN 'admin';
-    ELSIF v_role_id = 'master_editor' THEN RETURN 'editor';
-    ELSIF v_role_id = 'master_contributor' THEN RETURN 'contributor';
-    ELSIF v_role_id = 'master_viewer' THEN RETURN 'viewer';
-    END IF;
-
-    -- Look up specific vertical access (Normalized Table)
-    SELECT access_level INTO v_level
-    FROM public.vertical_access
-    WHERE user_id = auth.uid() AND vertical_id = v_id;
-    
-    RETURN COALESCE(v_level, 'viewer');
-END;
-$$;
-
--- 0C. Simple role checks
-CREATE OR REPLACE FUNCTION is_master_admin() RETURNS BOOLEAN AS $$
-  SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id = 'master_admin');
-$$ LANGUAGE sql SECURITY DEFINER;
-
-CREATE OR REPLACE FUNCTION is_elevated_role() RETURNS BOOLEAN AS $$
-  SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin'));
-$$ LANGUAGE sql SECURITY DEFINER;
-
--- 0D. TRIGGER: Auth -> profile sync
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
-    VALUES (
-        NEW.id, 
-        NEW.email, 
-        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
-        ARRAY[]::TEXT[]
-    );
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Cleanup existing trigger if any
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
-
--- -------------------------------------------------------------------------
 -- 1. BASE TABLES (IDEMPOTENT)
 -- -------------------------------------------------------------------------
 
@@ -159,6 +85,16 @@ CREATE TABLE IF NOT EXISTS public.client_categories (
   code text UNIQUE,
   default_service_code text REFERENCES public.client_services(code),
   description text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now()
+);
+
+-- Organization Verticals
+CREATE TABLE IF NOT EXISTS public.verticals (
+  id text NOT NULL PRIMARY KEY,
+  label text NOT NULL,
+  "order" integer DEFAULT 0,
+  locked boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );
@@ -330,6 +266,80 @@ CREATE TABLE IF NOT EXISTS public.role_permissions (
 );
 
 -- -------------------------------------------------------------------------
+-- 0. SECURITY & HELPER FUNCTIONS
+-- -------------------------------------------------------------------------
+
+-- 0A. Trigger for updated_at column
+CREATE OR REPLACE FUNCTION public.update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- 0B. RBAC Helper: Get user permission level for a vertical
+-- (Using the most recent version from manual log)
+CREATE OR REPLACE FUNCTION public.get_user_permission_level(v_id text)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_role_id text;
+    v_level text;
+BEGIN
+    SELECT role_id INTO v_role_id
+    FROM public.user_profiles
+    WHERE id = auth.uid();
+
+    -- Master Admin overrides
+    IF v_role_id = 'master_admin' THEN RETURN 'admin';
+    ELSIF v_role_id = 'master_editor' THEN RETURN 'editor';
+    ELSIF v_role_id = 'master_contributor' THEN RETURN 'contributor';
+    ELSIF v_role_id = 'master_viewer' THEN RETURN 'viewer';
+    END IF;
+
+    -- Look up specific vertical access (Normalized Table)
+    SELECT access_level INTO v_level
+    FROM public.vertical_access
+    WHERE user_id = auth.uid() AND vertical_id = v_id;
+    
+    RETURN COALESCE(v_level, 'viewer');
+END;
+$$;
+
+-- 0C. Simple role checks
+CREATE OR REPLACE FUNCTION is_master_admin() RETURNS BOOLEAN AS $$
+  SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id = 'master_admin');
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION is_elevated_role() RETURNS BOOLEAN AS $$
+  SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin'));
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- 0D. TRIGGER: Auth -> profile sync
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
+    VALUES (
+        NEW.id, 
+        NEW.email, 
+        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
+        ARRAY[]::TEXT[]
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Cleanup existing trigger if any
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- -------------------------------------------------------------------------
 -- 3. REPAIR BLOCKS & TRIGGERS (Automated Schema Healing)
 -- -------------------------------------------------------------------------
 
@@ -408,6 +418,7 @@ ALTER TABLE public.daily_task_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vertical_access ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.feature_access ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.verticals ENABLE ROW LEVEL SECURITY;
 
 -- 5A. Hubs & Departments (Simple Select)
 DROP POLICY IF EXISTS "Allow select for auth" ON public.hubs;
@@ -444,7 +455,14 @@ BEGIN
     END LOOP;
 END $$;
 
--- 5C. Tasks & Daily Tasks (Row-based Vertical Access)
+-- 5C. Role Permissions & Verticals (Global Read)
+DROP POLICY IF EXISTS "Allow authenticated read" ON public.role_permissions;
+CREATE POLICY "Allow authenticated read" ON public.role_permissions FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Allow authenticated read" ON public.verticals;
+CREATE POLICY "Allow authenticated read" ON public.verticals FOR SELECT USING (auth.role() = 'authenticated');
+
+-- 5D. Tasks & Daily Tasks (Row-based Vertical Access)
 DROP POLICY IF EXISTS "Permit SELECT based on role" ON public.tasks;
 CREATE POLICY "Permit SELECT based on role" ON public.tasks FOR SELECT USING (public.get_user_permission_level(verticalid) IN ('viewer', 'contributor', 'editor', 'admin'));
 DROP POLICY IF EXISTS "Permit ALL based on role" ON public.tasks;
@@ -467,3 +485,4 @@ BEGIN
     -- Final Success Notice
     RAISE NOTICE 'SUCCESS: PowerProject Absolute Master Schema Established Successfully.';
 END $$;
+

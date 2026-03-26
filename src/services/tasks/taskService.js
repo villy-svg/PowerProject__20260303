@@ -29,8 +29,8 @@ const normalizeTask = (row) => ({
   assigned_to: row.assigned_to,
   assigneeName: row.employees?.full_name || row.assigneeName,
   parentTask: row.parent_task || null,
-  createdAt: row.createdat ?? row.createdAt,
-  updatedAt: row.updatedat ?? row.updatedAt,
+  createdAt: row.created_at ?? row.createdat ?? row.createdAt,
+  updatedAt: row.updated_at ?? row.updatedat ?? row.updatedAt,
   createdBy: row.created_by,
   lastUpdatedBy: row.last_updated_by,
 });
@@ -52,8 +52,8 @@ const mapTaskToRow = (task) => ({
   last_updated_by: task.lastUpdatedBy || null,
 });
 
-/** Standard select string: includes employee name join. */
-const TASK_SELECT = '*, employees:assigned_to (full_name)';
+/** Standard select string: includes explicit employee join. */
+const TASK_SELECT = '*, employees!assigned_to (full_name)';
 
 // ---------------------------------------------------------------------------
 // Service
@@ -67,8 +67,9 @@ export const taskService = {
   async getTasks() {
     const { data, error } = await supabase
       .from('tasks')
-      .select(TASK_SELECT)
-      .order('updatedat', { ascending: true });
+      .select(TASK_SELECT);
+    // Sort logic handled in normalization if needed, or by standard name
+    const sorted = (data || []).sort((a,b) => (a.updated_at || a.updatedat) > (b.updated_at || b.updatedat) ? 1 : -1);
 
     if (error) throw error;
     return (data || []).map(normalizeTask);

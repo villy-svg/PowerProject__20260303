@@ -61,7 +61,7 @@ export const profileService = {
       { data: vAccess },
       { data: fAccess },
     ] = await Promise.all([
-      supabase.from('role_permissions').select('*').eq('role_id', profile.role_id).single(),
+      supabase.from('role_permissions').select('*').eq('role_id', profile.role_id).maybeSingle(),
       supabase.from('vertical_access').select('*').eq('user_id', userId),
       supabase.from('feature_access').select('*').eq('user_id', userId),
     ]);
