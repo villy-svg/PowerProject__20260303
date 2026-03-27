@@ -318,29 +318,31 @@ CREATE OR REPLACE FUNCTION is_elevated_role() RETURNS BOOLEAN AS $$
   SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin'));
 $$ LANGUAGE sql SECURITY DEFINER;
 
--- 0D. TRIGGER: Auth -> profile sync (STABLE)
+-- 0D. TRIGGER: Auth -> profile sync (CASE-INSENSITIVE + STABLE)
 -- The single source of truth for user profile creation.
--- Uses direct table names (not information_schema) for reliability inside trigger context.
+-- Handles:
+--   1. New User -> Clean Insert.
+--   2. Staging Reset / Orphaned Profile -> Case-insensitive cleanup and Re-linking.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
     orphaned_id uuid;
 BEGIN
-    -- ── STEP 1: Clean up orphaned profile (same email, different auth UUID) ─────────────
-    -- This handles staging resets where auth.users is wiped but user_profiles remain.
+    -- ── STEP 1: Find any orphaned profile (case-insensitive check) ──────────────────────
     SELECT id INTO orphaned_id
     FROM public.user_profiles
-    WHERE email = NEW.email AND id != NEW.id;
+    WHERE LOWER(email) = LOWER(NEW.email) AND id != NEW.id;
 
     IF orphaned_id IS NOT NULL THEN
-        -- Null out tasks FK references (tasks has no ON DELETE CASCADE)
+        -- Null out FKs that don't cascade (tasks is the only one)
         UPDATE public.tasks SET created_by = NULL WHERE created_by = orphaned_id;
         UPDATE public.tasks SET last_updated_by = NULL WHERE last_updated_by = orphaned_id;
-        -- Delete orphan (vertical_access, feature_access cascade automatically)
+        
+        -- Delete the orphan (RBAC tables vertical_access/feature_access CASCADE automatically)
         DELETE FROM public.user_profiles WHERE id = orphaned_id;
     END IF;
 
-    -- ── STEP 2: Insert fresh profile ────────────────────────────────────────────────────
+    -- ── STEP 2: Use UPSERT on email to be 100% collision-proof ──────────────────────────
     INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
     VALUES (
         NEW.id,
@@ -348,11 +350,11 @@ BEGIN
         COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
         ARRAY[]::TEXT[]
     )
-    ON CONFLICT (id) DO NOTHING;
+    ON CONFLICT (email) DO UPDATE 
+    SET id = EXCLUDED.id,
+        name = COALESCE(EXCLUDED.name, user_profiles.name);
 
-    -- ── STEP 3: Auto-link employee_id by email ──────────────────────────────────────────
-    -- Fixes the root cause of employee_id not linking on first registration.
-    -- SECURITY DEFINER bypasses RLS so this always works regardless of user role.
+    -- ── STEP 3: Auto-link employee_id (case-insensitive) ────────────────────────────────
     UPDATE public.user_profiles SET employee_id = e.id
     FROM public.employees e
     WHERE LOWER(e.email) = LOWER(NEW.email)

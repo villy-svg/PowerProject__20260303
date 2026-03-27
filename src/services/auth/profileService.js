@@ -32,11 +32,17 @@ export const profileService = {
     if (pError) throw pError;
 
     // FALLBACK: If the trigger failed silently, profile may be missing.
-    // Use upsert (not plain insert) to safely recover without conflicts.
     if (!profile) {
       console.warn(`Profile missing for user ${userId} — trigger may have failed. Attempting recovery.`);
       const { data: newUser } = await supabase.auth.getUser();
       const user = newUser?.user;
+
+      // 1. Check if profile exists under a different casing or orphaned email
+      const { data: existingByEmail } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .ilike('email', user?.email)
+        .maybeSingle();
 
       const { data: recovered, error: upsertError } = await supabase
         .from('user_profiles')
@@ -45,7 +51,7 @@ export const profileService = {
           email: user?.email,
           name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
           role_id: 'vertical_viewer'
-        }, { onConflict: 'id' })
+        })
         .select()
         .single();
 
