@@ -22,6 +22,32 @@ BEGIN
       FOREIGN KEY (manager_id) REFERENCES public.employees(id) ON DELETE SET NULL NOT VALID;
   END IF;
 
+  -- employees -> employee_roles (FIX: Programmatic Cleanup to resolve ambiguity/406)
+  DO $blk$
+  DECLARE 
+      r RECORD;
+  BEGIN
+      -- Drop ALL existing FKs between these tables to stop PostgREST confusion
+      FOR r IN (
+          SELECT conname 
+          FROM pg_constraint 
+          WHERE conrelid = 'public.employees'::regclass 
+          AND confrelid = 'public.employee_roles'::regclass
+      ) LOOP
+          EXECUTE 'ALTER TABLE public.employees DROP CONSTRAINT ' || quote_ident(r.conname);
+      END LOOP;
+
+      -- Add the single "Gold Standard" join
+      ALTER TABLE public.employees ADD CONSTRAINT employees_role_id_fkey
+          FOREIGN KEY (role_id) REFERENCES public.employee_roles(id) ON DELETE SET NULL NOT VALID;
+  END $blk$;
+
+  -- employees -> departments (FIX: NEW)
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'employees_department_id_fkey') THEN
+    ALTER TABLE public.employees ADD CONSTRAINT employees_department_id_fkey
+      FOREIGN KEY (department_id) REFERENCES public.departments(id) ON DELETE SET NULL NOT VALID;
+  END IF;
+
   -- employee_history FKs
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'employee_history_employee_id_fkey') THEN
     ALTER TABLE public.employee_history ADD CONSTRAINT employee_history_employee_id_fkey

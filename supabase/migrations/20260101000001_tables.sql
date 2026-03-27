@@ -266,3 +266,33 @@ CREATE TABLE IF NOT EXISTS public.test_table (
   message text DEFAULT 'Connection Successful'::text
 );
 ALTER SEQUENCE public.test_table_id_seq OWNED BY public.test_table.id;
+
+-- 1.13 REPAIR: Ensure all columns from old migrations exist (Safe on re-run)
+DO $$
+BEGIN
+    -- employee_roles.seniority_level
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='employee_roles' AND column_name='seniority_level') THEN
+        ALTER TABLE public.employee_roles ADD COLUMN seniority_level integer DEFAULT 1;
+    END IF;
+
+    -- daily_tasks.partner_id / vendor_id
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_tasks' AND column_name='partner_id') THEN
+        ALTER TABLE public.daily_tasks ADD COLUMN partner_id uuid;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_tasks' AND column_name='vendor_id') THEN
+        ALTER TABLE public.daily_tasks ADD COLUMN vendor_id uuid;
+    END IF;
+
+    -- daily_task_templates.partner_id / vendor_id
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_task_templates' AND column_name='partner_id') THEN
+        ALTER TABLE public.daily_task_templates ADD COLUMN partner_id uuid;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='daily_task_templates' AND column_name='vendor_id') THEN
+        ALTER TABLE public.daily_task_templates ADD COLUMN vendor_id uuid;
+    END IF;
+
+    -- user_profiles (ensure employee_id exists)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='user_profiles' AND column_name='employee_id') THEN
+        ALTER TABLE public.user_profiles ADD COLUMN employee_id uuid;
+    END IF;
+END $$;

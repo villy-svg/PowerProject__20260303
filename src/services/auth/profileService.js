@@ -127,7 +127,7 @@ export const profileService = {
           .from('employees')
           .select('id, role_id, employee_roles(seniority_level)')
           .eq('id', effectiveEmployeeId)
-          .single(),
+          .maybeSingle(), // Use maybeSingle to prevent PGRST116 crash if record is missing
         supabase.from('employees').select('id, manager_id')
       ]);
 
