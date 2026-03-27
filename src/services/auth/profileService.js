@@ -100,7 +100,7 @@ export const profileService = {
       const { data: matchedEmp } = await supabase
         .from('employees')
         .select('id')
-        .eq('email', profile.email)
+        .ilike('email', profile.email) // Use .ilike for case-insensitive matching
         .eq('status', 'Active')
         .maybeSingle();
 
