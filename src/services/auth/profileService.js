@@ -67,7 +67,9 @@ export const profileService = {
     let reporteeUserIds = [];
     let reporteeEmployeeIds = [];
     
-    // 5. SELF-HEALING: If employee_id is missing, try to link by email
+    // 5. SELF-HEALING FALLBACK: If employee_id still missing, try to link by email.
+    // This handles the edge case where an employee record was created AFTER the user registered.
+    // The trigger handles the common case (employee exists at registration time).
     let effectiveEmployeeId = profile.employee_id;
     if (!effectiveEmployeeId && profile.email) {
       const { data: matchedEmp } = await supabase
@@ -76,19 +78,19 @@ export const profileService = {
         .eq('email', profile.email)
         .eq('status', 'Active')
         .maybeSingle();
-      
+
       if (matchedEmp) {
         effectiveEmployeeId = matchedEmp.id;
-        // Persist the link for next time
+        // Persist the link — trigger missed this because employee was created after registration
         const { error: healError } = await supabase
           .from('user_profiles')
           .update({ employee_id: effectiveEmployeeId })
           .eq('id', userId);
-        
+
         if (healError) {
-          console.error(`FAILED self-heal for user ${userId}:`, healError.message);
+          console.warn(`Could not persist employee link for user ${userId}:`, healError.message);
         } else {
-          console.log(`Self-healed employee link for user ${userId} -> ${effectiveEmployeeId}`);
+          console.log(`Employee link established post-registration for user ${userId}`);
         }
       }
     }

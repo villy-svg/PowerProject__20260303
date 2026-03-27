@@ -318,23 +318,68 @@ CREATE OR REPLACE FUNCTION is_elevated_role() RETURNS BOOLEAN AS $$
   SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin'));
 $$ LANGUAGE sql SECURITY DEFINER;
 
--- 0D. TRIGGER: Auth -> profile sync (IDEMPOTENT)
--- This function handles two cases:
---   1. New user (email doesn't exist) -> Normal INSERT creates a new profile.
---   2. Existing email (e.g. after staging reset) -> UPDATE re-links the profile to the new Auth UUID.
--- Registration via the login page works normally in both cases.
+-- 0D. TRIGGER: Auth -> profile sync (PRODUCTION-HARDENED)
+-- This is the single source of truth for user profile creation and linking.
+-- Handles:
+--   1. Brand new user -> INSERT profile, auto-link employee by email if match found.
+--   2. Returning user after staging reset -> Dynamic FK cleanup, delete orphaned profile,
+--      INSERT fresh profile, auto-link employee.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    orphaned_id uuid;
+    r RECORD;
+    dyn_sql text;
 BEGIN
+    -- ── STEP 1: Check for an orphaned profile (same email, different auth UUID) ──────────
+    SELECT id INTO orphaned_id
+    FROM public.user_profiles
+    WHERE email = NEW.email AND id != NEW.id;
+
+    IF orphaned_id IS NOT NULL THEN
+        -- Null out ALL non-cascade FK references to the orphaned profile dynamically.
+        -- Future-proof: automatically handles any new tables added later.
+        FOR r IN
+            SELECT kcu.table_name, kcu.column_name
+            FROM information_schema.referential_constraints rc
+            JOIN information_schema.key_column_usage kcu
+                ON kcu.constraint_name = rc.constraint_name
+            JOIN information_schema.key_column_usage rcu
+                ON rcu.constraint_name = rc.unique_constraint_name
+            WHERE rcu.table_name = 'user_profiles'
+              AND rcu.column_name = 'id'
+              AND rc.delete_rule = 'NO ACTION'
+        LOOP
+            dyn_sql := format(
+                'UPDATE public.%I SET %I = NULL WHERE %I = %L',
+                r.table_name, r.column_name, r.column_name, orphaned_id
+            );
+            EXECUTE dyn_sql;
+        END LOOP;
+        -- ON DELETE CASCADE handles vertical_access, feature_access automatically
+        DELETE FROM public.user_profiles WHERE id = orphaned_id;
+    END IF;
+
+    -- ── STEP 2: Insert the fresh profile ─────────────────────────────────────────────────
     INSERT INTO public.user_profiles (id, email, name, assigned_verticals)
     VALUES (
-        NEW.id, 
-        NEW.email, 
-        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
+        NEW.id,
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
         ARRAY[]::TEXT[]
     )
-    ON CONFLICT (email) DO UPDATE
-      SET id = EXCLUDED.id;
+    ON CONFLICT (id) DO NOTHING;
+
+    -- ── STEP 3: Auto-link employee_id by email match (SECURITY DEFINER bypasses RLS) ─────
+    -- Fixes root cause of employee_id not linking when a user registers for the first time.
+    UPDATE public.user_profiles up
+    SET employee_id = e.id
+    FROM public.employees e
+    WHERE LOWER(e.email) = LOWER(NEW.email)
+      AND e.status = 'Active'
+      AND up.id = NEW.id
+      AND up.employee_id IS NULL;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
