@@ -31,10 +31,29 @@ export const profileService = {
 
     if (pError) throw pError;
 
-    // If profile is missing after auth, the DB trigger should have created it.
-    // This guards against a race condition or trigger failure.
+    // FALLBACK: If the trigger failed silently, profile may be missing.
+    // Use upsert (not plain insert) to safely recover without conflicts.
     if (!profile) {
-      throw new Error("Your profile could not be loaded. Please sign out and sign back in.");
+      console.warn(`Profile missing for user ${userId} — trigger may have failed. Attempting recovery.`);
+      const { data: newUser } = await supabase.auth.getUser();
+      const user = newUser?.user;
+
+      const { data: recovered, error: upsertError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          id: userId,
+          email: user?.email,
+          name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+          role_id: 'vertical_viewer'
+        }, { onConflict: 'id' })
+        .select()
+        .single();
+
+      if (upsertError) {
+        console.error('Profile recovery failed:', upsertError.message);
+        throw new Error('Your profile could not be loaded. Please sign out and sign back in.');
+      }
+      profile = recovered;
     }
 
     // 2. Fetch role permissions, vertical access, and feature access in parallel
