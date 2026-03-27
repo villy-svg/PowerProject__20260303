@@ -124,12 +124,6 @@ const TaskTreeView = ({
             {tasks.some(t => t.parentTask === task.id) ? (expandedIds.has(task.id) ? '▼' : '▶') : ''}
           </div>
           
-          <div 
-            className="stage-dot" 
-            style={{ backgroundColor: stage.color }} 
-            title={stage.label}
-          />
-
           <div className="list-row-badges">
             {task.isContextOnly && (
               <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>

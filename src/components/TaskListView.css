@@ -184,13 +184,6 @@
   color: var(--brand-green);
 }
 
-.stage-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
 .list-task-row.drop-target {
   border: 2px dashed var(--brand-green) !important;
   background: rgba(16, 185, 129, 0.05) !important;
