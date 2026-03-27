@@ -6,6 +6,7 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) var(--bg-color);
   font-family: inherit;
+  font-variant-emoji: text; /* PERSISTENT ICON FIX: Forces monochromatic (text) rendering for all Unicode symbols/emojis */
 }
 
 html,

@@ -14,7 +14,8 @@
   --surface-card: #f9f9fb;
   
   /* Typography */
-  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-icon: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
   /* Halo Glow System */
   --halo-glow: rgba(13, 148, 136, 0.2);
@@ -36,7 +37,8 @@
   --surface-card: #18181b;
   
   /* Typography */
-  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-icon: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
   --halo-glow: rgba(45, 212, 191, 0.15);
   --halo-bg: rgba(45, 212, 191, 0.05);
