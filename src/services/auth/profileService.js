@@ -31,28 +31,10 @@ export const profileService = {
 
     if (pError) throw pError;
 
-    // 1b. AUTO-HEALING: If profile is missing, create one on the fly
+    // If profile is missing after auth, the DB trigger should have created it.
+    // This guards against a race condition or trigger failure.
     if (!profile) {
-      console.log(`Profile missing for user ${userId}, creating on the fly...`);
-      const { data: newUser } = await supabase.auth.getUser();
-      const user = newUser?.user;
-      
-      const { data: newProfile, error: createError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: userId,
-          email: user?.email,
-          name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
-          role_id: 'vertical_viewer'
-        })
-        .select()
-        .single();
-      
-      if (createError) {
-        console.error("Critical: Failed to auto-create profile:", createError.message);
-        throw new Error("Your profile is being initialized. Please sign out and sign back in.");
-      }
-      profile = newProfile;
+      throw new Error("Your profile could not be loaded. Please sign out and sign back in.");
     }
 
     // 2. Fetch role permissions, vertical access, and feature access in parallel

@@ -318,7 +318,11 @@ CREATE OR REPLACE FUNCTION is_elevated_role() RETURNS BOOLEAN AS $$
   SELECT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = auth.uid() AND role_id IN ('master_admin', 'vertical_admin'));
 $$ LANGUAGE sql SECURITY DEFINER;
 
--- 0D. TRIGGER: Auth -> profile sync
+-- 0D. TRIGGER: Auth -> profile sync (IDEMPOTENT)
+-- This function handles two cases:
+--   1. New user (email doesn't exist) -> Normal INSERT creates a new profile.
+--   2. Existing email (e.g. after staging reset) -> UPDATE re-links the profile to the new Auth UUID.
+-- Registration via the login page works normally in both cases.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -328,7 +332,9 @@ BEGIN
         NEW.email, 
         COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), 
         ARRAY[]::TEXT[]
-    );
+    )
+    ON CONFLICT (email) DO UPDATE
+      SET id = EXCLUDED.id;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
