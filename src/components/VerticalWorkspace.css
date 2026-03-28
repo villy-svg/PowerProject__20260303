@@ -91,7 +91,7 @@
   padding: 0;
 }
 
-.workspace-container.sub-sidebar-collapsed h3 {
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-header h3 {
   display: none;
 }
 

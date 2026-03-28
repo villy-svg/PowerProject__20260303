@@ -796,3 +796,13 @@
   .employee-list-row { flex-wrap: wrap; gap: 12px; }
   .list-main-info, .list-meta-badges, .list-contact { width: 100%; }
 }
+
+@media screen and (max-width: 768px) {
+  .employee-grid {
+    grid-template-columns: 1fr;
+  }
+  .employee-card {
+    min-height: auto;
+    padding: 1rem;
+  }
+}
