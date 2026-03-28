@@ -62,12 +62,12 @@
 .client-card-name {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--text-color);
+  color: #ffffff;
   margin: 0;
   line-height: 1.2;
   letter-spacing: -0.02em;
   position: relative;
-  z-index: 10;
+  z-index: 15;
 }
 
 /* Floating Actions Area */
@@ -195,7 +195,7 @@
 .list-name {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--text-color);
+  color: #ffffff;
 }
 
 .matrix-summary-mini, .category-code-mini {
