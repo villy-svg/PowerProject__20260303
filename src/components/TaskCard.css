@@ -79,11 +79,31 @@
   border: 1px solid transparent;
 }
 
-.priority-low { color: #eab308; background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3); }
-.priority-medium { color: #d97706; background: rgba(217, 119, 6, 0.1); border-color: rgba(217, 119, 6, 0.3); }
-.priority-high { color: #f97316; background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); }
-.priority-urgent { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
-.priority-completed { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+.priority-low { 
+  color: var(--priority-low); 
+  background: color-mix(in srgb, var(--priority-low), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-low), transparent 70%); 
+}
+.priority-medium { 
+  color: var(--priority-medium); 
+  background: color-mix(in srgb, var(--priority-medium), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 70%); 
+}
+.priority-high { 
+  color: var(--priority-high); 
+  background: color-mix(in srgb, var(--priority-high), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-high), transparent 70%); 
+}
+.priority-urgent { 
+  color: var(--priority-urgent); 
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%); 
+}
+.priority-completed { 
+  color: var(--brand-green); 
+  background: color-mix(in srgb, var(--brand-green), transparent 90%); 
+  border-color: color-mix(in srgb, var(--brand-green), transparent 70%); 
+}
  
  .subtask-tag {
    font-size: 0.6rem;

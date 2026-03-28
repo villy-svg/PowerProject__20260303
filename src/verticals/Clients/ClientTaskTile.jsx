@@ -10,10 +10,10 @@ import React from 'react';
 const ClientTaskTile = ({ task, onClick }) => {
   const getPriorityColor = (p) => {
     switch (p) {
-      case 'Urgent': return '#ff4444';
-      case 'High': return '#ff8800';
-      case 'Medium': return '#007aff';
-      default: return 'var(--brand-green)';
+      case 'Urgent': return 'var(--priority-urgent)';
+      case 'High': return 'var(--priority-high)';
+      case 'Medium': return 'var(--priority-medium)';
+      default: return 'var(--priority-low)';
     }
   };
 

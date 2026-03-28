@@ -151,8 +151,8 @@ const HubFunctionManagement = ({ permissions = {} }) => {
               <h3>{fn.name}</h3>
               <p className="hub-city">{fn.description || 'No description provided'}</p>
               <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)}>Edit</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)}>Delete</button>}
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)} title="Edit Function">✎</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)} title="Delete Function">×</button>}
               </div>
             </div>
           ))}

@@ -119,8 +119,8 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
               <h3>{model.name}</h3>
               <p className="hub-city">{model.description || 'No description provided'}</p>
               <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(model)}>Edit</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(model.id)}>Delete</button>}
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(model)} title="Edit Billing Model">✎</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(model.id)} title="Delete Billing Model">×</button>}
               </div>
             </div>
           ))}

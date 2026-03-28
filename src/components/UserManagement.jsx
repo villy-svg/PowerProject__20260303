@@ -371,8 +371,8 @@ const UserManagement = ({ currentUser }) => {
                     )}
                   </td>
                   <td>
-                    <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
-                      Edit
+                    <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)} title="Edit User Permissions">
+                      ✎
                     </button>
                   </td>
                 </tr>
@@ -432,8 +432,8 @@ const UserManagement = ({ currentUser }) => {
               </div>
 
               <div className="user-card-actions">
-                <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)}>
-                  Edit Permissions
+                <button className="halo-button edit-user-btn" onClick={() => handleOpenEdit(u)} title="Edit User Permissions">
+                  ✎
                 </button>
               </div>
             </div>

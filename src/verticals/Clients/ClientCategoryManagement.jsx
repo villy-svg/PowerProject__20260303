@@ -166,8 +166,8 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
                 </div>
               )}
               <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)}>Edit</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)}>Delete</button>}
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)} title="Edit Category">✎</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)} title="Delete Category">×</button>}
               </div>
             </div>
           ))}

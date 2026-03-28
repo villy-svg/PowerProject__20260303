@@ -116,14 +116,19 @@
   margin-bottom: 20px;
 }
 
-.hub-actions {
-  display: flex;
-  gap: 12px;
+.edit-btn, .delete-btn {
+  padding: 8px;
+  min-width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
-.edit-btn, .delete-btn {
-  /* These will now inherit from global .halo-button if applied in JSX */
-  flex: 1;
+.hub-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
 }
 
 .status-badge {

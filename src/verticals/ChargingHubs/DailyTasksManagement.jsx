@@ -245,10 +245,10 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
               
               <div className="template-actions">
                 {permissions?.canUpdateDailyTaskTemplates && (
-                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(template)}>Edit</button>
+                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(template)} title="Edit Template">✎</button>
                 )}
                 {permissions?.canDeleteDailyTaskTemplates && (
-                  <button className="halo-button delete-btn" onClick={() => handleDelete(template.id)}>Delete</button>
+                  <button className="halo-button delete-btn" onClick={() => handleDelete(template.id)} title="Delete Template">×</button>
                 )}
               </div>
             </div>

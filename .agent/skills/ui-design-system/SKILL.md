@@ -230,8 +230,6 @@ To maintain the premium dark aesthetic, ALL dropdown (`<select>`) elements MUST 
 
 **Rule**: All dropdowns in management forms (Clients, Employees, Hubs) MUST use `.master-dropdown`. Never leave dropdown options to default browser styling (white background).
 
----
-
 ## 11. Small Laptop Responsiveness (11" & 13")
 To ensure the application remains functional on high-density 11" and 13" laptops (e.g., MacBook Air, Surface Go), ALL layouts MUST follow these scaling rules.
 
@@ -248,3 +246,45 @@ To ensure the application remains functional on high-density 11" and 13" laptops
 4.  **Font Scaling**: Root font size should decrease from `16px` to `15px` or `14px` on narrow viewports to preserve layout integrity.
 
 **Rule**: New designs MUST be tested at `1280x800` (13" sim) and `1024x768` (11" sim) to ensure no UI elements overlap or become inaccessible.
+
+---
+
+## 12. Apple-Inspired Premium Design Standards
+To maintain a world-class, "Apple-level" feel, all UI changes MUST adhere to these premium design principles.
+
+### A. The "Squircle" Standard (Continuous Curves)
+Avoid simple geometric rounded corners (e.g., `12px`). Use the **Squircle** curvature for an organic, approachable feel.
+- **Global Token**: `var(--radius-squircle)` (24px) for cards, modals, and layouts.
+- **Button Token**: `var(--radius-button)` (12px) for interactive elements.
+- **Rule**: Never use `4px` or `8px` for primary cards; they must be generous (`24px`).
+
+### B. Materials & Layering (Glassmorphism)
+Everything should feel like it has physical depth and realistic material properties.
+- **Glass Finish**: Use `backdrop-filter: blur(var(--glass-blur))` (15px-20px) for headers, modals, and floating cards.
+- **Shadows**: Use `var(--shadow-premium)` for soft, expansive depth. Elements should feel like they "float" above the midnight canvas.
+- **Satin Accents**: Borders in dark mode should be extremely subtle (`rgba(255,255,255,0.08)`) to create a "satin" edge, not a harsh outline.
+
+### C. Fluid Typography & Spacing
+Designs must feel balanced regardless of screen size.
+- **Proportional Scaling**: Always use `clamp()` for font sizes and padding.
+- **Breathing Room**: Prioritize white space. If a layout feels cramped, increase the gap or padding using `clamp(1rem, 5vw, 3rem)`.
+- **Weight Hierarchy**: Use `800` for titles, `600` for subtitles, and `400-500` for body text.
+
+### D. Sophisticated Midnight Palette
+Avoid aggressive saturations. Use colors functionally (to signify status), not structurally (as borders or backgrounds).
+- **Core Environment**: Midnight Black (`#050505`) or Deep Space Gray (`#121214`).
+- **Accent Palette**: Sophisticated Mint (`#70f3da`) and Electric Blue (`#60a5fa`).
+- **Rule**: Use the mint/blue accents only for status, icons, or text highlights.
+
+---
+
+## 13. General Rules Summary (Updated)
+| Rule | Policy |
+|------|--------|
+| Prohibited Colors | ❌ Hardcoded Hex, Neon/Aggressive Saturations |
+| Corner Radius | ✅ `var(--radius-squircle)` (24px) for major cards |
+| Action Buttons | ✅ `.halo-button` with `blur` and `shadow` |
+| Spacing & Fonts | ✅ `clamp()` for fluid responsiveness |
+| Depth | ✅ `backdrop-filter` and `shadow-premium` |
+| Main Area Buttons | ❌ No solid fills. Use `.halo-button` (glass) or icon-only actions. |
+| Layout Consistency| ✅ Must be tested at 1024px (11") and 1280px (13") |

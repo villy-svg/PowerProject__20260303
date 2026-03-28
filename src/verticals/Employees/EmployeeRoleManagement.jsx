@@ -149,8 +149,8 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
               <h3>{role.name}</h3>
               <p className="hub-city">{role.description || 'No description provided'}</p>
               <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)}>Edit</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)}>Delete</button>}
+                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)} title="Edit Role">✎</button>}
+                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)} title="Delete Role">×</button>}
               </div>
             </div>
           ))}

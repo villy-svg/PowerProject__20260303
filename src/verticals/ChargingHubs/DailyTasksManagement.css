@@ -72,16 +72,21 @@
   border: 1px solid var(--border-color);
 }
 
-.template-actions {
+.template-actions .halo-button {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  font-size: 1.1rem;
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  align-items: center;
+  justify-content: center;
 }
 
-.template-actions .halo-button {
-  flex: 1;
-  font-size: 0.75rem;
-  padding: 6px;
+.template-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
 }
 
 .template-modal {
