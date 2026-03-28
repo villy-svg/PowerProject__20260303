@@ -4,13 +4,13 @@
 .home-summary-view {
   animation: fadeIn 0.4s ease-out;
   background-color: var(--surface-card);
-  padding: 40px;
-  border-radius: 0; /* Fully unified with surface */
+  padding: clamp(20px, 5vw, 40px);
+  border-radius: 0;
 }
 
 .summary-header {
-  margin-bottom: 40px;
-  border-left: 3px solid var(--brand-green);
+  margin-bottom: clamp(20px, 4vh, 40px);
+  border-left: 4px solid var(--brand-mint);
   padding-left: 15px;
 }
 
@@ -40,13 +40,15 @@
   border-left: 6px solid var(--stage-color);
   background-color: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px 24px;
+  border-radius: var(--radius-squircle);
+  padding: clamp(12px, 2vh, 20px) 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   min-height: 90px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-premium);
+  backdrop-filter: blur(var(--glass-blur));
 }
 
 .summary-card:hover {
@@ -76,11 +78,12 @@
 .vertical-breakdown-list {
   background-color: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-button);
   padding: 12px 4px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-premium);
 }
 
 .vertical-mini-row {

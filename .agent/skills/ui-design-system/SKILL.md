@@ -229,3 +229,22 @@ To maintain the premium dark aesthetic, ALL dropdown (`<select>`) elements MUST 
 ```
 
 **Rule**: All dropdowns in management forms (Clients, Employees, Hubs) MUST use `.master-dropdown`. Never leave dropdown options to default browser styling (white background).
+
+---
+
+## 11. Small Laptop Responsiveness (11" & 13")
+To ensure the application remains functional on high-density 11" and 13" laptops (e.g., MacBook Air, Surface Go), ALL layouts MUST follow these scaling rules.
+
+### Breakpoints
+- **Large Laptop**: `1440px`
+- **Small Laptop/Tablet Landscape**: `1200px` (Target for 11"/13" screens)
+- **Tablet / Mobile**: `<1024px`
+
+### Core Constraints
+1.  **Dynamic Spacing**: Use `clamp()` for paddings and margins to prevent "overflow death" on small screens.
+    -   Example: `padding: clamp(1rem, 3vw, 2.5rem);`
+2.  **Horizontal Scrolling**: Tables and long lists MUST be wrapped in `.responsive-table-wrapper` with `overflow-x: auto`. Do NOT force-squish columns.
+3.  **Flex Wrapping**: Container flex-bases should be fluid. Sidebar and Main Area ratios MUST shift to 1:0 (hidden sidebar) or reduced width below `1200px`.
+4.  **Font Scaling**: Root font size should decrease from `16px` to `15px` or `14px` on narrow viewports to preserve layout integrity.
+
+**Rule**: New designs MUST be tested at `1280x800` (13" sim) and `1024x768` (11" sim) to ensure no UI elements overlap or become inaccessible.

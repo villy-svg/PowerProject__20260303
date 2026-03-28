@@ -5,18 +5,27 @@
    ========================================================================== */
 
 :root {
-  /* Core Palette */
+  /* Core Palette - Midnight Premium */
   --bg-color: #fcfcfd;
   --text-color: #18181b;
-  --brand-green: #0d9488;
+  --brand-mint: #0d9488;
+  --brand-blue: #3b82f6;
+  --brand-green: var(--brand-mint); /* Legacy alias */
   --border-color: #e4e4e7;
   --panel-bg: #ffffff;
   --surface-card: #f9f9fb;
   
   /* Typography */
   --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-icon: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   
+  /* Radii & Depth */
+  --radius-squircle: 24px;
+  --radius-button: 12px;
+  --radius-pill: 40px;
+  --glass-blur: 15px;
+  --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-halo: 0 0 15px var(--halo-glow);
+
   /* Halo Glow System */
   --halo-glow: rgba(13, 148, 136, 0.2);
   --halo-bg: rgba(13, 148, 136, 0.05);
@@ -29,19 +38,22 @@
 }
 
 [data-theme='dark'] {
-  --bg-color: #09090b;
+  --bg-color: #050505;        /* Midnight */
   --text-color: #f4f4f5;
-  --brand-green: #2dd4bf;
-  --border-color: #27272a;
-  --panel-bg: #111113;
-  --surface-card: #18181b;
+  --brand-mint: #70f3da;      /* Sophisticated Mint */
+  --brand-blue: #60a5fa;      /* Electric Blue */
+  --brand-green: var(--brand-mint);
+  --border-color: #1a1a1c;
+  --panel-bg: #0d0d0f;
+  --surface-card: #121214;    /* Space Gray Surface */
   
-  /* Typography */
-  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-icon: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Shadows & Depth */
+  --shadow-premium: 0 12px 40px rgba(0, 0, 0, 0.6);
+  --glass-blur: 20px;
   
-  --halo-glow: rgba(45, 212, 191, 0.15);
-  --halo-bg: rgba(45, 212, 191, 0.05);
+  --halo-glow: rgba(112, 243, 218, 0.15); /* Mint Glow */
+  --halo-glow-blue: rgba(96, 165, 250, 0.15); /* Blue Glow */
+  --halo-bg: rgba(112, 243, 218, 0.03);
 }
 
 /* ==========================================================================
@@ -106,12 +118,12 @@
 .halo-button {
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
-  color: var(--brand-green);
-  padding: 8px 16px;
-  border-radius: 8px;
+  color: var(--brand-mint);
+  padding: clamp(8px, 1.5vh, 12px) clamp(16px, 2vw, 24px);
+  border-radius: var(--radius-button);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -119,6 +131,8 @@
   min-width: 100px;
   font-family: inherit;
   font-size: 0.9rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-premium);
 }
 
 .halo-button:hover {

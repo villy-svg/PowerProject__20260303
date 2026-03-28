@@ -2,18 +2,19 @@
    HEADER & BRANDING STYLES
    ========================================================================== */
 .app-header {
-  height: 90px;
-  /* Consistent height */
+  height: clamp(60px, 8vh, 90px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background-color: var(--surface-card);
+  background-color: color-mix(in srgb, var(--surface-card), transparent 20%);
   border-bottom: 1px solid var(--border-color);
-  padding: 0 40px;
-  /* CONSISTENT PADDING AT ALL TIMES */
-  position: relative;
-  flex-shrink: 0;
+  padding: 0 clamp(12px, 4vw, 40px);
+  position: sticky;
+  top: 0;
+  z-index: 2001;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-premium);
 }
 
 .header-left {
@@ -66,23 +67,24 @@
 .brand-title-centered {
   position: absolute;
   left: 50%;
-  top: 45px;
+  top: 50%;
   transform: translate(-50%, -50%);
   margin: 0;
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
   font-weight: 800;
-  background: linear-gradient(135deg, var(--brand-green), #6ef59a);
+  background: linear-gradient(135deg, var(--brand-mint), var(--brand-blue));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: var(--brand-green); /* Fallback */
+  color: var(--brand-mint); /* Fallback */
   letter-spacing: -1px;
   white-space: nowrap;
   line-height: 1;
-  z-index: 2000; /* Extremely high to stay above header */
+  z-index: 2002;
   pointer-events: none;
   font-family: var(--font-main);
   text-transform: none;
+  text-shadow: 0 0 30px var(--halo-glow);
 }
 
 .theme-toggle-btn {

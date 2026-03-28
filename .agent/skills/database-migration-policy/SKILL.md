@@ -7,28 +7,32 @@ description: Rules for maintaining 100% schema parity and history continuity in 
 
 To maintain a stable development-to-production pipeline and ensure 100% schema parity, always follow these critical rules when interacting with `supabase/migrations`.
 
-### 1. Immutability of History
-- **Never Edit Applied Migrations**: Once a migration file has been pushed to the remote server (Staging or Production), it is considered "digitally signed" by its checksum. Never modify the contents of an existing migration file.
-- **Checksum Integrity**: If you change an old file, the Supabase CLI will fail with a "Checksum Mismatch" error.
+### 1. The 6-File "Stable Core" Baseline
+- **The Foundation**: All new environments must start with the 6 core files prefixed with `20260101`.
+- **Purpose**: These files are the "System Source of Truth" and must never be deleted. They are logically separated (Tables, FKs, Functions, RLS, Seed, Grants).
 
-### 2. Iterative Schema Evolution (The "New File" Rule)
-- **Always Use New Files**: Every new schema change, column addition, or data fix must be placed in a **new, timestamped `.sql` file**.
-- **Example**: If you need to add a column to `employees`, do not edit the file that created the table. Create `20260327000000_add_phone_to_employees.sql`.
+### 2. "Repair-Safe" Idempotency
+- **Baseline Rule**: The core baseline files must be "Repair-Safe". 
+- **Pattern**: Use `IF NOT EXISTS` for all `CREATE` commands AND `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for all critical fields inside the baseline.
+- **Why**: This allows the baseline to be re-pushed safely to an existing database to "patch" missing pieces without creating new migration files for one-off fixes.
 
-### 3. History Continuity & Placeholders
-- **Never Delete Applied Files**: If an applied migration file is deleted locally, the CLI will error with "Remote migration not found."
-- **Renaming/Moving**: If you must reorganize or consolidate files (like the "Master Mirror" strategy), the old filenames must remain as **empty placeholders** to satisfy the database's `_migrations` history table.
+### 3. Iterative Evolution (Standard Flow)
+- **New Files for New Features**: Once the baseline is applied, **never edit the 6 core files** for daily development.
+- **Timestamping**: Create a new, timestamped file for every new schema change (e.g., `20260328000000_add_search_to_tasks.sql`).
+- **One-Way Street**: Migrations only go forward.
 
-### 4. Idempotent SQL (Safe Repairs)
-- **Use `IF NOT EXISTS`**: Always use `CREATE TABLE IF NOT EXISTS` and `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`.
-- **Logic Triggers**: Wrap complex logic in `DO $$ BEGIN ... END $$` blocks with `IF NOT EXISTS` checks for triggers and indices.
-- **Why**: This ensures that your migrations are "self-healing" and can run safely on a database that is already partially or fully updated.
+### 4. History Cleansing (Consolidation)
+- **Resetting the Clock**: If the migration history becomes fragmented (checksum errors, dozens of messy files), a **One-Time Consolidation** is permitted.
+- **Process**:
+  1. Wipe local history and replace with a clean baseline.
+  2. Run `DELETE FROM supabase_migrations.schema_migrations;` on remote.
+  3. `db push --linked` to re-establish the new baseline.
+- **Frequency**: This should be extremely rare (after major refactors).
 
-### 5. Master Mirror Strategy (Canonical Start)
-- Current Canonical Root: `20260326000001_ultimate_production_mirror.sql`.
-- Any environment setup starts by running this Master Mirror. All subsequent changes must follow the iterative rules above.
+### 5. The "PostgreSQL Kick"
+- **Mandatory**: Every schema-changing migration MUST end with `NOTIFY pgrst, 'reload schema';`.
+- **Why**: This prevents 406 (Not Acceptable) errors by forcing the Supabase API to refresh its cache.
 
-### 6. Automated Recovery (Repair)
-- If a migration history desync occurs (e.g. after a branch merge or a failed deploy), use the automated `repair` step in GitHub Actions:
-  `supabase migration repair --status reverted <timestamp>`
-- This should only be used as a last resort to "clear the path" for the new, correct migrations.
+### 6. Never "UI-Only"
+- **Golden Rule**: Never create a table or column in the Supabase UI. Always write the SQL first in a migration file and `db push`. 
+- **Parity**: Database drifts are the #1 cause of deployment failure.

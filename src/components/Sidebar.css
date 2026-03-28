@@ -78,12 +78,12 @@
 .sidebar-nav li {
   padding: 12px 15px;
   margin-bottom: 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-button);
   cursor: pointer;
   background-color: transparent;
   color: var(--text-color);
   font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.25s ease;
   white-space: nowrap; 
   overflow: hidden;
   display: block;
@@ -91,13 +91,15 @@
 
 .sidebar-nav li:not(.locked):hover {
   background-color: var(--border-color);
-  color: var(--brand-green);
+  color: var(--brand-mint);
+  transform: translateX(4px);
 }
 
 .sidebar-nav li.active {
-  background-color: color-mix(in srgb, var(--brand-green), transparent 90%);
-  color: var(--brand-green);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand-mint), transparent 90%), transparent);
+  color: var(--brand-mint);
   font-weight: 700;
+  border-left: 3px solid var(--brand-mint);
 }
 
 .sidebar-nav li.locked {

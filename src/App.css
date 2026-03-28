@@ -78,42 +78,25 @@
 /* btn-primary removed (unused) */
 
 .halo-button {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
-  /* Glass Finish */
-  color: var(--brand-green) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  /* Master styles inherited from globalTheme.css */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .halo-button:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 85%) !important;
-  border-color: var(--brand-green) !important;
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
+  border-color: var(--brand-mint) !important;
   border-width: 2px !important;
   margin: -0.5px;
-  /* Fine-tuned alignment */
-  box-shadow: 0 0 20px var(--halo-glow);
-  transform: translateY(-1px);
+  box-shadow: 0 0 25px var(--halo-glow);
+  transform: translateY(-2px);
 }
 
 .halo-text-effect {
-  color: var(--brand-green);
+  color: var(--brand-mint);
   background: var(--halo-bg);
   padding: 4px 12px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
+  border-radius: var(--radius-button);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 80%);
   box-shadow: 0 0 10px var(--halo-glow);
   font-weight: 700;
   display: inline-flex;
@@ -143,10 +126,12 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: 12px;
+  border-radius: var(--radius-squircle);
   border: 1px solid var(--border-color);
   background-color: var(--surface-card);
   margin-top: 1rem;
+  box-shadow: var(--shadow-premium);
+  backdrop-filter: blur(var(--glass-blur));
 }
 
 .responsive-table-wrapper table {

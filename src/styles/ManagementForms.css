@@ -19,15 +19,16 @@
 .modal-content.hub-modal {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: 20px;
-  width: 100%;
-  max-width: 600px;
+  border-radius: var(--radius-squircle);
+  width: 95%;
+  max-width: 650px;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
-  animation: formSlideUp 0.4s ease-out;
+  animation: formSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(var(--glass-blur));
 }
 
 .modal-header {
@@ -44,7 +45,8 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--brand-green);
+  color: var(--brand-mint);
+  text-shadow: 0 0 10px var(--halo-glow);
 }
 
 .close-modal {
@@ -81,12 +83,12 @@
 
 .vertical-task-form label, 
 .form-group label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--brand-green);
-  opacity: 0.8;
+  color: var(--brand-mint);
+  opacity: 0.9;
   padding-left: 4px;
 }
 
@@ -98,8 +100,8 @@
 .hub-modal textarea {
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: var(--radius-button);
+  padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
   color: var(--text-color);
   font-family: var(--font-main);
   font-size: 0.95rem;
