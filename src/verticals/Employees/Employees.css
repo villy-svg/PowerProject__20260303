@@ -82,11 +82,14 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #00ff00 !important; /* DEBUG NEON GREEN */
+  background: rgba(0, 0, 0, 0.5) !important; /* DARK RECTANGLE BEHIND */
+  padding: 4px 8px;
+  border-radius: 4px;
   line-height: 1.2;
   flex: 1;
   position: relative;
-  z-index: 15;
+  z-index: 100; /* FORCE TO FRONT */
 }
 
 .card-status-block {

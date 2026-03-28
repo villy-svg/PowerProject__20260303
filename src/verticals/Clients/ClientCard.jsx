@@ -5,6 +5,7 @@ import React from 'react';
  * Grid/Tile view item for a client.
  */
 const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, permissions = {} }) => {
+  console.log('[DEBUG] Client Name Rendering:', client?.name || 'MISSING NAME');
   const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
 
   const formatPhone = (phone) => {

@@ -17,6 +17,7 @@ const EmployeeCard = ({
   onSelect,
   className = ''
 }) => {
+  console.log('[DEBUG] Employee Rendering:', emp?.full_name || emp?.name || 'MISSING NAME');
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
 
