@@ -13,8 +13,8 @@
   border: 1px solid var(--border-color);
   border-radius: 20px; /* Matching Squircle standard */
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
   border-left: 4px solid var(--brand-green);
+  min-height: 280px; /* Force minimum height to ensure visibility */
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -62,15 +62,12 @@
 .client-card-name {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #00ff00 !important; /* DEBUG NEON GREEN */
-  background: rgba(0, 0, 0, 0.5) !important; /* DARK RECTANGLE BEHIND */
-  padding: 4px 8px;
-  border-radius: 4px;
+  color: var(--text-color); /* Adaptive variable instead of hardcoded white */
   margin: 0;
   line-height: 1.2;
   letter-spacing: -0.02em;
   position: relative;
-  z-index: 100; /* FORCE TO FRONT */
+  z-index: 10;
 }
 
 /* Floating Actions Area */
@@ -428,5 +425,6 @@ input:checked + .slider:before {
 
   .client-card {
     padding: 1rem;
+    min-height: auto;
   }
 }

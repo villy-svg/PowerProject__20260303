@@ -4,20 +4,19 @@ import React, { useState } from 'react';
  * EmployeeCard
  * Grid/Tile view item for an employee. (Optimized Halo Layout)
  */
-const EmployeeCard = ({ 
-  emp, 
-  onEdit, 
-  onView, 
-  onDelete, 
-  onToggleStatus, 
-  permissions = {}, 
-  availableHubs, 
+const EmployeeCard = ({
+  emp,
+  onEdit,
+  onView,
+  onDelete,
+  onToggleStatus,
+  permissions = {},
+  availableHubs,
   onUpdateHub,
   isSelected = false,
   onSelect,
   className = ''
 }) => {
-  console.log('[DEBUG] Employee Rendering:', emp?.full_name || emp?.name || 'MISSING NAME');
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
 
@@ -43,7 +42,7 @@ const EmployeeCard = ({
   };
 
   return (
-    <div 
+    <div
       className={`employee-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${className}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"
@@ -58,8 +57,8 @@ const EmployeeCard = ({
       {/* Floating Card Actions */}
       <div className="employee-card-actions">
         {permissions.canUpdate && (
-          <button 
-            className="action-icon-btn edit-pencil edit-pencil-btn" 
+          <button
+            className="action-icon-btn edit-pencil edit-pencil-btn"
             onClick={(e) => { e.stopPropagation(); onEdit(emp); }}
             title="Edit Employee"
           >
@@ -67,8 +66,8 @@ const EmployeeCard = ({
           </button>
         )}
         {permissions.canDelete && (
-          <button 
-            className="action-icon-btn delete" 
+          <button
+            className="action-icon-btn delete"
             onClick={(e) => { e.stopPropagation(); onDelete(emp.id); }}
             title="Delete"
           >
@@ -76,7 +75,7 @@ const EmployeeCard = ({
           </button>
         )}
         {permissions.canUpdate && (
-          <button 
+          <button
             className={`halo-button status-toggle-btn ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
             onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
             title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
@@ -114,15 +113,15 @@ const EmployeeCard = ({
       {/* Row 3: Core Meta (Dept, Hub, Role) */}
       <div className="card-meta-row">
         <span className="dept-badge">{emp.dept_code || emp.department || 'NO DEPT'}</span>
-        <span 
-          className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`} 
-          onDoubleClick={handleHubDoubleClick} 
+        <span
+          className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
+          onDoubleClick={handleHubDoubleClick}
           title="Double-click to change primary hub"
         >
           {isEditingHub ? (
-            <select 
-              value={selectedHubId} 
-              onChange={handleHubChange} 
+            <select
+              value={selectedHubId}
+              onChange={handleHubChange}
               onBlur={handleHubBlur}
               autoFocus
               onClick={(e) => e.stopPropagation()}
@@ -137,7 +136,7 @@ const EmployeeCard = ({
         </span>
         <span className="role-badge">{emp.role_code || emp.role || 'NO ROLE'}</span>
       </div>
-      
+
       {/* Row 4: Contact Details */}
       <div className="employee-card-contact">
         <span className="id-line"><span className="contact-label">ID:</span> {emp.badge_id || emp.id}</span>

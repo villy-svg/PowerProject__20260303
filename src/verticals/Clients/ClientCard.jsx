@@ -5,7 +5,6 @@ import React from 'react';
  * Grid/Tile view item for a client.
  */
 const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStatus, permissions = {} }) => {
-  console.log('[DEBUG] Client Name Rendering:', client?.name || 'MISSING NAME');
   const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
 
   const formatPhone = (phone) => {
@@ -16,7 +15,7 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
 
   const getMatrixSummary = () => {
     if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return null;
-    
+
     // Group vehicles by service
     const serviceToVehicles = {};
     Object.entries(client.category_matrix).forEach(([vId, services]) => {
@@ -58,9 +57,9 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
           </button>
         )}
         {permissions.canDelete && (
-          <button 
-            className="action-icon-btn delete" 
-            onClick={(e) => { e.stopPropagation(); onDelete(client.id); }} 
+          <button
+            className="action-icon-btn delete"
+            onClick={(e) => { e.stopPropagation(); onDelete(client.id); }}
             title="Delete"
           >
             ×
