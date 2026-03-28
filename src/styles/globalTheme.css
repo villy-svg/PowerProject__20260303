@@ -35,6 +35,30 @@
   --priority-high: #f97316;
   --priority-medium: #eab308;
   --priority-low: #22c55e;
+  
+  /* Z-Index Hierarchy */
+  --z-base: 0;
+  --z-card-base: 1;
+  --z-card-content: 10;
+  --z-card-name-overlay: 15;
+  --z-card-actions: 20;
+  --z-toolbar: 100;
+  --z-sticky: 200;
+  --z-header: 2001;
+  --z-modal: 3000;
+  --z-toast: 4000;
+
+  /* Badge System Colors (Tokenized) */
+  --badge-teal-bg: rgba(45, 212, 191, 0.1);
+  --badge-teal-text: #2dd4bf;
+  --badge-blue-bg: rgba(59, 130, 246, 0.1);
+  --badge-blue-text: #60a5fa;
+  --badge-green-bg: rgba(52, 211, 153, 0.1);
+  --badge-green-text: #34d399;
+  --badge-amber-bg: rgba(245, 158, 11, 0.1);
+  --badge-amber-text: #f59e0b;
+  --badge-red-bg: rgba(239, 68, 68, 0.1);
+  --badge-red-text: #ef4444;
 }
 
 [data-theme='dark'] {

@@ -43,14 +43,14 @@
   align-items: center;
   flex-wrap: wrap;
   position: relative;
-  z-index: 10;
+  z-index: var(--z-card-content);
 }
 
 .billing-badge {
   font-size: 0.65rem;
   font-weight: 800;
-  background: rgba(0, 122, 255, 0.1);
-  color: #007aff;
+  background: var(--badge-blue-bg);
+  color: var(--badge-blue-text);
   padding: 3px 8px;
   border-radius: 20px;
   border: 1px solid rgba(0, 122, 255, 0.3);
@@ -67,7 +67,7 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
   position: relative;
-  z-index: 10;
+  z-index: var(--z-card-name-overlay);
 }
 
 /* Floating Actions Area */
@@ -75,7 +75,7 @@
   position: absolute;
   top: 1.25rem;
   right: 1.25rem;
-  z-index: 20;
+  z-index: var(--z-card-actions);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -208,8 +208,8 @@
 .pending-tasks-badge {
   font-size: 0.7rem;
   font-weight: 800;
-  color: #ff4444;
-  background: rgba(255, 68, 68, 0.1);
+  color: var(--badge-red-text);
+  background: var(--badge-red-bg);
   padding: 2px 8px;
   border-radius: 4px;
   text-transform: uppercase;

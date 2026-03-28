@@ -58,7 +58,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  z-index: 10;
+  z-index: var(--z-card-actions);
 }
 
 /* Row 1: System Indicators (App User, Bank Missing, DUP) */
@@ -86,7 +86,7 @@
   line-height: 1.2;
   flex: 1;
   position: relative;
-  z-index: 15;
+  z-index: var(--z-card-name-overlay);
 }
 
 .card-status-block {
@@ -210,7 +210,7 @@
   position: absolute;
   top: 12px;
   right: 45px; /* Leave space for selection checkbox */
-  z-index: 10;
+  z-index: var(--z-card-actions);
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -348,7 +348,7 @@
 
 .dept-badge { 
   border-color: rgba(45, 212, 191, 0.3); 
-  color: #2dd4bf; 
+  color: var(--badge-teal-text); 
 }
 .role-badge { 
   border-color: rgba(255, 255, 255, 0.2); 
@@ -356,16 +356,16 @@
 }
 .hub-badge { 
   border-color: rgba(59, 130, 246, 0.4); 
-  color: #60a5fa; 
+  color: var(--badge-blue-text); 
 }
 .app-user-badge-mini { 
   border-color: rgba(52, 211, 153, 0.4); 
-  color: #34d399; 
-  background: rgba(52, 211, 153, 0.05);
+  color: var(--badge-green-text); 
+  background: var(--badge-green-bg);
 }
 .duplicate-badge-mini {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  border-color: var(--badge-amber-text);
+  color: var(--badge-amber-text);
 }
 
 .dept-badge:hover, .hub-badge:hover, .app-user-badge-mini:hover {
@@ -474,7 +474,7 @@
   display: flex;
   align-items: center;
   gap: 2rem;
-  z-index: 1000;
+  z-index: var(--z-toolbar);
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
