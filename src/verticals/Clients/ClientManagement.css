@@ -11,10 +11,14 @@
   position: relative;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 20px; /* Matching Squircle standard */
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   border-left: 4px solid var(--brand-green);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .client-card:hover, .client-list-row:hover {
@@ -54,19 +58,22 @@
 
 /* Row 2: Name */
 .client-card-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-color);
   margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 /* Row 3: PoC Contact */
 .client-card-poc {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 0.85rem;
-  opacity: 0.8;
+  gap: 6px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  color: var(--text-color);
 }
 
 /* Row 4: Footer */
@@ -80,11 +87,45 @@
   font-size: 0.8rem;
 }
 
-.client-status {
+.client-status-indicator {
   font-weight: 800;
   text-transform: uppercase;
   font-size: 0.7rem;
   letter-spacing: 1px;
+}
+
+.client-status-indicator.active { color: var(--brand-green); }
+.client-status-indicator.inactive { color: #ff4444; }
+
+.client-category-label {
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.poc-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.poc-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.poc-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.7;
+}
+
+.poc-icon {
+  width: 16px;
+  opacity: 0.5;
 }
 
 /* List View */

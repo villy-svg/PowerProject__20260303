@@ -85,30 +85,36 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
       </div>
 
       {/* Name */}
-      <h3 className="client-card-name">{client.name}</h3>
+      <h3 className="client-card-name">{client.name || 'Untitled Client'}</h3>
 
       {/* PoC Details */}
       <div className="client-card-poc">
         {client.poc_name && (
-          <span style={{ fontWeight: 600 }}>👤 {client.poc_name}</span>
+          <div className="poc-primary">
+            <span className="poc-icon">👤</span>
+            <span className="poc-name">{client.poc_name}</span>
+          </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span>📞 {formatPhone(client.poc_phone)}</span>
+        <div className="poc-contact-info">
+          <span className="poc-item">
+            <span className="poc-icon">📞</span>
+            {formatPhone(client.poc_phone)}
+          </span>
           {client.poc_email && (
-            <>
-              <span style={{ opacity: 0.3 }}>|</span>
-              <span>✉️ {client.poc_email}</span>
-            </>
+            <span className="poc-item">
+              <span className="poc-icon">✉️</span>
+              {client.poc_email}
+            </span>
           )}
         </div>
       </div>
 
       {/* Footer */}
       <div className="client-card-footer">
-        <div style={{ fontSize: '0.75rem', opacity: 0.5 }}>
+        <div className="client-category-label">
           {client.category_name && client.category_name !== 'Uncategorized' ? client.category_name : 'No Category'}
         </div>
-        <div className="client-status" style={{ color: client.status === 'Active' ? 'var(--brand-green)' : '#ff4444' }}>
+        <div className={`client-status-indicator ${client.status === 'Active' ? 'active' : 'inactive'}`}>
           {client.status}
         </div>
       </div>
