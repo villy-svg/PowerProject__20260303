@@ -24,7 +24,7 @@
 }
 
 .logo-button {
-  position: absolute;
+  position: fixed;
   left: 2.5rem;
   top: 25px; /* (90px - 40px) / 2 */
   width: 40px;

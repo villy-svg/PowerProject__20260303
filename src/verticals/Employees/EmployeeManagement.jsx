@@ -269,7 +269,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
                           {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
                         </button>
                       </h5>
-                      <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
+                      <div className={viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                         {empsInRole.map(emp => (
                           viewMode === 'grid' ? (
                             <EmployeeCard
@@ -327,7 +327,7 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
               {inactiveEmps.length === 0 ? (
                 <p className="empty-sub-state faded">No inactive records.</p>
               ) : (
-                <div className={viewMode === 'grid' ? 'employee-grid' : 'employee-list'}>
+                <div className={viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                   {inactiveEmps.map(emp => (
                     viewMode === 'grid' ? (
                       <EmployeeCard

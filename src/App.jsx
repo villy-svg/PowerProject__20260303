@@ -333,6 +333,7 @@ function App() {
           permissions={currentUserPermissions}
           verticalList={verticalList}
         />
+        <h1 className="brand-title-centered">PowerProject</h1>
         <div 
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
           onClick={() => setIsSidebarOpen(false)} 
@@ -343,7 +344,7 @@ function App() {
               {/* Spacer for absolute branding */}
             </div>
             <div className="header-center">
-              <h1 className="brand-title-centered">PowerProject</h1>
+              {/* Title moved to top-level for static positioning */}
             </div>
             <div className="header-right">
               {user?.roleId === 'master_admin' && (
