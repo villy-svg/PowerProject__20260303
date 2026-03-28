@@ -80,7 +80,7 @@
   letter-spacing: -1px;
   white-space: nowrap;
   line-height: 1;
-  z-index: var(--z-header); /* Use the new standardized z-index */
+  z-index: calc(var(--z-header) + 20); /* Ensure it's above the header and logo button */
   pointer-events: none;
   font-family: var(--font-main);
   text-transform: none;
