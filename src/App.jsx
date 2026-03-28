@@ -343,7 +343,7 @@ function App() {
               {/* Spacer for absolute branding */}
             </div>
             <div className="header-center">
-              {/* Other tools could go here */}
+              <h1 className="brand-title-centered">PowerProject</h1>
             </div>
             <div className="header-right">
               {user?.roleId === 'master_admin' && (
@@ -471,7 +471,6 @@ function App() {
 
           </main>
         </div>
-        <h1 className="brand-title-centered">PowerProject</h1>
       </div>
     </div>
   );
