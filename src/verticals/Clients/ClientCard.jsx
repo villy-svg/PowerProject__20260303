@@ -78,7 +78,7 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
       </div>
 
       {/* Badges Row */}
-      <div className="client-card-badges">
+      <div className="client-card-badges" style={{ paddingRight: '120px' }}>
         {matrixSummary ? (
           <span className="dept-badge" title={matrixSummary}>{matrixSummary}</span>
         ) : (
@@ -122,9 +122,11 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
         <div className="client-category-label">
           {client.category_name && client.category_name !== 'Uncategorized' ? client.category_name : 'No Category'}
         </div>
-        <div className={`client-status-indicator ${client.status === 'Active' ? 'active' : 'inactive'}`}>
-          {client.status}
-        </div>
+        {client.status === 'Inactive' && (
+          <div className="client-status-indicator inactive">
+            {client.status}
+          </div>
+        )}
       </div>
     </div>
   );

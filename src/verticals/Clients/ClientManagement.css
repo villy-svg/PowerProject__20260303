@@ -62,7 +62,7 @@
 .client-card-name {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-color);
   margin: 0;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -195,7 +195,7 @@
 .list-name {
   font-size: 1rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-color);
 }
 
 .matrix-summary-mini, .category-code-mini {

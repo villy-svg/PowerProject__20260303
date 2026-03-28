@@ -74,10 +74,19 @@ const EmployeeCard = ({
             ×
           </button>
         )}
+        {permissions.canUpdate && (
+          <button 
+            className={`halo-button status-toggle-btn ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
+            onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
+            title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+          >
+            {emp.status === 'Active' ? '↓' : '↑'}
+          </button>
+        )}
       </div>
 
       {/* Row 1: System Badges (App User, Bank Missing, Duplicate) */}
-      <div className="card-system-rows">
+      <div className="card-system-rows" style={{ paddingRight: '120px' }}>
         {emp.is_app_user && (
           <span className="app-user-badge-mini" title="Has App Access">USER</span>
         )}
@@ -93,17 +102,10 @@ const EmployeeCard = ({
       <div className="card-header-row">
         <h3 className="employee-card-name">{emp.full_name || emp.name || 'Unnamed Employee'}</h3>
         <div className="card-status-block">
-          <span className={`employee-status-indicator ${emp.status === 'Active' ? 'active' : 'inactive'}`}>
-            {emp.status}
-          </span>
-          {permissions.canUpdate && (
-            <button 
-              className={`halo-button status-toggle-btn ${emp.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-              onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
-              title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-            >
-              {emp.status === 'Active' ? '↓' : '↑'}
-            </button>
+          {emp.status === 'Inactive' && (
+            <span className="employee-status-indicator inactive">
+              {emp.status}
+            </span>
           )}
         </div>
       </div>

@@ -82,7 +82,7 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #fff; /* Changed to white for better contrast as primary info */
+  color: var(--text-color);
   line-height: 1.2;
   flex: 1;
 }
@@ -285,7 +285,7 @@
 .list-name {
   font-size: 1.05rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-color);
 }
 
 /* Selection Toggle Styling */
