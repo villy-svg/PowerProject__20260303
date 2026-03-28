@@ -211,9 +211,10 @@
 }
 
 .v-select-btn.active {
-  background: var(--brand-green);
-  border-color: var(--brand-green);
-  color: white;
+  background: rgba(0, 255, 133, 0.15) !important;
+  border-color: var(--brand-mint) !important;
+  color: var(--brand-mint) !important;
+  border-width: 2px !important;
 }
 
 .modal-actions {
@@ -237,9 +238,15 @@
 }
 
 .save-btn {
-  background: var(--brand-green);
-  border: none;
-  color: white;
+  background: rgba(0, 255, 133, 0.1) !important;
+  border: 1px solid var(--brand-mint) !important;
+  color: var(--brand-mint) !important;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+  background: rgba(0, 255, 133, 0.2) !important;
+  box-shadow: 0 0 20px var(--halo-glow);
 }
 
 .status-banner {
@@ -599,8 +606,9 @@
 }
 
 .view-toggle-btn.active {
-  background: var(--brand-green);
-  color: #000;
+  background: rgba(0, 255, 133, 0.15) !important;
+  color: var(--brand-mint) !important;
+  border: 1px solid var(--brand-mint) !important;
   opacity: 1;
 }
 

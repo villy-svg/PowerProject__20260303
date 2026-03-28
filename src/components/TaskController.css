@@ -32,8 +32,9 @@
 }
 
 .toggle-depri-btn.active {
-  background: var(--brand-green);
-  color: #000;
+  background: rgba(0, 255, 133, 0.15) !important;
+  color: var(--brand-mint) !important;
+  border: 1px solid var(--brand-mint) !important;
   opacity: 1;
 }
 
@@ -74,8 +75,9 @@
 }
 
 .view-toggle-btn.active {
-  background: var(--brand-green);
-  color: #000;
+  background: rgba(0, 255, 133, 0.15) !important;
+  color: var(--brand-mint) !important;
+  border: 1px solid var(--brand-mint) !important;
   opacity: 1;
 }
 
@@ -456,8 +458,9 @@
 }
 
 .confirm-btn {
-  background: var(--brand-green);
-  color: black;
+  background: rgba(0, 255, 133, 0.1) !important;
+  color: var(--brand-mint) !important;
+  border: 1px solid var(--brand-mint) !important;
   font-weight: 700;
   min-width: 100px;
 }
