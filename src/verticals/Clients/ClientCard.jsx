@@ -44,6 +44,39 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
       onDoubleClick={() => onView(client)}
       title="Double-click to view"
     >
+      {/* Floating Card Actions */}
+      <div className="client-card-actions">
+        {permissions.canUpdate && (
+          <button
+            className="action-icon-btn edit-pencil"
+            onClick={(e) => { e.stopPropagation(); onEdit(client); }}
+            title="Edit Client"
+            style={{ opacity: 0.5, filter: 'grayscale(1)' }}
+          >
+            ✎
+          </button>
+        )}
+        {permissions.canDelete && (
+          <button 
+            className="action-icon-btn delete" 
+            onClick={(e) => { e.stopPropagation(); onDelete(client.id); }} 
+            title="Delete"
+          >
+            ×
+          </button>
+        )}
+        {permissions.canUpdate && (
+          <button
+            className={`halo-button status-toggle-btn ${client.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
+            style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', fontWeight: 900 }}
+            onClick={(e) => { e.stopPropagation(); onToggleStatus(client.id, client.status); }}
+            title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+          >
+            {client.status === 'Active' ? '↓' : '↑'}
+          </button>
+        )}
+      </div>
+
       {/* Badges Row */}
       <div className="client-card-badges">
         {matrixSummary ? (
@@ -57,31 +90,6 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
             {pendingTasksCount} Tasks
           </span>
         )}
-        <div style={{ marginLeft: 'auto' }} className="employee-actions">
-          {permissions.canUpdate && (
-            <button
-              className="action-icon-btn edit-pencil"
-              onClick={() => onEdit(client)}
-              title="Edit Client"
-              style={{ opacity: 0.5, filter: 'grayscale(1)' }}
-            >
-              ✎
-            </button>
-          )}
-          {permissions.canDelete && (
-            <button className="action-icon-btn delete" onClick={() => onDelete(client.id)} title="Delete">×</button>
-          )}
-          {permissions.canUpdate && (
-            <button
-              className={`halo-button ${client.status === 'Active' ? 'delete-btn' : 'save-btn'}`}
-              style={{ padding: '2px 10px', fontSize: '0.8rem', minWidth: 'auto', marginLeft: '4px', fontWeight: 900 }}
-              onClick={() => onToggleStatus(client.id, client.status)}
-              title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-            >
-              {client.status === 'Active' ? '↓' : '↑'}
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Name */}
