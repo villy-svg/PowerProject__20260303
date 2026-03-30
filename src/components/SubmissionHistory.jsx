@@ -170,6 +170,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
             {canReview && submission.status === 'pending' && (
               <div className="submission-card-actions">
                 <button
+                  type="button"
                   className="submission-approve-btn"
                   onClick={() => handleStatusUpdate(submission.id, 'approved')}
                   disabled={updating === submission.id}
@@ -177,6 +178,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                   {updating === submission.id ? '...' : '✓ Approve'}
                 </button>
                 <button
+                  type="button"
                   className="submission-reject-btn"
                   onClick={(e) => {
                     e.stopPropagation();
