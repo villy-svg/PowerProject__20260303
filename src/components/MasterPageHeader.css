@@ -69,6 +69,10 @@
   color: var(--brand-green);
 }
 
+.menu-trigger-btn.active:hover {
+  color: var(--brand-mint) !important;
+}
+
 /* Ensure halo buttons have consistent vertical alignment */
 .master-header-actions-row .halo-button, .expanded-menu-row .halo-button {
   padding: 8px 16px;

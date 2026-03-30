@@ -167,9 +167,10 @@
 }
 
 .halo-button.active {
-  background: var(--brand-green);
-  color: #000;
-  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-mint);
+  border: 2px solid var(--brand-green);
+  box-shadow: 0 0 20px var(--halo-glow);
 }
 
 .halo-button:disabled {
@@ -208,9 +209,9 @@
 }
 
 .view-toggle-btn.active {
-  background: rgba(0, 255, 133, 0.15) !important;
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
   color: var(--brand-mint) !important;
-  border: 1px solid var(--brand-mint) !important;
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
   opacity: 1;
 }
 
