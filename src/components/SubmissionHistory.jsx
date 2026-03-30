@@ -178,7 +178,10 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                 </button>
                 <button
                   className="submission-reject-btn"
-                  onClick={() => setRejectionSubmission(submission)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRejectionSubmission(submission);
+                  }}
                   disabled={updating === submission.id}
                 >
                   {updating === submission.id ? '...' : '✗ Reject'}
