@@ -84,7 +84,7 @@
   pointer-events: none;
   font-family: var(--font-main);
   text-transform: none;
-  text-shadow: 0 0 30px var(--halo-glow);
+  text-shadow: 0 0 8px var(--halo-glow);
 }
 
 .theme-toggle-btn {

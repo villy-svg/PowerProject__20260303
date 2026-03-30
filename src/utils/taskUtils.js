@@ -116,6 +116,9 @@ export const taskUtils = {
       }
 
       // Non-creators (Assignees/System-generated) move only between BACKLOG and IN_PROGRESS.
+      // Once it reaches REVIEW or COMPLETED, they can no longer move it via arrows.
+      if (['REVIEW', 'COMPLETED'].includes(task.stageId)) return false;
+
       // They MUST use "Submit for Review" (proof of work flow) to reach further.
       return ['BACKLOG', 'IN_PROGRESS'].includes(targetStageId);
     }
