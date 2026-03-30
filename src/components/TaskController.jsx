@@ -57,7 +57,8 @@ const TaskController = (props) => {
     executeMerge,
     handleClearBoard,
     openAddModal, openEditModal, handleAddSubtask,
-    toggleStageSelection
+    toggleStageSelection,
+    canEditTask
   } = controller;
 
   // ─── Proof of Work Submission Modal State ────────────────────────────
