@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import TaskListView from './TaskListView';
 import TaskKanbanView from './TaskKanbanView';
 import TaskActionModals from './TaskActionModals';
+import SubmissionModal from './SubmissionModal';
 import TaskCSVDownload from '../verticals/ChargingHubs/TaskCSVDownload';
 import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
 import MasterPageHeader from './MasterPageHeader';
@@ -58,6 +59,11 @@ const TaskController = (props) => {
     openAddModal, openEditModal, handleAddSubtask,
     toggleStageSelection
   } = controller;
+
+  // ─── Proof of Work Submission Modal State ────────────────────────────
+  const [submissionTask, setSubmissionTask] = useState(null);
+  const openSubmissionModal = (task) => setSubmissionTask(task);
+  const closeSubmissionModal = () => setSubmissionTask(null);
 
   return (
     <div className="task-controller">
@@ -142,6 +148,14 @@ const TaskController = (props) => {
         setConfirmDialog={setConfirmDialog}
       />
 
+      <SubmissionModal
+        isOpen={!!submissionTask}
+        onClose={closeSubmissionModal}
+        task={submissionTask}
+        user={props.user}
+        onSubmitSuccess={() => { closeSubmissionModal(); if (props.refreshTasks) props.refreshTasks(false); }}
+      />
+
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
           <TaskKanbanView
@@ -170,6 +184,7 @@ const TaskController = (props) => {
             onDuplicateMerge={openEditModal}
             onPromote={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}
+            openSubmissionModal={openSubmissionModal}
           />
         ) : viewMode === 'list' ? (
           <TaskListView
@@ -192,6 +207,7 @@ const TaskController = (props) => {
             currentUser={props.user}
             canCreate={canUserCreate}
             permissions={permissions}
+            openSubmissionModal={openSubmissionModal}
           />
         ) : (
           <TaskTreeView
@@ -209,6 +225,7 @@ const TaskController = (props) => {
             currentUser={props.user}
             canCreate={canUserCreate}
             permissions={permissions}
+            openSubmissionModal={openSubmissionModal}
           />
         )}
       </div>

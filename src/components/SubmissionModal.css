@@ -1,0 +1,298 @@
+/* ==========================================================================
+   SubmissionModal.css — Proof of Work Modal (Halo/Glassmorphism System)
+   Follows: UI Design System §5 (Modals), §12 (Apple Premium Standards)
+   ========================================================================== */
+
+/* ─── Modal Body Layout ─────────────────────────────────────────────────── */
+.submission-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ─── Section Labels ────────────────────────────────────────────────────── */
+.submission-section-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-mint);
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+/* ─── Comment Textarea ──────────────────────────────────────────────────── */
+.submission-comment-area {
+  width: 100%;
+  min-height: 120px;
+  padding: clamp(12px, 2vw, 16px);
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submission-comment-area::placeholder {
+  color: var(--text-color);
+  opacity: 0.35;
+}
+
+.submission-comment-area:focus {
+  outline: none;
+  border-color: var(--brand-mint);
+  box-shadow: 0 0 0 3px rgba(112, 243, 218, 0.15);
+}
+
+/* ─── File Upload Zone ──────────────────────────────────────────────────── */
+.submission-upload-zone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-button);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--halo-bg);
+  position: relative;
+}
+
+.submission-upload-zone:hover,
+.submission-upload-zone.drag-active {
+  border-color: var(--brand-mint);
+  box-shadow: 0 0 20px var(--halo-glow);
+  background: color-mix(in srgb, var(--brand-mint), transparent 95%);
+}
+
+.submission-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-zone-icon {
+  font-size: 2rem;
+  opacity: 0.3;
+  margin-bottom: 0.5rem;
+}
+
+.upload-zone-text {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  line-height: 1.5;
+}
+
+.upload-zone-text strong {
+  color: var(--brand-mint);
+  opacity: 1;
+}
+
+/* ─── File Preview Strip ────────────────────────────────────────────────── */
+.submission-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.submission-file-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 12px;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color);
+  max-width: 200px;
+  overflow: hidden;
+  animation: chipSlideIn 0.2s ease-out;
+}
+
+@keyframes chipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.submission-file-chip .file-chip-thumbnail {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.submission-file-chip .file-chip-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.submission-file-chip .file-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.submission-file-chip .file-chip-size {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.submission-file-chip .file-chip-remove {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.submission-file-chip .file-chip-remove:hover {
+  opacity: 1;
+  color: var(--priority-urgent);
+}
+
+/* ─── Submit Button Area ────────────────────────────────────────────────── */
+.submission-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.submission-cancel-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.6;
+  padding: 10px 20px;
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: inherit;
+}
+
+.submission-cancel-btn:hover {
+  opacity: 1;
+}
+
+.submission-submit-btn {
+  /* Inherits .halo-button styles */
+  min-width: 140px;
+}
+
+.submission-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Progress Indicator ────────────────────────────────────────────────── */
+.submission-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 12px 16px;
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%);
+  border-radius: var(--radius-button);
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--halo-glow); }
+  50% { box-shadow: 0 0 20px var(--halo-glow); }
+}
+
+.submission-progress-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.submission-progress-fill {
+  height: 100%;
+  background: var(--brand-mint);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.submission-progress-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brand-mint);
+  white-space: nowrap;
+}
+
+/* ─── Status Badge ──────────────────────────────────────────────────────── */
+.submission-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submission-status-badge.pending {
+  background: var(--badge-amber-bg);
+  color: var(--badge-amber-text);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.submission-status-badge.approved {
+  background: var(--badge-green-bg);
+  color: var(--badge-green-text);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.submission-status-badge.rejected {
+  background: var(--badge-red-bg);
+  color: var(--badge-red-text);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .submission-file-chip {
+    max-width: 100%;
+  }
+  
+  .submission-actions {
+    flex-direction: column;
+  }
+  
+  .submission-actions button {
+    width: 100%;
+  }
+}

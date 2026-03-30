@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
+    "browser-image-compression": "^2.0.2",
     "exceljs": "^4.4.0",
     "papaparse": "^5.5.3",
     "react": "^19.2.0",
