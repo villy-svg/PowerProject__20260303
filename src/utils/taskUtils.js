@@ -8,18 +8,18 @@ export const taskUtils = {
    */
   getAssigneeLabel(task, currentUser) {
     if (!task?.assigned_to) return 'NULL';
-    
-    const isMe = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || 
-                 (currentUser?.id && task.assigned_to === currentUser.id);
-                 
+
+    const isMe = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) ||
+      (currentUser?.id && task.assigned_to === currentUser.id);
+
     if (isMe) return 'YOU';
-    
+
     // Fallback to formatting the name
     if (task.assigneeName) {
       return task.assigneeName.split(' ')[0];
     }
-    
-    return '...'; 
+
+    return '...';
   },
 
   /**
@@ -41,9 +41,9 @@ export const taskUtils = {
    */
   formatAssigneeForList(assigneeId, assigneeName, currentUser) {
     if (!assigneeName) return 'Unassigned';
-    
-    const isMe = (currentUser?.employeeId && assigneeId === currentUser.employeeId) || 
-                 (currentUser?.id && assigneeId === currentUser.id);
+
+    const isMe = (currentUser?.employeeId && assigneeId === currentUser.employeeId) ||
+      (currentUser?.id && assigneeId === currentUser.id);
 
     if (isMe) {
       return `YOU (${assigneeName})`;
@@ -66,15 +66,15 @@ export const taskUtils = {
     if (funcLower === 'hiring') {
       const prefix = "Hire : ";
       if (!finalTaskText.startsWith(prefix)) {
-         // If it has another prefix, replace it? No, just ensure Hire: is leading
-         finalTaskText = `${prefix}${finalTaskText}`;
+        // If it has another prefix, replace it? No, just ensure Hire: is leading
+        finalTaskText = `${prefix}${finalTaskText}`;
       }
-    } 
+    }
     // 2. Asset-based tasks (Hubs, Clients, etc) get the Asset Code prefix
     else if (options.assetCode && (funcLower === 'facility' || options.forcePrefix)) {
       const code = options.assetCode;
       const prefix = `${code} : `;
-      
+
       if (!finalTaskText.includes(" : ")) {
         // No prefix at all, add it
         finalTaskText = `${prefix}${finalTaskText}`;
@@ -98,34 +98,33 @@ export const taskUtils = {
    */
   canUserMoveTask(task, targetStageId, permissions, user) {
     if (!task || task.isContextOnly) return false;
-    
+
     // Admin/Editor can do anything
     if (permissions.canUpdate) return true;
-    
+
     const isCreator = (task.createdBy || task.created_by) === user.id;
     const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
 
     // Contributor logic
     if (permissions.level === 'contributor') {
-      // Forbidden for all Contributors
+      // Forbidden for all Contributors via arrows
       if (targetStageId === 'DEPRIORITIZED') return false;
 
       if (isCreator) {
-        // Creator-Contributors can move to any stage (except DEPRIORITIZED above)
-        return true; 
+        // Creators have full movement rights (e.g. personal management)
+        return true;
       }
 
-      if (isAssignee) {
-        // Assignee-only Contributors: restricted to BACKLOG ↔ IN_PROGRESS.
-        // To reach REVIEW, they MUST use "Submit for Review" (proof of work flow).
-        return ['BACKLOG', 'IN_PROGRESS'].includes(targetStageId);
-      }
+      // Non-creators (Assignees/System-generated) move only between BACKLOG and IN_PROGRESS.
+      // They MUST use "Submit for Review" (proof of work flow) to reach further.
+      return ['BACKLOG', 'IN_PROGRESS'].includes(targetStageId);
     }
 
     // Viewer-as-Assignee logic
     if (permissions.level === 'viewer' && isAssignee) {
-      // Can move till REVIEW (Forbidden: COMPLETED, DEPRIORITIZED)
-      return targetStageId !== 'COMPLETED' && targetStageId !== 'DEPRIORITIZED';
+      // Forbidden: Viewers cannot move tasks via arrow buttons at all.
+      // They must use "Submit for Review" (proof flow) to interact with task movement.
+      return false;
     }
 
     return false;

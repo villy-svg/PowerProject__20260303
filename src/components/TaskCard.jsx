@@ -221,9 +221,9 @@ const TaskCard = ({
             </>
           )}
           
-          {/* RBAC: Only Contributor+ can submit proof on active tasks */}
+          {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
           {!task.isContextOnly && 
-           ['contributor', 'editor', 'admin'].includes(permissions.level) && 
+           (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((user?.employeeId && task.assigned_to === user.employeeId) || (user?.id && task.assigned_to === user.id)))) && 
            task.stageId !== 'DEPRIORITIZED' && 
            task.stageId !== 'COMPLETED' && (
             <button

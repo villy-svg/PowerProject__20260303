@@ -30,16 +30,16 @@ const TaskTreeView = ({
   // Auto-expand tree to show current user's tasks
   React.useEffect(() => {
     if (!currentUser || !tasks || tasks.length === 0) return;
-    
+
     const newExpanded = new Set();
     const taskMap = new Map(tasks.map(t => [t.id, t]));
-    
+
     // Find tasks assigned to "YOU"
-    const myTasks = tasks.filter(t => 
-      (currentUser.employeeId && t.assigned_to === currentUser.employeeId) || 
+    const myTasks = tasks.filter(t =>
+      (currentUser.employeeId && t.assigned_to === currentUser.employeeId) ||
       (currentUser.id && t.assigned_to === currentUser.id)
     );
-    
+
     // Trace back all ancestors for each of my tasks
     myTasks.forEach(task => {
       let curr = task;
@@ -48,7 +48,7 @@ const TaskTreeView = ({
         curr = taskMap.get(curr.parentTask);
       }
     });
-    
+
     if (newExpanded.size > 0) {
       setExpandedIds(prev => new Set([...prev, ...newExpanded]));
     }
@@ -111,9 +111,9 @@ const TaskTreeView = ({
     const canEditDescription = taskUtils.canUserEditField(task, 'description', permsWithUpdate, currentUser);
 
     return (
-      <div 
+      <div
         className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
-        style={{ 
+        style={{
           '--stage-color': stage.color,
           marginLeft: `${(task.depth || 0) * 24}px`,
           opacity: task.isContextOnly ? 0.7 : 1
@@ -126,7 +126,7 @@ const TaskTreeView = ({
           <div className="tree-expander" onClick={(e) => toggleExpand(task.id, e)}>
             {tasks.some(t => t.parentTask === task.id) ? (expandedIds.has(task.id) ? '▼' : '▶') : ''}
           </div>
-          
+
           <div className="list-row-badges">
             {task.isContextOnly && (
               <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
@@ -147,7 +147,7 @@ const TaskTreeView = ({
               const directTasks = tasks.filter(t => t.parentTask === task.id);
               const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
               const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
-              
+
               return (
                 <div className="list-hierarchy-badges">
                   <span className="subtask-progress-badge mini" title="Direct Children Progress">
@@ -174,8 +174,8 @@ const TaskTreeView = ({
             const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
             const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
 
-            const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permsWithUpdate, currentUser);
-            const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permsWithUpdate, currentUser);
+            const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
+            const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
             if (!canMoveLeft && !canMoveRight) return null;
 
@@ -240,7 +240,7 @@ const TaskTreeView = ({
                   </div>
                 )}
                 {canCreate && (
-                  <button 
+                  <button
                     className="card-add-sub-button"
                     onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
                     title="Add Subtask Under This"
@@ -251,20 +251,21 @@ const TaskTreeView = ({
                 )}
               </React.Fragment>
             )}
-            
-            {/* RBAC: Only Contributor+ can submit proof on active tasks */}
-            {!task.isContextOnly && 
-             ['contributor', 'editor', 'admin'].includes(permissions.level) && 
-             task.stageId !== 'DEPRIORITIZED' && 
-             task.stageId !== 'COMPLETED' && (
-              <button
-                className="card-submit-proof-button"
-                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
-                title="Submit Proof of Work"
-              >
-                📤
-              </button>
-            )}
+
+            {/* RBAC: Only Contributor+ (non-creator) can submit proof on active tasks */}
+            {!task.isContextOnly &&
+              ['contributor', 'editor', 'admin'].includes(permissions.level) &&
+              ((task.createdBy || task.created_by) !== currentUser.id) && // Only if NOT the creator
+              task.stageId !== 'DEPRIORITIZED' &&
+              task.stageId !== 'COMPLETED' && (
+                <button
+                  className="card-submit-proof-button"
+                  onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                  title="Submit Proof of Work"
+                >
+                  📤
+                </button>
+              )}
 
             {!task.isContextOnly && (effectiveCanUpdate || canEditDescription) && (
               <button
@@ -276,7 +277,7 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permsWithUpdate, currentUser) && (
+            {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
               <button
                 className="card-reprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'BACKLOG'); }}
@@ -286,7 +287,7 @@ const TaskTreeView = ({
                 ⬆
               </button>
             )}
-            {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permsWithUpdate, currentUser) && (
+            {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
               <button
                 className="card-deprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'DEPRIORITIZED'); }}

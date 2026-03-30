@@ -6,20 +6,20 @@ import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { taskUtils } from '../utils/taskUtils';
 import './TaskListView.css';
 
-const ListViewRow = ({ 
-  task, 
+const ListViewRow = ({
+  task,
   stage,
-  stageList, 
-  canUpdate, 
+  stageList,
+  canUpdate,
   canEditTask,
-  canManageHierarchy, 
-  canDelete, 
-  deleteTask, 
-  updateTaskStage, 
-  openEditModal, 
-  openAddSubtaskModal, 
+  canManageHierarchy,
+  canDelete,
+  deleteTask,
+  updateTaskStage,
+  openEditModal,
+  openAddSubtaskModal,
   openSubmissionModal,
-  onMoveToParent, 
+  onMoveToParent,
   TaskTileComponent,
   selectedTaskIds,
   onSelect,
@@ -80,15 +80,15 @@ const ListViewRow = ({
           openEditModal(task);
         }
       }}
-      style={{ 
+      style={{
         '--stage-color': taskStage.color,
         opacity: task.isContextOnly ? 0.7 : 1,
       }}
     >
       {/* LEFT SIDE: Identity & Content */}
       <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
-        <div 
-          className="tree-expander" 
+        <div
+          className="tree-expander"
           onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
           style={{ width: '20px', display: 'flex', justifyContent: 'center', cursor: 'pointer', opacity: hasChildren ? 1 : 0 }}
         >
@@ -122,7 +122,7 @@ const ListViewRow = ({
               DUP
             </span>
           )}
-          
+
           <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
 
           {TaskTileComponent && (
@@ -136,7 +136,7 @@ const ListViewRow = ({
             const directTasks = tasks.filter(t => t.parentTask === task.id);
             const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
             const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
-            
+
             return (
               <div className="list-hierarchy-badges">
                 <span className="subtask-progress-badge mini" title="Direct Children Progress">
@@ -214,7 +214,7 @@ const ListViewRow = ({
                 </div>
               )}
               {canCreate && (
-                <button 
+                <button
                   className="card-add-sub-button"
                   onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
                   title="Add Subtask Under This"
@@ -224,20 +224,20 @@ const ListViewRow = ({
               )}
             </>
           )}
-          
-          {/* RBAC: Only Contributor+ can submit proof on active tasks */}
-          {!task.isContextOnly && 
-           ['contributor', 'editor', 'admin'].includes(permissions.level) && 
-           task.stageId !== 'DEPRIORITIZED' && 
-           task.stageId !== 'COMPLETED' && (
-            <button
-              className="card-submit-proof-button"
-              onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
-              title="Submit Proof of Work"
-            >
-              📤
-            </button>
-          )}
+
+          {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
+          {!task.isContextOnly &&
+            (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || (currentUser?.id && task.assigned_to === currentUser.id)))) &&
+            task.stageId !== 'DEPRIORITIZED' &&
+            task.stageId !== 'COMPLETED' && (
+              <button
+                className="card-submit-proof-button"
+                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                title="Submit Proof of Work"
+              >
+                📤
+              </button>
+            )}
 
           {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
@@ -308,7 +308,7 @@ const TaskListView = ({
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
   // Conventionally, project boards start expanded but let's just use an empty set and they can expand.
-  
+
   const toggleExpand = (id, e) => {
     if (e) e.stopPropagation();
     const newExpanded = new Set(expandedIds);
@@ -324,7 +324,7 @@ const TaskListView = ({
       {stageList.map((stage) => {
         // Find tasks that belong to this stage section based on their top-level ancestor
         const rawStageRootTasks = tasks.filter(t => !t.parentTask && t.stageId === stage.id);
-        
+
         // Find all descendants of these roots
         const allMemberIds = new Set();
         rawStageRootTasks.forEach(root => {
@@ -398,9 +398,9 @@ const TaskListView = ({
                 }
                 return true;
               }).map((task) => (
-                <ListViewRow 
-                  key={task.id} 
-                  task={task} 
+                <ListViewRow
+                  key={task.id}
+                  task={task}
                   stage={stage}
                   stageList={stageList}
                   canUpdate={canUpdate}
