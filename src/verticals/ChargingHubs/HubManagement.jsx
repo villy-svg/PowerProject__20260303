@@ -182,7 +182,14 @@ const HubManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Hub Management"
         description="Create and manage global charging hub locations."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + Add New Hub
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             <button
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -198,7 +205,7 @@ const HubManagement = ({ permissions = {} }) => {
             </button>
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <HubCSVDownload
               className="master-action-btn"
@@ -208,12 +215,7 @@ const HubManagement = ({ permissions = {} }) => {
             />
             <HubCSVDownload className="master-action-btn" label="Download Template" />
             {permissions.canCreate && (
-              <>
-                <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + Add New Hub
-                </button>
-              </>
+              <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
             )}
           </>
         }

@@ -83,7 +83,14 @@ const ClientServiceManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Client Service Manager"
         description="Define and manage service categories offered to your clients."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Service
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             {['grid', 'list'].map(mode => (
               <button
@@ -96,7 +103,7 @@ const ClientServiceManagement = ({ permissions = {} }) => {
             ))}
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <ClientCategoryCSVDownload 
               className="master-action-btn" 
@@ -115,19 +122,14 @@ const ClientServiceManagement = ({ permissions = {} }) => {
               headers={['Service Name', 'Code', 'Description']}
             />
             {permissions.canCreate && (
-              <>
-                <ClientCategoryCSVImport 
-                  className="master-action-btn" 
-                  label="Import Services" 
-                  onImportComplete={fetchCategories} 
-                  tableName="client_services"
-                  entityName="Client Services"
-                  requiredFields={['service_name']}
-                />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Service
-                </button>
-              </>
+              <ClientCategoryCSVImport 
+                className="master-action-btn" 
+                label="Import Services" 
+                onImportComplete={fetchCategories} 
+                tableName="client_services"
+                entityName="Client Services"
+                requiredFields={['service_name']}
+              />
             )}
           </>
         }

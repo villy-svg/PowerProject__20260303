@@ -106,7 +106,14 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Employee Role Management"
         description="Define and manage specific job roles for the employee vertical."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Role
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             <button 
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -122,17 +129,12 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
             </button>
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
             <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
-              <>
-                <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Role
-                </button>
-              </>
+              <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
             )}
           </>
         }

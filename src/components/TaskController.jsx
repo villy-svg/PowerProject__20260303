@@ -104,7 +104,19 @@ const TaskController = (props) => {
       <MasterPageHeader
         title={boardLabel || `${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
-        leftActions={
+        rightActions={
+          <>
+            {canUserCreate && !activeVertical.includes('daily') && (
+              <button
+                className="halo-button master-action-btn"
+                onClick={openAddModal}
+              >
+                + Add Task
+              </button>
+            )}
+          </>
+        }
+        expandedLeft={
           <>
             <div className="view-mode-toggle">
               {['kanban', 'list', 'tree'].map((mode) => (
@@ -151,7 +163,7 @@ const TaskController = (props) => {
             )}
           </>
         }
-        rightActions={
+        expandedRight={
           <>
             {(activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') && (
               <>
@@ -159,14 +171,6 @@ const TaskController = (props) => {
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
                 <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
               </>
-            )}
-            {canUserCreate && !activeVertical.includes('daily') && (
-              <button
-                className="halo-button master-action-btn"
-                onClick={openAddModal}
-              >
-                + Add Task
-              </button>
             )}
           </>
         }

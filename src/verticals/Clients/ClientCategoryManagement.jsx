@@ -100,7 +100,14 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Client Category Manager"
         description="Define and manage client categories for segmenting your client base."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Category
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             {['grid', 'list'].map(mode => (
               <button
@@ -113,7 +120,7 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
             ))}
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <ClientCategoryCSVDownload 
               className="master-action-btn" 
@@ -132,19 +139,14 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
               headers={['Category Name', 'Code', 'Default Service', 'Description']}
             />
             {permissions.canCreate && (
-              <>
-                <ClientCategoryCSVImport 
-                  className="master-action-btn" 
-                  label="Import Categories" 
-                  onImportComplete={fetchCategories} 
-                  tableName="client_categories"
-                  entityName="Client Categories"
-                  requiredFields={['category_name']}
-                />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Category
-                </button>
-              </>
+              <ClientCategoryCSVImport 
+                className="master-action-btn" 
+                label="Import Categories" 
+                onImportComplete={fetchCategories} 
+                tableName="client_categories"
+                entityName="Client Categories"
+                requiredFields={['category_name']}
+              />
             )}
           </>
         }

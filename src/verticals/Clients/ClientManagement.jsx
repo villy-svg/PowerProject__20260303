@@ -169,7 +169,17 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
       <MasterPageHeader
         title="Client Records Manager"
         description="Centralized database for client profiles, billing arrangements, and point-of-contact information."
-        leftActions={
+        rightActions={
+          permissions.canCreateClients && (
+            <button
+              className="halo-button master-action-btn"
+              onClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
+            >
+              + Add Client
+            </button>
+          )
+        }
+        expandedLeft={
           <>
             <div className="view-mode-toggle">
               {['grid', 'list'].map(mode => (
@@ -194,20 +204,12 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
             </button>
           </>
         }
-        rightActions={
+        expandedRight={
           <>
             <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
             <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
             {permissions.canCreateClients && (
-              <>
-                <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
-                <button
-                  className="halo-button master-action-btn"
-                  onClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
-                >
-                  + Add Client
-                </button>
-              </>
+              <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
             )}
           </>
         }

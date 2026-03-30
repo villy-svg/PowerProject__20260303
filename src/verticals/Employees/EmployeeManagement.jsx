@@ -183,7 +183,14 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
       <MasterPageHeader
         title="Employee Records Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
-        leftActions={
+        rightActions={
+          permissions.canCreateEmployees && (
+            <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
+              + Add Employee
+            </button>
+          )
+        }
+        expandedLeft={
           <>
             <div className="view-mode-toggle">
               {['grid', 'list', 'tree'].map(mode => (
@@ -207,17 +214,12 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
             </button>
           </>
         }
-        rightActions={
+        expandedRight={
           <>
             <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
             <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreateEmployees && (
-              <>
-                <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
-                <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
-                  + Add Employee
-                </button>
-              </>
+              <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
             )}
           </>
         }

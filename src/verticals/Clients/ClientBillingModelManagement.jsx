@@ -80,7 +80,14 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Billing Model Manager"
         description="Define and manage billing models to categorize how clients are charged."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Billing Model
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             {['grid', 'list'].map(mode => (
               <button
@@ -93,17 +100,12 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
             ))}
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
             <ClientBillingModelCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
-              <>
-                <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Billing Model
-                </button>
-              </>
+              <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
             )}
           </>
         }

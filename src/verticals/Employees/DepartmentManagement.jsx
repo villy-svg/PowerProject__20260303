@@ -104,7 +104,14 @@ const DepartmentManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Department Management"
         description="Define and manage organization departments for employee tracking."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Department
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             <button 
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -120,17 +127,12 @@ const DepartmentManagement = ({ permissions = {} }) => {
             </button>
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
             <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
-              <>
-                <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Department
-                </button>
-              </>
+              <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
             )}
           </>
         }

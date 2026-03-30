@@ -171,7 +171,21 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
       <MasterPageHeader
         title="Daily Tasks Management"
         description="Create and manage recurring task templates that automatically generate on the Task Board."
-        leftActions={
+        rightActions={
+          <>
+            {statusMsg.text && !isModalOpen && (
+              <span className={`status-pill ${statusMsg.type}`} style={{ marginRight: '1rem' }}>
+                {statusMsg.text}
+              </span>
+            )}
+            {permissions?.canCreateDailyTaskTemplates && (
+              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                + New Template
+              </button>
+            )}
+          </>
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             <button
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -186,20 +200,6 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
               List
             </button>
           </div>
-        }
-        rightActions={
-          <>
-            {statusMsg.text && !isModalOpen && (
-              <span className={`status-pill ${statusMsg.type}`} style={{ marginRight: '1rem' }}>
-                {statusMsg.text}
-              </span>
-            )}
-            {permissions?.canCreateDailyTaskTemplates && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Template
-              </button>
-            )}
-          </>
         }
       />
 

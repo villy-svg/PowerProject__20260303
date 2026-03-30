@@ -276,7 +276,7 @@ const UserManagement = ({ currentUser }) => {
       <MasterPageHeader
         title="User Management"
         description="Manage application users, their roles, and vertical access levels."
-        leftActions={
+        expandedLeft={
           <div className="view-mode-toggle">
             <button 
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}

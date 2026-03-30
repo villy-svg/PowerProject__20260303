@@ -104,7 +104,14 @@ const HubFunctionManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Hub Function Management"
         description="Define and manage functional categories for charging hub tasks."
-        leftActions={
+        rightActions={
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Function
+            </button>
+          )
+        }
+        expandedLeft={
           <div className="view-mode-toggle">
             <button 
               className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -120,7 +127,7 @@ const HubFunctionManagement = ({ permissions = {} }) => {
             </button>
           </div>
         }
-        rightActions={
+        expandedRight={
           <>
             <FunctionCSVDownload 
               className="halo-button master-action-btn" 
@@ -130,12 +137,7 @@ const HubFunctionManagement = ({ permissions = {} }) => {
             />
             <FunctionCSVDownload className="halo-button master-action-btn" label="Download Template" />
             {permissions.canCreate && (
-              <>
-                <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
-                <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                  + New Function
-                </button>
-              </>
+              <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
             )}
           </>
         }
