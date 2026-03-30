@@ -1,9 +1,13 @@
-import React from 'react';
-import AssigneeBadge from './AssigneeBadge';
-import { hierarchyUtils } from '../utils/hierarchyUtils';
-import { hierarchyService } from '../services/rules/hierarchyService';
-import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { taskUtils } from '../utils/taskUtils';
+import { 
+  IconEdit, 
+  IconDelete, 
+  IconUpload, 
+  IconPlus, 
+  IconArrowLeft, 
+  IconArrowRight, 
+  IconPromote, 
+  IconDiagonalUp 
+} from './Icons';
 import './TaskListView.css';
 
 const ListViewRow = ({
@@ -173,22 +177,22 @@ const ListViewRow = ({
       <div className="list-row-controls">
         {(canMoveLeft || canMoveRight) && (
           <div className="list-nav-group">
-            <button
-              className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
-              onClick={() => handleMove('left')}
-              disabled={!canMoveLeft}
-              title="Move Back"
-            >
-              ←
-            </button>
-            <button
-              className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
-              onClick={() => handleMove('right')}
-              disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
-              title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
-            >
-              →
-            </button>
+              <button
+                className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+                onClick={() => handleMove('left')}
+                disabled={!canMoveLeft}
+                title="Move Back"
+              >
+                <IconArrowLeft size={14} />
+              </button>
+              <button
+                className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
+                onClick={() => handleMove('right')}
+                disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
+                title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+              >
+                <IconArrowRight size={14} />
+              </button>
           </div>
         )}
 
@@ -206,9 +210,9 @@ const ListViewRow = ({
                         if (parent) onMoveToParent(task.id, parent.parentTask);
                       }}
                       title="Promote to Parent's Sibling (Promote to Grandparent)"
-                      style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                      style={{ color: 'var(--brand-blue)' }}
                     >
-                      ↖
+                      <IconDiagonalUp size={14} />
                     </button>
                   )}
                   <button
@@ -218,9 +222,9 @@ const ListViewRow = ({
                       onMoveToParent(task.id, null);
                     }}
                     title="Make Top Level Task"
-                    style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                    style={{ color: 'var(--brand-blue)' }}
                   >
-                    ↑
+                    <IconPromote size={14} />
                   </button>
                 </div>
               )}
@@ -230,7 +234,7 @@ const ListViewRow = ({
                   onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
                   title="Add Subtask Under This"
                 >
-                  +
+                  <IconPlus size={14} />
                 </button>
               )}
             </>
@@ -246,7 +250,7 @@ const ListViewRow = ({
                 onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
                 title="Submit Proof of Work"
               >
-                📤
+                <IconUpload size={14} />
               </button>
             )}
 
@@ -278,7 +282,7 @@ const ListViewRow = ({
               onClick={() => openEditModal(task)}
               title="Edit Task"
             >
-              ✎
+              <IconEdit size={14} />
             </button>
           )}
           {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
@@ -286,9 +290,9 @@ const ListViewRow = ({
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
               title="Move back to Pending"
-              style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+              style={{ color: 'var(--brand-green)' }}
             >
-              ⬆
+              <IconPromote size={14} />
             </button>
           )}
           {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
@@ -297,7 +301,7 @@ const ListViewRow = ({
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
-              ⬇
+              <IconArrowLeft size={14} style={{ transform: 'rotate(-90deg)' }} />
             </button>
           )}
           {effectiveCanDelete && (
@@ -306,7 +310,7 @@ const ListViewRow = ({
               onClick={() => deleteTask(task.id)}
               title="Delete Task"
             >
-              ×
+              <IconDelete size={14} />
             </button>
           )}
         </div>

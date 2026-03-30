@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import AssigneeBadge from './AssigneeBadge';
-import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { hierarchyService } from '../services/rules/hierarchyService';
-import { taskUtils } from '../utils/taskUtils';
+import { 
+  IconEdit, 
+  IconDelete, 
+  IconUpload, 
+  IconPlus, 
+  IconArrowLeft, 
+  IconArrowRight, 
+  IconPromote, 
+  IconDiagonalUp 
+} from './Icons';
 import './TaskCard.css';
 
 /**
@@ -181,7 +186,7 @@ const TaskCard = ({
                 disabled={!canMoveLeft}
                 title="Move Back"
               >
-                ←
+                <IconArrowLeft size={14} />
               </button>
               <button
                 className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
@@ -189,7 +194,7 @@ const TaskCard = ({
                 disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                 title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
               >
-                →
+                <IconArrowRight size={14} />
               </button>
             </>
           )}
@@ -210,7 +215,7 @@ const TaskCard = ({
                       }}
                       title="Promote to Parent's Sibling (Promote to Grandparent)"
                     >
-                      ↖
+                      <IconDiagonalUp size={14} />
                     </button>
                   )}
                   <button
@@ -218,7 +223,7 @@ const TaskCard = ({
                     onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
                     title="Promote to Top Level"
                   >
-                    ↑
+                    <IconPromote size={14} />
                   </button>
                 </div>
               )}
@@ -227,7 +232,7 @@ const TaskCard = ({
                 onClick={() => openAddSubtaskModal(task.id)}
                 title="Add Subtask Under This"
               >
-                +
+                <IconPlus size={14} />
               </button>
             </>
           )}
@@ -242,7 +247,7 @@ const TaskCard = ({
                 onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
                 title="Submit Proof of Work"
               >
-                📤
+                <IconUpload size={14} />
               </button>
             )}
 
@@ -274,7 +279,7 @@ const TaskCard = ({
               onClick={() => openEditModal(task)}
               title="Edit Task"
             >
-              ✎
+              <IconEdit size={14} />
             </button>
           )}
 
@@ -285,7 +290,7 @@ const TaskCard = ({
               title="Move back to Pending"
               style={{ color: 'var(--brand-green)', fontWeight: 800 }}
             >
-              ⬆
+              <IconPromote size={14} />
             </button>
           )}
 
@@ -295,7 +300,7 @@ const TaskCard = ({
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
-              ⬇
+              <IconArrowLeft size={14} style={{ transform: 'rotate(-90deg)' }} />
             </button>
           )}
 
@@ -305,7 +310,7 @@ const TaskCard = ({
               onClick={() => deleteTask(task.id)}
               title="Delete Task"
             >
-              ×
+              <IconDelete size={14} />
             </button>
           )}
         </div>

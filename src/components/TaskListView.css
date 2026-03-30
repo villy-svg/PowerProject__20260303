@@ -131,6 +131,12 @@
   gap: 12px;
   flex-wrap: wrap;
   flex-shrink: 0;
+  opacity: 0; /* Progressive Disclosure */
+  transition: opacity 0.25s ease;
+}
+
+.list-task-row:hover .list-row-controls {
+  opacity: 1;
 }
 
 .list-nav-group, .list-action-group {
@@ -148,9 +154,12 @@
 .list-task-row .card-nav-button,
 .list-task-row .card-edit-button,
 .list-task-row .card-delete-button,
-.list-task-row .card-add-sub-button {
-  width: 32px;
-  height: 32px;
+.list-task-row .card-add-sub-button,
+.list-task-row .card-submit-proof-button,
+.list-task-row .card-reprio-button,
+.list-task-row .card-deprio-button {
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,11 +167,15 @@
   border: none;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
-.list-task-row .card-add-sub-button:hover {
-  background: rgba(16, 185, 129, 0.1);
+.list-task-row .card-nav-button:hover,
+.list-task-row .card-edit-button:hover,
+.list-task-row .card-delete-button:hover,
+.list-task-row .card-add-sub-button:hover,
+.list-task-row .card-submit-proof-button:hover {
+  background: var(--halo-bg);
 }
 
 /* Tree Specific */
@@ -235,4 +248,22 @@
 .card-submit-proof-button:hover {
   background: var(--halo-bg);
   opacity: 1;
+}
+
+/* Icon Softening Consistency */
+.list-task-row .standard-icon {
+  opacity: 0.5 !important;
+}
+
+.list-task-row button:hover .standard-icon {
+  opacity: 0.9 !important;
+}
+
+.list-task-row .card-delete-button:hover .standard-icon {
+  color: #ef4444;
+}
+
+.list-task-row .card-add-sub-button:hover .standard-icon,
+.list-task-row .card-reprio-button:hover .standard-icon {
+  color: var(--brand-green);
 }

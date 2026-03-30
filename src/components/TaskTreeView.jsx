@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { hierarchyUtils } from '../utils/hierarchyUtils';
-import { hierarchyService } from '../services/rules/hierarchyService';
-import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { STAGE_LIST, TASK_STAGES } from '../constants/stages';
-import { taskUtils } from '../utils/taskUtils';
-import AssigneeBadge from './AssigneeBadge';
+import { 
+  IconEdit, 
+  IconDelete, 
+  IconUpload, 
+  IconPlus, 
+  IconArrowLeft, 
+  IconArrowRight, 
+  IconPromote, 
+  IconDiagonalUp 
+} from './Icons';
 import './TaskListView.css'; // Reusing some list styles for consistency
 
 const TaskTreeView = ({
@@ -223,7 +226,7 @@ const TaskTreeView = ({
                   disabled={!canMoveLeft}
                   title="Move Back"
                 >
-                  ←
+                  <IconArrowLeft size={14} />
                 </button>
                 <button
                   className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
@@ -234,7 +237,7 @@ const TaskTreeView = ({
                   disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                   title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
                 >
-                  →
+                  <IconArrowRight size={14} />
                 </button>
               </div>
             );
@@ -254,9 +257,9 @@ const TaskTreeView = ({
                           if (parent) onMoveToParent(task.id, parent.parentTask);
                         }}
                         title="Move to Parent's Sibling (Promote to Grandparent)"
-                        style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                        style={{ color: 'var(--brand-blue)' }}
                       >
-                        ↖
+                        <IconDiagonalUp size={14} />
                       </button>
                     )}
                     <button
@@ -266,9 +269,9 @@ const TaskTreeView = ({
                         onMoveToParent(task.id, null);
                       }}
                       title="Make Top Level Task"
-                      style={{ color: 'var(--brand-blue)', fontWeight: 800 }}
+                      style={{ color: 'var(--brand-blue)' }}
                     >
-                      ↑
+                      <IconPromote size={14} />
                     </button>
                   </div>
                 )}
@@ -277,9 +280,9 @@ const TaskTreeView = ({
                     className="card-add-sub-button"
                     onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
                     title="Add Subtask Under This"
-                    style={{ color: 'var(--brand-green)', fontWeight: 800, fontSize: '1.1rem' }}
+                    style={{ color: 'var(--brand-green)' }}
                   >
-                    +
+                    <IconPlus size={14} />
                   </button>
                 )}
               </React.Fragment>
@@ -296,7 +299,7 @@ const TaskTreeView = ({
                   onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
                   title="Submit Proof of Work"
                 >
-                  📤
+                  <IconUpload size={14} />
                 </button>
               )}
 
@@ -328,7 +331,7 @@ const TaskTreeView = ({
                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
                 title="Edit Task"
               >
-                ✎
+                <IconEdit size={14} />
               </button>
             )}
 
@@ -337,9 +340,9 @@ const TaskTreeView = ({
                 className="card-reprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'BACKLOG'); }}
                 title="Move back to Pending"
-                style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+                style={{ color: 'var(--brand-green)' }}
               >
-                ⬆
+                <IconPromote size={14} />
               </button>
             )}
             {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
@@ -348,7 +351,7 @@ const TaskTreeView = ({
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'DEPRIORITIZED'); }}
                 title="Move to Deprioritized"
               >
-                ⬇
+                <IconArrowLeft size={14} style={{ transform: 'rotate(-90deg)' }} />
               </button>
             )}
 
@@ -358,7 +361,7 @@ const TaskTreeView = ({
                 onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
                 title="Delete Task"
               >
-                ×
+                <IconDelete size={14} />
               </button>
             )}
           </div>
