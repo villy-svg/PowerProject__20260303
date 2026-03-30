@@ -1,17 +1,18 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import './TaskModal.css';
 
 /**
  * TaskModal
  * A generic modal for task creation/editing.
- * Accepts a 'Form' component to render vertical-specific fields.
+ * Rendered via a React Portal at document.body to prevent nested event conflicts.
  */
 const TaskModal = ({ isOpen, onClose, title, children, className = '' }) => {
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className={`task-modal-overlay ${className}`} 
+  return ReactDOM.createPortal(
+    <div
+      className={`task-modal-overlay ${className}`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -25,7 +26,8 @@ const TaskModal = ({ isOpen, onClose, title, children, className = '' }) => {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
