@@ -11,6 +11,7 @@ const TaskTreeView = ({
   tasks,
   activeVertical,
   canUpdate,
+  canEditTask,
   canManageHierarchy,
   canDelete,
   deleteTask,
@@ -105,7 +106,8 @@ const TaskTreeView = ({
       disabled: task.isContextOnly || !canManageHierarchy(task)
     });
 
-    const permsWithUpdate = { ...permissions, ...canUpdate ? { canUpdate } : {} };
+    const effectiveCanUpdate = canEditTask ? canEditTask(task) : canUpdate;
+    const permsWithUpdate = { ...permissions, ...effectiveCanUpdate ? { canUpdate: effectiveCanUpdate } : {} };
     const canEditDescription = taskUtils.canUserEditField(task, 'description', permsWithUpdate, currentUser);
 
     return (
@@ -118,7 +120,7 @@ const TaskTreeView = ({
         }}
         {...dragProps}
         {...dropProps}
-        onDoubleClick={() => !task.isContextOnly && (canUpdate || canEditDescription) && openEditModal(task)}
+        onDoubleClick={() => !task.isContextOnly && (effectiveCanUpdate || canEditDescription) && openEditModal(task)}
       >
         <div className="list-row-main">
           <div className="tree-expander" onClick={(e) => toggleExpand(task.id, e)}>
@@ -206,7 +208,7 @@ const TaskTreeView = ({
           })()}
 
           <div className="list-action-group">
-            {!task.isContextOnly && canUpdate && canManageHierarchy(task) && (
+            {!task.isContextOnly && effectiveCanUpdate && canManageHierarchy(task) && (
               <React.Fragment>
                 {task.parentTask && (
                   <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
@@ -265,7 +267,7 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {!task.isContextOnly && (canUpdate || canEditDescription) && (
+            {!task.isContextOnly && (effectiveCanUpdate || canEditDescription) && (
               <button
                 className="card-edit-button"
                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}

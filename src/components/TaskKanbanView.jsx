@@ -22,6 +22,7 @@ const TaskKanbanView = ({
   toggleTaskSelection,
   toggleStageSelection,
   canUserUpdate,
+  canEditTask,
   canUserDelete,
   canManageHierarchy,
   updateTaskStage,
@@ -149,7 +150,7 @@ const TaskKanbanView = ({
                     <TaskCard
                       task={task}
                       stage={stage}
-                      canUpdate={canUserUpdate}
+                      canUpdate={canEditTask ? canEditTask(task) : canUserUpdate}
                       canDelete={canUserDelete}
                       canManageHierarchy={canManageHierarchy(task)}
                       updateTaskStage={updateTaskStage}

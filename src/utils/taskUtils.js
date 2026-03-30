@@ -138,18 +138,17 @@ export const taskUtils = {
     if (!task) return true; // Add mode
     if (task.isContextOnly) return false;
 
-    // Admin/Editor can edit everything
-    if (permissions.canUpdate) return true;
-
     const isCreator = (task.createdBy || task.created_by) === user.id;
+
+    // Admin/Editor OR a Contributor who authored the task can edit everything
+    if (permissions.canUpdate || (permissions.level === 'contributor' && isCreator)) {
+      return true;
+    }
+
     const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
 
-    // Contributor (Creator/Assignee) OR Viewer (Assignee)
-    const hasDescriptionRights = (permissions.level === 'contributor' && (isCreator || isAssignee)) ||
-                                 (permissions.level === 'viewer' && isAssignee);
-
-    if (hasDescriptionRights) {
-      // ONLY description is editable
+    // If they aren't fully authorized above, they might still have assignee description-only rights
+    if (['contributor', 'viewer'].includes(permissions.level) && isAssignee) {
       return fieldName === 'description';
     }
 

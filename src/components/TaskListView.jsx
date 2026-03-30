@@ -8,9 +8,10 @@ import './TaskListView.css';
 
 const ListViewRow = ({ 
   task, 
-  stage, 
+  stage,
   stageList, 
   canUpdate, 
+  canEditTask,
   canManageHierarchy, 
   canDelete, 
   deleteTask, 
@@ -33,7 +34,7 @@ const ListViewRow = ({
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
 
-  const effectiveCanUpdate = canUpdate && !task.isContextOnly;
+  const effectiveCanUpdate = (canEditTask ? canEditTask(task) : canUpdate) && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
   const canManage = canManageHierarchy(task);
 
@@ -287,6 +288,7 @@ const TaskListView = ({
   stageList,
   activeVertical,
   canUpdate,
+  canEditTask,
   canManageHierarchy,
   canDelete,
   deleteTask,
@@ -403,6 +405,7 @@ const TaskListView = ({
                   stage={stage}
                   stageList={stageList}
                   canUpdate={canUpdate}
+                  canEditTask={canEditTask}
                   canManageHierarchy={canManageHierarchy}
                   canDelete={canDelete}
                   deleteTask={deleteTask}

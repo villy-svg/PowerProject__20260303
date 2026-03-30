@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
- import { getPermissionsForLevel } from '../constants/roles';
+import { getPermissionsForLevel, getMinLevel } from '../constants/roles';
  import { hierarchyService } from '../services/rules/hierarchyService';
 
 /**
@@ -71,38 +71,63 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       current.toUpperCase();
 
     const permData = user.verticalPermissions?.[rootVerticalId];
-    const level = permData?.level || 'none';
+    const verticalLevel = permData?.level || 'none';
     const featureLevels = permData?.features || {};
 
-    // Base capabilities at the vertical level
-    const verticalCaps = getPermissionsForLevel(level);
+    // 1. Calculate effective capabilities at the vertical root level
+    const verticalCaps = getPermissionsForLevel(verticalLevel);
+    
+    // 2. Determine the active feature name (if any) to set the board's effective base level
+    // This allows a "Contributor" on a specific board to be treated as a Contributor globally within that view.
+    const isFeatureView = current.includes('_') && current !== verticals.CHARGING_HUBS?.id;
+    let activeFeatureLevel = verticalLevel; // Default to vertical level
+    
+    if (isFeatureView || current === verticals.CHARGING_HUBS?.id) {
+        // Find matching feature key, e.g. "hub_tasks" -> "canAccessHubTasks"
+        let featureKey;
+        if (current === verticals.CHARGING_HUBS?.id) featureKey = 'canAccessHubTasks'; // Default board for Hubs
+        else {
+            const featureName = current.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+            featureKey = `canAccess${featureName}`;
+        }
+        
+        // Scenario 1 & 2: Get specific feature level if it exists, otherwise fallback to vertical level.
+        // THEN cap it by the vertical level using getMinLevel (Scenario 2).
+        const rawFeatureLevel = featureLevels[featureKey] || verticalLevel;
+        activeFeatureLevel = getMinLevel(verticalLevel, rawFeatureLevel);
+    }
+    
+    // 3. The base view caps are now derived from the active feature's capped level, not just the vertical
+    // This solves Scenario 1 where `editor` on vertical but `contributor` on board allows edits incorrectly.
+    const effectiveCaps = getPermissionsForLevel(activeFeatureLevel);
 
-    // Build final permissions map
+    // Build final permissions map, starting with effectiveCaps
     const finalPerms = {
-      ...verticalCaps,
+      ...effectiveCaps,
       roleId,
       scope: 'assigned',
-      canAccessConfig: level === 'admin',
+      canAccessConfig: verticalLevel === 'admin',
       canViewKanbanHierarchy,
     };
 
-    // Feature-granular CRUD flags
-    // Pattern: canAccessClients, canCreateClients, canUpdateClients, etc.
+    // 4. Feature-granular CRUD flags
+    // Cap all granular features by the vertical level (Scenario 2 cascade)
     Object.keys(featureLevels).forEach(fId => {
-      const fLvl = featureLevels[fId];
-      const featureCaps = getPermissionsForLevel(fLvl);
+      const dbFeatureLevel = featureLevels[fId];
+      // Cascading downgrade: feature cannot exceed vertical level
+      const cappedLevel = getMinLevel(verticalLevel, dbFeatureLevel);
+      const featureCaps = getPermissionsForLevel(cappedLevel);
       const featureName = fId.replace('canAccess', '');
 
       // Boolean visibility flag (used by sidebar and sub-feature guards)
-      finalPerms[fId] = fLvl !== 'none';
+      finalPerms[fId] = cappedLevel !== 'none';
 
-      // Granular CRUD — effective = minimum of vertical and feature access
-      finalPerms[`canCreate${featureName}`] = verticalCaps.canCreate && featureCaps.canCreate;
-      finalPerms[`canRead${featureName}`] = verticalCaps.canRead && featureCaps.canRead;
-      finalPerms[`canUpdate${featureName}`] = verticalCaps.canUpdate && featureCaps.canUpdate;
-      finalPerms[`canDelete${featureName}`] = verticalCaps.canDelete && featureCaps.canDelete;
+      // Granular CRUD — derived from the capped permission level
+      finalPerms[`canCreate${featureName}`] = featureCaps.canCreate;
+      finalPerms[`canRead${featureName}`]   = featureCaps.canRead;
+      finalPerms[`canUpdate${featureName}`] = featureCaps.canUpdate;
+      finalPerms[`canDelete${featureName}`] = featureCaps.canDelete;
     });
-
 
      return finalPerms;
   }, [user, activeVertical, verticals]);

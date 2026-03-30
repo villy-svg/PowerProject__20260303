@@ -178,6 +178,7 @@ const TaskController = (props) => {
             toggleTaskSelection={toggleTaskSelection}
             toggleStageSelection={toggleStageSelection}
             canUserUpdate={canUserUpdate}
+            canEditTask={canEditTask}
             canUserDelete={canUserDelete}
             canManageHierarchy={canManageHierarchy}
             updateTaskStage={handleInternalUpdateStage}
@@ -196,6 +197,7 @@ const TaskController = (props) => {
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
+            canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
             updateTaskStage={handleInternalUpdateStage}
@@ -218,6 +220,7 @@ const TaskController = (props) => {
             tasks={filteredTasks}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
+            canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
             updateTaskStage={handleInternalUpdateStage}

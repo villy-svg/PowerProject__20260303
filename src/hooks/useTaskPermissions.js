@@ -51,10 +51,35 @@ export const useTaskPermissions = ({
     return isCreator;
   }, [user.seniority, user.id]);
 
+  // 5. Task Editing Guard
+  // Determines if the user can even *open* the Edit Modal (the ✎ button).
+  // taskUtils.canUserEditField will further lock down specific fields inside the modal.
+  const canEditTask = useCallback((task) => {
+    if (!task) return false;
+    if (task.isContextOnly) return false;
+
+    // Admin / Editor
+    if (canUserUpdate) return true;
+
+    // Contributor or lower
+    const isCreator = (task.createdBy || task.created_by) === user.id;
+    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+
+    // If the board caps them at contributor, they can still open the modal 
+    // IF they created the task OR if they are assigned.
+    if (['contributor', 'viewer'].includes(permissions.level) && (isCreator || isAssignee)) {
+      return true;
+    }
+
+    return false;
+  }, [canUserUpdate, user.id, user.employeeId, permissions.level]);
+
+
   return {
     canUserCreate,
     canUserUpdate,
     canUserDelete,
-    canManageHierarchy
+    canManageHierarchy,
+    canEditTask
   };
 };

@@ -62,6 +62,17 @@ export const ROLE_LIST = Object.keys(DEFAULT_ROLE_PERMISSIONS).map(id => ({
   icon: id.includes('master') ? '👑' : '🏢'
 }));
 
+export const LEVEL_ORDER = { admin: 4, editor: 3, contributor: 2, viewer: 1, none: 0 };
+
+/**
+ * Returns the more restrictive (lower) of two permission levels.
+ */
+export const getMinLevel = (l1, l2) => {
+  const lvl1 = l1 || 'none';
+  const lvl2 = l2 || 'none';
+  return LEVEL_ORDER[lvl1] < LEVEL_ORDER[lvl2] ? lvl1 : lvl2;
+};
+
 /**
  * Returns permissions flags for a given capability level.
  * @param {string} level - 'admin', 'editor', 'contributor', or 'viewer'

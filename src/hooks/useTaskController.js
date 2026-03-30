@@ -220,6 +220,7 @@ export const useTaskController = (props) => {
     handleSaveTask,
     executeMerge,
     handleClearBoard,
-    openAddModal, openEditModal, handleAddSubtask
+    openAddModal, openEditModal, handleAddSubtask,
+    canEditTask
   };
 };
