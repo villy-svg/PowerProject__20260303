@@ -25,7 +25,8 @@ const TaskActionModals = ({
   setMergeTaskCluster,
   executeMerge,
   confirmDialog,
-  setConfirmDialog
+  setConfirmDialog,
+  onSubmissionReview
 }) => {
   return (
     <>
@@ -41,6 +42,7 @@ const TaskActionModals = ({
             loading={saving}
             currentUser={user}
             permissions={permissions}
+            onSubmissionStatusUpdate={onSubmissionReview}
             availableTasks={(tasks || []).filter(t => {
               if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
               if (!editingTask) return true;

@@ -11,7 +11,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Includes text, priority, and link to a specific hub.
  */
-const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {} }) => {
+const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -211,6 +211,7 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
           taskId={safeData.id}
           permissions={permissions}
           currentUser={currentUser}
+          onStatusUpdate={onSubmissionStatusUpdate}
         />
       )}
     </form>

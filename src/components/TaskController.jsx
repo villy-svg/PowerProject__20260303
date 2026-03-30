@@ -29,7 +29,8 @@ const TaskController = (props) => {
     permissions,
     rootVerticalId,
     verticals,
-    boardLabel
+    boardLabel,
+    user
   } = props;
 
   const controller = useTaskController(props);
@@ -42,6 +43,7 @@ const TaskController = (props) => {
     showDeprioritized, setShowDeprioritized,
     drillDownId, setDrillDownId,
     drillPath,
+    showReworkOnly, setShowReworkOnly,
     selectedTaskIds,
     clearSelection,
     toggleTaskSelection,
@@ -192,6 +194,15 @@ const TaskController = (props) => {
         executeMerge={executeMerge}
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
+        onSubmissionReview={async (subId, status) => {
+          if (status === 'rejected' && editingTask) {
+            await handleInternalUpdateStage(editingTask.id, 'IN_PROGRESS');
+            if (refreshTasks) refreshTasks(false);
+          } else if (status === 'approved' && editingTask) {
+            await handleInternalUpdateStage(editingTask.id, 'COMPLETED');
+            if (refreshTasks) refreshTasks(false);
+          }
+        }}
       />
 
       <SubmissionModal

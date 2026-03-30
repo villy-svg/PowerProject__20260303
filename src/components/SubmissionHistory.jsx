@@ -12,8 +12,9 @@ import './SubmissionHistory.css';
  * - taskId (string): The task ID to fetch submissions for
  * - permissions (object): Current user's permissions ({ canUpdate, level })
  * - currentUser (object): Current user ({ id })
+ * - onStatusUpdate (fn): Optional callback after a successful status change (submissionId, newStatus)
  */
-const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
+const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatusUpdate }) => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null); // tracks which submission is being updated
@@ -46,6 +47,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
         prev.map(s => s.id === submissionId ? { ...s, status: updated.status, rejection_reason: updated.rejection_reason } : s)
       );
       setRejectionSubmission(null);
+      if (onStatusUpdate) onStatusUpdate(submissionId, newStatus);
     } catch (err) {
       alert(`Failed to ${newStatus}: ${err.message}`);
     } finally {
