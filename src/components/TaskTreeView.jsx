@@ -250,7 +250,11 @@ const TaskTreeView = ({
               </React.Fragment>
             )}
             
-            {!task.isContextOnly && task.stageId !== 'DEPRIORITIZED' && task.stageId !== 'COMPLETED' && (
+            {/* RBAC: Only Contributor+ can submit proof on active tasks */}
+            {!task.isContextOnly && 
+             ['contributor', 'editor', 'admin'].includes(permissions.level) && 
+             task.stageId !== 'DEPRIORITIZED' && 
+             task.stageId !== 'COMPLETED' && (
               <button
                 className="card-submit-proof-button"
                 onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}

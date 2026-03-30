@@ -111,13 +111,14 @@ export const taskUtils = {
       if (targetStageId === 'DEPRIORITIZED') return false;
 
       if (isCreator) {
-        // Can move till COMPLETED
+        // Creator-Contributors can move to any stage (except DEPRIORITIZED above)
         return true; 
       }
 
       if (isAssignee) {
-        // Can move till REVIEW (Forbidden: COMPLETED)
-        return targetStageId !== 'COMPLETED';
+        // Assignee-only Contributors: restricted to BACKLOG ↔ IN_PROGRESS.
+        // To reach REVIEW, they MUST use "Submit for Review" (proof of work flow).
+        return ['BACKLOG', 'IN_PROGRESS'].includes(targetStageId);
       }
     }
 

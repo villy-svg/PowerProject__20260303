@@ -6,12 +6,13 @@ import './SubmissionModal.css';
 /**
  * SubmissionModal
  * Proof of Work submission modal for Field Contributors.
- * Allows adding a comment and uploading compressed photos/documents.
+ * Two actions: "Upload Only" (save proof, stay in stage) and "Submit for Review" (save + move to REVIEW).
+ * Read-only when task is in REVIEW or COMPLETED (attachments locked).
  *
  * Props:
  * - isOpen (bool): Controls modal visibility
  * - onClose (fn): Callback to close the modal
- * - task (object): The task being submitted against ({ id, text })
+ * - task (object): The task being submitted against ({ id, text, stageId })
  * - user (object): Current user ({ id })
  * - onSubmitSuccess (fn): Optional callback after successful submission
  */
@@ -23,21 +24,26 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Task is locked if it's already in REVIEW or COMPLETED
+  const isLocked = task?.stageId === 'REVIEW' || task?.stageId === 'COMPLETED';
+
   // ─── File Handlers ──────────────────────────────────────────────────────
   const handleFiles = useCallback((newFiles) => {
+    if (isLocked) return;
     const fileArray = Array.from(newFiles);
     setFiles((prev) => [...prev, ...fileArray]);
-  }, []);
+  }, [isLocked]);
 
   const removeFile = useCallback((index) => {
+    if (isLocked) return;
     setFiles((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  }, [isLocked]);
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragActive(true);
-  }, []);
+    if (!isLocked) setDragActive(true);
+  }, [isLocked]);
 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
@@ -49,29 +55,28 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    if (e.dataTransfer.files?.length > 0) {
+    if (!isLocked && e.dataTransfer.files?.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
-  }, [handleFiles]);
+  }, [handleFiles, isLocked]);
 
   const handleFileInputChange = useCallback((e) => {
     if (e.target.files?.length > 0) {
       handleFiles(e.target.files);
-      e.target.value = ''; // Reset to allow re-selecting same file
+      e.target.value = '';
     }
   }, [handleFiles]);
 
   // ─── Submit Handler ─────────────────────────────────────────────────────
-  const handleSubmit = async () => {
+  const handleSubmit = async (moveToReview = false) => {
     if (!comment.trim() && files.length === 0) return;
     if (!task?.id || !user?.id) return;
 
     setSubmitting(true);
-    const totalSteps = files.length + 1; // files + DB insert
+    const totalSteps = files.length + 1;
     setProgress({ current: 0, total: totalSteps, label: 'Preparing...' });
 
     try {
-      // Update progress as files are processed
       setProgress({ current: 0, total: totalSteps, label: `Compressing ${files.length} file(s)...` });
 
       const result = await submitProofOfWork({
@@ -79,6 +84,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         userId: user.id,
         comment: comment.trim(),
         files,
+        moveToReview,
       });
 
       setProgress({ current: totalSteps, total: totalSteps, label: 'Done!' });
@@ -89,7 +95,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
       setSubmitting(false);
       setProgress({ current: 0, total: 0, label: '' });
 
-      if (onSubmitSuccess) onSubmitSuccess(result);
+      if (onSubmitSuccess) onSubmitSuccess(result, moveToReview);
       onClose();
     } catch (err) {
       console.error('Submission error:', err);
@@ -108,7 +114,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
 
   const isImageFile = (file) => file.type.startsWith('image/');
 
-  const canSubmit = (comment.trim().length > 0 || files.length > 0) && !submitting;
+  const canSubmit = (comment.trim().length > 0 || files.length > 0) && !submitting && !isLocked;
 
   if (!isOpen) return null;
 
@@ -116,7 +122,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
     <TaskModal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Submit Proof of Work`}
+      title={isLocked ? 'Proof of Work (Locked)' : 'Submit Proof of Work'}
       className="large-modal"
     >
       <div className="submission-modal-body">
@@ -143,43 +149,52 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
           </div>
         )}
 
+        {/* Locked Notice */}
+        {isLocked && (
+          <div className="submission-locked-notice">
+            🔒 This task is in <strong>{task.stageId === 'REVIEW' ? 'Review' : 'Completed'}</strong> — submissions are locked. A manager must review existing proofs before changes can be made.
+          </div>
+        )}
+
         {/* Comment Section */}
         <div>
           <label className="submission-section-label">Comment</label>
           <textarea
             className="submission-comment-area"
-            placeholder="Describe what was done, observations, or issues encountered..."
+            placeholder={isLocked ? 'Submissions locked for this task.' : 'Describe what was done, observations, or issues encountered...'}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            disabled={submitting}
+            disabled={submitting || isLocked}
           />
         </div>
 
         {/* File Upload Zone */}
-        <div>
-          <label className="submission-section-label">Attachments</label>
-          <div
-            className={`submission-upload-zone ${dragActive ? 'drag-active' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,.pdf,.doc,.docx"
-              onChange={handleFileInputChange}
-              style={{ display: 'none' }}
-            />
-            <div className="upload-zone-icon">📷</div>
-            <div className="upload-zone-text">
-              <strong>Click to browse</strong> or drag and drop<br />
-              Images auto-compressed to 300KB · Photos, PDFs, Docs
+        {!isLocked && (
+          <div>
+            <label className="submission-section-label">Attachments</label>
+            <div
+              className={`submission-upload-zone ${dragActive ? 'drag-active' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx"
+                onChange={handleFileInputChange}
+                style={{ display: 'none' }}
+              />
+              <div className="upload-zone-icon">📷</div>
+              <div className="upload-zone-text">
+                <strong>Click to browse</strong> or drag and drop<br />
+                Images auto-compressed to 300KB · Photos, PDFs, Docs
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* File Preview Strip */}
         {files.length > 0 && (
@@ -197,14 +212,16 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                 )}
                 <span className="file-chip-name">{file.name}</span>
                 <span className="file-chip-size">{formatFileSize(file.size)}</span>
-                <button
-                  className="file-chip-remove"
-                  onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                  disabled={submitting}
-                  title="Remove file"
-                >
-                  ×
-                </button>
+                {!isLocked && (
+                  <button
+                    className="file-chip-remove"
+                    onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                    disabled={submitting}
+                    title="Remove file"
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -230,15 +247,29 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            {isLocked ? 'Close' : 'Cancel'}
           </button>
-          <button
-            className="halo-button submission-submit-btn"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-          >
-            {submitting ? 'Uploading...' : '📤 Submit Proof'}
-          </button>
+
+          {!isLocked && (
+            <>
+              <button
+                className="halo-button submission-upload-only-btn"
+                onClick={() => handleSubmit(false)}
+                disabled={!canSubmit}
+                title="Save proof without moving task stage"
+              >
+                {submitting ? 'Uploading...' : '📎 Upload Only'}
+              </button>
+              <button
+                className="halo-button submission-submit-btn"
+                onClick={() => handleSubmit(true)}
+                disabled={!canSubmit}
+                title="Save proof and move task to Review"
+              >
+                {submitting ? 'Submitting...' : '📤 Submit for Review'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </TaskModal>

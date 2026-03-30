@@ -124,9 +124,10 @@ export const getSubmissionsForTask = async (taskId) => {
  * @param {string} params.userId
  * @param {string} params.comment
  * @param {File[]} params.files
+ * @param {boolean} params.moveToReview - If true, auto-transitions task to REVIEW stage
  * @returns {Object} The created submission record
  */
-export const submitProofOfWork = async ({ taskId, userId, comment, files = [] }) => {
+export const submitProofOfWork = async ({ taskId, userId, comment, files = [], moveToReview = false }) => {
   // 1. Get next submission number for file naming
   const submissionNumber = await getNextSubmissionNumber(taskId);
 
@@ -146,5 +147,32 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [] })
     links,
   });
 
+  // 4. Optionally move task to REVIEW stage
+  if (moveToReview) {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ stageid: 'REVIEW' })
+      .eq('id', taskId);
+    if (error) console.error('Failed to move task to REVIEW:', error.message);
+  }
+
   return submission;
+};
+
+/**
+ * Updates the status of a submission (approve/reject).
+ * Only accessible by editor+ via RLS.
+ * @param {string} submissionId
+ * @param {string} newStatus - 'approved' | 'rejected'
+ */
+export const updateSubmissionStatus = async (submissionId, newStatus) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .update({ status: newStatus })
+    .eq('id', submissionId)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Status update failed: ${error.message}`);
+  return data;
 };

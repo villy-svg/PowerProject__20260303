@@ -1,0 +1,236 @@
+/* ==========================================================================
+   SubmissionHistory.css — Manager Review Component (Halo/Glassmorphism)
+   Follows: UI Design System §3 (Badges), §12 (Apple Premium Standards)
+   ========================================================================== */
+
+/* ─── Container ─────────────────────────────────────────────────────────── */
+.submission-history {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.submission-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.submission-history-title {
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-mint);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submission-count-badge {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 60%);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+/* ─── Submission Card ───────────────────────────────────────────────────── */
+.submission-card {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button);
+  padding: clamp(12px, 2vw, 16px);
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.submission-card:hover {
+  border-color: color-mix(in srgb, var(--brand-mint), transparent 50%);
+}
+
+.submission-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.submission-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.submission-number-badge {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 60%);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
+.submission-submitter {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.submission-timestamp {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+/* ─── Submission Comment ────────────────────────────────────────────────── */
+.submission-comment-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  opacity: 0.85;
+  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
+}
+
+/* ─── Attachment Thumbnails ─────────────────────────────────────────────── */
+.submission-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.submission-attachment-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submission-attachment-thumb:hover {
+  transform: scale(1.1);
+  border-color: var(--brand-mint);
+  box-shadow: 0 0 10px var(--halo-glow);
+}
+
+.submission-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--brand-mint);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.submission-attachment-file:hover {
+  background: var(--halo-bg);
+  border-color: var(--brand-mint);
+}
+
+/* ─── Submission Actions (Approve/Reject) ───────────────────────────────── */
+.submission-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.submission-approve-btn,
+.submission-reject-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 4px 12px;
+  border-radius: var(--radius-button);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.submission-approve-btn {
+  color: var(--brand-green);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 60%);
+}
+
+.submission-approve-btn:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-color: var(--brand-green);
+}
+
+.submission-reject-btn {
+  color: var(--priority-urgent);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 60%);
+}
+
+.submission-reject-btn:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 85%);
+  border-color: var(--priority-urgent);
+}
+
+/* ─── Status Badges (Reused from SubmissionModal.css) ───────────────────── */
+.submission-history .submission-status-badge {
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submission-history .submission-status-badge.pending {
+  color: var(--priority-medium);
+  background: color-mix(in srgb, var(--priority-medium), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--priority-medium), transparent 60%);
+}
+
+.submission-history .submission-status-badge.approved {
+  color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+}
+
+.submission-history .submission-status-badge.rejected {
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 60%);
+}
+
+/* ─── Empty State ───────────────────────────────────────────────────────── */
+.submission-empty-state {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.8rem;
+  opacity: 0.4;
+  font-weight: 600;
+}
+
+/* ─── Loading ───────────────────────────────────────────────────────────── */
+.submission-loading {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  color: var(--brand-mint);
+}

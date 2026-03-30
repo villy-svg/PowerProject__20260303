@@ -388,3 +388,26 @@
   opacity: 1;
   background: rgba(59, 130, 246, 0.1);
 }
+
+.card-submit-proof-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: var(--brand-mint);
+  font-weight: 800;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 1 !important;
+}
+
+.card-submit-proof-button:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
+  box-shadow: 0 0 10px var(--halo-glow);
+}

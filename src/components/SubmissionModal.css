@@ -282,6 +282,29 @@
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
+/* ─── Locked Notice ─────────────────────────────────────────────────────── */
+.submission-locked-notice {
+  padding: 12px 16px;
+  background: color-mix(in srgb, var(--priority-medium), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--priority-medium), transparent 60%);
+  border-radius: var(--radius-button);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--priority-medium);
+  line-height: 1.5;
+}
+
+/* ─── Upload Only Button ────────────────────────────────────────────────── */
+.submission-upload-only-btn {
+  min-width: 130px;
+}
+
+.submission-upload-only-btn:disabled,
+.submission-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ─── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .submission-file-chip {

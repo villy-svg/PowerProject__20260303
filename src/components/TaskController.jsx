@@ -153,7 +153,11 @@ const TaskController = (props) => {
         onClose={closeSubmissionModal}
         task={submissionTask}
         user={props.user}
-        onSubmitSuccess={() => { closeSubmissionModal(); if (props.refreshTasks) props.refreshTasks(false); }}
+        onSubmitSuccess={(result, movedToReview) => {
+          closeSubmissionModal();
+          // Always refresh to pick up the new submission (and stage change if moved to REVIEW)
+          if (props.refreshTasks) props.refreshTasks(false);
+        }}
       />
 
       <div className="workspace-main-view">

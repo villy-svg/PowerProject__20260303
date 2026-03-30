@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
+import SubmissionHistory from '../../components/SubmissionHistory';
 import { taskUtils } from '../../utils/taskUtils';
 import './HubTaskForm.css';
 
@@ -203,6 +204,15 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
           {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
         </button>
       </div>
+
+      {/* Proof of Work Submissions — visible in edit mode only */}
+      {safeData.id && (
+        <SubmissionHistory
+          taskId={safeData.id}
+          permissions={permissions}
+          currentUser={currentUser}
+        />
+      )}
     </form>
   );
 };
