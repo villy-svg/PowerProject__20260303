@@ -146,6 +146,8 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
   const cities = [...new Set((tasks || []).map(t => t.city).filter(Boolean))].sort();
   const priorities = ['Low', 'Medium', 'High', 'Urgent'];
 
+  const [showFilters, setShowFilters] = useState(true);
+
   const toggleGroup = (key) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -188,100 +190,89 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         </div>
       )}
 
-      <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div 
+        className="filters-row-toggle" 
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <p>FILTERS {showFilters ? '▲' : '▼'}</p>
+        <div style={{ display: 'flex', gap: '4px' }}>
           <button
-            onClick={() => onFilterChange('duplicatesOnly', !filters.duplicatesOnly)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--brand-green)',
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              padding: '4px',
-              opacity: filters.duplicatesOnly ? 1 : 0.5,
-              textDecoration: filters.duplicatesOnly ? 'underline' : 'none'
-            }}
+            onClick={(e) => { e.stopPropagation(); onFilterChange('duplicatesOnly', !filters.duplicatesOnly); }}
+            className={`filters-action-btn ${filters.duplicatesOnly ? 'active' : ''}`}
           >
             DUP ONLY
           </button>
           <button
-            onClick={onReset}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--brand-green)',
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              padding: '4px'
-            }}
+            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            className="filters-action-btn"
           >
             RESET
           </button>
         </div>
       </div>
 
-      <FilterGroup
-        label="City"
-        options={cities}
-        currentFilters={filters.city || []}
-        filterKey="city"
-        isExpanded={expandedGroups.city}
-        onToggle={() => toggleGroup('city')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+      {showFilters && (
+        <div className="filters-content">
+          <FilterGroup
+            label="City"
+            options={cities}
+            currentFilters={filters.city || []}
+            filterKey="city"
+            isExpanded={expandedGroups.city}
+            onToggle={() => toggleGroup('city')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Hub"
-        options={hubs}
-        currentFilters={filters.hub || []}
-        filterKey="hub"
-        displayKey="hub_code"
-        valueKey="id"
-        isExpanded={expandedGroups.hub}
-        onToggle={() => toggleGroup('hub')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Hub"
+            options={hubs}
+            currentFilters={filters.hub || []}
+            filterKey="hub"
+            displayKey="hub_code"
+            valueKey="id"
+            isExpanded={expandedGroups.hub}
+            onToggle={() => toggleGroup('hub')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Priority"
-        options={priorities}
-        currentFilters={filters.priority || []}
-        filterKey="priority"
-        isExpanded={expandedGroups.priority}
-        onToggle={() => toggleGroup('priority')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Priority"
+            options={priorities}
+            currentFilters={filters.priority || []}
+            filterKey="priority"
+            isExpanded={expandedGroups.priority}
+            onToggle={() => toggleGroup('priority')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Function"
-        options={functions}
-        currentFilters={filters.function || []}
-        filterKey="function"
-        displayKey="function_code"
-        valueKey="name"
-        isExpanded={expandedGroups.function}
-        onToggle={() => toggleGroup('function')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Function"
+            options={functions}
+            currentFilters={filters.function || []}
+            filterKey="function"
+            displayKey="function_code"
+            valueKey="name"
+            isExpanded={expandedGroups.function}
+            onToggle={() => toggleGroup('function')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Assignee"
-        options={[...new Set((tasks || []).map(t => t.assigneeName || 'Unassigned'))].sort()}
-        currentFilters={filters.assignee || []}
-        filterKey="assignee"
-        isExpanded={expandedGroups.assignee}
-        onToggle={() => toggleGroup('assignee')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Assignee"
+            options={[...new Set((tasks || []).map(t => t.assigneeName || 'Unassigned'))].sort()}
+            currentFilters={filters.assignee || []}
+            filterKey="assignee"
+            isExpanded={expandedGroups.assignee}
+            onToggle={() => toggleGroup('assignee')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
+        </div>
+      )}
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
         <div className="sub-nav-text">

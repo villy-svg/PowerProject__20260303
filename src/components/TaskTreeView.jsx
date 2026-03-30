@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -8,6 +9,12 @@ import {
   IconPromote, 
   IconDiagonalUp 
 } from './Icons';
+import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { hierarchyService } from '../services/rules/hierarchyService';
+import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { taskUtils } from '../utils/taskUtils';
+import AssigneeBadge from './AssigneeBadge';
+import { TASK_STAGES, STAGE_LIST } from '../constants/stages';
 import './TaskListView.css'; // Reusing some list styles for consistency
 
 const TaskTreeView = ({

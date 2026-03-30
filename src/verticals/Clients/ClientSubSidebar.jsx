@@ -155,6 +155,8 @@ const ClientSubSidebar = ({
     fetchOptions();
   }, []);
 
+  const [showFilters, setShowFilters] = useState(true);
+
   const toggleGroup = (key) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -182,8 +184,8 @@ const ClientSubSidebar = ({
       )}
       </div>
 
-      {/* Filters Header */}
-      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
+      {/* Nav Toggle Header */}
+      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
         {permissions?.canAccessClients ? (
           <button
             onClick={() => setActiveVertical('CLIENTS')}
@@ -207,56 +209,65 @@ const ClientSubSidebar = ({
         ) : (
           <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
         )}
-        <button
-          onClick={onReset}
-          style={{ background: 'none', border: 'none', color: 'var(--brand-green)', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer', padding: '4px' }}
-        >
-          RESET
-        </button>
       </div>
 
-      <div style={{ padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 600, opacity: 0.5, textTransform: 'uppercase' }}>Filter Records</p>
+      <div 
+        className="filters-row-toggle" 
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <p>FILTERS {showFilters ? '▲' : '▼'}</p>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            className="filters-action-btn"
+          >
+            RESET
+          </button>
+        </div>
       </div>
 
-      <FilterGroup
-        label="Category"
-        options={filterOptions.vehicleCategories}
-        currentFilters={filters?.vehicle || []}
-        filterKey="vehicle"
-        displayKey="name"
-        valueKey="id"
-        isExpanded={expandedGroups.vehicle}
-        onToggle={() => toggleGroup('vehicle')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+      {showFilters && (
+        <div className="filters-content">
+          <FilterGroup
+            label="Category"
+            options={filterOptions.vehicleCategories}
+            currentFilters={filters?.vehicle || []}
+            filterKey="vehicle"
+            displayKey="name"
+            valueKey="id"
+            isExpanded={expandedGroups.vehicle}
+            onToggle={() => toggleGroup('vehicle')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Service Category"
-        options={filterOptions.serviceCategories}
-        currentFilters={filters?.service || []}
-        filterKey="service"
-        displayKey="name"
-        valueKey="id"
-        isExpanded={expandedGroups.service}
-        onToggle={() => toggleGroup('service')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Service Category"
+            options={filterOptions.serviceCategories}
+            currentFilters={filters?.service || []}
+            filterKey="service"
+            displayKey="name"
+            valueKey="id"
+            isExpanded={expandedGroups.service}
+            onToggle={() => toggleGroup('service')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Billing Model"
-        options={filterOptions.billingModels}
-        currentFilters={filters?.billing_model || []}
-        filterKey="billing_model"
-        displayKey="name"
-        valueKey="id"
-        isExpanded={expandedGroups.billing_model}
-        onToggle={() => toggleGroup('billing_model')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Billing Model"
+            options={filterOptions.billingModels}
+            currentFilters={filters?.billing_model || []}
+            filterKey="billing_model"
+            displayKey="name"
+            valueKey="id"
+            isExpanded={expandedGroups.billing_model}
+            onToggle={() => toggleGroup('billing_model')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
+        </div>
+      )}
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
         <div className="sub-nav-text">

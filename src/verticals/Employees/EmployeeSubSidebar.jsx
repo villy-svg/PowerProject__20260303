@@ -156,6 +156,8 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
     fetchOptions();
   }, []);
 
+  const [showFilters, setShowFilters] = useState(true);
+
   const toggleGroup = (key) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -174,71 +176,72 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         </div>
       )}
 
-      {/* Filters Header */}
-      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
+      {/* Nav Toggle Header */}
+      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
         {permissions?.canAccessEmployees ? (
            <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Employees</p>
         ) : (
            <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5, letterSpacing: '0.5px' }}>Employees</p>
         )}
-        <button
-          onClick={onReset}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--brand-green)',
-            fontSize: '0.7rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            padding: '4px'
-          }}
-        >
-          RESET
-        </button>
       </div>
 
-      <div style={{ padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: '1px solid var(--border-color)' }}>
-        <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 600, opacity: 0.5, textTransform: 'uppercase' }}>Filter Records</p>
+      <div 
+        className="filters-row-toggle" 
+        onClick={() => setShowFilters(!showFilters)}
+      >
+        <p>FILTERS {showFilters ? '▲' : '▼'}</p>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onReset(); }}
+            className="filters-action-btn"
+          >
+            RESET
+          </button>
+        </div>
       </div>
 
-      <FilterGroup
-        label="Employee Role"
-        options={filterOptions.roles}
-        currentFilters={filters.role}
-        filterKey="role"
-        displayKey="role_code"
-        valueKey="role_code"
-        isExpanded={expandedGroups.role}
-        onToggle={() => toggleGroup('role')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+      {showFilters && (
+        <div className="filters-content">
+          <FilterGroup
+            label="Employee Role"
+            options={filterOptions.roles}
+            currentFilters={filters.role}
+            filterKey="role"
+            displayKey="role_code"
+            valueKey="role_code"
+            isExpanded={expandedGroups.role}
+            onToggle={() => toggleGroup('role')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Primary Hub"
-        options={filterOptions.hubs}
-        currentFilters={filters.hub}
-        filterKey="hub"
-        displayKey="hub_code"
-        valueKey="id"
-        isExpanded={expandedGroups.hub}
-        onToggle={() => toggleGroup('hub')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Primary Hub"
+            options={filterOptions.hubs}
+            currentFilters={filters.hub}
+            filterKey="hub"
+            displayKey="hub_code"
+            valueKey="id"
+            isExpanded={expandedGroups.hub}
+            onToggle={() => toggleGroup('hub')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
 
-      <FilterGroup
-        label="Department"
-        options={filterOptions.departments}
-        currentFilters={filters.department}
-        filterKey="department"
-        displayKey="dept_code"
-        valueKey="dept_code"
-        isExpanded={expandedGroups.department}
-        onToggle={() => toggleGroup('department')}
-        onBatchFilter={onBatchFilter}
-        onFilterChange={onFilterChange}
-      />
+          <FilterGroup
+            label="Department"
+            options={filterOptions.departments}
+            currentFilters={filters.department}
+            filterKey="department"
+            displayKey="dept_code"
+            valueKey="dept_code"
+            isExpanded={expandedGroups.department}
+            onToggle={() => toggleGroup('department')}
+            onBatchFilter={onBatchFilter}
+            onFilterChange={onFilterChange}
+          />
+        </div>
+      )}
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
         <div className="sub-nav-text">

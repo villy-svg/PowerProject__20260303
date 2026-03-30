@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -8,6 +9,11 @@ import {
   IconPromote, 
   IconDiagonalUp 
 } from './Icons';
+import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { hierarchyService } from '../services/rules/hierarchyService';
+import { taskUtils } from '../utils/taskUtils';
+import { hierarchyUtils } from '../utils/hierarchyUtils';
+import AssigneeBadge from './AssigneeBadge';
 import './TaskListView.css';
 
 const ListViewRow = ({

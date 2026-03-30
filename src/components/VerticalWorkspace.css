@@ -203,3 +203,56 @@
   opacity: 1;
   color: var(--brand-green);
 }
+
+/* 6. FILTERS TOGGLE SYSTEM */
+.filters-row-toggle {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+  user-select: none;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.filters-row-toggle:hover {
+  background: var(--halo-bg);
+  border-color: var(--brand-green);
+}
+
+.filters-row-toggle p {
+  margin: 0;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--text-color);
+  letter-spacing: 1px;
+}
+
+.filters-action-btn {
+  background: none;
+  border: none;
+  color: var(--brand-green);
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.filters-action-btn:hover {
+  background: var(--halo-bg);
+  opacity: 1;
+}
+
+.filters-action-btn.active {
+  opacity: 1;
+  text-decoration: underline;
+}
