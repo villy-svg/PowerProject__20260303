@@ -5,6 +5,7 @@
  */
 import { supabase } from '../core/supabaseClient';
 import imageCompression from 'browser-image-compression';
+import { taskService } from './taskService';
 
 const BUCKET_NAME = 'field-submissions';
 
@@ -152,11 +153,12 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [], m
 
     // 4. Optionally move task to REVIEW stage
     if (moveToReview) {
-      const { error } = await supabase
-        .from('tasks')
-        .update({ stageid: 'REVIEW' })
-        .eq('id', taskId);
-      if (error) console.error('Failed to move task to REVIEW:', error.message);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        await taskService.updateTaskStage(taskId, 'REVIEW', user?.id);
+      } catch (err) {
+        console.error('Failed to move task to REVIEW:', err.message);
+      }
     }
 
     return updatedSubmission;

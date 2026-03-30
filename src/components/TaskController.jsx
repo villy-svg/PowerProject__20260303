@@ -212,9 +212,12 @@ const TaskController = (props) => {
         onClose={closeSubmissionModal}
         task={submissionTask}
         user={props.user}
-        onSubmitSuccess={(result, movedToReview) => {
+        onSubmitSuccess={(result) => {
+          const taskId = submissionTask.id;
           closeSubmissionModal();
-          // Always refresh to pick up the new submission (and stage change if moved to REVIEW)
+          // Optimistically move to REVIEW (instant UI feedback)
+          handleInternalUpdateStage(taskId, 'REVIEW');
+          // Then refresh in the background
           if (props.refreshTasks) props.refreshTasks(false);
         }}
       />
