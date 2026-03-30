@@ -116,7 +116,7 @@ const TaskCard = ({
                 title="Direct Children Progress"
                 onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
               >
-                {completedDirect} / {directTasks.length} DIRECT
+                {completedDirect} / {directTasks.length} Direct
               </div>
 
               {recursiveStats.total > directTasks.length && (
@@ -125,7 +125,7 @@ const TaskCard = ({
                   title={`Total recursive descendants: ${recursiveStats.total} (${recursiveStats.completed} completed)`}
                   onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
                 >
-                  {recursiveStats.completed} / {recursiveStats.total} TOTAL
+                  {recursiveStats.completed} / {recursiveStats.total} Total
                 </div>
               )}
             </div>
@@ -142,7 +142,7 @@ const TaskCard = ({
         )}
         {task.parentTask && showHierarchy && (
           <span className="subtask-tag" title="Subtask">
-            ↳ SUBTASK
+            ↳ Subtask
           </span>
         )}
         {task.priority && (
@@ -152,7 +152,7 @@ const TaskCard = ({
         )}
         {task.isDuplicate && (
           <span className="duplicate-badge" title={`${task.duplicateCount} identical tasks found`}>
-            DUP
+            Dup
           </span>
         )}
         <AssigneeBadge task={task} currentUser={currentUser} />

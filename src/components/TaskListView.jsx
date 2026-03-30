@@ -124,7 +124,7 @@ const ListViewRow = ({
 
           {task.isDuplicate && (
             <span className="duplicate-badge-mini" title={`${task.duplicateCount} identical tasks found`}>
-              DUP
+              Dup
             </span>
           )}
 
@@ -427,7 +427,7 @@ const TaskListView = ({
                       opacity: 0.8
                     }}
                   >
-                    {stageTasks.every(t => selectedTaskIds.includes(t.id)) ? 'DESELECT ALL' : 'SELECT ALL'}
+                    {stageTasks.every(t => selectedTaskIds.includes(t.id)) ? 'Deselect All' : 'Select All'}
                   </button>
                 )}
               </div>

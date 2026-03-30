@@ -24,8 +24,8 @@
   margin: 0;
   font-size: 0.9rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
 }
 
 .list-task-row {
@@ -92,13 +92,15 @@
 }
 
 .subtask-progress-badge.mini {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10B981;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  opacity: 0.6;
 }
 
 .recursive-progress-badge.mini {
-  background: rgba(59, 130, 246, 0.15);
-  color: #3B82F6;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-color);
+  opacity: 0.5;
 }
 
 @media (max-width: 1400px) {
@@ -201,15 +203,15 @@
 
 .tree-group-header {
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-secondary);
-  letter-spacing: 1px;
-  padding: 8px 16px;
+  letter-spacing: 0.5px;
+  padding: 6px 16px;
   background: var(--bg-elevated);
   border-radius: 6px;
   margin-bottom: 12px;
-  border-left: 4px solid var(--brand-green);
-  text-transform: uppercase;
+  border-left: 3px solid var(--brand-green);
+  text-transform: capitalize;
 }
 
 

@@ -3,25 +3,24 @@
 .assignee-badge-base {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
-  border-radius: 20px;
+  gap: 4px;
   font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 600;
   letter-spacing: 0.3px;
-  white-space: nowrap;
-  background: var(--halo-bg, rgba(0, 255, 170, 0.05));
-  color: var(--brand-green, #00C88C);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  text-transform: capitalize;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  opacity: 0.7;
+  border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
 
 .assignee-you {
-  /* Match other badges but with darker, more prominent text */
-  background: var(--halo-bg, rgba(0, 255, 170, 0.05));
-  color: #008F64; /* A slightly darker, richer green than brand-green */
-  border: 1px solid color-mix(in srgb, #008F64, transparent 60%);
-  font-weight: 900; /* Extra bold to distinguish "YOU" without needing a loud color */
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .assignee-none {

@@ -395,14 +395,14 @@ const TaskTreeView = ({
       <div className="list-task-container">
         {reworkTasks.length > 0 && (
           <div className="tree-group-section rework-section">
-            <h5 className="tree-group-header">REWORK REQUIRED</h5>
+            <h5 className="tree-group-header">Rework Required</h5>
             {reworkTasks.map(renderNode)}
           </div>
         )}
 
         {projectTreeTasks.length > 0 && (
           <div className="tree-group-section">
-            <h5 className="tree-group-header">INTEGRATED PROJECT TREES</h5>
+            <h5 className="tree-group-header">Integrated Project Trees</h5>
             {projectTreeTasks.filter(t => {
               let curr = t;
               const taskMap = new Map(tasks.map(t => [t.id, t]));
@@ -418,7 +418,7 @@ const TaskTreeView = ({
 
         {standaloneTasks.length > 0 && (
           <div className="tree-group-section">
-            <h5 className="tree-group-header">STANDALONE TASKS</h5>
+            <h5 className="tree-group-header">Standalone Tasks</h5>
             {standaloneTasks.map(renderNode)}
           </div>
         )}

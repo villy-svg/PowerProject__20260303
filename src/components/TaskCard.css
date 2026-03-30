@@ -102,55 +102,55 @@
   border-top: 1px dashed var(--border-color);
 }
 
-/* Priority Tags */
 .card-priority {
   font-size: 0.65rem;
-  font-weight: 500;
-  padding: 3px 8px;
+  font-weight: 600;
+  padding: 2px 8px;
   border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
   border: 1px solid transparent;
 }
 
 .priority-low { 
   color: var(--priority-low); 
-  background: color-mix(in srgb, var(--priority-low), transparent 90%); 
-  border-color: color-mix(in srgb, var(--priority-low), transparent 70%); 
+  background: color-mix(in srgb, var(--priority-low), transparent 92%); 
+  border-color: color-mix(in srgb, var(--priority-low), transparent 85%); 
 }
 .priority-medium { 
   color: var(--priority-medium); 
-  background: color-mix(in srgb, var(--priority-medium), transparent 90%); 
-  border-color: color-mix(in srgb, var(--priority-medium), transparent 70%); 
+  background: color-mix(in srgb, var(--priority-medium), transparent 92%); 
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 85%); 
 }
 .priority-high { 
   color: var(--priority-high); 
-  background: color-mix(in srgb, var(--priority-high), transparent 90%); 
-  border-color: color-mix(in srgb, var(--priority-high), transparent 70%); 
+  background: color-mix(in srgb, var(--priority-high), transparent 92%); 
+  border-color: color-mix(in srgb, var(--priority-high), transparent 85%); 
 }
 .priority-urgent { 
   color: var(--priority-urgent); 
-  background: color-mix(in srgb, var(--priority-urgent), transparent 90%); 
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%); 
+  background: color-mix(in srgb, var(--priority-urgent), transparent 92%); 
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 85%); 
 }
 .priority-completed { 
   color: var(--brand-green); 
-  background: color-mix(in srgb, var(--brand-green), transparent 90%); 
-  border-color: color-mix(in srgb, var(--brand-green), transparent 70%); 
+  background: color-mix(in srgb, var(--brand-green), transparent 92%); 
+  border-color: color-mix(in srgb, var(--brand-green), transparent 85%); 
 }
  
  .subtask-tag {
    font-size: 0.6rem;
-   font-weight: 700;
+   font-weight: 600;
    padding: 1px 6px;
    border-radius: 4px;
-   background: var(--bg-elevated);
-   color: var(--text-secondary);
+   background: rgba(255, 255, 255, 0.05); /* Neutralized */
+   color: var(--text-color);
+   opacity: 0.6;
    border: 1px solid var(--border-color);
    display: flex;
    align-items: center;
    gap: 4px;
-   text-transform: uppercase;
+   text-transform: capitalize;
    letter-spacing: 0.3px;
  }
  
@@ -207,13 +207,14 @@
   align-items: center;
   gap: 4px;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.3px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   border-radius: var(--radius-pill);
-  background: var(--halo-bg);
-  color: var(--brand-mint);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  opacity: 0.7;
+  border: 1px solid var(--border-color);
 }
 
 .assignee-badge {
@@ -232,13 +233,14 @@
   align-items: center;
   gap: 4px;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.3px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   border-radius: 20px;
-  color: #ef4444; 
-  background: rgba(239, 68, 68, 0.1); 
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--text-color);
+  opacity: 0.4; 
+  background: rgba(255, 255, 255, 0.03); 
+  border: 1px solid var(--border-color);
 }
 
 .assignee-none {

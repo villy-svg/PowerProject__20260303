@@ -7,12 +7,12 @@ export const taskUtils = {
    * @returns {string} The display label for the assignee badge.
    */
   getAssigneeLabel(task, currentUser) {
-    if (!task?.assigned_to) return 'NULL';
+    if (!task?.assigned_to) return 'None';
 
     const isMe = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) ||
       (currentUser?.id && task.assigned_to === currentUser.id);
 
-    if (isMe) return 'YOU';
+    if (isMe) return 'You';
 
     // Fallback to formatting the name
     if (task.assigneeName) {
@@ -46,7 +46,7 @@ export const taskUtils = {
       (currentUser?.id && assigneeId === currentUser.id);
 
     if (isMe) {
-      return `YOU (${assigneeName})`;
+      return `You (${assigneeName})`;
     }
     return assigneeName;
   },
