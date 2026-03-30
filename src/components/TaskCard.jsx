@@ -23,6 +23,8 @@ const TaskCard = ({
   openEditModal,
   openAddSubtaskModal,
   openSubmissionModal,
+  handleApproveSubmission,
+  handleRejectClick,
   onMoveToParent,
   onDuplicateMerge,
   STAGE_LIST,
@@ -57,6 +59,9 @@ const TaskCard = ({
   const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
   
   // Dynamic Check for buttons
+  const isRejected = task.latestSubmission?.status === 'rejected';
+  const blockArrows = isRejected && permissions.level !== 'admin';
+
   const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
   const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
   
@@ -155,7 +160,10 @@ const TaskCard = ({
       </div>
 
       {/* Row 2: Title */}
-      <div className="card-row-2">
+      <div className="card-row-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {isRejected && task.stageId === 'IN_PROGRESS' && (
+          <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+        )}
         <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>
 
@@ -173,10 +181,10 @@ const TaskCard = ({
                 ←
               </button>
               <button
-                className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
+                className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
                 onClick={() => handleMove('right')}
-                disabled={!canMoveRight || task.stageId === 'COMPLETED'}
-                title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+                disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
+                title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
               >
                 →
               </button>
@@ -233,6 +241,28 @@ const TaskCard = ({
             >
               📤
             </button>
+          )}
+
+          {/* MANAGER APPROVE / REJECT */}
+          {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+            <>
+              <button
+                className="halo-button save-btn"
+                style={{ padding: '4px 8px', fontSize: '0.8rem', minWidth: 'auto' }}
+                onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
+                title="Approve Submission"
+              >
+                ✓ Appr
+              </button>
+              <button
+                className="halo-button delete-btn"
+                style={{ padding: '4px 8px', fontSize: '0.8rem', minWidth: 'auto' }}
+                onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
+                title="Reject Submission & Request Rework"
+              >
+                ✗ Rej
+              </button>
+            </>
           )}
 
           {effectiveCanUpdate && (

@@ -23,7 +23,9 @@ const TaskTreeView = ({
   TaskTileComponent,
   currentUser,
   canCreate,
-  permissions = {}
+  permissions = {},
+  handleApproveSubmission,
+  handleRejectClick
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
 
@@ -163,13 +165,19 @@ const TaskTreeView = ({
             })()}
           </div>
 
-          <div className="list-row-content" title={task.text}>
+          <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {task.latestSubmission?.status === 'rejected' && task.stageId === 'IN_PROGRESS' && (
+              <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+            )}
             {task.text}
           </div>
         </div>
 
         <div className="list-row-controls">
           {(() => {
+            const isRejected = task.latestSubmission?.status === 'rejected';
+            const blockArrows = isRejected && permissions.level !== 'admin';
+
             const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
             const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
             const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
@@ -193,13 +201,13 @@ const TaskTreeView = ({
                   ←
                 </button>
                 <button
-                  className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
+                  className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (canMoveRight && task.stageId !== 'COMPLETED') updateTaskStage(task.id, rightStageId);
+                    if (canMoveRight && task.stageId !== 'COMPLETED' && !blockArrows) updateTaskStage(task.id, rightStageId);
                   }}
-                  disabled={!canMoveRight || task.stageId === 'COMPLETED'}
-                  title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+                  disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
+                  title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
                 >
                   →
                 </button>
@@ -266,6 +274,28 @@ const TaskTreeView = ({
                   📤
                 </button>
               )}
+
+            {/* MANAGER APPROVE / REJECT */}
+            {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+              <>
+                <button
+                  className="halo-button save-btn"
+                  style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                  onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
+                  title="Approve Submission"
+                >
+                  ✓ Appr
+                </button>
+                <button
+                  className="halo-button delete-btn"
+                  style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                  onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
+                  title="Reject Submission & Request Rework"
+                >
+                  ✗ Rej
+                </button>
+              </>
+            )}
 
             {!task.isContextOnly && (effectiveCanUpdate || canEditDescription) && (
               <button

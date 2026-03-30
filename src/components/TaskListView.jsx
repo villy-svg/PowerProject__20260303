@@ -30,7 +30,9 @@ const ListViewRow = ({
   onToggleExpand,
   hasChildren,
   tasks,
-  permissions = {}
+  permissions = {},
+  handleApproveSubmission,
+  handleRejectClick
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
 
@@ -67,6 +69,9 @@ const ListViewRow = ({
 
   const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
   const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
+
+  const isRejected = task.latestSubmission?.status === 'rejected';
+  const blockArrows = isRejected && permissions.level !== 'admin';
 
   return (
     <div
@@ -153,7 +158,10 @@ const ListViewRow = ({
         </div>
 
         {/* 6. Task Summary */}
-        <div className="list-row-content" title={task.text}>
+        <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isRejected && task.stageId === 'IN_PROGRESS' && (
+            <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+          )}
           {task.text}
         </div>
       </div>
@@ -171,10 +179,10 @@ const ListViewRow = ({
               ←
             </button>
             <button
-              className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
+              className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
               onClick={() => handleMove('right')}
-              disabled={!canMoveRight}
-              title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+              disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
+              title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
             >
               →
             </button>
@@ -238,6 +246,28 @@ const ListViewRow = ({
                 📤
               </button>
             )}
+
+          {/* MANAGER APPROVE / REJECT */}
+          {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+            <>
+              <button
+                className="halo-button save-btn"
+                style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
+                title="Approve Submission"
+              >
+                ✓ Appr
+              </button>
+              <button
+                className="halo-button delete-btn"
+                style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
+                title="Reject Submission & Request Rework"
+              >
+                ✗ Rej
+              </button>
+            </>
+          )}
 
           {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
@@ -303,7 +333,9 @@ const TaskListView = ({
   onDuplicateMerge,
   currentUser,
   canCreate,
-  permissions = {}
+  permissions = {},
+  handleApproveSubmission,
+  handleRejectClick
 }) => {
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
@@ -424,6 +456,8 @@ const TaskListView = ({
                   hasChildren={tasks.some(child => child.parentTask === task.id)}
                   tasks={tasks}
                   permissions={permissions}
+                  handleApproveSubmission={handleApproveSubmission}
+                  handleRejectClick={handleRejectClick}
                 />
               ))}
             </div>

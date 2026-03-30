@@ -33,7 +33,9 @@ const TaskKanbanView = ({
   onMoveToParent,
   onDuplicateMerge,
   onPromote,
-  TaskTileComponent
+  TaskTileComponent,
+  handleApproveSubmission,
+  handleRejectClick
 }) => {
   return (
     <div className="kanban-view-container">
@@ -158,6 +160,8 @@ const TaskKanbanView = ({
                       openEditModal={openEditModal}
                       openAddSubtaskModal={openAddSubtaskModal}
                       openSubmissionModal={openSubmissionModal}
+                      handleApproveSubmission={handleApproveSubmission}
+                      handleRejectClick={handleRejectClick}
                       onMoveToParent={onMoveToParent}
                       onDuplicateMerge={onDuplicateMerge}
                       STAGE_LIST={stageList}

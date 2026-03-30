@@ -59,6 +59,19 @@
   padding-top: 2px;
 }
 
+.rejected-red-dot {
+  font-size: 0.85rem;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8));
+  animation: pulse-red-dot 2s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-red-dot {
+  0% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+
 .card-row-3 {
   display: flex;
   align-items: center;

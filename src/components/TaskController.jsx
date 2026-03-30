@@ -9,6 +9,8 @@ import TaskCSVImport from '../verticals/ChargingHubs/TaskCSVImport';
 import MasterPageHeader from './MasterPageHeader';
 import TaskTreeView from './TaskTreeView';
 import { useTaskController } from '../hooks/useTaskController';
+import { updateSubmissionStatus } from '../services/tasks/submissionService';
+import RejectionModal from './RejectionModal';
 import './TaskController.css';
 
 /**
@@ -65,6 +67,35 @@ const TaskController = (props) => {
   const [submissionTask, setSubmissionTask] = useState(null);
   const openSubmissionModal = (task) => setSubmissionTask(task);
   const closeSubmissionModal = () => setSubmissionTask(null);
+
+  // ─── Proof of Work Approve / Reject State ────────────────────────────
+  const [rejectionModalState, setRejectionModalState] = useState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
+
+  const handleApproveSubmission = async (taskId, submissionId) => {
+    try {
+      await updateSubmissionStatus(submissionId, 'approved');
+      await handleInternalUpdateStage(taskId, 'COMPLETED');
+      if (props.refreshTasks) props.refreshTasks(false);
+    } catch (err) {
+      alert(`Approval failed: ${err.message}`);
+    }
+  };
+
+  const handleRejectClick = (task) => {
+    if (!task.latestSubmission) return;
+    setRejectionModalState({ isOpen: true, taskId: task.id, submissionId: task.latestSubmission.id, taskText: task.text });
+  };
+
+  const submitRejection = async (reason) => {
+    try {
+      await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
+      await handleInternalUpdateStage(rejectionModalState.taskId, 'IN_PROGRESS');
+      setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
+      if (props.refreshTasks) props.refreshTasks(false);
+    } catch (err) {
+      alert(`Rejection failed: ${err.message}`);
+    }
+  };
 
   return (
     <div className="task-controller">
@@ -161,6 +192,13 @@ const TaskController = (props) => {
         }}
       />
 
+      <RejectionModal
+        isOpen={rejectionModalState.isOpen}
+        onClose={() => setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' })}
+        task={{ text: rejectionModalState.taskText }}
+        onSubmit={submitRejection}
+      />
+
       <div className="workspace-main-view">
         {viewMode === 'kanban' ? (
           <TaskKanbanView
@@ -191,6 +229,8 @@ const TaskController = (props) => {
             onPromote={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}
             openSubmissionModal={openSubmissionModal}
+            handleApproveSubmission={handleApproveSubmission}
+            handleRejectClick={handleRejectClick}
           />
         ) : viewMode === 'list' ? (
           <TaskListView
@@ -215,6 +255,8 @@ const TaskController = (props) => {
             canCreate={canUserCreate}
             permissions={permissions}
             openSubmissionModal={openSubmissionModal}
+            handleApproveSubmission={handleApproveSubmission}
+            handleRejectClick={handleRejectClick}
           />
         ) : (
           <TaskTreeView
@@ -234,6 +276,8 @@ const TaskController = (props) => {
             canCreate={canUserCreate}
             permissions={permissions}
             openSubmissionModal={openSubmissionModal}
+            handleApproveSubmission={handleApproveSubmission}
+            handleRejectClick={handleRejectClick}
           />
         )}
       </div>

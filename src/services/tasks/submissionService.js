@@ -165,10 +165,15 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [], m
  * @param {string} submissionId
  * @param {string} newStatus - 'approved' | 'rejected'
  */
-export const updateSubmissionStatus = async (submissionId, newStatus) => {
+export const updateSubmissionStatus = async (submissionId, newStatus, rejectionReason = null) => {
+  const updatePayload = { status: newStatus };
+  if (newStatus === 'rejected') {
+    updatePayload.rejection_reason = rejectionReason;
+  }
+
   const { data, error } = await supabase
     .from('submissions')
-    .update({ status: newStatus })
+    .update(updatePayload)
     .eq('id', submissionId)
     .select()
     .single();

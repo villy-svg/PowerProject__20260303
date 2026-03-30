@@ -128,7 +128,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
       <div className="submission-modal-body">
         {/* Task Context */}
         {task && (
-          <div style={{ marginBottom: '0.25rem' }}>
+          <div style={{ marginBottom: '1rem' }}>
             <span style={{
               fontSize: '0.7rem',
               fontWeight: 700,
@@ -146,6 +146,14 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
             }}>
               {task.text}
             </p>
+          </div>
+        )}
+
+        {/* Rejection Feedback */}
+        {task?.latestSubmission?.status === 'rejected' && (
+          <div className="rejection-feedback-banner" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '12px', borderRadius: '8px', marginBottom: '16px', color: '#ef4444' }}>
+            <strong style={{ display: 'block', marginBottom: '4px' }}>⚠️ Rework Required:</strong>
+            {task.latestSubmission.rejection_reason}
           </div>
         )}
 

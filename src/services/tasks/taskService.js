@@ -16,24 +16,31 @@ import { auditService } from '../core/auditService';
  * Maps a Supabase row (lowercase column names) to the camelCase shape
  * the rest of the app expects. Handles optional joined employee data.
  */
-const normalizeTask = (row) => ({
-  id: row.id,
-  text: row.text,
-  verticalId: row.verticalid ?? row.verticalId,
-  stageId: row.stageid ?? row.stageId,
-  priority: row.priority,
-  description: row.description,
-  hub_id: row.hub_id,
-  city: row.city,
-  function: row.function,
-  assigned_to: row.assigned_to,
-  assigneeName: row.employees?.full_name || row.assigneeName,
-  parentTask: row.parent_task || null,
-  createdAt: row.created_at ?? row.createdat ?? row.createdAt,
-  updatedAt: row.updated_at ?? row.updatedat ?? row.updatedAt,
-  createdBy: row.created_by,
-  lastUpdatedBy: row.last_updated_by,
-});
+const normalizeTask = (row) => {
+  const latestSubmission = row.submissions?.length > 0
+    ? [...row.submissions].sort((a, b) => b.submission_number - a.submission_number)[0]
+    : null;
+
+  return {
+    id: row.id,
+    text: row.text,
+    verticalId: row.verticalid ?? row.verticalId,
+    stageId: row.stageid ?? row.stageId,
+    priority: row.priority,
+    description: row.description,
+    hub_id: row.hub_id,
+    city: row.city,
+    function: row.function,
+    assigned_to: row.assigned_to,
+    assigneeName: row.employees?.full_name || row.assigneeName,
+    parentTask: row.parent_task || null,
+    createdAt: row.created_at ?? row.createdat ?? row.createdAt,
+    updatedAt: row.updated_at ?? row.updatedat ?? row.updatedAt,
+    createdBy: row.created_by,
+    lastUpdatedBy: row.last_updated_by,
+    latestSubmission,
+  };
+};
 
 /**
  * Maps a camelCase task object to the Supabase column-name shape for inserts/updates.
@@ -52,8 +59,8 @@ const mapTaskToRow = (task) => ({
   last_updated_by: task.lastUpdatedBy || null,
 });
 
-/** Standard select string: includes explicit employee join. */
-const TASK_SELECT = '*, employees!assigned_to (full_name)';
+/** Standard select string: includes explicit employee join and latest submissions. */
+const TASK_SELECT = '*, employees!assigned_to (full_name), submissions(id, status, rejection_reason, submission_number, created_at)';
 
 // ---------------------------------------------------------------------------
 // Service
