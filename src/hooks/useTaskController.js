@@ -52,7 +52,7 @@ export const useTaskController = (props) => {
   const { selectedTaskIds, setSelectedTaskIds, clearSelection, toggleTaskSelection, selectedTasks, sameStage, commonStageId, toggleStageSelection } = selectionInfo;
 
   const permissionsInfo = useTaskPermissions({ ...props });
-  const { canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy } = permissionsInfo;
+  const { canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy, canEditTask } = permissionsInfo;
 
   // 3. Persistence & Derived State
   useEffect(() => {
