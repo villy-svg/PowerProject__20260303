@@ -16,7 +16,8 @@ export const useTaskFilters = ({
   permissions,
   filters,
   viewMode,
-  drillDownId
+  drillDownId,
+  showReworkOnly
 }) => {
   // 1. Duplicate Detection
   const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
@@ -62,9 +63,13 @@ export const useTaskFilters = ({
         const formattedAssignee = taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user);
         if (!filters.assignee.includes(formattedAssignee)) return false;
       }
+
+      // 3. Rework Filter
+      if (showReworkOnly && t.latestSubmission?.status !== 'rejected') return false;
+
       return true;
     });
-  }, [hierarchyFilteredTasks, viewMode, drillDownId, permissions.canViewKanbanHierarchy, filters, rootVerticalId, activeVertical, user]);
+  }, [hierarchyFilteredTasks, viewMode, drillDownId, permissions.canViewKanbanHierarchy, filters, rootVerticalId, activeVertical, user, showReworkOnly]);
 
   return {
     tasksWithDuplicateInfo,

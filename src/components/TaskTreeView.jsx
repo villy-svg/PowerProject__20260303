@@ -82,19 +82,26 @@ const TaskTreeView = ({
       .map(t => t.id)
   );
 
-  // Split tasks into two groups while preserving tree order
+  // Split tasks into three groups while preserving tree order
+  const reworkTasks = [];
   const projectTreeTasks = [];
   const standaloneTasks = [];
 
+  const taskMap = new Map(verticalTasks.map(t => [t.id, t]));
+
   treeTasks.forEach(task => {
-    // Find the root of this task's branch
+    // 0. Check if this task itself is a Rework task
+    const isRework = task.latestSubmission?.status === 'rejected';
+
+    // 1. Find the root of this task's branch to determine if it's a tree or standalone
     let root = task;
-    const taskMap = new Map(verticalTasks.map(t => [t.id, t]));
     while (root.parentTask && taskMap.has(root.parentTask)) {
       root = taskMap.get(root.parentTask);
     }
 
-    if (topLevelTasksWithChildren.has(root.id)) {
+    if (isRework) {
+      reworkTasks.push(task);
+    } else if (topLevelTasksWithChildren.has(root.id)) {
       projectTreeTasks.push(task);
     } else {
       standaloneTasks.push(task);
@@ -167,7 +174,7 @@ const TaskTreeView = ({
 
           <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {task.latestSubmission?.status === 'rejected' && task.stageId === 'IN_PROGRESS' && (
-              <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+              <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
             )}
             {task.text}
           </div>
@@ -368,6 +375,13 @@ const TaskTreeView = ({
   return (
     <div className="task-tree-view">
       <div className="list-task-container">
+        {reworkTasks.length > 0 && (
+          <div className="tree-group-section rework-section">
+            <h5 className="tree-group-header">REWORK REQUIRED</h5>
+            {reworkTasks.map(renderNode)}
+          </div>
+        )}
+
         {projectTreeTasks.length > 0 && (
           <div className="tree-group-section">
             <h5 className="tree-group-header">INTEGRATED PROJECT TREES</h5>

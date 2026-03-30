@@ -126,6 +126,20 @@ const TaskController = (props) => {
               DEPR
             </button>
 
+            <button
+              className={`halo-button toggle-rework-btn ${showReworkOnly ? 'active' : ''}`}
+              onClick={() => setShowReworkOnly(!showReworkOnly)}
+              title={showReworkOnly ? "Show All Tasks" : "Filter: Rework Required Only"}
+              style={{ 
+                fontWeight: 600, 
+                color: showReworkOnly ? '#3b82f6' : 'var(--text-color)',
+                borderColor: showReworkOnly ? '#3b82f6' : 'var(--border-color)',
+                boxShadow: showReworkOnly ? '0 0 15px rgba(59, 130, 246, 0.3)' : 'none'
+              }}
+            >
+              REWORK
+            </button>
+
             {permissions.roleId === 'master_admin' && (
               <button
                 className="halo-button clear-board-btn"

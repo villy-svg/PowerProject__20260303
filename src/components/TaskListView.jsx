@@ -160,7 +160,7 @@ const ListViewRow = ({
         {/* 6. Task Summary */}
         <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isRejected && task.stageId === 'IN_PROGRESS' && (
-            <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+            <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
           )}
           {task.text}
         </div>
@@ -368,6 +368,12 @@ const TaskListView = ({
         const rawStageTasks = tasks
           .filter(t => allMemberIds.has(t.id))
           .sort((a, b) => {
+            // 0. Rework Priority (Rejected tasks always first)
+            const isReworkA = a.latestSubmission?.status === 'rejected';
+            const isReworkB = b.latestSubmission?.status === 'rejected';
+            if (isReworkA && !isReworkB) return -1;
+            if (!isReworkA && isReworkB) return 1;
+
             const pA = priorityOrder[a.priority] ?? 99;
             const pB = priorityOrder[b.priority] ?? 99;
             if (pA !== pB) return pA - pB;

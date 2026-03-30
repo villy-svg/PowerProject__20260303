@@ -16,6 +16,10 @@ import './SubmissionModal.css';
  * - user (object): Current user ({ id })
  * - onSubmitSuccess (fn): Optional callback after successful submission
  */
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+const MAX_TOTAL_SIZE = 50 * 1024 * 1024; // 50MB total per submission
+
 const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   const [comment, setComment] = useState('');
   const [files, setFiles] = useState([]);
@@ -31,8 +35,23 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   const handleFiles = useCallback((newFiles) => {
     if (isLocked) return;
     const fileArray = Array.from(newFiles);
+    
+    // Size check
+    const oversizedFiles = fileArray.filter(f => f.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert(`Some files are too large (Max 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+      return;
+    }
+
+    const currentTotalSize = files.reduce((acc, f) => acc + f.size, 0);
+    const newTotalSize = fileArray.reduce((acc, f) => acc + f.size, 0);
+    if (currentTotalSize + newTotalSize > MAX_TOTAL_SIZE) {
+      alert('Total submission size exceeds 50MB limit.');
+      return;
+    }
+
     setFiles((prev) => [...prev, ...fileArray]);
-  }, [isLocked]);
+  }, [isLocked, files]);
 
   const removeFile = useCallback((index) => {
     if (isLocked) return;
@@ -85,6 +104,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         comment: comment.trim(),
         files,
         moveToReview,
+        // Optional: We could pass a progress callback here if we refactor submitProofOfWork further
       });
 
       setProgress({ current: totalSteps, total: totalSteps, label: 'Done!' });

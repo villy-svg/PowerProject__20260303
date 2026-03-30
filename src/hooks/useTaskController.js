@@ -40,12 +40,13 @@ export const useTaskController = (props) => {
     initialViewMode || 'list'
   );
   const [showDeprioritized, setShowDeprioritized] = useState(false);
+  const [showReworkOnly, setShowReworkOnly] = useState(false);
   const [drillDownId, setDrillDownId] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
 
   // 2. Integration of Sub-Hooks
-  const filtersInfo = useTaskFilters({ ...props, viewMode, drillDownId });
+  const filtersInfo = useTaskFilters({ ...props, viewMode, drillDownId, showReworkOnly });
   const { filteredTasks, hierarchyFilteredTasks, tasksWithDuplicateInfo } = filtersInfo;
 
   const selectionInfo = useTaskSelection(tasks);
@@ -209,6 +210,7 @@ export const useTaskController = (props) => {
     saving,
     viewMode, setViewMode,
     showDeprioritized, setShowDeprioritized,
+    showReworkOnly, setShowReworkOnly,
     drillDownId, setDrillDownId,
     drillPath,
     confirmDialog, setConfirmDialog,

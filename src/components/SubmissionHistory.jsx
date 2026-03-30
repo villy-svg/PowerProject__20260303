@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSubmissionsForTask, updateSubmissionStatus } from '../services/tasks/submissionService';
+import RejectionModal from './RejectionModal';
 import './SubmissionHistory.css';
 
 /**
@@ -16,6 +17,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null); // tracks which submission is being updated
+  const [rejectionSubmission, setRejectionSubmission] = useState(null); // tracks it for the modal
 
   const canReview = permissions.canUpdate || ['editor', 'admin'].includes(permissions.level);
 
@@ -36,13 +38,14 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
     fetchSubmissions();
   }, [fetchSubmissions]);
 
-  const handleStatusUpdate = async (submissionId, newStatus) => {
+  const handleStatusUpdate = async (submissionId, newStatus, reason = null) => {
     setUpdating(submissionId);
     try {
-      const updated = await updateSubmissionStatus(submissionId, newStatus);
+      const updated = await updateSubmissionStatus(submissionId, newStatus, reason);
       setSubmissions(prev =>
-        prev.map(s => s.id === submissionId ? { ...s, status: updated.status } : s)
+        prev.map(s => s.id === submissionId ? { ...s, status: updated.status, rejection_reason: updated.rejection_reason } : s)
       );
+      setRejectionSubmission(null);
     } catch (err) {
       alert(`Failed to ${newStatus}: ${err.message}`);
     } finally {
@@ -173,7 +176,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
                 </button>
                 <button
                   className="submission-reject-btn"
-                  onClick={() => handleStatusUpdate(submission.id, 'rejected')}
+                  onClick={() => setRejectionSubmission(submission)}
                   disabled={updating === submission.id}
                 >
                   {updating === submission.id ? '...' : '✗ Reject'}
@@ -183,6 +186,13 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {} }) => {
           </div>
         ))
       )}
+
+      <RejectionModal
+        isOpen={!!rejectionSubmission}
+        onClose={() => setRejectionSubmission(null)}
+        task={{ text: rejectionSubmission ? `Submission #${rejectionSubmission.submission_number}` : '' }}
+        onSubmit={(reason) => handleStatusUpdate(rejectionSubmission.id, 'rejected', reason)}
+      />
     </div>
   );
 };

@@ -162,7 +162,7 @@ const TaskCard = ({
       {/* Row 2: Title */}
       <div className="card-row-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {isRejected && task.stageId === 'IN_PROGRESS' && (
-          <span className="rejected-red-dot" title="Submission Rejected: Rework Required">🔴</span>
+          <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
         )}
         <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>

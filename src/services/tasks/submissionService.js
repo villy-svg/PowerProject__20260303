@@ -35,9 +35,9 @@ export const compressFile = async (file) => {
  * Path: {taskId}/{submissionNumber}_{fileName}
  * @returns {{ url: string, fileName: string, mimeType: string }} | throws
  */
-export const uploadSubmissionFile = async (taskId, submissionNumber, file) => {
+export const uploadSubmissionFile = async (taskId, submissionId, file) => {
   const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const storagePath = `${taskId}/${submissionNumber}_${sanitizedName}`;
+  const storagePath = `${taskId}/${submissionId}/${sanitizedName}`;
 
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
@@ -63,19 +63,18 @@ export const uploadSubmissionFile = async (taskId, submissionNumber, file) => {
 };
 
 /**
- * Gets the next submission number for a task.
- * The DB trigger handles this, but we need it client-side for file naming.
+ * Updates the links array for an existing submission.
  */
-export const getNextSubmissionNumber = async (taskId) => {
+export const updateSubmissionLinks = async (submissionId, links) => {
   const { data, error } = await supabase
     .from('submissions')
-    .select('submission_number')
-    .eq('task_id', taskId)
-    .order('submission_number', { ascending: false })
-    .limit(1);
+    .update({ links })
+    .eq('id', submissionId)
+    .select()
+    .single();
 
-  if (error) throw new Error(`Failed to get submission number: ${error.message}`);
-  return (data?.[0]?.submission_number ?? 0) + 1;
+  if (error) throw new Error(`Failed to update submission links: ${error.message}`);
+  return data;
 };
 
 /**
@@ -128,35 +127,45 @@ export const getSubmissionsForTask = async (taskId) => {
  * @returns {Object} The created submission record
  */
 export const submitProofOfWork = async ({ taskId, userId, comment, files = [], moveToReview = false }) => {
-  // 1. Get next submission number for file naming
-  const submissionNumber = await getNextSubmissionNumber(taskId);
-
-  // 2. Compress and upload all files
-  const links = [];
-  for (const file of files) {
-    const compressed = await compressFile(file);
-    const linkObj = await uploadSubmissionFile(taskId, submissionNumber, compressed);
-    links.push(linkObj);
-  }
-
-  // 3. Create submission record (trigger auto-sets submission_number)
+  // 1. Create submission record first (Trigger handles submission_number)
+  // We insert with empty links to get the UUID for storage folder naming
   const submission = await createSubmission({
     taskId,
     submittedBy: userId,
     comment,
-    links,
+    links: [], // Start empty
   });
 
-  // 4. Optionally move task to REVIEW stage
-  if (moveToReview) {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ stageid: 'REVIEW' })
-      .eq('id', taskId);
-    if (error) console.error('Failed to move task to REVIEW:', error.message);
-  }
+  const submissionId = submission.id;
 
-  return submission;
+  try {
+    // 2. Compress and upload all files into the submission's UUID folder
+    const links = [];
+    for (const file of files) {
+      const compressed = await compressFile(file);
+      const linkObj = await uploadSubmissionFile(taskId, submissionId, compressed);
+      links.push(linkObj);
+    }
+
+    // 3. Update the record with the final links
+    const updatedSubmission = await updateSubmissionLinks(submissionId, links);
+
+    // 4. Optionally move task to REVIEW stage
+    if (moveToReview) {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ stageid: 'REVIEW' })
+        .eq('id', taskId);
+      if (error) console.error('Failed to move task to REVIEW:', error.message);
+    }
+
+    return updatedSubmission;
+  } catch (err) {
+    // Cleanup: If file upload or link update fails, we should ideally mark the submission
+    // as 'error' or 'abandoned', but for now we just throw so the UI handles the error.
+    console.error('Core submission flow failed:', err.message);
+    throw err;
+  }
 };
 
 /**

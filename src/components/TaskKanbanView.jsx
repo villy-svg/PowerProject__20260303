@@ -82,13 +82,22 @@ const TaskKanbanView = ({
           const stageTasks = filteredTasks
             .filter((t) => t.stageId === stage.id)
             .sort((a, b) => {
+              // 1. Rework Priority (Rejected tasks always first)
+              const isReworkA = a.latestSubmission?.status === 'rejected';
+              const isReworkB = b.latestSubmission?.status === 'rejected';
+              if (isReworkA && !isReworkB) return -1;
+              if (!isReworkA && isReworkB) return 1;
+
+              // 2. Standard Priority weight
               const weightA = getPriorityWeight(a.priority);
               const weightB = getPriorityWeight(b.priority);
               if (weightA !== weightB) return weightB - weightA;
 
+              // 3. Duplicate Grouping
               if (a.isDuplicate && !b.isDuplicate) return -1;
               if (!a.isDuplicate && b.isDuplicate) return 1;
 
+              // 4. Metadata
               const hubA = a.hub_code || '';
               const hubB = b.hub_code || '';
               if (hubA !== hubB) return hubA.localeCompare(hubB);

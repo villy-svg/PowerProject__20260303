@@ -60,16 +60,20 @@
 }
 
 .rejected-red-dot {
-  font-size: 0.85rem;
-  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.8));
-  animation: pulse-red-dot 2s infinite ease-in-out;
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6; /* Matching In Progress Blue */
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+  animation: pulse-blue-dot 2s infinite ease-in-out;
   flex-shrink: 0;
+  display: inline-block;
 }
 
-@keyframes pulse-red-dot {
-  0% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0.8; transform: scale(1); }
+@keyframes pulse-blue-dot {
+  0% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 4px rgba(59, 130, 246, 0.4); }
+  50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 12px rgba(59, 130, 246, 0.9); }
+  100% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 4px rgba(59, 130, 246, 0.4); }
 }
 
 .card-row-3 {
