@@ -18,8 +18,6 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => { fetchModels(); }, []);
-
   const fetchModels = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -30,6 +28,8 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
     else console.error('BillingModel fetch error:', error);
     setLoading(false);
   };
+
+  useEffect(() => { fetchModels(); }, []);
 
   const handleOpenModal = (model = null) => {
     if (model) {

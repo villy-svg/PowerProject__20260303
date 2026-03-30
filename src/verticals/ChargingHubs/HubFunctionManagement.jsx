@@ -14,10 +14,6 @@ const HubFunctionManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => {
-    fetchFunctions();
-  }, []);
-
   const fetchFunctions = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -32,6 +28,10 @@ const HubFunctionManagement = ({ permissions = {} }) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchFunctions();
+  }, []);
 
   const handleOpenModal = (fn = null) => {
     if (fn) {

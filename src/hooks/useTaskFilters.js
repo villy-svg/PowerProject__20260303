@@ -32,9 +32,45 @@ export const useTaskFilters = ({
     [user, tasksWithDuplicateInfo, activeVertical, verticals, permissions]
   );
 
-  // 3. Metadata & Context Filtering
+  // 3. Metadata & Context Filtering (includes Review Descendant calculation)
   const filteredTasks = useMemo(() => {
-    return hierarchyFilteredTasks.filter(t => {
+    // 3.1 Pre-calculate Recursive Review Status
+    // We do this here once per task set for performance
+    const taskMap = new Map(hierarchyFilteredTasks.map(t => [t.id, t]));
+    const parentToChildren = new Map();
+    hierarchyFilteredTasks.forEach(t => {
+      if (t.parentTask) {
+        if (!parentToChildren.has(t.parentTask)) parentToChildren.set(t.parentTask, []);
+        parentToChildren.get(t.parentTask).push(t.id);
+      }
+    });
+
+    const checkCache = new Map();
+    const hasReviewDescendant = (taskId) => {
+      if (checkCache.has(taskId)) return checkCache.get(taskId);
+      
+      const children = parentToChildren.get(taskId) || [];
+      for (const childId of children) {
+        const child = taskMap.get(childId);
+        if (!child) continue;
+        
+        // If child is in REVIEW, or child has a review descendant, then parent does too
+        if (child.stageId === 'REVIEW' || hasReviewDescendant(childId)) {
+          checkCache.set(taskId, true);
+          return true;
+        }
+      }
+      
+      checkCache.set(taskId, false);
+      return false;
+    };
+
+    const tasksWithReviewInfo = hierarchyFilteredTasks.map(t => ({
+      ...t,
+      hasReviewDescendant: hasReviewDescendant(t.id)
+    }));
+
+    return tasksWithReviewInfo.filter(t => {
       // 0. Strict Vertical Filter
       const targetVerticalId = rootVerticalId || activeVertical;
       if (t.verticalId !== targetVerticalId && activeVertical !== 'daily_hub_tasks') return false;

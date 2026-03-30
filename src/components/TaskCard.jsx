@@ -57,14 +57,14 @@ const TaskCard = ({
   };
 
   const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
-  
+
   // Dynamic Check for buttons
   const isRejected = task.latestSubmission?.status === 'rejected';
   const blockArrows = isRejected && permissions.level !== 'admin';
 
   const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
   const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
-  
+
   const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
   const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
@@ -108,11 +108,11 @@ const TaskCard = ({
           const directTasks = tasks.filter(t => t.parentTask === task.id);
           const completedDirect = directTasks.filter(t => t.stageId === 'COMPLETED').length;
           const recursiveStats = hierarchyService.getRecursiveTaskStats(task.id, tasks);
-          
+
           return (
             <div className="task-hierarchy-badges">
-              <div 
-                className="subtask-progress-badge" 
+              <div
+                className="subtask-progress-badge"
                 title="Direct Children Progress"
                 onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
               >
@@ -120,8 +120,8 @@ const TaskCard = ({
               </div>
 
               {recursiveStats.total > directTasks.length && (
-                <div 
-                  className="recursive-progress-badge" 
+                <div
+                  className="recursive-progress-badge"
                   title={`Total recursive descendants: ${recursiveStats.total} (${recursiveStats.completed} completed)`}
                   onClick={(e) => { e.stopPropagation(); onDrillDown(task.id); }}
                 >
@@ -163,6 +163,9 @@ const TaskCard = ({
       <div className="card-row-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {isRejected && task.stageId === 'IN_PROGRESS' && (
           <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
+        )}
+        {permissions.canUpdate && task.hasReviewDescendant && (
+          <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
         )}
         <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>
@@ -210,13 +213,13 @@ const TaskCard = ({
                       ↖
                     </button>
                   )}
-                  <button 
-                  className="promotion-btn" 
-                  onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
-                  title="Promote to Top Level"
-                >
-                  ↑
-                </button>
+                  <button
+                    className="promotion-btn"
+                    onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
+                    title="Promote to Top Level"
+                  >
+                    ↑
+                  </button>
                 </div>
               )}
               <button
@@ -228,20 +231,20 @@ const TaskCard = ({
               </button>
             </>
           )}
-          
+
           {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
-          {!task.isContextOnly && 
-           (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((user?.employeeId && task.assigned_to === user.employeeId) || (user?.id && task.assigned_to === user.id)))) && 
-           task.stageId !== 'DEPRIORITIZED' && 
-           task.stageId !== 'COMPLETED' && (
-            <button
-              className="card-submit-proof-button"
-              onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
-              title="Submit Proof of Work"
-            >
-              📤
-            </button>
-          )}
+          {!task.isContextOnly &&
+            (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || (currentUser?.id && task.assigned_to === currentUser.id)))) &&
+            task.stageId !== 'DEPRIORITIZED' &&
+            task.stageId !== 'COMPLETED' && (
+              <button
+                className="card-submit-proof-button"
+                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                title="Submit Proof of Work"
+              >
+                📤
+              </button>
+            )}
 
           {/* MANAGER APPROVE / REJECT */}
           {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (

@@ -15,10 +15,6 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
-
   const fetchRoles = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -33,6 +29,10 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const handleOpenModal = (role = null) => {
     if (role) {

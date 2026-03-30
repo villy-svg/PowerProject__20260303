@@ -76,6 +76,23 @@
   100% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 4px rgba(59, 130, 246, 0.4); }
 }
 
+.review-yellow-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #f59e0b; /* Matching Review Amber/Yellow */
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+  animation: pulse-yellow-dot 2s infinite ease-in-out;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+@keyframes pulse-yellow-dot {
+  0% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 4px rgba(245, 158, 11, 0.4); }
+  50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 12px rgba(245, 158, 11, 0.9); }
+  100% { opacity: 0.6; transform: scale(1); box-shadow: 0 0 4px rgba(245, 158, 11, 0.4); }
+}
+
 .card-row-3 {
   display: flex;
   align-items: center;

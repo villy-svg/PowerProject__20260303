@@ -21,10 +21,6 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {},
   });
   const [clients, setClients] = useState([]);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
   const fetchClients = async () => {
     const { data } = await supabase
       .from('clients')
@@ -33,6 +29,10 @@ const ClientTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {},
       .order('name');
     if (data) setClients(data);
   };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -19,11 +19,6 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => { 
-    fetchCategories();
-    fetchServices();
-  }, []);
-
   const fetchCategories = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -42,6 +37,11 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
       .order('name');
     if (!error) setServices(data || []);
   };
+
+  useEffect(() => { 
+    fetchCategories();
+    fetchServices();
+  }, []);
 
   const handleOpenModal = (cat = null) => {
     if (cat) {

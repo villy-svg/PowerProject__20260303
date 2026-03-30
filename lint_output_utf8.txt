@@ -1,0 +1,887 @@
+﻿
+> powerpod-project-manager@0.0.0 lint
+> eslint .
+
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\capture.js
+  6:10  error  'e' is defined but never used  no-unused-vars
+  6:13  error  Empty block statement          no-empty
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\check_schema.js
+   3:21  error  'process' is not defined                                                               no-undef
+   4:21  error  'process' is not defined                                                               no-undef
+   8:17  error  'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  11:29  error  'e2' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\App.jsx
+   11:10  error  'taskService' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                 no-unused-vars
+   12:10  error  'dailyTaskService' is defined but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+   88:14  error  'dailyTasksLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  210:11  error  'isConfigView' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u       no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\CSVImportButton.jsx
+  158:9  error  'skipped' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  180:7  error  'inFileDups' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\Configuration.jsx
+   5:26  error  'tasks' is defined but never used  no-unused-vars
+  25:16  error  'err' is defined but never used    no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\Sidebar.jsx
+  2:8  error  'powerLogo' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\TaskCard.jsx
+    1:17   error  'useState' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  237:116  error  'user' is not defined                                                            no-undef
+  237:157  error  'user' is not defined                                                            no-undef
+  237:178  error  'user' is not defined                                                            no-undef
+  237:211  error  'user' is not defined                                                            no-undef
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\TaskController.jsx
+   33:5   error  'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  215:27  error  'result' is defined but never used                                                    no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\TaskKanbanView.jsx
+  93:19  error  'canUpdate' is not defined  no-undef
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\TaskListView.jsx
+  321:3  error  'activeVertical' is defined but never used  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\TaskTreeView.jsx
+  371:11  error  'isExpanded' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+  382:9   error  'visibleTasks' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\UserManagement.jsx
+   11:27  error  'currentUser' is defined but never used  no-unused-vars
+  343:39  error  '_' is defined but never used            no-unused-vars
+  406:35  error  '_' is defined but never used            no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\UserProfile.jsx
+  21:9  error  'roles' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                 no-unused-vars
+  23:9  error  'handleRoleSelect' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u      no-unused-vars
+  32:9  error  'handleVerticalSelect' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  45:9  error  'isVerticalRole' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u        no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\components\VerticalWorkspace.jsx
+  69:6  warning  React Hook React.useEffect has a missing dependency: 'user'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\hooks\useClients.js
+  35:16  error  '_' is defined but never used  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\hooks\useDuplicateDetection.js
+  24:11  error  'clusters' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\hooks\useEmployees.js
+  42:16  error  '_' is defined but never used  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\hooks\useRBAC.js
+  78:11  error  'verticalCaps' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\hooks\useTaskController.js
+   50:11   error  'filteredTasks' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+   50:26   error  'hierarchyFilteredTasks' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   50:50   error  'tasksWithDuplicateInfo' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   53:28   error  'setSelectedTaskIds' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u      no-unused-vars
+   53:64   error  'toggleTaskSelection' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+   53:126  error  'toggleStageSelection' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u    no-unused-vars
+   56:41   error  'canUserDelete' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+   89:20   error  'err' is defined but never used                                                                         no-unused-vars
+  137:18   error  'err' is defined but never used                                                                         no-unused-vars
+  149:14   error  'err' is defined but never used                                                                         no-unused-vars
+  177:14   error  'err' is defined but never used                                                                         no-unused-vars
+  190:16   error  'err' is defined but never used                                                                         no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\services\auth\profileService.js
+  41:21  error  'existingByEmail' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\services\employees\employeeService.js
+  198:35  error  'fetchErr' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\services\rules\hierarchyService.js
+  38:55  error  'verticals' is assigned a value but never used    no-unused-vars
+  38:71  error  'permissions' is assigned a value but never used  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\services\tasks\taskService.js
+  79:11  error  'sorted' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\DailyTasksManagement.jsx
+  19:10  error  'employees' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u           no-unused-vars
+  19:21  error  'setEmployees' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u        no-unused-vars
+  20:10  error  'seniorEmployees' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  20:27  error  'setSeniorEmployees' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\HubFunctionManagement.jsx
+  18:5  error  Error: Cannot access variable before it is declared
+
+`fetchFunctions` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  16 |
+  17 |   useEffect(() => {
+> 18 |     fetchFunctions();
+     |     ^^^^^^^^^^^^^^ `fetchFunctions` accessed before it is declared
+  19 |   }, []);
+  20 |
+  21 |   const fetchFunctions = async () => {
+
+  19 |   }, []);
+  20 |
+> 21 |   const fetchFunctions = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 22 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 23 |     const { data, error } = await supabase
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 33 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 34 |   };
+     | ^^^^^ `fetchFunctions` is declared here
+  35 |
+  36 |   const handleOpenModal = (fn = null) => {
+  37 |     if (fn) {  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\HubManagement.jsx
+  66:6  warning  React Hook useEffect has a missing dependency: 'fetchHubs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\HubSubSidebar.jsx
+   10:26  error  'user' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-unused-vars
+   11:9   error  'canAccessAdmin' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+   38:9   error  'selectAll' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+  239:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  237 |       </div>
+  238 |
+> 239 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  240 |         label="City"
+  241 |         options={cities}
+  242 |         currentFilters={filters.city || []}
+
+  103 |   });
+  104 |
+> 105 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 161 |   };
+      | ^^^^ The component is created during render here
+  162 |
+  163 |   return (
+  164 |     <div className="sub-sidebar-body">                                                                           react-hooks/static-components
+  246:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  244 |       />
+  245 |
+> 246 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  247 |         label="Hub"
+  248 |         options={hubs}
+  249 |         currentFilters={filters.hub || []}
+
+  103 |   });
+  104 |
+> 105 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 161 |   };
+      | ^^^^ The component is created during render here
+  162 |
+  163 |   return (
+  164 |     <div className="sub-sidebar-body">                                                                                   react-hooks/static-components
+  255:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  253 |       />
+  254 |
+> 255 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  256 |         label="Priority"
+  257 |         options={priorities}
+  258 |         currentFilters={filters.priority || []}
+
+  103 |   });
+  104 |
+> 105 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 161 |   };
+      | ^^^^ The component is created during render here
+  162 |
+  163 |   return (
+  164 |     <div className="sub-sidebar-body">                                                                   react-hooks/static-components
+  262:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  260 |       />
+  261 |
+> 262 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  263 |         label="Function"
+  264 |         options={functions}
+  265 |         currentFilters={filters.function || []}
+
+  103 |   });
+  104 |
+> 105 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 161 |   };
+      | ^^^^ The component is created during render here
+  162 |
+  163 |   return (
+  164 |     <div className="sub-sidebar-body">                                                                    react-hooks/static-components
+  271:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  269 |       />
+  270 |
+> 271 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  272 |         label="Assignee"
+  273 |         options={[...new Set((tasks || []).map(t => t.assigneeName || 'Unassigned'))].sort()}
+  274 |         currentFilters={filters.assignee || []}
+
+  103 |   });
+  104 |
+> 105 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 106 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 107 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 161 |   };
+      | ^^^^ The component is created during render here
+  162 |
+  163 |   return (
+  164 |     <div className="sub-sidebar-body">  react-hooks/static-components
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\HubTaskForm.jsx
+  30:5  error  Error: Cannot access variable before it is declared
+
+`fetchHubs` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  28 |
+  29 |   useEffect(() => {
+> 30 |     fetchHubs();
+     |     ^^^^^^^^^ `fetchHubs` accessed before it is declared
+  31 |     fetchFunctions();
+  32 |   }, []);
+  33 |
+
+  32 |   }, []);
+  33 |
+> 34 |   const fetchHubs = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |     let { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 36 |     
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |     }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |   };
+     | ^^^^^ `fetchHubs` is declared here
+  55 |
+  56 |   const fetchFunctions = async () => {
+  57 |     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');  react-hooks/immutability
+  31:5  error  Error: Cannot access variable before it is declared
+
+`fetchFunctions` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  29 |   useEffect(() => {
+  30 |     fetchHubs();
+> 31 |     fetchFunctions();
+     |     ^^^^^^^^^^^^^^ `fetchFunctions` accessed before it is declared
+  32 |   }, []);
+  33 |
+  34 |   const fetchHubs = async () => {
+
+  54 |   };
+  55 |
+> 56 |   const fetchFunctions = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 57 |     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 58 |     if (data) setFunctions(data);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 59 |   };
+     | ^^^^^ `fetchFunctions` is declared here
+  60 |
+  61 |   // Get unique cities from the hubs list
+  62 |   const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();                                     react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\ChargingHubs\HubTaskTile.jsx
+  16:7   error    Error: Cannot access variable before it is declared
+
+`fetchHubCode` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  14 |   useEffect(() => {
+  15 |     if (task.hub_id) {
+> 16 |       fetchHubCode();
+     |       ^^^^^^^^^^^^ `fetchHubCode` accessed before it is declared
+  17 |     } else {
+  18 |       setHubCode('N/A');
+  19 |     }
+
+  26 |   }, [task.hub_id, task.function]);
+  27 |
+> 28 |   const fetchHubCode = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 29 |     try {
+     | ^^^^^^^^^
+> 30 |       const { data, error } = await supabase
+     ΓÇª
+     | ^^^^^^^^^
+> 43 |     }
+     | ^^^^^^^^^
+> 44 |   };
+     | ^^^^^ `fetchHubCode` is declared here
+  45 |
+  46 |   const fetchFunctionCode = async () => {
+  47 |     try {  react-hooks/immutability
+  22:7   error    Error: Cannot access variable before it is declared
+
+`fetchFunctionCode` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  20 |
+  21 |     if (task.function) {
+> 22 |       fetchFunctionCode();
+     |       ^^^^^^^^^^^^^^^^^ `fetchFunctionCode` accessed before it is declared
+  23 |     } else {
+  24 |       setFunctionCode('');
+  25 |     }
+
+  44 |   };
+  45 |
+> 46 |   const fetchFunctionCode = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 47 |     try {
+     | ^^^^^^^^^
+> 48 |       const { data, error } = await supabase
+     ΓÇª
+     | ^^^^^^^^^
+> 62 |     }
+     | ^^^^^^^^^
+> 63 |   };
+     | ^^^^^ `fetchFunctionCode` is declared here
+  64 |
+  65 |   return (
+  66 |     <div className="hub-tile-meta">                   react-hooks/immutability
+  26:6   warning  React Hook useEffect has missing dependencies: 'fetchFunctionCode' and 'fetchHubCode'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+  41:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+  60:14  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientBillingModelCSVImport.jsx
+  111:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientBillingModelManagement.jsx
+  21:21  error  Error: Cannot access variable before it is declared
+
+`fetchModels` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  19 |   const [viewMode, setViewMode] = useState('grid');
+  20 |
+> 21 |   useEffect(() => { fetchModels(); }, []);
+     |                     ^^^^^^^^^^^ `fetchModels` accessed before it is declared
+  22 |
+  23 |   const fetchModels = async () => {
+  24 |     setLoading(true);
+
+  21 |   useEffect(() => { fetchModels(); }, []);
+  22 |
+> 23 |   const fetchModels = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 25 |     const { data, error } = await supabase
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 26 |       .from('client_billing_models')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 27 |       .select('*')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 28 |       .order('name', { ascending: true });
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 29 |     if (!error) setModels(data || []);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 30 |     else console.error('BillingModel fetch error:', error);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 31 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 32 |   };
+     | ^^^^^ `fetchModels` is declared here
+  33 |
+  34 |   const handleOpenModal = (model = null) => {
+  35 |     if (model) {  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientCSVImport.jsx
+  145:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientCategoryCSVImport.jsx
+  125:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientCategoryManagement.jsx
+  23:5  error  Error: Cannot access variable before it is declared
+
+`fetchCategories` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  21 |
+  22 |   useEffect(() => { 
+> 23 |     fetchCategories();
+     |     ^^^^^^^^^^^^^^^ `fetchCategories` accessed before it is declared
+  24 |     fetchServices();
+  25 |   }, []);
+  26 |
+
+  25 |   }, []);
+  26 |
+> 27 |   const fetchCategories = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 28 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 29 |     const { data, error } = await supabase
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 30 |       .from('client_categories')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 31 |       .select('*')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 32 |       .order('name', { ascending: true });
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 33 |     if (!error) setCategories(data || []);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 34 |     else console.error('ClientCategory fetch error:', error);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 35 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 36 |   };
+     | ^^^^^ `fetchCategories` is declared here
+  37 |
+  38 |   const fetchServices = async () => {
+  39 |     const { data, error } = await supabase  react-hooks/immutability
+  24:5  error  Error: Cannot access variable before it is declared
+
+`fetchServices` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  22 |   useEffect(() => { 
+  23 |     fetchCategories();
+> 24 |     fetchServices();
+     |     ^^^^^^^^^^^^^ `fetchServices` accessed before it is declared
+  25 |   }, []);
+  26 |
+  27 |   const fetchCategories = async () => {
+
+  36 |   };
+  37 |
+> 38 |   const fetchServices = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |     const { data, error } = await supabase
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 40 |       .from('client_services')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |       .select('id, name, code')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |       .order('name');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     if (!error) setServices(data || []);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   };
+     | ^^^^^ `fetchServices` is declared here
+  45 |
+  46 |   const handleOpenModal = (cat = null) => {
+  47 |     if (cat) {                                                                                                                           react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientForm.jsx
+  108:9  error  'selectStyle' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  115:9  error  'labelStyle' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+  126:9  error  'fieldStyle' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientManagement.jsx
+   22:20  error  'categories' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                    no-unused-vars
+   22:32  error  'billingModels' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                 no-unused-vars
+   48:3   error  React Hook "useEffect" is called conditionally. React Hooks must be called in the exact same order in every component render  react-hooks/rules-of-hooks
+  150:9   error  'isMasterAdmin' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                 no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientServiceManagement.jsx
+  21:21  error  Error: Cannot access variable before it is declared
+
+`fetchCategories` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  19 |   const [viewMode, setViewMode] = useState('grid');
+  20 |
+> 21 |   useEffect(() => { fetchCategories(); }, []);
+     |                     ^^^^^^^^^^^^^^^ `fetchCategories` accessed before it is declared
+  22 |
+  23 |   const fetchCategories = async () => {
+  24 |     setLoading(true);
+
+  21 |   useEffect(() => { fetchCategories(); }, []);
+  22 |
+> 23 |   const fetchCategories = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 24 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 25 |     const { data, error } = await supabase
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 26 |       .from('client_services')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 27 |       .select('*')
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 28 |       .order('name', { ascending: true });
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 29 |     if (!error) setCategories(data || []);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 30 |     else console.error('ClientService fetch error:', error);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 31 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 32 |   };
+     | ^^^^^ `fetchCategories` is declared here
+  33 |
+  34 |   const handleOpenModal = (cat = null) => {
+  35 |     if (cat) {  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientSubSidebar.jsx
+   12:3  error  'user' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+   21:9  error  'canAccessAdmin' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  227:8  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  225 |       </div>
+  226 |
+> 227 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  228 |         label="Category"
+  229 |         options={filterOptions.vehicleCategories}
+  230 |         currentFilters={filters?.vehicle || []}
+
+  116 |   });
+  117 |
+> 118 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 119 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 165 |   };
+      | ^^^^ The component is created during render here
+  166 |
+  167 |   return (
+  168 |     <div className="sub-sidebar-body">      react-hooks/static-components
+  236:8  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  234 |       />
+  235 |
+> 236 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  237 |         label="Service Category"
+  238 |         options={filterOptions.serviceCategories}
+  239 |         currentFilters={filters?.service || []}
+
+  116 |   });
+  117 |
+> 118 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 119 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 165 |   };
+      | ^^^^ The component is created during render here
+  166 |
+  167 |   return (
+  168 |     <div className="sub-sidebar-body">  react-hooks/static-components
+  245:8  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  243 |       />
+  244 |
+> 245 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  246 |         label="Billing Model"
+  247 |         options={filterOptions.billingModels}
+  248 |         currentFilters={filters?.billing_model || []}
+
+  116 |   });
+  117 |
+> 118 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 119 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 120 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 165 |   };
+      | ^^^^ The component is created during render here
+  166 |
+  167 |   return (
+  168 |     <div className="sub-sidebar-body">   react-hooks/static-components
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Clients\ClientTaskForm.jsx
+  25:5  error  Error: Cannot access variable before it is declared
+
+`fetchClients` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  23 |
+  24 |   useEffect(() => {
+> 25 |     fetchClients();
+     |     ^^^^^^^^^^^^ `fetchClients` accessed before it is declared
+  26 |   }, []);
+  27 |
+  28 |   const fetchClients = async () => {
+
+  26 |   }, []);
+  27 |
+> 28 |   const fetchClients = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 29 |     const { data } = await supabase
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 30 |       .from('clients')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 31 |       .select('id, name')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 32 |       .eq('status', 'Active')
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |       .order('name');
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 34 |     if (data) setClients(data);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |   };
+     | ^^^^^ `fetchClients` is declared here
+  36 |
+  37 |   const handleSubmit = (e) => {
+  38 |     e.preventDefault();  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\DepartmentCSVImport.jsx
+  111:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\DepartmentManagement.jsx
+  18:5  error  Error: Cannot access variable before it is declared
+
+`fetchDepartments` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  16 |
+  17 |   useEffect(() => {
+> 18 |     fetchDepartments();
+     |     ^^^^^^^^^^^^^^^^ `fetchDepartments` accessed before it is declared
+  19 |   }, []);
+  20 |
+  21 |   const fetchDepartments = async () => {
+
+  19 |   }, []);
+  20 |
+> 21 |   const fetchDepartments = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 22 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 23 |     const { data, error } = await supabase
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 33 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 34 |   };
+     | ^^^^^ `fetchDepartments` is declared here
+  35 |
+  36 |   const handleOpenModal = (dept = null) => {
+  37 |     if (dept) {  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeCSVImport.jsx
+  229:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeManagement.jsx
+  2:10  error  'supabase' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeRoleCSVImport.jsx
+  112:16  error  Unexpected constant truthiness on the left-hand side of a `||` expression  no-constant-binary-expression
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeRoleManagement.jsx
+  19:5  error  Error: Cannot access variable before it is declared
+
+`fetchRoles` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  17 |
+  18 |   useEffect(() => {
+> 19 |     fetchRoles();
+     |     ^^^^^^^^^^ `fetchRoles` accessed before it is declared
+  20 |   }, []);
+  21 |
+  22 |   const fetchRoles = async () => {
+
+  20 |   }, []);
+  21 |
+> 22 |   const fetchRoles = async () => {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 23 |     setLoading(true);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 24 |     const { data, error } = await supabase
+     ΓÇª
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 34 |     setLoading(false);
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 35 |   };
+     | ^^^^^ `fetchRoles` is declared here
+  36 |
+  37 |   const handleOpenModal = (role = null) => {
+  38 |     if (role) {  react-hooks/immutability
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeSubSidebar.jsx
+   10:31   error  'user' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+   10:134  error  'tasks' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         no-unused-vars
+   11:9    error  'canAccessAdmin' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            no-unused-vars
+  207:8    error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  205 |       </div>
+  206 |
+> 207 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  208 |         label="Employee Role"
+  209 |         options={filterOptions.roles}
+  210 |         currentFilters={filters.role}
+
+  108 |   });
+  109 |
+> 110 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 163 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |   };
+      | ^^^^ The component is created during render here
+  165 |
+  166 |   return (
+  167 |     <div className="sub-sidebar-body">       react-hooks/static-components
+  216:8    error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  214 |       />
+  215 |
+> 216 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  217 |         label="Primary Hub"
+  218 |         options={filterOptions.hubs}
+  219 |         currentFilters={filters.hub}
+
+  108 |   });
+  109 |
+> 110 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 163 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |   };
+      | ^^^^ The component is created during render here
+  165 |
+  166 |   return (
+  167 |     <div className="sub-sidebar-body">               react-hooks/static-components
+  225:8    error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+  223 |       />
+  224 |
+> 225 |       <FilterGroup
+      |        ^^^^^^^^^^^ This component is created during render
+  226 |         label="Department"
+  227 |         options={filterOptions.departments}
+  228 |         currentFilters={filters.department}
+
+  108 |   });
+  109 |
+> 110 |   const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
+      |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |     const isExpanded = expandedGroups[filterKey];
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |     return (
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 163 |     );
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 164 |   };
+      | ^^^^ The component is created during render here
+  165 |
+  166 |   return (
+  167 |     <div className="sub-sidebar-body">  react-hooks/static-components
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeTaskForm.jsx
+  2:10  error  'supabase' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\src\verticals\Employees\EmployeeTree.jsx
+  19:3  error  'onView' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          no-unused-vars
+  21:3  error  'onToggleStatus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  no-unused-vars
+  23:3  error  'availableHubs' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+  24:3  error  'onUpdateHub' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-unused-vars
+  48:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  46 |   useEffect(() => {
+  47 |     if (pathIds.size > 0) {
+> 48 |       setExpandedIds(new Set(pathIds));
+     |       ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |     }
+  50 |   }, [pathIds]);
+  51 |  react-hooks/set-state-in-effect
+
+C:\Users\villy\OneDrive\Documents\PowerPod New\Coding Practice\PowerProject\vite.config.js
+  8:29  error  'process' is not defined  no-undef
+
+Γ£û 115 problems (112 errors, 3 warnings)
+

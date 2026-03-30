@@ -88,7 +88,16 @@ const TaskKanbanView = ({
               if (isReworkA && !isReworkB) return -1;
               if (!isReworkA && isReworkB) return 1;
 
-              // 2. Standard Priority weight
+              // 2. Review Priority (Children in review)
+              // Only relevant for managers (canUpdate)
+              if (canUserUpdate) {
+                const isReviewA = a.hasReviewDescendant;
+                const isReviewB = b.hasReviewDescendant;
+                if (isReviewA && !isReviewB) return -1;
+                if (!isReviewA && isReviewB) return 1;
+              }
+
+              // 3. Standard Priority weight
               const weightA = getPriorityWeight(a.priority);
               const weightB = getPriorityWeight(b.priority);
               if (weightA !== weightB) return weightB - weightA;

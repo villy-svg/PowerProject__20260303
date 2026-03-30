@@ -7,15 +7,130 @@ import { supabase } from '../../services/core/supabaseClient';
  * Vertical-specific sidebar content for Charging Hubs.
  * Contains the Master Admin administrative shortcut and task filters.
  */
-const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
-  const canAccessAdmin = permissions?.canAccessConfig;
+const filterSectionStyle = {
+  borderBottom: '1px solid var(--border-color)',
+  transition: 'all 0.3s ease'
+};
+
+const groupHeaderStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: '12px',
+  cursor: 'pointer',
+  userSelect: 'none'
+};
+
+const groupLabelStyle = {
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  color: 'var(--brand-green)',
+  letterSpacing: '0.5px'
+};
+
+const checkboxGroupStyle = (isExpanded) => ({
+  display: isExpanded ? 'flex' : 'none',
+  flexDirection: 'column',
+  gap: '8px',
+  maxHeight: '180px',
+  overflowY: 'auto',
+  padding: '0 12px 16px 12px',
+  transition: 'opacity 0.2s ease'
+});
+
+const checkboxItemStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  cursor: 'pointer',
+  fontSize: '0.85rem',
+  color: 'var(--text-color)',
+  padding: '4px 0',
+  opacity: 0.8
+};
+
+const checkMarkStyle = (isSelected) => ({
+  width: '16px',
+  height: '16px',
+  borderRadius: '4px',
+  border: '2px solid var(--border-color)',
+  backgroundColor: isSelected ? 'var(--brand-green)' : 'transparent',
+  borderColor: isSelected ? 'var(--brand-green)' : 'var(--border-color)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '10px',
+  color: 'white',
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+});
+
+const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange }) => {
+  return (
+    <div style={filterSectionStyle}>
+      <div style={groupHeaderStyle} onClick={onToggle}>
+        <span style={groupLabelStyle}>{label}</span>
+        <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{isExpanded ? '▲' : '▼'}</span>
+      </div>
+
+      {isExpanded && (
+        <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
+              onBatchFilter(filterKey, allVals);
+            }}
+            className="text-action-button"
+            style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+          >
+            SELECT ALL
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBatchFilter(filterKey, []);
+            }}
+            className="text-action-button"
+            style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+          >
+            CLEAR
+          </button>
+        </div>
+      )}
+
+      <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
+        {options.map(opt => {
+          const val = valueKey ? opt[valueKey] : opt;
+          const labelText = displayKey ? opt[displayKey] : opt;
+          const isSelected = currentFilters.includes(val);
+          return (
+            <div
+              key={val}
+              style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
+              onClick={() => onFilterChange(filterKey, val)}
+            >
+              <div style={checkMarkStyle(isSelected)}>
+                {isSelected && '✓'}
+              </div>
+              <span style={{ fontWeight: isSelected ? 600 : 400 }}>{labelText}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks }) => {
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
   const [expandedGroups, setExpandedGroups] = useState({
     city: false,
     hub: false,
     priority: false,
-    function: false
+    function: false,
+    assignee: false
   });
 
   useEffect(() => {
@@ -33,131 +148,6 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
 
   const toggleGroup = (key) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const selectAll = (key, options, valueKey) => {
-    options.forEach(opt => {
-      const val = valueKey ? opt[valueKey] : opt;
-      if (!filters[key]?.includes(val)) {
-        onFilterChange(key, val);
-      }
-    });
-  };
-
-  const filterSectionStyle = {
-    borderBottom: '1px solid var(--border-color)',
-    transition: 'all 0.3s ease'
-  };
-
-  const groupHeaderStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '12px',
-    cursor: 'pointer',
-    userSelect: 'none'
-  };
-
-  const groupLabelStyle = {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
-    color: 'var(--brand-green)',
-    letterSpacing: '0.5px'
-  };
-
-  const checkboxGroupStyle = (isExpanded) => ({
-    display: isExpanded ? 'flex' : 'none',
-    flexDirection: 'column',
-    gap: '8px',
-    maxHeight: '180px',
-    overflowY: 'auto',
-    padding: '0 12px 16px 12px',
-    transition: 'opacity 0.2s ease'
-  });
-
-  const checkboxItemStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    cursor: 'pointer',
-    fontSize: '0.85rem',
-    color: 'var(--text-color)',
-    padding: '4px 0',
-    opacity: 0.8
-  };
-
-  const checkMarkStyle = (isSelected) => ({
-    width: '16px',
-    height: '16px',
-    borderRadius: '4px',
-    border: '2px solid var(--border-color)',
-    backgroundColor: isSelected ? 'var(--brand-green)' : 'transparent',
-    borderColor: isSelected ? 'var(--brand-green)' : 'var(--border-color)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '10px',
-    color: 'white',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-  });
-
-  const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey }) => {
-    const isExpanded = expandedGroups[filterKey];
-    return (
-      <div style={filterSectionStyle}>
-        <div style={groupHeaderStyle} onClick={() => toggleGroup(filterKey)}>
-          <span style={groupLabelStyle}>{label}</span>
-          <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{isExpanded ? '▲' : '▼'}</span>
-        </div>
-
-        {isExpanded && (
-          <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
-                onBatchFilter(filterKey, allVals);
-              }}
-              className="text-action-button"
-              style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
-            >
-              SELECT ALL
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onBatchFilter(filterKey, []);
-              }}
-              className="text-action-button"
-              style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
-            >
-              CLEAR
-            </button>
-          </div>
-        )}
-
-        <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
-          {options.map(opt => {
-            const val = valueKey ? opt[valueKey] : opt;
-            const labelText = displayKey ? opt[displayKey] : opt;
-            const isSelected = currentFilters.includes(val);
-            return (
-              <div
-                key={val}
-                style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
-                onClick={() => onFilterChange(filterKey, val)}
-              >
-                <div style={checkMarkStyle(isSelected)}>
-                  {isSelected && '✓'}
-                </div>
-                <span style={{ fontWeight: isSelected ? 600 : 400 }}>{labelText}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -197,8 +187,6 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
           </button>
         </div>
       )}
-
-      {/* Admin Quick Links Moved to Main Sidebar */}
 
       <div style={{ padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)' }}>
         <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-color)' }}>FILTERS</p>
@@ -241,6 +229,10 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         options={cities}
         currentFilters={filters.city || []}
         filterKey="city"
+        isExpanded={expandedGroups.city}
+        onToggle={() => toggleGroup('city')}
+        onBatchFilter={onBatchFilter}
+        onFilterChange={onFilterChange}
       />
 
       <FilterGroup
@@ -250,6 +242,10 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         filterKey="hub"
         displayKey="hub_code"
         valueKey="id"
+        isExpanded={expandedGroups.hub}
+        onToggle={() => toggleGroup('hub')}
+        onBatchFilter={onBatchFilter}
+        onFilterChange={onFilterChange}
       />
 
       <FilterGroup
@@ -257,6 +253,10 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         options={priorities}
         currentFilters={filters.priority || []}
         filterKey="priority"
+        isExpanded={expandedGroups.priority}
+        onToggle={() => toggleGroup('priority')}
+        onBatchFilter={onBatchFilter}
+        onFilterChange={onFilterChange}
       />
 
       <FilterGroup
@@ -266,6 +266,10 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         filterKey="function"
         displayKey="function_code"
         valueKey="name"
+        isExpanded={expandedGroups.function}
+        onToggle={() => toggleGroup('function')}
+        onBatchFilter={onBatchFilter}
+        onFilterChange={onFilterChange}
       />
 
       <FilterGroup
@@ -273,6 +277,10 @@ const HubSubSidebar = ({ user, permissions, activeVertical, setActiveVertical, o
         options={[...new Set((tasks || []).map(t => t.assigneeName || 'Unassigned'))].sort()}
         currentFilters={filters.assignee || []}
         filterKey="assignee"
+        isExpanded={expandedGroups.assignee}
+        onToggle={() => toggleGroup('assignee')}
+        onBatchFilter={onBatchFilter}
+        onFilterChange={onFilterChange}
       />
 
       <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>

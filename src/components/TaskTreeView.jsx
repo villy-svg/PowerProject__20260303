@@ -64,8 +64,23 @@ const TaskTreeView = ({
     setExpandedIds(newExpanded);
   };
 
-  // Sort by latest created first
+  // Sort by priority, then latest created first
   const sortFn = (a, b) => {
+    // 1. Rework Priority (Rejected tasks always first)
+    const isReworkA = a.latestSubmission?.status === 'rejected';
+    const isReworkB = b.latestSubmission?.status === 'rejected';
+    if (isReworkA && !isReworkB) return -1;
+    if (!isReworkA && isReworkB) return 1;
+
+    // 2. Review Priority (Children in review)
+    // Only relevant for managers (canUpdate)
+    if (canUpdate) {
+      const isReviewA = a.hasReviewDescendant;
+      const isReviewB = b.hasReviewDescendant;
+      if (isReviewA && !isReviewB) return -1;
+      if (!isReviewA && isReviewB) return 1;
+    }
+
     const dateA = new Date(a.created_at || a.createdAt || 0);
     const dateB = new Date(b.created_at || b.createdAt || 0);
     return dateB - dateA;
@@ -175,6 +190,9 @@ const TaskTreeView = ({
           <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {task.latestSubmission?.status === 'rejected' && task.stageId === 'IN_PROGRESS' && (
               <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
+            )}
+            {canUpdate && task.hasReviewDescendant && (
+              <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
             )}
             {task.text}
           </div>

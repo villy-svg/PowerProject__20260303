@@ -14,10 +14,6 @@ const DepartmentManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
   const fetchDepartments = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -32,6 +28,10 @@ const DepartmentManagement = ({ permissions = {} }) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
 
   const handleOpenModal = (dept = null) => {
     if (dept) {

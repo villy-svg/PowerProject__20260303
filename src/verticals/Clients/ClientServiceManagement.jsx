@@ -18,8 +18,6 @@ const ClientServiceManagement = ({ permissions = {} }) => {
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [viewMode, setViewMode] = useState('grid');
 
-  useEffect(() => { fetchCategories(); }, []);
-
   const fetchCategories = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -30,6 +28,8 @@ const ClientServiceManagement = ({ permissions = {} }) => {
     else console.error('ClientService fetch error:', error);
     setLoading(false);
   };
+
+  useEffect(() => { fetchCategories(); }, []);
 
   const handleOpenModal = (cat = null) => {
     if (cat) {

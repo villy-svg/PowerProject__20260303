@@ -11,20 +11,6 @@ const HubTaskTile = ({ task }) => {
   const [hubCode, setHubCode] = useState('...');
   const [functionCode, setFunctionCode] = useState('');
 
-  useEffect(() => {
-    if (task.hub_id) {
-      fetchHubCode();
-    } else {
-      setHubCode('N/A');
-    }
-
-    if (task.function) {
-      fetchFunctionCode();
-    } else {
-      setFunctionCode('');
-    }
-  }, [task.hub_id, task.function]);
-
   const fetchHubCode = async () => {
     try {
       const { data, error } = await supabase
@@ -61,6 +47,20 @@ const HubTaskTile = ({ task }) => {
       setFunctionCode(task.function);
     }
   };
+
+  useEffect(() => {
+    if (task.hub_id) {
+      fetchHubCode();
+    } else {
+      setHubCode('N/A');
+    }
+
+    if (task.function) {
+      fetchFunctionCode();
+    } else {
+      setFunctionCode('');
+    }
+  }, [task.hub_id, task.function]);
 
   return (
     <div className="hub-tile-meta">

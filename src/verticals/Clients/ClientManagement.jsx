@@ -35,7 +35,11 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
     }
   }, [fetchClients, permissions?.canAccessClients]);
 
-  if (!permissions?.canAccessClients && !permissions?.scope === 'global') {
+  useEffect(() => {
+    localStorage.setItem('powerpod_client_view', viewMode);
+  }, [viewMode]);
+
+  if (!permissions?.canAccessClients && !(permissions?.scope === 'global')) {
     return (
       <div className="empty-state" style={{ marginTop: '100px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>🔒</div>
@@ -44,10 +48,6 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
       </div>
     );
   }
-
-  useEffect(() => {
-    localStorage.setItem('powerpod_client_view', viewMode);
-  }, [viewMode]);
 
   const handleSave = async (formData, force = false) => {
     if (!force) {

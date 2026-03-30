@@ -162,6 +162,9 @@ const ListViewRow = ({
           {isRejected && task.stageId === 'IN_PROGRESS' && (
             <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
           )}
+          {effectiveCanUpdate && task.hasReviewDescendant && (
+            <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
+          )}
           {task.text}
         </div>
       </div>
@@ -373,6 +376,15 @@ const TaskListView = ({
             const isReworkB = b.latestSubmission?.status === 'rejected';
             if (isReworkA && !isReworkB) return -1;
             if (!isReworkA && isReworkB) return 1;
+
+            // 1. Review Priority (Children in review)
+            // Only relevant for managers (canUpdate)
+            if (canUpdate) {
+              const isReviewA = a.hasReviewDescendant;
+              const isReviewB = b.hasReviewDescendant;
+              if (isReviewA && !isReviewB) return -1;
+              if (!isReviewA && isReviewB) return 1;
+            }
 
             const pA = priorityOrder[a.priority] ?? 99;
             const pB = priorityOrder[b.priority] ?? 99;

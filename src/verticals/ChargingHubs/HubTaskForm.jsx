@@ -26,11 +26,6 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
 
-  useEffect(() => {
-    fetchHubs();
-    fetchFunctions();
-  }, []);
-
   const fetchHubs = async () => {
     let { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
     
@@ -57,6 +52,11 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
     if (data) setFunctions(data);
   };
+
+  useEffect(() => {
+    fetchHubs();
+    fetchFunctions();
+  }, []);
 
   // Get unique cities from the hubs list
   const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();
