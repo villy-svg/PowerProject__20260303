@@ -194,14 +194,16 @@ const TaskController = (props) => {
         executeMerge={executeMerge}
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
-        onSubmissionReview={async (subId, status) => {
+        onSubmissionReview={(subId, status) => {
           if (status === 'rejected' && editingTask) {
-            await handleInternalUpdateStage(editingTask.id, 'IN_PROGRESS');
-            if (refreshTasks) refreshTasks(false);
+            handleInternalUpdateStage(editingTask.id, 'IN_PROGRESS');
           } else if (status === 'approved' && editingTask) {
-            await handleInternalUpdateStage(editingTask.id, 'COMPLETED');
-            if (refreshTasks) refreshTasks(false);
+            handleInternalUpdateStage(editingTask.id, 'COMPLETED');
           }
+          // Close the edit modal so the board immediately reflects the change
+          setIsModalOpen(false);
+          setEditingTask(null);
+          if (props.refreshTasks) props.refreshTasks(false);
         }}
       />
 
