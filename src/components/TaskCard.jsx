@@ -174,7 +174,7 @@ const TaskCard = ({
         {isRejected && task.stageId === 'IN_PROGRESS' && (
           <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
         )}
-        {permissions.canUpdate && task.hasReviewDescendant && (
+        {permissions.canUpdate && !!task.hasReviewDescendant && (
           <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
         )}
         <span className="card-task-name" title={task.text}>{task.text}</span>
@@ -224,7 +224,7 @@ const TaskCard = ({
                     </button>
                   )}
                   <button
-                    className="promotion-btn"
+                    className="card-promote-button"
                     onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
                     title="Promote to Top Level"
                   >
@@ -256,20 +256,18 @@ const TaskCard = ({
               </button>
             )}
 
-          {/* MANAGER APPROVE / REJECT */}
-          {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+           {/* MANAGER APPROVE / REJECT */}
+          {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
             <>
               <button
-                className="halo-button save-btn"
-                style={{ padding: '4px 8px', fontSize: '0.8rem', minWidth: 'auto' }}
+                className="halo-button btn-approve"
                 onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
                 title="Approve Submission"
               >
                 ✓ Appr
               </button>
               <button
-                className="halo-button delete-btn"
-                style={{ padding: '4px 8px', fontSize: '0.8rem', minWidth: 'auto' }}
+                className="halo-button btn-reject"
                 onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
                 title="Reject Submission & Request Rework"
               >

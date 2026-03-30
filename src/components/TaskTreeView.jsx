@@ -85,8 +85,8 @@ const TaskTreeView = ({
     // 2. Review Priority (Children in review)
     // Only relevant for managers (canUpdate)
     if (canUpdate) {
-      const isReviewA = a.hasReviewDescendant;
-      const isReviewB = b.hasReviewDescendant;
+      const isReviewA = !!a.hasReviewDescendant;
+      const isReviewB = !!b.hasReviewDescendant;
       if (isReviewA && !isReviewB) return -1;
       if (!isReviewA && isReviewB) return 1;
     }
@@ -201,7 +201,7 @@ const TaskTreeView = ({
             {task.latestSubmission?.status === 'rejected' && task.stageId === 'IN_PROGRESS' && (
               <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
             )}
-            {canUpdate && task.hasReviewDescendant && (
+            {canUpdate && !!task.hasReviewDescendant && (
               <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
             )}
             {task.text}
@@ -311,19 +311,19 @@ const TaskTreeView = ({
               )}
 
             {/* MANAGER APPROVE / REJECT */}
-            {task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+            {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
               <>
                 <button
-                  className="halo-button save-btn"
-                  style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                  className="halo-button btn-approve"
+                  style={{ marginLeft: '4px' }}
                   onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
                   title="Approve Submission"
                 >
                   ✓ Appr
                 </button>
                 <button
-                  className="halo-button delete-btn"
-                  style={{ padding: '2px 6px', fontSize: '0.75rem', minWidth: 'auto', marginLeft: '4px' }}
+                  className="halo-button btn-reject"
+                  style={{ marginLeft: '4px' }}
                   onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
                   title="Reject Submission & Request Rework"
                 >

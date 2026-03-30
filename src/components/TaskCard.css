@@ -98,8 +98,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap; /* Standardized: wrap on narrow columns */
+  row-gap: 12px;
   padding-top: 12px;
-  border-top: none; /* Removed separator */
+  border-top: none;
 }
 
 .card-priority {
@@ -294,6 +296,8 @@
   display: flex !important;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap; /* Standardized: wrap on narrow columns */
+  justify-content: flex-end;
   opacity: 0; /* Progressive Disclosure */
   transition: opacity 0.25s ease;
 }

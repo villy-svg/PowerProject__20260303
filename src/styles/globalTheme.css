@@ -135,6 +135,41 @@
   align-items: center;
   flex-shrink: 0;
 }
+/* Management Action Themes (Halo Glass) - Standardized for Tasks */
+.btn-approve, .btn-reject {
+  padding: 4px 10px !important;
+  font-size: 0.72rem !important;
+  min-width: unset !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 8px !important;
+}
+
+.btn-approve {
+  color: var(--brand-mint) !important;
+  background: var(--halo-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
+}
+
+.btn-approve:hover {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
+  border-color: var(--brand-mint) !important;
+  box-shadow: 0 0 15px var(--halo-glow);
+}
+
+.btn-reject {
+  color: var(--priority-urgent) !important;
+  background: color-mix(in srgb, var(--priority-urgent), transparent 95%) !important;
+  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 70%) !important;
+}
+
+.btn-reject:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%) !important;
+  border-color: var(--priority-urgent) !important;
+  box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
+}
+
 /* ==========================================================================
    3. SHARED UI COMPONENTS (Halo Design System)
    ========================================================================== */
@@ -186,12 +221,13 @@
   letter-spacing: 0.5px;
 }
 
-/* View Toggles */
+/* View Toggles (Master Header System Standard) */
 .view-mode-toggle {
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--halo-bg); /* Standardized */
   border-radius: 10px;
   padding: 4px;
+  gap: 8px; /* Standardized */
   border: 1px solid var(--border-color);
 }
 

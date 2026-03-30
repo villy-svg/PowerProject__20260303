@@ -30,3 +30,12 @@ When writing code, adding new features, or modifying existing components, always
 ### 6. Code Quality & Formatting
 - **Destructure Early:** Destructure your props at the top of the function signature (e.g., `const EmployeeCard = ({ emp, onEdit }) =>`) instead of accessing `props.emp`. It acts as clear documentation for what the component expects.
 - **Strict Equality (`===`):** Always use strict equality checks (`===`). Relying on loose equality (`==`) can lead to unpredictable type coercion bugs, especially when dealing with numeric IDs versus string IDs (e.g., `1 == "1"` is true, but `1 === "1"` is false). To debug situations where two identifiers look exactly identical but fail strict equality, use `typeof value` (e.g., `console.log(typeof id1, typeof id2)`) to verify that the mismatch isn't simply a Number vs. String issue.
+
+### 7. Runtime Stability & Coding Health
+- **Adopt the Zero-Crash Policy:** Before finalizing any change, always refer to the detailed [Runtime Stability & Coding Health](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/runtime-stability-and-coding-health/SKILL.md) skill.
+- **Checklist Summary:**
+    - **Verify All Imports:** Never assume icons or components are globally available.
+    - **Avoid Optional Destructuring Crashes:** Use `const { x } = obj || {}`.
+    - **Define Const/Let Before Use:** Avoid temporal dead zone errors by placing logic after declarations.
+    - **Audit Truthy Renders:** Use `!!count && ...` instead of `count && ...` to avoid rendering `0`.
+
