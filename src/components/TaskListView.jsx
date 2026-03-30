@@ -234,7 +234,6 @@ const ListViewRow = ({
               className="card-submit-proof-button"
               onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
               title="Submit Proof of Work"
-              style={{ color: 'var(--brand-mint)', fontWeight: 800, fontSize: '1.1rem' }}
             >
               📤
             </button>

@@ -193,12 +193,12 @@ const TaskTreeView = ({
                   ←
                 </button>
                 <button
-                  className={`card-nav-button ${!canMoveRight ? 'disabled' : ''}`}
+                  className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED') ? 'disabled' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (canMoveRight) updateTaskStage(task.id, rightStageId);
+                    if (canMoveRight && task.stageId !== 'COMPLETED') updateTaskStage(task.id, rightStageId);
                   }}
-                  disabled={!canMoveRight}
+                  disabled={!canMoveRight || task.stageId === 'COMPLETED'}
                   title={task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
                 >
                   →
@@ -261,7 +261,6 @@ const TaskTreeView = ({
                 className="card-submit-proof-button"
                 onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
                 title="Submit Proof of Work"
-                style={{ color: 'var(--brand-mint)', fontWeight: 800, fontSize: '1.1rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
               >
                 📤
               </button>
