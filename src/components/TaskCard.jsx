@@ -22,6 +22,7 @@ const TaskCard = ({
   deleteTask,
   openEditModal,
   openAddSubtaskModal,
+  openSubmissionModal,
   onMoveToParent,
   onDuplicateMerge,
   STAGE_LIST,
@@ -218,6 +219,16 @@ const TaskCard = ({
                 +
               </button>
             </>
+          )}
+
+          {!task.isContextOnly && task.stageId !== 'DEPRIORITIZED' && task.stageId !== 'COMPLETED' && (
+            <button
+              className="card-submit-proof-button"
+              onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+              title="Submit Proof of Work"
+            >
+              📤
+            </button>
           )}
 
           {effectiveCanUpdate && (

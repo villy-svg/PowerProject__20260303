@@ -17,6 +17,7 @@ const ListViewRow = ({
   updateTaskStage, 
   openEditModal, 
   openAddSubtaskModal, 
+  openSubmissionModal,
   onMoveToParent, 
   TaskTileComponent,
   selectedTaskIds,
@@ -222,6 +223,18 @@ const ListViewRow = ({
               )}
             </>
           )}
+          
+          {!task.isContextOnly && task.stageId !== 'DEPRIORITIZED' && task.stageId !== 'COMPLETED' && (
+            <button
+              className="card-submit-proof-button"
+              onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+              title="Submit Proof of Work"
+              style={{ color: 'var(--brand-mint)', fontWeight: 800, fontSize: '1.1rem' }}
+            >
+              📤
+            </button>
+          )}
+
           {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
               className="card-edit-button"
@@ -276,6 +289,7 @@ const TaskListView = ({
   updateTaskStage,
   openEditModal,
   openAddSubtaskModal,
+  openSubmissionModal,
   onMoveToParent,
   TaskTileComponent, // To render vertical-specific metadata
   selectedTaskIds = [],
@@ -391,6 +405,7 @@ const TaskListView = ({
                   updateTaskStage={updateTaskStage}
                   openEditModal={openEditModal}
                   openAddSubtaskModal={openAddSubtaskModal}
+                  openSubmissionModal={openSubmissionModal}
                   onMoveToParent={onMoveToParent}
                   TaskTileComponent={TaskTileComponent}
                   selectedTaskIds={selectedTaskIds}

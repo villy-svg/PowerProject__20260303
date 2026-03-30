@@ -17,6 +17,7 @@ const TaskTreeView = ({
   updateTaskStage,
   openEditModal,
   openAddSubtaskModal,
+  openSubmissionModal,
   onMoveToParent,
   TaskTileComponent,
   currentUser,
@@ -249,6 +250,17 @@ const TaskTreeView = ({
               </React.Fragment>
             )}
             
+            {!task.isContextOnly && task.stageId !== 'DEPRIORITIZED' && task.stageId !== 'COMPLETED' && (
+              <button
+                className="card-submit-proof-button"
+                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                title="Submit Proof of Work"
+                style={{ color: 'var(--brand-mint)', fontWeight: 800, fontSize: '1.1rem', background: 'transparent', border: 'none', cursor: 'pointer' }}
+              >
+                📤
+              </button>
+            )}
+
             {!task.isContextOnly && (canUpdate || canEditDescription) && (
               <button
                 className="card-edit-button"

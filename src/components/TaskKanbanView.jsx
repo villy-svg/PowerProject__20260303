@@ -28,6 +28,7 @@ const TaskKanbanView = ({
   deleteTask,
   openEditModal,
   openAddSubtaskModal,
+  openSubmissionModal,
   onMoveToParent,
   onDuplicateMerge,
   onPromote,
@@ -155,6 +156,7 @@ const TaskKanbanView = ({
                       deleteTask={deleteTask}
                       openEditModal={openEditModal}
                       openAddSubtaskModal={openAddSubtaskModal}
+                      openSubmissionModal={openSubmissionModal}
                       onMoveToParent={onMoveToParent}
                       onDuplicateMerge={onDuplicateMerge}
                       STAGE_LIST={stageList}
