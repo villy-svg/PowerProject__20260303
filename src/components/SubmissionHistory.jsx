@@ -14,7 +14,7 @@ import './SubmissionHistory.css';
  * - currentUser (object): Current user ({ id })
  * - onStatusUpdate (fn): Optional callback after a successful status change (submissionId, newStatus)
  */
-const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatusUpdate }) => {
+const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatusUpdate, onCountLoad }) => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null); // tracks which submission is being updated
@@ -28,6 +28,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
     try {
       const data = await getSubmissionsForTask(taskId);
       setSubmissions(data);
+      if (onCountLoad) onCountLoad(data.length);
     } catch (err) {
       console.error('Failed to load submissions:', err);
     } finally {

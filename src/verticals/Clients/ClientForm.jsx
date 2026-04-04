@@ -131,169 +131,171 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
       onSubmit={currentPage === 2 ? handleSubmit : handleNext}
     >
       {/* Wizard Step Indicator */}
-      <div className="form-wizard-header">
+      <div className="task-form-tabs wizard-tabs">
         <div className={`step ${currentPage >= 1 ? 'active' : ''}`}>1. Client Details</div>
         <div className={`step ${currentPage >= 2 ? 'active' : ''}`}>2. PoC Details</div>
       </div>
 
-      <div className="form-content-area">
-        {/* PAGE 1: Client Details */}
-        {currentPage === 1 && (
-          <div className="form-page fade-in">
-            <div className="form-group">
-              <label>Client Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="e.g. Tata Motors Ltd."
-                required
-                readOnly={isViewOnly}
-              />
-            </div>
+      <div className="modal-content-area">
+        <div className="form-content-area">
+          {/* PAGE 1: Client Details */}
+          {currentPage === 1 && (
+            <div className="form-page fade-in">
+              <div className="form-group">
+                <label>Client Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g. Tata Motors Ltd."
+                  required
+                  readOnly={isViewOnly}
+                />
+              </div>
 
-            <div className="form-group" style={{ marginTop: '1.5rem' }}>
-              <label>Service Category Matrix</label>
-              <div className="matrix-container">
-                <table className="permissions-table client-matrix-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'left', padding: '12px' }}>Vehicle Category</th>
-                      {serviceCategories.map(service => (
-                        <th key={service.id} style={{ textAlign: 'center', padding: '12px', fontSize: '0.75rem' }}>
-                          {service.code || service.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vehicleCategories.map(vehicle => (
-                      <tr key={vehicle.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <td style={{ padding: '12px', fontSize: '0.85rem', fontWeight: 600 }}>
-                          {vehicle.name} <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({vehicle.code})</span>
-                        </td>
-                        {serviceCategories.map(service => {
-                          const isChecked = formData.category_matrix[vehicle.id]?.[service.id] || false;
-                          return (
-                            <td key={service.id} style={{ textAlign: 'center', padding: '12px' }}>
-                              <label className="switch" style={{ margin: '0 auto' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => {
-                                    if (isViewOnly) return;
-                                    setFormData(prev => {
-                                      const currentMatrix = JSON.parse(JSON.stringify(prev.category_matrix));
-                                      if (!currentMatrix[vehicle.id]) currentMatrix[vehicle.id] = {};
-                                      
-                                      const wasChecked = currentMatrix[vehicle.id][service.id] || false;
-                                      currentMatrix[vehicle.id][service.id] = !wasChecked;
-                                      
-                                      // MATRIX AUTOMATION: If checking ANY service for a vehicle for the first time, 
-                                      // check if that vehicle has a default service to auto-apply.
-                                      if (!wasChecked) {
-                                        // Count how many services are currently checked for this vehicle
-                                        const totalCheckedBefore = Object.values(currentMatrix[vehicle.id]).filter(v => v).length - 1; // -1 because we just checked one
+              <div className="form-group" style={{ marginTop: '1.5rem' }}>
+                <label>Service Category Matrix</label>
+                <div className="matrix-container">
+                  <table className="permissions-table client-matrix-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', padding: '12px' }}>Vehicle Category</th>
+                        {serviceCategories.map(service => (
+                          <th key={service.id} style={{ textAlign: 'center', padding: '12px', fontSize: '0.75rem' }}>
+                            {service.code || service.name}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vehicleCategories.map(vehicle => (
+                        <tr key={vehicle.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                          <td style={{ padding: '12px', fontSize: '0.85rem', fontWeight: 600 }}>
+                            {vehicle.name} <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({vehicle.code})</span>
+                          </td>
+                          {serviceCategories.map(service => {
+                            const isChecked = formData.category_matrix[vehicle.id]?.[service.id] || false;
+                            return (
+                              <td key={service.id} style={{ textAlign: 'center', padding: '12px' }}>
+                                <label className="switch" style={{ margin: '0 auto' }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => {
+                                      if (isViewOnly) return;
+                                      setFormData(prev => {
+                                        const currentMatrix = JSON.parse(JSON.stringify(prev.category_matrix));
+                                        if (!currentMatrix[vehicle.id]) currentMatrix[vehicle.id] = {};
                                         
-                                        if (totalCheckedBefore === 0 && vehicle.default_service_code) {
-                                          const defaultSvc = serviceCategories.find(s => s.code === vehicle.default_service_code);
-                                          // Apply the default if we found it and it's not the one we just toggled
-                                          if (defaultSvc && defaultSvc.id !== service.id) {
-                                            currentMatrix[vehicle.id][defaultSvc.id] = true;
+                                        const wasChecked = currentMatrix[vehicle.id][service.id] || false;
+                                        currentMatrix[vehicle.id][service.id] = !wasChecked;
+                                        
+                                        // MATRIX AUTOMATION: If checking ANY service for a vehicle for the first time, 
+                                        // check if that vehicle has a default service to auto-apply.
+                                        if (!wasChecked) {
+                                          // Count how many services are currently checked for this vehicle
+                                          const totalCheckedBefore = Object.values(currentMatrix[vehicle.id]).filter(v => v).length - 1; // -1 because we just checked one
+                                          
+                                          if (totalCheckedBefore === 0 && vehicle.default_service_code) {
+                                            const defaultSvc = serviceCategories.find(s => s.code === vehicle.default_service_code);
+                                            // Apply the default if we found it and it's not the one we just toggled
+                                            if (defaultSvc && defaultSvc.id !== service.id) {
+                                              currentMatrix[vehicle.id][defaultSvc.id] = true;
+                                            }
                                           }
                                         }
-                                      }
 
-                                      return { ...prev, category_matrix: currentMatrix };
-                                    });
-                                  }}
-                                  disabled={isViewOnly}
-                                />
-                                <span className="slider"></span>
-                              </label>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                    {vehicleCategories.length === 0 && (
-                      <tr>
-                        <td colSpan={serviceCategories.length + 1} style={{ textAlign: 'center', padding: '20px', opacity: 0.5 }}>
-                          No vehicle categories defined.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                                        return { ...prev, category_matrix: currentMatrix };
+                                      });
+                                    }}
+                                    disabled={isViewOnly}
+                                  />
+                                  <span className="slider"></span>
+                                </label>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                      {vehicleCategories.length === 0 && (
+                        <tr>
+                          <td colSpan={serviceCategories.length + 1} style={{ textAlign: 'center', padding: '20px', opacity: 0.5 }}>
+                            No vehicle categories defined.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px' }}>
+                  * Select the services applicable for each vehicle category.
+                </p>
               </div>
-              <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px' }}>
-                * Select the services applicable for each vehicle category.
-              </p>
-            </div>
 
-            <div className="form-group" style={{ marginTop: '1rem' }}>
-              <label>Billing Model</label>
-              <select
-                name="billing_model_id"
-                className="master-dropdown"
-                value={formData.billing_model_id}
-                onChange={handleChange}
-                disabled={isViewOnly}
-              >
-                <option value="">— Select Billing Model —</option>
-                {billingModels.map(model => (
-                  <option key={model.id} value={model.id}>{model.name} ({model.code})</option>
-                ))}
-              </select>
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <label>Billing Model</label>
+                <select
+                  name="billing_model_id"
+                  className="master-dropdown"
+                  value={formData.billing_model_id}
+                  onChange={handleChange}
+                  disabled={isViewOnly}
+                >
+                  <option value="">— Select Billing Model —</option>
+                  {billingModels.map(model => (
+                    <option key={model.id} value={model.id}>{model.name} ({model.code})</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* PAGE 2: PoC Details */}
-        {currentPage === 2 && (
-          <div className="form-page fade-in">
-            <div className="form-group">
-              <label>PoC Name</label>
-              <input
-                type="text"
-                name="poc_name"
-                value={formData.poc_name}
-                onChange={handleChange}
-                placeholder="Point of Contact Name"
-                readOnly={isViewOnly}
-              />
-            </div>
+          {/* PAGE 2: PoC Details */}
+          {currentPage === 2 && (
+            <div className="form-page fade-in">
+              <div className="form-group">
+                <label>PoC Name</label>
+                <input
+                  type="text"
+                  name="poc_name"
+                  value={formData.poc_name}
+                  onChange={handleChange}
+                  placeholder="Point of Contact Name"
+                  readOnly={isViewOnly}
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Contact Number</label>
-              <input
-                type="tel"
-                name="poc_phone"
-                value={formData.poc_phone}
-                onChange={handleChange}
-                placeholder="+91XXXXXXXXXX"
-                readOnly={isViewOnly}
-              />
-            </div>
+              <div className="form-group">
+                <label>Contact Number</label>
+                <input
+                  type="tel"
+                  name="poc_phone"
+                  value={formData.poc_phone}
+                  onChange={handleChange}
+                  placeholder="+91XXXXXXXXXX"
+                  readOnly={isViewOnly}
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Email ID</label>
-              <input
-                type="email"
-                name="poc_email"
-                value={formData.poc_email}
-                onChange={handleChange}
-                placeholder="poc@client.com"
-                readOnly={isViewOnly}
-              />
+              <div className="form-group">
+                <label>Email ID</label>
+                <input
+                  type="email"
+                  name="poc_email"
+                  value={formData.poc_email}
+                  onChange={handleChange}
+                  placeholder="poc@client.com"
+                  readOnly={isViewOnly}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Footer Controls */}
-      <div className="form-footer page-controls">
+      <div className="form-footer sticky page-controls">
         {currentPage > 1 && (
           <button type="button" className="halo-button back-btn" onClick={handleBack} disabled={loading}>
             Back

@@ -124,41 +124,43 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
 
   return (
     <form className={`employee-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`} onSubmit={currentPage === 3 ? handleSubmit : handleNext}>
-      <div className="form-wizard-header">
+      <div className="task-form-tabs wizard-tabs">
         <div className={`step ${currentPage >= 1 ? 'active' : ''}`}>1. Basic Details</div>
         <div className={`step ${currentPage >= 2 ? 'active' : ''}`}>2. Company Details</div>
         <div className={`step ${currentPage >= 3 ? 'active' : ''}`}>3. Banking & PAN</div>
       </div>
 
-      <div className="form-content-area">
-        {currentPage === 1 && (
-          <div className="form-page fade-in">
-            <BasicDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
-          </div>
-        )}
+      <div className="modal-content-area">
+        <div className="form-content-area">
+          {currentPage === 1 && (
+            <div className="form-page fade-in">
+              <BasicDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
+            </div>
+          )}
 
-        {currentPage === 2 && (
-          <div className="form-page fade-in">
-            <CompanyDetailsSection 
-              formData={formData} 
-              onChange={handleChange} 
-              hubs={hubs} 
-              departments={departments} 
-              roles={roles} 
-              employees={allEmployees}
-              isViewOnly={isViewOnly}
-            />
-          </div>
-        )}
+          {currentPage === 2 && (
+            <div className="form-page fade-in">
+              <CompanyDetailsSection 
+                formData={formData} 
+                onChange={handleChange} 
+                hubs={hubs} 
+                departments={departments} 
+                roles={roles} 
+                employees={allEmployees}
+                isViewOnly={isViewOnly}
+              />
+            </div>
+          )}
 
-        {currentPage === 3 && (
-          <div className="form-page fade-in">
-            <BankDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
-          </div>
-        )}
+          {currentPage === 3 && (
+            <div className="form-page fade-in">
+              <BankDetailsSection formData={formData} onChange={handleChange} isViewOnly={isViewOnly} />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="form-footer page-controls">
+      <div className="form-footer sticky page-controls">
         {currentPage > 1 && (
           <button type="button" className="halo-button back-btn" onClick={handleBack} disabled={loading}>
             Back

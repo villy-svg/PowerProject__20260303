@@ -3,12 +3,15 @@ npm run build
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260404 Proof of Work Submission 1.0.3"
+git commit -m "260404 Proof of Work Submission 1.0.4"
 git push origin staging 
 
 # 3. Merge Staging to Main
 #git checkout main
 #git merge staging
+#git push origin main
+#git pull origin main
+#git checkout staging
 
 # 4. Push Main to Server
 #git push origin main

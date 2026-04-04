@@ -76,9 +76,11 @@
 }
 
 .task-modal-body {
-  padding: 24px;
-  overflow-y: auto; /* ENABLE INTERNAL SCROLL */
+  overflow: hidden; /* INTERNAL COMPONENTS HANDLE SCROLLING */
+  display: flex;
+  flex-direction: column;
   flex: 1; /* Take up all remaining modal space */
+  padding: 0; /* Let children handle padding for sticky components */
 }
 
 @keyframes modalFadeIn {
