@@ -102,6 +102,25 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
     onSubmit({ ...formData, poc_phone: finalPhone });
   };
 
+  const handleStepClick = (targetPage) => {
+    if (targetPage === currentPage) return;
+    
+    if (targetPage < currentPage) {
+      setCurrentPage(targetPage);
+    } else {
+      let canProceed = true;
+      for (let p = currentPage; p < targetPage; p++) {
+        if (!validatePage(p)) {
+          canProceed = false;
+          break;
+        }
+      }
+      if (canProceed) {
+        setCurrentPage(targetPage);
+      }
+    }
+  };
+
   const inputStyle = {
     width: '100%',
     padding: '10px 14px',
@@ -142,8 +161,18 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
     >
       {/* Wizard Step Indicator */}
       <div className="task-form-tabs wizard-tabs">
-        <div className={`step ${currentPage >= 1 ? 'active' : ''}`}>1. Client Details</div>
-        <div className={`step ${currentPage >= 2 ? 'active' : ''}`}>2. PoC Details</div>
+        <div 
+          className={`step ${currentPage === 1 ? 'active' : ''} ${currentPage > 1 ? 'completed' : ''}`}
+          onClick={() => handleStepClick(1)}
+        >
+          1. Client Details
+        </div>
+        <div 
+          className={`step ${currentPage === 2 ? 'active' : ''}`}
+          onClick={() => handleStepClick(2)}
+        >
+          2. PoC Details
+        </div>
       </div>
 
       <div className="modal-content-area">

@@ -129,12 +129,49 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
     }
   };
 
+  const handleStepClick = (targetPage) => {
+    if (targetPage === currentPage) return;
+    
+    // BACKWARD: Always allowed
+    if (targetPage < currentPage) {
+      setCurrentPage(targetPage);
+    } 
+    // FORWARD: Sequential validation required
+    else {
+      let canProceed = true;
+      for (let p = currentPage; p < targetPage; p++) {
+        if (!validatePage(p)) {
+          canProceed = false;
+          break;
+        }
+      }
+      if (canProceed) {
+        setCurrentPage(targetPage);
+      }
+    }
+  };
+
   return (
     <form className={`employee-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`} onSubmit={currentPage === 3 ? handleSubmit : handleNext}>
       <div className="task-form-tabs wizard-tabs">
-        <div className={`step ${currentPage >= 1 ? 'active' : ''}`}>1. Basic Details</div>
-        <div className={`step ${currentPage >= 2 ? 'active' : ''}`}>2. Company Details</div>
-        <div className={`step ${currentPage >= 3 ? 'active' : ''}`}>3. Banking & PAN</div>
+        <div 
+          className={`step ${currentPage === 1 ? 'active' : ''} ${currentPage > 1 ? 'completed' : ''}`}
+          onClick={() => handleStepClick(1)}
+        >
+          1. Basic Details
+        </div>
+        <div 
+          className={`step ${currentPage === 2 ? 'active' : ''} ${currentPage > 2 ? 'completed' : ''}`}
+          onClick={() => handleStepClick(2)}
+        >
+          2. Company Details
+        </div>
+        <div 
+          className={`step ${currentPage === 3 ? 'active' : ''}`}
+          onClick={() => handleStepClick(3)}
+        >
+          3. Banking & PAN
+        </div>
       </div>
 
       <div className="modal-content-area">

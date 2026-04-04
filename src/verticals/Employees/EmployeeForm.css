@@ -147,6 +147,13 @@
   transition: all 0.3s ease;
   position: relative;
   padding-left: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.step:hover {
+  opacity: 0.8;
+  color: var(--brand-green);
 }
 
 .step::before {
@@ -164,6 +171,16 @@
 
 .step.active::before {
   content: '●';
+}
+
+.step.completed {
+  opacity: 0.9;
+  color: var(--brand-green);
+}
+
+.step.completed::before {
+  content: '✓';
+  font-weight: 900;
 }
 
 /* View-Only Mode */

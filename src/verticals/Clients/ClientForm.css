@@ -92,3 +92,57 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Wizard Header */
+.wizard-tabs {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1rem;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.step {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-left: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+}
+
+.step:hover {
+  opacity: 0.8;
+  color: var(--brand-green);
+}
+
+.step::before {
+  content: '○';
+  position: absolute;
+  left: 0;
+  color: var(--brand-green);
+}
+
+.step.active {
+  opacity: 1;
+  font-weight: 800;
+  color: var(--brand-green);
+}
+
+.step.active::before {
+  content: '●';
+}
+
+.step.completed {
+  opacity: 0.9;
+  color: var(--brand-green);
+}
+
+.step.completed::before {
+  content: '✓';
+  font-weight: 900;
+}
