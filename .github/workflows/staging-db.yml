@@ -18,11 +18,22 @@ jobs:
         with:
           version: latest
 
-      - name: Update project_id in config
+      - name: Update staging project configuration
         run: |
           echo "🔧 Updating staging project configuration..."
           sed -i 's/project_id = "local-dev"/project_id = "${{ secrets.SUPABASE_STAGING_PROJECT_ID }}"/' supabase/config.toml
           echo "✅ Staging Project ID updated"
+
+      - name: 🛡️ Secret Health Check
+        env:
+          ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_ID: ${{ secrets.SUPABASE_STAGING_PROJECT_ID }}
+          DB_PASS: ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+        run: |
+          echo "🔍 Checking Secret Status (Length check)..."
+          if [ -z "$ACCESS_TOKEN" ]; then echo "❌ SUPABASE_ACCESS_TOKEN is EMPTY"; else echo "✅ SUPABASE_ACCESS_TOKEN is loadable"; fi
+          if [ -z "$PROJECT_ID" ]; then echo "❌ SUPABASE_STAGING_PROJECT_ID is EMPTY"; else echo "✅ SUPABASE_STAGING_PROJECT_ID is loadable"; fi
+          if [ -z "$DB_PASS" ]; then echo "❌ SUPABASE_STAGING_DB_PASSWORD is EMPTY"; else echo "✅ SUPABASE_STAGING_DB_PASSWORD is loadable"; fi
 
       - name: Sync and deploy migrations to Staging
         env:
