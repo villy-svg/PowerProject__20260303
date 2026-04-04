@@ -111,7 +111,7 @@ export const getSubmissionsForTask = async (taskId) => {
     .from('submissions')
     .select('*, submitted_by_profile:user_profiles!submissions_submitted_by_fkey(name, email)')
     .eq('task_id', taskId)
-    .order('submission_number', { ascending: true });
+    .order('submission_number', { ascending: false });
 
   if (error) throw new Error(`Failed to fetch submissions: ${error.message}`);
   return data || [];
