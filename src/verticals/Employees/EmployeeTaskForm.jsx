@@ -9,7 +9,7 @@ import { taskUtils } from '../../utils/taskUtils';
  * Vertical-specific form for Employee Manager tasks.
  * Basic fields for now — will be extended with employee-specific data in future prompts.
  */
-const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
+const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -18,6 +18,13 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {
     assigned_to: safeData.assigned_to || '',
     parentTask: safeData.parentTask || ''
   });
+
+  // Check if form has changes
+  const isDirty = initialData.id ? Object.keys(formData).some(key => {
+    const initialVal = initialData[key] || '';
+    const currentVal = formData[key] || '';
+    return String(initialVal) !== String(currentVal);
+  }) : true; // Always dirty for new records
 
   useEffect(() => {
     // Other ref data could go here
@@ -96,8 +103,13 @@ const EmployeeTaskForm = ({ onSubmit, loading, initialData = {}, currentUser = {
       </div>
 
       <div className="form-footer">
-        <button type="submit" className="halo-button save-btn" disabled={loading}>
-          {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
+        <button
+          type={isDirty ? "submit" : "button"}
+          className={`halo-button ${isDirty ? 'save-btn' : 'close-btn'}`}
+          onClick={isDirty ? undefined : onCancel}
+          disabled={loading}
+        >
+          {loading ? 'Saving...' : (safeData.id ? (isDirty ? 'Update Task' : 'Close') : 'Create Task')}
         </button>
       </div>
     </form>

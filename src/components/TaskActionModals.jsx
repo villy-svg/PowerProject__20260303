@@ -28,17 +28,23 @@ const TaskActionModals = ({
   setConfirmDialog,
   onSubmissionReview
 }) => {
+  const handleClose = () => {
+    setIsModalOpen(false);
+    setEditingTask(null);
+  };
+
   return (
     <>
       <TaskModal
         isOpen={isModalOpen}
-        onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
+        onClose={handleClose}
         title={editingTask ? `Edit Task` : `Add New ${activeVertical?.replace('_', ' ')} Task`}
       >
         {TaskFormComponent ? (
           <TaskFormComponent
             initialData={editingTask}
             onSubmit={handleSaveTask}
+            onCancel={handleClose}
             loading={saving}
             currentUser={user}
             permissions={permissions}

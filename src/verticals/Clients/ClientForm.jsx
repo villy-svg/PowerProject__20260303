@@ -10,7 +10,7 @@ import '../ChargingHubs/HubManagement.css'; // For switch/slider styles
  * Page 1: Client Details (Name, Category, Billing Model)
  * Page 2: PoC Details (PoC Name, Contact Number, Email)
  */
-const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false }) => {
+const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [vehicleCategories, setVehicleCategories] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
@@ -39,6 +39,16 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
     poc_phone: initialData.poc_phone || '',
     poc_email: initialData.poc_email || '',
   });
+
+  // Check if form has changes
+  const isDirty = initialData.id ? Object.keys(formData).some(key => {
+    if (key === 'category_matrix') {
+      return JSON.stringify(initialData[key] || {}) !== JSON.stringify(formData[key] || {});
+    }
+    const initialVal = initialData[key] || '';
+    const currentVal = formData[key] || '';
+    return String(initialVal) !== String(currentVal);
+  }) : true; // Always dirty for new records
 
   const handleChange = (e) => {
     if (isViewOnly) return;
@@ -304,24 +314,29 @@ const ClientForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false })
         {currentPage < 2 ? (
           <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'flex-end' }}>
             <button type="submit" className="halo-button next-btn">
-              {isViewOnly ? 'Next ➔' : 'Continue ➔'}
+              {isViewOnly ? 'Next ➔' : (isDirty ? 'Continue ➔' : 'Next ➔')}
             </button>
             {initialData.id && !isViewOnly && (
               <button
                 type="button"
-                className="halo-button save-changes-btn"
-                onClick={handleSubmit}
+                className={`halo-button ${isDirty ? 'save-changes-btn' : 'close-btn'}`}
+                onClick={isDirty ? handleSubmit : onCancel}
                 disabled={loading}
-                style={{ backgroundColor: 'var(--brand-green)', color: 'white' }}
+                style={{ backgroundColor: isDirty ? 'var(--brand-green)' : 'rgba(255,255,255,0.1)', color: 'white' }}
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? 'Saving...' : (isDirty ? 'Save Changes' : 'Close')}
               </button>
             )}
           </div>
         ) : (
           !isViewOnly && (
-            <button type="submit" className="halo-button save-btn" disabled={loading}>
-              {loading ? 'Processing...' : (initialData.id ? 'Save Changes' : 'Create Record')}
+            <button
+              type="button"
+              className={`halo-button ${isDirty ? 'save-btn' : 'close-btn'}`}
+              onClick={isDirty ? handleSubmit : onCancel}
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : (initialData.id ? (isDirty ? 'Save Changes' : 'Close') : 'Create Record')}
             </button>
           )
         )}

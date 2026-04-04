@@ -10,7 +10,7 @@ import { hierarchyUtils } from '../../utils/hierarchyUtils';
  * Form for adding or editing employee records.
  * Features a 3-page wizard flow with View-Only support.
  */
-const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false }) => {
+const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -61,6 +61,13 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
     emp_code: initialData.emp_code || '',
     badge_id: initialData.badge_id || ''
   });
+
+  // Check if form has changes
+  const isDirty = initialData.id ? Object.keys(formData).some(key => {
+    const initialVal = initialData[key] || '';
+    const currentVal = formData[key] || '';
+    return String(initialVal) !== String(currentVal);
+  }) : true; // Always dirty for new records
 
   const handleChange = (e) => {
     if (isViewOnly) return;
@@ -170,18 +177,34 @@ const EmployeeForm = ({ onSubmit, loading, initialData = {}, isViewOnly = false 
         {currentPage < 3 ? (
           <div className="button-group">
             {!isViewOnly && initialData.id && (
-              <button type="button" className="halo-button save-btn secondary-action" onClick={handleSaveAndExit} disabled={loading}>
-                {loading ? 'Processing...' : 'Save Changes'}
-              </button>
+              isDirty ? (
+                <button type="button" className="halo-button save-btn secondary-action" onClick={handleSaveAndExit} disabled={loading}>
+                  {loading ? 'Processing...' : 'Save Changes'}
+                </button>
+              ) : (
+                <button type="button" className="halo-button close-btn secondary-action" onClick={onCancel} style={{ opacity: 0.6 }}>
+                  Close
+                </button>
+              )
             )}
             <button type="submit" className="halo-button next-btn">
               {isViewOnly ? 'Next Step ➔' : 'Continue ➔'}
             </button>
           </div>
         ) : (
-          !isViewOnly && (
-            <button type="submit" className="halo-button save-btn" disabled={loading}>
-              {loading ? 'Processing...' : (initialData.id ? 'Save Changes' : 'Create Record')}
+          !isViewOnly ? (
+            isDirty ? (
+              <button type="submit" className="halo-button save-btn" disabled={loading}>
+                {loading ? 'Processing...' : (initialData.id ? 'Save Changes' : 'Create Record')}
+              </button>
+            ) : (
+              <button type="button" className="halo-button close-btn" onClick={onCancel} style={{ opacity: 0.6 }}>
+                Close
+              </button>
+            )
+          ) : (
+            <button type="button" className="halo-button close-btn" onClick={onCancel}>
+              Done
             </button>
           )
         )}

@@ -147,6 +147,12 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
     return acc;
   }, {});
 
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+    setEditingClient(null);
+    setIsViewOnly(false);
+  };
+
   const isMasterAdmin = user?.roleId === 'master_admin';
 
   const clientCardProps = (client) => ({
@@ -286,12 +292,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [] }) => {
       {/* Add / Edit / View Modal */}
       <TaskModal
         isOpen={isAddModalOpen}
-        onClose={() => { setIsAddModalOpen(false); setEditingClient(null); setIsViewOnly(false); }}
+        onClose={handleCloseModal}
         title={isViewOnly ? 'View Client Record' : (editingClient ? 'Edit Client Record' : 'Add New Client')}
         className="large-modal"
       >
         <ClientForm
           onSubmit={handleSave}
+          onCancel={handleCloseModal}
           isViewOnly={isViewOnly}
           initialData={editingClient ? {
             id: editingClient.id,

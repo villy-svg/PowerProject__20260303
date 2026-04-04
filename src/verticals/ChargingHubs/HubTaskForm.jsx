@@ -11,7 +11,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Includes text, priority, and link to a specific hub.
  */
-const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate }) => {
+const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -23,7 +23,15 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
     assigned_to: safeData.assigned_to || '',
     parentTask: safeData.parentTask || ''
   });
+
   const [activeTab, setActiveTab] = useState('details');
+
+  // Check if form has changes
+  const isDirty = safeData.id ? Object.keys(formData).some(key => {
+    const initialVal = safeData[key] || '';
+    const currentVal = formData[key] || '';
+    return initialVal !== currentVal;
+  }) : true; // Always dirty for new tasks
   const [submissionCount, setSubmissionCount] = useState(0);
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
@@ -240,9 +248,15 @@ const HubTaskForm = ({ onSubmit, loading, initialData = {}, availableTasks = [],
       </div>
 
       <div className="form-footer sticky">
-        <button type="submit" className="halo-button save-btn" disabled={loading}>
-          {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
-        </button>
+        {isDirty ? (
+          <button type="submit" className="halo-button save-btn" disabled={loading}>
+            {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
+          </button>
+        ) : (
+          <button type="button" className="halo-button close-btn" onClick={onCancel} style={{ opacity: 0.6 }}>
+            Close
+          </button>
+        )}
       </div>
 
     </form>

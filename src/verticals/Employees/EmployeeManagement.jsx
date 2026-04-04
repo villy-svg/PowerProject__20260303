@@ -174,9 +174,13 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
     if (!acc[sortKey]) acc[sortKey] = { roleName, overrideKey: sortKey, emps: [] };
     acc[sortKey].emps.push(emp);
     return acc;
-  }, {});
+  }, {});  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
 
-  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
+  const handleCloseModal = () => {
+    setIsAddModalOpen(false);
+    setEditingEmployee(null);
+    setIsViewOnly(false);
+  };
 
   return (
     <>
@@ -385,12 +389,13 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
 
       <TaskModal
         isOpen={isAddModalOpen}
-        onClose={() => { setIsAddModalOpen(false); setEditingEmployee(null); setIsViewOnly(false); }}
+        onClose={handleCloseModal}
         title={isViewOnly ? "View Employee Record" : (editingEmployee ? "Edit Employee Record" : "Add New Employee Record")}
         className="large-modal"
       >
         <EmployeeForm
           onSubmit={handleSave}
+          onCancel={handleCloseModal}
           isViewOnly={isViewOnly}
           initialData={editingEmployee ? {
             id: editingEmployee.id,
@@ -453,3 +458,4 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
 };
 
 export default EmployeeManagement;
+;
