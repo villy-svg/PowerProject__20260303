@@ -30,13 +30,13 @@ jobs:
         run: |
           echo "🚀 Starting Staging Supabase deployment..."
           
+          # Link to project FIRST
+          echo "📡 Linking to Staging Supabase project..."
+          supabase link --project-ref "${{ secrets.SUPABASE_STAGING_PROJECT_ID }}" --password "${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}"
+          
           # Repair failed/renamed migration history
           echo "🛠️ Repairing migration history..."
-          supabase migration repair --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }} --status reverted 20260315000000 || echo "Repair not needed or already done"
-
-          # Link to project
-          echo "📡 Linking to Staging Supabase project..."
-          supabase link --project-ref ${{ secrets.SUPABASE_STAGING_PROJECT_ID }} --password ${{ secrets.SUPABASE_STAGING_DB_PASSWORD }}
+          supabase migration repair --project-ref "${{ secrets.SUPABASE_STAGING_PROJECT_ID }}" --status reverted 20260315000000 || echo "Repair not needed or already done"
           
           # Deploy all migrations
           echo "📤 Pushing local migrations to staging..."
