@@ -78,7 +78,7 @@ const TaskCard = ({
   const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
   const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
-  const effectiveCanUpdate = canUpdate && !task.isContextOnly;
+  const effectiveCanUpdate = (canUpdate || permissions.canEditTask?.(task)) && !task.isContextOnly;
   const effectiveCanDelete = canDelete && !task.isContextOnly;
 
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({

@@ -109,9 +109,15 @@ const TaskActionModals = ({
                 }
               </select>
             </div>
-            <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
-              {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
-            </button>
+            {((editingTask && permissions.canUpdate) || (!editingTask && permissions.canCreate)) ? (
+              <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
+                {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
+              </button>
+            ) : (
+              <button type="button" className="halo-button close-read-only-btn" onClick={handleClose} style={{ marginTop: '1rem', width: '100%', fontWeight: 600, opacity: 0.6 }}>
+                Close (Read Only)
+              </button>
+            )}
           </form>
         )}
       </TaskModal>

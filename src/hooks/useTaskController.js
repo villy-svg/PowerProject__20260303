@@ -116,7 +116,7 @@ export const useTaskController = (props) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task || task.isContextOnly) return;
     if (!taskUtils.canUserMoveTask(task, newStageId, permissions, user)) {
-      alert("Permission Denied.");
+      alert("Manual movement restricted. Please use 'Upload Proof' to submit your work for review.");
       return;
     }
     updateTaskStage(taskId, newStageId);
@@ -197,7 +197,10 @@ export const useTaskController = (props) => {
   const openEditModal = (task) => { setEditingTask(task); setIsModalOpen(true); };
   const handleAddSubtask = (parentId) => {
     const parentTask = tasks.find(t => t.id === parentId);
-    if (!canManageHierarchy(parentTask)) { alert("Permission Denied."); return; }
+    if (!canManageHierarchy(parentTask)) {
+      alert("Permission Denied: You do not have rights to add subtasks to this record.");
+      return;
+    }
     setEditingTask({ parentTask: parentId }); setIsModalOpen(true);
   };
 
