@@ -34,9 +34,9 @@ export const useTaskController = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => 
-    localStorage.getItem(`powerpod_task_view_${activeVertical}`) || 
-    localStorage.getItem('powerpod_task_view') || 
+  const [viewMode, setViewMode] = useState(() =>
+    localStorage.getItem(`powerpod_task_view_${activeVertical}`) ||
+    localStorage.getItem('powerpod_task_view') ||
     initialViewMode || 'list'
   );
   const [showDeprioritized, setShowDeprioritized] = useState(false);
@@ -112,7 +112,7 @@ export const useTaskController = (props) => {
     }
   };
 
-  const handleInternalUpdateStage = (taskId, newStageId) => {
+  const handleUIMoveTask = (taskId, newStageId) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task || task.isContextOnly) return;
     if (!taskUtils.canUserMoveTask(task, newStageId, permissions, user)) {
@@ -219,7 +219,8 @@ export const useTaskController = (props) => {
     confirmDialog, setConfirmDialog,
     mergeTaskCluster, setMergeTaskCluster,
     handleBulkAction,
-    handleInternalUpdateStage,
+    handleUIMoveTask,
+    updateTaskStage,
     handleInternalDelete,
     handleMoveToParent,
     handleSaveTask,

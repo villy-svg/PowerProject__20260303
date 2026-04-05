@@ -10,10 +10,8 @@ import { taskService } from './taskService';
 const BUCKET_NAME = 'field-submissions';
 
 const COMPRESSION_OPTIONS = {
-  maxSizeMB: 0.3,
-  maxWidthOrHeight: 1280,
+  maxSizeMB: 0.3, // Target ~300KB per image
   useWebWorker: true,
-  fileType: 'image/jpeg',
 };
 
 /**
@@ -127,7 +125,7 @@ export const getSubmissionsForTask = async (taskId) => {
  * @param {boolean} params.moveToReview - If true, auto-transitions task to REVIEW stage
  * @returns {Object} The created submission record
  */
-export const submitProofOfWork = async ({ taskId, userId, comment, files = [], moveToReview = false }) => {
+export const submitProofOfWork = async ({ taskId, userId, comment, files = [], moveToReview = false, onProgress }) => {
   // 1. Create submission record first (Trigger handles submission_number)
   // We insert with empty links to get the UUID for storage folder naming
   const submission = await createSubmission({
@@ -140,13 +138,23 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [], m
   const submissionId = submission.id;
 
   try {
-    // 2. Compress and upload all files into the submission's UUID folder
+    // 2. CONCURRENT COMPRESSION (Promise.all)
+    // Map over files and compress them in parallel using browser web workers
+    const compressedFiles = await Promise.all(files.map(file => compressFile(file)));
+
+    // 3. UPLOAD (Sequential to maintain order and stable connection)
     const links = [];
-    for (const file of files) {
-      const compressed = await compressFile(file);
-      const linkObj = await uploadSubmissionFile(taskId, submissionId, compressed);
+    let uploadedCount = 0;
+    
+    for (const file of compressedFiles) {
+      if (onProgress) onProgress({ current: uploadedCount, total: compressedFiles.length, label: `Uploading ${uploadedCount + 1} of ${compressedFiles.length}...` });
+      
+      const linkObj = await uploadSubmissionFile(taskId, submissionId, file);
       links.push(linkObj);
+      uploadedCount++;
     }
+    
+    if (onProgress) onProgress({ current: compressedFiles.length, total: compressedFiles.length, label: 'Finalizing...' });
 
     // 3. Update the record with the final links
     const updatedSubmission = await updateSubmissionLinks(submissionId, links);

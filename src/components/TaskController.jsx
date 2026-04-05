@@ -54,10 +54,11 @@ const TaskController = (props) => {
     filteredTasks,
     canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy,
     handleBulkAction,
-    handleInternalUpdateStage,
+    handleUIMoveTask,
     handleInternalDelete,
     handleMoveToParent,
     handleSaveTask,
+    updateTaskStage,
     executeMerge,
     handleClearBoard,
     openAddModal, openEditModal, handleAddSubtask,
@@ -75,8 +76,8 @@ const TaskController = (props) => {
 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
-      await updateSubmissionStatus(submissionId, 'approved');
-      await handleInternalUpdateStage(taskId, 'COMPLETED');
+      await updateTaskStage(taskId, 'approved');
+      await updateTaskStage(taskId, 'COMPLETED');
       if (props.refreshTasks) props.refreshTasks(false);
     } catch (err) {
       alert(`Approval failed: ${err.message}`);
@@ -91,7 +92,7 @@ const TaskController = (props) => {
   const submitRejection = async (reason) => {
     try {
       await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
-      await handleInternalUpdateStage(rejectionModalState.taskId, 'IN_PROGRESS');
+      await updateTaskStage(rejectionModalState.taskId, 'IN_PROGRESS');
       setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
       if (props.refreshTasks) props.refreshTasks(false);
     } catch (err) {
@@ -196,9 +197,9 @@ const TaskController = (props) => {
         setConfirmDialog={setConfirmDialog}
         onSubmissionReview={(subId, status) => {
           if (status === 'rejected' && editingTask) {
-            handleInternalUpdateStage(editingTask.id, 'IN_PROGRESS');
+            updateTaskStage(editingTask.id, 'IN_PROGRESS');
           } else if (status === 'approved' && editingTask) {
-            handleInternalUpdateStage(editingTask.id, 'COMPLETED');
+            updateTaskStage(editingTask.id, 'COMPLETED');
           }
           // Close the edit modal so the board immediately reflects the change
           setIsModalOpen(false);
@@ -217,7 +218,7 @@ const TaskController = (props) => {
           const taskId = submissionTask.id;
           closeSubmissionModal();
           // Optimistically move to REVIEW (instant UI feedback)
-          handleInternalUpdateStage(taskId, 'REVIEW');
+          updateTaskStage(taskId, 'REVIEW');
           // Then refresh in the background
           if (props.refreshTasks) props.refreshTasks(false);
         }}
@@ -251,7 +252,7 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canUserDelete={canUserDelete}
             canManageHierarchy={canManageHierarchy}
-            updateTaskStage={handleInternalUpdateStage}
+            updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
@@ -272,7 +273,7 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
-            updateTaskStage={handleInternalUpdateStage}
+            updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
@@ -297,7 +298,7 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canDelete={canUserDelete}
-            updateTaskStage={handleInternalUpdateStage}
+            updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}

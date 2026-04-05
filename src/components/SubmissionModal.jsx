@@ -114,7 +114,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         comment: comment.trim(),
         files,
         moveToReview,
-        // Optional: We could pass a progress callback here if we refactor submitProofOfWork further
+        onProgress: (p) => setProgress(p),
       });
 
       setProgress({ current: totalSteps, total: totalSteps, label: 'Done!' });
@@ -151,11 +151,11 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   return (
     <TaskModal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={submitting ? undefined : onClose}
       title={isLocked ? 'Proof of Work (Locked)' : 'Submit Proof of Work'}
       className="large-modal"
     >
-      <div className="submission-modal-body">
+      <div className={`submission-modal-body ${submitting ? 'is-processing-content' : ''}`}>
         {/* Task Context */}
         {task && (
           <div style={{ marginBottom: '1rem' }}>
@@ -211,11 +211,12 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
           <div>
             <label className="submission-section-label">Attachments</label>
             <div
-              className={`submission-upload-zone ${dragActive ? 'drag-active' : ''}`}
+              className={`submission-upload-zone ${dragActive ? 'drag-active' : ''} ${submitting ? 'is-upload-processing' : ''}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !submitting && fileInputRef.current?.click()}
+              style={{ pointerEvents: submitting ? 'none' : 'auto' }}
             >
               <input
                 ref={fileInputRef}
@@ -224,11 +225,17 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileInputChange}
                 style={{ display: 'none' }}
+                disabled={submitting}
               />
-              <div className="upload-zone-icon">📷</div>
+              <div className="upload-zone-icon">📸</div>
               <div className="upload-zone-text">
-                <strong>Click to browse</strong> or drag and drop<br />
-                Images auto-compressed to 300KB · Photos, PDFs, Docs
+                {submitting ? (
+                  <strong>Processing... Please wait.</strong>
+                ) : (
+                  <><strong>Click to browse</strong> or drag & drop images here</>
+                )}
+                <br />
+                Images auto-optimized to 300KB (max 10 images)
               </div>
             </div>
           </div>
