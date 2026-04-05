@@ -17,8 +17,9 @@ import './SubmissionModal.css';
  * - onSubmitSuccess (fn): Optional callback after successful submission
  */
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
-const MAX_TOTAL_SIZE = 50 * 1024 * 1024; // 50MB total per submission
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file
+const BATCH_LIMIT = 10;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   const [comment, setComment] = useState('');
@@ -35,18 +36,27 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
   const handleFiles = useCallback((newFiles) => {
     if (isLocked) return;
     const fileArray = Array.from(newFiles);
-    
-    // Size check
-    const oversizedFiles = fileArray.filter(f => f.size > MAX_FILE_SIZE);
-    if (oversizedFiles.length > 0) {
-      alert(`Some files are too large (Max 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
+
+    // 1. MIME Type Check (Fail-Fast)
+    const invalidFiles = fileArray.filter(f => !ALLOWED_TYPES.includes(f.type));
+    if (invalidFiles.length > 0) {
+      alert(`Invalid file type(s) detected: ${invalidFiles.map(f => f.name).join(', ')}. \n\nOnly JPG, PNG, and WEBP are allowed.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
-    const currentTotalSize = files.reduce((acc, f) => acc + f.size, 0);
-    const newTotalSize = fileArray.reduce((acc, f) => acc + f.size, 0);
-    if (currentTotalSize + newTotalSize > MAX_TOTAL_SIZE) {
-      alert('Total submission size exceeds 50MB limit.');
+    // 2. Batch Limit Check
+    if (files.length + fileArray.length > BATCH_LIMIT) {
+      alert(`Batch limit exceeded. You can only upload a maximum of ${BATCH_LIMIT} images.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    // 3. Individual Size Check (25MB)
+    const oversizedFiles = fileArray.filter(f => f.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert("One or more images exceed the 25MB limit. Please select smaller files.");
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
@@ -211,7 +221,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*,.pdf,.doc,.docx"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileInputChange}
                 style={{ display: 'none' }}
               />
