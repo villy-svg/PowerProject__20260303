@@ -156,6 +156,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
       className="large-modal"
     >
       <div className={`submission-modal-body ${submitting ? 'is-processing-content' : ''}`}>
+        <div className="submission-modal-scroll-area">
         {/* Task Context */}
         {task && (
           <div style={{ marginBottom: '1rem' }}>
@@ -209,7 +210,12 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         {/* File Upload Zone */}
         {!isLocked && (
           <div>
-            <label className="submission-section-label">Attachments</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label className="submission-section-label">Attachments</label>
+              <span className={`batch-counter ${files.length >= BATCH_LIMIT ? 'counter-red' : files.length >= BATCH_LIMIT - 2 ? 'counter-amber' : 'counter-mint'}`}>
+                {files.length} / {BATCH_LIMIT} images
+              </span>
+            </div>
             <div
               className={`submission-upload-zone ${dragActive ? 'drag-active' : ''} ${submitting ? 'is-upload-processing' : ''}`}
               onDragOver={handleDragOver}
@@ -244,31 +250,41 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         {/* File Preview Strip */}
         {files.length > 0 && (
           <div className="submission-file-list">
-            {files.map((file, index) => (
-              <div className="submission-file-chip" key={`${file.name}-${index}`}>
-                {isImageFile(file) ? (
-                  <img
-                    className="file-chip-thumbnail"
-                    src={URL.createObjectURL(file)}
-                    alt={file.name}
-                  />
-                ) : (
-                  <div className="file-chip-icon">📄</div>
-                )}
-                <span className="file-chip-name">{file.name}</span>
-                <span className="file-chip-size">{formatFileSize(file.size)}</span>
-                {!isLocked && (
-                  <button
-                    className="file-chip-remove"
-                    onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                    disabled={submitting}
-                    title="Remove file"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
+            {files.map((file, index) => {
+              const isUploaded = submitting && index < progress.current;
+              const isCurrent = submitting && index === progress.current;
+              
+              return (
+                <div 
+                  className={`submission-file-chip ${isUploaded ? 'is-done-chip' : ''} ${isCurrent ? 'is-uploading-chip' : ''}`} 
+                  key={`${file.name}-${index}`}
+                >
+                  {isImageFile(file) ? (
+                    <img
+                      className="file-chip-thumbnail"
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                    />
+                  ) : (
+                    <div className="file-chip-icon">📄</div>
+                  )}
+                  <span className="file-chip-name">{file.name}</span>
+                  <span className="file-chip-size">{formatFileSize(file.size)}</span>
+                  {isUploaded && <span className="success-checkmark">✓</span>}
+                  
+                  {!isLocked && (
+                    <button
+                      className="file-chip-remove"
+                      onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                      disabled={submitting}
+                      title="Remove file"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -285,36 +301,43 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="submission-actions">
-          <button
-            className="submission-cancel-btn"
-            onClick={onClose}
-            disabled={submitting}
-          >
-            {isLocked ? 'Close' : 'Cancel'}
-          </button>
+        </div>
 
-          {!isLocked && (
-            <>
-              <button
-                className="halo-button submission-upload-only-btn"
-                onClick={() => handleSubmit(false)}
-                disabled={!canSubmit}
-                title="Save proof without moving task stage"
-              >
-                {submitting ? 'Uploading...' : '📎 Upload Only'}
-              </button>
-              <button
-                className="halo-button submission-submit-btn"
-                onClick={() => handleSubmit(true)}
-                disabled={!canSubmit}
-                title="Save proof and move task to Review"
-              >
-                {submitting ? 'Submitting...' : '📤 Submit for Review'}
-              </button>
-            </>
-          )}
+        {/* Sticky Actions */}
+        <div className="submission-actions">
+          <div className="submission-guideline-text">
+            * Images up to 25MB accepted (auto-optimized to 300KB for field sync)
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              className="submission-cancel-btn"
+              onClick={onClose}
+              disabled={submitting}
+            >
+              {isLocked ? 'Close' : 'Cancel'}
+            </button>
+
+            {!isLocked && (
+              <>
+                <button
+                  className="halo-button submission-upload-only-btn"
+                  onClick={() => handleSubmit(false)}
+                  disabled={!canSubmit}
+                  title="Save proof without moving task stage"
+                >
+                  {submitting ? 'Uploading...' : '📎 Upload Only'}
+                </button>
+                <button
+                  className="halo-button submission-submit-btn"
+                  onClick={() => handleSubmit(true)}
+                  disabled={!canSubmit}
+                  title="Save proof and move task to Review"
+                >
+                  {submitting ? 'Submitting...' : '📤 Submit for Review'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </TaskModal>
