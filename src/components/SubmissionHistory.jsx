@@ -16,6 +16,7 @@ import './SubmissionHistory.css';
  */
 const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatusUpdate, onCountLoad }) => {
   const [submissions, setSubmissions] = useState([]);
+  const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null); // tracks which submission is being updated
   const [rejectionSubmission, setRejectionSubmission] = useState(null); // tracks it for the modal
@@ -28,6 +29,10 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
     try {
       const data = await getSubmissionsForTask(taskId);
       setSubmissions(data);
+      // Auto-expand the newest submission if exists
+      if (data.length > 0 && !expandedId) {
+        setExpandedId(data[0].id);
+      }
       if (onCountLoad) onCountLoad(data.length);
     } catch (err) {
       console.error('Failed to load submissions:', err);
@@ -39,6 +44,11 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
   useEffect(() => {
     fetchSubmissions();
   }, [fetchSubmissions]);
+
+  // Handle accordion toggle
+  const toggleExpand = (id) => {
+    setExpandedId(prev => prev === id ? null : id);
+  };
 
   const handleStatusUpdate = async (submissionId, newStatus, reason = null) => {
     setUpdating(submissionId);
@@ -104,95 +114,132 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
       {loading ? (
         <div className="submission-loading">Loading submissions...</div>
       ) : (
-        submissions.map((submission) => (
-          <div className="submission-card" key={submission.id}>
-            {/* Header: number + submitter + timestamp + status */}
-            <div className="submission-card-header">
-              <div className="submission-card-meta">
-                <span className="submission-number-badge">
-                  #{submission.submission_number}
-                </span>
-                <span className="submission-submitter">
-                  {getSubmitterName(submission)}
-                </span>
-                <span className="submission-timestamp">
-                  {formatDate(submission.created_at)}
-                </span>
-              </div>
-              <span className={`submission-status-badge ${submission.status}`}>
-                {submission.status}
-              </span>
-            </div>
+        <div className="timeline-container">
+          {submissions.map((submission, index) => {
+            const isExpanded = expandedId === submission.id;
+            
+            return (
+              <div 
+                className={`submission-item ${isExpanded ? 'expanded' : 'collapsed'}`} 
+                key={submission.id}
+              >
+                {/* Timeline node & line */}
+                <div className="timeline-marker">
+                  <div className={`status-node ${submission.status}`}></div>
+                  {index < submissions.length - 1 && <div className="timeline-line"></div>}
+                </div>
 
-            {/* Comment */}
-            {submission.comment && (
-              <p className="submission-comment-text">{submission.comment}</p>
-            )}
+                <div className="submission-content">
+                  {isExpanded ? (
+                    <div className="submission-card fade-in">
+                      {/* Header: number + submitter + timestamp + status */}
+                      <div className="submission-card-header" onClick={() => toggleExpand(submission.id)}>
+                        <div className="submission-card-meta">
+                          <span className="submission-number-badge">
+                            #{submission.submission_number}
+                          </span>
+                          <span className="submission-submitter">
+                            {getSubmitterName(submission)}
+                          </span>
+                          <span className="submission-timestamp">
+                            {formatDate(submission.created_at)}
+                          </span>
+                        </div>
+                        <span className={`submission-status-badge ${submission.status}`}>
+                          {submission.status}
+                        </span>
+                      </div>
 
-            {/* Attachments */}
-            {submission.links && submission.links.length > 0 && (
-              <div className="submission-attachments">
-                {submission.links.map((link, idx) => {
-                  const isImage = link.mime_type?.startsWith('image/');
-                  if (isImage) {
-                    return (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title={link.file_name}
-                      >
-                        <img
-                          className="submission-attachment-thumb"
-                          src={link.url}
-                          alt={link.file_name}
-                        />
-                      </a>
-                    );
-                  }
-                  return (
-                    <a
-                      key={idx}
-                      className="submission-attachment-file"
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={link.file_name}
+                      {/* Comment */}
+                      {submission.comment && (
+                        <p className="submission-comment-text">{submission.comment}</p>
+                      )}
+
+                      {/* Attachments */}
+                      {submission.links && submission.links.length > 0 && (
+                        <div className="submission-attachments">
+                          {submission.links.map((link, idx) => {
+                            const isImage = link.mime_type?.startsWith('image/');
+                            if (isImage) {
+                              return (
+                                <a
+                                  key={idx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={link.file_name}
+                                >
+                                  <img
+                                    className="submission-attachment-thumb"
+                                    src={link.url}
+                                    alt={link.file_name}
+                                  />
+                                </a>
+                              );
+                            }
+                            return (
+                              <a
+                                key={idx}
+                                className="submission-attachment-file"
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={link.file_name}
+                              >
+                                📄 {link.file_name}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Approve / Reject actions (editor+ only, pending only) */}
+                      {canReview && submission.status === 'pending' && (
+                        <div className="submission-card-actions">
+                          <button
+                            type="button"
+                            className="submission-approve-btn"
+                            onClick={() => handleStatusUpdate(submission.id, 'approved')}
+                            disabled={updating === submission.id}
+                          >
+                            {updating === submission.id ? '...' : '✓ Approve'}
+                          </button>
+                          <button
+                            type="button"
+                            className="submission-reject-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRejectionSubmission(submission);
+                            }}
+                            disabled={updating === submission.id}
+                          >
+                            {updating === submission.id ? '...' : '✗ Reject'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div 
+                      className="submission-summary-row" 
+                      onClick={() => toggleExpand(submission.id)}
                     >
-                      📄 {link.file_name}
-                    </a>
-                  );
-                })}
+                      <div className="summary-left">
+                        <span className="submission-number-badge">#{submission.submission_number}</span>
+                        <span className="submission-submitter">{getSubmitterName(submission)}</span>
+                      </div>
+                      <div className="summary-right">
+                        <span className={`submission-status-badge minified ${submission.status}`}>
+                          {submission.status}
+                        </span>
+                        <span className="submission-timestamp">{formatDate(submission.created_at)}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-
-            {/* Approve / Reject actions (editor+ only, pending only) */}
-            {canReview && submission.status === 'pending' && (
-              <div className="submission-card-actions">
-                <button
-                  type="button"
-                  className="submission-approve-btn"
-                  onClick={() => handleStatusUpdate(submission.id, 'approved')}
-                  disabled={updating === submission.id}
-                >
-                  {updating === submission.id ? '...' : '✓ Approve'}
-                </button>
-                <button
-                  type="button"
-                  className="submission-reject-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRejectionSubmission(submission);
-                  }}
-                  disabled={updating === submission.id}
-                >
-                  {updating === submission.id ? '...' : '✗ Reject'}
-                </button>
-              </div>
-            )}
-          </div>
-        ))
+            );
+          })}
+        </div>
       )}
 
       <RejectionModal

@@ -36,14 +36,98 @@
   font-weight: 800;
 }
 
-/* ─── Submission Card ───────────────────────────────────────────────────── */
+/* ─── Timeline Layout ──────────────────────────────────────────────────── */
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  padding-left: 10px;
+  position: relative;
+}
+
+.submission-item {
+  display: flex;
+  gap: 1.5rem;
+  position: relative;
+  min-height: 40px;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12px;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+
+.status-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border-color);
+  z-index: 2;
+  border: 2px solid var(--bg-color);
+  transition: all 0.3s ease;
+}
+
+.status-node.pending { background: var(--priority-medium); box-shadow: 0 0 8px var(--priority-medium); }
+.status-node.approved { background: var(--brand-green); box-shadow: 0 0 8px var(--brand-green); }
+.status-node.rejected { background: var(--priority-urgent); box-shadow: 0 0 8px var(--priority-urgent); }
+
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  margin: 4px 0;
+}
+
+.submission-content {
+  flex: 1;
+  padding-bottom: 1.5rem;
+}
+
+/* ─── Collapsed Summary Row ────────────────────────────────────────────── */
+.submission-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.submission-summary-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--brand-mint);
+}
+
+.summary-left, .summary-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.submission-status-badge.minified {
+  padding: 1px 6px;
+  font-size: 0.55rem;
+}
+
+/* ─── Submission Card Overrides ─────────────────────────────────────────── */
 .submission-card {
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-button);
   padding: clamp(12px, 2vw, 16px);
-  margin-bottom: 0.75rem;
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-premium);
+}
+
+.submission-card-header {
+  cursor: pointer;
 }
 
 .submission-card:hover {
