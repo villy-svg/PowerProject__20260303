@@ -76,7 +76,7 @@ const TaskController = (props) => {
 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
-      await updateTaskStage(taskId, 'approved');
+      await updateSubmissionStatus(submissionId, 'approved');
       await updateTaskStage(taskId, 'COMPLETED');
       if (props.refreshTasks) props.refreshTasks(false);
     } catch (err) {
