@@ -205,6 +205,7 @@ const TaskController = (props) => {
           setEditingTask(null);
           if (props.refreshTasks) props.refreshTasks(false);
         }}
+        openSubmissionModal={openSubmissionModal}
       />
 
       <SubmissionModal

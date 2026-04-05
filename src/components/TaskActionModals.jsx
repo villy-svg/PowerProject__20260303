@@ -3,6 +3,7 @@ import TaskModal from './TaskModal';
 import ConflictModal from './ConflictModal';
 import { STAGE_LIST } from '../constants/stages';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { IconUpload } from './Icons';
 
 /**
  * TaskActionModals Component
@@ -26,7 +27,8 @@ const TaskActionModals = ({
   executeMerge,
   confirmDialog,
   setConfirmDialog,
-  onSubmissionReview
+  onSubmissionReview,
+  openSubmissionModal
 }) => {
   const handleClose = () => {
     setIsModalOpen(false);
@@ -40,6 +42,19 @@ const TaskActionModals = ({
         onClose={handleClose}
         title={editingTask ? `Edit Task` : `Add New ${activeVertical?.replace('_', ' ')} Task`}
       >
+        {editingTask && (
+          <div className="task-modal-quick-actions" style={{ padding: '12px 24px 0', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              className="halo-button"
+              onClick={() => openSubmissionModal(editingTask)}
+              style={{ fontSize: '0.7rem', padding: '4px 10px', height: '28px', opacity: 0.8 }}
+              title="Upload Proof of Work"
+            >
+              <IconUpload size={12} style={{ marginRight: '6px' }} />
+              Upload Proof
+            </button>
+          </div>
+        )}
         {TaskFormComponent ? (
           <TaskFormComponent
             initialData={editingTask}
