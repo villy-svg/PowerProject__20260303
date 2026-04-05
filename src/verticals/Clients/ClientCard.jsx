@@ -13,9 +13,9 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
     return p.startsWith('+91') ? p : `+91 ${p.replace(/^\+?91/, '').trim()}`;
   };
 
-  const getMatrixSummary = () => {
-    if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return null;
-
+  const getMatrixSummaryGroups = () => {
+    if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return [];
+    
     // Group vehicles by service
     const serviceToVehicles = {};
     Object.entries(client.category_matrix).forEach(([vId, services]) => {
@@ -33,10 +33,10 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
         .map(vId => client.vehicle_categories?.[vId]?.code || '???')
         .join(', ');
       return `${sCode}: ${vCodes}`;
-    }).join(' | ');
+    });
   };
 
-  const matrixSummary = getMatrixSummary();
+  const matrixSummaryGroups = getMatrixSummaryGroups();
 
   return (
     <div
@@ -79,8 +79,12 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
 
       {/* Badges Row */}
       <div className="client-card-badges" style={{ paddingRight: '120px' }}>
-        {matrixSummary ? (
-          <span className="dept-badge" title={matrixSummary}>{matrixSummary}</span>
+        {matrixSummaryGroups && matrixSummaryGroups.length > 0 ? (
+          matrixSummaryGroups.map((group, idx) => (
+            <span key={idx} className="dept-badge" title={group}>
+              {group}
+            </span>
+          ))
         ) : (
           <span className="dept-badge">{client.category_code || 'NO CAT'}</span>
         )}

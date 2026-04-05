@@ -13,8 +13,8 @@ const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleS
     return p.startsWith('+91') ? p : `+91 ${p.replace(/^\+?91/, '').trim()}`;
   };
 
-  const getMatrixSummary = () => {
-    if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return null;
+  const getMatrixSummaryGroups = () => {
+    if (!client.category_matrix || Object.keys(client.category_matrix).length === 0) return [];
     
     // Group vehicles by service
     const serviceToVehicles = {};
@@ -33,10 +33,10 @@ const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleS
         .map(vId => client.vehicle_categories?.[vId]?.code || '???')
         .join(', ');
       return `${sCode}: ${vCodes}`;
-    }).join(' | ');
+    });
   };
 
-  const matrixSummary = getMatrixSummary();
+  const matrixSummaryGroups = getMatrixSummaryGroups();
 
   return (
     <div
@@ -52,8 +52,12 @@ const ClientListRow = ({ client, tasks = [], onEdit, onView, onDelete, onToggleS
           </div>
           <div className="col-row-2 management-info">
             {client.poc_name && <span className="poc-name-mini" style={{ marginRight: '12px' }}>{client.poc_name}</span>}
-            {matrixSummary ? (
-              <span className="matrix-summary-mini" title={matrixSummary}>{matrixSummary}</span>
+            {matrixSummaryGroups && matrixSummaryGroups.length > 0 ? (
+              matrixSummaryGroups.map((group, idx) => (
+                <span key={idx} className="matrix-summary-mini" title={group}>
+                  {group}
+                </span>
+              ))
             ) : (
               <span className="category-code-mini">{client.category_code || 'NO CATEGORY'}</span>
             )}
