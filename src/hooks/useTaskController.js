@@ -41,12 +41,15 @@ export const useTaskController = (props) => {
   );
   const [showDeprioritized, setShowDeprioritized] = useState(false);
   const [showReworkOnly, setShowReworkOnly] = useState(false);
+  const [showMyTasksOnly, setShowMyTasksOnly] = useState(() =>
+    localStorage.getItem(`powerpod_task_my_tasks_${activeVertical}`) === 'true'
+  );
   const [drillDownId, setDrillDownId] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
 
   // 2. Integration of Sub-Hooks
-  const filtersInfo = useTaskFilters({ ...props, viewMode, drillDownId, showReworkOnly });
+  const filtersInfo = useTaskFilters({ ...props, viewMode, drillDownId, showReworkOnly, showMyTasksOnly });
   const { filteredTasks, hierarchyFilteredTasks, tasksWithDuplicateInfo } = filtersInfo;
 
   const selectionInfo = useTaskSelection(tasks);
@@ -59,6 +62,10 @@ export const useTaskController = (props) => {
   useEffect(() => {
     localStorage.setItem(`powerpod_task_view_${activeVertical}`, viewMode);
   }, [viewMode, activeVertical]);
+
+  useEffect(() => {
+    localStorage.setItem(`powerpod_task_my_tasks_${activeVertical}`, showMyTasksOnly);
+  }, [showMyTasksOnly, activeVertical]);
 
   const drillPath = useCallback(() => {
     if (!drillDownId) return [];
@@ -214,6 +221,7 @@ export const useTaskController = (props) => {
     viewMode, setViewMode,
     showDeprioritized, setShowDeprioritized,
     showReworkOnly, setShowReworkOnly,
+    showMyTasksOnly, setShowMyTasksOnly,
     drillDownId, setDrillDownId,
     drillPath,
     confirmDialog, setConfirmDialog,

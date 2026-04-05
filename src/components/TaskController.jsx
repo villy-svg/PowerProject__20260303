@@ -44,6 +44,7 @@ const TaskController = (props) => {
     drillDownId, setDrillDownId,
     drillPath,
     showReworkOnly, setShowReworkOnly,
+    showMyTasksOnly, setShowMyTasksOnly,
     selectedTaskIds,
     clearSelection,
     toggleTaskSelection,
@@ -140,6 +141,16 @@ const TaskController = (props) => {
             >
               DEPR
             </button>
+
+            <div className="view-mode-toggle">
+              <button
+                className={`view-toggle-btn ${showMyTasksOnly ? 'active' : ''}`}
+                onClick={() => setShowMyTasksOnly(!showMyTasksOnly)}
+                title={showMyTasksOnly ? "Show All Tasks" : "Filter: My Tasks Only"}
+              >
+                MY TASKS
+              </button>
+            </div>
 
             <div className="view-mode-toggle">
               <button

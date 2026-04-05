@@ -17,7 +17,8 @@ export const useTaskFilters = ({
   filters,
   viewMode,
   drillDownId,
-  showReworkOnly
+  showReworkOnly,
+  showMyTasksOnly
 }) => {
   // 1. Duplicate Detection
   const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
@@ -103,9 +104,16 @@ export const useTaskFilters = ({
       // 3. Rework Filter
       if (showReworkOnly && t.latestSubmission?.status !== 'rejected') return false;
 
+      // 4. My Tasks Filter
+      if (showMyTasksOnly) {
+        const isMe = (user?.employeeId && t.assigned_to === user.employeeId) ||
+                     (user?.id && t.assigned_to === user.id);
+        if (!isMe) return false;
+      }
+
       return true;
     });
-  }, [hierarchyFilteredTasks, viewMode, drillDownId, permissions.canViewKanbanHierarchy, filters, rootVerticalId, activeVertical, user, showReworkOnly]);
+  }, [hierarchyFilteredTasks, viewMode, drillDownId, permissions.canViewKanbanHierarchy, filters, rootVerticalId, activeVertical, user, showReworkOnly, showMyTasksOnly]);
 
   return {
     tasksWithDuplicateInfo,
