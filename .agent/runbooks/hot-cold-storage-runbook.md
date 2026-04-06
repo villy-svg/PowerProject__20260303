@@ -2,7 +2,8 @@
 
 > **Purpose**: This file persists across chats. Each phase-chat reads this file at start and updates it at end.
 > **Location**: `.agent/runbooks/hot-cold-storage-runbook.md`
-> **Last Updated**: 2026-04-06 (Initial creation)
+<!-- > **Last Updated**: 2026-04-06 (Initial creation) -->
+> **Last Updated**: 2026-04-06 (Phase 1 Complete)
 
 ---
 
@@ -41,9 +42,9 @@
 
 | Phase | Sub-Phase | Status | Chat ID | Date | Notes |
 |-------|-----------|--------|---------|------|-------|
-| 1A | Entities Table | `[ ] TODO` | — | — | — |
-| 1B | Entity Type Registry | `[ ] TODO` | — | — | — |
-| 1C | Submissions Entity Link | `[ ] TODO` | — | — | — |
+| 1A | Entities Table | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Created entities table + RLS |
+| 1B | Entity Type Registry | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Created registry + proof_of_work seed |
+| 1C | Submissions Entity Link | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Added entity_id to submissions |
 | 2A | Edge Fn: Create Entity (scaffold) | `[ ] TODO` | — | — | — |
 | 2B | Edge Fn: Create Entity (dispatch) | `[ ] TODO` | — | — | — |
 | 2C | Edge Fn: Create Entity (normalize) | `[ ] TODO` | — | — | — |
@@ -78,9 +79,9 @@ Files created/modified by this system. Updated after each phase.
 ### Migrations
 | File | Phase | Status |
 |------|-------|--------|
-| `supabase/migrations/20260406000001_entities_table.sql` | 1A | Not Created |
-| `supabase/migrations/20260406000002_entity_type_registry.sql` | 1B | Not Created |
-| `supabase/migrations/20260406000003_submissions_entity_link.sql` | 1C | Not Created |
+| `supabase/migrations/20260406000001_entities_table.sql` | 1A | Created |
+| `supabase/migrations/20260406000002_entity_type_registry.sql` | 1B | Created |
+| `supabase/migrations/20260406000003_submissions_entity_link.sql` | 1C | Created |
 | `supabase/migrations/20260406000005_archive_logs.sql` | 9 | Not Created |
 | `supabase/migrations/20260406000006_rpc_create_entity_atomic.sql` | 2 | Not Created |
 
@@ -129,21 +130,21 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 ## ✅ Validation Results
 
 ### Phase 1A — Entities Table
-- [ ] Table created successfully
-- [ ] CHECK constraints validated (invalid tier rejected)
-- [ ] Indexes confirmed via pg_indexes
-- [ ] Test record inserted + queried
+- [x] Table created successfully
+- [x] CHECK constraints validated (invalid tier rejected)
+- [x] Indexes confirmed via pg_indexes
+- [x] Test record inserted + queried
 
 ### Phase 1B — Entity Type Registry
-- [ ] Table created successfully
-- [ ] Seed data present (proof_of_work)
-- [ ] ON CONFLICT idempotency verified
+- [x] Table created successfully
+- [x] Seed data present (proof_of_work)
+- [x] ON CONFLICT idempotency verified
 
 ### Phase 1C — Submissions Entity Link
-- [ ] entity_id column added to submissions
-- [ ] FK constraint enforced
-- [ ] Index created
-- [ ] Existing submissions unaffected (entity_id = NULL)
+- [x] entity_id column added to submissions
+- [x] FK constraint enforced
+- [x] Index created
+- [x] Existing submissions unaffected (entity_id = NULL)
 
 ### Phase 2 — Create Entity
 - [ ] Edge Function deploys successfully
