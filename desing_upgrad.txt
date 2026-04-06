@@ -1,5 +1,0 @@
-i have received feedback from Gemini pro on the design aesthetics, make a document for this and then we will follow it step by step
-1. The "Squircle" Standard: Your current UI uses varied corner radii. Apple uses a "continuous curve" (the squircle). We should standardize all cards and buttons to a generous radius to make the interface feel organic and approachable.
-2. Refining the Palette: The neon green (#00FFC2 style) is too aggressive for long-term "deep work." Change: Use a deeper "Midnight" or "Space Gray" background. Accent: Use a more sophisticated "Mint" or "Electric Blue" as a functional accent, not a structural border color.
-3. Depth & Layering: Everything is currently on the same Z-plane. Change: Use subtle background blurs (system-thin materials) and soft drop shadows to signify that cards "float" above the dashboard.
-4. Typography: The mix of fonts is jarring. We need a single, clean sans-serif font family (like Inter, Roboto, or SF Pro) with clear weight hierarchy.
