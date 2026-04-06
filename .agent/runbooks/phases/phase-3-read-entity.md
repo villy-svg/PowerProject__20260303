@@ -212,31 +212,68 @@ Add to `src/services/storage/entityService.js`:
 ```javascript
 /**
  * Fetches an entity by ID via the Edge Function.
- * Transparently handles hot/cold routing.
+ * Transparently handles hot/cold routing — caller does not need to know storage tier.
  */
 export const getEntity = async (entityId) => {
-  const { data, error } = await supabase.functions.invoke('entity-read', {
-    body: null,
-    // Edge Functions use query params via URL, so we use the method option
+  if (!entityId) throw new Error('entityId is required');
+
+  // Use native fetch with GET + query param — supabase.functions.invoke() defaults to POST
+  // and does not support query parameters natively.
+  const session = await supabase.auth.getSession();
+  const token = session.data.session?.access_token;
+  if (!token) throw new Error('User is not authenticated');
+
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/entity-read?id=${encodeURIComponent(entityId)}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
 
-  // Alternative: direct fetch
-  const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/entity-read?id=${entityId}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-      },
-    }
-  );
-
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error || 'Failed to fetch entity');
+    let errBody;
+    try { errBody = await response.json(); } catch { errBody = { error: 'unknown error' }; }
+    throw new Error(errBody.error || `entity-read returned ${response.status}`);
   }
 
   return response.json();
 };
+
+/**
+ * Lists entities by type with optional pagination.
+ * NOTE: Requires the `entity-list` Edge Function (not yet implemented — planned gap).
+ * Until that function is deployed, use the Supabase client directly with RLS:
+ *
+ * const { data } = await supabase
+ *   .from('entities')
+ *   .select('*')
+ *   .eq('entity_type', entityType)
+ *   .order('created_at', { ascending: false })
+ *   .range(from, to);
+ */
+export const listEntities = async ({ entityType, page = 0, pageSize = 20 } = {}) => {
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  const query = supabase
+    .from('entities')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  if (entityType) query.eq('entity_type', entityType);
+
+  const { data, error } = await query;
+  if (error) throw new Error(`listEntities failed: ${error.message}`);
+  return data;
+};
+```
+
+> [!NOTE]
+> **Missing: entity-update** — There is currently no `entity-update` Edge Function or RPC. If a `submission` needs to be resubmitted or corrected while still hot, callers should update the `submissions` table directly via the Supabase client (with RLS enforcement). A dedicated `entity-update` RPC (mirroring the `create_entity_atomic` pattern) should be added before Phase 6 is deployed to avoid drift.
 ```
 
 ---

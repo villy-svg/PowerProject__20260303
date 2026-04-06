@@ -5,81 +5,171 @@
 
 ---
 
-## Phase 8: Cron Job Setup
+## Phase 8: Cron Job Setup — GitHub Actions
 
-### Option A: pg_cron (Supabase Pro Plan)
+> [!IMPORTANT]
+> **We are using GitHub Actions, not pg_cron.**
+> `pg_cron` requires the Supabase Pro plan ($25/month). GitHub Actions is free for public repos and included in all GitHub plans. There is NO SQL migration for Phase 8.
 
-**File**: `supabase/migrations/20260406000004_archive_cron.sql`
+### What to Create
 
-```sql
--- =========================================================================
--- HOT/COLD STORAGE: 4/5 — ARCHIVE CRON JOB
--- Requires pg_cron extension (Pro plan).
--- Idempotent: Uses ON CONFLICT pattern.
--- =========================================================================
+**3 workflow files** inside `.github/workflows/`:
 
--- Enable pg_cron if not already
-CREATE EXTENSION IF NOT EXISTS pg_cron;
+---
 
--- Schedule archive function every 30 minutes
-SELECT cron.schedule(
-  'archive-cold-storage',        -- job name
-  '*/30 * * * *',                -- every 30 minutes
-  $$
-  SELECT net.http_post(
-    url := current_setting('app.settings.supabase_url') || '/functions/v1/entity-archive',
-    headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key'),
-      'Content-Type', 'application/json'
-    ),
-    body := '{}'::jsonb
-  );
-  $$
-);
-
-NOTIFY pgrst, 'reload schema';
-```
-
-### Option B: GitHub Actions (Free Plan)
+#### File 1: Archive Cron (Primary)
 
 **File**: `.github/workflows/archive-cron.yml`
 
 ```yaml
 name: Cold Storage Archive
+
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
-  workflow_dispatch: {}       # Manual trigger
+    - cron: '0 */6 * * *'  # Every 6 hours (adjust as needed — '*/30 * * * *' for every 30 min)
+  workflow_dispatch: {}     # Manual trigger from GitHub UI at any time
 
 jobs:
   archive:
     runs-on: ubuntu-latest
+    timeout-minutes: 10     # Fail fast if Edge Function hangs
     steps:
       - name: Trigger Archive Edge Function
         run: |
-          curl -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/entity-archive" \
+          HTTP_STATUS=$(curl -s -o /tmp/archive_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/entity-archive" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{}' \
-            --max-time 55
+            --max-time 55)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          cat /tmp/archive_response.json
+
+          # Fail the workflow if the function returns a non-2xx status
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "❌ Archive function returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Archive completed successfully"
 ```
 
-### Validation
+> [!NOTE]
+> The `workflow_dispatch` trigger lets you manually run the archive job from the **GitHub UI → Actions tab → Cold Storage Archive → Run workflow**. This is useful for testing before the schedule kicks in.
 
-```sql
--- Verify pg_cron schedule (Option A)
-SELECT * FROM cron.job WHERE jobname = 'archive-cold-storage';
+---
+
+#### File 2: Log Retention (Daily Cleanup)
+
+**File**: `.github/workflows/archive-log-cleanup.yml`
+
+```yaml
+name: Archive Log Retention
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight every day
+  workflow_dispatch: {}
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete archive_logs older than 30 days
+        run: |
+          curl -s -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/cleanup_archive_logs" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
 ```
 
-For Option B: Check GitHub Actions run history.
+> [!NOTE]
+> This workflow calls a Postgres RPC function. Add this migration with your Phase 9 SQL:
+>
+> ```sql
+> CREATE OR REPLACE FUNCTION public.cleanup_archive_logs()
+> RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
+>   DELETE FROM public.archive_logs
+>   WHERE created_at < now() - INTERVAL '30 days';
+> $$;
+> ```
 
-### Rollback
-```sql
--- Option A
-SELECT cron.unschedule('archive-cold-storage');
+---
+
+#### File 3: Failure Alert (Hourly Check)
+
+**File**: `.github/workflows/archive-failure-alert.yml`
+
+```yaml
+name: Archive Failure Alert
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch: {}
+
+jobs:
+  check-failures:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for recent archive failures
+        run: |
+          # Query archive_logs for failures in the last 2 hours
+          RESPONSE=$(curl -s \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Prefer: count=exact" \
+            -w "%{stderr}Content-Range: %header{content-range}")
+
+          echo "Failure query response: $RESPONSE"
+          # GitHub will email you automatically if this workflow step fails.
+          # For Slack: add a Slack notification step below using a Slack webhook secret.
 ```
 
 ---
+
+### GitHub Secrets Setup
+
+Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret Name | Value |
+|---|---|
+| `SUPABASE_URL` | Your Supabase project URL (e.g. `https://xxxx.supabase.co`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your service role key (from Supabase Dashboard → Project Settings → API) |
+
+> [!CAUTION]
+> **Never commit the service role key to your codebase.** It must only live in GitHub Secrets. It is transmitted only over HTTPS when GitHub Actions invokes it.
+
+---
+
+### Validation
+
+1. **Commit + push** the workflow files.
+2. Go to **GitHub → Actions tab** → you should see all 3 workflows listed.
+3. Click **"Cold Storage Archive"** → **"Run workflow"** → **"Run workflow"** to trigger manually.
+4. Check the run output — you should see `✅ Archive completed successfully`.
+5. Check `archive_logs` in your Supabase Dashboard SQL editor for a log entry.
+
+```sql
+SELECT * FROM public.archive_logs ORDER BY created_at DESC LIMIT 5;
+```
+
+---
+
+### Rollback
+
+```
+To pause or stop the cron job:
+- Go to GitHub → Actions → "Cold Storage Archive" → "..." → "Disable workflow"
+- Or delete / rename the .github/workflows/archive-cron.yml file.
+No SQL changes needed.
+```
+---
+
+
 
 ## Phase 9: Logging & Observability
 
@@ -136,11 +226,59 @@ DROP POLICY IF EXISTS "Archive logs service_role bypass" ON public.archive_logs;
 CREATE POLICY "Archive logs service_role bypass" ON public.archive_logs
   FOR ALL USING (auth.role() = 'service_role');
 
--- 5. Auto-cleanup: Keep only last 30 days of logs
--- (Can be done via separate cron job or manual cleanup)
+-- 5. LOG RETENTION FUNCTION
+-- Called by the GitHub Actions archive-log-cleanup.yml workflow daily.
+-- Deletes archive_logs older than 30 days.
+-- Idempotent: CREATE OR REPLACE is safe to re-run.
+CREATE OR REPLACE FUNCTION public.cleanup_archive_logs()
+RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
+  DELETE FROM public.archive_logs
+  WHERE created_at < now() - INTERVAL '30 days';
+$$;
+
+-- Grant execute to service_role (called via REST API from GitHub Actions)
+GRANT EXECUTE ON FUNCTION public.cleanup_archive_logs TO service_role;
 
 -- 6. POSTGRESQL KICK
 NOTIFY pgrst, 'reload schema';
+```
+
+### Verify Migration Was Applied
+
+```sql
+-- Verify table exists with all columns
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'archive_logs'
+ORDER BY ordinal_position;
+```
+
+**Expected — all 8 columns:**
+
+| column_name   | data_type |
+|---|---|
+| id            | uuid |
+| run_id        | uuid |
+| entity_type   | text |
+| batch_id      | text |
+| status        | text |
+| records_count | integer |
+| error_message | text |
+| duration_ms   | integer |
+| created_at    | timestamp with time zone |
+
+```sql
+-- Verify cleanup function exists
+SELECT routine_name FROM information_schema.routines
+WHERE routine_schema = 'public' AND routine_name = 'cleanup_archive_logs';
+```
+
+**Expected — 1 row.**
+
+```sql
+-- Test the cleanup function runs without error
+SELECT public.cleanup_archive_logs();
+-- Expected: no error, returns void (no rows to delete if this is a fresh system)
 ```
 
 ### Observability Queries
@@ -183,33 +321,25 @@ LIMIT 7;
 
 ### Phase 10A: Batch File Caching
 
-Add in-memory LRU cache to `entity-read` for cold batch files:
+> [!IMPORTANT]
+> **The cache code is already included in the Phase 7 `entity-read/index.ts` file.**
+> If you followed Phase 7 as written, you DO NOT need to modify `entity-read` again.
+> Check that the `batchCache` Map and `getCachedBatch`/`setCachedBatch` functions are at the top of your deployed `entity-read/index.ts`. If they are present, Phase 10A is complete.
+
+For reference, these are the functions that should exist at the top of `entity-read/index.ts`:
 
 ```typescript
-// Simple in-memory cache (per Edge Function worker)
+// Already included in Phase 7 — verify these exist, do not re-add
 const batchCache = new Map<string, { data: Uint8Array; ts: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 50;
 
-function getCachedBatch(pointer: string): Uint8Array | null {
-  const entry = batchCache.get(pointer);
-  if (!entry) return null;
-  if (Date.now() - entry.ts > CACHE_TTL_MS) {
-    batchCache.delete(pointer);
-    return null;
-  }
-  return entry.data;
-}
-
-function setCachedBatch(pointer: string, data: Uint8Array) {
-  // Evict oldest if at capacity
-  if (batchCache.size >= MAX_CACHE_SIZE) {
-    const oldest = [...batchCache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
-    batchCache.delete(oldest[0]);
-  }
-  batchCache.set(pointer, { data, ts: Date.now() });
-}
+function getCachedBatch(pointer: string): Uint8Array | null { ... }
+function setCachedBatch(pointer: string, data: Uint8Array): void { ... }
 ```
+
+To verify the cache is active: read the same cold entity 3 times and compare latency.
+The first read should be the slowest (cache miss). Subsequent reads should be faster (cache hit).
 
 ### Phase 10B: Batch Size Optimization
 
@@ -267,20 +397,58 @@ const pointer = await withRetry(() => adapter.upload(batchId, data, metadata));
 ### Phase 10D: Load Testing
 
 ```typescript
-// Generate 1000 test entities
-const testEntities = [];
-for (let i = 0; i < 1000; i++) {
-  testEntities.push({
-    entity_type: "proof_of_work",
-    metadata: { test: true, index: i },
-    // Set created_at to 100 days ago for archival eligibility
-  });
+// Generate 1000 test entities and backdate them for immediate archival eligibility
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+const ONE_HUNDRED_DAYS_AGO = new Date();
+ONE_HUNDRED_DAYS_AGO.setDate(ONE_HUNDRED_DAYS_AGO.getDate() - 100);
+
+// 1. Insert 1000 entity records backdated to 100 days ago
+const entityBatch = Array.from({ length: 1000 }, (_, i) => ({
+  entity_type: "proof_of_work",
+  storage_tier: "hot",
+  metadata: { test: true, index: i },
+  created_at: ONE_HUNDRED_DAYS_AGO.toISOString(),
+}));
+
+// Insert in chunks of 100 to avoid request size limits
+for (let i = 0; i < entityBatch.length; i += 100) {
+  const { error } = await supabase
+    .from("entities")
+    .insert(entityBatch.slice(i, i + 100));
+  if (error) throw new Error(`Entity insert failed at chunk ${i}: ${error.message}`);
 }
 
-// Insert via batch
-// Run archive
-// Measure: total time, per-batch time, Drive API calls
-// Verify: all 1000 entities archived correctly
+console.log("Inserted 1000 test entities (backdated 100 days)");
+
+// 2. Trigger archive run
+const start = Date.now();
+const response = await fetch(`${SUPABASE_URL}/functions/v1/entity-archive`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: "{}",
+});
+const result = await response.json();
+const elapsed = Date.now() - start;
+
+console.log(`Archive completed in ${elapsed}ms`);
+console.log("Results:", JSON.stringify(result, null, 2));
+
+// 3. Verify: all 1000 entities should now be cold
+const { count } = await supabase
+  .from("entities")
+  .select("id", { count: "exact", head: true })
+  .eq("storage_tier", "cold")
+  .eq("entity_type", "proof_of_work")
+  .eq("metadata->>test", "true");
+
+console.assert(count === 1000, `Expected 1000 cold entities, got ${count}`);
+console.log(`✅ Load test passed: ${count}/1000 entities archived in ${elapsed}ms`);
+
+// 4. Cleanup (optional — remove test data)
+// await supabase.from("entities").delete().eq("metadata->>test", "true");
 ```
 
 ### Validation

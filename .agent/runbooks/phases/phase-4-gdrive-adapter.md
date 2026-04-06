@@ -54,6 +54,16 @@ export interface StorageAdapter {
     }
   ): Promise<string>;
 
+  /**
+   * Upload a single binary asset (e.g. a photo from Supabase Storage).
+   * Returns a pointer (file_id, URL, etc.) to the uploaded file.
+   */
+  uploadAsset(
+    data: Uint8Array,
+    fileName: string,
+    entityType: string
+  ): Promise<string>;
+
   /** Download a batch file by pointer. Returns raw compressed bytes. */
   download(pointer: string): Promise<Uint8Array>;
 
@@ -63,6 +73,10 @@ export interface StorageAdapter {
 
 export type StorageProvider = "gdrive" | "s3" | "supabase_storage";
 
+// Import all adapters statically to avoid `await` inside a sync function.
+// Add new adapters here when implemented.
+import { GoogleDriveAdapter } from "./gdrive-adapter.ts";
+
 /**
  * Factory function to create the appropriate storage adapter.
  * Currently only Google Drive is implemented.
@@ -70,8 +84,6 @@ export type StorageProvider = "gdrive" | "s3" | "supabase_storage";
 export function createStorageAdapter(provider: StorageProvider): StorageAdapter {
   switch (provider) {
     case "gdrive":
-      // Lazy import to avoid loading GDrive deps when not needed
-      const { GoogleDriveAdapter } = await import("./gdrive-adapter.ts");
       return new GoogleDriveAdapter();
     case "s3":
       throw new Error("S3 adapter not yet implemented");
@@ -83,7 +95,11 @@ export function createStorageAdapter(provider: StorageProvider): StorageAdapter 
 }
 ```
 
-> **Note**: The factory uses dynamic import for lazy loading. Update to static import if Deno doesn't support top-level await in this context.
+> [!IMPORTANT]
+> **Static imports required**: The original plan used `await import()` inside a sync function — a TypeScript compile error. All adapters are now imported statically at the top of `adapter.ts`. When adding a new adapter, add its static import here.
+
+> [!WARNING]
+> **Drive API Quotas**: Google Drive API has rate limits (300 requests/second per project, 750 GB/day). The `GoogleDriveAdapter` has no rate limit handling at this stage. Phase 10C adds retry with exponential backoff — do NOT deploy to production without Phase 10C complete.
 
 ### Validation
 
@@ -352,6 +368,79 @@ export class GoogleDriveAdapter implements StorageAdapter {
     if (!response.ok && response.status !== 404) {
       throw new Error(`Delete failed: ${await response.text()}`);
     }
+  }
+
+  /**
+   * Uploads a single binary asset (e.g. a photo blob from Supabase Storage).
+   * Uses the same folder structure as batch files: root/cold-storage/{entityType}/{YYYY-MM}/
+   * @param data       - Raw bytes of the file (Uint8Array)
+   * @param fileName   - Original file name (e.g. 'photo-001.jpg')
+   * @param entityType - Used to organise into the correct Drive subfolder
+   * @returns Drive file ID (the cold_pointer for this asset)
+   */
+  async uploadAsset(
+    data: Uint8Array,
+    fileName: string,
+    entityType: string
+  ): Promise<string> {
+    const token = await this.getAccessToken();
+    const folderId = await this.getTargetFolder(entityType);
+
+    // Detect content type from extension (basic)
+    const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+    const contentTypeMap: Record<string, string> = {
+      jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+      gif: "image/gif", webp: "image/webp", pdf: "application/pdf",
+      mp4: "video/mp4", mov: "video/quicktime",
+    };
+    const contentType = contentTypeMap[ext] ?? "application/octet-stream";
+
+    const metadataPayload = JSON.stringify({
+      name: fileName,
+      parents: [folderId],
+      description: `Cold asset | entity_type: ${entityType}`,
+      properties: {
+        entity_type: entityType,
+        original_name: fileName,
+        uploaded_at: new Date().toISOString(),
+      },
+    });
+
+    const boundary = "----AssetUploadBoundary";
+    const bodyParts = [
+      `--${boundary}\r\n`,
+      `Content-Type: application/json; charset=UTF-8\r\n\r\n`,
+      `${metadataPayload}\r\n`,
+      `--${boundary}\r\n`,
+      `Content-Type: ${contentType}\r\n`,
+      `Content-Transfer-Encoding: binary\r\n\r\n`,
+    ];
+
+    const textBytes = new TextEncoder().encode(bodyParts.join(""));
+    const closingBytes = new TextEncoder().encode(`\r\n--${boundary}--`);
+    const body = new Uint8Array(textBytes.length + data.length + closingBytes.length);
+    body.set(textBytes, 0);
+    body.set(data, textBytes.length);
+    body.set(closingBytes, textBytes.length + data.length);
+
+    const response = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": `multipart/related; boundary=${boundary}`,
+        },
+        body,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Asset upload failed: ${await response.text()}`);
+    }
+
+    const fileData = await response.json();
+    return fileData.id; // Drive file ID — store as the link's cold pointer
   }
 }
 ```

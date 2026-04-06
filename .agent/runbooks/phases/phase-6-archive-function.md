@@ -9,12 +9,12 @@
 ## Overview
 
 This is the **heart** of the system. The archive function:
-1. Finds eligible entities (older than threshold, still hot)
-2. Groups them into batches
-3. Fetches full domain data
-4. Compresses + uploads to cold storage
-5. Updates the entities table
-6. Optionally cleans up hot data
+1. Finds eligible entities (older than 7 days, still hot)
+2. **Binary Asset Migration**: For each entity, identifies associated files in Supabase Storage.
+3. **Transfer**: Downloads binary blobs from Supabase Storage -> Uploads to Google Drive.
+4. **Batching**: Groups the record metadata into compressed batches.
+5. **Update**: Sets the entities table to 'cold' and updates the domain table.
+6. **Purge**: Deletes the original file from Supabase Storage to free up space.
 
 ---
 
@@ -121,9 +121,10 @@ async function fetchFullBatchData(
 // Core archival pipeline. Called by pg_cron or manually.
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createBatches, serializeBatch } from "../_shared/batch/batcher.ts";
+// Import helpers from their respective phase files (already implemented):
+import { createBatches, serializeBatch, BatchableEntity } from "../_shared/batch/batcher.ts";
 import { compress } from "../_shared/batch/compressor.ts";
-import { createStorageAdapter } from "../_shared/storage/adapter.ts";
+import { createStorageAdapter, StorageProvider } from "../_shared/storage/adapter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -145,7 +146,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // 1. Get all enabled entity types
+    // 1. Get all enabled entity types from registry
     const { data: registryEntries, error: regError } = await supabase
       .from("entity_type_registry")
       .select("*")
@@ -194,49 +195,120 @@ serve(async (req) => {
         const batches = createBatches(batchableEntities, registry.batch_size);
 
         // 2d. Process each batch
-        const adapter = createStorageAdapter("gdrive");
+        // Use cold_provider from registry — NOT hardcoded — so future entity types
+        // can use different providers (s3, supabase_storage, etc.)
+        const adapter = createStorageAdapter(registry.cold_provider as StorageProvider);
         let totalArchived = 0;
 
-        for (const batch of batches) {
+        for (const batch of batches) {  // ← FIX: outer loop was missing in original
           try {
-            // Serialize + compress
+            // 2d-i. Binary Asset Migration
+            // For each entity in the batch, move any hot binary assets to cold storage
+            // and replace Supabase Storage URLs with Drive pointers.
+            if (registry.has_binary_assets && registry.storage_bucket) {
+              for (const entity of batch.entities) {
+                const links: any[] = (entity.domain_data as any).links ?? [];
+                const updatedLinks: any[] = [];
+                const purgeQueue: string[] = []; // paths deleted AFTER batch success
+
+                for (const link of links) {
+                  if (link.provider === "supabase" && link.tier === "hot") {
+                    // Use the storage path stored on the link object directly.
+                    // Do NOT parse the public URL — it's fragile.
+                    // links should carry a `storage_path` field (e.g. "2026-04/photo.jpg").
+                    const storagePath: string = link.storage_path ?? link.url;
+
+                    // Download from Supabase Storage → returns Blob | null
+                    const { data: blob, error: dlError } = await supabase.storage
+                      .from(registry.storage_bucket)  // ← FIX: from registry, not hardcoded
+                      .download(storagePath);
+
+                    if (dlError || !blob) {
+                      console.error(`Asset download failed for ${storagePath}:`, dlError?.message);
+                      updatedLinks.push(link); // keep original link on failure, don't block batch
+                      continue;
+                    }
+
+                    // Convert Blob → Uint8Array (Supabase SDK returns Blob, adapter needs Uint8Array)
+                    const assetBytes = new Uint8Array(await blob.arrayBuffer());
+
+                    // Upload to cold storage
+                    const coldPointer = await adapter.uploadAsset(
+                      assetBytes,
+                      link.file_name ?? storagePath.split("/").pop() ?? "asset",
+                      registry.entity_type
+                    );
+
+                    updatedLinks.push({
+                      ...link,
+                      url: coldPointer,        // Drive file ID
+                      provider: registry.cold_provider,
+                      tier: "cold",
+                      storage_path: null,      // no longer in Supabase Storage
+                    });
+
+                    // Queue for deletion only after the whole batch succeeds
+                    purgeQueue.push(storagePath);
+                  } else {
+                    updatedLinks.push(link); // already cold or different provider
+                  }
+                }
+
+                // Mutate in place so the serialized batch captures updated links
+                (entity.domain_data as any).links = updatedLinks;
+                (entity as any)._purgeQueue = purgeQueue;
+              }
+            }
+
+            // 2d-ii. Serialize + compress metadata batch
             const serialized = serializeBatch(batch);
             const compressed = await compress(serialized);
 
-            // Upload to cold storage
+            // 2d-iii. Upload compressed metadata batch to cold storage
             const pointer = await adapter.upload(batch.batch_id, compressed, {
               entityType: batch.entity_type,
               recordCount: batch.entities.length,
               compressedSize: compressed.length,
             });
 
-            // Update entities in DB
+            // 2d-iv. Update entities in DB (mark as cold)
             for (let i = 0; i < batch.entities.length; i++) {
               const entity = batch.entities[i];
               await supabase
                 .from("entities")
                 .update({
                   storage_tier: "cold",
-                  cold_provider: "gdrive",
+                  cold_provider: registry.cold_provider,  // ← FIX: from registry, not hardcoded
                   cold_pointer: pointer,
                   cold_batch_id: batch.batch_id,
                   cold_index: i,
                   archived_at: new Date().toISOString(),
                 })
                 .eq("id", entity.entity_id)
-                .eq("storage_tier", "hot"); // Idempotency guard
+                .eq("storage_tier", "hot"); // Idempotency guard: already-cold entities are skipped
 
               totalArchived++;
             }
 
-            // Optional: Clear hot data (nullify links, keep row)
-            // Uncomment when ready:
-            // const entityIds = batch.entities.map(e => e.entity_id);
-            // await supabase.from("submissions")
-            //   .update({ links: [] })
-            //   .in("entity_id", entityIds);
+            // 2d-v. Purge original Supabase Storage files AFTER batch is confirmed cold
+            // This runs only when the upload + DB update both succeeded.
+            if (registry.has_binary_assets && registry.storage_bucket) {
+              const allPurgePaths = batch.entities.flatMap(
+                (e: any) => e._purgeQueue ?? []
+              );
+              if (allPurgePaths.length > 0) {
+                const { error: purgeError } = await supabase.storage
+                  .from(registry.storage_bucket)
+                  .remove(allPurgePaths);
+                if (purgeError) {
+                  // Non-fatal: files will be orphans but data is safe in Drive.
+                  // Log for manual cleanup.
+                  console.error(`Supabase Storage purge partial failure:`, purgeError.message);
+                }
+              }
+            }
 
-          } catch (batchError) {
+          } catch (batchError: any) {
             // Log batch failure, continue with other batches
             await logArchiveResult(supabase, {
               run_id: runId,
@@ -265,7 +337,7 @@ serve(async (req) => {
           batches: batches.length,
         });
 
-      } catch (typeError) {
+      } catch (typeError: any) {
         await logArchiveResult(supabase, {
           run_id: runId,
           entity_type: registry.entity_type,
@@ -286,7 +358,7 @@ serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
-  } catch (err) {
+  } catch (err: any) {
     return new Response(
       JSON.stringify({ run_id: runId, error: err.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -294,11 +366,68 @@ serve(async (req) => {
   }
 });
 
-// ─── Helper Functions (inline for now, can be extracted) ─────────────────────
+// ─── Helper Functions ─────────────────────────────────────────────────────────
+// Copied from Phases 6A and 6B — do NOT re-implement; paste directly or
+// refactor into a shared module at _shared/archive/helpers.ts.
 
-// These are the functions from phases 6A and 6B (paste them here or import)
-// getEligibleEntities(...)
-// fetchFullBatchData(...)
+async function getEligibleEntities(
+  supabase: any,
+  entityType: string,
+  archiveAfterDays: number,
+  limit: number = 500
+) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - archiveAfterDays);
+
+  const { data, error } = await supabase
+    .from("entities")
+    .select("*")
+    .eq("entity_type", entityType)
+    .eq("storage_tier", "hot")
+    .lt("created_at", cutoffDate.toISOString())
+    .is("archived_at", null)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) throw new Error(`Failed to fetch eligible entities: ${error.message}`);
+  return data || [];
+}
+
+async function fetchFullBatchData(
+  supabase: any,
+  entities: any[],
+  entityType: string
+): Promise<BatchableEntity[]> {
+  const fetchers: Record<string, (ids: string[]) => Promise<Record<string, any>>> = {
+    proof_of_work: async (entityIds) => {
+      const { data, error } = await supabase
+        .from("submissions")
+        .select("*")
+        .in("entity_id", entityIds);
+
+      if (error) throw new Error(`Submissions fetch failed: ${error.message}`);
+      const byEntityId: Record<string, any> = {};
+      for (const row of (data || [])) {
+        byEntityId[row.entity_id] = row;
+      }
+      return byEntityId;
+    },
+  };
+
+  const fetcher = fetchers[entityType];
+  if (!fetcher) throw new Error(`No fetcher for entity type: ${entityType}`);
+
+  const entityIds = entities.map((e: any) => e.id);
+  const domainDataMap = await fetcher(entityIds);
+
+  return entities.map((entity: any) => ({
+    entity_id: entity.id,
+    entity_type: entity.entity_type,
+    domain_data: domainDataMap[entity.id] || {},
+    metadata: entity.metadata || {},
+    created_at: entity.created_at,
+  }));
+}
 
 async function logArchiveResult(supabase: any, log: {
   run_id: string;

@@ -6,6 +6,37 @@
 
 ---
 
+## 🚀 Execution Order for Implementation
+
+> **For Gemini Flash**: Execute phases in this exact order. Do not skip steps. Read only the file listed for each step.
+
+| Step | File to Execute | Action |
+|------|-----------------|--------|
+| 1 | `phases/phase-1-database-foundation.md` | Apply 3 migration files + run validation SQL |
+| 2 | `phases/checkpoint-1-after-db-setup.md` | **USER RUNS ALL SQL CHECKS — must pass before proceeding** |
+| 3 | `phases/phase-2-create-entity.md` | Apply RPC migration + deploy `entity-create` function |
+| 4 | `phases/phase-3-read-entity.md` | Deploy `entity-read` function (hot path only) |
+| 5 | `phases/checkpoint-2-after-edge-functions.md` | **USER RUNS CURL TESTS — must pass before proceeding** |
+| 6 | `phases/phase-4-gdrive-adapter.md` | Create adapter.ts and gdrive-adapter.ts |
+| 7 | `phases/checkpoint-3-gdrive-connection.md` | **USER RUNS DRIVE TEST — must pass before proceeding** |
+| 8 | `phases/phase-5-batching-compression.md` | Create batcher.ts and compressor.ts |
+| 9 | `phases/checkpoint-4-pre-archive.md` | **USER RUNS UNIT TESTS — must pass before proceeding** |
+| 10 | `phases/phase-8-9-10-cron-logging-perf.md` (Phase 9 section only) | Apply `archive_logs` migration (MUST happen before Phase 6) |
+| 11 | `phases/phase-6-archive-function.md` | Deploy `entity-archive` function |
+| 12 | `phases/checkpoint-5-first-archive-run.md` | **USER TRIGGERS ARCHIVE + VERIFIES DRIVE — must pass before proceeding** |
+| 13 | `phases/phase-7-cold-read.md` | Overwrite `entity-read` with full hot+cold+cache version |
+| 14 | `phases/checkpoint-6-full-cycle.md` | **USER READS COLD ENTITY — must pass before proceeding** |
+| 15 | `phases/phase-8-9-10-cron-logging-perf.md` (Phase 8 section only) | Create 3 GitHub Actions workflow files |
+| 16 | `phases/checkpoint-7-cron-verification.md` | **USER TRIGGERS GITHUB ACTION — must pass before proceeding** |
+| 17 | `phases/phase-8-9-10-cron-logging-perf.md` (Phase 10 section) | Verify cache, tuning, retry logic |
+| 18 | `phases/checkpoint-8-production-ready.md` | **USER RUNS FULL E2E TEST — system goes live** |
+
+> [!WARNING]
+> **Migration 20260406000005 (archive_logs) MUST be applied at Step 10, before deploying the archive Edge Function in Step 11.**
+> The function writes to `archive_logs` on every run. If the table doesn't exist, all archive runs will crash on the logging step.
+
+---
+
 ## 📊 Phase Tracker
 
 | Phase | Sub-Phase | Status | Chat ID | Date | Notes |
@@ -50,8 +81,14 @@ Files created/modified by this system. Updated after each phase.
 | `supabase/migrations/20260406000001_entities_table.sql` | 1A | Not Created |
 | `supabase/migrations/20260406000002_entity_type_registry.sql` | 1B | Not Created |
 | `supabase/migrations/20260406000003_submissions_entity_link.sql` | 1C | Not Created |
-| `supabase/migrations/20260406000004_archive_cron.sql` | 8 | Not Created |
 | `supabase/migrations/20260406000005_archive_logs.sql` | 9 | Not Created |
+| `supabase/migrations/20260406000006_rpc_create_entity_atomic.sql` | 2 | Not Created |
+
+### GitHub Actions
+| File | Phase | Status |
+|------|-------|--------|
+| `.github/workflows/archive-cron.yml` | 8 | Not Created |
+| `.github/workflows/archive-failure-alert.yml` | 8 | Not Created |
 
 ### Edge Functions
 | File | Phase | Status |
@@ -77,14 +114,15 @@ Files created/modified by this system. Updated after each phase.
 ```
 GOOGLE_SERVICE_ACCOUNT_JSON   — GCP service account key (JSON string)
 GOOGLE_DRIVE_FOLDER_ID        — Root folder ID for cold storage
-SUPABASE_SERVICE_ROLE_KEY     — For pg_cron HTTP triggers
 ```
 
-### Supabase Vault Secrets (set via CLI)
-```bash
-supabase secrets set GOOGLE_SERVICE_ACCOUNT_JSON='...'
-supabase secrets set GOOGLE_DRIVE_FOLDER_ID='...'
+### GitHub Actions Secrets (set in GitHub Repo → Settings → Secrets → Actions)
 ```
+SUPABASE_URL                  — Your Supabase project URL
+SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
+```
+
+> **Note**: `pg_cron` is NOT used. The scheduled archive trigger is handled entirely by GitHub Actions (free). The `service_role_key` is stored in GitHub Secrets, NOT in any Postgres setting.
 
 ---
 
@@ -143,9 +181,11 @@ supabase secrets set GOOGLE_DRIVE_FOLDER_ID='...'
 - [ ] Response shape matches hot read
 - [ ] Batch file decompression works
 
-### Phase 8 — Cron Job
-- [ ] Schedule registered in cron.job
-- [ ] Periodic execution confirmed
+### Phase 8 — Cron Job (GitHub Actions)
+- [ ] `.github/workflows/archive-cron.yml` created and committed
+- [ ] GitHub Secrets set (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
+- [ ] Manual trigger (`workflow_dispatch`) tested successfully
+- [ ] Scheduled run confirmed in GitHub Actions run history
 
 ### Phase 9 — Logging
 - [ ] archive_logs table created
@@ -179,8 +219,9 @@ ALTER TABLE public.submissions DROP COLUMN IF EXISTS entity_id;
 ```
 
 ### Phase 8
-```sql
-SELECT cron.unschedule('archive-cold-storage');
+```
+Delete or disable the `.github/workflows/archive-cron.yml` file.
+No SQL rollback needed — GitHub Actions requires no database changes.
 ```
 
 ### Phase 9
@@ -213,6 +254,15 @@ The AI should:
 
 ---
 
+## 🚨 Known Constraints
+
+- **Cron Strategy: GitHub Actions** (Free): pg_cron is a paid Supabase Pro feature and is NOT used. The archive job is triggered by a GitHub Actions scheduled workflow. This means cron scheduling lives in the repo, not the database.
+- **GitHub Actions Limit**: Free plan allows 2,000 minutes/month. At 30-min intervals, the archive job uses ~60 monthly runs × job duration. Well within limits unless the job takes >33 minutes per run.
+- **Google Drive API Rate Limits**: 300 req/min per user → batching is critical
+- **Edge Function Timeout**: 60s default → large batches may need chunking
+- **Deno Compatibility**: Must use Deno-compatible npm modules for gzip
+- **Failure Alerting**: Without pg_cron, failure alerts rely on GitHub Actions email notifications when a workflow run fails (not Slack). A separate `archive-failure-alert` workflow can poll `archive_logs` if needed.
+
 ## 🏗️ Architecture Decisions
 
 1. **Adapter Pattern for Storage**: The `StorageAdapter` interface allows swapping Google Drive for S3 or Supabase Storage without changing archive logic.
@@ -221,12 +271,4 @@ The AI should:
 4. **Nullable entity_id on submissions**: Backward-compatible. Existing submissions continue to work without entities.
 5. **Edge Functions over RPC**: Edge Functions provide a cleaner HTTP abstraction layer and support non-Supabase APIs (Drive).
 6. **Separation of concerns**: `entity-create` / `entity-read` / `entity-archive` are separate functions, not one monolith.
-
----
-
-## 🚨 Known Constraints
-
-- **Supabase Free Plan**: pg_cron not available → must use external scheduler
-- **Google Drive API Rate Limits**: 300 req/min per user → batching is critical
-- **Edge Function Timeout**: 60s default → large batches may need chunking
-- **Deno Compatibility**: Must use Deno-compatible npm modules for gzip
+7. **GitHub Actions for Scheduling**: No pg_cron dependency. The `.github/workflows/archive-cron.yml` file is the single source of truth for the archive schedule. It can be paused, modified, or triggered manually at any time from the GitHub UI.

@@ -35,7 +35,19 @@ Follow these steps to generate the credentials and folder structure required for
 5. Paste the **Service Account Email** (e.g., `storage-manager@...iam.gserviceaccount.com`).
 6. Set permission to **Editor**.
 
-## 6. Update Runbook Config
-Once you have these, add them to your secret manager:
-- `GOOGLE_SERVICE_ACCOUNT_JSON`: [Contents of your downloaded JSON file]
-- `GOOGLE_DRIVE_FOLDER_ID`: [The ID from step 5.3]
+## 6. Set Supabase Edge Function Secrets
+Once you have the Google credentials, store them in your Supabase project so the Edge Functions can access them:
+```bash
+supabase secrets set GOOGLE_SERVICE_ACCOUNT_JSON='<contents of downloaded JSON file>'
+supabase secrets set GOOGLE_DRIVE_FOLDER_ID='<the ID from step 5.3>'
+```
+
+## 7. Set GitHub Actions Secrets
+The archive cron job is triggered by GitHub Actions (not pg_cron). Store these in **GitHub Repo → Settings → Secrets and variables → Actions**:
+
+| Secret Name | Value |
+|---|---|
+| `SUPABASE_URL` | Your Supabase project URL (e.g. `https://xxxx.supabase.co`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Found in Supabase Dashboard → Project Settings → API → service_role key |
+
+> **Why GitHub Secrets and not Supabase Vault?** The service role key is used to trigger the Edge Function from outside Supabase (via GitHub Actions). Storing it in GitHub Secrets means it is only ever transmitted over HTTPS — never stored in a database setting.

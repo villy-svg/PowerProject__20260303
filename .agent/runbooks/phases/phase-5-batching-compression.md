@@ -53,7 +53,9 @@ export function createBatches(
 
   for (let i = 0; i < entities.length; i += batchSize) {
     const chunk = entities.slice(i, i + batchSize);
-    const batchId = `${chunk[0].entity_type}_${timestamp.replace(/[^0-9]/g, "")}_${Math.floor(i / batchSize)}`;
+    // Use a UUID suffix to guarantee global uniqueness even if the function
+    // runs twice within the same millisecond (timestamp-only IDs can collide).
+    const batchId = `${chunk[0].entity_type}_${timestamp.replace(/[^0-9]/g, "")}_${Math.floor(i / batchSize)}_${crypto.randomUUID().slice(0, 8)}`;
 
     batches.push({
       batch_id: batchId,
