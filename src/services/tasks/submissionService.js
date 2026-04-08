@@ -6,6 +6,7 @@
 import { supabase } from '../core/supabaseClient';
 import imageCompression from 'browser-image-compression';
 import { taskService } from './taskService';
+import { createEntity } from '../storage/entityService';
 
 const BUCKET_NAME = 'field-submissions';
 
@@ -85,20 +86,22 @@ export const updateSubmissionLinks = async (submissionId, links) => {
  * @param {Array} submission.links - Array of link objects matching the JSONB schema
  */
 export const createSubmission = async ({ taskId, submittedBy, comment, links = [] }) => {
-  const { data, error } = await supabase
-    .from('submissions')
-    .insert({
-      task_id: taskId,
-      submitted_by: submittedBy,
-      comment,
-      links,
-      status: 'pending',
-    })
-    .select()
-    .single();
-
-  if (error) throw new Error(`Submission failed: ${error.message}`);
-  return data;
+  try {
+    const result = await createEntity({
+      entityType: 'proof_of_work',
+      domainData: {
+        task_id: taskId,
+        submitted_by: submittedBy,
+        comment,
+        links,
+      }
+    });
+    
+    // We return the 'domain' part of the atomic response, which represents the submission record itself
+    return result.domain;
+  } catch (err) {
+    throw new Error(`Submission failed: ${err.message}`);
+  }
 };
 
 /**
