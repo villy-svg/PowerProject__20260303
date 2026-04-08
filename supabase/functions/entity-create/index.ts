@@ -29,20 +29,17 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // 2. Strict Service Role Security
-    // This is an internal ingestion endpoint. We verify the token role is 'service_role'.
-    try {
-      const tokenParts = authHeader.split(' ')[1].split('.');
-      // Use Deno-safe base64 decoding
-      const payload = JSON.parse(atob(tokenParts[1]));
-      
-      if (payload.role !== 'service_role') {
-        throw new Error('Forbidden: Requires service_role key');
-      }
-    } catch (_err) {
+    // Verify the caller's JWT is valid (not just present)
+    const callerClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user }, error: authError } = await callerClient.auth.getUser();
+    if (authError || !user) {
       return new Response(
-        JSON.stringify({ success: false, error: "Service Role authorization required", code: "FORBIDDEN" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: false, error: "Invalid or expired token", code: "UNAUTHORIZED" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

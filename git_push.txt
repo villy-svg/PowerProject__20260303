@@ -3,7 +3,7 @@ npm run build
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260408 Hot-Cold Storage Phase 1.0.2"
+git commit -m "260408 Hot-Cold Storage Phase 1.0.3"
 git push origin staging 
 
 # 3. Merge Staging to Main 
@@ -28,6 +28,6 @@ git branch --show-current
 #npx supabase link --project-ref dhhbdgzutlltiojbsboi
 #npx supabase link --project-ref eeoibqxhfkrgbylnluvk
 #npx supabase db push
-#npx supabase deploy function
+#npx supabase deploy functions entity-create
 
 Get-Content supabase\.temp\project-ref 
