@@ -48,8 +48,8 @@
 | 2A | Edge Fn: Create Entity (scaffold) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | Function deployed succesfully |
 | 2B | Edge Fn: Create Entity (dispatch) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | RPC applied with CLI wrapper fix |
 | 2C | Edge Fn: Create Entity (normalize) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | Response path validated |
-| 3A | Edge Fn: Read Entity (hot join) | `[ ] TODO` | — | — | — |
-| 3B | Edge Fn: Read Entity (normalize) | `[ ] TODO` | — | — | — |
+| 3A | Edge Fn: Read Entity (hot join) | `[x] DONE` | ab6e2fdc-9305-4041-80bd-3d4090e4ef34 | 2026-04-08 | Function deployed + profile join included |
+| 3B | Edge Fn: Read Entity (normalize) | `[x] DONE` | ab6e2fdc-9305-4041-80bd-3d4090e4ef34 | 2026-04-08 | Response shape standardized |
 | 4A | Storage Adapter Interface | `[ ] TODO` | — | — | — |
 | 4B | GDrive Upload | `[ ] TODO` | — | — | — |
 | 4C | GDrive Download + Delete | `[ ] TODO` | — | — | — |
@@ -95,7 +95,7 @@ Files created/modified by this system. Updated after each phase.
 | File | Phase | Status |
 |------|-------|--------|
 | `supabase/functions/entity-create/index.ts` | 2 | Deployed |
-| `supabase/functions/entity-read/index.ts` | 3, 7 | Not Created |
+| `supabase/functions/entity-read/index.ts` | 3, 7 | Deployed |
 | `supabase/functions/entity-archive/index.ts` | 6 | Not Created |
 | `supabase/functions/_shared/storage/adapter.ts` | 4A | Not Created |
 | `supabase/functions/_shared/storage/gdrive-adapter.ts` | 4B-D | Not Created |
@@ -105,7 +105,7 @@ Files created/modified by this system. Updated after each phase.
 ### Frontend Services
 | File | Phase | Status |
 |------|-------|--------|
-| `src/services/storage/entityService.js` | 2-3 | Not Created |
+| `src/services/storage/entityService.js` | 2-3 | Created |
 
 ---
 
@@ -153,10 +153,11 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 - [x] Handles invalid entity_type gracefully
 
 ### Phase 3 — Read Entity (Hot)
-- [ ] Fetches entity by ID
-- [ ] Joins hot table data
-- [ ] Returns normalized structure
-- [ ] Returns 404 for missing entities
+- [x] Fetches entity by ID (Auth check included)
+- [x] Joins hot table data (submissions + user_profiles)
+- [x] Returns normalized structure
+- [x] Returns 404 for missing entities
+- [x] Returns 400 for missing parameters
 
 ### Phase 4 — Google Drive Adapter
 - [ ] Adapter interface compiles
