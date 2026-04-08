@@ -45,9 +45,9 @@
 | 1A | Entities Table | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Created entities table + RLS |
 | 1B | Entity Type Registry | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Created registry + proof_of_work seed |
 | 1C | Submissions Entity Link | `[x] DONE` | 7a4e9f2a-a4e6-47b4-a50e-dcee7cccd926 | 2026-04-06 | Added entity_id to submissions |
-| 2A | Edge Fn: Create Entity (scaffold) | `[ ] TODO` | — | — | — |
-| 2B | Edge Fn: Create Entity (dispatch) | `[ ] TODO` | — | — | — |
-| 2C | Edge Fn: Create Entity (normalize) | `[ ] TODO` | — | — | — |
+| 2A | Edge Fn: Create Entity (scaffold) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | Function deployed succesfully |
+| 2B | Edge Fn: Create Entity (dispatch) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | RPC applied with CLI wrapper fix |
+| 2C | Edge Fn: Create Entity (normalize) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | Response path validated |
 | 3A | Edge Fn: Read Entity (hot join) | `[ ] TODO` | — | — | — |
 | 3B | Edge Fn: Read Entity (normalize) | `[ ] TODO` | — | — | — |
 | 4A | Storage Adapter Interface | `[ ] TODO` | — | — | — |
@@ -83,7 +83,7 @@ Files created/modified by this system. Updated after each phase.
 | `supabase/migrations/20260406000002_entity_type_registry.sql` | 1B | Created |
 | `supabase/migrations/20260406000003_submissions_entity_link.sql` | 1C | Created |
 | `supabase/migrations/20260406000005_archive_logs.sql` | 9 | Not Created |
-| `supabase/migrations/20260406000006_rpc_create_entity_atomic.sql` | 2 | Not Created |
+| `supabase/migrations/20260406000006_rpc_create_entity_atomic.sql` | 2 | Applied |
 
 ### GitHub Actions
 | File | Phase | Status |
@@ -94,7 +94,7 @@ Files created/modified by this system. Updated after each phase.
 ### Edge Functions
 | File | Phase | Status |
 |------|-------|--------|
-| `supabase/functions/entity-create/index.ts` | 2 | Not Created |
+| `supabase/functions/entity-create/index.ts` | 2 | Deployed |
 | `supabase/functions/entity-read/index.ts` | 3, 7 | Not Created |
 | `supabase/functions/entity-archive/index.ts` | 6 | Not Created |
 | `supabase/functions/_shared/storage/adapter.ts` | 4A | Not Created |
@@ -147,10 +147,10 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 - [x] Existing submissions unaffected (entity_id = NULL)
 
 ### Phase 2 — Create Entity
-- [ ] Edge Function deploys successfully
-- [ ] Creates entity + domain record atomically
-- [ ] Returns correct response shape
-- [ ] Handles invalid entity_type gracefully
+- [x] Edge Function deploys successfully
+- [x] Creates entity + domain record atomically
+- [x] Returns correct response shape
+- [x] Handles invalid entity_type gracefully
 
 ### Phase 3 — Read Entity (Hot)
 - [ ] Fetches entity by ID
