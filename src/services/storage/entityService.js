@@ -21,7 +21,17 @@ import { supabase } from '../core/supabaseClient';
 export const createEntity = async ({ entityType, domainData = {}, metadata = {} }) => {
   if (!entityType) throw new Error('entityType is required');
 
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  
+  if (!token) {
+    throw new Error('User is not authenticated. Cannot create entity.');
+  }
+
   const { data, error } = await supabase.functions.invoke('entity-create', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     body: { 
       entity_type: entityType, 
       domain_data: domainData, 
