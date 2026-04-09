@@ -54,9 +54,9 @@
 | 4B | GDrive Upload | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Multi-part upload with type detection |
 | 4C | GDrive Download + Delete | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Verified via smoke test |
 | 4D | GDrive Integration Test | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Verified on Shared Drive |
-| 5A | Batcher Logic | `[ ] TODO` | — | — | — |
-| 5B | Compression Utilities | `[ ] TODO` | — | — | — |
-| 5C | Batch-Compress Integration | `[ ] TODO` | — | — | — |
+| 5A | Batcher Logic | `[x] DONE` | a47994af-0755-400a-adc4-4079c20d47cb | 2026-04-09 | Pure logic for entity chunking |
+| 5B | Compression Utilities | `[x] DONE` | a47994af-0755-400a-adc4-4079c20d47cb | 2026-04-09 | gzip compression via Web Streams |
+| 5C | Batch-Compress Integration | `[x] DONE` | a47994af-0755-400a-adc4-4079c20d47cb | 2026-04-09 | Verified 91% savings in integration test |
 | 6A | Archive: Eligible Selection | `[ ] TODO` | — | — | — |
 | 6B | Archive: Batch + Fetch | `[ ] TODO` | — | — | — |
 | 6C | Archive: Compress → Upload → Update | `[ ] TODO` | — | — | — |
@@ -99,8 +99,8 @@ Files created/modified by this system. Updated after each phase.
 | `supabase/functions/entity-archive/index.ts` | 6 | Not Created |
 | `supabase/functions/_shared/storage/adapter.ts` | 4A | Created |
 | `supabase/functions/_shared/storage/gdrive-adapter.ts` | 4B-D | Created |
-| `supabase/functions/_shared/batch/batcher.ts` | 5A | Not Created |
-| `supabase/functions/_shared/batch/compressor.ts` | 5B | Not Created |
+| `supabase/functions/_shared/batch/batcher.ts` | 5A | Created |
+| `supabase/functions/_shared/batch/compressor.ts` | 5B | Created |
 
 ### Frontend Services
 | File | Phase | Status |
@@ -168,9 +168,9 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 - [x] Mime-type detection verified
 
 ### Phase 5 — Batching + Compression
-- [ ] Batch sizes match config
-- [ ] Compression reduces size >50%
-- [ ] Round-trip integrity verified
+- [x] Batch sizes match config (Verified via integration test)
+- [x] Compression reduces size >50% (Verified 91.0% savings)
+- [x] Round-trip integrity verified (Matched 100/100 entities)
 
 ### Phase 6 — Archive Function
 - [ ] Archives eligible entities
