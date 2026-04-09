@@ -26,12 +26,10 @@ Deno.serve(async (req) => {
     const decoded = new TextDecoder().decode(downloaded);
     console.log("✅ Download Success! Content matches.");
 
-    // 3. CLEANUP (Optional - comment out if you want to see the file in Drive)
-    /*
+    // 3. CLEANUP
     console.log("🗑️ Attempting Cleanup...");
     await adapter.delete(pointer);
     console.log("✅ Cleanup Success!");
-    */
 
     return new Response(
       JSON.stringify({

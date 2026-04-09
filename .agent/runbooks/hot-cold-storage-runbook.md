@@ -3,7 +3,7 @@
 > **Purpose**: This file persists across chats. Each phase-chat reads this file at start and updates it at end.
 > **Location**: `.agent/runbooks/hot-cold-storage-runbook.md`
 <!-- > **Last Updated**: 2026-04-06 (Initial creation) -->
-> **Last Updated**: 2026-04-06 (Phase 1 Complete)
+> **Last Updated**: 2026-04-09 (Phase 4 Complete)
 
 ---
 
@@ -50,10 +50,10 @@
 | 2C | Edge Fn: Create Entity (normalize) | `[x] DONE` | d9b23a70-f7e4-4b97-8078-b21b0a456a9b | 2026-04-08 | Response path validated |
 | 3A | Edge Fn: Read Entity (hot join) | `[x] DONE` | ab6e2fdc-9305-4041-80bd-3d4090e4ef34 | 2026-04-08 | Function deployed + profile join included |
 | 3B | Edge Fn: Read Entity (normalize) | `[x] DONE` | ab6e2fdc-9305-4041-80bd-3d4090e4ef34 | 2026-04-08 | Response shape standardized |
-| 4A | Storage Adapter Interface | `[ ] TODO` | — | — | — |
-| 4B | GDrive Upload | `[ ] TODO` | — | — | — |
-| 4C | GDrive Download + Delete | `[ ] TODO` | — | — | — |
-| 4D | GDrive Integration Test | `[ ] TODO` | — | — | — |
+| 4A | Storage Adapter Interface | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Interface + Shared Factory |
+| 4B | GDrive Upload | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Multi-part upload with type detection |
+| 4C | GDrive Download + Delete | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Verified via smoke test |
+| 4D | GDrive Integration Test | `[x] DONE` | 08d37e2a-cef7-4eaa-a0fb-c5b86275580c | 2026-04-09 | Verified on Shared Drive |
 | 5A | Batcher Logic | `[ ] TODO` | — | — | — |
 | 5B | Compression Utilities | `[ ] TODO` | — | — | — |
 | 5C | Batch-Compress Integration | `[ ] TODO` | — | — | — |
@@ -97,8 +97,8 @@ Files created/modified by this system. Updated after each phase.
 | `supabase/functions/entity-create/index.ts` | 2 | Deployed |
 | `supabase/functions/entity-read/index.ts` | 3, 7 | Deployed |
 | `supabase/functions/entity-archive/index.ts` | 6 | Not Created |
-| `supabase/functions/_shared/storage/adapter.ts` | 4A | Not Created |
-| `supabase/functions/_shared/storage/gdrive-adapter.ts` | 4B-D | Not Created |
+| `supabase/functions/_shared/storage/adapter.ts` | 4A | Created |
+| `supabase/functions/_shared/storage/gdrive-adapter.ts` | 4B-D | Created |
 | `supabase/functions/_shared/batch/batcher.ts` | 5A | Not Created |
 | `supabase/functions/_shared/batch/compressor.ts` | 5B | Not Created |
 
@@ -160,11 +160,12 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 - [x] Returns 400 for missing parameters
 
 ### Phase 4 — Google Drive Adapter
-- [ ] Adapter interface compiles
-- [ ] Upload creates file in Drive
-- [ ] Download retrieves correct content
-- [ ] Delete removes file
-- [ ] Folder structure is correct
+- [x] Adapter interface compiles
+- [x] Upload creates file in Drive
+- [x] Download retrieves correct content
+- [x] Delete removes file
+- [x] Folder structure is correct (Shared Drive supported)
+- [x] Mime-type detection verified
 
 ### Phase 5 — Batching + Compression
 - [ ] Batch sizes match config
