@@ -1,0 +1,39 @@
+name: Cold Storage Archive
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Archival heartbeat (Staging & Prod)
+  workflow_dispatch: {}     # Allows manual trigger
+
+jobs:
+  archive-staging:
+    name: "Archive: Staging"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger Staging Archive
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/archive_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_STAGING_URL }}/functions/v1/entity-archive" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            --max-time 55)
+          echo "Staging Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then exit 1; fi
+
+  archive-production:
+    name: "Archive: Production"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger Production Archive
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/archive_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/entity-archive" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            --max-time 55)
+          echo "Production Status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then exit 1; fi

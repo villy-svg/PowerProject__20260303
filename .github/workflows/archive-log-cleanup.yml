@@ -1,0 +1,29 @@
+name: Archive Log Retention
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight daily
+  workflow_dispatch: {}
+
+jobs:
+  cleanup-staging:
+    name: "Cleanup: Staging"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup Staging Logs
+        run: |
+          curl -s -X POST "${{ secrets.SUPABASE_STAGING_URL }}/rest/v1/rpc/cleanup_archive_logs" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+          -H "Content-Type: application/json" -d '{}'
+
+  cleanup-production:
+    name: "Cleanup: Production"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup Production Logs
+        run: |
+          curl -s -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/cleanup_archive_logs" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Content-Type: application/json" -d '{}'

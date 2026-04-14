@@ -1,0 +1,29 @@
+name: Archive Failure Alert
+
+on:
+  schedule:
+    - cron: '30 * * * *'  # Check every hour (at the half-hour mark)
+  workflow_dispatch: {}
+
+jobs:
+  check-failures:
+    name: "Check: Staging & Production"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Staging Failures
+        run: |
+          RESPONSE=$(curl -s "${{ secrets.SUPABASE_STAGING_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+            -H "Prefer: count=exact")
+          COUNT=$(echo $RESPONSE | grep -oP '"count":\K\d+') || COUNT=0
+          if [ "$COUNT" -gt 0 ]; then echo "❌ Staging Failures detected!"; exit 1; fi
+
+      - name: Check Production Failures
+        run: |
+          RESPONSE=$(curl -s "${{ secrets.SUPABASE_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Prefer: count=exact")
+          COUNT=$(echo $RESPONSE | grep -oP '"count":\K\d+') || COUNT=0
+          if [ "$COUNT" -gt 0 ]; then echo "❌ Production Failures detected!"; exit 1; fi
