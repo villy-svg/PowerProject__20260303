@@ -3,7 +3,13 @@ name: Cold Storage Archive
 on:
   schedule:
     - cron: '*/30 * * * *'  # Archival heartbeat (Staging & Prod)
-  workflow_dispatch: {}     # Allows manual trigger
+  workflow_dispatch:        # Allows manual trigger via GHA Dashboard
+    inputs:
+      dry_run:
+        description: 'If true, will only report eligible records without archiving them'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   archive-staging:
@@ -18,21 +24,15 @@ jobs:
             -X POST "${{ secrets.SUPABASE_STAGING_URL }}/functions/v1/entity-archive" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{}' \
+            -d '{"dry_run": ${{ github.event.inputs.dry_run || false }}}' \
             --max-time 58)
 
           echo "Staging Status: $HTTP_STATUS"
           cat /tmp/archive_response.json
 
-          # 200 = fully done, 206 = partial (healthy — next heartbeat continues)
-          # 207 = some pages failed → surface as GHA failure for alerting
           if [ "$HTTP_STATUS" -ne 200 ] && [ "$HTTP_STATUS" -ne 206 ]; then
             echo "Archive failed or had page-level errors. Status: $HTTP_STATUS"
             exit 1
-          fi
-
-          if [ "$HTTP_STATUS" -eq 206 ]; then
-            echo "Partial run: more records remain. Will continue on next heartbeat."
           fi
 
   archive-production:
@@ -47,7 +47,7 @@ jobs:
             -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/entity-archive" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{}' \
+            -d '{"dry_run": ${{ github.event.inputs.dry_run || false }}}' \
             --max-time 58)
 
           echo "Production Status: $HTTP_STATUS"
@@ -56,8 +56,4 @@ jobs:
           if [ "$HTTP_STATUS" -ne 200 ] && [ "$HTTP_STATUS" -ne 206 ]; then
             echo "Archive failed or had page-level errors. Status: $HTTP_STATUS"
             exit 1
-          fi
-
-          if [ "$HTTP_STATUS" -eq 206 ]; then
-            echo "Partial run: more records remain. Will continue on next heartbeat."
           fi
