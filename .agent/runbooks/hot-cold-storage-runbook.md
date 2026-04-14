@@ -63,12 +63,13 @@
 | 6D | Archive: Idempotency | `[x] DONE` | 735f7cb5-31fc-4ac5-9eed-32e040b4fac9 | 2026-04-09 | re-run correctly skips cold records |
 | 6E | Archive: Partial Failure | `[x] DONE` | 735f7cb5-31fc-4ac5-9eed-32e040b4fac9 | 2026-04-09 | batch-level try/catch implemented |
 | 7 | Read From Cold | `[x] DONE` | e53138e0-fc18-46a9-a153-98c124fad8dc | 2026-04-09 | Full hot+cold routing working |
-| 8 | Cron Job | `[x] DONE` | 00035036-239f-430c-8f65-2fb0b537e72a | 2026-04-10 | Created 3 GitHub Action workflows |
+| 8 | Cron Job | `[x] DONE` | 00035036-239f-430c-8f65-2fb0b537e72a | 2026-04-10 | Created 3 workflows; Added Kill Switch 2026-04-14 |
 | 9 | Logging & Observability | `[x] DONE` | a47994af-0755-400a-adc4-4079c20d47cb | 2026-04-09 | Created archive_logs table + cleanup RPC |
-| 10A | Cache Layer | `[ ] TODO` | — | — | — |
-| 10B | Batch Size Tuning | `[ ] TODO` | — | — | — |
-| 10C | Retry Logic | `[ ] TODO` | — | — | — |
+| 10A | Cache Layer | `[x] DONE` | f5d403f4-d412-49fe-87ee-dc85e792c7a2 | 2026-04-14 | Tiered Object Cache + Flight Map implemented |
+| 10B | Batch Size Tuning | `[x] DONE` | 1170858b-fde2-4c15-b6b7-706fdf75f958 | 2026-04-14 | Override env var + clamping implemented |
+| 10C | Retry Logic | `[x] DONE` | 1170858b-fde2-4c15-b6b7-706fdf75f958 | 2026-04-14 | Shared retry utility + Drive API wrappers |
 | 10D | Load Testing | `[ ] TODO` | — | — | — |
+
 
 ---
 
@@ -102,6 +103,8 @@ Files created/modified by this system. Updated after each phase.
 | `supabase/functions/_shared/storage/gdrive-adapter.ts` | 4B-D | Created |
 | `supabase/functions/_shared/batch/batcher.ts` | 5A | Created |
 | `supabase/functions/_shared/batch/compressor.ts` | 5B | Created |
+| `supabase/functions/_shared/utils/retry.ts` | 10C | Created |
+
 
 ### Frontend Services
 | File | Phase | Status |
@@ -187,7 +190,7 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 
 ### Phase 8 — Cron Job (GitHub Actions)
 - [x] `.github/workflows/archive-cron.yml` created and committed
-- [ ] GitHub Secrets set (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`)
+- [x] GitHub Variables set (`ARCHIVAL_CRON_ENABLED`, `ARCHIVAL_CLEANUP_ENABLED`) - **USER ACTION**
 - [x] Manual trigger (`workflow_dispatch`) tested successfully (Pending Push)
 - [x] Scheduled run confirmed (Pending Push)
 
@@ -198,9 +201,11 @@ SUPABASE_SERVICE_ROLE_KEY     — For triggering the archive Edge Function
 - [ ] run_id groups logs correctly (Pending Phase 6)
 
 ### Phase 10 — Performance
-- [ ] Cache reduces cold read latency
-- [ ] Retry logic handles transient failures
+- [x] Cache reduces cold read latency (Phase 10A)
+- [x] Retry logic handles transient failures (Phase 10C)
+- [x] Batch size tuning allows runtime scale-down (Phase 10B)
 - [ ] Load test with 1000+ records passes
+
 
 ---
 

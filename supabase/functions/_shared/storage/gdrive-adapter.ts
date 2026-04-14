@@ -2,6 +2,8 @@
 // Google Drive storage adapter using service account authentication.
 
 import { StorageAdapter } from "./adapter.ts";
+import { withRetry } from "../utils/retry.ts";
+
 
 interface ServiceAccountKey {
   client_email: string;
@@ -32,14 +34,18 @@ export class GoogleDriveAdapter implements StorageAdapter {
     }
 
     const jwt = await this.createJWT();
-    const response = await fetch(this.serviceAccount.token_uri, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-        assertion: jwt,
+    const response = await withRetry(
+      () => fetch(this.serviceAccount.token_uri, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+          assertion: jwt,
+        }),
       }),
-    });
+      { maxAttempts: 3, baseDelayMs: 1000, label: "GDrive Token Exchange" }
+    );
+
 
     if (!response.ok) {
       const errText = await response.text();
@@ -113,10 +119,14 @@ export class GoogleDriveAdapter implements StorageAdapter {
 
     // Check if folder exists
     const query = `'${parentId}' in parents and name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-    const searchResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)&supportsAllDrives=true&includeItemsFromAllDrives=true`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const searchResponse = await withRetry(
+      () => fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)&supportsAllDrives=true&includeItemsFromAllDrives=true`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ),
+      { maxAttempts: 3, baseDelayMs: 500, label: "GDrive Folder Search" }
     );
+
 
     const searchData = await searchResponse.json();
     if (searchData.files && searchData.files.length > 0) {
@@ -124,18 +134,22 @@ export class GoogleDriveAdapter implements StorageAdapter {
     }
 
     // Create folder
-    const createResponse = await fetch("https://www.googleapis.com/drive/v3/files?supportsAllDrives=true", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: folderName,
-        mimeType: "application/vnd.google-apps.folder",
-        parents: [parentId],
+    const createResponse = await withRetry(
+      () => fetch("https://www.googleapis.com/drive/v3/files?supportsAllDrives=true", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: folderName,
+          mimeType: "application/vnd.google-apps.folder",
+          parents: [parentId],
+        }),
       }),
-    });
+      { maxAttempts: 3, baseDelayMs: 1000, label: "GDrive Folder Creation" }
+    );
+
 
     if (!createResponse.ok) {
       const errorText = await createResponse.text();
@@ -203,17 +217,21 @@ export class GoogleDriveAdapter implements StorageAdapter {
     body.set(data, textBytes.length);
     body.set(closingBytes, textBytes.length + data.length);
 
-    const response = await fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size&supportsAllDrives=true",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": `multipart/related; boundary=${boundary}`,
-        },
-        body,
-      }
+    const response = await withRetry(
+      () => fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size&supportsAllDrives=true",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": `multipart/related; boundary=${boundary}`,
+          },
+          body,
+        }
+      ),
+      { maxAttempts: 3, baseDelayMs: 500, label: "GDrive Batch Upload" }
     );
+
 
     if (!response.ok) {
       throw new Error(`Upload failed: ${await response.text()}`);
@@ -226,10 +244,14 @@ export class GoogleDriveAdapter implements StorageAdapter {
   async download(pointer: string): Promise<Uint8Array> {
     const token = await this.getAccessToken();
 
-    const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${pointer}?alt=media&supportsAllDrives=true`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const response = await withRetry(
+      () => fetch(
+        `https://www.googleapis.com/drive/v3/files/${pointer}?alt=media&supportsAllDrives=true`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ),
+      { maxAttempts: 3, baseDelayMs: 500, label: "GDrive Download" }
     );
+
 
     if (!response.ok) {
       throw new Error(`Download failed: ${await response.text()}`);
@@ -241,13 +263,17 @@ export class GoogleDriveAdapter implements StorageAdapter {
   async delete(pointer: string): Promise<void> {
     const token = await this.getAccessToken();
 
-    const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${pointer}?supportsAllDrives=true`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const response = await withRetry(
+      () => fetch(
+        `https://www.googleapis.com/drive/v3/files/${pointer}?supportsAllDrives=true`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      ),
+      { maxAttempts: 3, baseDelayMs: 500, label: "GDrive Delete" }
     );
+
 
     if (!response.ok && response.status !== 404) {
       throw new Error(`Delete failed: ${await response.text()}`);
@@ -306,17 +332,21 @@ export class GoogleDriveAdapter implements StorageAdapter {
     body.set(data, textBytes.length);
     body.set(closingBytes, textBytes.length + data.length);
 
-    const response = await fetch(
-      "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size&supportsAllDrives=true",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": `multipart/related; boundary=${boundary}`,
-        },
-        body,
-      }
+    const response = await withRetry(
+      () => fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size&supportsAllDrives=true",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": `multipart/related; boundary=${boundary}`,
+          },
+          body,
+        }
+      ),
+      { maxAttempts: 3, baseDelayMs: 500, label: "GDrive Asset Upload" }
     );
+
 
     if (!response.ok) {
       throw new Error(`Asset upload failed: ${await response.text()}`);

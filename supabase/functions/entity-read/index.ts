@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { decompress } from "../_shared/batch/compressor.ts";
 import { deserializeBatch, extractFromBatch, BatchableEntity } from "../_shared/batch/batcher.ts";
+import { withRetry } from "../_shared/utils/retry.ts";
+
 import { createStorageAdapter, StorageProvider } from "../_shared/storage/adapter.ts";
 
 const corsHeaders = {
@@ -9,31 +11,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ─── In-Memory LRU Cache (Phase 10A) ─────────────────────────────────────────
-// Caches compressed batch files by Drive pointer.
-// Per-worker (Deno isolate), so cache is NOT shared across concurrent requests.
-// TTL: 5 minutes. Max size: 50 entries. Eviction: oldest-first.
-const batchCache = new Map<string, { data: Uint8Array; ts: number }>();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_CACHE_SIZE = 50;
+// ─── Tiered Object Cache (Phase 10A Hardened) ────────────────────────────────
+// Layer 1: Object Cache. Stores fully-deserialized batch objects after first fetch.
+// Key: cold_pointer (Drive File ID). All entities sharing a batch reuse this.
+// TTL: 5 min. Max: 25 entries. Eviction: oldest-first.
+// WHY object not bytes: avoids decompress() + JSON.parse() on every cache hit.
+type CachedRecord = { 
+  index: number; 
+  entity_id: string; 
+  domain_data: Record<string, unknown>; 
+  metadata: Record<string, unknown> 
+};
+type CachedBatch = CachedRecord[];
 
-function getCachedBatch(pointer: string): Uint8Array | null {
-  const entry = batchCache.get(pointer);
+const batchObjectCache = new Map<string, { records: CachedBatch; ts: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 25;
+
+// Layer 2: Flight Map. Prevents thundering-herd Drive API calls when multiple
+// concurrent requests arrive for the same un-cached batch.
+// Key: cold_pointer. Value: the in-flight download+decompress Promise.
+const pendingRequests = new Map<string, Promise<CachedBatch>>();
+
+// Initialize Supabase client once at module level for reuse across warm starts
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
+
+function getCachedRecords(pointer: string): CachedBatch | null {
+
+  const entry = batchObjectCache.get(pointer);
   if (!entry) return null;
   if (Date.now() - entry.ts > CACHE_TTL_MS) {
-    batchCache.delete(pointer);
+    batchObjectCache.delete(pointer);
     return null;
   }
-  return entry.data;
+  return entry.records;
 }
 
-function setCachedBatch(pointer: string, data: Uint8Array): void {
-  if (batchCache.size >= MAX_CACHE_SIZE) {
+function setCachedRecords(pointer: string, records: CachedBatch): void {
+  if (batchObjectCache.size >= MAX_CACHE_SIZE) {
     // Evict the oldest entry
-    const oldest = [...batchCache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
-    batchCache.delete(oldest[0]);
+    const oldest = [...batchObjectCache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
+    if (oldest) batchObjectCache.delete(oldest[0]);
   }
-  batchCache.set(pointer, { data, ts: Date.now() });
+  batchObjectCache.set(pointer, { records, ts: Date.now() });
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -44,13 +67,8 @@ serve(async (req) => {
   }
 
   try {
-    // Service role client — bypasses RLS for internal reads
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
     // Extract entity ID from query string: GET /entity-read?id=<uuid>
+
     const url = new URL(req.url);
     const entityId = url.searchParams.get("id");
 
@@ -107,25 +125,46 @@ serve(async (req) => {
           );
         }
 
-        // Check cache first (avoids a Drive API call if same batch was recently accessed)
-        let compressedData = getCachedBatch(entity.cold_pointer);
+        // Layer 1: Object Cache check (instant return if already parsed)
+        let batchRecords = getCachedRecords(entity.cold_pointer);
 
-        if (!compressedData) {
-          // Cache miss — download from Drive
-          const adapter = createStorageAdapter(entity.cold_provider as StorageProvider);
-          compressedData = await adapter.download(entity.cold_pointer);
-          // Store in cache for subsequent reads within the TTL window
-          setCachedBatch(entity.cold_pointer, compressedData);
+        if (!batchRecords) {
+          // Layer 2: Flight Map check — is another request currently fetching this batch?
+          let inflightPromise = pendingRequests.get(entity.cold_pointer);
+
+          if (!inflightPromise) {
+            // No one is fetching this yet — start download and register in Flight Map
+            inflightPromise = (async () => {
+              const adapter = createStorageAdapter(entity.cold_provider as StorageProvider);
+              const compressedData = await withRetry(
+                () => adapter.download(entity.cold_pointer!),
+                { maxAttempts: 2, baseDelayMs: 1000, label: "Cold Path Download (outer)" }
+              );
+              const rawData = await decompress(compressedData);
+
+              const batchData = deserializeBatch(rawData);
+              return batchData.records as CachedBatch;
+            })().then((records) => {
+              // Success: populate Object Cache, remove mapping
+              setCachedRecords(entity.cold_pointer!, records);
+              pendingRequests.delete(entity.cold_pointer!);
+              return records;
+            }).catch((err) => {
+              // Failure: remove mapping WITHOUT caching (prevents cache poisoning)
+              pendingRequests.delete(entity.cold_pointer!);
+              throw err;
+            });
+
+            pendingRequests.set(entity.cold_pointer, inflightPromise);
+          }
+
+          // Await the new or existing fetch promise
+          batchRecords = await inflightPromise;
         }
 
-        // Decompress the gzipped batch bytes
-        const rawData = await decompress(compressedData);
-
-        // Deserialize the JSON batch structure
-        const batchData = deserializeBatch(rawData);
-
-        // Extract this specific entity's domain data using its position in the batch
-        const domainData = extractFromBatch(batchData, entity.cold_index ?? 0);
+        // Extract this specific entity metadata using its position in the batch
+        const record = batchRecords.find((r) => r.index === (entity.cold_index ?? 0));
+        const domainData = record ? record.domain_data : null;
 
         if (!domainData) {
           return new Response(

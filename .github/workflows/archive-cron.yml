@@ -8,6 +8,7 @@ on:
 jobs:
   archive-staging:
     name: "Archive: Staging"
+    if: vars.ARCHIVAL_CRON_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,6 +25,7 @@ jobs:
 
   archive-production:
     name: "Archive: Production"
+    if: vars.ARCHIVAL_CRON_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

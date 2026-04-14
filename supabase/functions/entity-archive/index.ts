@@ -11,7 +11,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Initialize Supabase client once at module level for reuse across warm starts
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+);
+
 serve(async (req) => {
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -21,12 +28,8 @@ serve(async (req) => {
   const results: any[] = [];
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
     // Parse request body for dry_run flag
+
     let dryRun = false;
     try {
       const body = await req.json();
@@ -95,8 +98,10 @@ serve(async (req) => {
 
         // 2c. Phase 6C: Pipeline Logic
         // 2c-i. Create batches
-        const batches = createBatches(batchableEntities, registry.batch_size);
+        const effectiveBatchSize = resolveEffectiveBatchSize(registry.batch_size);
+        const batches = createBatches(batchableEntities, effectiveBatchSize);
         const adapter = createStorageAdapter(registry.cold_provider as StorageProvider);
+
         let totalArchived = 0;
 
         for (const batch of batches) {
@@ -311,7 +316,43 @@ async function fetchFullBatchData(
   }));
 }
 
+/**
+ * Resolves the effective batch size for this run.
+ * Priority: 1) ARCHIVE_BATCH_SIZE_OVERRIDE env var  2) registry.batch_size
+ * Clamped to [5, 100] regardless of source.
+ */
+function resolveEffectiveBatchSize(registryBatchSize: number): number {
+  const MIN_BATCH = 5;
+  const MAX_BATCH = 100;
+  
+  const override = Deno.env.get("ARCHIVE_BATCH_SIZE_OVERRIDE");
+  let effective: number;
+  
+  if (override !== undefined) {
+    const parsed = parseInt(override, 10);
+    if (isNaN(parsed)) {
+      console.warn(`[BatchSize] ARCHIVE_BATCH_SIZE_OVERRIDE="${override}" is not a valid integer. Using DB value: ${registryBatchSize}`);
+      effective = registryBatchSize;
+    } else {
+      effective = parsed;
+      console.log(`[BatchSize] Override active: ARCHIVE_BATCH_SIZE_OVERRIDE=${parsed}`);
+    }
+  } else {
+    effective = registryBatchSize;
+  }
+  
+  // Clamp
+  const clamped = Math.max(MIN_BATCH, Math.min(MAX_BATCH, effective));
+  if (clamped !== effective) {
+    console.warn(`[BatchSize] Value ${effective} clamped to ${clamped} (valid range: ${MIN_BATCH}–${MAX_BATCH})`);
+  }
+  
+  console.log(`[BatchSize] Effective batch size: ${clamped} (registry default: ${registryBatchSize})`);
+  return clamped;
+}
+
 async function logArchiveResult(supabase: any, log: {
+
   run_id: string;
   entity_type: string;
   batch_id?: string;
