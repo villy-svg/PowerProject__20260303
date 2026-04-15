@@ -3,7 +3,7 @@ npm run build
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260414 Hot-Cold Storage Phase 1.0.2"
+git commit -m "260415 Hot-Cold Storage Phase 1.0.2"
 git push origin staging 
 
 # 3. Merge Staging to Main 

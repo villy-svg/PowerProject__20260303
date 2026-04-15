@@ -2,7 +2,7 @@ name: Cold Storage Archive
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Archival heartbeat (Staging & Prod)
+    - cron: '0 8 * * *'  # Archival heartbeat (Staging & Prod)
   workflow_dispatch:        # Allows manual trigger via GHA Dashboard
     inputs:
       dry_run:
