@@ -7,10 +7,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && npx shx cp public/CNAME dist/CNAME",
+    "build:staging": "vite build --mode staging && npx shx cp public/CNAME dist/CNAME",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "deploy:staging": "gh-pages -d dist --dest staging"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
