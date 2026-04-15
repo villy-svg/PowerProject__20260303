@@ -9,13 +9,13 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "/powerpod-logo.svg",
+      "src": "powerpod-logo.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/powerpod-logo.svg",
+      "src": "powerpod-logo.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -23,15 +23,15 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshot-mobile.png",
-      "sizes": "1080x1920",
+      "src": "screenshot-mobile.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "PowerProject Mobile Dashboard"
     },
     {
-      "src": "/screenshot-desktop.png",
-      "sizes": "1920x1080",
+      "src": "screenshot-desktop.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "form_factor": "wide",
       "label": "PowerProject Desktop Dashboard"
