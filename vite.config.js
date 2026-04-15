@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'auto',
-        includeAssets: ['PowerPod Transparent Background.svg'],
+        includeAssets: ['powerpod-logo.svg', 'screenshot-mobile.png', 'screenshot-desktop.png'],
         manifest: false,  // We use our own public/manifest.json
         workbox: {
           // Precache the app shell (HTML, JS, CSS bundles)
