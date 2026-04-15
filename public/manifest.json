@@ -1,0 +1,18 @@
+{
+  "name": "PowerProject",
+  "short_name": "PowerProject",
+  "description": "Enterprise project management by PowerPod",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/PowerPod Transparent Background.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
