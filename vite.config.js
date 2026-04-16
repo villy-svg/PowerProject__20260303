@@ -9,9 +9,54 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'prompt',
-        injectRegister: null,
-        includeAssets: ['powerpod-logo.svg', 'pwa-icon-square.svg', 'pwa-icon-512.png', 'screenshot-mobile.png', 'screenshot-desktop.png'],
-        manifest: false,  // We use our own public/manifest.json
+        injectRegister: 'auto',
+        manifest: {
+          id: "/",
+          name: "PowerProject",
+          short_name: "PowerProject",
+          description: "Enterprise project management by PowerPod",
+          start_url: "/",
+          display: "standalone",
+          orientation: "portrait",
+          background_color: "#050505",
+          theme_color: "#050505",
+          icons: [
+            {
+              src: "pwa-icon-512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any"
+            },
+            {
+              src: "pwa-icon-512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable"
+            },
+            {
+              src: "powerpod-logo.svg",
+              sizes: "any",
+              type: "image/svg+xml",
+              purpose: "any"
+            }
+          ],
+          screenshots: [
+            {
+              src: "screenshot-mobile.png",
+              sizes: "1024x1024",
+              type: "image/png",
+              form_factor: "narrow",
+              label: "PowerProject Mobile Dashboard"
+            },
+            {
+              src: "screenshot-desktop.png",
+              sizes: "1024x1024",
+              type: "image/png",
+              form_factor: "wide",
+              label: "PowerProject Desktop Dashboard"
+            }
+          ]
+        },
         workbox: {
           // Precache the app shell (HTML, JS, CSS bundles)
           globPatterns: ['**/*.{js,css,html,svg,woff2}'],
