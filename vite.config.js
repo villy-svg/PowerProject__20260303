@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'auto',
+        includeAssets: ['powerpod-logo.svg', 'pwa-icon-512.png', 'pwa-icon-512.svg', 'pwa-icon-square.svg', 'screenshot-mobile.png', 'screenshot-desktop.png'],
         manifest: {
           id: base,
           name: "PowerProject",
