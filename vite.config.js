@@ -35,18 +35,6 @@ export default defineConfig(({ mode }) => {
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable"
-            },
-            {
-              src: "pwa-icon-512.svg",
-              sizes: "any",
-              type: "image/svg+xml",
-              purpose: "any"
-            },
-            {
-              src: "powerpod-logo.svg",
-              sizes: "any",
-              type: "image/svg+xml",
-              purpose: "any"
             }
           ],
           screenshots: [
