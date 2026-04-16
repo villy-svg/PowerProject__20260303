@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'auto',
-        includeAssets: ['powerpod-logo.svg', 'pwa-icon-512.png', 'pwa-icon-512.svg', 'pwa-icon-square.svg', 'screenshot-mobile.png', 'screenshot-desktop.png'],
+        includeAssets: ['screenshot-mobile.png', 'screenshot-desktop.png', 'powerpod-logo_11zon.png'],
         manifest: {
           id: base,
           name: "PowerProject",
@@ -25,13 +25,13 @@ export default defineConfig(({ mode }) => {
           theme_color: "#050505",
           icons: [
             {
-              src: "pwa-icon-512.png",
+              src: "powerpod-logo_11zon.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "any"
             },
             {
-              src: "pwa-icon-512.png",
+              src: "powerpod-logo_11zon.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable"
