@@ -4,18 +4,20 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  const base = env.VITE_BASE_URL || '/'
   return {
+    base,
     plugins: [
       react(),
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'auto',
         manifest: {
-          id: "/",
+          id: base,
           name: "PowerProject",
           short_name: "PowerProject",
           description: "Enterprise project management by PowerPod",
-          start_url: "/",
+          start_url: base,
           display: "standalone",
           orientation: "portrait",
           background_color: "#050505",
@@ -65,7 +67,7 @@ export default defineConfig(({ mode }) => {
           // NEVER cache Supabase API responses.
           // Serving stale RLS-filtered data would be a security breach.
           // Users could see data their permissions no longer allow.
-          navigateFallback: '/index.html',
+          navigateFallback: `${base}index.html`,
           navigateFallbackDenylist: [/^\/api/],
 
           runtimeCaching: [
@@ -100,7 +102,6 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
-    base: env.VITE_BASE_URL || '/',
     server: { open: true },
     build: {
       rollupOptions: {
