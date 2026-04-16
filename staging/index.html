@@ -9,10 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>PowerPod-Project-Manager</title>
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/staging/manifest.json" />
-    <meta name="theme-color" content="#050505" />
-
     <!-- Apple PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,23 +22,12 @@
         document.documentElement.className = theme;
       })();
     </script>
-
-    <!-- Explicit Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(reg => console.log('✅ PWA: Service Worker Registered', reg))
-            .catch(err => console.error('❌ PWA: Service Worker Registration Failed', err));
-        });
-      }
-    </script>
     <script type="module" crossorigin src="/staging/assets/index-BtBUJSZt.js"></script>
     <link rel="modulepreload" crossorigin href="/staging/assets/vendor-D3RxZUcv.js">
     <link rel="modulepreload" crossorigin href="/staging/assets/vendor-supabase-CXKMqTYQ.js">
     <link rel="modulepreload" crossorigin href="/staging/assets/vendor-excel-C59NOePa.js">
     <link rel="stylesheet" crossorigin href="/staging/assets/index-DXhPaqDr.css">
-  </head>
+  <link rel="manifest" href="/staging/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/staging/registerSW.js"></script></head>
   <body>
     <div id="root"></div>
   </body>
