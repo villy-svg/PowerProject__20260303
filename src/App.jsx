@@ -16,6 +16,7 @@ import { profileService } from './services/auth/profileService';
 import { useTasks } from './hooks/useTasks';
 import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
+import { useOTAUpdate } from './hooks/useOTAUpdate';
 
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
@@ -159,6 +160,11 @@ function App() {
 
   // Compute current permissions via dedicated RBAC hook
   const currentUserPermissions = useRBAC(user, activeVertical, verticals);
+
+  // OTA Update Hook — no-op on web, checks for updates on native platform
+  // CRITICAL: Do NOT conditionally call this hook (Rules of Hooks). The hook
+  // itself handles the Capacitor.isNativePlatform() guard internally.
+  useOTAUpdate();
 
   // Test database connection on app start
   useEffect(() => {

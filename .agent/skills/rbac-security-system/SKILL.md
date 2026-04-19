@@ -127,3 +127,30 @@ When building a new vertical or feature:
 3. [ ] Update `App.jsx` to pass `permissions` to the new view.
 4. [ ] Implement UI guards in the new view (Buttons, Imports, Modals).
 5. [ ] Verify as both 'Viewer' and 'Admin'.
+
+---
+
+## 7. Service Worker — RBAC Cache Prohibition
+
+> [!CAUTION]
+> **NEVER** cache any Supabase API response in the Service Worker. This is a hard security rule, not a performance suggestion.
+
+**Why**: Supabase RLS policies mean each user sees a different subset of data. If a service worker caches a response for User A, then User B logs in on the same device, User B could receive User A's data from cache — a direct RBAC breach.
+
+**Mandatory NetworkOnly domains in workbox config:**
+```javascript
+// vite.config.js — PWA runtimeCaching
+{ urlPattern: /\.supabase\.co/, handler: 'NetworkOnly' },
+{ urlPattern: /storage\/v1\/object/, handler: 'NetworkOnly' },
+```
+
+This rule is enforced in the [Hot-Cold Archival Engine](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/hot-cold-archival/SKILL.md) skill as well, specifically for cold storage blobs.
+
+---
+
+## 8. Staging vs Production RBAC Parity
+
+Both environments MUST have **identical RLS policies**. The staging Supabase project is a separate instance with its own `SUPABASE_STAGING_URL` and `SUPABASE_STAGING_SERVICE_ROLE_KEY`.
+
+**Rule**: Whenever a new RLS policy is added to production migrations, it MUST also appear in the same migration file (applied to staging via `staging-db.yml` GitHub Actions workflow). Policy drift between environments is a blocking defect.
+

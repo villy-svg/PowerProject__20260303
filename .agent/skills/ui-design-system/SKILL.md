@@ -288,3 +288,52 @@ Avoid aggressive saturations. Use colors functionally (to signify status), not s
 | Depth | ✅ `backdrop-filter` and `shadow-premium` |
 | Main Area Buttons | ❌ No solid fills. Use `.halo-button` (glass) or icon-only actions. |
 | Layout Consistency| ✅ Must be tested at 1024px (11") and 1280px (13") |
+
+---
+
+## 14. Mobile Viewport Rules (Capacitor / Phase 6)
+
+> [!IMPORTANT]
+> All mobile-specific CSS MUST be scoped inside `@media` queries. Zero desktop impact is a hard requirement.
+
+### Breakpoints for Mobile
+- **Phone (Portrait)**: `max-width: 430px` — primary mobile target
+- **Phone (Landscape)**: `max-width: 768px and orientation: landscape`
+- **Tablet**: `min-width: 431px and max-width: 1023px`
+
+### Touch Target Rule
+All interactive elements MUST be ≥ **44px** in both height and width on mobile. This follows Apple HIG and Material Design standards.
+```css
+@media (max-width: 430px) {
+  .halo-button, button, a[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+```
+
+### Safe Area Insets (Notch / Camera Cutout)
+Always wrap fixed/sticky UI with safe area padding to accommodate device notches.
+```css
+.app-header {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+.app-footer, .bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+```
+
+### Forbidden on Mobile
+- **CSS `:has()` selector** — not supported in older Android WebViews. Use class toggling instead.
+- **Hover-dependent interactions** — touch devices have no hover state. All interactions must work on tap alone.
+- **Fixed pixel widths on containers** — use `100%`, `100vw`, or `min(100%, Npx)`.
+
+### Sidebar Behaviour on Mobile
+- The main sidebar MUST collapse to an off-canvas drawer on `max-width: 768px`.
+- The sub-sidebar MUST be hidden by default on mobile and accessible via a floating toggle button.
+
+### Background Color During WebView Load
+The WebView background is `#050505` (Midnight Black), configured in `capacitor.config.ts`. Avoid large white-flash during navigation by setting `background-color: #050505` on `html, body` in `App.css`.
+

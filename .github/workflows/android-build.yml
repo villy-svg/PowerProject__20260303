@@ -1,0 +1,168 @@
+name: Android Build & OTA Release
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'vite.config.*'
+      - 'capacitor.config.*'
+      - 'android/**'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch:
+    inputs:
+      force_env:
+        description: 'Override environment (staging/production)'
+        required: false
+        default: ''
+
+concurrency:
+  group: "android-${{ github.ref_name }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: write  # Required for creating GitHub Releases
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Determine Environment ──
+      - name: Determine Environment
+        id: env
+        run: |
+          if [ "${{ github.event.inputs.force_env }}" != "" ]; then
+            ENV="${{ github.event.inputs.force_env }}"
+          elif [ "${{ github.ref_name }}" = "main" ]; then
+            ENV="production"
+          else
+            ENV="staging"
+          fi
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "🎯 Building for: $ENV"
+
+      # ── 2. Checkout ──
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      # ── 3. Read App Version ──
+      - name: Read APP_VERSION
+        id: version
+        run: |
+          VERSION=$(node -e "const m = require('fs').readFileSync('src/constants/appVersion.js','utf8').match(/APP_VERSION\s*=\s*'([^']+)'/); console.log(m?.[1] || '0.0.0')")
+          echo "app_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 App Version: $VERSION"
+
+      # ── 4. Setup Node.js ──
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 5. Setup Java ──
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # ── 6. Setup Android SDK ──
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ── 7. Install Dependencies ──
+      - name: Install Dependencies
+        run: npm ci
+
+      # ── 8. Build Web Assets (Environment-Specific) ──
+      - name: Build Web Assets
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ steps.env.outputs.environment == 'production' && secrets.VITE_SUPABASE_URL || secrets.SUPABASE_STAGING_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ steps.env.outputs.environment == 'production' && secrets.VITE_SUPABASE_ANON_KEY || secrets.SUPABASE_STAGING_ANON_KEY }}
+          VITE_BASE_URL: /
+
+      # ── 9. Sync Capacitor ──
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      # ── 10. Decode Keystore ──
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/powerproject-release.jks
+          echo "✅ Keystore decoded"
+
+      # ── 11. Build APK ──
+      - name: Build Signed APK
+        working-directory: android
+        run: |
+          FLAVOR="${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }}"
+          echo "🔨 Building: assemble${FLAVOR}Release"
+          ./gradlew assemble${FLAVOR}Release --no-daemon
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/powerproject-release.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      # ── 12. Locate APK ──
+      - name: Locate Built APK
+        id: apk
+        run: |
+          FLAVOR_LOWER="${{ steps.env.outputs.environment == 'production' && 'production' || 'staging' }}"
+          APK_PATH=$(find android/app/build/outputs/apk/${FLAVOR_LOWER}/release -name "*.apk" | head -1)
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "📱 APK: $APK_PATH ($(du -h $APK_PATH | cut -f1))"
+
+      # ── 13. Upload APK as Build Artifact ──
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PowerProject-${{ steps.env.outputs.environment }}-v${{ steps.version.outputs.app_version }}
+          path: ${{ steps.apk.outputs.apk_path }}
+          retention-days: 30
+
+      # ── 14. Create OTA Bundle ──
+      - name: Create OTA Bundle
+        run: |
+          cd dist
+          zip -r ../ota-bundle.zip .
+          cd ..
+          echo "📦 OTA Bundle: $(du -h ota-bundle.zip | cut -f1)"
+
+      # ── 15. Create GitHub Release ──
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ota-${{ steps.env.outputs.environment }}-v${{ steps.version.outputs.app_version }}
+          name: "${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }} v${{ steps.version.outputs.app_version }}"
+          body: |
+            ## ${{ steps.env.outputs.environment == 'production' && '🚀 Production' || '🧪 Staging' }} Release v${{ steps.version.outputs.app_version }}
+            
+            **Branch**: `${{ github.ref_name }}`
+            **Commit**: `${{ github.sha }}`
+            **Built**: ${{ github.event.head_commit.timestamp }}
+            
+            ### Assets
+            - 📱 **APK**: Install directly on Android device
+            - 📦 **OTA Bundle**: Auto-downloaded by existing installs
+            
+            ### Changes
+            ${{ github.event.head_commit.message }}
+          files: |
+            ${{ steps.apk.outputs.apk_path }}
+            ota-bundle.zip
+          draft: false
+          prerelease: ${{ steps.env.outputs.environment == 'staging' }}
+          make_latest: ${{ steps.env.outputs.environment == 'production' }}
+
+      # ── 16. Cleanup ──
+      - name: Cleanup Keystore
+        if: always()
+        run: rm -f android/app/powerproject-release.jks

@@ -36,3 +36,37 @@ To maintain a stable development-to-production pipeline and ensure 100% schema p
 ### 6. Never "UI-Only"
 - **Golden Rule**: Never create a table or column in the Supabase UI. Always write the SQL first in a migration file and `db push`. 
 - **Parity**: Database drifts are the #1 cause of deployment failure.
+
+---
+
+### 7. Staging vs Production Pipeline
+
+PowerProject runs **two independent Supabase projects**:
+
+| Environment | URL Secret | Project ID Secret | DB Password Secret |
+|-------------|------------|-------------------|--------------------|
+| **Production** | `SUPABASE_URL` | _(linked)_ | `SUPABASE_DB_PASSWORD` |
+| **Staging** | `SUPABASE_STAGING_URL` | `SUPABASE_STAGING_PROJECT_ID` | `SUPABASE_STAGING_DB_PASSWORD` |
+
+**Deployment Flow:**
+- **Staging DB**: Push via `staging-db.yml` (triggers on push to `staging` branch).
+- **Production DB**: Push via `supabase-deploy.yml` (triggers on push to `main` branch).
+
+**Critical Rule**: Migrations flow **Staging → Production**. Never push a migration directly to production without first validating it on staging. The ordering is: write SQL → push to staging branch → verify → merge to main → production auto-deploys.
+
+**Schema Parity Guard**: The staging and production schemas MUST remain identical. If a migration is applied to staging and causes an error, do NOT push the same migration to production until fixed.
+
+---
+
+### 8. Edge Function Deployment
+
+Edge Functions in `supabase/functions/` are **not** managed by migration files. They are deployed separately:
+
+- **Deploy all functions**: `supabase functions deploy` (via `supabase-deploy.yml`).
+- **Staging functions**: Deployed to staging Supabase project using `SUPABASE_STAGING_SERVICE_ROLE_KEY`.
+- **Shared code**: Common utilities live in `supabase/functions/_shared/` and are `import`-ed by individual functions.
+
+**Rule**: Never hardcode environment-specific URLs or keys inside Edge Function code. Use `Deno.env.get('SUPABASE_URL')` which is auto-injected by the Supabase runtime.
+
+See [Hot-Cold Archival Engine](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/hot-cold-archival/SKILL.md) for full Edge Function rules.
+
