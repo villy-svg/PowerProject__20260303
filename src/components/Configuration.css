@@ -6,7 +6,6 @@
   display: block;
   animation: fadeIn 0.4s ease-out;
 }
-
 .config-inner-wrap {
   padding: 32px;
   max-width: 1200px;
@@ -14,11 +13,6 @@
   display: flex;
   flex-direction: column;
 }
-
-
-
-
-
 .config-header {
   display: flex;
   justify-content: space-between;
@@ -27,7 +21,6 @@
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 24px;
 }
-
 .header-text h2 {
   font-size: 1.8rem;
   font-weight: 800;
@@ -35,14 +28,12 @@
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 }
-
 .header-text p {
   font-size: 1rem;
   opacity: 0.7;
   margin-bottom: 32px;
   line-height: 1.5;
 }
-
 /* View Toggle */
 .view-toggle {
   display: flex;
@@ -51,7 +42,6 @@
   border-radius: 8px;
   padding: 4px;
 }
-
 .view-toggle button {
   width: 36px;
   height: 36px;
@@ -65,18 +55,15 @@
   transition: all 0.2s;
   opacity: 0.5;
 }
-
 .view-toggle button.active {
   background: var(--primary-color);
   color: white;
   opacity: 1;
 }
-
 /* Grouping */
 .config-group {
   margin-bottom: 48px;
 }
-
 .group-label {
   font-size: 0.75rem;
   letter-spacing: 0.1em;
@@ -87,27 +74,23 @@
   border-left: 2px solid var(--border-color);
   padding-left: 12px;
 }
-
 .master-label {
   color: #a855f7;
   opacity: 1;
   border-left-color: #a855f7;
 }
-
 /* Grid Layout */
 .grid-view .config-items-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
 }
-
 /* Horizontal Layout */
 .horizontal-view .config-items-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .config-tile {
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
@@ -119,13 +102,11 @@
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .config-tile:hover {
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color), transparent 95%);
   transform: translateX(4px);
 }
-
 .config-tile.non-clickable {
   cursor: default;
   opacity: 0.8;
@@ -134,7 +115,6 @@
   transform: none;
   border-color: var(--border-color);
 }
-
 .tile-icon {
   width: 44px;
   height: 44px;
@@ -147,32 +127,26 @@
   font-size: 1.2rem;
   flex-shrink: 0;
 }
-
 .tile-info {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-
 .tile-info h4 {
   margin: 0 0 4px 0;
   font-size: 1rem;
 }
-
 .tile-info p {
   margin: 0;
   font-size: 0.85rem;
   opacity: 0.6;
 }
-
-
 /* Destructive Tile */
 .destructive:hover {
   border-color: #ef4444;
   background: rgba(239, 68, 68, 0.05);
 }
 .destructive h4 { color: #ef4444; }
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .config-header {

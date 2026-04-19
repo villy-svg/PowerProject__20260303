@@ -35,7 +35,9 @@ const TaskTreeView = ({
   canCreate,
   permissions = {},
   handleApproveSubmission,
-  handleRejectClick
+  handleRejectClick,
+  expandedTaskId,
+  setExpandedTaskId
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
 
@@ -133,7 +135,7 @@ const TaskTreeView = ({
     }
   });
 
-  const TreeRow = ({ task, stage }) => {
+  const TreeRow = ({ task, stage, isRowExpanded, onToggleExpandRow }) => {
     const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
       itemId: task.id,
       onDrop: onMoveToParent,
@@ -146,14 +148,19 @@ const TaskTreeView = ({
 
     return (
       <div
-        className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+        className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${isDragOver ? 'drop-target' : ''}`}
         style={{
           '--stage-color': stage.color,
           marginLeft: `${(task.depth || 0) * 24}px`,
-          opacity: task.isContextOnly ? 0.7 : 1
+          opacity: task.isContextOnly ? 0.7 : 1,
+          cursor: task.isContextOnly ? 'default' : 'pointer'
         }}
         {...dragProps}
         {...dropProps}
+        onClick={(e) => {
+          if (e.target.closest('button') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
+          if (onToggleExpandRow) onToggleExpandRow();
+        }}
         onDoubleClick={() => !task.isContextOnly && (effectiveCanUpdate || canEditDescription) && openEditModal(task)}
       >
         <div className="list-row-main">
@@ -383,7 +390,12 @@ const TaskTreeView = ({
 
     return (
       <div key={task.id} className="tree-node-wrapper">
-        <TreeRow task={task} stage={stage} />
+        <TreeRow 
+          task={task} 
+          stage={stage} 
+          isRowExpanded={expandedTaskId === task.id}
+          onToggleExpandRow={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+        />
       </div>
     );
   };

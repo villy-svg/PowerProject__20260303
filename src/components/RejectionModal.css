@@ -1,20 +1,17 @@
 /* RejectionModal.css */
 @import '../styles/DropdownSystem.css';
-
 .rejection-form {
   padding: 0;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
-
 .rejection-form .form-group {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;
 }
-
 .rejection-form label {
   font-size: 0.75rem;
   font-weight: 800;
@@ -22,14 +19,12 @@
   color: var(--brand-mint);
   letter-spacing: 0.5px;
 }
-
 .rejection-feedback-hint {
   font-size: 0.85rem;
   opacity: 0.7;
   margin: 4px 0 12px;
   line-height: 1.5;
 }
-
 .rejection-textarea {
   width: 100%;
   min-height: 120px;
@@ -44,13 +39,11 @@
   outline: none;
   transition: all 0.3s ease;
 }
-
 .rejection-textarea:focus {
   border-color: var(--brand-red, #ef4444);
   background: rgba(239, 68, 68, 0.05);
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
 }
-
 .rejection-actions {
   display: flex;
   justify-content: flex-end;
@@ -59,30 +52,25 @@
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-color);
 }
-
 .rejection-actions .cancel-btn {
   background: transparent;
   border-color: transparent;
   opacity: 0.7;
 }
-
 .rejection-actions .cancel-btn:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.05);
 }
-
 .rejection-actions .confirm-reject-btn {
   background: var(--brand-red, #ef4444) !important;
   border-color: var(--brand-red, #ef4444) !important;
   color: white !important;
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
-
 .rejection-actions .confirm-reject-btn:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
-
 .rejection-actions .confirm-reject-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;

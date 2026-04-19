@@ -24,6 +24,7 @@ import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 
 // Components
 import Sidebar from './components/Sidebar';
+import BottomNav from './components/BottomNav';
 import VerticalWorkspace from './components/VerticalWorkspace';
 import ExecutiveSummary from './components/ExecutiveSummary';
 import Configuration from './components/Configuration';
@@ -157,6 +158,9 @@ function App() {
     const saved = localStorage.getItem('sub_sidebar_state');
     return saved !== null ? saved === 'true' : true;
   });
+  
+  // Mobile Overlay Nav State
+  const [showBottomNavOverlay, setShowBottomNavOverlay] = useState(false);
 
   // Compute current permissions via dedicated RBAC hook
   const currentUserPermissions = useRBAC(user, activeVertical, verticals);
@@ -327,7 +331,7 @@ function App() {
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
       <div className="app-layout">
-        <button className="logo-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+        <button className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
         </button>
         <Sidebar
@@ -339,13 +343,13 @@ function App() {
           permissions={currentUserPermissions}
           verticalList={verticalList}
         />
-        <h1 className="brand-title-centered">PowerProject</h1>
+        <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
         <div 
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
           onClick={() => setIsSidebarOpen(false)} 
         />
-        <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`}>
-          <header className="app-header">
+        <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
+          <header className={`app-header ${activeVertical ? 'mobile-hidden' : ''}`}>
             <div className="header-left">
               {/* Spacer for absolute branding */}
             </div>
@@ -421,6 +425,7 @@ function App() {
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 setActiveVertical={setActiveVertical}
+                onShowBottomNav={() => setShowBottomNavOverlay(true)}
                 SidebarComponent={
                   (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
@@ -479,6 +484,14 @@ function App() {
           </main>
         </div>
       </div>
+      <BottomNav 
+        activeVertical={activeVertical} 
+        setActiveVertical={setActiveVertical} 
+        onMenuClick={() => setIsSidebarOpen(true)}
+        verticals={verticals}
+        showOverlay={showBottomNavOverlay}
+        onCloseOverlay={() => setShowBottomNavOverlay(false)}
+      />
     </div>
   );
 }

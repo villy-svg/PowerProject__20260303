@@ -291,49 +291,48 @@ Avoid aggressive saturations. Use colors functionally (to signify status), not s
 
 ---
 
-## 14. Mobile Viewport Rules (Capacitor / Phase 6)
+## 14. Mobile Viewport Adaptations
 
-> [!IMPORTANT]
-> All mobile-specific CSS MUST be scoped inside `@media` queries. Zero desktop impact is a hard requirement.
+All mobile-specific styles MUST follow these rules to ensure zero impact on the desktop experience.
 
-### Breakpoints for Mobile
-- **Phone (Portrait)**: `max-width: 430px` — primary mobile target
-- **Phone (Landscape)**: `max-width: 768px and orientation: landscape`
-- **Tablet**: `min-width: 431px and max-width: 1023px`
+### A. Breakpoints
+| Name | Max-Width | Target Devices |
+|------|-----------|----------------|
+| **Tablet** | `768px` | iPads, Android tablets, small laptops in portrait |
+| **Phone** | `480px` | All smartphones (iPhone SE to iPhone Pro Max) |
 
-### Touch Target Rule
-All interactive elements MUST be ≥ **44px** in both height and width on mobile. This follows Apple HIG and Material Design standards.
-```css
-@media (max-width: 430px) {
-  .halo-button, button, a[role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
-```
+### B. Touch Target Minimum
+- **Rule**: ALL interactive elements (`button`, `a`, `select`, `input`, `[role="button"]`) MUST have `min-height: 44px` and `min-width: 44px` on mobile viewports.
+- **Source**: Apple Human Interface Guidelines + Material Design 3.
+- **Input Font Size**: All text inputs MUST be `font-size: 16px` minimum on mobile to prevent iOS Safari auto-zoom.
 
-### Safe Area Insets (Notch / Camera Cutout)
-Always wrap fixed/sticky UI with safe area padding to accommodate device notches.
-```css
-.app-header {
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-.app-footer, .bottom-nav {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-```
+### C. Design Token Scaling
+| Token | Desktop | Tablet (768px) | Phone (480px) |
+|-------|---------|-----------------|----------------|
+| `--radius-squircle` | 24px | 20px | 16px |
+| `--radius-button` | 12px | 10px | 8px |
+| `--glass-blur` | 20px | 14px | 12px |
+| `--shadow-premium` | `0 12px 40px` | `0 8px 24px` | `0 4px 16px` |
 
-### Forbidden on Mobile
-- **CSS `:has()` selector** — not supported in older Android WebViews. Use class toggling instead.
-- **Hover-dependent interactions** — touch devices have no hover state. All interactions must work on tap alone.
-- **Fixed pixel widths on containers** — use `100%`, `100vw`, or `min(100%, Npx)`.
+### D. Safe Area Handling
+- **Rule**: Use `env(safe-area-inset-*)` for padding on edges that touch the screen boundary.
+- **Pattern**: Define CSS variables `--safe-top`, `--safe-right`, `--safe-bottom`, `--safe-left` with `env()` fallback.
+- **Prerequisite**: `<meta name="viewport" content="viewport-fit=cover">` must be in `index.html`.
 
-### Sidebar Behaviour on Mobile
-- The main sidebar MUST collapse to an off-canvas drawer on `max-width: 768px`.
-- The sub-sidebar MUST be hidden by default on mobile and accessible via a floating toggle button.
+### E. Mobile Navigation
+- **Desktop**: Left sidebar (always visible or toggle).
+- **Mobile (≤768px)**: Sidebar becomes a full-height overlay (slide from left), triggered by the logo/hamburger button. Overlay has `backdrop-filter: blur(4px)` and semi-transparent background.
+- **Phone (≤480px)**: Sidebar takes full viewport width.
 
-### Background Color During WebView Load
-The WebView background is `#050505` (Midnight Black), configured in `capacitor.config.ts`. Avoid large white-flash during navigation by setting `background-color: #050505` on `html, body` in `App.css`.
+### F. Testing Requirements
+Test all mobile changes at these viewport widths:
+- `360px` — Small Android (Galaxy S series)
+- `390px` — iPhone 14 / 15
+- `428px` — iPhone 14 Pro Max
+- `768px` — iPad Mini / tablet boundary
+
+### G. Zero Desktop Impact Rule
+- **Rule**: ALL mobile CSS MUST be inside `@media screen and (max-width: Xpx)` queries.
+- **Verification**: After any mobile CSS change, open the app at `1440px` width and confirm ZERO visual differences from the previous state.
+- **Violation**: Any mobile CSS that escapes its `@media` query and affects desktop is a blocking bug.
 

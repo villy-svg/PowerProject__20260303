@@ -22,6 +22,39 @@ export const profileService = {
    * @throws {Error} If the user_profiles fetch fails.
    */
   async fetchUserProfile(userId) {
+    // -------------------------------------------------------------------------
+    // OFFLINE BYPASS: Provide mock profile from cache or template.
+    // -------------------------------------------------------------------------
+    if (import.meta.env.DEV && userId === 'dev-bypass-user-id') {
+      const cached = localStorage.getItem('power_project_user');
+      if (cached) {
+        try {
+          const user = JSON.parse(cached);
+          console.warn('PowerProject: Using cached user profile for bypass.');
+          return user;
+        } catch (e) { console.error('Cache Parse Error:', e); }
+      }
+      
+      console.warn('PowerProject: No cached profile found. Using Master Admin template.');
+      return {
+        id: userId,
+        name: 'Dev Admin (Offline)',
+        email: 'dev@powerpod.in',
+        roleId: 'master_admin',
+        seniority: 1,
+        assignedVerticals: ['charging_hubs', 'employees', 'clients'],
+        verticalPermissions: {
+          charging_hubs: { level: 'admin', features: {} },
+          employees: { level: 'admin', features: {} },
+          clients: { level: 'admin', features: {} }
+        },
+        baseCapabilities: { 
+          canCreate: true, canRead: true, canUpdate: true, canDelete: true, 
+          canAccessConfig: true, canManageRoles: true 
+        }
+      };
+    }
+
     // 1. Fetch the user's base profile (using maybeSingle to avoid crash)
     let { data: profile, error: pError } = await supabase
       .from('user_profiles')

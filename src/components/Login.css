@@ -6,7 +6,6 @@
   background-color: var(--bg-color);
   color: var(--text-color);
 }
-
 .login-card {
   width: 100%;
   max-width: 400px;
@@ -19,32 +18,27 @@
   flex-direction: column;
   gap: 24px;
 }
-
 .login-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
 }
-
 .logo-svg-large {
   width: 64px;
   height: 64px;
 }
-
 .login-form h2 {
   margin: 0 0 8px 0;
   font-size: 24px;
   font-weight: 600;
 }
-
 .login-subtitle {
   margin: 0 0 16px 0;
   font-size: 14px;
   color: var(--text-color);
   opacity: 0.7;
 }
-
 .login-toggle {
   display: flex;
   background-color: var(--bg-color);
@@ -53,7 +47,6 @@
   margin-bottom: 24px;
   border: 1px solid var(--border-color);
 }
-
 .login-toggle button {
   flex: 1;
   padding: 8px;
@@ -67,32 +60,27 @@
   transition: all 0.2s ease;
   opacity: 0.6;
 }
-
 .login-toggle button.active {
   background-color: var(--brand-green);
   color: #fff;
   opacity: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .form-group-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .form-group label {
   font-size: 14px;
   font-weight: 500;
 }
-
 .form-group input {
   padding: 12px 16px;
   border: 1px solid var(--border-color);
@@ -103,11 +91,9 @@
   outline: none;
   transition: border-color 0.2s ease;
 }
-
 .form-group input:focus {
   border-color: var(--brand-green);
 }
-
 .login-button {
   width: 100%;
   padding: 12px;
@@ -121,16 +107,13 @@
   transition: background-color 0.2s ease, opacity 0.2s ease;
   margin-bottom: 12px;
 }
-
 .login-button:hover:not(:disabled) {
   opacity: 0.9;
 }
-
 .login-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .login-back-button {
   width: 100%;
   padding: 12px;
@@ -142,24 +125,20 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
 .login-back-button:hover:not(:disabled) {
   background-color: var(--border-color);
 }
-
 .login-message {
   padding: 12px;
   border-radius: 8px;
   font-size: 14px;
   text-align: center;
 }
-
 .login-message.error {
   background-color: rgba(255, 68, 68, 0.1);
   color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.2);
 }
-
 .login-message.success {
   background-color: rgba(0, 200, 83, 0.1);
   color: #00c853;

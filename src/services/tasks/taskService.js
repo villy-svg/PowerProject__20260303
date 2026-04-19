@@ -72,14 +72,40 @@ export const taskService = {
    * @returns {Array} Normalized task array.
    */
   async getTasks() {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select(TASK_SELECT);
-    // Sort logic handled in normalization if needed, or by standard name
-    const sorted = (data || []).sort((a,b) => (a.updated_at || a.updatedat) > (b.updated_at || b.updatedat) ? 1 : -1);
+    try {
+      // -------------------------------------------------------------------------
+      // OFFLINE BYPASS: Immediate cache retrieval
+      // -------------------------------------------------------------------------
+      if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+        const cached = localStorage.getItem('power_project_cache_tasks');
+        if (cached) {
+          console.warn('PowerProject: Using cached task data.');
+          return JSON.parse(cached);
+        }
+      }
 
-    if (error) throw error;
-    return (data || []).map(normalizeTask);
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(TASK_SELECT);
+
+      if (error) throw error;
+
+      const results = (data || []).map(normalizeTask);
+      const sorted = results.sort((a,b) => (a.updatedAt || a.createdAt) > (b.updatedAt || b.createdAt) ? 1 : -1);
+
+      // -------------------------------------------------------------------------
+      // CACHE PERSISTENCE: Save for offline use
+      // -------------------------------------------------------------------------
+      localStorage.setItem('power_project_cache_tasks', JSON.stringify(sorted));
+
+      return sorted;
+    } catch (err) {
+      console.error('TaskService Error:', err);
+      // Fallback to cache on any error if we have it
+      const cached = localStorage.getItem('power_project_cache_tasks');
+      if (cached) return JSON.parse(cached);
+      throw err;
+    }
   },
 
   /**
@@ -88,6 +114,13 @@ export const taskService = {
    * @returns {Object} The normalized, newly created task.
    */
   async addTask(taskData, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (addTask) — data will persist in cache but not database.');
+      // Simple local echo for developer testing
+      const newTask = { ...taskData, id: taskData.id || `local-${Date.now()}`, createdAt: new Date().toISOString() };
+      return newTask;
+    }
+    
     let row = {
       id: taskData.id,
       ...mapTaskToRow(taskData),
@@ -110,6 +143,11 @@ export const taskService = {
    * @returns {Object} The normalized, updated task.
    */
   async updateTask(taskData, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (updateTask).');
+      return taskData;
+    }
+    
     let row = mapTaskToRow(taskData);
     row = auditService.stamp(row, userId);
 
@@ -164,6 +202,11 @@ export const taskService = {
    * @param {string} taskId
    */
   async deleteTask(taskId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (deleteTask).');
+      return;
+    }
+    
     const { error } = await supabase
       .from('tasks')
       .delete()

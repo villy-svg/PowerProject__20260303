@@ -12,7 +12,6 @@
   z-index: 2000;
   animation: modalFadeIn 0.3s ease-out;
 }
-
 .task-modal-content {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
@@ -26,18 +25,15 @@
   flex-direction: column;
   max-height: 90vh; /* Capped for viewport safety */
 }
-
 .task-modal-overlay.large-modal .task-modal-content {
   max-width: 800px;
 }
-
 .task-modal-overlay.xl-modal .task-modal-content {
   max-width: 1400px;
   width: 95vw;
   height: 95vh;
   max-height: 95vh;
 }
-
 .task-modal-header {
   padding: 24px;
   border-bottom: 1px solid var(--border-color);
@@ -46,7 +42,6 @@
   align-items: center;
   flex-shrink: 0; /* Header stays at the top */
 }
-
 .task-modal-header h2 {
   margin: 0;
   font-size: 1.2rem;
@@ -54,8 +49,22 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--brand-green);
+  white-space: normal; /* allow wrapping instead of overflowing */
+  line-height: 1.2;
 }
-
+@media screen and (max-width: 480px) {
+  .task-modal-content {
+    max-width: 95vw;
+    border-radius: 12px;
+  }
+  .task-modal-header {
+    padding: 16px;
+  }
+  .task-modal-header h2 {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+}
 .close-modal-btn {
   background: transparent;
   border: none;
@@ -70,11 +79,9 @@
   height: 32px;
   width: 32px;
 }
-
 .close-modal-btn:hover {
   opacity: 1;
 }
-
 .task-modal-body {
   overflow: hidden; /* INTERNAL COMPONENTS HANDLE SCROLLING */
   display: flex;
@@ -82,7 +89,6 @@
   flex: 1; /* Take up all remaining modal space */
   padding: 0; /* Let children handle padding for sticky components */
 }
-
 @keyframes modalFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

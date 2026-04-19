@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 import './MasterPageHeader.css';
 import MasterHeaderMenu from './MasterHeaderMenu';
 
@@ -15,7 +16,24 @@ import MasterHeaderMenu from './MasterHeaderMenu';
  *   expandedLeft   {node}      - Row 4 Left: Menu Row content (View toggles, filters)
  *   expandedRight  {node}      - Row 4 Right: Menu Row content (Import/Export/Bulk)
  */
-const MasterPageHeader = ({ title, description, leftActions, rightActions, expandedLeft, expandedRight }) => {
+const MasterPageHeader = ({ 
+  title, 
+  description, 
+  leftActions, 
+  rightActions, 
+  expandedLeft, 
+  expandedRight,
+  isSubSidebarOpen,
+  onSidebarToggle,
+  canAdd,
+  onAddClick,
+  isTaskModalOpen,
+  onShowBottomNav,
+  setActiveVertical
+}) => {
+  const isScrollVisible = useScrollDirection(10, 100);
+  const pressTimer = useRef(null);
+
   const [isMenuOpen, setIsMenuOpen] = useState(() => {
     const saved = localStorage.getItem('master-header-menu-open');
     return saved === 'true';
@@ -24,6 +42,14 @@ const MasterPageHeader = ({ title, description, leftActions, rightActions, expan
   useEffect(() => {
     localStorage.setItem('master-header-menu-open', isMenuOpen);
   }, [isMenuOpen]);
+
+  // MUTUAL EXCLUSIVITY: Add Task Modal closes other overlays
+  useEffect(() => {
+    if (isTaskModalOpen) {
+      setIsMenuOpen(false);
+      if (isSubSidebarOpen && onSidebarToggle) onSidebarToggle(false);
+    }
+  }, [isTaskModalOpen, isSubSidebarOpen, onSidebarToggle]);
 
   const hasExpandedContent = !!(expandedLeft || expandedRight);
 
@@ -63,6 +89,76 @@ const MasterPageHeader = ({ title, description, leftActions, rightActions, expan
           expandedRight={expandedRight}
         />
       )}
+
+      {/* MOBILE ACTION TRAY (Only visible on small screens) */}
+      <div className={`mobile-action-tray ${!isScrollVisible ? 'tray-hidden' : ''}`}>
+        <button 
+          className="halo-button mobile-tray-btn" 
+          title="Home"
+          onPointerDown={(e) => {
+            // Start a timer for long-press
+            pressTimer.current = setTimeout(() => {
+              pressTimer.current = null;
+              if (onShowBottomNav) onShowBottomNav();
+            }, 500);
+          }}
+          onPointerUp={(e) => {
+            // If timer is still running, it was a short tap. Go home.
+            if (pressTimer.current) {
+              clearTimeout(pressTimer.current);
+              pressTimer.current = null;
+              if (setActiveVertical) setActiveVertical(null);
+            }
+          }}
+          onPointerLeave={(e) => {
+            // Cancel if they drag their finger away
+            if (pressTimer.current) {
+              clearTimeout(pressTimer.current);
+              pressTimer.current = null;
+            }
+          }}
+        >
+          <span className="menu-icon" style={{ fontSize: '1.2rem', marginBottom: '2px' }}>🏠</span>
+        </button>
+
+        {onSidebarToggle && (
+          <button 
+            className={`halo-button mobile-tray-btn ${isSubSidebarOpen ? 'active' : ''}`} 
+            onClick={() => {
+              const nextSidebarState = !isSubSidebarOpen;
+              if (nextSidebarState) setIsMenuOpen(false); // Close menu if opening sidebar
+              onSidebarToggle(nextSidebarState);
+            }} 
+            title="Toggle Sidebar"
+          >
+            {isSubSidebarOpen ? '«' : '»'}
+          </button>
+        )}
+        
+        {hasExpandedContent && (
+          <button 
+            className={`halo-button mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
+            onClick={() => {
+              const nextMenuState = !isMenuOpen;
+              setIsMenuOpen(nextMenuState);
+              if (nextMenuState) onSidebarToggle(false); // Force close sidebar if opening menu
+            }}
+            title="Toggle Menu"
+          >
+            <span className="menu-icon">{isMenuOpen ? '▼' : '☰'}</span>
+          </button>
+        )}
+
+        {canAdd && (
+          <button 
+            className={`halo-button mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`} 
+            onClick={onAddClick} 
+            title="Add Task"
+          >
+            +
+          </button>
+        )}
+      </div>
     </header>
   );
 };

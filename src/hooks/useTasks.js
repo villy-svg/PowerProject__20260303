@@ -12,7 +12,20 @@ import { masterErrorHandler } from '../services/core/masterErrorHandler';
  *           updateTaskStage, deleteTask, bulkUpdateTasks } = useTasks();
  */
 export const useTasks = (user) => {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      const cached = localStorage.getItem('power_project_cache_tasks');
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          console.error('UseTasks Cache Parse Error:', e);
+          return [];
+        }
+      }
+    }
+    return [];
+  });
   const [loading, setLoading] = useState(true);
 
   // ---------------------------------------------------------------------------

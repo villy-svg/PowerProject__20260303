@@ -2,7 +2,6 @@
   max-width: 900px !important;
   width: 90% !important;
 }
-
 .conflict-warning {
   background: rgba(234, 179, 8, 0.1);
   border-left: 4px solid #eab308;
@@ -10,7 +9,6 @@
   margin-bottom: 24px;
   border-radius: 8px;
 }
-
 .conflict-warning h3 {
   color: #eab308;
   margin: 0 0 8px 0;
@@ -18,13 +16,11 @@
   align-items: center;
   gap: 8px;
 }
-
 .conflict-options {
   display: flex;
   flex-direction: column;
   gap: 32px;
 }
-
 .option-box {
   padding: 20px;
   background: var(--panel-bg);
@@ -32,13 +28,11 @@
   border-radius: 12px;
   transition: all 0.3s ease;
 }
-
 .option-box h4 {
   margin: 0 0 12px 0;
   color: var(--brand-green);
   font-size: 1.1rem;
 }
-
 .selection-tiles-container {
   margin-top: 16px;
   max-height: 400px;
@@ -50,7 +44,6 @@
   background: rgba(0, 0, 0, 0.05);
   border-radius: 20px;
 }
-
 .conflict-tile {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
@@ -60,17 +53,14 @@
   position: relative;
   transition: all 0.2s;
 }
-
 .conflict-tile:hover {
   border-color: var(--brand-green);
 }
-
 .conflict-tile.selected {
   border-color: var(--brand-green);
   background: rgba(45, 212, 191, 0.05);
   box-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
 }
-
 .tile-checkbox {
   position: absolute;
   top: 12px;
@@ -79,7 +69,6 @@
   height: 18px;
   accent-color: var(--brand-green);
 }
-
 .modal-action-bar {
   display: flex;
   justify-content: flex-end;

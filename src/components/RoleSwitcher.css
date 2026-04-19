@@ -1,12 +1,10 @@
 /* RoleSwitcher.css */
 @import '../styles/DropdownSystem.css';
-
 .role-switcher-container {
   margin-left: 10px;
   display: flex;
   align-items: center;
 }
-
 .role-select-dropdown {
   background-color: var(--bg-color);
   color: var(--brand-green);
@@ -19,7 +17,6 @@
   outline: none;
   transition: all 0.2s ease;
 }
-
 .role-select-dropdown:hover {
   border-color: var(--brand-green);
 }

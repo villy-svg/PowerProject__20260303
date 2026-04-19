@@ -16,13 +16,11 @@
   backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--shadow-premium);
 }
-
 .header-left {
   flex: 1;
   display: flex;
   align-items: center;
 }
-
 .logo-button {
   position: fixed;
   left: 2.5rem;
@@ -39,31 +37,26 @@
   justify-content: center;
   transition: transform 0.2s ease;
 }
-
 .logo-button:hover {
   transform: scale(1.05);
 }
-
 .logo-svg {
   width: 36px;
   height: 36px;
   object-fit: contain;
 }
-
 .header-center {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .header-right {
   flex: 1;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
-
 .brand-title-centered {
   position: fixed;
   left: 50%;
@@ -86,7 +79,6 @@
   text-transform: none;
   text-shadow: 0 0 8px var(--halo-glow);
 }
-
 .theme-toggle-btn {
   padding: 8px;
   cursor: pointer;
@@ -96,63 +88,67 @@
   color: inherit;
   transition: all 0.2s ease;
 }
-
 .theme-toggle-btn:hover {
   background-color: var(--border-color);
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN (HEADER)
    ========================================================================== */
-
 @media screen and (max-width: 1280px) {
   .app-header {
     padding: 0 24px;
     height: 70px;
   }
-
   .logo-button {
     left: 1.5rem;
     top: 15px; /* (70px - 40px) / 2 */
   }
-
   .brand-title-centered {
     font-size: 1.3rem;
     top: 35px;
   }
 }
-
 @media screen and (max-width: 1024px) {
   .app-header {
     padding: 0 16px;
   }
-
   .logo-button {
     left: 1rem;
   }
-
   .brand-title-centered {
-    display: none; 
+    font-size: 1.2rem;
+    top: calc(35px + var(--safe-top, 0px));
   }
 }
-
 @media screen and (max-width: 768px) {
   .app-header {
     height: 60px;
     padding: 0 12px;
   }
-
   .logo-button {
-    top: 10px;
+    top: calc(10px + var(--safe-top, 0px));
   }
-
   .header-right {
     gap: 8px;
   }
+  /* Hide user profile text to save space for centered title on all mobile/tablet */
+  .header-right .user-profile-toggle .user-info-text {
+    display: none !important;
+  }
+  /* When inside a vertical (mobile-hidden class applies), reclaim vertical space */
+  .app-header.mobile-hidden, .brand-title-centered.mobile-hidden, .logo-button.mobile-hidden {
+    display: none !important;
+  }
 }
-
 @media screen and (max-width: 480px) {
-  .header-right .user-profile-name {
-    display: none; 
+  .brand-title-centered {
+    font-size: 1rem;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Ensure it stays perfectly centered even if container flexes */
+    position: fixed;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }

@@ -16,6 +16,20 @@ export const authService = {
    * @returns {{ session: Session | null }}
    */
   async getSession() {
+    // -------------------------------------------------------------------------
+    // OFFLINE BYPASS: Allow developer access without internet or auth session.
+    // -------------------------------------------------------------------------
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline Auth Bypass Active.');
+      return { 
+        user: { 
+          id: 'dev-bypass-user-id', 
+          email: 'dev@powerpod.in',
+          user_metadata: { name: 'Lead Developer' }
+        } 
+      };
+    }
+
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
     return session;
@@ -48,6 +62,11 @@ export const authService = {
    * @returns {{ subscription: Subscription }}
    */
   onAuthStateChange(callback) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      // Return a dummy subscription that does nothing
+      return { unsubscribe: () => {} };
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(callback);
     return subscription;
   },

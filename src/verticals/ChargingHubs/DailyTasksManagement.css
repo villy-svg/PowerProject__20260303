@@ -4,7 +4,6 @@
   gap: 1.5rem;
   padding: 1rem 0;
 }
-
 .template-card {
   background: var(--bg-color);
   border: 1px solid var(--border-color);
@@ -16,22 +15,18 @@
   position: relative;
   transition: all 0.2s ease;
 }
-
 .template-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
-
 .template-card.inactive {
   opacity: 0.6;
 }
-
 .template-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .template-frequency {
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
   color: var(--brand-green);
@@ -40,14 +35,12 @@
   border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
   align-self: flex-start;
 }
-
 .template-title {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
   color: var(--text-color);
 }
-
 .template-desc {
   font-size: 0.85rem;
   color: var(--text-color);
@@ -60,7 +53,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .template-meta {
   display: flex;
   flex-direction: column;
@@ -71,7 +63,6 @@
   border-radius: 6px;
   border: 1px solid var(--border-color);
 }
-
 .template-actions .halo-button {
   width: 36px;
   height: 36px;
@@ -81,31 +72,26 @@
   align-items: center;
   justify-content: center;
 }
-
 .template-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: auto;
 }
-
 .template-modal {
   max-width: 600px;
 }
-
 .icon-btn.test {
   background: rgba(0, 0, 0, 0.05);
   color: var(--text-color);
   opacity: 0.6;
 }
-
 .icon-btn.test:hover {
   background: var(--border-color);
   color: var(--text-color);
   opacity: 1;
   transform: scale(1.1);
 }
-
 .status-message {
   padding: 12px;
   border-radius: 8px;
@@ -114,19 +100,16 @@
   font-weight: 500;
   text-align: center;
 }
-
 .status-message.success {
   background: rgba(16, 185, 129, 0.1);
   color: var(--brand-green);
   border: 1px solid var(--brand-green);
 }
-
 .status-message.error {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
   border: 1px solid #ef4444;
 }
-
 .status-pill.success {
   background: var(--brand-green);
   color: white;
@@ -136,40 +119,33 @@
   font-weight: 700;
   animation: fadeIn 0.3s ease;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .loading-spinner {
   padding: 40px;
   text-align: center;
   color: var(--brand-green);
   font-weight: 600;
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
-
 @media screen and (max-width: 1280px) {
   .templates-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
   }
 }
-
 @media screen and (max-width: 768px) {
   .templates-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-
   .template-card {
     padding: 1.25rem;
   }
-
   .template-title {
     font-size: 1rem;
   }

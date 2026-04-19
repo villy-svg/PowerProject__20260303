@@ -60,16 +60,47 @@ const DAILY_TASK_SELECT = '*, employees:assigned_to (full_name)';
 
 export const dailyTaskService = {
   async getTasks() {
-    const { data, error } = await supabase
-      .from('daily_tasks')
-      .select(DAILY_TASK_SELECT)
-      .order('updated_at', { ascending: false });
+    try {
+      // -------------------------------------------------------------------------
+      // OFFLINE BYPASS: Immediate cache retrieval
+      // -------------------------------------------------------------------------
+      if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+        const cached = localStorage.getItem('power_project_cache_daily_tasks');
+        if (cached) {
+          console.warn('PowerProject: Using cached daily task data.');
+          return JSON.parse(cached);
+        }
+      }
 
-    if (error) throw error;
-    return (data || []).map(normalizeDailyTask);
+      const { data, error } = await supabase
+        .from('daily_tasks')
+        .select(DAILY_TASK_SELECT)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      const results = (data || []).map(normalizeDailyTask);
+
+      // -------------------------------------------------------------------------
+      // CACHE PERSISTENCE: Save for offline use
+      // -------------------------------------------------------------------------
+      localStorage.setItem('power_project_cache_daily_tasks', JSON.stringify(results));
+
+      return results;
+    } catch (err) {
+      console.error('DailyTaskService Error:', err);
+      const cached = localStorage.getItem('power_project_cache_daily_tasks');
+      if (cached) return JSON.parse(cached);
+      throw err;
+    }
   },
 
   async addTask(taskData, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (addDailyTask).');
+      return { ...taskData, id: taskData.id || `local-dt-${Date.now()}`, createdAt: new Date().toISOString() };
+    }
+
     let row = mapDailyTaskToRow(taskData);
     row = auditService.stamp(row, userId, { isNew: true, useUnderscore: true });
 
@@ -83,6 +114,11 @@ export const dailyTaskService = {
   },
 
   async updateTask(taskData, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (updateDailyTask).');
+      return taskData;
+    }
+
     let row = mapDailyTaskToRow(taskData);
     row = auditService.stamp(row, userId, { useUnderscore: true });
     
@@ -102,6 +138,11 @@ export const dailyTaskService = {
   },
 
   async updateTaskStage(taskId, newStageId, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (updateDailyTaskStage).');
+      return;
+    }
+
     let updates = { stage_id: newStageId };
     updates = auditService.stamp(updates, userId, { useUnderscore: true });
     
@@ -118,6 +159,11 @@ export const dailyTaskService = {
   },
 
   async bulkUpdateTasks(taskIds, updates, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (bulkUpdateDailyTasks).');
+      return []; // Shallow update in UI handles persistence
+    }
+
     let dbUpdates = { ...updates };
     
     // Remap stageId if present in bulk updates
@@ -143,6 +189,11 @@ export const dailyTaskService = {
   },
 
   async deleteTask(taskId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (deleteDailyTask).');
+      return;
+    }
+
     const { error } = await supabase
       .from('daily_tasks')
       .delete()

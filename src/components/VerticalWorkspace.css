@@ -1,14 +1,12 @@
 /* ==========================================================================
    VERTICAL WORKSPACE LAYOUT
    ========================================================================== */
-
 .workspace-container {
   display: flex;
   height: 100%;
   width: 100%;
   transition: all var(--transition-main);
 }
-
 /* 1. LEFT SUB-SIDEBAR */
 .sub-sidebar {
   width: 260px; 
@@ -20,7 +18,6 @@
   overflow: hidden; 
   flex-shrink: 0;
 }
-
 /* 2. SUB-SIDEBAR HEADER */
 .sub-sidebar-header {
   padding: 0 12px;
@@ -31,7 +28,6 @@
   width: 100%;
   border-bottom: 1px solid var(--border-color);
 }
-
 .sub-sidebar-header h3 {
   margin: 0;
   padding: 8px 16px;
@@ -51,12 +47,10 @@
   text-overflow: ellipsis;
   transition: all 0.3s ease;
 }
-
 .sub-sidebar-header h3.navigable-header {
   cursor: pointer;
   position: relative;
 }
-
 /* Balanced Toggle Button */
 .sub-sidebar-toggle {
   background: transparent;
@@ -74,90 +68,74 @@
   transition: all 0.2s;
   flex-shrink: 0;
 }
-
 .sub-sidebar-toggle:hover {
   background: var(--border-color);
   opacity: 1;
   color: var(--brand-green);
 }
-
 /* Collapsed State Logic */
 .workspace-container.sub-sidebar-collapsed .sub-sidebar {
   width: 64px;
 }
-
 .workspace-container.sub-sidebar-collapsed .sub-sidebar-header {
   justify-content: center;
   padding: 0;
 }
-
 .workspace-container.sub-sidebar-collapsed .sub-sidebar-header h3 {
   display: none;
 }
-
 /* 3. BODY CONTENT */
 .sub-sidebar-body {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
 }
-
 .workspace-container.sub-sidebar-collapsed .sub-sidebar-body {
   display: none;
 }
-
 /* 4. MAIN CONTENT AREA */
 .workspace-content {
   flex: 1;
   padding: 32px;
-  overflow-x: auto;
+  overflow-y: auto; /* Enable independent scrolling */
+  overflow-x: hidden; /* Prevent horizontal jitter */
   background-color: var(--surface-card);
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
-
+@media (max-width: 768px) {
+  .workspace-content {
+    padding: 12px;
+    /* Add padding to the END of the scrollable content to clear BottomNav/Tray */
+    padding-bottom: calc(100px + var(--safe-bottom, 0px));
+  }
+}
 @media (max-width: 1280px) {
   .workspace-content {
     padding: 24px;
   }
-
   .sub-sidebar {
     width: 240px;
   }
 }
-
 @media (max-width: 1024px) {
   .workspace-content {
-    padding: 16px;
+    padding: 12px;
   }
-
   .sub-sidebar {
+    width: 240px;
     position: fixed;
-    z-index: 1001; /* Above main sidebar but below dropdowns? No, needs to be accessible */
+    z-index: 1001;
     height: 100%;
     left: 0;
     transform: translateX(-100%);
     box-shadow: 10px 0 30px rgba(0,0,0,0.1);
   }
-
   .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
     transform: translateX(0);
   }
-
-  .sub-sidebar-toggle {
-    display: flex; /* Ensure toggle is always visible on mobile if needed */
-  }
 }
-
-@media (max-width: 768px) {
-  .workspace-content {
-    padding: 12px;
-  }
-
-  .sub-sidebar {
-    width: 240px;
-  }
-}
-
 /* 5. SUB-NAV ITEMS */
 .sub-nav-item {
   display: flex;
@@ -170,40 +148,33 @@
   transition: all 0.3s ease;
   user-select: none;
 }
-
 .sub-nav-item.navigable {
   cursor: pointer;
 }
-
 .sub-nav-item.navigable:hover {
   background: rgba(45, 212, 191, 0.05);
   border-color: var(--brand-green);
   transform: translateX(4px);
 }
-
 .sub-nav-text p {
   margin: 0;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-color);
 }
-
 .sub-nav-text small {
   font-size: 0.7rem;
   opacity: 0.5;
 }
-
 .nav-arrow {
   margin-left: auto;
   opacity: 0.3;
   transition: opacity 0.3s;
 }
-
 .sub-nav-item:hover .nav-arrow {
   opacity: 1;
   color: var(--brand-green);
 }
-
 /* 6. FILTERS TOGGLE SYSTEM */
 .filters-row-toggle {
   display: flex !important;
@@ -220,12 +191,10 @@
   border-radius: 8px;
   margin-bottom: 4px;
 }
-
 .filters-row-toggle:hover {
   background: var(--halo-bg);
   border-color: var(--brand-green);
 }
-
 .filters-row-toggle p {
   margin: 0;
   font-weight: 800;
@@ -233,7 +202,6 @@
   color: var(--text-color);
   letter-spacing: 1px;
 }
-
 .filters-action-btn {
   background: none;
   border: none;
@@ -246,12 +214,10 @@
   transition: all 0.2s;
   opacity: 0.6;
 }
-
 .filters-action-btn:hover {
   background: var(--halo-bg);
   opacity: 1;
 }
-
 .filters-action-btn.active {
   opacity: 1;
   text-decoration: underline;

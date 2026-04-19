@@ -4,16 +4,10 @@
   margin: 0;
   animation: fadeIn 0.4s ease-out;
 }
-
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-
-
-
 .header-info h1 {
   font-size: 1.8rem;
   font-weight: 800;
@@ -22,16 +16,12 @@
   margin: 0 0 4px 0;
   color: var(--brand-green);
 }
-
 .header-info p {
   color: var(--text-color);
   opacity: 0.6;
   font-size: 0.9rem;
   margin: 0;
 }
-
-
-
 /* Grid and Cards */
 .hubs-grid {
   display: grid;
@@ -42,7 +32,6 @@
   padding-right: 8px;
   padding-bottom: 24px;
 }
-
 /* Custom internal scrollbar for grid */
 .hubs-grid::-webkit-scrollbar {
   width: 6px;
@@ -58,7 +47,6 @@
 .hubs-grid::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
-
 .hub-card {
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
@@ -68,13 +56,11 @@
   transition: all 0.3s ease;
   overflow: hidden;
 }
-
 .hub-card:hover {
   transform: translateY(-5px);
   border-color: var(--primary-color);
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
-
 .status-badge {
   position: absolute;
   top: 24px;
@@ -85,11 +71,9 @@
   font-weight: 700;
   text-transform: uppercase;
 }
-
 .status-badge.active { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
 .status-badge.maintenance { background: rgba(234, 179, 8, 0.1); color: #eab308; }
 .status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
 .hub-code-tag {
   display: inline-block;
   background: var(--halo-bg);
@@ -101,7 +85,6 @@
   border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
   margin-bottom: 12px;
 }
-
 .hub-card h3 {
   margin: 0 0 12px 0;
   font-size: 1.2rem;
@@ -109,13 +92,11 @@
   text-transform: uppercase;
   color: var(--brand-green);
 }
-
 .hub-card .hub-city {
   font-size: 0.85rem;
   opacity: 0.7;
   margin-bottom: 20px;
 }
-
 .edit-btn, .delete-btn {
   padding: 8px;
   min-width: 36px;
@@ -123,14 +104,12 @@
   font-size: 1.2rem;
   line-height: 1;
 }
-
 .hub-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: auto;
 }
-
 .status-badge {
   display: inline-block;
   margin-bottom: 12px;
@@ -141,9 +120,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
-
-
 /* List View Styling */
 .hubs-list-view {
   background: var(--panel-bg);
@@ -153,7 +129,6 @@
   overflow-y: auto;
   animation: fadeIn 0.3s ease-out;
 }
-
 /* Custom internal scrollbar for list view */
 .hubs-list-view::-webkit-scrollbar {
   width: 6px;
@@ -168,13 +143,11 @@
 .hubs-list-view::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
-
 .management-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
-
 .management-table th {
   text-align: left;
   padding: 16px 20px;
@@ -190,25 +163,20 @@
   top: 0;
   z-index: 10;
 }
-
 .management-table td {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
-
 .management-table tr:last-child td { border-bottom: none; }
-
 .management-table tr:hover {
   background: rgba(255, 255, 255, 0.02);
 }
-
 .name-cell {
   font-weight: 700;
   color: var(--brand-green);
   font-size: 1rem;
 }
-
 .status-pill {
   padding: 4px 10px;
   border-radius: 6px;
@@ -219,13 +187,11 @@
 .status-pill.active { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
 .status-pill.maintenance { background: rgba(234, 179, 8, 0.15); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); }
 .status-pill.inactive { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-
 .table-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
-
 .icon-btn {
   background: transparent;
   border: 1px solid var(--border-color);
@@ -240,19 +206,16 @@
   transition: all 0.2s;
   font-size: 1rem;
 }
-
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--brand-green);
   color: var(--brand-green);
   transform: translateY(-2px);
 }
-
 .icon-btn.delete:hover {
   border-color: #ef4444;
   color: #ef4444;
 }
-
 .code-font {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
@@ -260,53 +223,42 @@
   padding: 2px 6px;
   border-radius: 4px;
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
-
 @media screen and (max-width: 1280px) {
   .hub-management-container {
     padding: 24px;
   }
-  
   .hubs-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     max-height: calc(100vh - 240px);
   }
 }
-
 @media screen and (max-width: 1024px) {
   .hubs-list-view {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-
   .management-table {
     min-width: 900px;
   }
-
   .hubs-grid {
     max-height: none; /* Allow natural scrolling on touch devices if container scrolls */
   }
 }
-
 @media screen and (max-width: 768px) {
   .hub-management-container {
     padding: 16px;
   }
-
   .hubs-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-
   .hub-card {
     padding: 20px;
   }
-
   .hub-card h3 {
     font-size: 1.1rem;
   }
 }
-

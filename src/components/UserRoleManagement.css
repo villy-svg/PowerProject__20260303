@@ -2,15 +2,12 @@
 .header-nav {
   margin-bottom: 1rem;
 }
-
 .back-link-btn {
   margin-bottom: 24px;
 }
-
 .back-link-btn:hover {
   background: var(--border-color);
 }
-
 .matrix-container {
   margin-top: 2rem;
   background: var(--bg-color);
@@ -21,31 +18,25 @@
   /* Strict height for container scroll */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
-
 /* Custom internal scrollbar */
 .matrix-container::-webkit-scrollbar {
   width: 6px;
 }
-
 .matrix-container::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .matrix-container::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
-
 .matrix-container::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
-
 .permissions-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
-
 .permissions-table th {
   background: var(--bg-color);
   /* Sticky background */
@@ -60,13 +51,11 @@
   z-index: 10;
   border-bottom: 2px solid var(--border-color);
 }
-
 .permissions-table td {
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
-
 /* Roles Grid Layout */
 .roles-grid {
   display: grid;
@@ -79,70 +68,57 @@
   padding-right: 8px;
   padding-bottom: 24px;
 }
-
 /* Custom internal scrollbar for grid */
 .roles-grid::-webkit-scrollbar {
   width: 6px;
 }
-
 .roles-grid::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.02);
   border-radius: 10px;
 }
-
 .roles-grid::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
-
 .roles-grid::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
-
 .role-cell {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .role-icon {
   font-size: 1.5rem;
 }
-
 .role-details {
   display: flex;
   flex-direction: column;
 }
-
 .role-name {
   font-weight: 700;
   color: var(--text-color);
 }
-
 .role-id-tag {
   font-size: 0.7rem;
   font-family: monospace;
   opacity: 0.5;
 }
-
 /* Custom Toggle Switch Styling */
 .checkbox-cell {
   text-align: center;
 }
-
 .switch {
   position: relative;
   display: inline-block;
   width: 44px;
   height: 22px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -154,7 +130,6 @@
   transition: .4s;
   border-radius: 34px;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -166,26 +141,21 @@
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked+.slider {
   background-color: #2ecc71;
   /* Brand Green */
 }
-
 input:focus+.slider {
   box-shadow: 0 0 1px #2ecc71;
 }
-
 input:checked+.slider:before {
   transform: translateX(22px);
 }
-
 input:disabled+.slider {
   background-color: #222;
   cursor: not-allowed;
   opacity: 0.5;
 }
-
 .matrix-footer {
   margin-top: 1.5rem;
   font-size: 0.8rem;

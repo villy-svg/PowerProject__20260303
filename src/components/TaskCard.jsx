@@ -46,7 +46,9 @@ const TaskCard = ({
   onDrillDown,
   onPromote,
   showHierarchy = false,
-  permissions = {}
+  permissions = {},
+  isExpanded = false,
+  onToggleExpand
 }) => {
   const handleMove = (direction) => {
     const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
@@ -89,9 +91,14 @@ const TaskCard = ({
 
   return (
     <div
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
       {...dragProps}
       {...dropProps}
+      onClick={(e) => {
+        // Only toggle expand if NOT clicking a button or checkbox
+        if (e.target.closest('button') || e.target.closest('.task-selection-area') || e.target.closest('.subtask-progress-badge')) return;
+        if (onToggleExpand) onToggleExpand();
+      }}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);
@@ -103,7 +110,7 @@ const TaskCard = ({
         borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
         '--stage-color': stage?.color || 'var(--brand-green)',
         opacity: task.isContextOnly ? 0.7 : 1,
-        cursor: task.isContextOnly ? 'default' : undefined
+        cursor: task.isContextOnly ? 'default' : 'pointer'
       }}
     >
       {/* Row 0: Header (Selection + Drill Down) */}

@@ -1,12 +1,10 @@
 /* ClientManagement.css — Styling for Client Tiles and List View */
-
 .client-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
   padding: 1rem 0;
 }
-
 .client-card, .client-list-row {
   position: relative;
   background: var(--panel-bg);
@@ -20,22 +18,18 @@
   flex-direction: column;
   gap: 1.25rem;
 }
-
 .client-card:hover, .client-list-row:hover {
   background: color-mix(in srgb, var(--panel-bg), white 2%);
   border-color: var(--brand-green);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--brand-green-rgb), 0.1);
 }
-
 .client-card:hover { transform: translateY(-4px); }
 .client-list-row:hover { transform: translateX(4px); }
-
 .client-card.inactive, .client-list-row.inactive {
   filter: grayscale(1);
   opacity: 0.5;
   border-left-color: #666;
 }
-
 /* Row 1: Badges */
 .client-card-badges {
   display: flex;
@@ -45,7 +39,6 @@
   position: relative;
   z-index: var(--z-card-content);
 }
-
 .billing-badge {
   font-size: 0.65rem;
   font-weight: 800;
@@ -57,7 +50,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 /* Row 2: Name */
 .client-card-name {
   font-size: 1.35rem;
@@ -69,7 +61,6 @@
   position: relative;
   z-index: var(--z-card-name-overlay);
 }
-
 /* Floating Actions Area */
 .client-card-actions {
   position: absolute;
@@ -82,11 +73,9 @@
   opacity: 0;
   transition: opacity 0.2s;
 }
-
 .client-card:hover .client-card-actions {
   opacity: 1;
 }
-
 /* Row 3: PoC Contact */
 .client-card-poc {
   display: flex;
@@ -96,7 +85,6 @@
   opacity: 0.9;
   color: var(--text-color);
 }
-
 /* Row 4: Footer */
 .client-card-footer {
   margin-top: auto;
@@ -107,22 +95,18 @@
   align-items: flex-end;
   font-size: 0.8rem;
 }
-
 .client-status-indicator {
   font-weight: 800;
   text-transform: uppercase;
   font-size: 0.7rem;
   letter-spacing: 1px;
 }
-
 .client-status-indicator.active { color: var(--brand-green); }
 .client-status-indicator.inactive { color: #ff4444; }
-
 .client-category-label {
   font-size: 0.75rem;
   opacity: 0.5;
 }
-
 .poc-primary {
   display: flex;
   align-items: center;
@@ -130,25 +114,21 @@
   font-weight: 700;
   margin-bottom: 4px;
 }
-
 .poc-contact-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .poc-item {
   display: flex;
   align-items: center;
   gap: 8px;
   opacity: 0.7;
 }
-
 .poc-icon {
   width: 16px;
   opacity: 0.5;
 }
-
 /* List View */
 .client-list-row {
   display: flex;
@@ -157,7 +137,6 @@
   padding: 1rem 1.75rem;
   min-height: auto;
 }
-
 .list-row-inner {
   flex: 1;
   display: flex;
@@ -165,21 +144,18 @@
   gap: 1.5rem; /* Reduced gap for better responsiveness */
   padding: 0.5rem 0;
 }
-
 .list-col {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 12px;
 }
-
 .col-row-1, .col-row-2 {
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 22px;
 }
-
 .col-identity { flex: 0 1 250px; }
 .col-business { flex: 0 1 180px; }
 .col-contact { flex: 1 1 auto; min-width: 150px; }
@@ -187,24 +163,20 @@
   flex: 0 0 100px; 
   align-items: flex-end;
 }
-
 .management-info {
   padding-left: 0; /* Align with name */
 }
-
 .list-name {
   font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
 }
-
 .matrix-summary-mini, .category-code-mini {
   font-size: 0.75rem;
   color: var(--brand-green);
   opacity: 0.8;
   font-weight: 600;
 }
-
 .pending-tasks-badge {
   font-size: 0.7rem;
   font-weight: 800;
@@ -214,23 +186,19 @@
   border-radius: 4px;
   text-transform: uppercase;
 }
-
 .actions-row, .status-row {
   justify-content: flex-end;
   width: 100%;
 }
-
 .email-id {
   opacity: 0.6;
   font-size: 0.85rem;
 }
-
 .poc-name-mini {
   font-size: 0.8rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
 }
-
 /* Action Icons (Standardized & Blended) */
 .action-icon-btn {
   background: transparent;
@@ -246,17 +214,14 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 1.1rem;
 }
-
 .action-icon-btn:hover {
   background: rgba(255, 255, 255, 0.05);
   color: var(--brand-green);
   transform: translateY(-1px);
 }
-
 .action-icon-btn.delete:hover {
   color: #ef4444;
 }
-
 /* Status Toggle Button (Blended Version) */
 .status-toggle-btn {
   background: transparent !important;
@@ -275,7 +240,6 @@
   justify-content: center;
   border-radius: 6px;
 }
-
 .status-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.05) !important;
   color: var(--brand-green) !important;
@@ -288,15 +252,12 @@
   letter-spacing: 1px;
   font-weight: 700;
 }
-
 .client-matrix-table td {
   color: var(--text-color);
 }
-
 .client-matrix-table tr:hover {
   background: rgba(255, 255, 255, 0.02);
 }
-
 /* Switch Styles (if not already global) */
 .switch {
   position: relative;
@@ -304,13 +265,11 @@
   width: 34px;
   height: 20px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -322,7 +281,6 @@
   transition: .4s;
   border-radius: 20px;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -334,19 +292,15 @@
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .slider {
   background-color: var(--brand-green);
 }
-
 input:focus + .slider {
   box-shadow: 0 0 1px var(--brand-green);
 }
-
 input:checked + .slider:before {
   transform: translateX(14px);
 }
-
 /* Section headers */
 .client-section-title {
   font-size: 0.8rem;
@@ -356,7 +310,6 @@ input:checked + .slider:before {
   color: var(--brand-green);
   margin-bottom: 1.5rem;
 }
-
 .client-empty-sub-state {
   padding: 2rem;
   text-align: center;
@@ -366,16 +319,13 @@ input:checked + .slider:before {
   font-size: 0.9rem;
   opacity: 0.5;
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
-
 @media screen and (max-width: 1400px) {
   .list-row-inner {
     gap: 1.25rem;
   }
-  
   .list-name { font-size: 0.95rem; }
   .matrix-summary-mini, .category-code-mini, .poc-name-mini, .billing-badge, .pending-tasks-badge { 
     font-size: 0.65rem; 
@@ -384,18 +334,15 @@ input:checked + .slider:before {
   }
   .contact-item { font-size: 0.8rem; }
   .email-id { font-size: 0.75rem; }
-  
   .col-identity { flex-basis: 220px; }
   .col-business { flex-basis: 170px; flex-grow: 1.2; } /* Give more space to badges */
 }
-
 @media screen and (max-width: 1280px) {
   .client-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
   }
 }
-
 @media screen and (max-width: 1024px) {
   .list-row-inner {
     flex-direction: column;
@@ -403,26 +350,21 @@ input:checked + .slider:before {
     gap: 1rem;
     padding: 1rem 0;
   }
-
   .list-col {
     width: 100%;
     min-width: 0 !important;
   }
-
   .col-actions {
     align-items: flex-start;
   }
-
   .actions-row, .status-row {
     justify-content: flex-start;
   }
 }
-
 @media screen and (max-width: 768px) {
   .client-grid {
     grid-template-columns: 1fr;
   }
-
   .client-card {
     padding: 1rem;
     min-height: auto;

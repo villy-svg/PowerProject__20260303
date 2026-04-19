@@ -1,13 +1,11 @@
 /* HubFunctionManagement uses HubManagement styles primarily */
 /* Adding specific overrides if needed */
-
 .hub-card .hub-code-tag {
   background: rgba(0, 255, 137, 0.1);
   color: var(--brand-green);
   font-size: 0.65rem;
   letter-spacing: 1px;
 }
-
 /* Standardized List View Styling (Shared with DepartmentManagement) */
 .hubs-list-view {
   background: var(--panel-bg);
@@ -17,7 +15,6 @@
   overflow-y: auto;
   animation: fadeIn 0.3s ease-out;
 }
-
 /* Custom internal scrollbar */
 .hubs-list-view::-webkit-scrollbar {
   width: 6px;
@@ -32,13 +29,11 @@
 .hubs-list-view::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
-
 .management-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
-
 .management-table th {
   text-align: left;
   padding: 16px 20px;
@@ -54,25 +49,20 @@
   top: 0;
   z-index: 10;
 }
-
 .management-table td {
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
-
 .management-table tr:last-child td { border-bottom: none; }
-
 .management-table tr:hover {
   background: rgba(255, 255, 255, 0.02);
 }
-
 .name-cell {
   font-weight: 700;
   color: var(--brand-green);
   font-size: 1rem;
 }
-
 .code-font {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
@@ -80,13 +70,11 @@
   padding: 2px 6px;
   border-radius: 4px;
 }
-
 .table-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
-
 .icon-btn {
   background: transparent;
   border: 1px solid var(--border-color);
@@ -101,41 +89,33 @@
   transition: all 0.2s;
   font-size: 1rem;
 }
-
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--brand-green);
   color: var(--brand-green);
   transform: translateY(-2px);
 }
-
 .icon-btn.delete:hover {
   border-color: #ef4444;
   color: #ef4444;
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
-
 @media screen and (max-width: 1024px) {
   .hubs-list-view {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-
   .management-table {
     min-width: 800px;
   }
 }
-
 @media screen and (max-width: 768px) {
   .management-view-header {
     margin-bottom: 24px;
   }
-  
   .management-table th, .management-table td {
     padding: 12px 16px;
   }
 }
-

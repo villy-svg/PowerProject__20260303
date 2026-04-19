@@ -3,7 +3,6 @@
   gap: 6px;
   align-items: center;
 }
-
 .tile-hub-code.halo-type {
   font-size: 0.7rem;
   font-weight: 600;
@@ -16,7 +15,6 @@
   text-transform: capitalize;
   letter-spacing: 0.3px;
 }
-
 .tile-function-badge.halo-type {
   font-size: 0.65rem;
   font-weight: 600;

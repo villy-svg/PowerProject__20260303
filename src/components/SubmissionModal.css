@@ -2,7 +2,6 @@
    SubmissionModal.css — Proof of Work Modal (Halo/Glassmorphism System)
    Follows: UI Design System §5 (Modals), §12 (Apple Premium Standards)
    ========================================================================== */
-
 /* ─── Modal Body Layout ─────────────────────────────────────────────────── */
 .submission-modal-body {
   display: flex;
@@ -12,7 +11,6 @@
   overflow: hidden;
   padding: 0 !important; /* Managed by scroll-area and sticky-footer */
 }
-
 .submission-modal-scroll-area {
   flex: 1;
   overflow-y: auto;
@@ -21,7 +19,6 @@
   flex-direction: column;
   gap: 1.5rem;
 }
-
 /* ─── Section Labels ────────────────────────────────────────────────────── */
 .submission-section-label {
   font-weight: 700;
@@ -32,7 +29,6 @@
   opacity: 0.8;
   margin-bottom: 0.25rem;
 }
-
 /* ─── Comment Textarea ──────────────────────────────────────────────────── */
 .submission-comment-area {
   width: 100%;
@@ -48,18 +44,15 @@
   resize: vertical;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .submission-comment-area::placeholder {
   color: var(--text-color);
   opacity: 0.35;
 }
-
 .submission-comment-area:focus {
   outline: none;
   border-color: var(--brand-mint);
   box-shadow: 0 0 0 3px rgba(112, 243, 218, 0.15);
 }
-
 /* ─── File Upload Zone ──────────────────────────────────────────────────── */
 .submission-upload-zone {
   border: 2px dashed var(--border-color);
@@ -71,45 +64,38 @@
   background: var(--halo-bg);
   position: relative;
 }
-
 .submission-upload-zone:hover,
 .submission-upload-zone.drag-active {
   border-color: var(--brand-mint);
   box-shadow: 0 0 20px var(--halo-glow);
   background: color-mix(in srgb, var(--brand-mint), transparent 95%);
 }
-
 .submission-upload-zone input[type="file"] {
   position: absolute;
   inset: 0;
   opacity: 0;
   cursor: pointer;
 }
-
 .upload-zone-icon {
   font-size: 2rem;
   opacity: 0.3;
   margin-bottom: 0.5rem;
 }
-
 .upload-zone-text {
   font-size: 0.85rem;
   opacity: 0.5;
   line-height: 1.5;
 }
-
 .upload-zone-text strong {
   color: var(--brand-mint);
   opacity: 1;
 }
-
 /* ─── File Preview Strip ────────────────────────────────────────────────── */
 .submission-file-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
-
 .submission-file-chip {
   display: flex;
   align-items: center;
@@ -125,7 +111,6 @@
   overflow: hidden;
   animation: chipSlideIn 0.2s ease-out;
 }
-
 @keyframes chipSlideIn {
   from {
     opacity: 0;
@@ -136,7 +121,6 @@
     transform: translateY(0) scale(1);
   }
 }
-
 .submission-file-chip .file-chip-thumbnail {
   width: 32px;
   height: 32px;
@@ -145,7 +129,6 @@
   border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
-
 .submission-file-chip .file-chip-icon {
   width: 32px;
   height: 32px;
@@ -157,7 +140,6 @@
   font-size: 1rem;
   flex-shrink: 0;
 }
-
 .submission-file-chip .file-chip-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -165,13 +147,11 @@
   flex: 1;
   min-width: 0;
 }
-
 .submission-file-chip .file-chip-size {
   font-size: 0.65rem;
   opacity: 0.5;
   white-space: nowrap;
 }
-
 .submission-file-chip .file-chip-remove {
   background: none;
   border: none;
@@ -184,12 +164,10 @@
   transition: opacity 0.15s, color 0.15s;
   flex-shrink: 0;
 }
-
 .submission-file-chip .file-chip-remove:hover {
   opacity: 1;
   color: var(--priority-urgent);
 }
-
 /* ─── Submit Button Area ────────────────────────────────────────────────── */
 .submission-actions {
   display: flex;
@@ -203,7 +181,6 @@
   flex-shrink: 0;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
 }
-
 .submission-guideline-text {
   font-size: 0.65rem;
   font-weight: 600;
@@ -212,7 +189,6 @@
   letter-spacing: 0.3px;
   line-height: 1.4;
 }
-
 .submission-cancel-btn {
   background: transparent;
   border: 1px solid var(--border-color);
@@ -226,21 +202,17 @@
   transition: opacity 0.2s;
   font-family: inherit;
 }
-
 .submission-cancel-btn:hover {
   opacity: 1;
 }
-
 .submission-submit-btn {
   /* Inherits .halo-button styles */
   min-width: 140px;
 }
-
 .submission-submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 /* ─── Progress Indicator ────────────────────────────────────────────────── */
 .submission-progress {
   display: flex;
@@ -252,12 +224,10 @@
   border-radius: var(--radius-button);
   animation: progressPulse 1.5s ease-in-out infinite;
 }
-
 @keyframes progressPulse {
   0%, 100% { box-shadow: 0 0 5px var(--halo-glow); }
   50% { box-shadow: 0 0 20px var(--halo-glow); }
 }
-
 .submission-progress-bar {
   flex: 1;
   height: 4px;
@@ -265,20 +235,17 @@
   background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
-
 .submission-progress-fill {
   height: 100%;
   background: var(--brand-mint);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
-
 /* ─── Halo Scan & Success Animations ────────────────────────────────────── */
 .is-uploading-chip {
   position: relative;
   overflow: hidden;
 }
-
 .is-uploading-chip::after {
   content: '';
   position: absolute;
@@ -294,36 +261,30 @@
   );
   animation: haloScan 1.5s infinite linear;
 }
-
 @keyframes haloScan {
   0% { left: -100%; }
   100% { left: 200%; }
 }
-
 .is-done-chip {
   border-color: var(--brand-mint) !important;
   background: color-mix(in srgb, var(--brand-mint), transparent 92%) !important;
   animation: successPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
 @keyframes successPop {
   0% { transform: scale(0.9); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-
 .success-checkmark {
   color: var(--brand-mint);
   font-weight: 900;
   margin-left: 4px;
 }
-
 .submission-progress-text {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--brand-mint);
   white-space: nowrap;
 }
-
 /* ─── Batch Counter ─────────────────────────────────────────────────────── */
 .batch-counter {
   font-size: 0.75rem;
@@ -334,28 +295,23 @@
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
-
 .batch-counter.counter-mint {
   color: var(--brand-mint);
   border-color: rgba(112, 243, 218, 0.3);
 }
-
 .batch-counter.counter-amber {
   color: var(--priority-medium);
   border-color: rgba(245, 158, 11, 0.4);
 }
-
 .batch-counter.counter-red {
   color: var(--priority-urgent);
   border-color: rgba(239, 68, 68, 0.5);
   animation: counterPanic 0.4s ease infinite;
 }
-
 @keyframes counterPanic {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
-
 /* ─── Status Badge ──────────────────────────────────────────────────────── */
 .submission-status-badge {
   padding: 4px 10px;
@@ -365,25 +321,21 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .submission-status-badge.pending {
   background: var(--badge-amber-bg);
   color: var(--badge-amber-text);
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
-
 .submission-status-badge.approved {
   background: var(--badge-green-bg);
   color: var(--badge-green-text);
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
-
 .submission-status-badge.rejected {
   background: var(--badge-red-bg);
   color: var(--badge-red-text);
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
-
 /* ─── Locked Notice ─────────────────────────────────────────────────────── */
 .submission-locked-notice {
   padding: 12px 16px;
@@ -395,28 +347,23 @@
   color: var(--priority-medium);
   line-height: 1.5;
 }
-
 /* ─── Upload Only Button ────────────────────────────────────────────────── */
 .submission-upload-only-btn {
   min-width: 130px;
 }
-
 .submission-upload-only-btn:disabled,
 .submission-submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 /* ─── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .submission-file-chip {
     max-width: 100%;
   }
-  
   .submission-actions {
     flex-direction: column;
   }
-  
   .submission-actions button {
     width: 100%;
   }

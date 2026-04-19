@@ -6,14 +6,14 @@
   background-color: var(--surface-card);
   padding: clamp(20px, 5vw, 40px);
   border-radius: 0;
+  height: 100%;
+  overflow-y: auto;
 }
-
 .summary-header {
   margin-bottom: clamp(20px, 4vh, 40px);
   border-left: 4px solid var(--brand-mint);
   padding-left: 15px;
 }
-
 .summary-header h2 {
   font-size: 1.1rem;
   font-weight: 600;
@@ -23,19 +23,16 @@
   opacity: 0.9;
   margin: 0;
 }
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
 }
-
 .summary-column-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .summary-card {
   border-left: 6px solid var(--stage-color);
   background-color: var(--surface-card);
@@ -50,12 +47,10 @@
   box-shadow: var(--shadow-premium);
   backdrop-filter: blur(var(--glass-blur));
 }
-
 .summary-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
-
 .summary-count {
   font-size: 2.2rem;
   font-weight: 900;
@@ -64,7 +59,6 @@
   letter-spacing: 1px;
   line-height: 1;
 }
-
 .summary-label {
   font-size: 0.85rem;
   font-weight: 700;
@@ -73,7 +67,6 @@
   opacity: 0.6;
   text-align: right;
 }
-
 /* BREAKDOWN LIST */
 .vertical-breakdown-list {
   background-color: var(--surface-card);
@@ -85,7 +78,6 @@
   transition: all 0.3s ease;
   box-shadow: var(--shadow-premium);
 }
-
 .vertical-mini-row {
   display: flex;
   justify-content: space-between;
@@ -94,11 +86,9 @@
   font-size: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
-
 .vertical-mini-row:last-child {
   border-bottom: none;
 }
-
 .v-mini-label {
   opacity: 0.6;
   font-weight: 500;
@@ -108,7 +98,6 @@
   text-overflow: ellipsis;
   max-width: 120px;
 }
-
 .v-mini-count {
   font-weight: 800;
   font-family: monospace;
@@ -116,56 +105,45 @@
   color: var(--stage-color);
   -webkit-text-stroke: 0.8px var(--stage-color);
 }
-
 .summary-column-group:hover .vertical-breakdown-list {
   transform: translateY(-2px);
   filter: brightness(1.1);
 }
-
 /* ==========================================================================
    RESPONSIVE DESIGN (EXECUTIVE SUMMARY)
    ========================================================================== */
-
 @media screen and (max-width: 1280px) {
   .home-summary-view {
     padding: 24px;
   }
-
   .summary-header {
     margin-bottom: 24px;
   }
-
   .summary-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
   }
 }
-
 @media screen and (max-width: 1024px) {
   .home-summary-view {
     padding: 16px;
   }
-
   .summary-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
-
 @media screen and (max-width: 768px) {
   .summary-grid {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-
   .summary-card {
     min-height: 80px;
     padding: 12px 16px;
   }
-
   .summary-count {
     font-size: 1.8rem;
   }
-
   .summary-label {
     font-size: 0.75rem;
   }

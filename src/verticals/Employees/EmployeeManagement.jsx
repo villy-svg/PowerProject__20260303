@@ -20,7 +20,7 @@ import ConflictModal from '../../components/ConflictModal';
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = ({ user, permissions, filters }) => {
+const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onShowBottomNav }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -185,6 +185,8 @@ const EmployeeManagement = ({ user, permissions, filters }) => {
   return (
     <>
       <MasterPageHeader
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         title="Employee Records Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
         rightActions={

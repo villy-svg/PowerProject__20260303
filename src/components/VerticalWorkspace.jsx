@@ -23,6 +23,7 @@ const VerticalWorkspace = ({
   isSubSidebarOpen,
   setIsSubSidebarOpen,
   setActiveVertical,
+  onShowBottomNav,
   SidebarComponent, 
   onHeaderClick,
   TaskFormComponent, 
@@ -190,7 +191,12 @@ const VerticalWorkspace = ({
         {React.Children.toArray(children).some(child => !!child) ? (
           React.Children.map(children, child => 
             React.isValidElement(child) 
-              ? React.cloneElement(child, { filters, onFilterChange: handleFilterChange })
+              ? React.cloneElement(child, { 
+                  filters, 
+                  onFilterChange: handleFilterChange,
+                  setActiveVertical,
+                  onShowBottomNav
+                })
               : child
           )
         ) : (
@@ -219,6 +225,10 @@ const VerticalWorkspace = ({
             permissions={permissions} 
             verticals={verticals}
             boardLabel={boardLabel}
+            isSubSidebarOpen={isSubSidebarOpen}
+            setIsSubSidebarOpen={setIsSubSidebarOpen}
+            onShowBottomNav={onShowBottomNav}
+            setActiveVertical={setActiveVertical}
           />
         )}
       </main>

@@ -1,49 +1,45 @@
 /* Design system variables moved to index.css for global access */
 /* Section 1 deleted */
-
 /* Base reset and scrollbars moved to index.css */
-
-
 /* ==========================================================================
    3. LAYOUT STRUCTURE
    ========================================================================== */
 .app-container {
   background-color: var(--bg-color);
   color: var(--text-color);
-  min-height: 100vh;
+  height: 100%; /* Rigidly fill the window */
   width: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent body scroll */
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 .app-layout {
   display: flex;
   width: 100%;
-  height: 100vh;
+  height: 100%; /* Fill parent */
   overflow: hidden;
   position: relative;
 }
-
 .app-main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding: 0;
   /* Standardized: No padding here, sub-components handle it */
-  overflow-y: auto;
+  overflow: hidden; 
   transition: all var(--transition-main);
-  background-color: var(--surface-card);
+  background-color: var(--surface-card); /* Cohesive background */
+  position: relative;
+  min-height: 0; /* Flexbox safety */
 }
-
 .app-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  padding-top: 0; /* Removed gap - belt of pitch black */
+  overflow: hidden; /* Children handle scrolling */
+  padding-top: 0;
 }
-
 /* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
 .management-view-container {
   padding: 0 40px;
@@ -52,74 +48,11 @@
   flex-direction: column;
   animation: fadeIn 0.4s ease-out;
 }
-
-/* ==========================================================================
-   4. HEADER & BRANDING
-   ========================================================================== */
-/* Header styles moved to components/Header.css */
-
-/* Branding and Theme styles moved to components/Header.css or Theme */
-
-/* ==========================================================================
-   5. EXECUTIVE SUMMARY (LEFT-ALIGNED LAYOUT)
-   ========================================================================== */
-/* Executive Summary styles moved to components/ExecutiveSummary.css */
-
-/* Executive Summary styles moved to components/ExecutiveSummary.css */
-
-/* ==========================================================================
-   7. TASK MANAGEMENT & KANBAN STYLING
-   ========================================================================== */
-/* Legacy Task System removed (unused) */
-
-/* ==========================================================================
-   9. HALO BUTTONS & DESIGN SYSTEM REFINEMENTS
-   ========================================================================== */
-
-/* btn-primary removed (unused) */
-
-.halo-button {
-  /* Master styles inherited from globalTheme.css */
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.halo-button:hover {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
-  border-color: var(--brand-mint) !important;
-  border-width: 2px !important;
-  margin: -0.5px;
-  box-shadow: 0 0 25px var(--halo-glow);
-  transform: translateY(-2px);
-}
-
-.halo-text-effect {
-  color: var(--brand-mint);
-  background: var(--halo-bg);
-  padding: 4px 12px;
-  border-radius: var(--radius-button);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 80%);
-  box-shadow: 0 0 10px var(--halo-glow);
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* ==========================================================================
-   9. GLOBAL ANIMATIONS
-   ========================================================================== */
+/* Global animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* Media queries moved to component-specific CSS files */
-
 /* ==========================================================================
    11. UTILITIES
    ========================================================================== */
@@ -134,7 +67,33 @@
   box-shadow: var(--shadow-premium);
   backdrop-filter: blur(var(--glass-blur));
 }
-
 .responsive-table-wrapper table {
   min-width: 800px;
+}
+/* ── Mobile Layout Adaptations ── */
+@media screen and (max-width: 768px) {
+  .app-container {
+    padding-top: var(--safe-top, 0px);
+    padding-left: var(--safe-left, 0px);
+    padding-right: var(--safe-right, 0px);
+  }
+  /* On mobile the sidebar is a fixed overlay — main area always takes full width */
+  .app-main-area {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 0; /* Content handles its own bottom padding */
+  }
+  /* Content area padding for mobile */
+  .app-content {
+    padding: 12px;
+  }
+}
+/* ── Phone-Specific Layout ── */
+@media screen and (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+  }
+  .app-content {
+    padding: 8px;
+  }
 }

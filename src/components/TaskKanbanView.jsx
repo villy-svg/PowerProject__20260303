@@ -35,7 +35,9 @@ const TaskKanbanView = ({
   onPromote,
   TaskTileComponent,
   handleApproveSubmission,
-  handleRejectClick
+  handleRejectClick,
+  expandedTaskId,
+  setExpandedTaskId
 }) => {
   return (
     <div className="kanban-view-container">
@@ -191,6 +193,8 @@ const TaskKanbanView = ({
                       onDrillDown={setDrillDownId}
                       showHierarchy={permissions.canViewKanbanHierarchy}
                       permissions={permissions}
+                      isExpanded={expandedTaskId === task.id}
+                      onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
                     >
                       {TaskTileComponent && (
                         <TaskTileComponent

@@ -42,7 +42,9 @@ const ListViewRow = ({
   tasks,
   permissions = {},
   handleApproveSubmission,
-  handleRejectClick
+  handleRejectClick,
+  isRowExpanded,
+  onToggleRowExpand
 }) => {
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
 
@@ -85,9 +87,14 @@ const ListViewRow = ({
 
   return (
     <div
-      className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
       {...dragProps}
       {...dropProps}
+      onClick={(e) => {
+        // Only toggle expand if NOT clicking a button, checkbox or expander
+        if (e.target.closest('button') || e.target.closest('.list-row-selection') || e.target.closest('.tree-expander')) return;
+        if (onToggleRowExpand) onToggleRowExpand();
+      }}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);
@@ -98,6 +105,7 @@ const ListViewRow = ({
       style={{
         '--stage-color': taskStage.color,
         opacity: task.isContextOnly ? 0.7 : 1,
+        cursor: task.isContextOnly ? 'default' : 'pointer',
       }}
     >
       {/* LEFT SIDE: Identity & Content */}
@@ -348,7 +356,9 @@ const TaskListView = ({
   canCreate,
   permissions = {},
   handleApproveSubmission,
-  handleRejectClick
+  handleRejectClick,
+  expandedTaskId,
+  setExpandedTaskId
 }) => {
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
@@ -486,6 +496,8 @@ const TaskListView = ({
                   permissions={permissions}
                   handleApproveSubmission={handleApproveSubmission}
                   handleRejectClick={handleRejectClick}
+                  isRowExpanded={expandedTaskId === task.id}
+                  onToggleRowExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
                 />
               ))}
             </div>

@@ -30,7 +30,11 @@ const TaskController = (props) => {
     rootVerticalId,
     verticals,
     boardLabel,
-    user
+    user,
+    isSubSidebarOpen,
+    setIsSubSidebarOpen,
+    onShowBottomNav,
+    setActiveVertical
   } = props;
 
   const controller = useTaskController(props);
@@ -75,6 +79,9 @@ const TaskController = (props) => {
   // ─── Proof of Work Approve / Reject State ────────────────────────────
   const [rejectionModalState, setRejectionModalState] = useState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
 
+  // ─── Compact Tiles Expansion State (For Touch Devices) ──────────
+  const [expandedTaskId, setExpandedTaskId] = useState(null);
+
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
       await updateSubmissionStatus(submissionId, 'approved');
@@ -118,6 +125,13 @@ const TaskController = (props) => {
             )}
           </>
         }
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={(val) => setIsSubSidebarOpen(typeof val === 'boolean' ? val : !isSubSidebarOpen)}
+        canAdd={canUserCreate && !activeVertical.includes('daily')}
+        onAddClick={openAddModal}
+        isTaskModalOpen={isModalOpen}
+        onShowBottomNav={onShowBottomNav}
+        setActiveVertical={setActiveVertical}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
@@ -274,6 +288,8 @@ const TaskController = (props) => {
             openSubmissionModal={openSubmissionModal}
             handleApproveSubmission={handleApproveSubmission}
             handleRejectClick={handleRejectClick}
+            expandedTaskId={expandedTaskId}
+            setExpandedTaskId={setExpandedTaskId}
           />
         ) : viewMode === 'list' ? (
           <TaskListView
@@ -300,6 +316,8 @@ const TaskController = (props) => {
             openSubmissionModal={openSubmissionModal}
             handleApproveSubmission={handleApproveSubmission}
             handleRejectClick={handleRejectClick}
+            expandedTaskId={expandedTaskId}
+            setExpandedTaskId={setExpandedTaskId}
           />
         ) : (
           <TaskTreeView
@@ -321,6 +339,8 @@ const TaskController = (props) => {
             openSubmissionModal={openSubmissionModal}
             handleApproveSubmission={handleApproveSubmission}
             handleRejectClick={handleRejectClick}
+            expandedTaskId={expandedTaskId}
+            setExpandedTaskId={setExpandedTaskId}
           />
         )}
       </div>
@@ -338,7 +358,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('backward')}
                 title="Move Backward"
               >
-                ← Prev
+                ← <span className="bulk-btn-text">Prev</span>
               </button>
             )}
 
@@ -348,7 +368,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('forward')}
                 title="Move Forward"
               >
-                Next →
+                <span className="bulk-btn-text">Next</span> →
               </button>
             )}
 
@@ -358,7 +378,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('deprio')}
                 title="Deprioritize Selection"
               >
-                ⬇ Deprio
+                ⬇ <span className="bulk-btn-text">Deprio</span>
               </button>
             )}
 
@@ -368,7 +388,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('restore')}
                 title="Restore to Pending"
               >
-                ⬆ Restore
+                ⬆ <span className="bulk-btn-text">Restore</span>
               </button>
             )}
 
@@ -378,11 +398,11 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('delete')}
                 title="Delete Permanently"
               >
-                × Delete
+                × <span className="bulk-btn-text">Delete</span>
               </button>
             )}
 
-            <button className="bulk-btn cancel" onClick={clearSelection}>Cancel</button>
+            <button className="bulk-btn cancel" onClick={clearSelection} title="Cancel">↺ <span className="bulk-btn-text">Cancel</span></button>
           </div>
         </div>
       )}

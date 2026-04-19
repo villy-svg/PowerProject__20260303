@@ -1,9 +1,7 @@
 /* globalTheme.css - Shared Design Tokens and Global UI Components */
-
 /* ==========================================================================
    1. THEME VARIABLES (Centralized Source of Truth)
    ========================================================================== */
-
 :root {
   /* Core Palette - Midnight Premium */
   --bg-color: #fcfcfd;
@@ -14,10 +12,12 @@
   --border-color: #e4e4e7;
   --panel-bg: #ffffff;
   --surface-card: #f9f9fb;
-  
   /* Typography */
   --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  
+  --font-xs: 0.70rem;   /* 11px - Micro labels */
+  --font-sm: 0.875rem;  /* 14px - Menu items, task chips */
+  --font-base: 1rem;    /* 16px - Body text */
+  --font-lg: 1.125rem;  /* 18px - Subheaders */
   /* Radii & Depth */
   --radius-squircle: 24px;
   --radius-button: 12px;
@@ -25,17 +25,14 @@
   --glass-blur: 15px;
   --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.1);
   --shadow-halo: 0 0 15px var(--halo-glow);
-
   /* Halo Glow System */
   --halo-glow: rgba(13, 148, 136, 0.2);
   --halo-bg: rgba(13, 148, 136, 0.05);
-
   /* Status Colors */
   --priority-urgent: #ef4444;
   --priority-high: #f97316;
   --priority-medium: #eab308;
   --priority-low: #22c55e;
-  
   /* Z-Index Hierarchy */
   --z-base: 0;
   --z-card-base: 1;
@@ -47,7 +44,6 @@
   --z-header: 2001;
   --z-modal: 3000;
   --z-toast: 4000;
-
   /* Badge System Colors (Tokenized) */
   --badge-teal-bg: rgba(45, 212, 191, 0.1);
   --badge-teal-text: #2dd4bf;
@@ -60,30 +56,26 @@
   --badge-red-bg: rgba(239, 68, 68, 0.1);
   --badge-red-text: #ef4444;
 }
-
 [data-theme='dark'] {
-  --bg-color: #050505;        /* Midnight */
-  --text-color: #f4f4f5;
-  --brand-mint: #70f3da;      /* Sophisticated Mint */
-  --brand-blue: #60a5fa;      /* Electric Blue */
+  --bg-color: #0b0b0d;        /* Muted Midnight Satin */
+  --text-color: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --brand-mint: #2dd4bf;      /* Softer Teal-400 (was #70f3da) */
+  --brand-blue: #60a5fa;      
   --brand-green: var(--brand-mint);
-  --border-color: #1a1a1c;
-  --panel-bg: #0d0d0f;
-  --surface-card: #121214;    /* Space Gray Surface */
-  
+  --border-color: rgba(255, 255, 255, 0.08); /* Satin edges */
+  --panel-bg: #121214;
+  --surface-card: #161618;    
   /* Shadows & Depth */
-  --shadow-premium: 0 12px 40px rgba(0, 0, 0, 0.6);
-  --glass-blur: 20px;
-  
-  --halo-glow: rgba(112, 243, 218, 0.15); /* Mint Glow */
-  --halo-glow-blue: rgba(96, 165, 250, 0.15); /* Blue Glow */
-  --halo-bg: rgba(112, 243, 218, 0.03);
+  --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.8);
+  --glass-blur: 25px;
+  --halo-glow: rgba(45, 212, 191, 0.15); /* Matched to new mint */
+  --halo-glow-blue: rgba(96, 165, 250, 0.12); 
+  --halo-bg: rgba(45, 212, 191, 0.03);
 }
-
 /* ==========================================================================
    2. UNIVERSAL SELECTION SYSTEM (Halo Pattern)
    ========================================================================== */
-
 /* The interactive area around the checkbox */
 .selection-area {
   width: 20px;
@@ -95,7 +87,6 @@
   justify-content: center;
   transition: opacity 0.15s ease;
 }
-
 /* The circular checkbox itself */
 .selection-checkbox {
   width: 16px;
@@ -113,20 +104,17 @@
   cursor: pointer;
   user-select: none;
 }
-
 /* Hover state for the container */
 .selection-area:hover .selection-checkbox {
   border-color: var(--brand-green);
   box-shadow: 0 0 8px var(--halo-glow);
 }
-
 /* Checked state */
 .selection-checkbox.checked {
   background: var(--brand-green);
   border-color: var(--brand-green);
   color: #000; /* Contrast for the checkmark */
 }
-
 /* Global alignment helper for selection columns in lists */
 .list-selection-col {
   width: 40px;
@@ -145,35 +133,29 @@
   letter-spacing: 0.5px;
   border-radius: 8px !important;
 }
-
 .btn-approve {
   color: var(--brand-mint) !important;
   background: var(--halo-bg) !important;
   border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
 }
-
 .btn-approve:hover {
   background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
   border-color: var(--brand-mint) !important;
   box-shadow: 0 0 15px var(--halo-glow);
 }
-
 .btn-reject {
   color: var(--priority-urgent) !important;
   background: color-mix(in srgb, var(--priority-urgent), transparent 95%) !important;
   border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 70%) !important;
 }
-
 .btn-reject:hover {
   background: color-mix(in srgb, var(--priority-urgent), transparent 90%) !important;
   border-color: var(--priority-urgent) !important;
   box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
 }
-
 /* ==========================================================================
    3. SHARED UI COMPONENTS (Halo Design System)
    ========================================================================== */
-
 .halo-button {
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
@@ -193,34 +175,29 @@
   backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--shadow-premium);
 }
-
 .halo-button:hover {
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
   border-color: var(--brand-green);
   box-shadow: 0 0 15px var(--halo-glow);
   transform: translateY(-1px);
 }
-
 .halo-button.active {
   background: color-mix(in srgb, var(--brand-green), transparent 85%);
   color: var(--brand-mint);
   border: 2px solid var(--brand-green);
   box-shadow: 0 0 20px var(--halo-glow);
 }
-
 .halo-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
-
 /* Master Action Buttons */
 .master-action-btn {
   padding: 10px 20px;
   font-size: 0.85rem;
   letter-spacing: 0.5px;
 }
-
 /* View Toggles (Master Header System Standard) */
 .view-mode-toggle {
   display: flex;
@@ -230,7 +207,6 @@
   gap: 8px; /* Standardized */
   border: 1px solid var(--border-color);
 }
-
 .view-toggle-btn {
   background: transparent;
   border: 1px solid transparent;
@@ -243,14 +219,12 @@
   transition: all 0.2s;
   opacity: 0.6;
 }
-
 .view-toggle-btn.active {
   background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
   color: var(--brand-mint) !important;
   border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
   opacity: 1;
 }
-
 .status-pill {
   padding: 4px 10px;
   border-radius: 6px;
@@ -258,10 +232,8 @@
   font-weight: 700;
   text-transform: capitalize;
 }
-
 .status-pill.active { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
 .status-pill.inactive { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-
 /* Common Empty State */
 .empty-state-container {
   padding: 4rem 2rem;
@@ -271,28 +243,23 @@
   align-items: center;
   gap: 1.5rem;
 }
-
 .empty-state-icon {
   font-size: 4rem;
   opacity: 0.2;
 }
-
 .empty-state-title {
   font-size: 1.5rem;
   font-weight: 700;
   opacity: 0.8;
 }
-
 .empty-state-text {
   max-width: 400px;
   opacity: 0.5;
   line-height: 1.6;
 }
-
 /* ==========================================================================
    4. SHARED VERTICAL TOKENS (Badges & Indicators)
    ========================================================================== */
-
 .tag-neutral {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
@@ -306,7 +273,6 @@
   letter-spacing: 0.3px;
   backdrop-filter: blur(4px);
 }
-
 .dept-badge {
   font-size: 0.65rem;
   font-weight: 800;
@@ -318,7 +284,6 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .role-badge {
   font-size: 0.65rem;
   font-weight: 600;
@@ -330,7 +295,6 @@
   text-transform: capitalize;
   opacity: 0.8;
 }
-
 .hub-badge {
   font-size: 0.65rem;
   font-weight: 800;
@@ -342,24 +306,148 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .hub-badge.null-hub {
   background-color: rgba(255, 68, 68, 0.1);
   color: #ff4444;
   border: 1px solid rgba(255, 68, 68, 0.4);
 }
-
 .employee-status-indicator {
   font-size: 0.75rem;
   font-weight: 700;
   align-self: center;
 }
-
 .employee-status-indicator.active {
   color: var(--brand-green);
 }
-
 .employee-status-indicator.inactive {
   color: #ff4444;
   opacity: 0.5;
+}
+/* ==========================================================================
+   5. MOBILE VIEWPORT ADAPTATIONS
+   Rule: ALL styles below MUST remain inside @media queries.
+   Zero desktop impact. See UI Design System §14.
+   ========================================================================== */
+/* ── Tablet (≤768px) ── */
+@media screen and (max-width: 768px) {
+  :root,
+  [data-theme='dark'] {
+    --radius-squircle: 20px;
+    --radius-button: 10px;
+    --glass-blur: 14px;
+    --shadow-premium: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  /* Scale down halo buttons for touch */
+  .halo-button {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    min-width: 80px;
+    min-height: 44px; /* Touch target minimum */
+  }
+  .master-action-btn {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    min-height: 44px;
+  }
+  /* View toggles — larger touch targets */
+  .view-toggle-btn {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    min-height: 38px;
+  }
+  /* Empty states — less padding on mobile */
+  .empty-state-container {
+    padding: 2.5rem 1.5rem;
+  }
+  .empty-state-icon {
+    font-size: 3rem;
+  }
+  .empty-state-title {
+    font-size: 1.25rem;
+  }
+  /* ── Universal Touch Target Enforcement ── */
+  button,
+  a,
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  .selection-area,
+  [role="button"],
+  [tabindex] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input[type="tel"],
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  .tag-neutral,
+  .dept-badge,
+  .role-badge,
+  .hub-badge,
+  .status-pill {
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* ── Safe Area Support (Notched Devices) ── */
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+  }
+}
+/* ── Phone (≤480px) ── */
+@media screen and (max-width: 480px) {
+  :root,
+  [data-theme='dark'] {
+    --radius-squircle: 16px;
+    --radius-button: 8px;
+    --glass-blur: 12px;
+    --shadow-premium: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+  /* Full-width buttons on phone */
+  .halo-button {
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    width: 100%;
+    min-height: 44px;
+  }
+  .master-action-btn {
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    width: 100%;
+    min-height: 44px;
+  }
+  .view-mode-toggle {
+    gap: 4px;
+    padding: 3px;
+  }
+  .view-toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    min-height: 36px;
+  }
+  .empty-state-container {
+    padding: 2rem 1rem;
+    gap: 1rem;
+  }
+  .empty-state-icon {
+    font-size: 2.5rem;
+  }
+  .empty-state-title {
+    font-size: 1.1rem;
+  }
+  .empty-state-text {
+    font-size: 0.85rem;
+  }
 }

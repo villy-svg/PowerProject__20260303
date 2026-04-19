@@ -1,13 +1,10 @@
 @import '../../styles/ManagementForms.css';
-
 /* Component-specific overrides or additions for HubTaskForm */
-
 .vertical-task-form select option {
   background: var(--bg-color);
   color: var(--text-color);
   padding: 10px;
 }
-
 .vertical-task-form {
   padding: 0; /* Let internal content area handle padding */
   display: flex;
@@ -15,7 +12,6 @@
   height: 100%;
   min-height: 0; /* Help prevent overflow issues in flex */
 }
-
 .modal-content-area {
   flex: 1;
   overflow-y: auto;
@@ -24,14 +20,12 @@
   display: flex;
   flex-direction: column;
 }
-
 .tab-pane, .history-tab-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-
 /* Tab Navigation */
 .task-form-tabs {
   display: flex;
@@ -46,7 +40,6 @@
   padding-top: 24px;
   z-index: 5;
 }
-
 .task-form-tab {
   padding: 12px 24px;
   font-size: 0.8rem;
@@ -65,18 +58,15 @@
   align-items: center;
   gap: 8px;
 }
-
 .task-form-tab:hover {
   opacity: 0.8;
   color: var(--brand-green);
 }
-
 .task-form-tab.active {
   opacity: 1;
   color: var(--brand-green);
   border-bottom-color: var(--brand-green);
 }
-
 .task-form-tab .tab-count {
   background: color-mix(in srgb, var(--brand-green), transparent 85%);
   color: var(--brand-green);
@@ -86,7 +76,6 @@
   font-size: 0.65rem;
   font-weight: 800;
 }
-
 .form-footer.sticky {
   position: sticky;
   bottom: 0;
@@ -98,26 +87,21 @@
   flex-shrink: 0;
   backdrop-filter: blur(10px);
 }
-
 .history-tab-content {
   animation: tabFadeIn 0.3s ease-out;
 }
-
 .form-footer.sticky .close-btn {
   background: transparent;
   border: 1px solid var(--border-color);
   color: var(--text-color);
   opacity: 0.6;
 }
-
 .form-footer.sticky .close-btn:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--brand-green);
 }
-
 @keyframes tabFadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-

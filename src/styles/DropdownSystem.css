@@ -2,7 +2,6 @@
    MASTER DROPDOWN SYSTEM
    Consistent styling for all select elements across PowerProject.
    ========================================================================== */
-
 .master-dropdown {
   /* Use standard form input variables */
   background: var(--halo-bg, rgba(45, 212, 191, 0.05));
@@ -19,13 +18,11 @@
   padding-right: 40px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .master-dropdown:focus {
   border-color: var(--brand-green);
   box-shadow: 0 0 10px var(--halo-glow);
   outline: none;
 }
-
 /* 
    OPTION STYLING:
    Native <option> elements have limited styling support but we can control 
@@ -42,7 +39,6 @@
   padding: 12px;
   font-weight: normal;
 }
-
 /* Light mode support */
 [data-theme='light'] .master-dropdown option {
   background-color: #fcfcfd;

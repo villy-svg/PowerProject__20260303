@@ -1,5 +1,4 @@
 /* AssigneeBadge.css */
-
 .assignee-badge-base {
   display: inline-flex;
   align-items: center;
@@ -16,20 +15,17 @@
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
-
 .assignee-you {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
 }
-
 .assignee-none {
   color: #ef4444; 
   background: rgba(239, 68, 68, 0.1); 
   border: 1px solid rgba(239, 68, 68, 0.3);
   font-weight: 800;
 }
-
 /* Mini variant for list view */
 .assignee-badge-base.mini {
   padding: 1px 5px;
