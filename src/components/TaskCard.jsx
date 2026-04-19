@@ -310,7 +310,7 @@ const TaskCard = ({
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
-              <IconArrowLeft size={14} style={{ transform: 'rotate(-90deg)' }} />
+              v
             </button>
           )}
 

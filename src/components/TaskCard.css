@@ -27,14 +27,21 @@
   transition: all 0.3s ease;
   pointer-events: none;
 }
-/* Selection State reveals Header Row even if not hovered */
-.task-card-master.selected .card-header-row {
+/* Selection State reveals Header Row and Action Row even if not hovered */
+.task-card-master.selected .card-header-row,
+.task-card-master.selected .card-row-3 {
   display: flex;
-  max-height: 40px;
+  max-height: 100px;
   min-height: 24px;
   opacity: 1;
-  margin-bottom: 8px; /* Add spacing manually when revealed */
   pointer-events: auto;
+}
+.task-card-master.selected .card-header-row {
+  margin-bottom: 8px;
+}
+.task-card-master.selected .card-row-3 {
+  padding-top: 12px;
+  margin-top: 10px;
 }
 /* Expansion Logic (Hover for Desktops) */
 @media (hover: hover) {
@@ -157,10 +164,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  flex-wrap: wrap; /* Standardized: wrap on narrow columns */
-  row-gap: 12px;
+  flex-wrap: nowrap; /* Strictly enforce single line */
+  overflow-x: auto; /* Allow smooth horizontal swiping on tiny screens */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
   padding-top: 12px;
   border-top: none;
+}
+.card-row-3::-webkit-scrollbar {
+  display: none; /* Hide scrollbar in Chrome/Safari */
 }
 .card-priority {
   font-size: 0.65rem;
@@ -332,7 +343,7 @@
   display: flex !important;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap; /* Standardized: wrap on narrow columns */
+  flex-wrap: nowrap; /* Strictly enforce single line */
   justify-content: flex-end;
   opacity: 0; /* Progressive Disclosure */
   transition: opacity 0.25s ease;

@@ -413,17 +413,21 @@
   }
   .bulk-actions {
     justify-content: center;
+    flex-wrap: wrap; /* CRITICAL: Allow buttons to wrap naturally instead of overflowing */
     padding-bottom: 0px;
+    width: 100%;
   }
   .bulk-action-bar .bulk-btn .bulk-btn-text {
     display: none; /* Hide the text labels completely on mobile */
   }
   .bulk-action-bar .bulk-btn {
     border-radius: 8px !important; /* Replaces the 50px pill shape with neat rounded squares */
-    padding: 6px 16px !important;
+    padding: 8px 14px !important;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 1.1rem; /* Make the directional symbols a bit larger since text is gone */
+    height: 36px;
+    min-width: 36px;
   }
 }

@@ -11,6 +11,12 @@ import TaskTreeView from './TaskTreeView';
 import { useTaskController } from '../hooks/useTaskController';
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import RejectionModal from './RejectionModal';
+import { 
+  IconDelete, 
+  IconArrowLeft, 
+  IconArrowRight, 
+  IconPromote,
+} from './Icons';
 import './TaskController.css';
 
 /**
@@ -358,7 +364,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('backward')}
                 title="Move Backward"
               >
-                ← <span className="bulk-btn-text">Prev</span>
+                <IconArrowLeft size={18} strokeWidth={2} /> <span className="bulk-btn-text">Prev</span>
               </button>
             )}
 
@@ -368,7 +374,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('forward')}
                 title="Move Forward"
               >
-                <span className="bulk-btn-text">Next</span> →
+                <span className="bulk-btn-text">Next</span> <IconArrowRight size={18} strokeWidth={2} />
               </button>
             )}
 
@@ -378,7 +384,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('deprio')}
                 title="Deprioritize Selection"
               >
-                ⬇ <span className="bulk-btn-text">Deprio</span>
+                v <span className="bulk-btn-text">Deprio</span>
               </button>
             )}
 
@@ -388,7 +394,7 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('restore')}
                 title="Restore to Pending"
               >
-                ⬆ <span className="bulk-btn-text">Restore</span>
+                <IconPromote size={18} strokeWidth={2} /> <span className="bulk-btn-text">Restore</span>
               </button>
             )}
 
@@ -398,11 +404,11 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('delete')}
                 title="Delete Permanently"
               >
-                × <span className="bulk-btn-text">Delete</span>
+                <IconDelete size={18} strokeWidth={2} /> <span className="bulk-btn-text">Delete</span>
               </button>
             )}
 
-            <button className="bulk-btn cancel" onClick={clearSelection} title="Cancel">↺ <span className="bulk-btn-text">Cancel</span></button>
+            <button className="bulk-btn cancel" onClick={clearSelection} title="Cancel"><IconDelete size={18} strokeWidth={2} /> <span className="bulk-btn-text">Cancel</span></button>
           </div>
         </div>
       )}

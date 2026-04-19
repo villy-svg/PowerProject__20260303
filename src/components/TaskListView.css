@@ -136,19 +136,26 @@
     margin-top: 4px;
     border-top: 1px solid var(--border-color);
     background: transparent !important; 
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Strictly enforce single line */
+    overflow-x: auto; /* Allow smooth horizontal swiping */
+    scrollbar-width: none;
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
     opacity: 1;
     pointer-events: auto;
   }
+  .list-row-controls::-webkit-scrollbar {
+    display: none;
+  }
   .list-task-row:hover .list-row-controls,
   .list-task-row.is-expanded .list-row-controls {
     display: flex;
   }
   .list-nav-group, .list-action-group {
-    display: contents; /* Flatten the flex tree so buttons wrap individually instead of massive chunks */
+    display: flex; /* Restore flex grouping so they stick together nicely */
+    gap: 6px;
+    flex-shrink: 0; /* Prevent icons from getting crushed */
   }
 }
 .list-nav-group, .list-action-group {
