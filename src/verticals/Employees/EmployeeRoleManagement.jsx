@@ -6,7 +6,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 
-const EmployeeRoleManagement = ({ permissions = {} }) => {
+const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,6 +106,8 @@ const EmployeeRoleManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Employee Role Management"
         description="Define and manage specific job roles for the employee vertical."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>

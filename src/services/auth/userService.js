@@ -17,13 +17,14 @@ export const userService = {
         *,
         linkedEmployee:employees (
           id,
-          name,
+          full_name,
+          emp_code,
           email,
           status,
           role_id
         )
       `)
-      .order('name');
+      .order('name', { ascending: true });
 
     if (error) throw error;
     return data;

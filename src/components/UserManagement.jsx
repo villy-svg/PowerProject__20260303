@@ -10,7 +10,7 @@ import './UserManagement.css';
  * Entry point for administrative user & permission management.
  * Now modularized for extreme safety and auditability.
  */
-const UserManagement = () => {
+const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
   const {
     users,
     loading,
@@ -47,6 +47,8 @@ const UserManagement = () => {
       <MasterPageHeader
         title="User Management"
         description="Configure application roles, vertical access, and granular feature-level permissions."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         expandedLeft={
           <div className="view-mode-toggle">
             <button 

@@ -5,7 +5,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
 
-const DepartmentManagement = ({ permissions = {} }) => {
+const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,6 +104,8 @@ const DepartmentManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Department Management"
         description="Define and manage organization departments for employee tracking."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>

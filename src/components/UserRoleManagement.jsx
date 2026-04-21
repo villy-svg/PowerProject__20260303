@@ -8,7 +8,7 @@ import './UserRoleManagement.css';
  * Provides a matrix to toggle CRUD capabilities for each role.
  * Only accessible by Master Admin.
  */
-const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
+const UserRoleManagement = ({ permissions, setPermissions, onBack, setActiveVertical, onShowBottomNav }) => {
 
   const handleToggle = (roleId, capability) => {
     const updatedPermissions = {
@@ -33,6 +33,8 @@ const UserRoleManagement = ({ permissions, setPermissions, onBack }) => {
       <MasterPageHeader
         title="Role Permissions Matrix"
         description="Global overrides for Create, Read, Update, and Delete actions across all system entities."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         leftActions={
           <button className="halo-button back-link-btn" onClick={onBack}>
             ← Back to Configuration

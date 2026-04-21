@@ -3,7 +3,7 @@ import { supabase } from '../services/core/supabaseClient';
 import { IconHome, IconMenu } from './Icons';
 import './Configuration.css';
 
-const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, verticals = {}, verticalList = [] }) => {
+const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, onShowBottomNav, verticals = {}, verticalList = [] }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   
   const canManageSystem = permissions.canManageRoles;

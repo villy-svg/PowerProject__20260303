@@ -9,7 +9,7 @@ import ClientCategoryCSVImport from './ClientCategoryCSVImport';
  * ClientCategoryManagement
  * CRUD sub-view for client categories (mirrors DepartmentManagement).
  */
-const ClientCategoryManagement = ({ permissions = {} }) => {
+const ClientCategoryManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,8 +98,10 @@ const ClientCategoryManagement = ({ permissions = {} }) => {
   return (
     <div className="management-view-container">
       <MasterPageHeader
-        title="Client Category Manager"
-        description="Define and manage client categories for segmenting your client base."
+        title="Client Category Management"
+        description="Define and manage client categories (Vehicle types, Operations, etc.)"
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>

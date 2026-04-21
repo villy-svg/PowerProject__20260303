@@ -5,7 +5,7 @@ import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 
-const HubFunctionManagement = ({ permissions = {} }) => {
+const HubFunctionManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [functions, setFunctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,6 +104,8 @@ const HubFunctionManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Hub Function Management"
         description="Define and manage functional categories for charging hub tasks."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         hideMenuClose={true}
         rightActions={
           permissions.canCreate && (

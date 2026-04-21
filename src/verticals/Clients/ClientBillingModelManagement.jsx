@@ -9,7 +9,7 @@ import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
  * ClientBillingModelManagement
  * CRUD sub-view for client billing models.
  */
-const ClientBillingModelManagement = ({ permissions = {} }) => {
+const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,8 +78,10 @@ const ClientBillingModelManagement = ({ permissions = {} }) => {
   return (
     <div className="management-view-container">
       <MasterPageHeader
-        title="Billing Model Manager"
-        description="Define and manage billing models to categorize how clients are charged."
+        title="Billing Models Management"
+        description="Define global billing models for client contracts."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
