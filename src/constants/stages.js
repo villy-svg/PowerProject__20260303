@@ -36,7 +36,7 @@ export const TASK_STAGES = {
   },
   DEPRIORITIZED: {
     id: 'DEPRIORITIZED',
-    label: 'Deprioritized',
+    label: 'Defer',
     color: '#94a3b8', 
     description: 'Tasks on hold or low priority',
     showInVerticalSummary: false

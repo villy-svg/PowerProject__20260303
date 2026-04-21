@@ -369,8 +369,114 @@
     overflow-x: auto;
     padding-bottom: 2px;
   }
+}/* ==========================================================================
+   KANBAN MOBILE STAGE NAVIGATION TRAY (Top-Fixed Style)
+   ========================================================================== */
+.stage-navigation-tray {
+  display: none; /* Hidden on desktop */
+  padding: 0;
+  background: color-mix(in srgb, var(--bg-color), transparent 10%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
 }
+
+.stage-nav-container {
+  display: flex;
+  height: 68px;
+  width: 100%;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.stage-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.5;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 44px;
+  border-radius: 12px;
+  margin: 2px;
+  position: relative;
+}
+
+.stage-nav-item .stage-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.stage-badge-count {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  background: var(--stage-accent);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 800;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.stage-nav-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Active State */
+.stage-nav-item.active {
+  opacity: 1;
+  color: var(--stage-accent);
+}
+
+.stage-nav-item.active .stage-icon-wrapper {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 15px -8px var(--stage-accent);
+}
+
+@keyframes stageFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @media screen and (max-width: 768px) {
+  .stage-navigation-tray {
+    display: block;
+  }
+
   .header-expanded-controls {
     flex-direction: column;
     width: 100%;
@@ -409,11 +515,32 @@
     filter: blur(8px);
   }
   .kanban-board {
-    gap: 12px;
+    overflow-x: hidden !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    gap: 0 !important;
   }
+
   .kanban-stage-halo {
-    min-width: calc(100vw - 64px);
+    display: none !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 !important;
+    padding: 12px 0 16px 0 !important;
+    background: transparent !important;
+    border: none !important;
   }
+
+  .kanban-stage-halo.active {
+    display: flex !important;
+    animation: stageFadeSlideIn 0.3s ease forwards;
+  }
+
+  /* Hide stage headers on mobile since the tray provides the label */
+  .kanban-stage-halo.active .stage-header {
+    display: none;
+  }
+
   .add-task-btn {
     width: 100%;
     padding: 12px;
@@ -516,4 +643,6 @@
     font-size: 0.85rem;
     font-weight: 600;
   }
+}
+ }
 }

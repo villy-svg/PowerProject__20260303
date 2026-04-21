@@ -1,11 +1,58 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TaskCard from './TaskCard';
+import { 
+  IconClock, 
+  IconZap, 
+  IconEye, 
+  IconCheck, 
+  IconArchive,
+  IconChevronRightSingle
+} from './Icons';
 
 /**
- * TaskKanbanView Component
- * Dedicated view for the Kanban board layout.
- * Extracted from TaskController for better maintainability.
+ * StageNavigationTray
+ * Fixed horizontal navigation for switching between Kanban columns on mobile.
+ * Styled like the primary BottomNav for consistency.
  */
+const StageNavigationTray = ({ stageList, activeStageId, setActiveStageId, filteredTasks }) => {
+  const getStageIcon = (id) => {
+    switch (id) {
+      case 'BACKLOG': return <IconClock size={20} />;
+      case 'IN_PROGRESS': return <IconZap size={18} />;
+      case 'REVIEW': return <IconEye size={20} />;
+      case 'COMPLETED': return <IconCheck size={20} />;
+      case 'DEPRIORITIZED': return <IconArchive size={20} />;
+      default: return null;
+    }
+  };
+
+  return (
+    <nav className="stage-navigation-tray">
+      <div className="stage-nav-container">
+        {stageList.map((stage) => {
+          const count = filteredTasks.filter(t => t.stageId === stage.id).length;
+          const isActive = activeStageId === stage.id;
+          
+          return (
+            <button 
+              key={stage.id}
+              className={`stage-nav-item ${isActive ? 'active' : ''}`}
+              onClick={() => setActiveStageId(stage.id)}
+              style={{ '--stage-accent': stage.color }}
+            >
+              <div className="stage-icon-wrapper">
+                {getStageIcon(stage.id)}
+                {count > 0 && <span className="stage-badge-count">{count}</span>}
+              </div>
+              <span className="stage-nav-label">{stage.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
+
 const TaskKanbanView = ({
   tasks,
   filteredTasks,
@@ -39,6 +86,9 @@ const TaskKanbanView = ({
   expandedTaskId,
   setExpandedTaskId
 }) => {
+  const [activeStageId, setActiveStageId] = useState('BACKLOG');
+  const visibleStages = stageList.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED');
+
   return (
     <div className="kanban-view-container">
       {permissions.canViewKanbanHierarchy && (drillDownId || drillPath.length > 0) && (
@@ -70,8 +120,16 @@ const TaskKanbanView = ({
         </div>
       )}
 
+      <StageNavigationTray 
+        stageList={visibleStages}
+        activeStageId={activeStageId}
+        setActiveStageId={setActiveStageId}
+        filteredTasks={filteredTasks}
+      />
+
       <div className="kanban-board">
-        {stageList.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED').map((stage) => {
+        {visibleStages.map((stage) => {
+          const isActive = activeStageId === stage.id;
           const getPriorityWeight = (p) => {
             if (!p) return 0;
             const lowerP = p.toLowerCase();
@@ -125,7 +183,7 @@ const TaskKanbanView = ({
           return (
             <div
               key={stage.id}
-              className="kanban-stage-halo"
+              className={`kanban-stage-halo ${isActive ? 'active' : ''}`}
               style={{
                 borderTop: `4px solid ${stage.color}`,
                 borderColor: `${stage.color}44`,

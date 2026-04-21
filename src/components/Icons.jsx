@@ -172,3 +172,37 @@ export const IconFile = (props) => (
     <polyline points="13 2 13 9 20 9" />
   </IconBase>
 );
+
+export const IconClock = (props) => (
+  <IconBase {...props}>
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </IconBase>
+);
+
+export const IconZap = (props) => (
+  <IconBase {...props}>
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </IconBase>
+);
+
+export const IconEye = (props) => (
+  <IconBase {...props}>
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </IconBase>
+);
+
+export const IconArchive = (props) => (
+  <IconBase {...props}>
+    <polyline points="21 8 21 21 3 21 3 8" />
+    <rect x="1" y="3" width="22" height="5" />
+    <line x1="10" y1="12" x2="14" y2="12" />
+  </IconBase>
+);
+
+export const IconChevronRightSingle = (props) => (
+  <IconBase {...props}>
+    <polyline points="9 18 15 12 9 6" />
+  </IconBase>
+);
