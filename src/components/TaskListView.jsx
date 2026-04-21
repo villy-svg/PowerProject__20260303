@@ -7,7 +7,9 @@ import {
   IconArrowLeft, 
   IconArrowRight, 
   IconPromote, 
-  IconDiagonalUp 
+  IconDiagonalUp,
+  IconChevronDown,
+  IconChevronRight
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { hierarchyService } from '../services/rules/hierarchyService';
@@ -115,7 +117,7 @@ const ListViewRow = ({
           onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
           style={{ width: '20px', display: 'flex', justifyContent: 'center', cursor: 'pointer', opacity: hasChildren ? 1 : 0 }}
         >
-          {hasChildren ? (isExpanded ? '▼' : '▶') : ''}
+          {hasChildren ? (isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
         </div>
         {task.depth > 0 && (
           <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
@@ -315,7 +317,7 @@ const ListViewRow = ({
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
-              v
+              <IconChevronDown size={14} />
             </button>
           )}
           {effectiveCanDelete && (

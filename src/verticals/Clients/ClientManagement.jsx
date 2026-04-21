@@ -5,6 +5,8 @@ import './ClientManagement.css';
 import ClientCSVDownload from './ClientCSVDownload';
 import ClientCSVImport from './ClientCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { useScrollDirection } from '../../hooks/useScrollDirection';
+import { IconChevronDown, IconPlus } from '../../components/Icons';
 import TaskModal from '../../components/TaskModal';
 import ClientForm from './ClientForm';
 import ClientCard from './ClientCard';
@@ -18,7 +20,7 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
  * Primary view for the Client Manager vertical.
  * Displays client records grouped by category.
  */
-const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVertical, onShowBottomNav }) => {
+const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -28,6 +30,8 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
   const [editingClient, setEditingClient] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
   const [pendingConflict, setPendingConflict] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+  const isScrollVisible = useScrollDirection(10, 100);
 
   useEffect(() => {
     if (permissions?.canAccessClients) {
@@ -155,26 +159,14 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
 
   const isMasterAdmin = user?.roleId === 'master_admin';
 
-  const clientCardProps = (client) => ({
-    key: client.id,
-    client,
-    tasks: tasks.filter(t => t.assigned_client_id === client.id),
-    onEdit: openEditModal,
-    onView: openViewModal,
-    onDelete: handleDelete,
-    onToggleStatus: toggleStatus,
-    permissions: {
-      ...permissions,
-      canUpdate: permissions.canUpdateClients,
-      canDelete: permissions.canDeleteClients
-    },
-  });
-
   return (
     <>
       <MasterPageHeader
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={setIsSubSidebarOpen}
+        hideMenuClose={true}
         title="Client Records Manager"
         description="Centralized database for client profiles, billing arrangements, and point-of-contact information."
         rightActions={
@@ -187,6 +179,8 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
             </button>
           )
         }
+        canAdd={permissions.canCreateClients}
+        onAddClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
@@ -208,6 +202,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
               title={showInactive ? 'Hide Inactive' : 'Show Inactive'}
               style={{ fontWeight: 600, textDecoration: showInactive ? 'none' : 'line-through' }}
             >
+              <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
               INACTIVE
             </button>
           </>
@@ -256,11 +251,29 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                         {billingModelName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInModel.length})</span>
                       </h5>
                       <div className={viewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
-                        {clientsInModel.map(client =>
-                          viewMode === 'grid'
-                            ? <ClientCard {...clientCardProps(client)} />
-                            : <ClientListRow {...clientCardProps(client)} />
-                        )}
+                        {clientsInModel.map(client => {
+                          const props = {
+                            client,
+                            tasks: tasks.filter(t => t.assigned_client_id === client.id),
+                            onEdit: openEditModal,
+                            onView: openViewModal,
+                            onDelete: handleDelete,
+                            onToggleStatus: toggleStatus,
+                            permissions: {
+                              ...permissions,
+                              canUpdate: permissions.canUpdateClients,
+                              canDelete: permissions.canDeleteClients
+                            }
+                          };
+                          return viewMode === 'grid'
+                            ? <ClientCard key={client.id} {...props} />
+                            : <ClientListRow 
+                                key={client.id} 
+                                {...props} 
+                                isExpanded={expandedId === client.id}
+                                onToggleExpand={() => setExpandedId(expandedId === client.id ? null : client.id)}
+                              />;
+                        })}
                       </div>
                     </div>
                   ))}
@@ -279,11 +292,29 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                 <p className="client-empty-sub-state" style={{ opacity: 0.3 }}>No inactive records.</p>
               ) : (
                 <div className={viewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
-                  {inactiveClients.map(client =>
-                    viewMode === 'grid'
-                      ? <ClientCard {...clientCardProps(client)} />
-                      : <ClientListRow {...clientCardProps(client)} />
-                  )}
+                  {inactiveClients.map(client => {
+                    const props = {
+                      client,
+                      tasks: tasks.filter(t => t.assigned_client_id === client.id),
+                      onEdit: openEditModal,
+                      onView: openViewModal,
+                      onDelete: handleDelete,
+                      onToggleStatus: toggleStatus,
+                      permissions: {
+                        ...permissions,
+                        canUpdate: permissions.canUpdateClients,
+                        canDelete: permissions.canDeleteClients
+                      }
+                    };
+                    return viewMode === 'grid'
+                      ? <ClientCard key={client.id} {...props} />
+                      : <ClientListRow 
+                          key={client.id} 
+                          {...props} 
+                          isExpanded={expandedId === client.id}
+                          onToggleExpand={() => setExpandedId(expandedId === client.id ? null : client.id)}
+                        />;
+                  })}
                 </div>
               )}
             </div>

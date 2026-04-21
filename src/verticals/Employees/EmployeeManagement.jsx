@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import './Employees.css';
 import EmployeeCSVDownload from './EmployeeCSVDownload';
@@ -13,6 +13,7 @@ import EmployeeBulkUpdateModal from './EmployeeBulkUpdateModal';
 import { useEmployees } from '../../hooks/useEmployees';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import ConflictModal from '../../components/ConflictModal';
+import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Icons';
 
 /**
  * EmployeeManagement
@@ -20,7 +21,7 @@ import ConflictModal from '../../components/ConflictModal';
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onShowBottomNav }) => {
+const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -35,6 +36,16 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
   const [selectedIds, setSelectedIds] = useState([]);
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  const [expandedId, setExpandedId] = useState(null);
+
+  // Tray Visibility (synced FROM MasterPageHeader's scroll hook)
+  // We intentionally do NOT call useScrollDirection here. MasterPageHeader
+  // owns the single authoritative instance and notifies us via callback.
+  const [isTrayVisible, setIsTrayVisible] = useState(true);
+  const handleTrayVisibilityChange = useCallback((visible) => {
+    setIsTrayVisible(visible);
+  }, []);
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
@@ -187,6 +198,10 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       <MasterPageHeader
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={setIsSubSidebarOpen}
+        onTrayVisibilityChange={handleTrayVisibilityChange}
+        hideMenuClose={true}
         title="Employee Records Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
         rightActions={
@@ -196,6 +211,8 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
             </button>
           )
         }
+        canAdd={permissions.canCreateEmployees}
+        onAddClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
@@ -216,6 +233,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
               onClick={() => setShowInactive(!showInactive)}
               title={showInactive ? "Hide Inactive" : "Show Inactive"}
             >
+              <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
               INACTIVE
             </button>
           </>
@@ -314,6 +332,8 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                               onUpdateHub={updateEmployeeHub}
                               isSelected={selectedIds.includes(emp.id)}
                               onSelect={handleSelectIndividual}
+                              isExpanded={expandedId === emp.id}
+                              onToggleExpand={() => setExpandedId(expandedId === emp.id ? null : emp.id)}
                             />
                           )
                         ))}
@@ -362,6 +382,8 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                         onUpdateHub={updateEmployeeHub}
                         isSelected={selectedIds.includes(emp.id)}
                         onSelect={handleSelectIndividual}
+                        isExpanded={expandedId === emp.id}
+                        onToggleExpand={() => setExpandedId(expandedId === emp.id ? null : emp.id)}
                       />
                     )
                   ))}
@@ -372,18 +394,20 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
         </div>
       )}
 
-      {/* Floating Bulk Action Toolbar */}
+      {/* Floating Bulk Action Bar */}
       {selectedIds.length > 0 && (
-        <div className="bulk-action-toolbar">
+        <div className={`bulk-action-bar ${!isTrayVisible ? 'tray-hidden' : ''}`}>
           <div className="bulk-info">
             {selectedIds.length} Selected
           </div>
           <div className="bulk-actions">
-            <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)}>
-              Bulk Update
+            <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
+              <IconEdit size={18} />
+              <span className="bulk-btn-text">Update</span>
             </button>
-            <button className="bulk-btn secondary" onClick={() => setSelectedIds([])}>
-              Cancel
+            <button className="bulk-btn cancel" onClick={() => setSelectedIds([])} title="Cancel Selection">
+              <IconX size={18} />
+              <span className="bulk-btn-text">Cancel</span>
             </button>
           </div>
         </div>

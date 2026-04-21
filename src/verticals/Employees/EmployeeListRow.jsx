@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../components/Icons';
 
 /**
  * EmployeeListRow
- * Row view item for an employee.
+ * Row view item for an employee, refactored to match Task Board aesthetics.
  */
 const EmployeeListRow = ({
   emp,
@@ -14,7 +15,9 @@ const EmployeeListRow = ({
   availableHubs,
   onUpdateHub,
   isSelected = false,
-  onSelect
+  onSelect,
+  isExpanded,
+  onToggleExpand
 }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
@@ -42,100 +45,91 @@ const EmployeeListRow = ({
 
   return (
     <div
-      className={`employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''}`}
+      className={`list-task-row employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''}`}
+      onClick={(e) => {
+        if (e.target.closest('button') || e.target.closest('.list-row-selection')) return;
+        onToggleExpand();
+      }}
       onDoubleClick={() => onView(emp)}
-      title="Double-click to view"
     >
-      <div className="list-row-inner">
-        {/* COLUMN 1: Identity & Management */}
-        <div className="list-col col-identity">
-          <div className="col-row-1">
-            <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`} onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
-              {isSelected && '✓'}
-            </div>
-            <span className="list-name">{emp.full_name}</span>
+      <div className="list-row-main">
+        {/* 1. Selection Checkbox */}
+        <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(emp.id); }}>
+          <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+            {isSelected && '✓'}
           </div>
-          <div className="col-row-2 management-info">
-            <span className="contact-item-id">{emp.badge_id}</span>
-            {emp.manager_name && emp.manager_name !== 'None' && (
-              <span className="manager-info">👤 {emp.manager_name}</span>
-            )}
+        </div>
+
+        {/* 2. Identity Block */}
+        <div className="list-row-content">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="id-line" style={{ fontSize: '0.75rem', minWidth: '60px' }}>{emp.badge_id}</span>
+            <span className="list-name">{emp.full_name}</span>
             {emp.isDuplicate && (
               <span className="duplicate-badge-mini" title={`${emp.duplicateCount} duplicates`}>DUP</span>
             )}
           </div>
         </div>
 
-        {/* COLUMN 2: Organization & User/Badges */}
-        <div className="list-col col-org">
-          <div className="col-row-1">
-            <span className="dept-badge">{emp.dept_code || 'NO DEPT'}</span>
-            <span
-              className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
-              onDoubleClick={handleHubDoubleClick}
-            >
-              {isEditingHub ? (
-                <select
-                  className="hub-select-mini"
-                  value={selectedHubId}
-                  onChange={handleHubChange}
-                  onBlur={handleHubBlur}
-                  autoFocus
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <option value="ALL">ALL</option>
-                  {availableHubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
-                </select>
-              ) : (
-                emp.hub_code || 'NO HUB'
-              )}
-            </span>
-            <span className="role-badge">{emp.role_code || 'NO ROLE'}</span>
-          </div>
-          <div className="col-row-2 system-badges">
-            {emp.is_app_user && <span className="app-user-badge-mini">USER</span>}
-            {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
-              <span className="bank-missing-badge-mini">Bank Missing</span>
-            )}
-          </div>
-        </div>
-
-        {/* COLUMN 3: Contact */}
-        <div className="list-col col-contact">
-          <div className="col-row-1">
-            <span className="contact-item">{emp.phone ? (emp.phone.toString().startsWith('+91') ? emp.phone : `+91 ${emp.phone.toString().replace(/^\+?91/, '').trim()}`) : 'N/A'}</span>
-          </div>
-          <div className="col-row-2">
-            {emp.email && <span className="contact-item email-id">{emp.email}</span>}
-          </div>
-        </div>
-
-        {/* COLUMN 4: Actions & Status */}
-        <div className="list-col col-actions">
-          <div className="col-row-1 actions-row">
-            {permissions.canUpdate && (
-              <button className="action-icon-btn edit-pencil-btn" onClick={() => onEdit(emp)} title="Edit">✎</button>
-            )}
-            {permissions.canDelete && (
-              <button className="action-icon-btn delete" onClick={() => onDelete(emp.id)} title="Delete">×</button>
-            )}
-          </div>
-          <div className="col-row-2 status-row">
-            {emp.status === 'Inactive' ? (
-              <div className="employee-status-indicator inactive">{emp.status}</div>
+        {/* 3. Badges / Metadata */}
+        <div className="list-row-badges">
+          <span className="dept-badge">{emp.dept_code || 'NO DEPT'}</span>
+          <span
+            className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
+            onDoubleClick={handleHubDoubleClick}
+          >
+            {isEditingHub ? (
+              <select
+                className="hub-select-mini"
+                value={selectedHubId}
+                onChange={handleHubChange}
+                onBlur={handleHubBlur}
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+              >
+                <option value="ALL">ALL</option>
+                {availableHubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
+              </select>
             ) : (
-              permissions.canUpdate && (
-                <button
-                  className="status-toggle-btn"
-                  onClick={() => onToggleStatus(emp.id, emp.status)}
-                  title="Move to Inactive"
-                >
-                  ↓
-                </button>
-              )
+              emp.hub_code || 'NO HUB'
             )}
-          </div>
+          </span>
+          <span className="role-badge">{emp.role_code || 'NO ROLE'}</span>
+          {emp.is_app_user && <span className="app-user-badge-mini">USER</span>}
+          {emp.manager_name && emp.manager_name !== 'None' && (
+            <span className="manager-info" style={{ opacity: 0.7, fontSize: '0.7rem' }}>👤 {emp.manager_name}</span>
+          )}
         </div>
+      </div>
+
+      {/* 4. Controls (Hover/Expand) */}
+      <div className="list-row-controls">
+        {permissions.canUpdate && (
+          <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit">
+            <IconEdit size={14} />
+          </button>
+        )}
+        {permissions.canDelete && (
+          <button className="card-delete-button" onClick={(e) => { e.stopPropagation(); onDelete(emp.id); }} title="Delete">
+            <IconTrash size={14} />
+          </button>
+        )}
+        {emp.status !== 'Inactive' && permissions.canUpdate && (
+          <button
+            className="card-deprio-button"
+            onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
+            title="Move to Inactive"
+          >
+            <IconChevronDown size={14} />
+          </button>
+        )}
+        <button 
+          className="card-nav-button" 
+          onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
+          title={isExpanded ? "Collapse" : "Expand Details"}
+        >
+          {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+        </button>
       </div>
     </div>
   );

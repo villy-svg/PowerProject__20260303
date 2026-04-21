@@ -7,7 +7,8 @@ import {
   IconArrowLeft, 
   IconArrowRight, 
   IconPromote, 
-  IconDiagonalUp 
+  IconDiagonalUp,
+  IconChevronDown 
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { hierarchyService } from '../services/rules/hierarchyService';
@@ -310,7 +311,7 @@ const TaskCard = ({
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
-              v
+              <IconChevronDown size={14} />
             </button>
           )}
 

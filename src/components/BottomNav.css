@@ -1,22 +1,32 @@
+/* ==========================================================================
+   BOTTOM NAV — Mobile Primary Navigation Tray
+   Only renders on screens ≤ 768px (display: none at desktop by default)
+   ========================================================================== */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(64px + var(--safe-bottom, 0px));
-  background: color-mix(in srgb, var(--bg-color), transparent 20%);
+  /* Extend below viewport to cover bounce-gap at bottom */
+  padding-bottom: calc(var(--safe-bottom, 0px) + 20px);
+  margin-bottom: -20px;
+  background: color-mix(in srgb, var(--bg-color), transparent 10%);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-top: 1px solid var(--border-color);
-  z-index: 2005; /* Just below sidebar drawer (3010) but above content */
-  display: none; /* Hidden by default on desktop */
-  padding-bottom: var(--safe-bottom, 0px);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  /* Curvy premium top edge */
+  border-radius: 20px 20px 0 0;
+  z-index: 2005;
+  display: none;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .bottom-nav-hidden {
   transform: translateY(110%);
 }
+
+/* --- BACKDROP (for overlay mode) --- */
 .bottom-nav-backdrop {
   position: fixed;
   inset: 0;
@@ -26,16 +36,21 @@
   -webkit-backdrop-filter: blur(2px);
   animation: fadeIn 0.2s ease;
 }
+
+/* --- OVERLAY MODE (Global Vertical Switcher) --- */
 .bottom-nav.overlay-mode {
-  display: block; /* Force visible on mobile */
-  transform: translateY(0); /* Override hidden */
-  z-index: 4000; /* Above everything */
+  transform: translateY(0);
+  z-index: 4000;
 }
+
+/* Hide overlay on desktop */
 @media screen and (min-width: 769px) {
   .bottom-nav.overlay-mode {
-    display: none; /* Never show on desktop */
+    display: none;
   }
 }
+
+/* --- CONTAINER --- */
 .bottom-nav-container {
   display: flex;
   height: 64px;
@@ -44,6 +59,8 @@
   align-items: center;
   padding: 0 8px;
 }
+
+/* --- NAV ITEMS --- */
 .nav-item {
   flex: 1;
   display: flex;
@@ -61,6 +78,7 @@
   border-radius: var(--radius-button);
   margin: 4px;
 }
+
 .nav-item .icon-wrapper {
   display: flex;
   align-items: center;
@@ -69,12 +87,14 @@
   border-radius: 50%;
   transition: all 0.3s ease;
 }
+
 .nav-item .nav-icon {
   width: 20px;
   height: 20px;
   stroke-width: 1.8;
   opacity: 0.8;
 }
+
 .nav-label {
   font-size: var(--font-xs);
   font-weight: 700;
@@ -82,38 +102,45 @@
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
 }
-/* --- ACTIVE STATE (Toggle Logic: Border + Subtle Tint) --- */
+
+/* --- ACTIVE STATE --- */
 .nav-item.active {
   opacity: 1;
   color: var(--brand-mint);
 }
+
 .nav-item.active .icon-wrapper {
   background: var(--halo-bg);
   box-shadow: 0 0 10px var(--halo-glow);
 }
+
 .nav-item.active .nav-icon {
-  stroke-width: 2.2; /* Bold active state */
+  stroke-width: 2.2;
   opacity: 1;
 }
+
 .nav-item:hover:not(.active) {
   opacity: 0.9;
   transform: translateY(-2px);
 }
+
 /* --- RESPONSIVENESS --- */
 @media screen and (max-width: 768px) {
   .bottom-nav {
     display: block;
   }
 }
-/* Apple Notch Devices / Tall Screens */
+
 @media screen and (max-width: 480px) {
   .bottom-nav-container {
     padding: 0 4px;
   }
+
   .nav-item {
     margin: 2px;
   }
+
   .nav-label {
     font-size: 0.65rem;
   }
-}
+}

@@ -1,5 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useScrollDirection } from '../hooks/useScrollDirection';
+import { 
+  IconHome, 
+  IconMenu, 
+  IconPlus, 
+  IconChevronLeft, 
+  IconChevronRight, 
+  IconChevronDown 
+} from './Icons';
 import './MasterPageHeader.css';
 import MasterHeaderMenu from './MasterHeaderMenu';
 
@@ -29,19 +37,43 @@ const MasterPageHeader = ({
   onAddClick,
   isTaskModalOpen,
   onShowBottomNav,
-  setActiveVertical
+  setActiveVertical,
+  onTrayVisibilityChange,
+  isMenuOpen: controlledIsMenuOpen,
+  setIsMenuOpen: controlledSetIsMenuOpen,
+  hideMenuClose,
+  isSidebarOpen
 }) => {
   const isScrollVisible = useScrollDirection(10, 100);
   const pressTimer = useRef(null);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(() => {
+  // Internal state fallback if not controlled by parent
+  const [internalIsMenuOpen, setInternalIsMenuOpen] = useState(() => {
     const saved = localStorage.getItem('master-header-menu-open');
     return saved === 'true';
   });
 
+  const isMenuOpen = controlledIsMenuOpen !== undefined ? controlledIsMenuOpen : internalIsMenuOpen;
+  const setIsMenuOpen = controlledSetIsMenuOpen !== undefined ? controlledSetIsMenuOpen : setInternalIsMenuOpen;
+
   useEffect(() => {
     localStorage.setItem('master-header-menu-open', isMenuOpen);
+
+    // Body scroll lock for mobile menu
+    if (isMenuOpen && window.innerWidth <= 1024) {
+      document.body.classList.add('no-scroll');
+    } else {
+      document.body.classList.remove('no-scroll');
+    }
+
+    return () => document.body.classList.remove('no-scroll');
   }, [isMenuOpen]);
+
+  // Notify parent whenever tray visibility changes, so they can sync
+  // the bulk-action-bar without running a separate hook instance.
+  useEffect(() => {
+    if (onTrayVisibilityChange) onTrayVisibilityChange(isScrollVisible);
+  }, [isScrollVisible, onTrayVisibilityChange]);
 
   // MUTUAL EXCLUSIVITY: Add Task Modal closes other overlays
   useEffect(() => {
@@ -54,7 +86,7 @@ const MasterPageHeader = ({
   const hasExpandedContent = !!(expandedLeft || expandedRight);
 
   return (
-    <header className="master-page-header">
+    <header className={`master-page-header ${isMenuOpen ? 'is-sticky' : ''} ${(!isScrollVisible && !isMenuOpen && !isSubSidebarOpen && !isSidebarOpen) ? 'header-hidden' : ''}`}>
       <div className="header-row-1">
         <h1>{title}</h1>
       </div>
@@ -65,99 +97,106 @@ const MasterPageHeader = ({
         </div>
       )}
       
-      <div className="master-header-actions-row">
-        <div className="master-header-left">
-          {hasExpandedContent && (
-            <button 
-              className={`halo-button menu-trigger-btn ${isMenuOpen ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <span className="menu-icon">{isMenuOpen ? '▼' : '▶'}</span>
-              MENU
-            </button>
-          )}
-          {leftActions}
-        </div>
-        <div className="master-header-right">
-          {rightActions}
-        </div>
-      </div>
+        <div className="header-actions-area">
+          <div className="master-header-actions-row">
+            <div className="master-header-left">
+              {hasExpandedContent && (
+                <button 
+                  className={`halo-button menu-trigger-btn ${isMenuOpen ? 'active' : ''}`}
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  <span className="menu-icon">
+                    {isMenuOpen ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+                  </span>
+                  MENU
+                </button>
+              )}
+              {leftActions}
+            </div>
+            <div className="master-header-right">
+              {rightActions}
+            </div>
+          </div>
 
-      {hasExpandedContent && isMenuOpen && (
-        <MasterHeaderMenu 
-          expandedLeft={expandedLeft}
-          expandedRight={expandedRight}
-        />
-      )}
+          {hasExpandedContent && isMenuOpen && (
+            <MasterHeaderMenu 
+              expandedLeft={expandedLeft}
+              expandedRight={expandedRight}
+              onClose={() => setIsMenuOpen(false)}
+              hideCloseButton={hideMenuClose}
+            />
+          )}
+        </div>
+
 
       {/* MOBILE ACTION TRAY (Only visible on small screens) */}
-      <div className={`mobile-action-tray ${!isScrollVisible ? 'tray-hidden' : ''}`}>
-        <button 
-          className="halo-button mobile-tray-btn" 
-          title="Home"
-          onPointerDown={(e) => {
-            // Start a timer for long-press
-            pressTimer.current = setTimeout(() => {
-              pressTimer.current = null;
-              if (onShowBottomNav) onShowBottomNav();
-            }, 500);
-          }}
-          onPointerUp={(e) => {
-            // If timer is still running, it was a short tap. Go home.
-            if (pressTimer.current) {
-              clearTimeout(pressTimer.current);
-              pressTimer.current = null;
-              if (setActiveVertical) setActiveVertical(null);
-            }
-          }}
-          onPointerLeave={(e) => {
-            // Cancel if they drag their finger away
-            if (pressTimer.current) {
-              clearTimeout(pressTimer.current);
-              pressTimer.current = null;
-            }
-          }}
-        >
-          <span className="menu-icon" style={{ fontSize: '1.2rem', marginBottom: '2px' }}>🏠</span>
-        </button>
-
-        {onSidebarToggle && (
+      <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen) ? '' : 'tray-hidden'}`}>
+        <div className="mobile-action-tray-container">
           <button 
-            className={`halo-button mobile-tray-btn ${isSubSidebarOpen ? 'active' : ''}`} 
-            onClick={() => {
-              const nextSidebarState = !isSubSidebarOpen;
-              if (nextSidebarState) setIsMenuOpen(false); // Close menu if opening sidebar
-              onSidebarToggle(nextSidebarState);
-            }} 
-            title="Toggle Sidebar"
-          >
-            {isSubSidebarOpen ? '«' : '»'}
-          </button>
-        )}
-        
-        {hasExpandedContent && (
-          <button 
-            className={`halo-button mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => {
-              const nextMenuState = !isMenuOpen;
-              setIsMenuOpen(nextMenuState);
-              if (nextMenuState) onSidebarToggle(false); // Force close sidebar if opening menu
+            className="halo-button mobile-tray-btn" 
+            title="Home"
+            onPointerDown={(e) => {
+              pressTimer.current = setTimeout(() => {
+                pressTimer.current = null;
+                if (onShowBottomNav) onShowBottomNav();
+              }, 500);
             }}
-            title="Toggle Menu"
+            onPointerUp={(e) => {
+              if (pressTimer.current) {
+                clearTimeout(pressTimer.current);
+                pressTimer.current = null;
+                // User confirmed: always return to main dashboard
+                if (setActiveVertical) setActiveVertical(null);
+              }
+            }}
+            onPointerLeave={(e) => {
+              if (pressTimer.current) {
+                clearTimeout(pressTimer.current);
+                pressTimer.current = null;
+              }
+            }}
           >
-            <span className="menu-icon">{isMenuOpen ? '▼' : '☰'}</span>
+            <IconHome size={22} />
           </button>
-        )}
 
-        {canAdd && (
-          <button 
-            className={`halo-button mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`} 
-            onClick={onAddClick} 
-            title="Add Task"
-          >
-            +
-          </button>
-        )}
+          {onSidebarToggle && (
+            <button 
+              className={`halo-button mobile-tray-btn ${isSubSidebarOpen ? 'active' : ''}`} 
+              onClick={() => {
+                const nextSidebarState = !isSubSidebarOpen;
+                if (nextSidebarState) setIsMenuOpen(false);
+                onSidebarToggle(nextSidebarState);
+              }} 
+              title="Toggle Sidebar"
+            >
+              {isSubSidebarOpen ? <IconChevronLeft size={20} /> : <IconChevronRight size={20} />}
+            </button>
+          )}
+          
+          {hasExpandedContent && (
+            <button 
+              className={`halo-button mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
+              onClick={() => {
+                const nextMenuState = !isMenuOpen;
+                setIsMenuOpen(nextMenuState);
+                if (nextMenuState && onSidebarToggle) onSidebarToggle(false);
+              }}
+              title="Toggle Menu"
+            >
+              <IconMenu size={20} />
+            </button>
+          )}
+
+          {canAdd && (
+            <button 
+              className={`halo-button mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`} 
+              onClick={onAddClick} 
+              title="Add New"
+            >
+              <IconPlus size={24} />
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

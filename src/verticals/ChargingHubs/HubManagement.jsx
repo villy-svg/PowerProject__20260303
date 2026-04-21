@@ -6,6 +6,7 @@ import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
+import { IconEdit, IconTrash, IconX, IconPlus } from '../../components/Icons';
 
 // Error boundary component
 class HubManagementErrorBoundary extends React.Component {
@@ -46,7 +47,7 @@ class HubManagementErrorBoundary extends React.Component {
   }
 }
 
-const HubManagement = ({ permissions = {} }) => {
+const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen, setActiveVertical, onShowBottomNav }) => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -182,6 +183,11 @@ const HubManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Hub Management"
         description="Create and manage global charging hub locations."
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={setIsSubSidebarOpen}
+        hideMenuClose={true}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
@@ -189,6 +195,8 @@ const HubManagement = ({ permissions = {} }) => {
             </button>
           )
         }
+        canAdd={permissions.canCreate}
+        onAddClick={() => handleOpenModal()}
         expandedLeft={
           <div className="view-mode-toggle">
             <button
@@ -235,8 +243,16 @@ const HubManagement = ({ permissions = {} }) => {
               <h3>{hub.name}</h3>
               <p className="hub-city">{hub.city || 'No city set'}</p>
               <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)} title="Delete Hub">×</button>}
+                {permissions.canUpdate && (
+                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">
+                    <IconEdit size={16} />
+                  </button>
+                )}
+                {permissions.canDelete && (
+                  <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)} title="Delete Hub">
+                    <IconTrash size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -272,8 +288,16 @@ const HubManagement = ({ permissions = {} }) => {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="table-actions">
-                      {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">✎</button>}
-                      {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">×</button>}
+                      {permissions.canUpdate && (
+                        <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">
+                          <IconEdit size={16} />
+                        </button>
+                      )}
+                      {permissions.canDelete && (
+                        <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">
+                          <IconTrash size={16} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -288,7 +312,9 @@ const HubManagement = ({ permissions = {} }) => {
           <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
               <h2>{editingHub ? 'Edit Charging Hub' : 'Create New Hub'}</h2>
-              <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
+              <button className="close-modal" onClick={() => setIsModalOpen(false)}>
+                <IconX size={20} />
+              </button>
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">

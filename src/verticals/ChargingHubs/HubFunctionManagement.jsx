@@ -104,6 +104,7 @@ const HubFunctionManagement = ({ permissions = {} }) => {
       <MasterPageHeader
         title="Hub Function Management"
         description="Define and manage functional categories for charging hub tasks."
+        hideMenuClose={true}
         rightActions={
           permissions.canCreate && (
             <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>

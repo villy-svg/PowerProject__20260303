@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import TaskListView from './TaskListView';
 import TaskKanbanView from './TaskKanbanView';
@@ -12,10 +12,12 @@ import { useTaskController } from '../hooks/useTaskController';
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import RejectionModal from './RejectionModal';
 import { 
-  IconDelete, 
   IconArrowLeft, 
   IconArrowRight, 
   IconPromote,
+  IconTrash,
+  IconX,
+  IconChevronDown,
 } from './Icons';
 import './TaskController.css';
 
@@ -85,6 +87,20 @@ const TaskController = (props) => {
   // ─── Proof of Work Approve / Reject State ────────────────────────────
   const [rejectionModalState, setRejectionModalState] = useState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
 
+  // ─── Tray Visibility (synced FROM MasterPageHeader's scroll hook) ──────
+  // We intentionally do NOT call useScrollDirection here. MasterPageHeader
+  // owns the single authoritative instance and notifies us via the callback.
+  const [isTrayVisible, setIsTrayVisible] = useState(true);
+  const handleTrayVisibilityChange = useCallback((visible) => {
+    setIsTrayVisible(visible);
+    if (props.onTrayVisibilityChange) {
+      props.onTrayVisibilityChange(visible);
+    }
+  }, [props.onTrayVisibilityChange]);
+
+  // ─── Header Menu State ───────────────────────────────────────────
+  const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+
   // ─── Compact Tiles Expansion State (For Touch Devices) ──────────
   const [expandedTaskId, setExpandedTaskId] = useState(null);
 
@@ -119,6 +135,10 @@ const TaskController = (props) => {
       <MasterPageHeader
         title={boardLabel || `${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
+        isMenuOpen={isHeaderMenuOpen}
+        setIsMenuOpen={setIsHeaderMenuOpen}
+        hideMenuClose={label?.includes('Hub')}
+        isSidebarOpen={props.isMainSidebarOpen}
         rightActions={
           <>
             {canUserCreate && !activeVertical.includes('daily') && (
@@ -138,6 +158,7 @@ const TaskController = (props) => {
         isTaskModalOpen={isModalOpen}
         onShowBottomNav={onShowBottomNav}
         setActiveVertical={setActiveVertical}
+        onTrayVisibilityChange={handleTrayVisibilityChange}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
@@ -153,32 +174,29 @@ const TaskController = (props) => {
               ))}
             </div>
 
-            <button
-              className={`halo-button toggle-depri-btn ${!showDeprioritized ? 'active' : ''}`}
-              onClick={() => setShowDeprioritized(!showDeprioritized)}
-              title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
-              style={{ fontWeight: 600, textDecoration: showDeprioritized ? 'none' : 'line-through' }}
-            >
-              DEPR
-            </button>
-
-            <div className="view-mode-toggle">
+            <div className="header-filter-group">
               <button
-                className={`view-toggle-btn ${showMyTasksOnly ? 'active' : ''}`}
+                className={`halo-button toggle-depri-btn ${showDeprioritized ? 'active' : ''}`}
+                onClick={() => setShowDeprioritized(!showDeprioritized)}
+                title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
+              >
+                DEPR
+              </button>
+
+              <button
+                className={`halo-button toggle-depri-btn ${showMyTasksOnly ? 'active' : ''}`}
                 onClick={() => setShowMyTasksOnly(!showMyTasksOnly)}
                 title={showMyTasksOnly ? "Show All Tasks" : "Filter: My Tasks Only"}
               >
-                MY TASKS
+                My Tasks
               </button>
-            </div>
 
-            <div className="view-mode-toggle">
               <button
-                className={`view-toggle-btn ${showReworkOnly ? 'active' : ''}`}
+                className={`halo-button toggle-depri-btn ${showReworkOnly ? 'active' : ''}`}
                 onClick={() => setShowReworkOnly(!showReworkOnly)}
                 title={showReworkOnly ? "Show All Tasks" : "Filter: Rework Required Only"}
               >
-                REWORK
+                Rework
               </button>
             </div>
 
@@ -262,7 +280,14 @@ const TaskController = (props) => {
         onSubmit={submitRejection}
       />
 
-      <div className="workspace-main-view">
+      {isHeaderMenuOpen && (
+        <div 
+          className="menu-backdrop" 
+          onClick={() => setIsHeaderMenuOpen(false)} 
+        />
+      )}
+
+      <div className={`workspace-main-view ${(isHeaderMenuOpen || isSubSidebarOpen) ? 'is-blurred' : ''}`}>
         {viewMode === 'kanban' ? (
           <TaskKanbanView
             tasks={hierarchyFilteredTasks}
@@ -352,9 +377,9 @@ const TaskController = (props) => {
       </div>
 
       {selectedTaskIds.length > 0 && (
-        <div className="bulk-action-bar active">
+        <div className={`bulk-action-bar ${!isTrayVisible ? 'tray-hidden' : ''}`}>
           <div className="bulk-info">
-            <span className="selection-count">{selectedTaskIds.length} tasks selected</span>
+            <span className="selection-count">{selectedTaskIds.length} Selected</span>
           </div>
 
           <div className="bulk-actions">
@@ -364,7 +389,8 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('backward')}
                 title="Move Backward"
               >
-                <IconArrowLeft size={18} strokeWidth={2} /> <span className="bulk-btn-text">Prev</span>
+                <IconArrowLeft size={18} strokeWidth={2} />
+                <span className="bulk-btn-text">Prev</span>
               </button>
             )}
 
@@ -374,7 +400,8 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('forward')}
                 title="Move Forward"
               >
-                <span className="bulk-btn-text">Next</span> <IconArrowRight size={18} strokeWidth={2} />
+                <span className="bulk-btn-text">Next</span>
+                <IconArrowRight size={18} strokeWidth={2} />
               </button>
             )}
 
@@ -384,7 +411,8 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('deprio')}
                 title="Deprioritize Selection"
               >
-                v <span className="bulk-btn-text">Deprio</span>
+                <IconChevronDown size={18} strokeWidth={2} />
+                <span className="bulk-btn-text">Deprio</span>
               </button>
             )}
 
@@ -404,11 +432,18 @@ const TaskController = (props) => {
                 onClick={() => handleBulkAction('delete')}
                 title="Delete Permanently"
               >
-                <IconDelete size={18} strokeWidth={2} /> <span className="bulk-btn-text">Delete</span>
+                <IconTrash size={18} strokeWidth={2} /> <span className="bulk-btn-text">Delete</span>
               </button>
             )}
 
-            <button className="bulk-btn cancel" onClick={clearSelection} title="Cancel"><IconDelete size={18} strokeWidth={2} /> <span className="bulk-btn-text">Cancel</span></button>
+            <button
+              className="bulk-btn cancel"
+              onClick={clearSelection}
+              title="Cancel Selection"
+            >
+              <IconX size={18} strokeWidth={2} />
+              <span className="bulk-btn-text">Cancel</span>
+            </button>
           </div>
         </div>
       )}

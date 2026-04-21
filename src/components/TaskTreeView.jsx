@@ -7,7 +7,9 @@ import {
   IconArrowLeft, 
   IconArrowRight, 
   IconPromote, 
-  IconDiagonalUp 
+  IconDiagonalUp,
+  IconChevronDown,
+  IconChevronRight
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { hierarchyService } from '../services/rules/hierarchyService';
@@ -165,7 +167,7 @@ const TaskTreeView = ({
       >
         <div className="list-row-main">
           <div className="tree-expander" onClick={(e) => toggleExpand(task.id, e)}>
-            {tasks.some(t => t.parentTask === task.id) ? (expandedIds.has(task.id) ? '▼' : '▶') : ''}
+            {tasks.some(t => t.parentTask === task.id) ? (expandedIds.has(task.id) ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
           </div>
 
           <div className="list-row-badges">
@@ -365,7 +367,7 @@ const TaskTreeView = ({
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'DEPRIORITIZED'); }}
                 title="Move to Deprioritized"
               >
-                v
+                <IconChevronDown size={14} />
               </button>
             )}
 

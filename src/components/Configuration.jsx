@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/core/supabaseClient';
+import { IconHome, IconMenu } from './Icons';
 import './Configuration.css';
 
 const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, verticals = {}, verticalList = [] }) => {
@@ -118,14 +119,14 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
               onClick={() => toggleViewMode('grid')}
               title="Grid View"
             >
-              田
+              <IconHome size={18} />
             </button>
             <button 
               className={viewMode === 'horizontal' ? 'active' : ''} 
               onClick={() => toggleViewMode('horizontal')}
               title="List View"
             >
-              ☰
+              <IconMenu size={18} />
             </button>
           </div>
         </header>

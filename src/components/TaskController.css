@@ -9,6 +9,7 @@
 }
 .toggle-depri-btn {
   font-size: 0.75rem;
+  font-weight: 600;
   padding: 6px 14px;
   opacity: 0.7;
 }
@@ -17,6 +18,11 @@
   color: var(--brand-mint) !important;
   border: 1px solid var(--brand-mint) !important;
   opacity: 1;
+}
+.header-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .clear-board-btn {
   font-size: 0.75rem;
@@ -133,6 +139,12 @@
   background-color: color-mix(in srgb, var(--brand-green), transparent 94%);
 }
 /* ===== FLOATING BULK ACTION BAR ===== */
+/* Entry animation: uses opacity only so it doesn't conflict with
+   the transform-based transition used for tray-hidden state. */
+@keyframes bulkBarFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 .bulk-action-bar {
   position: fixed;
   bottom: 28px;
@@ -149,11 +161,7 @@
   gap: 24px;
   z-index: 2000;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
-  animation: bulkBarSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-@keyframes bulkBarSlideUp {
-  from { opacity: 0; transform: translate(-50%, 20px); }
-  to   { opacity: 1; transform: translate(-50%, 0); }
+  animation: bulkBarFadeIn 0.25s ease both;
 }
 .bulk-info {
   display: flex;
@@ -170,27 +178,16 @@
   letter-spacing: 0.6px;
   white-space: nowrap;
 }
-.clear-selection-btn {
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.65rem;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-  transition: color 0.15s;
-}
-.clear-selection-btn:hover { color: rgba(255,255,255,0.8); }
 .bulk-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.bulk-nav-btn {
+/* All bulk buttons: neutral glass style — no colored borders */
+.bulk-btn {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.8);
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
   padding: 6px 14px;
   border-radius: 100px;
   font-size: 0.72rem;
@@ -198,44 +195,31 @@
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
-  flex-shrink: 0; /* Prevent squashing into circles on mobile */
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.bulk-nav-btn:hover {
+.bulk-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: var(--brand-green);
   color: white;
 }
-.bulk-action-btn {
-  padding: 6px 16px;
-  border-radius: 100px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0; /* Prevent squashing into circles on mobile */
+/* Specific button accents on HOVER only (no resting border colors) */
+.bulk-btn.deprio:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
-.bulk-action-btn.deprio {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.25);
-}
-.bulk-action-btn.restore {
+.bulk-btn.restore:hover {
   background: rgba(0, 255, 102, 0.1);
   color: var(--brand-green);
-  border: 1px solid rgba(0, 255, 102, 0.2);
 }
-.bulk-action-btn.delete {
-  background: rgba(239, 68, 68, 0.1);
+.bulk-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
 }
-.bulk-action-btn:hover {
-  filter: brightness(1.25);
-  transform: translateY(-1px);
+.bulk-btn.cancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
 }
 /* ===== DUPLICATE MERGE INTERFACE ===== */
 .duplicate-merge-container {
@@ -387,47 +371,149 @@
   }
 }
 @media screen and (max-width: 768px) {
+  .header-expanded-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  .view-mode-toggle {
+    width: 100%;
+    display: flex !important;
+    gap: 4px !important;
+  }
+  .view-mode-toggle .view-toggle-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px !important;
+    min-width: unset !important;
+  }
+  .header-filter-group {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .header-filter-group .toggle-depri-btn {
+    flex: 1;
+    text-align: center;
+    padding: 8px 2px !important; /* Extremely compact to handle 320px screens */
+    font-size: 0.7rem !important;
+    min-width: unset !important;
+    white-space: nowrap;
+  }
+  .clear-board-btn, .master-action-btn, .csv-import-wrapper {
+    width: 100%;
+  }
+  .workspace-main-view {
+    transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .workspace-main-view.is-blurred {
+    filter: blur(8px);
+  }
   .kanban-board {
     gap: 12px;
   }
   .kanban-stage-halo {
-    min-width: calc(100vw - 64px); /* Almost full width columns on mobile */
+    min-width: calc(100vw - 64px);
   }
   .add-task-btn {
     width: 100%;
     padding: 12px;
   }
+  /* Float bulk bar ABOVE the action tray */
   .bulk-action-bar {
-    flex-direction: column; /* Wrap to 2 rows */
-    align-items: stretch;
-    gap: 8px;
-    padding: 12px 16px;
+    position: fixed;
+    /* Sit just above the tray: tray height + safe area inset */
+    bottom: calc(var(--tray-height, 64px) + var(--safe-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 500px;
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 3010;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    /* Only animate transform — do NOT animate "all" (interferes with layout) */
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    /* Disable the entry animation on mobile (tray-hidden logic uses transition) */
+    animation: none;
+  }
+
+  .bulk-action-bar.tray-hidden {
+    /*
+     * The icon tray slides off-screen by translateY(110%) — roughly its own
+     * full height. We shift down by the same --tray-height so the bulk bar
+     * tracks the tray's position rather than sitting fixed in the viewport.
+     */
+    transform: translate(-50%, var(--tray-height, 64px));
+  }
+
+  @media screen and (min-width: 1025px) {
+    .bulk-action-bar {
+      flex-direction: row;
+      align-items: center;
+      width: auto;
+      border-radius: 50px;
+      padding: 8px 1.5rem;
+      bottom: 2rem;
+    }
+    .bulk-action-bar.tray-hidden {
+      /* On desktop the tray never hides, so keep the bar at its normal position */
+      transform: translate(-50%, 0);
+    }
   }
   .bulk-info {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-right: 0;
     padding-bottom: 8px;
-    align-items: center; /* Center the text "1 TASKS SELECTED" */
+    align-items: center;
+    font-weight: 600;
+    color: var(--brand-green);
+    font-size: 0.9rem;
+    text-align: center;
   }
+  
+  @media screen and (min-width: 1025px) {
+    .bulk-info {
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: none;
+      padding-right: 16px;
+      padding-bottom: 0;
+    }
+  }
+
   .bulk-actions {
     justify-content: center;
-    flex-wrap: wrap; /* CRITICAL: Allow buttons to wrap naturally instead of overflowing */
-    padding-bottom: 0px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-bottom: 0;
     width: 100%;
   }
+  /* Mobile: icon-only compact buttons */
   .bulk-action-bar .bulk-btn .bulk-btn-text {
-    display: none; /* Hide the text labels completely on mobile */
+    display: none;
+  }
+  @media screen and (min-width: 1025px) {
+    .bulk-action-bar .bulk-btn .bulk-btn-text {
+      display: inline;
+    }
   }
   .bulk-action-bar .bulk-btn {
-    border-radius: 8px !important; /* Replaces the 50px pill shape with neat rounded squares */
-    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.1rem; /* Make the directional symbols a bit larger since text is gone */
     height: 36px;
     min-width: 36px;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
-}
+}

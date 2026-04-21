@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import powerLogo from '../assets/logo.svg';
+import { IconChevronDown, IconChevronRight, IconX } from './Icons';
 import './Sidebar.css';
 
 /**
@@ -63,8 +64,8 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
         <div className="sidebar-top-section">
           <div className="sidebar-header">
             {/* Header space maintained for alignment with external logo */}
-            <button className="mobile-close-btn" onClick={onClose} aria-label="Close Sidebar">
-              ✕
+            <button className="mobile-logo-btn" onClick={onClose} aria-label="Close Sidebar">
+              <img src={powerLogo} alt="Logo" className="logo-svg" />
             </button>
           </div>
 
@@ -107,7 +108,7 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
                               className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}
                               onClick={(e) => toggleVertical(e, vertical.id)}
                             >
-                              {isExpanded ? '▼' : '▶'}
+                              {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
                             </button>
                           )}
                         </div>

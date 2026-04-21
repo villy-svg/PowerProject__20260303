@@ -357,7 +357,7 @@ function App() {
               {/* Title moved to top-level for static positioning */}
             </div>
             <div className="header-right">
-              {user?.roleId === 'master_admin' && (
+              {user?.roleId === 'master_admin' && activeVertical && activeVertical !== 'home' && (
                 <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
               )}
               <div style={{ width: '16px' }} />
@@ -424,6 +424,7 @@ function App() {
                 updateTaskStage={activeVertical === 'daily_hub_tasks' ? updateDailyTaskStage : updateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
+                isMainSidebarOpen={isSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 onShowBottomNav={() => setShowBottomNavOverlay(true)}
                 SidebarComponent={

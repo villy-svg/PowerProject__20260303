@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskController from './TaskController';
 import { taskUtils } from '../utils/taskUtils';
+import { IconChevronLeft, IconChevronRight } from './Icons';
 import './VerticalWorkspace.css';
 
 /**
@@ -32,7 +33,8 @@ const VerticalWorkspace = ({
   permissions = {},
   verticals = {}, // Passed from App.jsx
   boardLabel, // New prop
-  children
+  children,
+  isMainSidebarOpen
 }) => {
   const [filters, setFilters] = React.useState({ 
     city: [], 
@@ -44,6 +46,12 @@ const VerticalWorkspace = ({
     duplicatesOnly: false 
   });
   const [isInitialized, setIsInitialized] = React.useState(false);
+  const [isTrayVisible, setIsTrayVisible] = React.useState(true);
+
+  // Sync state upward from MasterPageHeader (via TaskController)
+  const handleTrayVisibilityChange = (visible) => {
+    setIsTrayVisible(visible);
+  };
 
   // Auto-populate filters on first load (Select All by default)
   React.useEffect(() => {
@@ -139,14 +147,14 @@ const VerticalWorkspace = ({
 
   return (
     <div className={`workspace-container ${!isSubSidebarOpen ? 'sub-sidebar-collapsed' : ''}`}>
-      <aside className="sub-sidebar">
+      <aside className={`sub-sidebar ${!isSubSidebarOpen ? 'collapsed' : ''} ${isTrayVisible ? 'tray-visible' : ''}`}>
         <div className="sub-sidebar-header">
           <button 
             className="sub-sidebar-toggle" 
             onClick={() => setIsSubSidebarOpen(!isSubSidebarOpen)}
             title={isSubSidebarOpen ? "Collapse Menu" : "Expand Menu"}
           >
-            {isSubSidebarOpen ? '«' : '»'}
+            {isSubSidebarOpen ? <IconChevronLeft size={16} /> : <IconChevronRight size={16} />}
           </button>
 
           <h3 
@@ -186,6 +194,12 @@ const VerticalWorkspace = ({
         )}
       </aside>
 
+      {isSubSidebarOpen && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={() => setIsSubSidebarOpen(false)} 
+        />
+      )}
 
       <main className="workspace-content">
         {React.Children.toArray(children).some(child => !!child) ? (
@@ -195,7 +209,11 @@ const VerticalWorkspace = ({
                   filters, 
                   onFilterChange: handleFilterChange,
                   setActiveVertical,
-                  onShowBottomNav
+                  onShowBottomNav,
+                  isSubSidebarOpen,
+                  setIsSubSidebarOpen,
+                  isMainSidebarOpen,
+                  onTrayVisibilityChange: handleTrayVisibilityChange
                 })
               : child
           )
@@ -227,8 +245,10 @@ const VerticalWorkspace = ({
             boardLabel={boardLabel}
             isSubSidebarOpen={isSubSidebarOpen}
             setIsSubSidebarOpen={setIsSubSidebarOpen}
+            isMainSidebarOpen={isMainSidebarOpen}
             onShowBottomNav={onShowBottomNav}
             setActiveVertical={setActiveVertical}
+            onTrayVisibilityChange={handleTrayVisibilityChange}
           />
         )}
       </main>
