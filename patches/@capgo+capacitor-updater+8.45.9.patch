@@ -1,0 +1,133 @@
+diff --git a/node_modules/@capgo/capacitor-updater/android/.classpath b/node_modules/@capgo/capacitor-updater/android/.classpath
+new file mode 100644
+index 0000000..bbe97e5
+--- /dev/null
++++ b/node_modules/@capgo/capacitor-updater/android/.classpath
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<classpath>
++	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17/"/>
++	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
++	<classpathentry kind="output" path="bin/default"/>
++</classpath>
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/checksums/checksums.lock b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/checksums/checksums.lock
+new file mode 100644
+index 0000000..9a58df2
+Binary files /dev/null and b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/checksums/checksums.lock differ
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/dependencies-accessors/gc.properties b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/dependencies-accessors/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileChanges/last-build.bin b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileChanges/last-build.bin
+new file mode 100644
+index 0000000..f76dd23
+Binary files /dev/null and b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileChanges/last-build.bin differ
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileHashes/fileHashes.lock b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileHashes/fileHashes.lock
+new file mode 100644
+index 0000000..b840a5e
+Binary files /dev/null and b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/fileHashes/fileHashes.lock differ
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/gc.properties b/node_modules/@capgo/capacitor-updater/android/.gradle/8.9/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock b/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+new file mode 100644
+index 0000000..d40d576
+Binary files /dev/null and b/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/buildOutputCleanup.lock differ
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/cache.properties b/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/cache.properties
+new file mode 100644
+index 0000000..dedfe9a
+--- /dev/null
++++ b/node_modules/@capgo/capacitor-updater/android/.gradle/buildOutputCleanup/cache.properties
+@@ -0,0 +1,2 @@
++#Tue Apr 21 08:09:19 IST 2026
++gradle.version=8.9
+diff --git a/node_modules/@capgo/capacitor-updater/android/.gradle/vcs-1/gc.properties b/node_modules/@capgo/capacitor-updater/android/.gradle/vcs-1/gc.properties
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@capgo/capacitor-updater/android/.project b/node_modules/@capgo/capacitor-updater/android/.project
+new file mode 100644
+index 0000000..2a4dc49
+--- /dev/null
++++ b/node_modules/@capgo/capacitor-updater/android/.project
+@@ -0,0 +1,34 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<projectDescription>
++	<name>capgo-capacitor-updater</name>
++	<comment>Project capgo-capacitor-updater created by Buildship.</comment>
++	<projects>
++	</projects>
++	<buildSpec>
++		<buildCommand>
++			<name>org.eclipse.jdt.core.javabuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++		<buildCommand>
++			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
++	</buildSpec>
++	<natures>
++		<nature>org.eclipse.jdt.core.javanature</nature>
++		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
++	</natures>
++	<filteredResources>
++		<filter>
++			<id>1776739090218</id>
++			<name></name>
++			<type>30</type>
++			<matcher>
++				<id>org.eclipse.core.resources.regexFilterMatcher</id>
++				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
++			</matcher>
++		</filter>
++	</filteredResources>
++</projectDescription>
+diff --git a/node_modules/@capgo/capacitor-updater/android/.settings/org.eclipse.buildship.core.prefs b/node_modules/@capgo/capacitor-updater/android/.settings/org.eclipse.buildship.core.prefs
+new file mode 100644
+index 0000000..68c9fab
+--- /dev/null
++++ b/node_modules/@capgo/capacitor-updater/android/.settings/org.eclipse.buildship.core.prefs
+@@ -0,0 +1,2 @@
++connection.project.dir=../../../../android
++eclipse.preferences.version=1
+diff --git a/node_modules/@capgo/capacitor-updater/android/src/main/java/ee/forgr/capacitor_updater/DelayUpdateUtils.java b/node_modules/@capgo/capacitor-updater/android/src/main/java/ee/forgr/capacitor_updater/DelayUpdateUtils.java
+index 85af932..efd7e95 100644
+--- a/node_modules/@capgo/capacitor-updater/android/src/main/java/ee/forgr/capacitor_updater/DelayUpdateUtils.java
++++ b/node_modules/@capgo/capacitor-updater/android/src/main/java/ee/forgr/capacitor_updater/DelayUpdateUtils.java
+@@ -46,7 +46,7 @@ public class DelayUpdateUtils {
+             DelayUntilNext kind = condition.getKind();
+             String value = condition.getValue();
+             switch (kind) {
+-                case DelayUntilNext.background:
++                case background:
+                     if (source == CancelDelaySource.FOREGROUND) {
+                         long backgroundedAt = getBackgroundTimestamp();
+                         long now = System.currentTimeMillis();
+@@ -89,7 +89,7 @@ public class DelayUpdateUtils {
+                         );
+                     }
+                     break;
+-                case DelayUntilNext.kill:
++                case kill:
+                     if (source == CancelDelaySource.KILLED) {
+                         logger.info("Kill delay (value: " + value + ") condition removed at index " + index + " after app kill");
+                     } else {
+@@ -99,7 +99,7 @@ public class DelayUpdateUtils {
+                         );
+                     }
+                     break;
+-                case DelayUntilNext.date:
++                case date:
+                     if (!"".equals(value)) {
+                         Date date = parseDateCondition(value);
+                         if (date != null) {
+@@ -116,7 +116,7 @@ public class DelayUpdateUtils {
+                         logger.debug("Date delay (value: " + value + ") condition removed due to empty value at index " + index);
+                     }
+                     break;
+-                case DelayUntilNext.nativeVersion:
++                case nativeVersion:
+                     if (!"".equals(value)) {
+                         try {
+                             final Version versionLimit = new Version(value);
