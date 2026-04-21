@@ -12,6 +12,7 @@ import {
   IconChevronRight
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { useTaskViewActions } from '../hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
 import { taskUtils } from '../utils/taskUtils';
@@ -138,15 +139,25 @@ const TaskTreeView = ({
   });
 
   const TreeRow = ({ task, stage, isRowExpanded, onToggleExpandRow }) => {
+    const tva = useTaskViewActions({
+      onUpdateStage: updateTaskStage,
+      onDeleteTask: deleteTask,
+      permissions,
+      currentUser,
+      openEditModal,
+      openSubmissionModal,
+      openAddSubtaskModal
+    });
+
     const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
       itemId: task.id,
       onDrop: onMoveToParent,
       disabled: task.isContextOnly || !canManageHierarchy(task)
     });
 
-    const effectiveCanUpdate = canEditTask ? canEditTask(task) : canUpdate;
-    const permsWithUpdate = { ...permissions, ...effectiveCanUpdate ? { canUpdate: effectiveCanUpdate } : {} };
-    const canEditDescription = taskUtils.canUserEditField(task, 'description', permsWithUpdate, currentUser);
+    const taskPerms = tva.getTaskPermissions(task);
+    const effectiveCanUpdate = taskPerms.canUpdate;
+    const canEditDescription = taskUtils.canUserEditField(task, 'description', permissions, currentUser);
 
     return (
       <div
@@ -163,7 +174,7 @@ const TaskTreeView = ({
           if (e.target.closest('button') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
           if (onToggleExpandRow) onToggleExpandRow();
         }}
-        onDoubleClick={() => !task.isContextOnly && (effectiveCanUpdate || canEditDescription) && openEditModal(task)}
+        onDoubleClick={() => !task.isContextOnly && (effectiveCanUpdate || canEditDescription) && tva.handleEdit(task)}
       >
         <div className="list-row-main">
           <div className="tree-expander" onClick={(e) => toggleExpand(task.id, e)}>
@@ -237,7 +248,7 @@ const TaskTreeView = ({
                   className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (canMoveLeft) updateTaskStage(task.id, leftStageId);
+                    tva.handleMove(task, 'left');
                   }}
                   disabled={!canMoveLeft}
                   title="Move Back"
@@ -248,7 +259,7 @@ const TaskTreeView = ({
                   className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (canMoveRight && task.stageId !== 'COMPLETED' && !blockArrows) updateTaskStage(task.id, rightStageId);
+                    tva.handleMove(task, 'right');
                   }}
                   disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                   title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
@@ -294,7 +305,7 @@ const TaskTreeView = ({
                 {canCreate && (
                   <button
                     className="card-add-sub-button"
-                    onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
+                    onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
                     title="Add Subtask Under This"
                     style={{ color: 'var(--brand-green)' }}
                   >
@@ -312,7 +323,7 @@ const TaskTreeView = ({
               task.stageId !== 'COMPLETED' && (
                 <button
                   className="card-submit-proof-button"
-                  onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                  onClick={(e) => { e.stopPropagation(); tva.handleSubmitProof(task); }}
                   title="Submit Proof of Work"
                 >
                   <IconUpload size={14} />
@@ -344,7 +355,7 @@ const TaskTreeView = ({
             {!task.isContextOnly && (effectiveCanUpdate || canEditDescription) && (
               <button
                 className="card-edit-button"
-                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+                onClick={(e) => { e.stopPropagation(); tva.handleEdit(task); }}
                 title="Edit Task"
               >
                 <IconEdit size={14} />
@@ -371,10 +382,10 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {!task.isContextOnly && canDelete && (
+            {!task.isContextOnly && taskPerms.canDelete && (
               <button
                 className="card-delete-button"
-                onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
+                onClick={(e) => { e.stopPropagation(); tva.handleDelete(task.id); }}
                 title="Delete Task"
               >
                 <IconDelete size={14} />

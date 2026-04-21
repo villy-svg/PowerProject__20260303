@@ -11,6 +11,7 @@ import EmployeeListRow from './EmployeeListRow';
 import EmployeeTree from './EmployeeTree';
 import EmployeeBulkUpdateModal from './EmployeeBulkUpdateModal';
 import { useEmployees } from '../../hooks/useEmployees';
+import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import ConflictModal from '../../components/ConflictModal';
 import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Icons';
@@ -24,28 +25,12 @@ import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Ic
 const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_employee_view') || 'grid');
-  const [showInactive, setShowInactive] = useState(true);
-  const [editingEmployee, setEditingEmployee] = useState(null);
-  const [isViewOnly, setIsViewOnly] = useState(false);
+  const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
 
-  // Bulk Selection State
-  const [selectedIds, setSelectedIds] = useState([]);
+  // Bulk Context
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
-
-  const [expandedId, setExpandedId] = useState(null);
-
-  // Tray Visibility (synced FROM MasterPageHeader's scroll hook)
-  // We intentionally do NOT call useScrollDirection here. MasterPageHeader
-  // owns the single authoritative instance and notifies us via callback.
-  const [isTrayVisible, setIsTrayVisible] = useState(true);
-  const handleTrayVisibilityChange = useCallback((visible) => {
-    setIsTrayVisible(visible);
-  }, []);
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
@@ -53,9 +38,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
     }
   }, [fetchEmployees, permissions?.canAccessEmployees]);
 
-  useEffect(() => {
-    localStorage.setItem('powerpod_employee_view', viewMode);
-  }, [viewMode]);
+
 
   if (!permissions?.canAccessEmployees && !permissions?.scope === 'global') {
     return (
@@ -76,7 +59,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       };
 
       const existingMatch = employees.find(emp =>
-        emp.id !== (editingEmployee?.id) &&
+        emp.id !== (ui.editingItem?.id) &&
         matchesCriteria(matchingProbe, emp, {
           fields: ['full_name'],
           useFuzzy: true,
@@ -91,20 +74,19 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       }
     }
 
-    setIsSaving(true);
+    ui.setIsSaving(true);
     try {
-      if (editingEmployee) {
-        await updateEmployee(editingEmployee.id, formData);
+      if (ui.editingItem) {
+        await updateEmployee(ui.editingItem.id, formData);
       } else {
         await addEmployee(formData);
       }
-      setIsAddModalOpen(false);
-      setEditingEmployee(null);
+      ui.closeModal();
     } catch (err) {
       console.error('EmployeeManagement: Operation Error:', err);
       alert(`Operation failed: ${err.message}`);
     } finally {
-      setIsSaving(false);
+      ui.setIsSaving(false);
     }
   };
 
@@ -118,42 +100,13 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
     }
   };
 
-  const openEditModal = (emp) => {
-    setEditingEmployee(emp);
-    setIsViewOnly(false);
-    setIsAddModalOpen(true);
-  };
-
-  const openViewModal = (emp) => {
-    setEditingEmployee(emp);
-    setIsViewOnly(true);
-    setIsAddModalOpen(true);
-  };
-
-  const handleSelectIndividual = (id) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = (filteredEmps) => {
-    const allFilteredIds = filteredEmps.map(e => e.id);
-    const areAllSelected = allFilteredIds.every(id => selectedIds.includes(id));
-
-    if (areAllSelected) {
-      setSelectedIds(prev => prev.filter(id => !allFilteredIds.includes(id)));
-    } else {
-      setSelectedIds(prev => Array.from(new Set([...prev, ...allFilteredIds])));
-    }
-  };
-
   const handleBulkUpdate = async (updates) => {
     setIsBulkUpdating(true);
     try {
-      await bulkUpdateEmployees(selectedIds, updates);
+      await bulkUpdateEmployees(ui.selectedIds, updates);
       setIsBulkUpdateModalOpen(false);
-      setSelectedIds([]);
-      alert(`Successfully updated ${selectedIds.length} employees.`);
+      ui.clearSelection();
+      alert(`Successfully updated ${ui.selectedIds.length} employees.`);
     } catch (err) {
       alert(`Bulk update failed: ${err.message}`);
     } finally {
@@ -162,7 +115,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
   };
 
   const filteredEmployees = employees.filter(emp => {
-    const matchesStatus = showInactive || emp.status === 'Active';
+    const matchesStatus = ui.showInactive || emp.status === 'Active';
 
     const matchesRole = !filters?.role?.length || filters.role.some(r =>
       r?.trim().toUpperCase() === emp.role_code?.trim().toUpperCase()
@@ -206,21 +159,21 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
         rightActions={
           permissions.canCreateEmployees && (
-            <button className="halo-button master-action-btn" onClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}>
+            <button className="halo-button master-action-btn" onClick={ui.openAddModal}>
               + Add Employee
             </button>
           )
         }
         canAdd={permissions.canCreateEmployees}
-        onAddClick={() => { setEditingEmployee(null); setIsAddModalOpen(true); }}
+        onAddClick={ui.openAddModal}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
               {['grid', 'list', 'tree'].map(mode => (
                 <button
                   key={mode}
-                  className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                  onClick={() => setViewMode(mode)}
+                  className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
+                  onClick={() => ui.setViewMode(mode)}
                   title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
                 >
                   {mode === 'tree' ? 'Hierarchy' : mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -229,9 +182,9 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
             </div>
 
             <button
-              className={`halo-button toggle-inactive-btn ${showInactive ? '' : 'hidden'}`}
-              onClick={() => setShowInactive(!showInactive)}
-              title={showInactive ? "Hide Inactive" : "Show Inactive"}
+              className={`halo-button toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}
+              onClick={() => ui.setShowInactive(!ui.showInactive)}
+              title={ui.showInactive ? "Hide Inactive" : "Show Inactive"}
             >
               <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
               INACTIVE
@@ -257,19 +210,19 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
           <h3>Personnel Database Empty</h3>
           <p>Click "+ Add Employee" to insert your first structural record.</p>
         </div>
-      ) : viewMode === 'tree' ? (
+      ) : ui.viewMode === 'tree' ? (
         <EmployeeTree
           employees={filteredEmployees}
           user={user}
-          onEdit={openEditModal}
-          onView={openViewModal}
+          onEdit={ui.openEditModal}
+          onView={ui.openViewModal}
           onDelete={handleDelete}
           onToggleStatus={toggleStatus}
           permissions={permissions}
           availableHubs={hubs}
           onUpdateHub={updateEmployeeHub}
-          selectedIds={selectedIds}
-          onSelect={handleSelectIndividual}
+          selectedIds={ui.selectedIds}
+          onSelect={ui.handleSelectIndividual}
         />
       ) : (
         <div className="employees-container">
@@ -290,19 +243,19 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                         </span>
                         <button
                           className="halo-button role-select-btn"
-                          onClick={() => handleSelectAll(empsInRole)}
+                          onClick={() => ui.handleSelectAll(empsInRole)}
                         >
-                          {empsInRole.every(id => selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
+                          {empsInRole.every(id => ui.selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
                         </button>
                       </h5>
-                      <div className={viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
+                      <div className={ui.viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                         {empsInRole.map(emp => (
-                          viewMode === 'grid' ? (
+                          ui.viewMode === 'grid' ? (
                             <EmployeeCard
                               key={emp.id}
                               emp={emp}
-                              onEdit={openEditModal}
-                              onView={openViewModal}
+                              onEdit={ui.openEditModal}
+                              onView={ui.openViewModal}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
                               permissions={{
@@ -312,15 +265,15 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                               }}
                               availableHubs={hubs}
                               onUpdateHub={updateEmployeeHub}
-                              isSelected={selectedIds.includes(emp.id)}
-                              onSelect={handleSelectIndividual}
+                              isSelected={ui.selectedIds.includes(emp.id)}
+                              onSelect={ui.handleSelectIndividual}
                             />
                           ) : (
                             <EmployeeListRow
                               key={emp.id}
                               emp={emp}
-                              onEdit={openEditModal}
-                              onView={openViewModal}
+                              onEdit={ui.openEditModal}
+                              onView={ui.openViewModal}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
                               permissions={{
@@ -330,10 +283,10 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                               }}
                               availableHubs={hubs}
                               onUpdateHub={updateEmployeeHub}
-                              isSelected={selectedIds.includes(emp.id)}
-                              onSelect={handleSelectIndividual}
-                              isExpanded={expandedId === emp.id}
-                              onToggleExpand={() => setExpandedId(expandedId === emp.id ? null : emp.id)}
+                              isSelected={ui.selectedIds.includes(emp.id)}
+                              onSelect={ui.handleSelectIndividual}
+                              isExpanded={ui.expandedId === emp.id}
+                              onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
                             />
                           )
                         ))}
@@ -345,7 +298,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
           </div>
 
           {/* INACTIVE SECTION */}
-          {showInactive && (
+          {ui.showInactive && (
             <div className="status-section inactive-section">
               <div className="section-header-row">
                 <h4 className="section-title inactive-title">Inactive / History ({inactiveEmps.length})</h4>
@@ -355,14 +308,14 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
               {inactiveEmps.length === 0 ? (
                 <p className="empty-sub-state faded">No inactive records.</p>
               ) : (
-                <div className={viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
+                <div className={ui.viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                   {inactiveEmps.map(emp => (
-                    viewMode === 'grid' ? (
+                    ui.viewMode === 'grid' ? (
                       <EmployeeCard
                         key={emp.id}
                         emp={emp}
-                        onEdit={openEditModal}
-                        onView={openViewModal}
+                        onEdit={ui.openEditModal}
+                        onView={ui.openViewModal}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
                         permissions={permissions}
@@ -373,17 +326,17 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
                       <EmployeeListRow
                         key={emp.id}
                         emp={emp}
-                        onEdit={openEditModal}
-                        onView={openViewModal}
+                        onEdit={ui.openEditModal}
+                        onView={ui.openViewModal}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
-                        isSelected={selectedIds.includes(emp.id)}
-                        onSelect={handleSelectIndividual}
-                        isExpanded={expandedId === emp.id}
-                        onToggleExpand={() => setExpandedId(expandedId === emp.id ? null : emp.id)}
+                        isSelected={ui.selectedIds.includes(emp.id)}
+                        onSelect={ui.handleSelectIndividual}
+                        isExpanded={ui.expandedId === emp.id}
+                        onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
                       />
                     )
                   ))}
@@ -395,17 +348,17 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       )}
 
       {/* Floating Bulk Action Bar */}
-      {selectedIds.length > 0 && (
-        <div className={`bulk-action-bar ${!isTrayVisible ? 'tray-hidden' : ''}`}>
+      {ui.selectedIds.length > 0 && (
+        <div className={`bulk-action-bar ${!ui.isTrayVisible ? 'tray-hidden' : ''}`}>
           <div className="bulk-info">
-            {selectedIds.length} Selected
+            {ui.selectedIds.length} Selected
           </div>
           <div className="bulk-actions">
             <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
               <IconEdit size={18} />
               <span className="bulk-btn-text">Update</span>
             </button>
-            <button className="bulk-btn cancel" onClick={() => setSelectedIds([])} title="Cancel Selection">
+            <button className="bulk-btn cancel" onClick={ui.clearSelection} title="Cancel Selection">
               <IconX size={18} />
               <span className="bulk-btn-text">Cancel</span>
             </button>
@@ -414,35 +367,35 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       )}
 
       <TaskModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseModal}
-        title={isViewOnly ? "View Employee Record" : (editingEmployee ? "Edit Employee Record" : "Add New Employee Record")}
+        isOpen={ui.isAddModalOpen}
+        onClose={ui.closeModal}
+        title={ui.isViewOnly ? "View Employee Record" : (ui.editingItem ? "Edit Employee Record" : "Add New Employee Record")}
         className="large-modal"
       >
         <EmployeeForm
           onSubmit={handleSave}
-          onCancel={handleCloseModal}
-          isViewOnly={isViewOnly}
-          initialData={editingEmployee ? {
-            id: editingEmployee.id,
-            name: editingEmployee.full_name,
-            contactNumber: editingEmployee.phone,
-            emailId: editingEmployee.email,
-            gender: editingEmployee.gender,
-            dob: editingEmployee.dob,
-            doj: editingEmployee.hire_date,
-            hub_id: editingEmployee.hub_id || 'ALL',
-            role_id: editingEmployee.role_id,
-            department_id: editingEmployee.department_id,
-            accountNumber: editingEmployee.account_number,
-            ifscCode: editingEmployee.ifsc_code,
-            accountName: editingEmployee.account_name,
-            panNumber: editingEmployee.pan_number,
-            emp_code: editingEmployee.emp_code,
-            badge_id: editingEmployee.badge_id,
-            manager_id: editingEmployee.manager_id
+          onCancel={ui.closeModal}
+          isViewOnly={ui.isViewOnly}
+          initialData={ui.editingItem ? {
+            id: ui.editingItem.id,
+            name: ui.editingItem.full_name,
+            contactNumber: ui.editingItem.phone,
+            emailId: ui.editingItem.email,
+            gender: ui.editingItem.gender,
+            dob: ui.editingItem.dob,
+            doj: ui.editingItem.hire_date,
+            hub_id: ui.editingItem.hub_id || 'ALL',
+            role_id: ui.editingItem.role_id,
+            department_id: ui.editingItem.department_id,
+            accountNumber: ui.editingItem.account_number,
+            ifscCode: ui.editingItem.ifsc_code,
+            accountName: ui.editingItem.account_name,
+            panNumber: ui.editingItem.pan_number,
+            emp_code: ui.editingItem.emp_code,
+            badge_id: ui.editingItem.badge_id,
+            manager_id: ui.editingItem.manager_id
           } : {}}
-          loading={isSaving}
+          loading={ui.isSaving}
         />
       </TaskModal>
 
@@ -474,7 +427,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
         title="Bulk Update Employees"
       >
         <EmployeeBulkUpdateModal
-          selectedCount={selectedIds.length}
+          selectedCount={ui.selectedIds.length}
           onUpdate={handleBulkUpdate}
           loading={isBulkUpdating}
         />

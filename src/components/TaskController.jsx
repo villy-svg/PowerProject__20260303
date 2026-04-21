@@ -11,14 +11,7 @@ import TaskTreeView from './TaskTreeView';
 import { useTaskController } from '../hooks/useTaskController';
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import RejectionModal from './RejectionModal';
-import { 
-  IconArrowLeft, 
-  IconArrowRight, 
-  IconPromote,
-  IconTrash,
-  IconX,
-  IconChevronDown,
-} from './Icons';
+import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
 
 /**
@@ -376,77 +369,16 @@ const TaskController = (props) => {
         )}
       </div>
 
-      {selectedTaskIds.length > 0 && (
-        <div className={`bulk-action-bar ${!isTrayVisible ? 'tray-hidden' : ''}`}>
-          <div className="bulk-info">
-            <span className="selection-count">{selectedTaskIds.length} Selected</span>
-          </div>
-
-          <div className="bulk-actions">
-            {canUserUpdate && sameStage && commonStageId !== STAGE_LIST[0].id && (
-              <button
-                className="bulk-btn"
-                onClick={() => handleBulkAction('backward')}
-                title="Move Backward"
-              >
-                <IconArrowLeft size={18} strokeWidth={2} />
-                <span className="bulk-btn-text">Prev</span>
-              </button>
-            )}
-
-            {canUserUpdate && sameStage && commonStageId !== STAGE_LIST[STAGE_LIST.length - 1].id && (
-              <button
-                className="bulk-btn"
-                onClick={() => handleBulkAction('forward')}
-                title="Move Forward"
-              >
-                <span className="bulk-btn-text">Next</span>
-                <IconArrowRight size={18} strokeWidth={2} />
-              </button>
-            )}
-
-            {canUserUpdate && commonStageId !== 'DEPRIORITIZED' && (
-              <button
-                className="bulk-btn deprio"
-                onClick={() => handleBulkAction('deprio')}
-                title="Deprioritize Selection"
-              >
-                <IconChevronDown size={18} strokeWidth={2} />
-                <span className="bulk-btn-text">Deprio</span>
-              </button>
-            )}
-
-            {canUserUpdate && commonStageId === 'DEPRIORITIZED' && (
-              <button
-                className="bulk-btn restore"
-                onClick={() => handleBulkAction('restore')}
-                title="Restore to Pending"
-              >
-                <IconPromote size={18} strokeWidth={2} /> <span className="bulk-btn-text">Restore</span>
-              </button>
-            )}
-
-            {canUserDelete && (
-              <button
-                className="bulk-btn delete"
-                onClick={() => handleBulkAction('delete')}
-                title="Delete Permanently"
-              >
-                <IconTrash size={18} strokeWidth={2} /> <span className="bulk-btn-text">Delete</span>
-              </button>
-            )}
-
-            <button
-              className="bulk-btn cancel"
-              onClick={clearSelection}
-              title="Cancel Selection"
-            >
-              <IconX size={18} strokeWidth={2} />
-              <span className="bulk-btn-text">Cancel</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <BulkActionBar 
+        selectedCount={selectedTaskIds.length}
+        isTrayVisible={isTrayVisible}
+        canUpdate={canUserUpdate}
+        canDelete={canUserDelete}
+        sameStage={sameStage}
+        commonStageId={commonStageId}
+        onAction={handleBulkAction}
+        onClear={clearSelection}
+      />
     </div>
   );
 };

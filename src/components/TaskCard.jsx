@@ -11,6 +11,7 @@ import {
   IconChevronDown 
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { useTaskViewActions } from '../hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
 import AssigneeBadge from './AssigneeBadge';
@@ -51,25 +52,18 @@ const TaskCard = ({
   isExpanded = false,
   onToggleExpand
 }) => {
-  const handleMove = (direction) => {
-    const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
-    let newIndex = currentIndex;
-
-    if (direction === 'left' && currentIndex > 0) {
-      newIndex = currentIndex - 1;
-    } else if (direction === 'right' && currentIndex < STAGE_LIST.length - 1) {
-      newIndex = currentIndex + 1;
-    }
-
-    if (newIndex !== currentIndex) {
-      const targetStageId = STAGE_LIST[newIndex].id;
-      if (taskUtils.canUserMoveTask(task, targetStageId, permissions, currentUser)) {
-        updateTaskStage(task.id, targetStageId);
-      }
-    }
-  };
+  const tva = useTaskViewActions({
+    onUpdateStage: updateTaskStage,
+    onDeleteTask: deleteTask,
+    permissions,
+    currentUser,
+    openEditModal,
+    openSubmissionModal,
+    openAddSubtaskModal
+  });
 
   const currentIndex = STAGE_LIST.findIndex(s => s.id === task.stageId);
+  const taskPerms = tva.getTaskPermissions(task);
 
   // Dynamic Check for buttons
   const isRejected = task.latestSubmission?.status === 'rejected';
@@ -81,8 +75,8 @@ const TaskCard = ({
   const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
   const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
-  const effectiveCanUpdate = (canUpdate || permissions.canEditTask?.(task)) && !task.isContextOnly;
-  const effectiveCanDelete = canDelete && !task.isContextOnly;
+  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly;
+  const effectiveCanDelete = taskPerms.canDelete && !task.isContextOnly;
 
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
     itemId: task.id,
@@ -195,7 +189,7 @@ const TaskCard = ({
             <>
               <button
                 className="action-icon-btn"
-                onClick={() => handleMove('left')}
+                onClick={() => tva.handleMove(task, 'left')}
                 disabled={!canMoveLeft}
                 title="Move Back"
               >
@@ -203,7 +197,7 @@ const TaskCard = ({
               </button>
               <button
                 className="action-icon-btn"
-                onClick={() => handleMove('right')}
+                onClick={() => tva.handleMove(task, 'right')}
                 disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                 title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
               >
@@ -245,7 +239,7 @@ const TaskCard = ({
               <button
                 className="action-icon-btn"
                 style={{ color: 'var(--brand-green)' }}
-                onClick={() => openAddSubtaskModal(task.id)}
+                onClick={() => tva.handleAddSubtask(task.id)}
                 title="Add Subtask Under This"
               >
                 <IconPlus size={14} />
@@ -260,7 +254,7 @@ const TaskCard = ({
             task.stageId !== 'COMPLETED' && (
               <button
                 className="action-icon-btn"
-                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                onClick={(e) => { e.stopPropagation(); tva.handleSubmitProof(task); }}
                 title="Submit Proof of Work"
               >
                 <IconUpload size={14} />
@@ -290,7 +284,7 @@ const TaskCard = ({
           {effectiveCanUpdate && (
             <button
               className="action-icon-btn"
-              onClick={() => openEditModal(task)}
+              onClick={() => tva.handleEdit(task)}
               title="Edit Task"
             >
               <IconEdit size={14} />
@@ -321,7 +315,7 @@ const TaskCard = ({
           {effectiveCanDelete && (
             <button
               className="action-icon-btn delete"
-              onClick={() => deleteTask(task.id)}
+              onClick={() => tva.handleDelete(task.id)}
               title="Delete Task"
             >
               <IconDelete size={14} />

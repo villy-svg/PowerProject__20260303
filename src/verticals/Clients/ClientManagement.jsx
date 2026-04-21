@@ -12,6 +12,7 @@ import ClientForm from './ClientForm';
 import ClientCard from './ClientCard';
 import ClientListRow from './ClientListRow';
 import ConflictModal from '../../components/ConflictModal';
+import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 
 /**
@@ -23,14 +24,8 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
 const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('powerpod_client_view') || 'grid');
-  const [showInactive, setShowInactive] = useState(true);
-  const [editingClient, setEditingClient] = useState(null);
-  const [isViewOnly, setIsViewOnly] = useState(false);
+  const ui = useManagementUI({ storageKey: 'powerpod_client_view' });
   const [pendingConflict, setPendingConflict] = useState(null);
-  const [expandedId, setExpandedId] = useState(null);
   const isScrollVisible = useScrollDirection(10, 100);
 
   useEffect(() => {
@@ -39,9 +34,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
     }
   }, [fetchClients, permissions?.canAccessClients]);
 
-  useEffect(() => {
-    localStorage.setItem('powerpod_client_view', viewMode);
-  }, [viewMode]);
+
 
   if (!permissions?.canAccessClients && !(permissions?.scope === 'global')) {
     return (
@@ -62,7 +55,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
       };
 
       const existingMatch = clients.find(c =>
-        c.id !== (editingClient?.id) &&
+        c.id !== (ui.editingItem?.id) &&
         matchesCriteria(matchingProbe, { full_name: c.name, phone: c.poc_phone, email: c.poc_email }, {
           fields: ['full_name'],
           useFuzzy: true,
@@ -77,20 +70,19 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
       }
     }
 
-    setIsSaving(true);
+    ui.setIsSaving(true);
     try {
-      if (editingClient) {
-        await updateClient(editingClient.id, formData);
+      if (ui.editingItem) {
+        await updateClient(ui.editingItem.id, formData);
       } else {
         await addClient(formData);
       }
-      setIsAddModalOpen(false);
-      setEditingClient(null);
+      ui.closeModal();
     } catch (err) {
       console.error('ClientManagement: Operation Error:', err);
       alert(`Operation failed: ${err.message}`);
     } finally {
-      setIsSaving(false);
+      ui.setIsSaving(false);
     }
   };
 
@@ -104,21 +96,9 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
     }
   };
 
-  const openEditModal = (client) => {
-    setEditingClient(client);
-    setIsViewOnly(false);
-    setIsAddModalOpen(true);
-  };
-
-  const openViewModal = (client) => {
-    setEditingClient(client);
-    setIsViewOnly(true);
-    setIsAddModalOpen(true);
-  };
-
   // Apply filters from sub-sidebar
   const filteredClients = clients.filter(c => {
-    const matchesStatus = showInactive || c.status === 'Active';
+    const matchesStatus = ui.showInactive || c.status === 'Active';
     
     // Vehicle Category Filter: client is included if ANY of its selected vehicle IDs are in the filter
     const selectedVehicleIds = Object.keys(c.category_matrix || {}).filter(vId => 
@@ -173,22 +153,22 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
           permissions.canCreateClients && (
             <button
               className="halo-button master-action-btn"
-              onClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
+              onClick={ui.openAddModal}
             >
               + Add Client
             </button>
           )
         }
         canAdd={permissions.canCreateClients}
-        onAddClick={() => { setEditingClient(null); setIsAddModalOpen(true); }}
+        onAddClick={ui.openAddModal}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
               {['grid', 'list'].map(mode => (
                 <button
                   key={mode}
-                  className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                  onClick={() => setViewMode(mode)}
+                  className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
+                  onClick={() => ui.setViewMode(mode)}
                   title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -197,10 +177,10 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
             </div>
 
             <button
-              className={`halo-button toggle-depri-btn ${!showInactive ? 'active' : ''}`}
-              onClick={() => setShowInactive(!showInactive)}
-              title={showInactive ? 'Hide Inactive' : 'Show Inactive'}
-              style={{ fontWeight: 600, textDecoration: showInactive ? 'none' : 'line-through' }}
+              className={`halo-button toggle-depri-btn ${!ui.showInactive ? 'active' : ''}`}
+              onClick={() => ui.setShowInactive(!ui.showInactive)}
+              title={ui.showInactive ? 'Hide Inactive' : 'Show Inactive'}
+              style={{ fontWeight: 600, textDecoration: ui.showInactive ? 'none' : 'line-through' }}
             >
               <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
               INACTIVE
@@ -250,13 +230,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                       }}>
                         {billingModelName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInModel.length})</span>
                       </h5>
-                      <div className={viewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
+                      <div className={ui.viewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
                         {clientsInModel.map(client => {
                           const props = {
                             client,
                             tasks: tasks.filter(t => t.assigned_client_id === client.id),
-                            onEdit: openEditModal,
-                            onView: openViewModal,
+                            onEdit: ui.openEditModal,
+                            onView: ui.openViewModal,
                             onDelete: handleDelete,
                             onToggleStatus: toggleStatus,
                             permissions: {
@@ -265,13 +245,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                               canDelete: permissions.canDeleteClients
                             }
                           };
-                          return viewMode === 'grid'
+                          return ui.viewMode === 'grid'
                             ? <ClientCard key={client.id} {...props} />
                             : <ClientListRow 
                                 key={client.id} 
                                 {...props} 
-                                isExpanded={expandedId === client.id}
-                                onToggleExpand={() => setExpandedId(expandedId === client.id ? null : client.id)}
+                                isExpanded={ui.expandedId === client.id}
+                                onToggleExpand={() => ui.setExpandedId(ui.expandedId === client.id ? null : client.id)}
                               />;
                         })}
                       </div>
@@ -291,13 +271,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
               {inactiveClients.length === 0 ? (
                 <p className="client-empty-sub-state" style={{ opacity: 0.3 }}>No inactive records.</p>
               ) : (
-                <div className={viewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
+                <div className={ui.viewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
                   {inactiveClients.map(client => {
                     const props = {
                       client,
                       tasks: tasks.filter(t => t.assigned_client_id === client.id),
-                      onEdit: openEditModal,
-                      onView: openViewModal,
+                      onEdit: ui.openEditModal,
+                      onView: ui.openViewModal,
                       onDelete: handleDelete,
                       onToggleStatus: toggleStatus,
                       permissions: {
@@ -306,13 +286,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                         canDelete: permissions.canDeleteClients
                       }
                     };
-                    return viewMode === 'grid'
+                    return ui.viewMode === 'grid'
                       ? <ClientCard key={client.id} {...props} />
                       : <ClientListRow 
                           key={client.id} 
                           {...props} 
-                          isExpanded={expandedId === client.id}
-                          onToggleExpand={() => setExpandedId(expandedId === client.id ? null : client.id)}
+                          isExpanded={ui.expandedId === client.id}
+                          onToggleExpand={() => ui.setExpandedId(ui.expandedId === client.id ? null : client.id)}
                         />;
                   })}
                 </div>
@@ -324,25 +304,25 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
 
       {/* Add / Edit / View Modal */}
       <TaskModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseModal}
-        title={isViewOnly ? 'View Client Record' : (editingClient ? 'Edit Client Record' : 'Add New Client')}
+        isOpen={ui.isAddModalOpen}
+        onClose={ui.closeModal}
+        title={ui.isViewOnly ? 'View Client Record' : (ui.editingItem ? 'Edit Client Record' : 'Add New Client')}
         className="large-modal"
       >
         <ClientForm
           onSubmit={handleSave}
-          onCancel={handleCloseModal}
-          isViewOnly={isViewOnly}
-          initialData={editingClient ? {
-            id: editingClient.id,
-            name: editingClient.name,
-            billing_model_id: editingClient.billing_model_id || '',
-            category_matrix: editingClient.category_matrix || {},
-            poc_name: editingClient.poc_name || '',
-            poc_phone: editingClient.poc_phone || '',
-            poc_email: editingClient.poc_email || '',
+          onCancel={ui.closeModal}
+          isViewOnly={ui.isViewOnly}
+          initialData={ui.editingItem ? {
+            id: ui.editingItem.id,
+            name: ui.editingItem.name,
+            billing_model_id: ui.editingItem.billing_model_id || '',
+            category_matrix: ui.editingItem.category_matrix || {},
+            poc_name: ui.editingItem.poc_name || '',
+            poc_phone: ui.editingItem.poc_phone || '',
+            poc_email: ui.editingItem.poc_email || '',
           } : {}}
-          loading={isSaving}
+          loading={ui.isSaving}
         />
       </TaskModal>
 

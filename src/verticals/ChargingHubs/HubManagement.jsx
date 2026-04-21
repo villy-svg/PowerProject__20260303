@@ -6,6 +6,7 @@ import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
+import { useManagementUI } from '../../hooks/useManagementUI';
 import { IconEdit, IconTrash, IconX, IconPlus } from '../../components/Icons';
 
 // Error boundary component
@@ -48,13 +49,11 @@ class HubManagementErrorBoundary extends React.Component {
 }
 
 const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen, setActiveVertical, onShowBottomNav }) => {
+  const ui = useManagementUI({ storageKey: 'powerpod_hub_view' });
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingHub, setEditingHub] = useState(null);
   const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
-  const [viewMode, setViewMode] = useState('grid');
 
   // MASTER-SLAVE: Unified Duplicate Detection
   const hubsWithDuplicateInfo = useDuplicateDetection(hubs, {
@@ -102,7 +101,7 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
 
   const handleOpenModal = (hub = null) => {
     if (hub) {
-      setEditingHub(hub);
+      ui.openEditModal(hub);
       setFormData({
         name: hub.name,
         hub_code: hub.hub_code || '',
@@ -110,10 +109,9 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
         status: hub.status || 'active'
       });
     } else {
-      setEditingHub(null);
+      ui.openAddModal();
       setFormData({ name: '', hub_code: '', city: '', status: 'active' });
     }
-    setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
   };
 
@@ -129,11 +127,11 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
       };
 
       let result;
-      if (editingHub) {
+      if (ui.editingItem) {
         result = await supabase
           .from('hubs')
           .update(hubData)
-          .eq('id', editingHub.id)
+          .eq('id', ui.editingItem.id)
           .select();
       } else {
         result = await supabase
@@ -145,9 +143,9 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
       if (result.error) {
         masterErrorHandler.handleDatabaseError(result.error, 'HubManagement - Submit Hub');
       } else {
-        setStatusMsg({ type: 'success', text: `Hub ${editingHub ? 'updated' : 'created'} successfully!` });
+        setStatusMsg({ type: 'success', text: `Hub ${ui.editingItem ? 'updated' : 'created'} successfully!` });
         setTimeout(() => {
-          setIsModalOpen(false);
+          ui.closeModal();
           fetchHubs();
         }, 1000);
       }
@@ -200,14 +198,14 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
         expandedLeft={
           <div className="view-mode-toggle">
             <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
+              className={`view-toggle-btn ${ui.viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => ui.setViewMode('grid')}
             >
               Grid
             </button>
             <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+              className={`view-toggle-btn ${ui.viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => ui.setViewMode('list')}
             >
               List
             </button>
@@ -229,9 +227,9 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
         }
       />
 
-      {loading && !isModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
+      {loading && !ui.isAddModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
 
-      {viewMode === 'grid' ? (
+      {ui.viewMode === 'grid' ? (
         <div className="hubs-grid">
           {hubsWithDuplicateInfo.map(hub => (
             <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
@@ -307,12 +305,12 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+      {ui.isAddModalOpen && (
+        <div className="modal-overlay" onClick={ui.closeModal}>
           <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
-              <h2>{editingHub ? 'Edit Charging Hub' : 'Create New Hub'}</h2>
-              <button className="close-modal" onClick={() => setIsModalOpen(false)}>
+              <h2>{ui.editingItem ? 'Edit Charging Hub' : 'Create New Hub'}</h2>
+              <button className="close-modal" onClick={ui.closeModal}>
                 <IconX size={20} />
               </button>
             </header>
@@ -372,9 +370,9 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
               )}
 
               <div className="modal-footer">
-                <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="button" className="halo-button cancel-btn" onClick={ui.closeModal}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>
-                  {loading ? 'Saving...' : (editingHub ? 'Update' : 'Create')}
+                  {loading ? 'Saving...' : (ui.editingItem ? 'Update' : 'Create')}
                 </button>
               </div>
             </form>

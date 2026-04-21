@@ -5,22 +5,23 @@ import { dailyTaskTemplateService } from '../../services/tasks/dailyTaskTemplate
 import { VERTICALS } from '../../constants/verticals';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import AssigneeSelector from '../../components/AssigneeSelector';
+import { useManagementUI } from '../../hooks/useManagementUI';
 import { taskUtils } from '../../utils/taskUtils';
 import './DailyTasksManagement.css';
 
 const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) => {
+  const ui = useManagementUI({
+    resourceName: 'DailyTaskTemplates',
+    onRefetch: () => fetchTemplates()
+  });
+
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState(null);
   
   // Reference Data
   const [hubs, setHubs] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [seniorEmployees, setSeniorEmployees] = useState([]);
   const [clients, setClients] = useState([]);
   
-  const [viewMode, setViewMode] = useState('grid');
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
   // Form State
@@ -73,7 +74,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
 
   const handleOpenModal = (template = null) => {
     if (template) {
-      setEditingTemplate(template);
+      ui.openEditModal(template);
       setFormData({
         title: template.title,
         description: template.description || '',
@@ -86,14 +87,13 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         uploadLink: template.uploadLink || ''
       });
     } else {
-      setEditingTemplate(null);
+      ui.openAddModal();
       setFormData({ 
         title: '', description: '', verticalId: VERTICALS.CHARGING_HUBS.id, 
         subjectId: '', frequency: 'DAILY', timeOfDay: '08:00', 
         assignedTo: '', isActive: true, uploadLink: '' 
       });
     }
-    setIsModalOpen(true);
     setStatusMsg({ type: '', text: '' });
   };
 
@@ -104,15 +104,15 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
       // Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (editingTemplate) {
-        await dailyTaskTemplateService.updateTemplate({ ...formData, id: editingTemplate.id }, user.id);
+      if (ui.editingItem) {
+        await dailyTaskTemplateService.updateTemplate({ ...formData, id: ui.editingItem.id }, user.id);
         setStatusMsg({ type: 'success', text: 'Template updated successfully!' });
       } else {
         await dailyTaskTemplateService.addTemplate(formData, user.id);
         setStatusMsg({ type: 'success', text: 'Template created successfully!' });
       }
       setTimeout(() => {
-        setIsModalOpen(false);
+        ui.closeModal();
         fetchTemplates();
       }, 1000);
     } catch (err) {
@@ -173,7 +173,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         description="Create and manage recurring task templates that automatically generate on the Task Board."
         rightActions={
           <>
-            {statusMsg.text && !isModalOpen && (
+            {statusMsg.text && !ui.isAddModalOpen && (
               <span className={`status-pill ${statusMsg.type}`} style={{ marginRight: '1rem' }}>
                 {statusMsg.text}
               </span>
@@ -188,14 +188,14 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         expandedLeft={
           <div className="view-mode-toggle">
             <button
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
+              className={`view-toggle-btn ${ui.viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => ui.setViewMode('grid')}
             >
               Grid
             </button>
             <button
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+              className={`view-toggle-btn ${ui.viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => ui.setViewMode('list')}
             >
               List
             </button>
@@ -203,9 +203,9 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         }
       />
 
-      {loading && !isModalOpen && <div className="loading-spinner">Processing...</div>}
+      {loading && !ui.isAddModalOpen && <div className="loading-spinner">Processing...</div>}
 
-      {viewMode === 'grid' ? (
+      {ui.viewMode === 'grid' ? (
         <div className="templates-grid">
           {templates.map(template => (
             <div key={template.id} className={`template-card ${!template.isActive ? 'inactive' : ''}`}>
@@ -305,12 +305,12 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+      {ui.isAddModalOpen && (
+        <div className="modal-overlay" onClick={ui.closeModal}>
           <div className="modal-content template-modal" onClick={(e) => e.stopPropagation()}>
             <header className="modal-header">
-              <h2>{editingTemplate ? 'Edit Task Template' : 'Create Task Template'}</h2>
-              <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
+              <h2>{ui.editingItem ? 'Edit Task Template' : 'Create Task Template'}</h2>
+              <button className="close-modal" onClick={ui.closeModal}>&times;</button>
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">
@@ -423,9 +423,9 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
               )}
 
               <div className="modal-footer">
-                <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="button" className="halo-button cancel-btn" onClick={ui.closeModal}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>
-                  {loading ? 'Saving...' : (editingTemplate ? 'Update Template' : 'Create Template')}
+                  {loading ? 'Saving...' : (ui.editingItem ? 'Update Template' : 'Create Template')}
                 </button>
               </div>
             </form>

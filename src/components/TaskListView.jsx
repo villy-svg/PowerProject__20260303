@@ -12,6 +12,7 @@ import {
   IconChevronRight
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
+import { useTaskViewActions } from '../hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
@@ -48,10 +49,21 @@ const ListViewRow = ({
   isRowExpanded,
   onToggleRowExpand
 }) => {
-  const currentIndex = stageList.findIndex(s => s.id === task.stageId);
+  const tva = useTaskViewActions({
+    onUpdateStage: updateTaskStage,
+    onDeleteTask: deleteTask,
+    permissions,
+    currentUser,
+    openEditModal,
+    openSubmissionModal,
+    openAddSubtaskModal
+  });
 
-  const effectiveCanUpdate = (canEditTask ? canEditTask(task) : canUpdate) && !task.isContextOnly;
-  const effectiveCanDelete = canDelete && !task.isContextOnly;
+  const currentIndex = stageList.findIndex(s => s.id === task.stageId);
+  const taskPerms = tva.getTaskPermissions(task);
+
+  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly;
+  const effectiveCanDelete = taskPerms.canDelete && !task.isContextOnly;
   const canManage = canManageHierarchy(task);
 
   // Use task's own stage for color coding
@@ -63,19 +75,6 @@ const ListViewRow = ({
     onDrop: onMoveToParent,
     disabled: task.isContextOnly || !canManage
   });
-
-  const handleMove = (direction) => {
-    let newIndex = currentIndex;
-    if (direction === 'left' && canMoveLeft) newIndex--;
-    else if (direction === 'right' && canMoveRight) newIndex++;
-
-    if (newIndex !== currentIndex) {
-      const targetStageId = stageList[newIndex].id;
-      if (taskUtils.canUserMoveTask(task, targetStageId, permissions, currentUser)) {
-        updateTaskStage(task.id, targetStageId);
-      }
-    }
-  };
 
   // Dynamic Check for buttons
   const leftStageId = currentIndex > 0 ? stageList[currentIndex - 1].id : null;
@@ -195,7 +194,7 @@ const ListViewRow = ({
           <div className="list-nav-group">
               <button
                 className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
-                onClick={() => handleMove('left')}
+                onClick={() => tva.handleMove(task, 'left')}
                 disabled={!canMoveLeft}
                 title="Move Back"
               >
@@ -203,7 +202,7 @@ const ListViewRow = ({
               </button>
               <button
                 className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
-                onClick={() => handleMove('right')}
+                onClick={() => tva.handleMove(task, 'right')}
                 disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                 title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
               >
@@ -247,7 +246,7 @@ const ListViewRow = ({
               {canCreate && (
                 <button
                   className="card-add-sub-button"
-                  onClick={(e) => { e.stopPropagation(); openAddSubtaskModal(task.id); }}
+                  onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
                   title="Add Subtask Under This"
                 >
                   <IconPlus size={14} />
@@ -263,7 +262,7 @@ const ListViewRow = ({
             task.stageId !== 'COMPLETED' && (
               <button
                 className="card-submit-proof-button"
-                onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
+                onClick={(e) => { e.stopPropagation(); tva.handleSubmitProof(task); }}
                 title="Submit Proof of Work"
               >
                 <IconUpload size={14} />
@@ -295,7 +294,7 @@ const ListViewRow = ({
           {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
               className="card-edit-button"
-              onClick={() => openEditModal(task)}
+              onClick={(e) => { e.stopPropagation(); tva.handleEdit(task); }}
               title="Edit Task"
             >
               <IconEdit size={14} />
@@ -323,7 +322,7 @@ const ListViewRow = ({
           {effectiveCanDelete && (
             <button
               className="card-delete-button"
-              onClick={() => deleteTask(task.id)}
+              onClick={(e) => { e.stopPropagation(); tva.handleDelete(task.id); }}
               title="Delete Task"
             >
               <IconDelete size={14} />
