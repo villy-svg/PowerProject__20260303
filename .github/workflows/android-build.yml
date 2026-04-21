@@ -102,6 +102,7 @@ jobs:
       - name: Build Signed APK
         working-directory: android
         run: |
+          chmod +x gradlew
           FLAVOR="${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }}"
           echo "🔨 Building: assemble${FLAVOR}Release"
           ./gradlew assemble${FLAVOR}Release --no-daemon
