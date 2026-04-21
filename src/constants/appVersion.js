@@ -8,7 +8,7 @@
  * Example: ota-staging-v1.0.0, ota-production-v1.0.0
  */
 
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '2.0.1';
 
 export const OTA_CONFIG = {
   // GitHub repository for checking releases
