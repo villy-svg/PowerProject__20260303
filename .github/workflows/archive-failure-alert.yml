@@ -2,7 +2,7 @@ name: Archive Failure Alert
 
 on:
   schedule:
-    - cron: '30 * * * *'  # Check every hour (at the half-hour mark)
+    - cron: '30 */6 * * *'  # Check every hour (at the half-hour mark)
   workflow_dispatch: {}
 
 jobs:
