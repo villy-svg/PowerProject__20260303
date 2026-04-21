@@ -46,14 +46,6 @@
   font-size: 13px;
   opacity: 0.5;
 }
-.role-badge {
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: var(--border-color);
-}
 .role-badge.master_admin { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
 .role-badge.vertical_admin { background: rgba(52, 152, 219, 0.2); color: #3498db; }
 .role-badge.master_viewer { background: rgba(155, 89, 182, 0.2); color: #9b59b2; }
@@ -61,18 +53,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-.v-tag {
-  padding: 4px 8px;
-  background: var(--border-color);
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.v-tag.locked {
-  opacity: 0.4;
-  border: 1px dashed var(--text-color);
-  background: transparent;
 }
 .edit-user-btn {
   padding: 8px;
@@ -313,15 +293,7 @@
   gap: 12px;
   margin-top: 12px;
 }
-.vertical-perm-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-}
+
 .vertical-perm-item .v-name {
   font-weight: 600;
   font-size: 0.9rem;
@@ -497,37 +469,7 @@
   min-width: 32px;
   font-size: 10px;
 }
-/* View Mode Toggle (Master Page System) */
-.view-mode-toggle {
-  display: flex;
-  gap: 8px;
-  background: var(--halo-bg);
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-}
-.view-toggle-btn {
-  padding: 6px 16px;
-  border: none;
-  background: transparent;
-  color: var(--text-color);
-  font-size: 13px;
-  font-weight: 700;
-  border-radius: 6px;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.2s;
-}
-.view-toggle-btn:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
-}
-.view-toggle-btn.active {
-  background: rgba(0, 255, 133, 0.15) !important;
-  color: var(--brand-mint) !important;
-  border: 1px solid var(--brand-mint) !important;
-  opacity: 1;
-}
+
 /* User Grid View */
 .user-grid {
   display: grid;

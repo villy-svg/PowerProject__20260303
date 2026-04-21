@@ -58,7 +58,8 @@ const ConflictModal = ({
       title={reviewIdx !== null ? `Detailed Comparison: ${entityName}` : title}
       className={reviewIdx !== null ? 'xl-modal' : 'large-modal'}
     >
-      <div className="conflict-modal-body">
+      <div className="master-modal-body">
+        <div className="master-modal-scroll-area">
         {reviewIdx !== null ? (
           <div className="conflict-review-view">
             <div className="review-header">
@@ -67,9 +68,9 @@ const ConflictModal = ({
               </button>
               <div className="review-status-indicator">
                 {selectedIndices.has(reviewIdx) ? (
-                  <span className="status-badge selected">Selected for Update</span>
+                  <span className="submission-status-badge approved">Selected for Update</span>
                 ) : (
-                  <span className="status-badge pending">Pending Review</span>
+                  <span className="submission-status-badge pending">Pending Review</span>
                 )}
               </div>
             </div>
@@ -198,6 +199,7 @@ const ConflictModal = ({
             )}
           </>
         )}
+        </div>
       </div>
     </TaskModal>
   );

@@ -580,20 +580,6 @@
     transform: translate(-50%, var(--tray-height, 64px));
   }
 
-  @media screen and (min-width: 1025px) {
-    .bulk-action-bar {
-      flex-direction: row;
-      align-items: center;
-      width: auto;
-      border-radius: 50px;
-      padding: 8px 1.5rem;
-      bottom: 2rem;
-    }
-    .bulk-action-bar.tray-hidden {
-      /* On desktop the tray never hides, so keep the bar at its normal position */
-      transform: translate(-50%, 0);
-    }
-  }
   .bulk-info {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -604,15 +590,6 @@
     color: var(--brand-green);
     font-size: 0.9rem;
     text-align: center;
-  }
-  
-  @media screen and (min-width: 1025px) {
-    .bulk-info {
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom: none;
-      padding-right: 16px;
-      padding-bottom: 0;
-    }
   }
 
   .bulk-actions {
@@ -627,11 +604,6 @@
   .bulk-action-bar .bulk-btn .bulk-btn-text {
     display: none;
   }
-  @media screen and (min-width: 1025px) {
-    .bulk-action-bar .bulk-btn .bulk-btn-text {
-      display: inline;
-    }
-  }
   .bulk-action-bar .bulk-btn {
     border-radius: 8px !important;
     padding: 8px 12px !important;
@@ -644,5 +616,28 @@
     font-weight: 600;
   }
 }
- }
+/* ==========================================================================
+   DESKTOP BULK BAR OVERRIDES (≥1025px)
+   ========================================================================== */
+@media screen and (min-width: 1025px) {
+  .bulk-action-bar {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    border-radius: 50px;
+    padding: 8px 1.5rem;
+    bottom: 2rem;
+  }
+  .bulk-action-bar.tray-hidden {
+    transform: translate(-50%, 0);
+  }
+  .bulk-info {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+    padding-right: 16px;
+    padding-bottom: 0;
+  }
+  .bulk-action-bar .bulk-btn .bulk-btn-text {
+    display: inline;
+  }
 }

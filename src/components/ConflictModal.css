@@ -1,20 +1,11 @@
-/* Conflict Modal Styles */
-.conflict-modal-body {
-  padding: 10px 0;
-}
+
 .conflict-intro {
   margin-bottom: 24px;
   opacity: 0.8;
   font-size: 0.95rem;
   line-height: 1.5;
 }
-/* Review View (Page Flow Style) */
-.conflict-review-view {
-  animation: fadeIn 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+
 .review-header {
   display: flex;
   justify-content: space-between;
@@ -39,24 +30,7 @@
 .back-to-list:hover {
   transform: translateX(-4px);
 }
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.status-badge.pending {
-  background: rgba(255, 193, 7, 0.1);
-  color: #ffc107;
-  border: 1px solid rgba(255, 193, 7, 0.2);
-}
-.status-badge.selected {
-  background: rgba(45, 212, 191, 0.1);
-  color: var(--brand-green);
-  border: 1px solid rgba(45, 212, 191, 0.2);
-}
+
 .comparison-container {
   flex: 1;
   overflow-y: auto;
@@ -118,13 +92,7 @@
   opacity: 0.6;
   border-left: 1px solid var(--border-color);
 }
-/* Action Section */
-.review-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-color);
-}
+
 /* Multi-Flow Containers (List View) */
 .conflict-flow-dual {
   display: grid;

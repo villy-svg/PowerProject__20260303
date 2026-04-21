@@ -1,0 +1,199 @@
+/* systemButtons.css - Shared Button and Selection Systems */
+
+/* ─── Universal Selection System (Halo Pattern) ─── */
+.selection-area {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+.selection-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  background: var(--surface-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #000;
+  font-weight: 900;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.selection-area:hover .selection-checkbox {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 8px var(--halo-glow);
+}
+.selection-checkbox.checked {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+  color: #000;
+}
+.list-selection-col {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ─── Halo Design System Buttons ─── */
+.halo-button {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  color: var(--brand-mint);
+  padding: clamp(8px, 1.5vh, 12px) clamp(16px, 2vw, 24px);
+  border-radius: var(--radius-button);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 100px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-premium);
+}
+.halo-button:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+  border-color: var(--brand-green);
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+.halo-button.active {
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-mint);
+  border: 2px solid var(--brand-green);
+  box-shadow: 0 0 20px var(--halo-glow);
+}
+.halo-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.master-action-btn {
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+/* ─── View Mode Toggles ─── */
+.view-mode-toggle {
+  display: flex;
+  background: var(--halo-bg);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 8px;
+  border: 1px solid var(--border-color);
+}
+.view-toggle-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-color);
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+.view-toggle-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+.view-toggle-btn.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
+  color: var(--brand-mint) !important;
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
+  opacity: 1;
+}
+
+/* ─── Management Action Themes (Approve/Reject) ─── */
+.btn-approve, .btn-reject {
+  padding: 4px 10px !important;
+  font-size: 0.72rem !important;
+  min-width: unset !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 8px !important;
+}
+.btn-approve {
+  color: var(--brand-mint) !important;
+  background: var(--halo-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
+}
+.btn-approve:hover {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
+  border-color: var(--brand-mint) !important;
+  box-shadow: 0 0 15px var(--halo-glow);
+}
+.btn-reject {
+  color: var(--priority-urgent) !important;
+  background: color-mix(in srgb, var(--priority-urgent), transparent 95%) !important;
+  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 70%) !important;
+}
+.btn-reject:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%) !important;
+  border-color: var(--priority-urgent) !important;
+  box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
+}
+
+/* ─── Functional Action Icons ─── */
+.action-icon-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.1rem;
+}
+.action-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--brand-green);
+  transform: translateY(-1px);
+}
+.action-icon-btn.delete:hover {
+  color: #ef4444;
+}
+
+.status-toggle-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: auto !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 1.1rem !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+.status-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--brand-green) !important;
+  transform: translateY(-1px);
+}

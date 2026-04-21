@@ -194,7 +194,7 @@ const TaskCard = ({
           {(canMoveLeft || canMoveRight) && (
             <>
               <button
-                className={`card-nav-button ${!canMoveLeft ? 'disabled' : ''}`}
+                className="action-icon-btn"
                 onClick={() => handleMove('left')}
                 disabled={!canMoveLeft}
                 title="Move Back"
@@ -202,7 +202,7 @@ const TaskCard = ({
                 <IconArrowLeft size={14} />
               </button>
               <button
-                className={`card-nav-button ${(!canMoveRight || task.stageId === 'COMPLETED' || blockArrows) ? 'disabled' : ''}`}
+                className="action-icon-btn"
                 onClick={() => handleMove('right')}
                 disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
                 title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
@@ -220,7 +220,8 @@ const TaskCard = ({
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {tasks.find(t => t.id === task.parentTask)?.parentTask && (
                     <button
-                      className="card-promote-button"
+                      className="action-icon-btn"
+                      style={{ color: 'var(--brand-blue)' }}
                       onClick={() => {
                         const parent = tasks.find(t => t.id === task.parentTask);
                         if (parent) onMoveToParent(task.id, parent.parentTask);
@@ -232,7 +233,8 @@ const TaskCard = ({
                     </button>
                   )}
                   <button
-                    className="card-promote-button"
+                    className="action-icon-btn"
+                    style={{ color: 'var(--brand-green)' }}
                     onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
                     title="Promote to Top Level"
                   >
@@ -241,7 +243,8 @@ const TaskCard = ({
                 </div>
               )}
               <button
-                className="card-add-sub-button"
+                className="action-icon-btn"
+                style={{ color: 'var(--brand-green)' }}
                 onClick={() => openAddSubtaskModal(task.id)}
                 title="Add Subtask Under This"
               >
@@ -256,7 +259,7 @@ const TaskCard = ({
             task.stageId !== 'DEPRIORITIZED' &&
             task.stageId !== 'COMPLETED' && (
               <button
-                className="card-submit-proof-button"
+                className="action-icon-btn"
                 onClick={(e) => { e.stopPropagation(); openSubmissionModal(task); }}
                 title="Submit Proof of Work"
               >
@@ -286,7 +289,7 @@ const TaskCard = ({
 
           {effectiveCanUpdate && (
             <button
-              className="card-edit-button"
+              className="action-icon-btn"
               onClick={() => openEditModal(task)}
               title="Edit Task"
             >
@@ -296,7 +299,7 @@ const TaskCard = ({
 
           {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
             <button
-              className="card-reprio-button"
+              className="action-icon-btn"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
               title="Move back to Pending"
               style={{ color: 'var(--brand-green)', fontWeight: 800 }}
@@ -307,7 +310,7 @@ const TaskCard = ({
 
           {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
             <button
-              className="card-deprio-button"
+              className="action-icon-btn"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
               title="Move to Deprioritized"
             >
@@ -317,7 +320,7 @@ const TaskCard = ({
 
           {effectiveCanDelete && (
             <button
-              className="card-delete-button"
+              className="action-icon-btn delete"
               onClick={() => deleteTask(task.id)}
               title="Delete Task"
             >

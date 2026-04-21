@@ -155,8 +155,8 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
       title={isLocked ? 'Proof of Work (Locked)' : 'Submit Proof of Work'}
       className="large-modal"
     >
-      <div className={`submission-modal-body ${submitting ? 'is-processing-content' : ''}`}>
-        <div className="submission-modal-scroll-area">
+      <div className={`master-modal-body ${submitting ? 'is-processing-content' : ''}`}>
+        <div className="master-modal-scroll-area">
         {/* Task Context */}
         {task && (
           <div style={{ marginBottom: '1rem' }}>
@@ -304,7 +304,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         </div>
 
         {/* Sticky Actions */}
-        <div className="submission-actions">
+        <div className="master-modal-footer">
           <div className="submission-guideline-text">
             * Images up to 25MB accepted (auto-optimized to 300KB for field sync)
           </div>
@@ -320,7 +320,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
             {!isLocked && (
               <>
                 <button
-                  className="halo-button submission-upload-only-btn"
+                  className="halo-button"
                   onClick={() => handleSubmit(false)}
                   disabled={!canSubmit}
                   title="Save proof without moving task stage"
@@ -328,7 +328,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                   {submitting ? 'Uploading...' : '📎 Upload Only'}
                 </button>
                 <button
-                  className="halo-button submission-submit-btn"
+                  className="halo-button"
                   onClick={() => handleSubmit(true)}
                   disabled={!canSubmit}
                   title="Save proof and move task to Review"

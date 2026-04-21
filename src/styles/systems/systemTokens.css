@@ -1,0 +1,87 @@
+/* systemTokens.css - Centralized Design Tokens and variables */
+:root {
+  /* Core Palette - Midnight Premium */
+  --bg-color: #fcfcfd;
+  --text-color: #18181b;
+  --brand-mint: #0d9488;
+  --brand-blue: #3b82f6;
+  --brand-green: var(--brand-mint); /* Legacy alias */
+  --border-color: #e4e4e7;
+  --panel-bg: #ffffff;
+  --surface-card: #f9f9fb;
+  
+  /* Typography */
+  --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-xs: 0.70rem;   /* 11px - Micro labels */
+  --font-sm: 0.875rem;  /* 14px - Menu items, task chips */
+  --font-base: 1rem;    /* 16px - Body text */
+  --font-lg: 1.125rem;  /* 18px - Subheaders */
+  
+  /* Radii & Depth */
+  --radius-squircle: 24px;
+  --radius-button: 12px;
+  --radius-pill: 40px;
+  --glass-blur: 15px;
+  --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-halo: 0 0 15px var(--halo-glow);
+  
+  /* Halo Glow System */
+  --halo-glow: rgba(13, 148, 136, 0.2);
+  --halo-bg: rgba(13, 148, 136, 0.05);
+  
+  /* Status Colors */
+  --priority-urgent: #ef4444;
+  --priority-high: #f97316;
+  --priority-medium: #eab308;
+  --priority-low: #22c55e;
+  
+  /* Z-Index Hierarchy */
+  --z-base: 0;
+  --z-card-base: 1;
+  --z-card-content: 10;
+  --z-card-name-overlay: 15;
+  --z-card-actions: 20;
+  --z-toolbar: 100;
+  --z-sticky: 200;
+  --z-header: 2001;
+  --z-modal: 3000;
+  --z-toast: 4000;
+  
+  /* Badge System Colors (Tokenized) */
+  --badge-teal-bg: rgba(45, 212, 191, 0.1);
+  --badge-teal-text: #2dd4bf;
+  --badge-blue-bg: rgba(59, 130, 246, 0.1);
+  --badge-blue-text: #60a5fa;
+  --badge-green-bg: rgba(52, 211, 153, 0.1);
+  --badge-green-text: #34d399;
+  --badge-amber-bg: rgba(245, 158, 11, 0.1);
+  --badge-amber-text: #f59e0b;
+  --badge-red-bg: rgba(239, 68, 68, 0.1);
+  --badge-red-text: #ef4444;
+}
+
+[data-theme='dark'] {
+  --bg-color: #0b0b0d;
+  --text-color: #e4e4e7;
+  --text-secondary: #a1a1aa;
+  --brand-mint: #2dd4bf; 
+  --brand-blue: #60a5fa;      
+  --brand-green: var(--brand-mint);
+  --border-color: rgba(255, 255, 255, 0.08); 
+  --panel-bg: #121214;
+  --surface-card: #161618;    
+  --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.8);
+  --glass-blur: 25px;
+  --halo-glow: rgba(45, 212, 191, 0.15);
+  --halo-glow-blue: rgba(96, 165, 250, 0.12); 
+  --halo-bg: rgba(45, 212, 191, 0.03);
+}
+
+/* Safe Area Support */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --tray-height: 64px;
+}

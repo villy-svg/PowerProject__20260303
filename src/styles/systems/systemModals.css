@@ -1,0 +1,90 @@
+/* systemModals.css - Shared Modal and Overlay Foundations */
+
+/* ─── Common Empty States (Often inside modals or panels) ─── */
+.empty-state-container {
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.empty-state-icon {
+  font-size: 4rem;
+  opacity: 0.2;
+}
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+.empty-state-text {
+  max-width: 400px;
+  opacity: 0.5;
+  line-height: 1.6;
+}
+
+/* ─── Master Modal Layout (Foundation for Phase 3) ─── */
+.master-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+.master-modal-content {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle);
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-premium);
+  overflow: hidden;
+}
+
+/* ─── Standardized Internal Layouts ─── */
+.master-modal-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.master-modal-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.master-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in srgb, var(--surface-card), transparent 20%);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  flex-shrink: 0;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.master-modal-footer button {
+  min-width: 100px;
+}
+

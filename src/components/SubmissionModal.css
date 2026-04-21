@@ -3,22 +3,7 @@
    Follows: UI Design System §5 (Modals), §12 (Apple Premium Standards)
    ========================================================================== */
 /* ─── Modal Body Layout ─────────────────────────────────────────────────── */
-.submission-modal-body {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-height: calc(90vh - 80px); /* Account for modal header */
-  overflow: hidden;
-  padding: 0 !important; /* Managed by scroll-area and sticky-footer */
-}
-.submission-modal-scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: clamp(1rem, 3vw, 1.5rem);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
+
 /* ─── Section Labels ────────────────────────────────────────────────────── */
 .submission-section-label {
   font-weight: 700;
@@ -169,18 +154,7 @@
   color: var(--priority-urgent);
 }
 /* ─── Submit Button Area ────────────────────────────────────────────────── */
-.submission-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  background: color-mix(in srgb, var(--surface-card), transparent 20%);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border-color);
-  margin-top: auto;
-  flex-shrink: 0;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
-}
+
 .submission-guideline-text {
   font-size: 0.65rem;
   font-weight: 600;
@@ -312,30 +286,7 @@
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
-/* ─── Status Badge ──────────────────────────────────────────────────────── */
-.submission-status-badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.submission-status-badge.pending {
-  background: var(--badge-amber-bg);
-  color: var(--badge-amber-text);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-.submission-status-badge.approved {
-  background: var(--badge-green-bg);
-  color: var(--badge-green-text);
-  border: 1px solid rgba(52, 211, 153, 0.3);
-}
-.submission-status-badge.rejected {
-  background: var(--badge-red-bg);
-  color: var(--badge-red-text);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
+
 /* ─── Locked Notice ─────────────────────────────────────────────────────── */
 .submission-locked-notice {
   padding: 12px 16px;
@@ -360,11 +311,5 @@
 @media (max-width: 600px) {
   .submission-file-chip {
     max-width: 100%;
-  }
-  .submission-actions {
-    flex-direction: column;
-  }
-  .submission-actions button {
-    width: 100%;
   }
 }
