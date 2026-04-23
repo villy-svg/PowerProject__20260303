@@ -22,7 +22,7 @@ import { APP_VERSION, OTA_CONFIG } from '../../constants/appVersion';
 // based on the Supabase URL injected at build time
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const IS_STAGING = SUPABASE_URL.includes('staging') ||
-                   SUPABASE_URL.includes('nmdxitxelwlnbdrzzopc'); // staging project ref
+                   SUPABASE_URL.includes('eeoibqxhfkrgbylnluvk'); // staging project ref
 
 /**
  * Determines the current environment tag prefix
@@ -64,9 +64,14 @@ async function checkForUpdate() {
     const releases = await response.json();
 
     // Filter releases matching our environment prefix
-    const relevantReleases = releases.filter(r =>
-      r.tag_name.startsWith(prefix) && !r.draft && !r.prerelease
-    );
+    const relevantReleases = releases.filter(r => {
+      const isCorrectEnv = r.tag_name.startsWith(prefix);
+      const isDraft = r.draft;
+      // Allow pre-releases ONLY for staging
+      const isAllowedPrerelease = IS_STAGING || !r.prerelease;
+      
+      return isCorrectEnv && !isDraft && isAllowedPrerelease;
+    });
 
     if (relevantReleases.length === 0) {
       console.log('[OTA] No releases found for environment:', env);
