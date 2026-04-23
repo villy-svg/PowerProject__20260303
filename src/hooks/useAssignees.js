@@ -17,12 +17,19 @@ export const useAssignees = (autoFetch = false) => {
     try {
       const { data, error: fetchError } = await supabase
         .from('employees')
-        .select('id, full_name, emp_code, email, badge_id, seniority_level')
+        .select('id, full_name, emp_code, email, badge_id, employee_roles(seniority_level)')
         .eq('status', 'Active')
         .order('full_name');
 
       if (fetchError) throw fetchError;
-      setAssignees(data || []);
+      
+      // Flatten the joined seniority_level
+      const processed = (data || []).map(emp => ({
+        ...emp,
+        seniority_level: emp.employee_roles?.seniority_level || 999
+      }));
+
+      setAssignees(processed);
     } catch (err) {
       console.error('Error fetching assignees:', err);
       setError(err);

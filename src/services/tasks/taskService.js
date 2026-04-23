@@ -48,7 +48,7 @@ const normalizeTask = (row) => {
     hub_id: row.hub_id,
     city: row.city,
     function: row.function,
-    assigned_to: row.assigned_to || [], // Now an array
+    assigned_to: Array.isArray(row.assignees) ? row.assignees.map(a => a.id) : (row.assigned_to ? [row.assigned_to] : []),
     assigneeName: assigneeNames,
     parentTask: row.parent_task_id || null,
     createdAt: row.created_at,
@@ -56,10 +56,10 @@ const normalizeTask = (row) => {
     createdBy: row.created_by,
     lastUpdatedBy: row.last_updated_by,
     task_board: row.task_board || [],
-    client_id: row.client_id || [],
-    partner_id: row.partner_id || [],
-    vendor_id: row.vendor_id || [],
-    employee_id: row.employee_id || [],
+    client_id: row.client_id ? [row.client_id] : [],
+    partner_id: row.partner_id ? [row.partner_id] : [],
+    vendor_id: row.vendor_id ? [row.vendor_id] : [],
+    employee_id: row.employee_id ? [row.employee_id] : [],
     latestSubmission,
     assigneeMeta,
   };
@@ -77,14 +77,14 @@ const mapTaskToRow = (task) => ({
   hub_id: task.hub_id === '' ? null : (task.hub_id || null),
   city: task.city || null,
   function: task.function || null,
-  assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : (task.assigned_to ? [task.assigned_to] : []),
+  assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to[0] : (task.assigned_to || null),
   parent_task_id: task.parentTask || null,
   last_updated_by: task.lastUpdatedBy || null,
   task_board: task.task_board || [],
-  client_id: task.client_id || [],
-  partner_id: task.partner_id || [],
-  vendor_id: task.vendor_id || [],
-  employee_id: task.employee_id || [],
+  client_id: Array.isArray(task.client_id) ? task.client_id[0] : (task.client_id || null),
+  partner_id: Array.isArray(task.partner_id) ? task.partner_id[0] : (task.partner_id || null),
+  vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id[0] : (task.vendor_id || null),
+  employee_id: Array.isArray(task.employee_id) ? task.employee_id[0] : (task.employee_id || null),
 });
 
 /** Standard select string: uses computed relationship 'assignees' backed by task_context_links. */

@@ -51,13 +51,13 @@ export const taskUtils = {
 
       const senior = sorted[0];
       const name = senior.full_name.split(' ')[0];
-      return count > 1 ? `${name} + ${count - 1}` : name;
+      return name;
     }
 
     // Fallback if metadata isn't joined
     if (task.assigneeName) {
       const first = task.assigneeName.split(',')[0].trim().split(' ')[0];
-      return count > 1 ? `${first} + ${count - 1}` : first;
+      return first;
     }
 
     return '...';
