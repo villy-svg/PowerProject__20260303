@@ -16,7 +16,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
     priority: safeData.priority || 'Medium',
     description: safeData.description || '',
     assigned_client_id: safeData.assigned_client_id || '',
-    assigned_to: safeData.assigned_to || '',
+    assigned_to: Array.isArray(safeData.assigned_to) ? safeData.assigned_to : (safeData.assigned_to ? [safeData.assigned_to] : []),
     parentTask: safeData.parentTask || ''
   });
 

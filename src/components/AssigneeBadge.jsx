@@ -14,10 +14,11 @@ const AssigneeBadge = ({ task, currentUser, className = '' }) => {
   const tooltip = taskUtils.getAssigneeTooltip(task);
   
   // Determine if it's the current user or unassigned
-  const isCurrentUser = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || 
-                         (currentUser?.id && task.assigned_to === currentUser.id);
+  const assignedTo = task.assigned_to || [];
+  const isCurrentUser = (currentUser?.employeeId && assignedTo.includes(currentUser.employeeId)) || 
+                         (currentUser?.id && assignedTo.includes(currentUser.id));
                          
-  const isUnassigned = !task.assigned_to || label === 'NULL';
+  const isUnassigned = assignedTo.length === 0 || label === 'NULL';
 
   let modifierClass = '';
   if (isCurrentUser) modifierClass = 'assignee-you';

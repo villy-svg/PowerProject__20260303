@@ -106,8 +106,9 @@ export const useTaskFilters = ({
 
       // 4. My Tasks Filter
       if (showMyTasksOnly) {
-        const isMe = (user?.employeeId && t.assigned_to === user.employeeId) ||
-                     (user?.id && t.assigned_to === user.id);
+        const assignedTo = t.assigned_to || [];
+        const isMe = (user?.employeeId && assignedTo.includes(user.employeeId)) ||
+                     (user?.id && assignedTo.includes(user.id));
         if (!isMe) return false;
       }
 

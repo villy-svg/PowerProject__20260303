@@ -16,7 +16,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     * 1. First, apply Hierarchy Rules (Seniority, Reportees, etc.)
     * 2. Then, restrict to Assigned Verticals (unless Global Scope)
     */
-  const hierarchyFiltered = hierarchyService.filterTasksByHierarchy(user, tasks, null, verticals);
+  const hierarchyFiltered = hierarchyService.filterTasksByHierarchy(user, tasks, null, verticals, permissions);
 
   const hasGlobalScope = permissions.scope === 'global';
   

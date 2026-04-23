@@ -257,7 +257,7 @@ const ListViewRow = ({
 
           {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
           {!task.isContextOnly &&
-            (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((currentUser?.employeeId && task.assigned_to === currentUser.employeeId) || (currentUser?.id && task.assigned_to === currentUser.id)))) &&
+            (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&
             task.stageId !== 'DEPRIORITIZED' &&
             task.stageId !== 'COMPLETED' && (
               <button

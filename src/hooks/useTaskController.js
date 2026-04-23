@@ -105,15 +105,15 @@ export const useTaskController = (props) => {
       const targetIds = selectedTasks.filter(t => !t.isContextOnly).map(t => t.id);
       if (targetIds.length === 0) { clearSelection(); return; }
 
-      if (action === 'deprio') await bulkUpdateTasks(targetIds, { stageid: 'DEPRIORITIZED' });
-      else if (action === 'restore') await bulkUpdateTasks(targetIds, { stageid: 'BACKLOG' });
+      if (action === 'deprio') await bulkUpdateTasks(targetIds, { stage_id: 'DEPRIORITIZED' });
+      else if (action === 'restore') await bulkUpdateTasks(targetIds, { stage_id: 'BACKLOG' });
       else if (action === 'forward' || action === 'backward') {
         if (!sameStage) return;
         const currentIndex = STAGE_LIST.findIndex(s => s.id === commonStageId);
         let newIndex = currentIndex;
         if (action === 'forward' && currentIndex < STAGE_LIST.length - 1) newIndex++;
         if (action === 'backward' && currentIndex > 0) newIndex--;
-        if (newIndex !== currentIndex) await bulkUpdateTasks(targetIds, { stageid: STAGE_LIST[newIndex].id });
+        if (newIndex !== currentIndex) await bulkUpdateTasks(targetIds, { stage_id: STAGE_LIST[newIndex].id });
       }
       clearSelection();
     }
@@ -179,7 +179,7 @@ export const useTaskController = (props) => {
     if (!primaryTask) return;
     const duplicates = tasks.filter(t => t.id !== primaryTaskId && t.text === primaryTask.text && t.verticalId === primaryTask.verticalId);
     try {
-      await bulkUpdateTasks(duplicates.map(t => t.id), { stageid: 'DEPRIORITIZED' });
+      await bulkUpdateTasks(duplicates.map(t => t.id), { stage_id: 'DEPRIORITIZED' });
       setMergeTaskCluster(null);
     } catch (err) { alert('Merge failed.'); }
   };
@@ -193,7 +193,7 @@ export const useTaskController = (props) => {
       message: `Move ${verticalTasks.length} active tasks to Deprioritized?`,
       onConfirm: async () => {
         setSaving(true);
-        try { await bulkUpdateTasks(verticalTasks.map(t => t.id), { stageid: 'DEPRIORITIZED' }); }
+        try { await bulkUpdateTasks(verticalTasks.map(t => t.id), { stage_id: 'DEPRIORITIZED' }); }
         catch (err) { alert("Failed to clear board."); }
         finally { setSaving(false); setConfirmDialog(p => ({ ...p, isOpen: false })); }
       }

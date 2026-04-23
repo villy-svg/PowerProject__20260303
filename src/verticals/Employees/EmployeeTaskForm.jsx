@@ -15,7 +15,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
     description: safeData.description || '',
-    assigned_to: safeData.assigned_to || '',
+    assigned_to: Array.isArray(safeData.assigned_to) ? safeData.assigned_to : (safeData.assigned_to ? [safeData.assigned_to] : []),
     parentTask: safeData.parentTask || ''
   });
 

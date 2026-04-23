@@ -9,8 +9,13 @@ import { supabase } from '../core/supabaseClient';
 import { auditService } from '../core/auditService';
 
 // ---------------------------------------------------------------------------
-// Internal Utilities
+// Constants & Internal Utilities
 // ---------------------------------------------------------------------------
+
+// Bump this whenever the normalized task shape changes (uuid[] migration = v2)
+const TASK_CACHE_VERSION = 3;
+const TASK_CACHE_KEY = 'powerpod_tasks_v3';
+const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
 
 /**
  * Maps a Supabase row (lowercase column names) to the camelCase shape
@@ -21,24 +26,42 @@ const normalizeTask = (row) => {
     ? [...row.submissions].sort((a, b) => b.submission_number - a.submission_number)[0]
     : null;
 
+  // Handle multi-assignee names (PostgREST returns an array via the 'assignees' computed relationship)
+  const assigneeNames = Array.isArray(row.assignees)
+    ? row.assignees.map(e => e.full_name).join(', ')
+    : (row.assignees?.full_name || '');
+
+  // Flatten nested employee_roles for each assignee in assigneeMeta
+  const rawMeta = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
+  const assigneeMeta = rawMeta.map(e => ({
+    ...e,
+    seniority_level: e.employee_roles?.seniority_level || 1
+  }));
+
   return {
     id: row.id,
     text: row.text,
-    verticalId: row.verticalid ?? row.verticalId,
-    stageId: row.stageid ?? row.stageId,
+    verticalId: row.vertical_id,
+    stageId: row.stage_id,
     priority: row.priority,
     description: row.description,
     hub_id: row.hub_id,
     city: row.city,
     function: row.function,
-    assigned_to: row.assigned_to,
-    assigneeName: row.employees?.full_name || row.assigneeName,
-    parentTask: row.parent_task || null,
-    createdAt: row.created_at ?? row.createdat ?? row.createdAt,
-    updatedAt: row.updated_at ?? row.updatedat ?? row.updatedAt,
+    assigned_to: row.assigned_to || [], // Now an array
+    assigneeName: assigneeNames,
+    parentTask: row.parent_task_id || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
     createdBy: row.created_by,
     lastUpdatedBy: row.last_updated_by,
+    task_board: row.task_board || [],
+    client_id: row.client_id || [],
+    partner_id: row.partner_id || [],
+    vendor_id: row.vendor_id || [],
+    employee_id: row.employee_id || [],
     latestSubmission,
+    assigneeMeta,
   };
 };
 
@@ -47,20 +70,26 @@ const normalizeTask = (row) => {
  */
 const mapTaskToRow = (task) => ({
   text: task.text,
-  verticalid: task.verticalId,
-  stageid: task.stageId,
+  vertical_id: task.verticalId,
+  stage_id: task.stageId,
   priority: task.priority || null,
   description: task.description || null,
   hub_id: task.hub_id === '' ? null : (task.hub_id || null),
   city: task.city || null,
   function: task.function || null,
-  assigned_to: task.assigned_to || null,
-  parent_task: task.parentTask || null,
+  assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : (task.assigned_to ? [task.assigned_to] : []),
+  parent_task_id: task.parentTask || null,
   last_updated_by: task.lastUpdatedBy || null,
+  task_board: task.task_board || [],
+  client_id: task.client_id || [],
+  partner_id: task.partner_id || [],
+  vendor_id: task.vendor_id || [],
+  employee_id: task.employee_id || [],
 });
 
-/** Standard select string: includes explicit employee join and latest submissions. */
-const TASK_SELECT = '*, employees!assigned_to (full_name), submissions(id, status, rejection_reason, submission_number, created_at)';
+/** Standard select string: uses computed relationship 'assignees' backed by task_context_links. */
+const TASK_SELECT = '*, assignees(id, full_name, badge_id, employee_roles(seniority_level)), submissions(id, status, rejection_reason, submission_number, created_at)';
+const DAILY_TASK_SELECT = '*, assignees(id, full_name, badge_id, employee_roles(seniority_level))';
 
 // ---------------------------------------------------------------------------
 // Service
@@ -77,7 +106,16 @@ export const taskService = {
       // OFFLINE BYPASS: Immediate cache retrieval
       // -------------------------------------------------------------------------
       if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
-        const cached = localStorage.getItem('power_project_cache_tasks');
+        const cachedVersion = parseInt(localStorage.getItem(TASK_CACHE_VERSION_KEY) || '0', 10);
+        const cached = (cachedVersion === TASK_CACHE_VERSION)
+          ? localStorage.getItem(TASK_CACHE_KEY)
+          : null;
+
+        if (cachedVersion !== TASK_CACHE_VERSION) {
+          localStorage.removeItem(TASK_CACHE_KEY);
+          localStorage.removeItem(TASK_CACHE_VERSION_KEY);
+        }
+
         if (cached) {
           console.warn('PowerProject: Using cached task data.');
           return JSON.parse(cached);
@@ -91,18 +129,22 @@ export const taskService = {
       if (error) throw error;
 
       const results = (data || []).map(normalizeTask);
-      const sorted = results.sort((a,b) => (a.updatedAt || a.createdAt) > (b.updatedAt || b.createdAt) ? 1 : -1);
+      const sorted = results.sort((a, b) => (a.updatedAt || a.createdAt) > (b.updatedAt || b.createdAt) ? 1 : -1);
 
       // -------------------------------------------------------------------------
       // CACHE PERSISTENCE: Save for offline use
       // -------------------------------------------------------------------------
-      localStorage.setItem('power_project_cache_tasks', JSON.stringify(sorted));
+      localStorage.setItem(TASK_CACHE_KEY, JSON.stringify(sorted));
+      localStorage.setItem(TASK_CACHE_VERSION_KEY, String(TASK_CACHE_VERSION));
 
       return sorted;
     } catch (err) {
       console.error('TaskService Error:', err);
-      // Fallback to cache on any error if we have it
-      const cached = localStorage.getItem('power_project_cache_tasks');
+      // Fallback to cache on any error if we have it and it's valid
+      const cachedVersion = parseInt(localStorage.getItem(TASK_CACHE_VERSION_KEY) || '0', 10);
+      const cached = (cachedVersion === TASK_CACHE_VERSION)
+        ? localStorage.getItem(TASK_CACHE_KEY)
+        : null;
       if (cached) return JSON.parse(cached);
       throw err;
     }
@@ -120,7 +162,7 @@ export const taskService = {
       const newTask = { ...taskData, id: taskData.id || `local-${Date.now()}`, createdAt: new Date().toISOString() };
       return newTask;
     }
-    
+
     let row = {
       id: taskData.id,
       ...mapTaskToRow(taskData),
@@ -147,7 +189,7 @@ export const taskService = {
       console.warn('PowerProject: Offline modification (updateTask).');
       return taskData;
     }
-    
+
     let row = mapTaskToRow(taskData);
     row = auditService.stamp(row, userId);
 
@@ -167,7 +209,7 @@ export const taskService = {
    * @param {string} newStageId
    */
   async updateTaskStage(taskId, newStageId, userId) {
-    const row = auditService.stamp({ stageid: newStageId }, userId);
+    const row = auditService.stamp({ stage_id: newStageId }, userId);
 
     const { error } = await supabase
       .from('tasks')
@@ -206,7 +248,7 @@ export const taskService = {
       console.warn('PowerProject: Offline modification (deleteTask).');
       return;
     }
-    
+
     const { error } = await supabase
       .from('tasks')
       .delete()

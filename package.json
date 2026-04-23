@@ -6,6 +6,7 @@
   "homepage": "https://villy-svg.github.io/PowerProject__20260303",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging",
     "build": "vite build && npx shx cp public/CNAME dist/CNAME",
     "build:staging": "vite build --mode staging && npx shx cp public/CNAME dist/CNAME",
     "postinstall": "patch-package",

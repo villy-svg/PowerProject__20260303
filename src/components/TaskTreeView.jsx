@@ -52,10 +52,11 @@ const TaskTreeView = ({
     const taskMap = new Map(tasks.map(t => [t.id, t]));
 
     // Find tasks assigned to "YOU"
-    const myTasks = tasks.filter(t =>
-      (currentUser.employeeId && t.assigned_to === currentUser.employeeId) ||
-      (currentUser.id && t.assigned_to === currentUser.id)
-    );
+    const myTasks = tasks.filter(t => {
+      const assignedTo = t.assigned_to || [];
+      return (currentUser.employeeId && assignedTo.includes(currentUser.employeeId)) ||
+             (currentUser.id && assignedTo.includes(currentUser.id));
+    });
 
     // Trace back all ancestors for each of my tasks
     myTasks.forEach(task => {

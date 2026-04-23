@@ -13,7 +13,7 @@ import { supabase } from '../../services/core/supabaseClient';
  *   - Sample row data for templates
  */
 const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['text', 'priority', 'stageid', 'hub_code', 'function_code', 'description', 'city'];
+  const headers = ['text', 'priority', 'stage_id', 'hub_code', 'function_code', 'description', 'city'];
 
   const defaultLabel = isTemplate ? "Download Task Template" : "Export Tasks";
   const finalLabel = label || defaultLabel;
@@ -34,7 +34,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
       return [{
         text: 'Sample Task Name',
         priority: priorities[1],
-        stageid: stages[0],
+        stage_id: stages[0],
         hub_code: hubCodes[0] || 'NYC-001',
         function_code: funcCodes[0] || 'MNT',
         description: 'Sample description',
@@ -46,7 +46,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
       return data.map(task => ({
         text: task.text,
         priority: task.priority || '',
-        stageid: task.stageId || task.stageid || '',
+        stage_id: task.stageId || task.stage_id || '',
         hub_code: hubMap[task.hub_id] || task.hub_id || '',
         function_code: funcMap[task.function] || task.function || '',
         description: task.description || '',

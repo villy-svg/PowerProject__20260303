@@ -21,7 +21,7 @@ const normalizeTemplate = (row) => ({
   frequency: row.frequency,
   frequencyDetails: row.frequency_details,
   timeOfDay: row.time_of_day,
-  assignedTo: row.assigned_to,
+  assignedTo: row.assigned_to || [],
   assigneeName: row.employees?.full_name,
   isActive: row.is_active,
   uploadLink: row.upload_link,
@@ -43,7 +43,7 @@ const mapTemplateToRow = (template) => {
     frequency: template.frequency || 'DAILY',
     frequency_details: template.frequencyDetails || null,
     time_of_day: template.timeOfDay || '08:00:00',
-    assigned_to: template.assignedTo || null,
+    assigned_to: Array.isArray(template.assignedTo) ? template.assignedTo : (template.assignedTo ? [template.assignedTo] : []),
     is_active: template.isActive !== undefined ? template.isActive : true,
     upload_link: template.uploadLink || null,
     city: template.city || null,
@@ -51,11 +51,11 @@ const mapTemplateToRow = (template) => {
   };
 
   // Intelligent Subject Mapping based on vertical
-  if (vid.includes('CLIENT')) row.client_id = subjectId;
-  else if (vid.includes('EMPLOYEE')) row.employee_id = subjectId;
-  else if (vid.includes('PARTNER')) row.partner_id = subjectId;
-  else if (vid.includes('VENDOR')) row.vendor_id = subjectId;
-  else row.hub_id = subjectId; // Fallback to Hubs
+  if (vid.includes('CLIENT')) row.client_id = subjectId ? [subjectId] : [];
+  else if (vid.includes('EMPLOYEE')) row.employee_id = subjectId ? [subjectId] : [];
+  else if (vid.includes('PARTNER')) row.partner_id = subjectId ? [subjectId] : [];
+  else if (vid.includes('VENDOR')) row.vendor_id = subjectId ? [subjectId] : [];
+  else row.hub_id = subjectId; // hub_id is still a scalar UUID (location)
 
   return row;
 };

@@ -1,22 +1,63 @@
+/**
+ * taskUtils
+ * Utility functions for task display and RBAC logic.
+ * 
+ * IMPORTANT: assigned_to is now a uuid[] array.
+ * Use isAssignee(task, user) helper for all membership checks.
+ */
+
+/**
+ * Internal helper: checks if a user is in the task's assigned_to array.
+ * Handles both employeeId and auth user.id comparisons.
+ */
+const isAssignee = (task, user) => {
+  if (!task?.assigned_to?.length) return false;
+  return (
+    (user?.employeeId && task.assigned_to.includes(user.employeeId)) ||
+    (user?.id && task.assigned_to.includes(user.id))
+  );
+};
+
 export const taskUtils = {
   /**
-   * Returns "YOU" if the task is assigned to the current user,
+   * Returns "You" if the task is assigned to the current user,
    * otherwise returns the assignee's first name.
-   * @param {Object} task - The task object containing assignee info.
-   * @param {Object} currentUser - The currently logged-in user object.
-   * @returns {string} The display label for the assignee badge.
+   * For multi-assignee tasks, returns the first assignee name.
    */
   getAssigneeLabel(task, currentUser) {
-    if (!task?.assigned_to) return 'None';
+    if (!task?.assigned_to?.length) return 'None';
 
-    const isMe = (currentUser?.employeeId && task.assigned_to === currentUser.employeeId) ||
-      (currentUser?.id && task.assigned_to === currentUser.id);
+    const isMe = isAssignee(task, currentUser);
+    const count = task.assigned_to.length;
 
-    if (isMe) return 'You';
+    // Rule 1: If I am an assignee, just show "You"
+    if (isMe) {
+      return 'You';
+    }
 
-    // Fallback to formatting the name
+    // Rule 2: If others are assigned, show senior-most based on Badge ID
+    if (task.assigneeMeta && task.assigneeMeta.length > 0) {
+      // Sort meta by badge_id (assuming lower string/number is more senior)
+      // If badge_id is missing, use seniority_level
+      const sorted = [...task.assigneeMeta].sort((a, b) => {
+        const badgeA = String(a.badge_id || '999999');
+        const badgeB = String(b.badge_id || '999999');
+        if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
+        
+        const levelA = a.seniority_level ?? 999;
+        const levelB = b.seniority_level ?? 999;
+        return levelA - levelB;
+      });
+
+      const senior = sorted[0];
+      const name = senior.full_name.split(' ')[0];
+      return count > 1 ? `${name} + ${count - 1}` : name;
+    }
+
+    // Fallback if metadata isn't joined
     if (task.assigneeName) {
-      return task.assigneeName.split(' ')[0];
+      const first = task.assigneeName.split(',')[0].trim().split(' ')[0];
+      return count > 1 ? `${first} + ${count - 1}` : first;
     }
 
     return '...';
@@ -24,26 +65,24 @@ export const taskUtils = {
 
   /**
    * Returns a detailed tooltip string for the assignee.
-   * @param {Object} task - The task object.
-   * @returns {string} Tooltip text.
    */
   getAssigneeTooltip(task) {
-    if (!task?.assigned_to) return 'No assignee';
-    return `Assignee: ${task.assigneeName || 'Unknown'}`;
+    if (!task?.assigned_to?.length) return 'No assignee';
+    return `Assignees: ${task.assigneeName || 'Unknown'}`;
   },
 
   /**
-   * Formats a raw employee object or string into the "YOU" format for lists/dropdowns.
-   * @param {string} assigneeId - The ID of the assignee.
-   * @param {string} assigneeName - The full name of the assignee.
-   * @param {Object} currentUser - The currently logged-in user.
-   * @returns {string} Formatted string, e.g., "YOU (John Doe)" or "Jane Smith".
+   * Formats a raw employee ID/name into the "YOU" format for lists/dropdowns.
+   * assigneeId can now be an array — takes the first element for comparison.
    */
-  formatAssigneeForList(assigneeId, assigneeName, currentUser) {
+  formatAssigneeForList(assigneeIdOrArray, assigneeName, currentUser) {
     if (!assigneeName) return 'Unassigned';
 
-    const isMe = (currentUser?.employeeId && assigneeId === currentUser.employeeId) ||
-      (currentUser?.id && assigneeId === currentUser.id);
+    // Support both array and single-value inputs
+    const firstId = Array.isArray(assigneeIdOrArray) ? assigneeIdOrArray[0] : assigneeIdOrArray;
+
+    const isMe = (currentUser?.employeeId && firstId === currentUser.employeeId) ||
+      (currentUser?.id && firstId === currentUser.id);
 
     if (isMe) {
       return `You (${assigneeName})`;
@@ -53,34 +92,24 @@ export const taskUtils = {
 
   /**
    * Universal Task Prefixing Principle
-   * Applies "CODE : Summary" formatting based on vertical context.
-   * @param {string} text - The raw task summary.
-   * @param {Object} options - Contextual metadata (assetCode, functionName, forcePrefix).
-   * @returns {string} Formatted task text.
    */
   formatTaskText(text, options = {}) {
     let finalTaskText = (text || '').trim();
     const funcLower = (options.functionName || '').toLowerCase();
 
-    // 1. Hiring tasks always get "Hire : " prefix
     if (funcLower === 'hiring') {
       const prefix = "Hire : ";
       if (!finalTaskText.startsWith(prefix)) {
-        // If it has another prefix, replace it? No, just ensure Hire: is leading
         finalTaskText = `${prefix}${finalTaskText}`;
       }
     }
-    // 2. Asset-based tasks (Hubs, Clients, etc) get the Asset Code prefix
     else if (options.assetCode && (funcLower === 'facility' || options.forcePrefix)) {
       const code = options.assetCode;
       const prefix = `${code} : `;
 
       if (!finalTaskText.includes(" : ")) {
-        // No prefix at all, add it
         finalTaskText = `${prefix}${finalTaskText}`;
       } else if (!finalTaskText.startsWith(prefix)) {
-        // Has a different prefix, replace the code part if it looks like a code
-        // Generic approach: split by " : " and replace first part
         const parts = finalTaskText.split(" : ");
         if (parts.length > 1) {
           finalTaskText = `${prefix}${parts.slice(1).join(" : ")}`;
@@ -98,35 +127,19 @@ export const taskUtils = {
    */
   canUserMoveTask(task, targetStageId, permissions, user) {
     if (!task || task.isContextOnly) return false;
-
-    // Admin/Editor can do anything
     if (permissions.canUpdate) return true;
 
     const isCreator = (task.createdBy || task.created_by) === user.id;
-    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+    const assignee = isAssignee(task, user);
 
-    // Contributor logic
     if (permissions.level === 'contributor') {
-      // Forbidden for all Contributors via arrows
       if (targetStageId === 'DEPRIORITIZED') return false;
-
-      if (isCreator) {
-        // Creators have full movement rights (e.g. personal management)
-        return true;
-      }
-
-      // Non-creators (Assignees/System-generated) move only between BACKLOG and IN_PROGRESS.
-      // Once it reaches REVIEW or COMPLETED, they can no longer move it via arrows.
+      if (isCreator) return true;
       if (['REVIEW', 'COMPLETED'].includes(task.stageId)) return false;
-
-      // They MUST use "Submit for Review" (proof of work flow) to reach further.
       return ['BACKLOG', 'IN_PROGRESS'].includes(targetStageId);
     }
 
-    // Viewer-as-Assignee logic
-    if (permissions.level === 'viewer' && isAssignee) {
-      // Forbidden: Viewers cannot move tasks via arrow buttons at all.
-      // They must use "Submit for Review" (proof flow) to interact with task movement.
+    if (permissions.level === 'viewer' && assignee) {
       return false;
     }
 
@@ -137,20 +150,18 @@ export const taskUtils = {
    * RBAC: Can the user edit a specific field in the modal?
    */
   canUserEditField(task, fieldName, permissions, user) {
-    if (!task) return true; // Add mode
+    if (!task) return true;
     if (task.isContextOnly) return false;
 
     const isCreator = (task.createdBy || task.created_by) === user.id;
 
-    // Admin/Editor OR a Contributor who authored the task can edit everything
     if (permissions.canUpdate || (permissions.level === 'contributor' && isCreator)) {
       return true;
     }
 
-    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+    const assignee = isAssignee(task, user);
 
-    // If they aren't fully authorized above, they might still have assignee description-only rights
-    if (['contributor', 'viewer'].includes(permissions.level) && isAssignee) {
+    if (['contributor', 'viewer'].includes(permissions.level) && assignee) {
       return fieldName === 'description';
     }
 

@@ -63,7 +63,8 @@ export const useTaskPermissions = ({
 
     // Contributor or lower
     const isCreator = (task.createdBy || task.created_by) === user.id;
-    const isAssignee = (user.employeeId && task.assigned_to === user.employeeId) || (user.id && task.assigned_to === user.id);
+    const assignedTo = task.assigned_to || [];
+    const isAssignee = (user.employeeId && assignedTo.includes(user.employeeId)) || (user.id && assignedTo.includes(user.id));
 
     // If the board caps them at contributor, they can still open the modal 
     // IF they created the task OR if they are assigned.

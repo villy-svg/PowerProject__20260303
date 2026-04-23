@@ -20,7 +20,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     city: safeData.city || '',
     function: safeData.function || '',
     description: safeData.description || '',
-    assigned_to: safeData.assigned_to || '',
+    assigned_to: Array.isArray(safeData.assigned_to) ? safeData.assigned_to : (safeData.assigned_to ? [safeData.assigned_to] : []),
     parentTask: safeData.parentTask || ''
   });
 

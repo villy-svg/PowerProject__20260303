@@ -36,8 +36,9 @@ export const hierarchyService = {
    * @returns {Array} Subset of tasks the user is allowed to see.
    */
   filterTasksByHierarchy(user, tasks, activeVertical, verticals = {}, permissions = {}) {
-    // Master Admin or Global Scope bypasses hierarchy filters IF they don't have a restricted seniority
-    if (!user) return tasks;
+    // Master Admin or Global Scope bypasses hierarchy filters
+    const hasGlobalScope = permissions.scope === 'global' || user.roleId === 'master_admin';
+    if (hasGlobalScope) return tasks;
     
     const seniority = Number(user.seniority ?? 100);
     const employeeId = user.employeeId;
@@ -59,9 +60,13 @@ export const hierarchyService = {
 
       const directMatches = (tasks || []).filter(task => {
         const creatorId = task.createdBy || task.created_by;
-        const assigneeId = task.assigned_to || task.employee_id;
+        const assignees = Array.isArray(task.assigned_to) ? task.assigned_to : (task.assigned_to ? [task.assigned_to] : []);
+        const employeeIdLink = task.employee_id; // legacy field fallback
         
-        const isAssignedToMe = (assigneeId === employeeId) || (assigneeId === user.id);
+        const isAssignedToMe = assignees.includes(employeeId) || 
+                               assignees.includes(user.id) || 
+                               (employeeIdLink === employeeId);
+
         const isCreatedByMe = (creatorId === user.id) || (creatorId === user.employeeId);
         const isCreatedByTreeMember = (reporteeUserIds || []).includes(creatorId) || 
                                       (user.reporteeEmployeeIds || []).includes(creatorId) || 

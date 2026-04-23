@@ -26,7 +26,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
       verticalId === 'daily_hub_tasks' 
         ? supabase.from('daily_tasks').select('id, text, hub_id, function_name')
-        : supabase.from('tasks').select('id, text, hub_id, function').eq('verticalid', verticalId)
+        : supabase.from('tasks').select('id, text, hub_id, function').eq('vertical_id', verticalId)
     ]);
 
     const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
@@ -68,7 +68,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
   // Renders a conflict tile in the modal
   const renderConflictTile = (conflict) => {
     const existing = conflict.existingRecord;
-    const stage = STAGE_LIST.find(s => s.id === existing?.stageid || s.id === existing?.stageId);
+    const stage = STAGE_LIST.find(s => s.id === existing?.stage_id || s.id === existing?.stageId);
     return (
       <div className="tile-content">
         <h5 style={{ margin: '0 0 4px 0', fontWeight: 600, color: 'var(--brand-green)' }}>
@@ -77,7 +77,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         <div style={{ fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
           <strong>Hub:</strong> {conflict.csvRow.hub_code || 'N/A'}<br />
           <strong>Function:</strong> {conflict.csvRow.function_code || 'N/A'}<br />
-          <em style={{ fontSize: '0.7rem' }}>Status: {stage?.label || existing?.stageid || 'Unknown'}</em>
+          <em style={{ fontSize: '0.7rem' }}>Status: {stage?.label || existing?.stage_id || 'Unknown'}</em>
         </div>
       </div>
     );
@@ -120,7 +120,10 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           getConflictKey({ 
             text: t.text, 
             hub_code: Object.keys(hubCodeMap).find(c => hubCodeMap[c] === t.hub_id) || 
-                       t.client_id || t.employee_id || t.partner_id || t.vendor_id || '', 
+                       (t.client_id?.length ? t.client_id[0] : null) || 
+                       (t.employee_id?.length ? t.employee_id[0] : null) || 
+                       (t.partner_id?.length ? t.partner_id[0] : null) || 
+                       (t.vendor_id?.length ? t.vendor_id[0] : null) || '', 
             function_code: (t.function || t.function_name) || '',
             vertical_id: t.verticalId || t.vertical_id || verticalId
           }) === getConflictKey(row)
@@ -134,7 +137,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
           city: row.city || null,
-          assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
+          // Wrap assigned_to in an array for uuid[] compatibility
+          assigned_to: row.assigned_to ? [empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null].filter(Boolean) : [],
           updated_at: new Date().toISOString(),
         };
 
@@ -145,14 +149,14 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
           // Multi-Subject Mapping during Import
           const vid = verticalId.toUpperCase();
-          if (vid.includes('CLIENT')) taskRow.client_id = resolvedHubId;
-          else if (vid.includes('EMPLOYEE')) taskRow.employee_id = resolvedHubId;
-          else if (vid.includes('PARTNER')) taskRow.partner_id = resolvedHubId;
-          else if (vid.includes('VENDOR')) taskRow.vendor_id = resolvedHubId;
+          if (vid.includes('CLIENT')) taskRow.client_id = resolvedHubId ? [resolvedHubId] : [];
+          else if (vid.includes('EMPLOYEE')) taskRow.employee_id = resolvedHubId ? [resolvedHubId] : [];
+          else if (vid.includes('PARTNER')) taskRow.partner_id = resolvedHubId ? [resolvedHubId] : [];
+          else if (vid.includes('VENDOR')) taskRow.vendor_id = resolvedHubId ? [resolvedHubId] : [];
           else taskRow.hub_id = resolvedHubId;
         } else {
-          taskRow.verticalid = verticalId;
-          taskRow.stageid = row.stageid || 'BACKLOG';
+          taskRow.vertical_id = verticalId;
+          taskRow.stage_id = row.stageid || row.stage_id || 'BACKLOG';
           taskRow.function = resolvedFunc;
         }
 

@@ -262,7 +262,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
           </div>
 
           {/* INACTIVE SECTION */}
-          {showInactive && (
+          {ui.showInactive && (
             <div className="status-section inactive-section" style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
                 <h4 className="client-section-title" style={{ margin: 0, opacity: 0.5 }}>Inactive / History ({inactiveClients.length})</h4>

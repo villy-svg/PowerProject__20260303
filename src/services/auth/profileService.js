@@ -41,7 +41,7 @@ export const profileService = {
         name: 'Dev Admin (Offline)',
         email: 'dev@powerpod.in',
         roleId: 'master_admin',
-        seniority: 1,
+        seniority: 10,
         assignedVerticals: ['charging_hubs', 'employees', 'clients'],
         verticalPermissions: {
           charging_hubs: { level: 'admin', features: {} },

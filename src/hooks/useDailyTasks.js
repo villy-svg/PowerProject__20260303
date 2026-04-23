@@ -5,7 +5,7 @@ import { masterErrorHandler } from '../services/core/masterErrorHandler';
 export const useDailyTasks = (user) => {
   const [tasks, setTasks] = useState(() => {
     if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
-      const cached = localStorage.getItem('power_project_cache_daily_tasks');
+      const cached = localStorage.getItem('powerpod_daily_tasks_v3');
       if (cached) {
         try {
           return JSON.parse(cached);

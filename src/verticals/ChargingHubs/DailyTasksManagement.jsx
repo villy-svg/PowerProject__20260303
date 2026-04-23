@@ -32,7 +32,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
     subjectId: '',
     frequency: 'DAILY',
     timeOfDay: '08:00',
-    assignedTo: '',
+    assignedTo: [],
     isActive: true,
     uploadLink: ''
   });
@@ -82,7 +82,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         subjectId: template.subjectId || '',
         frequency: template.frequency || 'DAILY',
         timeOfDay: template.timeOfDay || '08:00',
-        assignedTo: template.assignedTo || '',
+        assignedTo: Array.isArray(template.assignedTo) ? template.assignedTo : (template.assignedTo ? [template.assignedTo] : []),
         isActive: template.isActive,
         uploadLink: template.uploadLink || ''
       });
@@ -90,8 +90,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
       ui.openAddModal();
       setFormData({ 
         title: '', description: '', verticalId: VERTICALS.CHARGING_HUBS.id, 
-        subjectId: '', frequency: 'DAILY', timeOfDay: '08:00', 
-        assignedTo: '', isActive: true, uploadLink: '' 
+        assignedTo: [], isActive: true, uploadLink: '' 
       });
     }
     setStatusMsg({ type: '', text: '' });
