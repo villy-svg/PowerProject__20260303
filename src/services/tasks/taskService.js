@@ -12,9 +12,9 @@ import { auditService } from '../core/auditService';
 // Constants & Internal Utilities
 // ---------------------------------------------------------------------------
 
-// Bump this whenever the normalized task shape changes (uuid[] migration = v2)
-const TASK_CACHE_VERSION = 3;
-const TASK_CACHE_KEY = 'powerpod_tasks_v3';
+// Bump this whenever the normalized task shape changes (Context Link migration = v4)
+const TASK_CACHE_VERSION = 4;
+const TASK_CACHE_KEY = 'powerpod_tasks_v4';
 const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
 
 /**
