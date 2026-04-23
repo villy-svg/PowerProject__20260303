@@ -161,7 +161,13 @@
   gap: 24px;
   z-index: 2000;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
-  animation: bulkBarFadeIn 0.25s ease both;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
+}
+.bulk-action-bar.bulk-hidden {
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
 }
 .bulk-info {
   display: flex;
@@ -396,6 +402,7 @@
 
 .stage-nav-item {
   flex: 1;
+  min-width: 0; /* Allow shrinking below content size */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -566,9 +573,15 @@
     z-index: 3010;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     /* Only animate transform — do NOT animate "all" (interferes with layout) */
-    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
     /* Disable the entry animation on mobile (tray-hidden logic uses transition) */
     animation: none;
+  }
+  .bulk-action-bar.bulk-hidden {
+    transform: translate(-50%, 150%) !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
   }
 
   .bulk-action-bar.tray-hidden {
@@ -578,6 +591,7 @@
      * tracks the tray's position rather than sitting fixed in the viewport.
      */
     transform: translate(-50%, var(--tray-height, 64px));
+    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
   }
 
   .bulk-info {
@@ -614,6 +628,44 @@
     min-width: 36px;
     font-size: 0.85rem;
     font-weight: 600;
+  }
+
+  /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
+  @media screen and (max-width: 400px) {
+    .stage-nav-item {
+      margin: 1px;
+    }
+    .stage-nav-label {
+      font-size: 0.58rem;
+      letter-spacing: 0;
+    }
+    .stage-nav-item .stage-icon-wrapper .standard-icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    .stage-nav-item .stage-icon-wrapper {
+      padding: 6px;
+    }
+    .stage-badge-count {
+      top: 2px;
+      right: 0;
+      min-width: 14px;
+      height: 14px;
+      font-size: 0.55rem;
+    }
+  }
+
+  @media screen and (max-width: 340px) {
+    .stage-nav-container {
+      padding: 0 2px;
+    }
+    .stage-nav-label {
+      font-size: 0.52rem;
+    }
+    .stage-nav-item .stage-icon-wrapper .standard-icon {
+      width: 16px !important;
+      height: 16px !important;
+    }
   }
 }
 /* ==========================================================================

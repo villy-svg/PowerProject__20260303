@@ -86,8 +86,9 @@ const MasterPageHeader = ({
   const hasExpandedContent = !!(expandedLeft || expandedRight);
 
   return (
-    <header className={`master-page-header ${isMenuOpen ? 'is-sticky' : ''} ${(!isScrollVisible && !isMenuOpen && !isSubSidebarOpen && !isSidebarOpen) ? 'header-hidden' : ''}`}>
-      <div className="header-row-1">
+    <>
+      <header className={`master-page-header ${isMenuOpen ? 'is-sticky' : ''} ${(!isScrollVisible && !isMenuOpen && !isSubSidebarOpen && !isSidebarOpen) ? 'header-hidden' : ''}`}>
+        <div className="header-row-1">
         <h1>{title}</h1>
       </div>
       
@@ -129,31 +130,16 @@ const MasterPageHeader = ({
         </div>
 
 
+      </header>
+
       {/* MOBILE ACTION TRAY (Only visible on small screens) */}
       <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen) ? '' : 'tray-hidden'}`}>
         <div className="mobile-action-tray-container">
           <button 
             className="halo-button mobile-tray-btn" 
-            title="Home"
-            onPointerDown={(e) => {
-              pressTimer.current = setTimeout(() => {
-                pressTimer.current = null;
-                if (onShowBottomNav) onShowBottomNav();
-              }, 500);
-            }}
-            onPointerUp={(e) => {
-              if (pressTimer.current) {
-                clearTimeout(pressTimer.current);
-                pressTimer.current = null;
-                // User confirmed: always return to main dashboard
-                if (setActiveVertical) setActiveVertical(null);
-              }
-            }}
-            onPointerLeave={(e) => {
-              if (pressTimer.current) {
-                clearTimeout(pressTimer.current);
-                pressTimer.current = null;
-              }
+            title="Switch Vertical"
+            onClick={() => {
+              if (onShowBottomNav) onShowBottomNav();
             }}
           >
             <IconHome size={22} />
@@ -198,7 +184,7 @@ const MasterPageHeader = ({
           )}
         </div>
       </div>
-    </header>
+    </>
   );
 };
 

@@ -380,8 +380,15 @@
   z-index: 3010;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   /* Only animate transform — do NOT use transition:all (interferes with layout) */
-  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
   animation: none;
+}
+
+.bulk-action-bar.bulk-hidden {
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
 }
 
 .bulk-action-bar.tray-hidden {
@@ -391,6 +398,7 @@
    * tracks the tray's position rather than sitting fixed in the viewport.
    */
   transform: translate(-50%, var(--tray-height, 64px));
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
 }
 
 @media screen and (min-width: 1025px) {

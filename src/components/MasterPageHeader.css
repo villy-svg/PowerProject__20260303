@@ -4,6 +4,7 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 .master-page-header .header-row-1 h1 {
   margin: 0;
@@ -102,8 +103,21 @@
 }
 @media (max-width: 1024px) {
   .master-page-header .header-row-1 h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
+    text-align: center;
+    width: 100%;
+    opacity: 0.9;
+    text-shadow: 0 0 20px var(--halo-glow);
   }
+
+  .master-page-header .header-row-2 {
+    display: none;
+  }
+
+  .master-header-actions-row {
+    display: none !important;
+  }
+
   .expanded-menu-row {
     position: fixed !important;
     top: 0;
@@ -118,7 +132,8 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    align-items: flex-start;
+    gap: 16px;
     border-radius: 0 0 24px 24px;
     animation: slidePaneDown 0.4s cubic-bezier(0.19, 1, 0.22, 1);
   }
@@ -128,46 +143,6 @@
     to { transform: translateY(0); }
   }
 
-  .master-page-header.header-hidden {
-    transform: translateY(-110%);
-    opacity: 0;
-    pointer-events: none;
-  }
-  .master-page-header.is-sticky {
-    position: sticky !important;
-    top: 0;
-    z-index: 1100;
-    background: var(--bg-color);
-    margin-bottom: 0px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-color);
-  }
-}
-
-/* Scroll Lock Utility */
-body.no-scroll {
-  overflow: hidden !important;
-  touch-action: none;
-}
-@media (max-width: 1024px) {
-  .master-page-header .header-row-1 h1 {
-    font-size: 1.25rem;
-    text-align: center;
-    width: 100%;
-    opacity: 0.9;
-    text-shadow: 0 0 20px var(--halo-glow);
-  }
-  .master-page-header .header-row-2 {
-    display: none;
-  }
-  .master-header-actions-row {
-    display: none !important;
-  }
-  .expanded-menu-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
   .mobile-menu-header {
     display: flex;
     align-items: center;
@@ -175,6 +150,30 @@ body.no-scroll {
     width: 100%;
     margin-bottom: 12px;
   }
+
+  .master-page-header.header-hidden {
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2000;
+    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
+  }
+
+  .master-page-header {
+    padding-top: 12px;
+    margin-bottom: 16px;
+  }
+
+  .master-page-header.is-sticky {
+    position: sticky !important;
+    top: 0;
+    z-index: 2000;
+    background: var(--bg-color);
+    margin-bottom: 0px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
   /* Mobile Action Tray */
   .mobile-action-tray {
     display: block;
@@ -182,16 +181,14 @@ body.no-scroll {
     bottom: 0;
     left: 0;
     right: 0;
-    /* Background extends below to cover bounce-gap */
     padding-bottom: 100px;
     margin-bottom: -100px;
     background: rgba(15, 15, 15, 0.85);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    /* Curvy premium top edge */
     border-radius: 20px 20px 0 0;
-    z-index: 3020;
+    z-index: 4001;
     transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
   }
@@ -207,7 +204,9 @@ body.no-scroll {
 
   .mobile-action-tray.tray-hidden {
     transform: translateY(110%);
+    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
   }
+
   .mobile-action-tray .mobile-tray-btn {
     background: transparent;
     border: none;
@@ -222,6 +221,7 @@ body.no-scroll {
     position: relative;
     flex: 1;
     max-width: 80px;
+    min-width: 0;
   }
 
   .mobile-action-tray .mobile-tray-btn:hover,
@@ -240,6 +240,7 @@ body.no-scroll {
     border-radius: 50%;
     box-shadow: 0 0 10px var(--brand-green);
   }
+
   .mobile-action-tray .mobile-add-btn {
     background: rgba(45, 212, 191, 0.12) !important;
     border: 1px solid rgba(45, 212, 191, 0.2) !important;
@@ -260,4 +261,36 @@ body.no-scroll {
     color: #000 !important;
     opacity: 1 !important;
   }
+
+  /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
+  @media screen and (max-width: 360px) {
+    .mobile-action-tray-container {
+      padding: 0 0.5rem var(--safe-bottom, 0px) 0.5rem;
+    }
+    .mobile-action-tray .mobile-tray-btn {
+      max-width: 64px;
+    }
+  }
+
+  @media screen and (max-width: 330px) {
+    .mobile-action-tray-container {
+      padding: 0 0.25rem var(--safe-bottom, 0px) 0.25rem;
+    }
+    .mobile-action-tray .mobile-tray-btn {
+      max-width: 56px;
+    }
+    .mobile-action-tray .mobile-tray-btn .standard-icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    .mobile-action-tray .mobile-add-btn {
+      transform: scale(1.05);
+      max-width: 48px;
+    }
+  }
+}
+/* Scroll Lock Utility */
+body.no-scroll {
+  overflow: hidden !important;
+  touch-action: none;
 }

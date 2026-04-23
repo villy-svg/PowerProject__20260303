@@ -348,23 +348,21 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
       )}
 
       {/* Floating Bulk Action Bar */}
-      {ui.selectedIds.length > 0 && (
-        <div className={`bulk-action-bar ${!ui.isTrayVisible ? 'tray-hidden' : ''}`}>
-          <div className="bulk-info">
-            {ui.selectedIds.length} Selected
-          </div>
-          <div className="bulk-actions">
-            <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
-              <IconEdit size={18} />
-              <span className="bulk-btn-text">Update</span>
-            </button>
-            <button className="bulk-btn cancel" onClick={ui.clearSelection} title="Cancel Selection">
-              <IconX size={18} />
-              <span className="bulk-btn-text">Cancel</span>
-            </button>
-          </div>
+      <div className={`bulk-action-bar ${ui.selectedIds.length === 0 ? 'bulk-hidden' : ''} ${!ui.isTrayVisible ? 'tray-hidden' : ''}`}>
+        <div className="bulk-info">
+          {ui.selectedIds.length} Selected
         </div>
-      )}
+        <div className="bulk-actions">
+          <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
+            <IconEdit size={18} />
+            <span className="bulk-btn-text">Update</span>
+          </button>
+          <button className="bulk-btn cancel" onClick={ui.clearSelection} title="Cancel Selection">
+            <IconX size={18} />
+            <span className="bulk-btn-text">Cancel</span>
+          </button>
+        </div>
+      </div>
 
       <TaskModal
         isOpen={ui.isAddModalOpen}

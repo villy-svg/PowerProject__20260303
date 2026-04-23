@@ -43,6 +43,7 @@
   justify-content: space-between;
   align-items: center;
   min-height: 90px;
+  cursor: default;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-premium);
   backdrop-filter: blur(var(--glass-blur));
@@ -67,6 +68,40 @@
   opacity: 0.6;
   text-align: right;
 }
+
+.summary-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.is-tappable {
+  cursor: pointer !important;
+  user-select: none;
+}
+
+.expand-indicator {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--stage-color);
+  opacity: 0.6;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 12px;
+}
+
+.expand-indicator.active {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.expand-indicator svg {
+  width: 16px;
+  height: 16px;
+}
 /* BREAKDOWN LIST */
 .vertical-breakdown-list {
   background-color: var(--surface-card);
@@ -77,6 +112,13 @@
   flex-direction: column;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-premium);
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+  to { opacity: 1; transform: translateY(0); max-height: 500px; }
 }
 .vertical-mini-row {
   display: flex;
@@ -139,7 +181,29 @@
   }
   .summary-card {
     min-height: 80px;
-    padding: 12px 16px;
+    padding: 12px 20px;
+  }
+  .summary-card-content {
+    justify-content: flex-start;
+    gap: 20px;
+  }
+  .summary-label {
+    text-align: left;
+  }
+  .summary-column-group.is-mobile {
+    gap: 8px;
+  }
+  .vertical-breakdown-list {
+    margin-top: -4px;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: color-mix(in srgb, var(--surface-card), transparent 20%);
+  }
+  .summary-column-group.is-expanded .summary-card {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-color: transparent;
   }
   .summary-count {
     font-size: 1.8rem;

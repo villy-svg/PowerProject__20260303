@@ -1,56 +1,76 @@
 /* ==========================================================================
    BOTTOM NAV — Mobile Primary Navigation Tray
-   Only renders on screens ≤ 768px (display: none at desktop by default)
    ========================================================================== */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  /* Extend below viewport to cover bounce-gap at bottom */
-  padding-bottom: calc(var(--safe-bottom, 0px) + 20px);
-  margin-bottom: -20px;
+  z-index: 2005;
+  display: none;
   background: color-mix(in srgb, var(--bg-color), transparent 10%);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  /* Curvy premium top edge */
   border-radius: 20px 20px 0 0;
-  z-index: 2005;
-  display: none;
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Single transition source for smooth motion */
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  
+  /* Height & Padding */
+  padding-bottom: var(--safe-bottom, 0px);
+  height: calc(64px + var(--safe-bottom, 0px));
 }
 
 .bottom-nav-hidden {
-  transform: translateY(110%);
+  transform: translateY(115%);
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
 }
 
-/* --- BACKDROP (for overlay mode) --- */
+/* --- BACKDROP --- */
 .bottom-nav-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 3999;
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
 }
 
-/* --- OVERLAY MODE (Global Vertical Switcher) --- */
+/* --- OVERLAY MODE --- */
 .bottom-nav.overlay-mode {
-  transform: translateY(0);
-  z-index: 4000;
+  display: block;
+  z-index: 4005;
+  transform: translateY(calc(-76px - var(--safe-bottom, 0px)));
+  
+  /* Floating Pill Design */
+  left: 16px;
+  right: 16px;
+  width: calc(100% - 32px);
+  height: 60px;
+  padding-bottom: 0; /* Reset for pill mode */
+  border-radius: 100px;
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
 
-/* Hide overlay on desktop */
+/* Hide on Desktop */
 @media screen and (min-width: 769px) {
-  .bottom-nav.overlay-mode {
-    display: none;
-  }
+  .bottom-nav { display: none !important; }
 }
 
-/* --- CONTAINER --- */
+/* Show on Mobile */
+@media screen and (max-width: 768px) {
+  .bottom-nav { display: block; }
+}
+
+/* --- CONTAINER & ITEMS --- */
 .bottom-nav-container {
   display: flex;
   height: 64px;
@@ -60,7 +80,10 @@
   padding: 0 8px;
 }
 
-/* --- NAV ITEMS --- */
+.bottom-nav.overlay-mode .bottom-nav-container {
+  height: 60px; /* Match pill height */
+}
+
 .nav-item {
   flex: 1;
   display: flex;
@@ -72,11 +95,10 @@
   color: var(--text-color);
   opacity: 0.6;
   gap: 4px;
-  cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 44px;
+  min-width: 0;
   border-radius: var(--radius-button);
-  margin: 4px;
 }
 
 .nav-item .icon-wrapper {
@@ -92,7 +114,6 @@
   width: 20px;
   height: 20px;
   stroke-width: 1.8;
-  opacity: 0.8;
 }
 
 .nav-label {
@@ -100,10 +121,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: all 0.2s ease;
 }
 
-/* --- ACTIVE STATE --- */
+/* Active State */
 .nav-item.active {
   opacity: 1;
   color: var(--brand-mint);
@@ -114,33 +134,22 @@
   box-shadow: 0 0 10px var(--halo-glow);
 }
 
-.nav-item.active .nav-icon {
-  stroke-width: 2.2;
-  opacity: 1;
-}
-
-.nav-item:hover:not(.active) {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* --- RESPONSIVENESS --- */
-@media screen and (max-width: 768px) {
-  .bottom-nav {
-    display: block;
-  }
-}
-
+/* Compact Mobile Breaks */
 @media screen and (max-width: 480px) {
-  .bottom-nav-container {
-    padding: 0 4px;
-  }
+  .nav-item { margin: 1px; }
+  .nav-label { font-size: 0.6rem; }
+  .nav-item .icon-wrapper { padding: 6px; }
+}
 
-  .nav-item {
-    margin: 2px;
+@media screen and (max-width: 340px) {
+  .nav-label { font-size: 0.52rem; }
+  .nav-item .icon-wrapper .standard-icon {
+    width: 18px !important;
+    height: 18px !important;
   }
+}
 
-  .nav-label {
-    font-size: 0.65rem;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

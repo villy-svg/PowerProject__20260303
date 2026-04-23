@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { hierarchyService } from '../services/rules/hierarchyService';
+import { useIsMobile } from '../hooks/useIsMobile';
 import './ExecutiveSummary.css';
 
 /**
@@ -10,6 +11,8 @@ import './ExecutiveSummary.css';
  * Multi-Vertical Update: Aggregates data from all assigned verticals in the array.
  */
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false }) => {
+  const { isMobile } = useIsMobile();
+  const [expandedStageId, setExpandedStageId] = useState(null);
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -50,23 +53,41 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               )
             : [];
 
+          const isExpanded = isMobile ? expandedStageId === stage.id : true;
+          const showBreakdown = showVerticalBreakdown && stage.showInVerticalSummary && activeVerticalsInStage.length > 0 && isExpanded;
+
+          const handleToggle = () => {
+            if (!isMobile) return;
+            setExpandedStageId(prev => prev === stage.id ? null : stage.id);
+          };
+
           return (
             <div 
               key={stage.id} 
-              className="summary-column-group" 
+              className={`summary-column-group ${isMobile ? 'is-mobile' : ''} ${isExpanded ? 'is-expanded' : ''}`}
               style={{ '--stage-color': stage.color }}
+              onClick={handleToggle}
             >
-              <div className="summary-card">
-                  <span className="summary-count">
-                    {loading ? <span className="counting-placeholder">...</span> : stageCount}
-                  </span>
-                  <span className="summary-label">
-                    {loading ? 'Calculating...' : stage.label}
-                  </span>
+              <div className={`summary-card ${isMobile && activeVerticalsInStage.length > 0 ? 'is-tappable' : ''}`}>
+                  <div className="summary-card-content">
+                    <span className="summary-count">
+                      {loading ? <span className="counting-placeholder">...</span> : stageCount}
+                    </span>
+                    <span className="summary-label">
+                      {loading ? 'Calculating...' : stage.label}
+                    </span>
+                  </div>
+                  {isMobile && activeVerticalsInStage.length > 0 && (
+                    <div className={`expand-indicator ${isExpanded ? 'active' : ''}`}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  )}
               </div>
 
-              {/* Breakdown list is gated by the scope permission */}
-              {showVerticalBreakdown && stage.showInVerticalSummary && activeVerticalsInStage.length > 0 && (
+              {/* Breakdown list is gated by the scope permission AND expanded state on mobile */}
+              {showBreakdown && (
                 <div className="vertical-breakdown-list">
                   {activeVerticalsInStage.map((vertical) => {
                     const vCount = visibleTasks.filter(

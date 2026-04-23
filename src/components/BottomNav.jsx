@@ -32,7 +32,7 @@ const BottomNav = ({ activeVertical, setActiveVertical, onMenuClick, verticals =
   return (
     <>
       {showOverlay && <div className="bottom-nav-backdrop" onClick={onCloseOverlay} />}
-      <nav className={`bottom-nav ${!isEffectivelyVisible ? 'bottom-nav-hidden' : ''} ${showOverlay ? 'overlay-mode' : ''}`}>
+      <nav className={`bottom-nav ${(!isEffectivelyVisible && !showOverlay) ? 'bottom-nav-hidden' : ''} ${showOverlay ? 'overlay-mode' : ''}`}>
         <div className="bottom-nav-container">
           {navItems.map((item) => {
             const isActive = activeVertical === item.id;

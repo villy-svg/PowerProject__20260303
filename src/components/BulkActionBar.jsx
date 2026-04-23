@@ -24,10 +24,8 @@ const BulkActionBar = ({
   onAction,
   onClear
 }) => {
-  if (selectedCount === 0) return null;
-
   return (
-    <div className={`bulk-action-bar ${!isTrayVisible ? 'tray-hidden' : ''}`}>
+    <div className={`bulk-action-bar ${selectedCount === 0 ? 'bulk-hidden' : ''} ${!isTrayVisible ? 'tray-hidden' : ''}`}>
       <div className="bulk-info">
         <span className="selection-count">{selectedCount} Selected</span>
       </div>

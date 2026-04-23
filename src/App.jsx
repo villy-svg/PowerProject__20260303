@@ -374,7 +374,7 @@ function App() {
                 user={user}
                 permissions={currentUserPermissions}
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
                 verticals={verticals}
                 verticalList={verticalList}
               />
@@ -384,62 +384,62 @@ function App() {
                 setPermissions={setRolePermissions} 
                 onBack={() => setActiveVertical('configuration')} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'user_management' ? (
               <UserManagement 
                 currentUser={user} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'hub_management' ? (
               <HubManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'hub_function_management' ? (
               <HubFunctionManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'department_management' ? (
               <DepartmentManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'employee_role_management' ? (
               <EmployeeRoleManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'client_category_management' ? (
               <ClientCategoryManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'client_service_management' ? (
               <ClientServiceManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'client_billing_model_management' ? (
               <ClientBillingModelManagement 
                 user={user} 
                 permissions={currentUserPermissions} 
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : (
               <VerticalWorkspace
@@ -472,7 +472,7 @@ function App() {
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 isMainSidebarOpen={isSidebarOpen}
                 setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(true)}
+                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
                 SidebarComponent={
                   (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :

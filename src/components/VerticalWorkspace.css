@@ -106,7 +106,7 @@
 }
 @media (max-width: 768px) {
   .workspace-content {
-    padding: 12px;
+    padding: 0 12px 12px 12px;
     /* Add padding to the END of the scrollable content to clear BottomNav/Tray */
     padding-bottom: calc(100px + var(--safe-bottom, 0px));
     transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -126,7 +126,7 @@
 }
 @media (max-width: 1024px) {
   .workspace-content {
-    padding: 12px;
+    padding: 0 12px 12px 12px;
   }
   .sub-sidebar {
     width: 240px;
