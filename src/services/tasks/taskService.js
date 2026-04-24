@@ -78,11 +78,11 @@ export const normalizeTask = (row) => {
     createdBy: row.created_by,
     lastUpdatedBy: row.last_updated_by,
 
-    // Entity Links (Legacy/Future)
-    client_id: row.client_id ? [row.client_id] : [],
-    partner_id: row.partner_id ? [row.partner_id] : [],
-    vendor_id: row.vendor_id ? [row.vendor_id] : [],
-    employee_id: row.employee_id ? [row.employee_id] : [],
+    // Entity Links (Hybrid: Joins for existing tables, Metadata for future placeholders)
+    client_id: Array.isArray(row.clients) ? row.clients.map(c => c.id) : (row.metadata?.entity_links?.client_id || []),
+    employee_id: Array.isArray(row.employees) ? row.employees.map(e => e.id) : (row.metadata?.entity_links?.employee_id || []),
+    partner_id: row.metadata?.entity_links?.partner_id || [],
+    vendor_id: row.metadata?.entity_links?.vendor_id || [],
 
     latestSubmission,
     submissionBy: row.submission_by,
@@ -105,18 +105,24 @@ export const mapTaskToRow = (task) => ({
   parent_task_id: task.parentTask || null,
   last_updated_by: task.lastUpdatedBy || null,
   task_board: task.task_board || [],
-  client_id: Array.isArray(task.client_id) ? task.client_id[0] : (task.client_id || null),
-  partner_id: Array.isArray(task.partner_id) ? task.partner_id[0] : (task.partner_id || null),
-  vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id[0] : (task.vendor_id || null),
-  employee_id: Array.isArray(task.employee_id) ? task.employee_id[0] : (task.employee_id || null),
+  metadata: {
+    ...(task.metadata || {}),
+    entity_links: {
+      client_id: Array.isArray(task.client_id) ? task.client_id : (task.client_id ? [task.client_id] : []),
+      partner_id: Array.isArray(task.partner_id) ? task.partner_id : (task.partner_id ? [task.partner_id] : []),
+      vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id : (task.vendor_id ? [task.vendor_id] : []),
+      employee_id: Array.isArray(task.employee_id) ? task.employee_id : (task.employee_id ? [task.employee_id] : []),
+    }
+  },
   submission_by: task.submissionBy || null,
 });
 
-/** Standard select string: uses computed relationships backed by task_context_links. */
 export const TASK_SELECT = `
   *,
   assignees(id, full_name, badge_id, employee_roles(seniority_level)),
   hubs(id, name, hub_code, city),
+  clients(id, name),
+  employees(id, full_name),
   submissions(id, status, rejection_reason, submission_number, created_at),
   children:tasks!parent_task_id(id)
 `;
@@ -264,6 +270,14 @@ export const taskService = {
     if (taskData.assigned_to) {
       await syncContextLinks(newTask.id, 'assignee', taskData.assigned_to);
     }
+    // Sync Clients
+    if (taskData.client_id) {
+      await syncContextLinks(newTask.id, 'client', Array.isArray(taskData.client_id) ? taskData.client_id : [taskData.client_id]);
+    }
+    // Sync Employees
+    if (taskData.employee_id) {
+      await syncContextLinks(newTask.id, 'employee', Array.isArray(taskData.employee_id) ? taskData.employee_id : [taskData.employee_id]);
+    }
 
     return newTask;
   },
@@ -295,6 +309,12 @@ export const taskService = {
     }
     if (taskData.assigned_to) {
       await syncContextLinks(taskData.id, 'assignee', taskData.assigned_to);
+    }
+    if (taskData.client_id) {
+      await syncContextLinks(taskData.id, 'client', Array.isArray(taskData.client_id) ? taskData.client_id : [taskData.client_id]);
+    }
+    if (taskData.employee_id) {
+      await syncContextLinks(taskData.id, 'employee', Array.isArray(taskData.employee_id) ? taskData.employee_id : [taskData.employee_id]);
     }
 
     // Fetch fresh data with links

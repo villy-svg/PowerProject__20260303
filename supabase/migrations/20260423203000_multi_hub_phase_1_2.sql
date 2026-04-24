@@ -24,6 +24,25 @@ RETURNS SETOF public.hubs AS $$
       AND tcl.entity_type = 'hub';
 $$ LANGUAGE sql STABLE;
 
+-- Computed relationships for tasks (Link Architecture)
+CREATE OR REPLACE FUNCTION public.clients(t public.tasks)
+RETURNS SETOF public.clients AS $$
+    SELECT c.* FROM public.clients c
+    JOIN public.task_context_links tcl ON tcl.entity_id = c.id
+    WHERE tcl.source_id = t.id
+      AND tcl.source_type = 'task'
+      AND tcl.entity_type = 'client';
+$$ LANGUAGE sql STABLE;
+
+CREATE OR REPLACE FUNCTION public.employees(t public.tasks)
+RETURNS SETOF public.employees AS $$
+    SELECT e.* FROM public.employees e
+    JOIN public.task_context_links tcl ON tcl.entity_id = e.id
+    WHERE tcl.source_id = t.id
+      AND tcl.source_type = 'task'
+      AND tcl.entity_type = 'employee';
+$$ LANGUAGE sql STABLE;
+
 -- hubs() for daily_task_templates (Always safe)
 CREATE OR REPLACE FUNCTION public.hubs(t public.daily_task_templates)
 RETURNS SETOF public.hubs AS $$
@@ -96,6 +115,8 @@ BEGIN
             EXECUTE 'CREATE TABLE public.daily_tasks_backup AS SELECT * FROM public.daily_tasks';
         END IF;
 
+        -- (Standardization columns were already handled via TCL migration in Section 2)
+
         -- 2. Migrate rows to tasks (Hardened for Prod)
         INSERT INTO public.tasks (
             id, text, description, priority, stage_id, vertical_id,
@@ -111,14 +132,14 @@ BEGIN
             dt.priority,
             dt.stage_id,
             dt.vertical_id,
-            COALESCE((SELECT id FROM public.hubs WHERE id = dt.hub_id), dt.hub_id), -- Fallback to original if missing (FK will catch actual errors)
+            COALESCE((SELECT id FROM public.hubs WHERE id = dt.hub_id), dt.hub_id),
             dt.city,
             dt.function_name,
-            (SELECT id FROM public.employees WHERE id = dt.assigned_to), -- Validate assigned_to
+            (SELECT id FROM public.employees WHERE id = dt.assigned_to),
             NULL,
-            COALESCE((SELECT id FROM public.user_profiles WHERE id = dt.created_by), (SELECT id FROM public.user_profiles LIMIT 1)), -- System Fallback for NOT NULL
             COALESCE((SELECT id FROM public.user_profiles WHERE id = dt.created_by), (SELECT id FROM public.user_profiles LIMIT 1)),
-            (SELECT id FROM public.user_profiles WHERE id = dt.last_updated_by), -- Optional column
+            COALESCE((SELECT id FROM public.user_profiles WHERE id = dt.created_by), (SELECT id FROM public.user_profiles LIMIT 1)),
+            (SELECT id FROM public.user_profiles WHERE id = dt.last_updated_by),
             COALESCE(dt.task_board, '["Hubs Daily"]'::jsonb),
             CASE
                 WHEN dt.submission_by IS NOT NULL
