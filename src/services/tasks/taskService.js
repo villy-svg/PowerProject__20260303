@@ -22,8 +22,10 @@ const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
  * the rest of the app expects. Handles optional joined employee data.
  */
 export const normalizeTask = (row) => {
-  const latestSubmission = row.submissions?.length > 0
-    ? [...row.submissions].sort((a, b) => b.submission_number - a.submission_number)[0]
+  // Safeguard: Ensure submissions is an array before processing
+  const submissions = Array.isArray(row.submissions) ? row.submissions : [];
+  const latestSubmission = submissions.length > 0
+    ? [...submissions].sort((a, b) => (b.submission_number || 0) - (a.submission_number || 0))[0]
     : null;
 
   // 1. Resolve Multi-Hub Data
@@ -129,32 +131,23 @@ export const TASK_SELECT = `
 
 /**
  * Synchronizes many-to-many links in task_context_links.
- * @param {string} taskId - Target task UUID
- * @param {string} entityType - 'hub' | 'assignee' | 'role'
- * @param {string[]} entityIds - Array of target UUIDs
  */
-const syncContextLinks = async (taskId, entityType, entityIds) => {
-  if (!taskId) return;
-
-  // 1. Wipe existing links for this specific task + entity type
-  const { error: deleteError } = await supabase
+const syncContextLinks = async (sourceId, entityType, entityIds) => {
+  if (!sourceId || !entityType) return;
+  
+  // Ensure entityIds is a clean array of UUIDs
+  const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
+  
+  // 1. Deactivate old links for this type (Soft-Archive approach)
+  await supabase
     .from('task_context_links')
-    .delete()
-    .match({ 
-      source_id: taskId, 
-      source_type: 'task', 
-      entity_type: entityType 
-    });
-
-  if (deleteError) {
-    console.error(`[taskService] Failed to purge ${entityType} links:`, deleteError);
-    throw deleteError;
-  }
+    .update({ is_active: false })
+    .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
 
   // 2. Batch insert new links
-  if (entityIds && entityIds.length > 0) {
-    const linkRows = entityIds.filter(id => !!id).map(id => ({
-      source_id: taskId,
+  if (ids.length > 0) {
+    const linkRows = ids.filter(id => !!id).map(id => ({
+      source_id: sourceId,
       source_type: 'task',
       entity_type: entityType,
       entity_id: id,
@@ -163,13 +156,13 @@ const syncContextLinks = async (taskId, entityType, entityIds) => {
 
     if (linkRows.length === 0) return;
 
-    const { error: insertError } = await supabase
+    const { error } = await supabase
       .from('task_context_links')
       .insert(linkRows);
 
-    if (insertError) {
-      console.error(`[taskService] Failed to insert ${entityType} links:`, insertError);
-      throw insertError;
+    if (error) {
+      console.error(`Error syncing ${entityType} links:`, error);
+      throw error;
     }
   }
 };
