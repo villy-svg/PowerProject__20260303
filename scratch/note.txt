@@ -1,7 +1,0 @@
-const { createClient } = require('@supabase/supabase-js');
-
-// USE SERVICE ROLE KEY if possible, but I don't have it.
-// I'll try to use the anon key to run a simple RPC if there is one.
-// Actually, I can't run NOTIFY via REST API directly without an RPC function.
-
-console.log('Cannot reload schema cache via anon key directly.');
