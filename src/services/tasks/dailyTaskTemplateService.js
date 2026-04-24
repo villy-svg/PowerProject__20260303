@@ -36,15 +36,15 @@ const normalizeTemplate = (row) => {
     timeOfDay: row.time_of_day,
     
     // --- ASSIGNEES & GOVERNANCE ---
-    assignedTo: row.assigned_to || [],            // Default assignees (scalar fallback)
-    assigneeName: row.employees?.full_name,
-    seniorManagerId: row.senior_manager_id,       // The "Umbrella" owner
+    assignedTo: row.assigned_to || [],            // Scalar primary / Senior Manager
+    assigneeName: row.senior_manager?.full_name || null,
+    seniorManagerId: row.assigned_to,             // The "Umbrella" owner is the assigned_to column
     seniorManagerName: row.senior_manager?.full_name || null,
     
     // --- LOGIC FLAGS ---
     isActive: row.is_active,
     priority: row.priority || 'Medium',
-    hasSubAssignees: row.has_sub_assignees || false, // Mode 2: Multi-Assignee
+    hasSubAssignees: row.metadata?.fan_out?.has_sub_assignees || false, // Mode 2 from metadata
     
     // --- AUDIT ---
     uploadLink: row.upload_link,
@@ -67,13 +67,18 @@ const mapTemplateToRow = (template) => {
     frequency: template.frequency || 'DAILY',
     frequency_details: template.frequencyDetails || null,
     time_of_day: template.timeOfDay || '08:00:00',
-    assigned_to: Array.isArray(template.assignedTo) ? template.assignedTo : (template.assignedTo ? [template.assignedTo] : []),
+    assigned_to: template.seniorManagerId || (Array.isArray(template.assignedTo) ? template.assignedTo[0] : (template.assignedTo || null)),
     is_active: template.isActive !== undefined ? template.isActive : true,
     
-    // NEW COLUMNS
-    senior_manager_id: template.seniorManagerId || null,
+    // METADATA WRAPPING
     priority: template.priority || 'Medium',
-    has_sub_assignees: !!template.hasSubAssignees,
+    metadata: {
+      ...template.metadata,
+      fan_out: {
+        ...(template.metadata?.fan_out || {}),
+        has_sub_assignees: !!template.hasSubAssignees
+      }
+    },
 
     upload_link: template.uploadLink || null,
     city: template.city || null,
@@ -159,9 +164,8 @@ const syncTemplateAssignees = async (templateId, assigneeIds) => {
  */
 const TEMPLATE_SELECT = `
   *,
-  employees:assigned_to (full_name),
   hubs(id, name, hub_code, city),
-  senior_manager:senior_manager_id (id, full_name)
+  senior_manager:employees!assigned_to (id, full_name)
 `;
 
 export const dailyTaskTemplateService = {

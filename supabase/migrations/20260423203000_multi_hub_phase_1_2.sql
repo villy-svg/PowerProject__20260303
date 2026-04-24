@@ -200,8 +200,22 @@ CREATE INDEX IF NOT EXISTS idx_tcl_auth_active
   WHERE is_active = true;
 
 -- 4. Set Metadata Documentation
+-- We designate the template's 'assigned_to' column as the 'Senior Manager'.
+-- This column acts as the fallback owner if no specific links are found.
 COMMENT ON COLUMN public.daily_task_templates.assigned_to IS 
   'Acts as the Senior Manager / Parent Owner for all fan-out tasks.';
+
+-- 4.1 Ensure Foreign Key for assigned_to exists (Idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'daily_task_templates_assigned_to_fkey') THEN
+        ALTER TABLE public.daily_task_templates 
+        ADD CONSTRAINT daily_task_templates_assigned_to_fkey 
+        FOREIGN KEY (assigned_to) REFERENCES public.employees(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_dtt_assigned_to ON public.daily_task_templates(assigned_to);
 
 -- 5. Implement Cleanup Trigger Function
 CREATE OR REPLACE FUNCTION public.handle_source_deletion()
