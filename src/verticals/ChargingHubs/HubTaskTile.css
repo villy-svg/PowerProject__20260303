@@ -1,28 +1,117 @@
+@import '../../styles/ManagementForms.css';
+
 .hub-tile-meta {
   display: flex;
+  flex-direction: column;
   gap: 6px;
-  align-items: center;
+  width: 100%;
 }
-.tile-hub-code.halo-type {
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  opacity: 0.7;
-  padding: 2px 8px;
-  border-radius: 20px;
-  border: 1px solid var(--border-color);
-  text-transform: capitalize;
-  letter-spacing: 0.3px;
+
+/* Multi-Hub Badges */
+.task-hub-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
-.tile-function-badge.halo-type {
+
+.hub-badge {
   font-size: 0.65rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-color);
-  padding: 2px 8px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(var(--brand-green-rgb), 0.12);
+  color: var(--brand-green);
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(var(--brand-green-rgb), 0.2);
+}
+
+/* Hierarchy Visuals */
+.task-hierarchy-visuals {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parent-task-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
   border-radius: 20px;
-  border: 1px solid var(--border-color);
-  text-transform: capitalize;
-  opacity: 0.5;
+  background: rgba(var(--brand-green-rgb), 0.1);
+  color: var(--brand-green);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(var(--brand-green-rgb), 0.2);
+}
+
+.parent-task-badge:hover {
+  background: rgba(var(--brand-green-rgb), 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.parent-task-badge.expanded {
+  background: var(--brand-green);
+  color: white;
+}
+
+.child-count-icon {
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+}
+
+.subtask-indicator {
+  font-size: 0.65rem;
+  color: var(--brand-green);
+  font-weight: 600;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Function Badge */
+.tile-function-badge {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Mobile & Adaptive Logic */
+@media (max-width: 768px) {
+  .hub-badge {
+    font-size: 0.6rem;
+    padding: 1px 4px;
+  }
+  
+  .parent-task-badge {
+    padding: 2px 8px;
+    font-size: 0.65rem;
+  }
+}
+
+/* Master Card Overrides for Nesting */
+/* Note: These classes are applied to the parent TaskCard container via TaskKanbanView logic */
+.is-subtask-render {
+  margin-left: 24px !important;
+  border-left: 2px solid var(--brand-green) !important;
+  opacity: 0.9;
+  position: relative;
+}
+
+.is-subtask-render::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 0;
+  width: 12px;
+  height: 20px;
+  border-left: 2px solid rgba(var(--brand-green-rgb), 0.3);
+  border-bottom: 2px solid rgba(var(--brand-green-rgb), 0.3);
+  border-bottom-left-radius: 8px;
 }

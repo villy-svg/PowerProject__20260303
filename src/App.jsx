@@ -9,7 +9,6 @@ import { masterErrorHandler } from './services/core/masterErrorHandler';
 import { verticalService } from './services/core/verticalService';
 // Services — Auth
 import { taskService } from './services/tasks/taskService';
-import { dailyTaskService } from './services/tasks/dailyTaskService';
 import { authService } from './services/auth/authService';
 import { profileService } from './services/auth/profileService';
 // Hooks

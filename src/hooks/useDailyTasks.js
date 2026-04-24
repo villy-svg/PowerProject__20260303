@@ -1,102 +1,47 @@
-import { useState, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useTasks } from './useTasks';
 import { dailyTaskService } from '../services/tasks/dailyTaskService';
-import { masterErrorHandler } from '../services/core/masterErrorHandler';
 
+/**
+ * useDailyTasks Hook
+ * 
+ * ARCHITECTURE NOTE:
+ * This hook wraps useTasks() to share the global task stream and cache.
+ * It applies 'Hubs Daily' filtering and uses dailyTaskService for 
+ * board-specific logic (like submission tracking and tagging).
+ */
 export const useDailyTasks = (user) => {
-  const [tasks, setTasks] = useState(() => {
-    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
-      const cached = localStorage.getItem('powerpod_daily_tasks_v3');
-      if (cached) {
-        try {
-          return JSON.parse(cached);
-        } catch (e) {
-          console.error('UseDailyTasks Cache Parse Error:', e);
-          return [];
-        }
-      }
-    }
-    return [];
-  });
-  const [loading, setLoading] = useState(true);
+  const taskHook = useTasks(user);
 
-  const fetchTasks = useCallback(async (showLoading = true) => {
-    if (showLoading) setLoading(true);
-    try {
-      const data = await dailyTaskService.getTasks();
-      setTasks(data);
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.fetchTasks');
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, []);
+  // 1. Filter tasks for the Daily Board
+  const dailyTasks = useMemo(() => 
+    taskHook.tasks.filter(t => 
+      Array.isArray(t.task_board) && t.task_board.includes('Hubs Daily')
+    ), 
+    [taskHook.tasks]
+  );
 
-  const addTask = async (taskData) => {
-    try {
-      const newTask = await dailyTaskService.addTask(taskData, user?.id);
-      setTasks(prev => [newTask, ...prev]);
-      return newTask;
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.addTask');
-      throw err;
-    }
-  };
+  // 2. Hierarchy Logic
+  const parentTasks = useMemo(() => 
+    dailyTasks.filter(t => !t.parentTask), 
+    [dailyTasks]
+  );
 
-  const updateTask = async (taskData) => {
-    try {
-      const updated = await dailyTaskService.updateTask(taskData, user?.id);
-      setTasks(prev => prev.map(t => t.id === taskData.id ? updated : t));
-      return updated;
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.updateTask');
-      throw err;
-    }
-  };
+  const getSubTasks = (parentId) => 
+    dailyTasks.filter(t => t.parentTask === parentId);
 
-  const updateTaskStage = async (taskId, newStageId) => {
-    // Optimistic UI update
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
-    try {
-      await dailyTaskService.updateTaskStage(taskId, newStageId, user?.id);
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.updateTaskStage');
-      await fetchTasks(false);
-      throw err;
-    }
-  };
-
-  const bulkUpdateTasks = async (taskIds, updates) => {
-    try {
-      const updatedTasks = await dailyTaskService.bulkUpdateTasks(taskIds, updates, user?.id);
-      setTasks(prev => prev.map(t => {
-        const updated = updatedTasks.find(u => u.id === t.id);
-        return updated || t;
-      }));
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.bulkUpdateTasks');
-      throw err;
-    }
-  };
-
-  const deleteTask = async (taskId) => {
-    try {
-      await dailyTaskService.deleteTask(taskId);
-      setTasks(prev => prev.filter(t => t.id !== taskId));
-    } catch (err) {
-      masterErrorHandler.handleDatabaseError(err, 'useDailyTasks.deleteTask');
-      throw err;
-    }
-  };
-
+  // 3. Export filtered data & override CRUD with domain-specific logic
   return {
-    tasks,
-    setTasks,
-    loading,
-    fetchTasks,
-    addTask,
-    updateTask,
-    updateTaskStage,
-    bulkUpdateTasks,
-    deleteTask,
+    ...taskHook,
+    tasks: dailyTasks,
+    allTasks: taskHook.tasks,
+    parentTasks,
+    getSubTasks,
+    
+    // Domain Overrides
+    addTask: (taskData) => dailyTaskService.addTask(taskData, user?.id),
+    updateTask: (taskData) => dailyTaskService.updateTask(taskData, user?.id),
+    updateTaskStage: (taskId, newStageId) => dailyTaskService.updateTaskStage(taskId, newStageId, user?.id),
+    bulkUpdateTasks: (taskIds, updates) => dailyTaskService.bulkUpdateTasks(taskIds, updates, user?.id),
   };
 };

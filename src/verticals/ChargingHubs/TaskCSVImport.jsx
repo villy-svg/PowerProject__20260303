@@ -24,9 +24,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       supabase.from('hubs').select('id, hub_code, name'),
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
-      verticalId === 'daily_hub_tasks' 
-        ? supabase.from('daily_tasks').select('id, text, hub_id, function_name')
-        : supabase.from('tasks').select('id, text, hub_id, function').eq('vertical_id', verticalId)
+      supabase.from('tasks').select('id, text, hub_id, function, task_board')
+        .or(`vertical_id.eq.${verticalId},task_board.cs.{"Hubs Daily"}`)
     ]);
 
     const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
@@ -137,16 +136,16 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
           city: row.city || null,
-          // Wrap assigned_to in an array for uuid[] compatibility
           assigned_to: row.assigned_to ? [empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null].filter(Boolean) : [],
           updated_at: new Date().toISOString(),
+          vertical_id: verticalId,
+          stage_id: row.stageid || row.stage_id || 'BACKLOG',
+          function: resolvedFunc,
         };
 
         if (isDaily) {
-          taskRow.stage_id = row.stageid || 'BACKLOG';
-          taskRow.function_name = resolvedFunc;
-          taskRow.vertical_id = verticalId;
-
+          taskRow.task_board = ['Hubs Daily'];
+          
           // Multi-Subject Mapping during Import
           const vid = verticalId.toUpperCase();
           if (vid.includes('CLIENT')) taskRow.client_id = resolvedHubId ? [resolvedHubId] : [];
@@ -154,17 +153,13 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           else if (vid.includes('PARTNER')) taskRow.partner_id = resolvedHubId ? [resolvedHubId] : [];
           else if (vid.includes('VENDOR')) taskRow.vendor_id = resolvedHubId ? [resolvedHubId] : [];
           else taskRow.hub_id = resolvedHubId;
-        } else {
-          taskRow.vertical_id = verticalId;
-          taskRow.stage_id = row.stageid || row.stage_id || 'BACKLOG';
-          taskRow.function = resolvedFunc;
         }
 
         return taskRow;
       });
 
       const { error } = await supabase
-        .from(verticalId === 'daily_hub_tasks' ? 'daily_tasks' : 'tasks')
+        .from('tasks')
         .upsert(tasksToInsert, { onConflict: 'id' });
 
       if (error) throw error;

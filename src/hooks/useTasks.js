@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { taskService } from '../services/tasks/taskService';
 import { masterErrorHandler } from '../services/core/masterErrorHandler';
 
@@ -14,7 +14,7 @@ import { masterErrorHandler } from '../services/core/masterErrorHandler';
 export const useTasks = (user) => {
   const [tasks, setTasks] = useState(() => {
     if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
-      const cached = localStorage.getItem('powerpod_tasks_v3');
+      const cached = localStorage.getItem('powerpod_tasks_v5');
       if (cached) {
         try {
           return JSON.parse(cached);
@@ -115,6 +115,31 @@ export const useTasks = (user) => {
   };
 
   // ---------------------------------------------------------------------------
+  // HIERARCHY COMPUTATIONS
+  // ---------------------------------------------------------------------------
+
+  const parentTasks = useMemo(() =>
+    tasks.filter(t => !t.isSubTask),
+    [tasks]
+  );
+
+  const subTasksByParent = useMemo(() => {
+    const map = {};
+    tasks.forEach(t => {
+      if (t.parentTask) {
+        if (!map[t.parentTask]) map[t.parentTask] = [];
+        map[t.parentTask].push(t);
+      }
+    });
+    return map;
+  }, [tasks]);
+
+  const getSubTasks = useCallback((parentId) =>
+    subTasksByParent[parentId] || [],
+    [subTasksByParent]
+  );
+
+  // ---------------------------------------------------------------------------
 
   return {
     tasks,
@@ -126,5 +151,9 @@ export const useTasks = (user) => {
     updateTaskStage,
     bulkUpdateTasks,
     deleteTask,
+    // Hierarchy
+    parentTasks,
+    subTasksByParent,
+    getSubTasks,
   };
 };

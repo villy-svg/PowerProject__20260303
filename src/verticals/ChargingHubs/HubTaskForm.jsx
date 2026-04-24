@@ -16,7 +16,10 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const [formData, setFormData] = useState({
     text: safeData.text || '',
     priority: safeData.priority || 'Medium',
-    hub_id: safeData.hub_id || '',
+    // NEW: Initialize from either existing array or legacy single ID
+    hub_ids: Array.isArray(safeData.hub_ids) 
+      ? safeData.hub_ids 
+      : (safeData.hub_id ? [safeData.hub_id] : []),
     city: safeData.city || '',
     function: safeData.function || '',
     description: safeData.description || '',
@@ -81,21 +84,35 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     setFormData({
       ...formData,
       city: newCity,
-      hub_id: '' // Reset hub selection when city changes
+      hub_ids: [] // CRITICAL: Reset multi-hub selection on city change
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const selectedHub = hubs.find(h => h.id === formData.hub_id);
+    // 1. Resolve primary hub for text formatting
+    const primaryHub = hubs.find(h => h.id === formData.hub_ids[0]);
+    
+    // 2. Format task text using the established utility
     const finalTaskText = taskUtils.formatTaskText(formData.text, {
-      assetCode: selectedHub?.hub_code,
+      assetCode: primaryHub?.hub_code,
       functionName: formData.function,
-      forcePrefix: !!formData.hub_id
+      forcePrefix: formData.hub_ids.length > 0
     });
 
-    onSubmit({ ...formData, text: finalTaskText });
+    // 3. Construct Payload
+    const submissionPayload = {
+      ...formData,
+      text: finalTaskText,
+      // NEW: Pass all selected hubs
+      hub_ids: formData.hub_ids, 
+      // BACKWARD COMPAT: Set single hub_id to the first selection
+      hub_id: formData.hub_ids[0] || null 
+    };
+
+    console.log('[HubTaskForm] Submitting Payload:', submissionPayload);
+    onSubmit(submissionPayload);
   };
 
   return (
@@ -153,19 +170,64 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 </select>
               </div>
 
-              <div className="form-group">
-                <label>Charging Hub</label>
-                <select 
-                  className="master-dropdown"
-                  value={formData.hub_id}
-                  onChange={(e) => setFormData({...formData, hub_id: e.target.value})}
-                  disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
-                >
-                  <option value="">N/A (No Hub Linked)</option>
-                  {filteredHubs.map(hub => (
-                    <option key={hub.id} value={hub.id}>{hub.hub_code || hub.name}</option>
-                  ))}
-                </select>
+              <div className="form-group hub-selection-container">
+                <label className="form-label-with-badge">
+                  Target Charging Hub(s)
+                  {formData.hub_ids.length > 1 && (
+                    <span className="mode-badge mode-3-badge">🔀 Multi-Hub Generation</span>
+                  )}
+                </label>
+
+                {/* Selection Display (Tags) */}
+                <div className="hub-tags-wrapper">
+                  {formData.hub_ids.length > 0 ? (
+                    formData.hub_ids.map(hid => {
+                      const hub = hubs.find(h => h.id === hid);
+                      return hub ? (
+                        <div key={hid} className="hub-tag-item anim-scale-in">
+                          <span className="hub-tag-code">{hub.hub_code || '??'}</span>
+                          <span className="hub-tag-name">{hub.name}</span>
+                          <button 
+                            type="button" 
+                            className="hub-tag-remove" 
+                            onClick={() => setFormData(p => ({ ...p, hub_ids: p.hub_ids.filter(id => id !== hid) }))}
+                            title="Remove Hub"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ) : null;
+                    })
+                  ) : (
+                    <span className="hub-selection-placeholder">No hubs selected. Tasks will be unlinked.</span>
+                  )}
+                </div>
+
+                {/* Selection Input (Dropdown) */}
+                <div className="hub-dropdown-wrapper">
+                  <select 
+                    className="master-dropdown hub-selector-input"
+                    value=""
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val && !formData.hub_ids.includes(val)) {
+                        setFormData(p => ({ ...p, hub_ids: [...p.hub_ids, val] }));
+                      }
+                    }}
+                    disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
+                  >
+                    <option value="">{formData.city ? `+ Add Hub from ${formData.city}...` : 'Select City First...'}</option>
+                    {filteredHubs
+                      .filter(h => !formData.hub_ids.includes(h.id))
+                      .map(hub => (
+                        <option key={hub.id} value={hub.id}>
+                          [{hub.hub_code}] {hub.name}
+                        </option>
+                      ))
+                    }
+                  </select>
+                  <p className="field-help-text">You can select multiple hubs to generate identical tasks for each.</p>
+                </div>
               </div>
             </div>
 
@@ -243,6 +305,34 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               onStatusUpdate={onSubmissionStatusUpdate}
               onCountLoad={setSubmissionCount}
             />
+          </div>
+        )}
+
+        {/* FAN-OUT PREDICTION LOGIC */}
+        {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && (
+          <div className="fanout-prediction-box anim-slide-up">
+            <div className="prediction-header">
+              <span className="prediction-icon">⚡</span>
+              <h4>Automation Insight</h4>
+            </div>
+            <div className="prediction-content">
+              {formData.hub_ids.length > 1 ? (
+                <div className="prediction-detail">
+                  <p><strong>Multi-Hub Mode (Mode 3) Detected:</strong></p>
+                  <p>This will create <strong>{formData.hub_ids.length}</strong> identical tasks across selected hubs.</p>
+                  <ul>
+                    <li>Primary Hub: {hubs.find(h => h.id === formData.hub_ids[0])?.hub_code}</li>
+                    <li>Total Secondary Links: {formData.hub_ids.length - 1}</li>
+                  </ul>
+                </div>
+              ) : formData.assigned_to.length > 1 ? (
+                <div className="prediction-detail">
+                  <p><strong>Assignee Fan-Out (Mode 2) Detected:</strong></p>
+                  <p>This will create <strong>{formData.assigned_to.length}</strong> tasks (one for each person).</p>
+                </div>
+              ) : null}
+              <p className="prediction-disclaimer">Tasks will be generated as a "Batch" linked to a parent task.</p>
+            </div>
           </div>
         )}
       </div>

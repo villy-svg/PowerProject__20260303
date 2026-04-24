@@ -87,6 +87,15 @@ const TaskKanbanView = ({
   setExpandedTaskId
 }) => {
   const [activeStageId, setActiveStageId] = useState('BACKLOG');
+  const [expandedParents, setExpandedParents] = useState({});
+
+  const toggleExpanded = useCallback((parentId) => {
+    setExpandedParents(prev => ({
+      ...prev,
+      [parentId]: !prev[parentId],
+    }));
+  }, []);
+
   const visibleStages = stageList.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED');
 
   return (
@@ -139,44 +148,50 @@ const TaskKanbanView = ({
             return 0;
           };
 
-          const stageTasks = filteredTasks
-            .filter((t) => t.stageId === stage.id)
-            .sort((a, b) => {
-              // 1. Rework Priority (Rejected tasks always first)
-              const isReworkA = a.latestSubmission?.status === 'rejected';
-              const isReworkB = b.latestSubmission?.status === 'rejected';
-              if (isReworkA && !isReworkB) return -1;
-              if (!isReworkA && isReworkB) return 1;
+          const tasksInColumn = filteredTasks.filter((t) => t.stageId === stage.id);
+          
+          // --- HIERARCHY NESTING LOGIC ---
+          const parents = tasksInColumn.filter(t => !t.isSubTask);
+          const stageTasks = [];
 
-              // 2. Review Priority (Children in review)
-              // Only relevant for managers (canUpdate)
-              if (canUserUpdate) {
-                const isReviewA = a.hasReviewDescendant;
-                const isReviewB = b.hasReviewDescendant;
-                if (isReviewA && !isReviewB) return -1;
-                if (!isReviewA && isReviewB) return 1;
-              }
+          parents.forEach(parent => {
+            stageTasks.push(parent);
+            // Insert children directly after parent (only if expanded)
+            if (expandedParents[parent.id]) {
+              const children = tasksInColumn.filter(t => t.parentTask === parent.id);
+              stageTasks.push(...children);
+            }
+          });
 
-              // 3. Standard Priority weight
-              const weightA = getPriorityWeight(a.priority);
-              const weightB = getPriorityWeight(b.priority);
-              if (weightA !== weightB) return weightB - weightA;
+          // Add orphan sub-tasks (parent in different column or missing)
+          const orphans = tasksInColumn.filter(t =>
+            t.isSubTask && !parents.some(p => p.id === t.parentTask)
+          );
+          stageTasks.push(...orphans);
 
-              // 3. Duplicate Grouping
-              if (a.isDuplicate && !b.isDuplicate) return -1;
-              if (!a.isDuplicate && b.isDuplicate) return 1;
+          // Standard sorting for top-level (parents + orphans)
+          // Note: Children follow parents immediately, so we only sort the 'stageTasks' 
+          // array if we want a global sort, but Runbook suggests this insertion model.
+          // We'll apply the priority sort to parents/orphans first.
+          stageTasks.sort((a, b) => {
+            // Keep children with parents: if b is child of a, a comes first
+            if (b.parentTask === a.id) return -1;
+            if (a.parentTask === b.id) return 1;
+            // If they share same parent, or are both top-level, sort by priority
+            
+            // 1. Rework Priority
+            const isReworkA = a.latestSubmission?.status === 'rejected';
+            const isReworkB = b.latestSubmission?.status === 'rejected';
+            if (isReworkA && !isReworkB) return -1;
+            if (!isReworkA && isReworkB) return 1;
 
-              // 4. Metadata
-              const hubA = a.hub_code || '';
-              const hubB = b.hub_code || '';
-              if (hubA !== hubB) return hubA.localeCompare(hubB);
+            // 2. Standard Priority weight
+            const weightA = getPriorityWeight(a.priority);
+            const weightB = getPriorityWeight(b.priority);
+            if (weightA !== weightB) return weightB - weightA;
 
-              const funcA = a.function || '';
-              const funcB = b.function || '';
-              if (funcA !== funcB) return funcA.localeCompare(funcB);
-
-              return 0;
-            });
+            return 0;
+          });
 
           const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
 
@@ -225,7 +240,7 @@ const TaskKanbanView = ({
                 {stageTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="task-card-container"
+                    className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
                   >
                     <TaskCard
                       task={task}
@@ -251,13 +266,15 @@ const TaskKanbanView = ({
                       onDrillDown={setDrillDownId}
                       showHierarchy={permissions.canViewKanbanHierarchy}
                       permissions={permissions}
-                      isExpanded={expandedTaskId === task.id}
-                      onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                      isExpanded={expandedParents[task.id] || expandedTaskId === task.id}
+                      onToggleExpand={() => task.childCount > 0 ? toggleExpanded(task.id) : setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
                     >
                       {TaskTileComponent && (
                         <TaskTileComponent
                           task={task}
                           stage={stage}
+                          isExpanded={!!expandedParents[task.id]}
+                          toggleExpanded={toggleExpanded}
                         />
                       )}
                     </TaskCard>

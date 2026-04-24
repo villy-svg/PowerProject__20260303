@@ -13,25 +13,28 @@ import { auditService } from '../core/auditService';
 // ---------------------------------------------------------------------------
 
 // Bump this whenever the normalized task shape changes (Context Link migration = v4)
-const TASK_CACHE_VERSION = 4;
-const TASK_CACHE_KEY = 'powerpod_tasks_v4';
+const TASK_CACHE_VERSION = 5;
+const TASK_CACHE_KEY = 'powerpod_tasks_v5';
 const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
 
 /**
  * Maps a Supabase row (lowercase column names) to the camelCase shape
  * the rest of the app expects. Handles optional joined employee data.
  */
-const normalizeTask = (row) => {
+export const normalizeTask = (row) => {
   const latestSubmission = row.submissions?.length > 0
     ? [...row.submissions].sort((a, b) => b.submission_number - a.submission_number)[0]
     : null;
 
-  // Handle multi-assignee names (PostgREST returns an array via the 'assignees' computed relationship)
+  // 1. Resolve Multi-Hub Data
+  const hubData = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+
+  // 2. Resolve Assignee Names (PostgREST returns an array via the 'assignees' computed relationship)
   const assigneeNames = Array.isArray(row.assignees)
     ? row.assignees.map(e => e.full_name).join(', ')
     : (row.assignees?.full_name || '');
 
-  // Flatten nested employee_roles for each assignee in assigneeMeta
+  // 3. Flatten nested employee_roles for each assignee in assigneeMeta
   const rawMeta = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
   const assigneeMeta = rawMeta.map(e => ({
     ...e,
@@ -45,30 +48,51 @@ const normalizeTask = (row) => {
     stageId: row.stage_id,
     priority: row.priority,
     description: row.description,
-    hub_id: row.hub_id,
+
+    // Hub Relationships
+    hub_id: row.hub_id,                          // Legacy scalar primary hub
+    hub_ids: hubData.map(h => h.id),             // Multi-hub UUID array
+    hubNames: hubData.map(h => h.name),          // For display
+    hubCodes: hubData.map(h => h.hub_code),      // For badges
+    hubData: hubData,                            // Full objects for forms
     city: row.city,
+
     function: row.function,
+
+    // Assignee Relationships
     assigned_to: Array.isArray(row.assignees) ? row.assignees.map(a => a.id) : (row.assigned_to ? [row.assigned_to] : []),
     assigneeName: assigneeNames,
+    assigneeMeta,
+
+    // Hierarchy
     parentTask: row.parent_task_id || null,
+    childCount: row.children?.length || 0,        // Count of child tasks
+    isSubTask: !!row.parent_task_id,              // Is this a fan-out child?
+
+    // Meta & Audit
+    task_board: row.task_board || [],
+    isDailyTask: Array.isArray(row.task_board) && row.task_board.includes('Hubs Daily'),
+
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     createdBy: row.created_by,
     lastUpdatedBy: row.last_updated_by,
-    task_board: row.task_board || [],
+
+    // Entity Links (Legacy/Future)
     client_id: row.client_id ? [row.client_id] : [],
     partner_id: row.partner_id ? [row.partner_id] : [],
     vendor_id: row.vendor_id ? [row.vendor_id] : [],
     employee_id: row.employee_id ? [row.employee_id] : [],
+
     latestSubmission,
-    assigneeMeta,
+    submissionBy: row.submission_by,
   };
 };
 
 /**
  * Maps a camelCase task object to the Supabase column-name shape for inserts/updates.
  */
-const mapTaskToRow = (task) => ({
+export const mapTaskToRow = (task) => ({
   text: task.text,
   vertical_id: task.verticalId,
   stage_id: task.stageId,
@@ -85,11 +109,64 @@ const mapTaskToRow = (task) => ({
   partner_id: Array.isArray(task.partner_id) ? task.partner_id[0] : (task.partner_id || null),
   vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id[0] : (task.vendor_id || null),
   employee_id: Array.isArray(task.employee_id) ? task.employee_id[0] : (task.employee_id || null),
+  submission_by: task.submissionBy || null,
 });
 
-/** Standard select string: uses computed relationship 'assignees' backed by task_context_links. */
-const TASK_SELECT = '*, assignees(id, full_name, badge_id, employee_roles(seniority_level)), submissions(id, status, rejection_reason, submission_number, created_at)';
-const DAILY_TASK_SELECT = '*, assignees(id, full_name, badge_id, employee_roles(seniority_level))';
+/** Standard select string: uses computed relationships backed by task_context_links. */
+export const TASK_SELECT = `
+  *,
+  assignees(id, full_name, badge_id, employee_roles(seniority_level)),
+  hubs(id, name, hub_code, city),
+  submissions(id, status, rejection_reason, submission_number, created_at),
+  children:tasks!parent_task_id(id)
+`;
+
+/**
+ * Synchronizes many-to-many links in task_context_links.
+ * @param {string} taskId - Target task UUID
+ * @param {string} entityType - 'hub' | 'assignee' | 'role'
+ * @param {string[]} entityIds - Array of target UUIDs
+ */
+const syncContextLinks = async (taskId, entityType, entityIds) => {
+  if (!taskId) return;
+
+  // 1. Wipe existing links for this specific task + entity type
+  const { error: deleteError } = await supabase
+    .from('task_context_links')
+    .delete()
+    .match({ 
+      source_id: taskId, 
+      source_type: 'task', 
+      entity_type: entityType 
+    });
+
+  if (deleteError) {
+    console.error(`[taskService] Failed to purge ${entityType} links:`, deleteError);
+    throw deleteError;
+  }
+
+  // 2. Batch insert new links
+  if (entityIds && entityIds.length > 0) {
+    const linkRows = entityIds.filter(id => !!id).map(id => ({
+      source_id: taskId,
+      source_type: 'task',
+      entity_type: entityType,
+      entity_id: id,
+      is_active: true
+    }));
+
+    if (linkRows.length === 0) return;
+
+    const { error: insertError } = await supabase
+      .from('task_context_links')
+      .insert(linkRows);
+
+    if (insertError) {
+      console.error(`[taskService] Failed to insert ${entityType} links:`, insertError);
+      throw insertError;
+    }
+  }
+};
 
 // ---------------------------------------------------------------------------
 // Service
@@ -176,7 +253,19 @@ export const taskService = {
       .select(TASK_SELECT);
 
     if (error) throw error;
-    return normalizeTask(data[0]);
+    const newTask = normalizeTask(data[0]);
+
+    // --- NEW: Sync Context Links ---
+    // Sync Hubs
+    if (taskData.hub_ids) {
+      await syncContextLinks(newTask.id, 'hub', taskData.hub_ids);
+    }
+    // Sync Assignees
+    if (taskData.assigned_to) {
+      await syncContextLinks(newTask.id, 'assignee', taskData.assigned_to);
+    }
+
+    return newTask;
   },
 
   /**
@@ -193,14 +282,30 @@ export const taskService = {
     let row = mapTaskToRow(taskData);
     row = auditService.stamp(row, userId);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('tasks')
       .update(row)
-      .eq('id', taskData.id)
-      .select(TASK_SELECT);
+      .eq('id', taskData.id);
 
     if (error) throw error;
-    return normalizeTask(data[0]);
+
+    // --- NEW: Sync Context Links ---
+    if (taskData.hub_ids) {
+      await syncContextLinks(taskData.id, 'hub', taskData.hub_ids);
+    }
+    if (taskData.assigned_to) {
+      await syncContextLinks(taskData.id, 'assignee', taskData.assigned_to);
+    }
+
+    // Fetch fresh data with links
+    const { data: refreshed, error: fetchError } = await supabase
+      .from('tasks')
+      .select(TASK_SELECT)
+      .eq('id', taskData.id)
+      .single();
+
+    if (fetchError) throw fetchError;
+    return normalizeTask(refreshed);
   },
 
   /**
@@ -255,5 +360,19 @@ export const taskService = {
       .eq('id', taskId);
 
     if (error) throw error;
+  },
+
+  /**
+   * Retrieves all child tasks for a given parent.
+   */
+  async getChildTasks(parentTaskId) {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(TASK_SELECT)
+      .eq('parent_task_id', parentTaskId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return (data || []).map(normalizeTask);
   },
 };

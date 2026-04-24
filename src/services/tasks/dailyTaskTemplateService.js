@@ -6,31 +6,55 @@ import { supabase } from '../core/supabaseClient';
 import { VERTICALS } from '../../constants/verticals';
 import { dailyTaskService } from './dailyTaskService';
 
-const normalizeTemplate = (row) => ({
-  id: row.id,
-  title: row.title,
-  description: row.description,
-  verticalId: row.vertical_id,
-  hub_id: row.hub_id,
-  client_id: row.client_id,
-  employee_id: row.employee_id,
-  // Unified subject reading for UI simplicity (assuming mostly Hubs for now)
-  subjectId: row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id,
-  city: row.city,
-  functionName: row.function_name,
-  frequency: row.frequency,
-  frequencyDetails: row.frequency_details,
-  timeOfDay: row.time_of_day,
-  assignedTo: row.assigned_to || [],
-  assigneeName: row.employees?.full_name,
-  isActive: row.is_active,
-  uploadLink: row.upload_link,
-  lastRunAt: row.last_run_at,
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
-  createdBy: row.created_by,
-  lastUpdatedBy: row.last_updated_by,
-});
+const normalizeTemplate = (row) => {
+  if (!row) return null;
+
+  // PostgREST returns an array for the computed 'hubs' relationship
+  const hubData = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    verticalId: row.vertical_id,
+    
+    // --- MULTI-HUB SUPPORT ---
+    hub_id: row.hub_id,                           // Scalar primary (legacy)
+    hub_ids: hubData.map(h => h.id),              // Array of UUIDs for multi-select
+    hubNames: hubData.map(h => h.name),           // Array of Names for display
+    hubData: hubData,                             // Full objects for detailed views
+    
+    // --- BACKWARD COMPATIBILITY ---
+    client_id: row.client_id,
+    employee_id: row.employee_id,
+    subjectId: row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id,
+    
+    city: row.city,
+    functionName: row.function_name,
+    frequency: row.frequency,
+    frequencyDetails: row.frequency_details,
+    timeOfDay: row.time_of_day,
+    
+    // --- ASSIGNEES & GOVERNANCE ---
+    assignedTo: row.assigned_to || [],            // Default assignees (scalar fallback)
+    assigneeName: row.employees?.full_name,
+    seniorManagerId: row.senior_manager_id,       // The "Umbrella" owner
+    seniorManagerName: row.senior_manager?.full_name || null,
+    
+    // --- LOGIC FLAGS ---
+    isActive: row.is_active,
+    priority: row.priority || 'Medium',
+    hasSubAssignees: row.has_sub_assignees || false, // Mode 2: Multi-Assignee
+    
+    // --- AUDIT ---
+    uploadLink: row.upload_link,
+    lastRunAt: row.last_run_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdBy: row.created_by,
+    lastUpdatedBy: row.last_updated_by,
+  };
+};
 
 const mapTemplateToRow = (template) => {
   const vid = (template.verticalId || '').toUpperCase();
@@ -45,6 +69,12 @@ const mapTemplateToRow = (template) => {
     time_of_day: template.timeOfDay || '08:00:00',
     assigned_to: Array.isArray(template.assignedTo) ? template.assignedTo : (template.assignedTo ? [template.assignedTo] : []),
     is_active: template.isActive !== undefined ? template.isActive : true,
+    
+    // NEW COLUMNS
+    senior_manager_id: template.seniorManagerId || null,
+    priority: template.priority || 'Medium',
+    has_sub_assignees: !!template.hasSubAssignees,
+
     upload_link: template.uploadLink || null,
     city: template.city || null,
     function_name: template.functionName || null,
@@ -60,7 +90,79 @@ const mapTemplateToRow = (template) => {
   return row;
 };
 
-const TEMPLATE_SELECT = '*, employees:assigned_to (full_name)';
+/**
+ * Synchronizes multi-hub links with per-hub assignee metadata.
+ * @param {string} templateId 
+ * @param {Array} hubConfigs - [{ hubId: string, assigneeIds: string[] }]
+ */
+const syncTemplateHubs = async (templateId, hubConfigs) => {
+  if (!templateId) return;
+
+  // 1. Purge existing Hub links for this template
+  const { error: delError } = await supabase
+    .from('task_context_links')
+    .delete()
+    .match({ source_id: templateId, source_type: 'template', entity_type: 'hub' });
+
+  if (delError) throw delError;
+
+  // 2. Insert new configurations with metadata
+  if (hubConfigs && hubConfigs.length > 0) {
+    const rows = hubConfigs.map(hc => ({
+      source_id: templateId,
+      source_type: 'template',
+      entity_type: 'hub',
+      entity_id: hc.hubId,
+      is_active: true,
+      metadata: { 
+        assignee_ids: hc.assigneeIds || [] // CRITICAL: This is used by the PL/pgSQL generator
+      }
+    }));
+
+    const { error: insError } = await supabase
+      .from('task_context_links')
+      .insert(rows);
+    if (insError) throw insError;
+  }
+};
+
+/**
+ * Synchronizes template-level assignee links.
+ * @param {string} templateId 
+ * @param {string[]} assigneeIds 
+ */
+const syncTemplateAssignees = async (templateId, assigneeIds) => {
+  if (!templateId) return;
+
+  await supabase
+    .from('task_context_links')
+    .delete()
+    .match({ source_id: templateId, source_type: 'template', entity_type: 'assignee' });
+
+  if (assigneeIds && assigneeIds.length > 0) {
+    const rows = assigneeIds.map(aid => ({
+      source_id: templateId,
+      source_type: 'template',
+      entity_type: 'assignee',
+      entity_id: aid,
+      is_active: true
+    }));
+    const { error } = await supabase.from('task_context_links').insert(rows);
+    if (error) throw error;
+  }
+};
+
+/**
+ * Standard select string for templates.
+ * - hubs: Uses the computed PostgREST relationship.
+ * - senior_manager: Join to user_profiles for governance visibility.
+ */
+const TEMPLATE_SELECT = `
+  *,
+  employees:assigned_to (full_name),
+  hubs(id, name, hub_code, city),
+  senior_manager:senior_manager_id (id, full_name)
+`;
 
 export const dailyTaskTemplateService = {
   async getTemplates() {
@@ -73,7 +175,27 @@ export const dailyTaskTemplateService = {
     return (data || []).map(normalizeTemplate);
   },
 
+  /**
+   * Fetches the hub-assignee configuration matrix for a template.
+   * Returns: [{ hubId, assigneeIds }]
+   */
+  async getTemplateHubConfigs(templateId) {
+    const { data, error } = await supabase
+      .from('task_context_links')
+      .select('entity_id, metadata')
+      .eq('source_id', templateId)
+      .eq('source_type', 'template')
+      .eq('entity_type', 'hub');
+
+    if (error) throw error;
+    return (data || []).map(d => ({
+      hubId: d.entity_id,
+      assigneeIds: d.metadata?.assignee_ids || []
+    }));
+  },
+
   async addTemplate(templateData, userId) {
+    // 1. Insert base template
     const row = {
       ...mapTemplateToRow(templateData),
       created_by: userId,
@@ -86,10 +208,22 @@ export const dailyTaskTemplateService = {
       .select(TEMPLATE_SELECT);
 
     if (error) throw error;
-    return normalizeTemplate(data[0]);
+    const saved = normalizeTemplate(data[0]);
+
+    // 2. Sync Hub Links (Mode 3)
+    if (templateData.hubConfigs) {
+      await syncTemplateHubs(saved.id, templateData.hubConfigs);
+    }
+    // 3. Sync Template Assignees (Mode 2)
+    if (templateData.assigneeIds) {
+      await syncTemplateAssignees(saved.id, templateData.assigneeIds);
+    }
+
+    return saved;
   },
 
   async updateTemplate(templateData, userId) {
+    // 1. Update base template
     const row = {
       ...mapTemplateToRow(templateData),
       last_updated_by: userId,
@@ -102,7 +236,18 @@ export const dailyTaskTemplateService = {
       .select(TEMPLATE_SELECT);
 
     if (error) throw error;
-    return normalizeTemplate(data[0]);
+    const saved = normalizeTemplate(data[0]);
+
+    // 2. Sync Hub Links
+    if (templateData.hubConfigs) {
+      await syncTemplateHubs(saved.id, templateData.hubConfigs);
+    }
+    // 3. Sync Template Assignees
+    if (templateData.assigneeIds) {
+      await syncTemplateAssignees(saved.id, templateData.assigneeIds);
+    }
+
+    return saved;
   },
 
   async toggleStatus(templateId, isActive, userId) {
