@@ -4,6 +4,8 @@ import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import SubmissionHistory from '../../components/SubmissionHistory';
 import { taskUtils } from '../../utils/taskUtils';
+import HubSelector from './HubSelector';
+import { IconUpload } from '../../components/Icons';
 import './HubTaskForm.css';
 
 /**
@@ -11,7 +13,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Includes text, priority, and link to a specific hub.
  */
-const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate }) => {
+const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate, onUploadProof }) => {
   const safeData = initialData || {};
   const [formData, setFormData] = useState({
     text: safeData.text || '',
@@ -136,6 +138,19 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             >
               📋 History {submissionCount > 0 && <span className="tab-count">{submissionCount}</span>}
             </button>
+
+            {/* NEW: Proof button moved next to tabs for space efficiency */}
+            {onUploadProof && initialData.id && (
+              <button
+                type="button"
+                className="halo-button proof-btn-inline"
+                onClick={onUploadProof}
+                title="Upload Proof of Work"
+              >
+                <IconUpload size={12} />
+                <span>Proof</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -155,7 +170,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
             <div className="form-row-grid">
               <div className="form-group">
-                <label>Charging Hub City</label>
+                <label>City</label>
                 <select 
                   className="master-dropdown"
                   value={formData.city}
@@ -170,64 +185,20 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 </select>
               </div>
 
-              <div className="form-group hub-selection-container">
+              <div className="form-group">
                 <label className="form-label-with-badge">
-                  Target Charging Hub(s)
+                  Charging Hub(s)
                   {formData.hub_ids.length > 1 && (
                     <span className="mode-badge mode-3-badge">🔀 Multi-Hub Generation</span>
                   )}
                 </label>
 
-                {/* Selection Display (Tags) */}
-                <div className="hub-tags-wrapper">
-                  {formData.hub_ids.length > 0 ? (
-                    formData.hub_ids.map(hid => {
-                      const hub = hubs.find(h => h.id === hid);
-                      return hub ? (
-                        <div key={hid} className="hub-tag-item anim-scale-in">
-                          <span className="hub-tag-code">{hub.hub_code || '??'}</span>
-                          <span className="hub-tag-name">{hub.name}</span>
-                          <button 
-                            type="button" 
-                            className="hub-tag-remove" 
-                            onClick={() => setFormData(p => ({ ...p, hub_ids: p.hub_ids.filter(id => id !== hid) }))}
-                            title="Remove Hub"
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ) : null;
-                    })
-                  ) : (
-                    <span className="hub-selection-placeholder">No hubs selected. Tasks will be unlinked.</span>
-                  )}
-                </div>
-
-                {/* Selection Input (Dropdown) */}
-                <div className="hub-dropdown-wrapper">
-                  <select 
-                    className="master-dropdown hub-selector-input"
-                    value=""
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val && !formData.hub_ids.includes(val)) {
-                        setFormData(p => ({ ...p, hub_ids: [...p.hub_ids, val] }));
-                      }
-                    }}
-                    disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
-                  >
-                    <option value="">{formData.city ? `+ Add Hub from ${formData.city}...` : 'Select City First...'}</option>
-                    {filteredHubs
-                      .filter(h => !formData.hub_ids.includes(h.id))
-                      .map(hub => (
-                        <option key={hub.id} value={hub.id}>
-                          [{hub.hub_code}] {hub.name}
-                        </option>
-                      ))
-                    }
-                  </select>
-                  <p className="field-help-text">You can select multiple hubs to generate identical tasks for each.</p>
-                </div>
+                <HubSelector 
+                  hubs={filteredHubs}
+                  value={formData.hub_ids}
+                  onChange={(val) => setFormData(p => ({ ...p, hub_ids: val }))}
+                  disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
+                />
               </div>
             </div>
 

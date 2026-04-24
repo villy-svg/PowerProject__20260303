@@ -14,20 +14,8 @@
   z-index: 2000;
   animation: modalFadeIn 0.3s ease-out;
 }
-.modal-content.hub-modal {
-  background: var(--surface-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-squircle);
-  width: 95%;
-  max-width: 650px;
-  padding: 0;
-  overflow: hidden;
-  box-shadow: var(--shadow-premium);
-  display: flex;
-  flex-direction: column;
-  animation: formSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(var(--glass-blur));
-}
+/* .modal-content.hub-modal REMOVED - Logic moved to TaskModal.css */
+
 .modal-header {
   padding: 24px;
   border-bottom: 1px solid var(--border-color);
@@ -169,3 +157,54 @@
   padding: 14px;
   font-size: 1rem;
 }
+
+/* Mobile Adaptations (Phone <= 480px) as per Design System */
+@media screen and (max-width: 480px) {
+  .vertical-task-form {
+    gap: 22px;
+    padding: 0;
+  }
+
+  .modal-content-area {
+    padding: 12px 14px;
+  }
+
+  .modal-header {
+    padding: 10px 16px;
+  }
+
+  .form-row-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .form-group {
+    gap: 2px;
+  }
+
+  .form-group label {
+    font-size: 0.65rem;
+    letter-spacing: 0.3px;
+    margin-bottom: 0;
+    opacity: 0.8;
+  }
+
+  .vertical-task-form input[type="text"],
+  .vertical-task-form select,
+  .vertical-task-form textarea,
+  .hub-modal input[type="text"],
+  .hub-modal select,
+  .hub-modal textarea {
+    padding: 6px 12px;
+    font-size: 0.9rem !important; /* Slightly smaller font */
+  }
+
+  .form-footer, .modal-footer {
+    padding: 10px 16px;
+  }
+
+  .form-footer .halo-button, .modal-footer .halo-button {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+}

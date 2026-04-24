@@ -1,0 +1,143 @@
+.hub-selector-container {
+  position: relative;
+  width: 100%;
+  user-select: none;
+}
+
+.hub-selector-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 42px;
+}
+
+.hub-selector-trigger:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--brand-green-alpha, rgba(0, 255, 157, 0.3));
+}
+
+.hub-selector-trigger.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selected-count {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--brand-green, #00ff9d);
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+}
+
+.hub-selector-container.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.hub-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.hub-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hub-option:last-child {
+  border-bottom: none;
+}
+
+.hub-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hub-option.selected {
+  background: rgba(0, 255, 157, 0.05);
+}
+
+.hub-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #000;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.hub-option.selected .hub-checkbox {
+  background: var(--brand-green, #00ff9d);
+  border-color: var(--brand-green, #00ff9d);
+}
+
+.hub-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hub-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  width: fit-content;
+  color: var(--text-secondary);
+}
+
+.hub-name {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hub-option.selected .hub-name {
+  color: var(--brand-green, #00ff9d);
+  font-weight: 500;
+}
+
+.no-hubs {
+  padding: 15px;
+  text-align: center;
+  opacity: 0.5;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.hub-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hub-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}

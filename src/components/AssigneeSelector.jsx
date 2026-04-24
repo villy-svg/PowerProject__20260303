@@ -50,10 +50,21 @@ const AssigneeSelector = ({
   const getLabel = () => {
     if (loading) return 'Loading...';
     if (selectedIds.length === 0) return 'N/A (Unassigned)';
+    
     if (selectedIds.length === 1) {
       const emp = assignees.find(e => e.id === selectedIds[0]);
       return emp ? taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser) : 'Selected (1)';
     }
+
+    // NEW: Primary Assignee Name + N format
+    const primaryEmp = assignees.find(e => e.id === selectedIds[0]);
+    if (primaryEmp) {
+      const isMe = (currentUser?.employeeId && primaryEmp.id === currentUser.employeeId) ||
+                   (currentUser?.id && primaryEmp.id === currentUser.id);
+      const name = isMe ? 'You' : primaryEmp.full_name.split(' ')[0];
+      return `${name} + ${selectedIds.length - 1}`;
+    }
+
     return `Selected (${selectedIds.length})`;
   };
 

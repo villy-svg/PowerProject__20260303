@@ -1,0 +1,171 @@
+@import './DropdownSystem.css';
+/* Shared sophisticated form styles for all management modals */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: modalFadeIn 0.3s ease-out;
+}
+.modal-content.hub-modal {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle);
+  width: 95%;
+  max-width: 650px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-premium);
+  display: flex;
+  flex-direction: column;
+  animation: formSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(var(--glass-blur));
+}
+.modal-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--brand-mint);
+  text-shadow: 0 0 10px var(--halo-glow);
+}
+.close-modal {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-color);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.close-modal:hover {
+  opacity: 1;
+}
+.vertical-task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px; /* Added padding for modal consistency */
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vertical-task-form label, 
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--brand-mint);
+  opacity: 0.9;
+  padding-left: 4px;
+}
+.vertical-task-form input[type="text"],
+.vertical-task-form select,
+.vertical-task-form textarea,
+.hub-modal input[type="text"],
+.hub-modal select,
+.hub-modal textarea {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button);
+  padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  width: 100%;
+}
+/* Inherits from .master-dropdown where applied in JSX */
+.vertical-task-form input[type="text"]::placeholder,
+.vertical-task-form textarea::placeholder,
+.hub-modal input[type="text"]::placeholder,
+.hub-modal textarea::placeholder {
+  color: var(--text-color);
+  opacity: 0.3;
+}
+.vertical-task-form input[type="text"]:focus,
+.vertical-task-form select:focus,
+.vertical-task-form textarea:focus,
+.hub-modal input[type="text"]:focus,
+.hub-modal select:focus,
+.hub-modal textarea:focus {
+  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 95%);
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+.vertical-task-form textarea,
+.hub-modal textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes formSlideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.form-group:focus-within label {
+  opacity: 1;
+  transform: translateX(2px);
+  transition: all 0.2s ease;
+}
+.form-footer, .modal-footer {
+  margin-top: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--surface-card);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+  z-index: 10;
+}
+.form-footer.sticky, .modal-footer.sticky {
+  position: sticky;
+  bottom: 0;
+  backdrop-filter: blur(10px);
+}
+.modal-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+.form-footer .halo-button, .modal-footer .halo-button {
+  flex: 1;
+  padding: 14px;
+  font-size: 1rem;
+}

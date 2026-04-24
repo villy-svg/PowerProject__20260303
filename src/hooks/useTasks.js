@@ -50,9 +50,10 @@ export const useTasks = (user) => {
 
   const addTask = async (taskData) => {
     try {
-      const newTask = await taskService.addTask(taskData, user?.id);
-      setTasks(prev => [...prev, newTask]);
-      return newTask;
+      const result = await taskService.addTask(taskData, user?.id);
+      const newTasks = Array.isArray(result) ? result : [result];
+      setTasks(prev => [...prev, ...newTasks]);
+      return newTasks[0]; // Return the primary/parent task for callers
     } catch (err) {
       masterErrorHandler.handleDatabaseError(err, 'useTasks.addTask');
       throw err;

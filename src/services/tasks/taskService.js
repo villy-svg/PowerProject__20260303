@@ -235,11 +235,17 @@ export const taskService = {
   async addTask(taskData, userId) {
     if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
       console.warn('PowerProject: Offline modification (addTask) — data will persist in cache but not database.');
-      // Simple local echo for developer testing
       const newTask = { ...taskData, id: taskData.id || `local-${Date.now()}`, createdAt: new Date().toISOString() };
-      return newTask;
+      return [newTask];
     }
 
+    // 1. Determine Fan-Out Mode
+    const hubIds = Array.isArray(taskData.hub_ids) ? taskData.hub_ids : [];
+    const assigneeIds = Array.isArray(taskData.assigned_to) ? taskData.assigned_to : [];
+    const isMultiHub = hubIds.length > 1;
+    const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
+
+    // 2. Create Primary/Parent Row
     let row = {
       ...mapTaskToRow(taskData),
     };
@@ -250,33 +256,64 @@ export const taskService = {
 
     row = auditService.stamp(row, userId, { isNew: true });
 
-    const { data, error } = await supabase
+    // For multi-hub, the parent should be unassigned or assigned to a specific person?
+    // Usually parent is an "Umbrella".
+    const { data: parentData, error: parentError } = await supabase
       .from('tasks')
       .insert([row])
       .select(TASK_SELECT);
 
-    if (error) throw error;
-    const newTask = normalizeTask(data[0]);
+    if (parentError) throw parentError;
+    const parentTask = normalizeTask(parentData[0]);
 
-    // --- NEW: Sync Context Links ---
-    // Sync Hubs
-    if (taskData.hub_ids) {
-      await syncContextLinks(newTask.id, 'hub', taskData.hub_ids);
-    }
-    // Sync Assignees
-    if (taskData.assigned_to) {
-      await syncContextLinks(newTask.id, 'assignee', taskData.assigned_to);
-    }
-    // Sync Clients
-    if (taskData.client_id) {
-      await syncContextLinks(newTask.id, 'client', Array.isArray(taskData.client_id) ? taskData.client_id : [taskData.client_id]);
-    }
-    // Sync Employees
-    if (taskData.employee_id) {
-      await syncContextLinks(newTask.id, 'employee', Array.isArray(taskData.employee_id) ? taskData.employee_id : [taskData.employee_id]);
+    // Sync context links for parent
+    if (hubIds.length > 0) await syncContextLinks(parentTask.id, 'hub', hubIds);
+    if (assigneeIds.length > 0) await syncContextLinks(parentTask.id, 'assignee', assigneeIds);
+    
+    // Sync other links
+    if (taskData.client_id) await syncContextLinks(parentTask.id, 'client', taskData.client_id);
+    if (taskData.employee_id) await syncContextLinks(parentTask.id, 'employee', taskData.employee_id);
+
+    const createdTasks = [parentTask];
+
+    // 3. Spawn Children if Fan-Out is active
+    if (isMultiHub || isMultiAssignee) {
+      const childRows = [];
+      const loopArray = isMultiHub ? hubIds : assigneeIds;
+
+      for (const entityId of loopArray) {
+        let childRow = {
+          ...mapTaskToRow(taskData),
+          parent_task_id: parentTask.id,
+          // Special case: if multi-hub, each child gets 1 hub. If multi-assignee, each child gets 1 assignee.
+          hub_id: isMultiHub ? entityId : (taskData.hub_id || null),
+          assigned_to: isMultiAssignee ? entityId : (Array.isArray(taskData.assigned_to) ? taskData.assigned_to[0] : null)
+        };
+        childRow = auditService.stamp(childRow, userId, { isNew: true });
+        childRows.push(childRow);
+      }
+
+      const { data: childrenData, error: childrenError } = await supabase
+        .from('tasks')
+        .insert(childRows)
+        .select(TASK_SELECT);
+
+      if (childrenError) {
+        console.error('Failed to spawn child tasks:', childrenError);
+      } else if (childrenData) {
+        for (const childRow of childrenData) {
+          const childTask = normalizeTask(childRow);
+          // Sync context link for the specific entity (hub or assignee) to the child
+          const childEntityId = isMultiHub ? childTask.hub_id : (childTask.assigned_to ? childTask.assigned_to[0] : null);
+          if (childEntityId) {
+            await syncContextLinks(childTask.id, isMultiHub ? 'hub' : 'assignee', [childEntityId]);
+          }
+          createdTasks.push(childTask);
+        }
+      }
     }
 
-    return newTask;
+    return createdTasks;
   },
 
   /**

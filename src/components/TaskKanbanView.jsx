@@ -273,8 +273,6 @@ const TaskKanbanView = ({
                         <TaskTileComponent
                           task={task}
                           stage={stage}
-                          isExpanded={!!expandedParents[task.id]}
-                          toggleExpanded={toggleExpanded}
                         />
                       )}
                     </TaskCard>

@@ -14,44 +14,53 @@
 -- SECTION 1: HUB COMPUTED RELATIONSHIPS & INDEXES
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- hubs() for tasks (Always safe)
+-- hubs() for tasks
+-- SECURITY DEFINER: All computed functions reading task_context_links MUST
+-- bypass RLS to prevent the recursive chain:
+-- tasks RLS → computed fn → TCL RLS → subquery tasks → tasks RLS → ∞
 CREATE OR REPLACE FUNCTION public.hubs(t public.tasks)
-RETURNS SETOF public.hubs AS $$
+RETURNS SETOF public.hubs
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
     SELECT h.* FROM public.hubs h
     JOIN public.task_context_links tcl ON tcl.entity_id = h.id
     WHERE tcl.source_id = t.id
       AND tcl.source_type = 'task'
       AND tcl.entity_type = 'hub';
-$$ LANGUAGE sql STABLE;
+$$;
 
 -- Computed relationships for tasks (Link Architecture)
+-- SECURITY DEFINER: Bypasses task_context_links RLS to prevent recursive
+-- evaluation loop: tasks RLS → TCL → tasks (for vertical_id) → TCL → ∞
 CREATE OR REPLACE FUNCTION public.clients(t public.tasks)
-RETURNS SETOF public.clients AS $$
+RETURNS SETOF public.clients
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
     SELECT c.* FROM public.clients c
     JOIN public.task_context_links tcl ON tcl.entity_id = c.id
     WHERE tcl.source_id = t.id
       AND tcl.source_type = 'task'
       AND tcl.entity_type = 'client';
-$$ LANGUAGE sql STABLE;
+$$;
 
 CREATE OR REPLACE FUNCTION public.employees(t public.tasks)
-RETURNS SETOF public.employees AS $$
+RETURNS SETOF public.employees
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
     SELECT e.* FROM public.employees e
     JOIN public.task_context_links tcl ON tcl.entity_id = e.id
     WHERE tcl.source_id = t.id
       AND tcl.source_type = 'task'
       AND tcl.entity_type = 'employee';
-$$ LANGUAGE sql STABLE;
+$$;
 
--- hubs() for daily_task_templates (Always safe)
+-- hubs() for daily_task_templates
 CREATE OR REPLACE FUNCTION public.hubs(t public.daily_task_templates)
-RETURNS SETOF public.hubs AS $$
+RETURNS SETOF public.hubs
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
     SELECT h.* FROM public.hubs h
     JOIN public.task_context_links tcl ON tcl.entity_id = h.id
     WHERE tcl.source_id = t.id
       AND tcl.source_type = 'template'
       AND tcl.entity_type = 'hub';
-$$ LANGUAGE sql STABLE;
+$$;
 
 -- Conditional functions and migrations
 DO $$
@@ -220,21 +229,90 @@ CREATE INDEX IF NOT EXISTS idx_tcl_auth_active
   ON public.task_context_links (source_id, source_type, entity_type)
   WHERE is_active = true;
 
+-- 3.1 RLS Recursion Helpers
+-- These functions bypass RLS to prevent infinite loops during policy evaluation.
+DROP FUNCTION IF EXISTS public.get_task_vertical_id(uuid);
+DROP FUNCTION IF EXISTS public.get_task_assigned_to(uuid);
+
+CREATE OR REPLACE FUNCTION public.get_task_vertical_id(p_task_id uuid)
+RETURNS text LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT vertical_id FROM public.tasks WHERE id = p_task_id;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_task_assigned_to(p_task_id uuid)
+RETURNS uuid LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+  SELECT assigned_to FROM public.tasks WHERE id = p_task_id;
+$$;
+
+-- 3.2 Hardened TCL Policies (Allows Assignees to sync their own task links)
+-- We use the SD helpers above to break the recursion chain:
+-- tasks RLS -> check_task_junction -> TCL -> TCL RLS -> tasks -> tasks RLS...
+DROP POLICY IF EXISTS "tcl SELECT" ON public.task_context_links;
+DROP POLICY IF EXISTS "tcl INSERT" ON public.task_context_links;
+DROP POLICY IF EXISTS "tcl UPDATE" ON public.task_context_links;
+DROP POLICY IF EXISTS "tcl DELETE" ON public.task_context_links;
+
+-- SELECT: All roles + Assignees
+CREATE POLICY "tcl SELECT" ON public.task_context_links
+FOR SELECT USING (
+    (source_type = 'task' AND (
+        public.get_user_permission_level(public.get_task_vertical_id(source_id)) IN ('viewer','contributor','editor','admin')
+        OR public.get_task_assigned_to(source_id) = auth.uid()
+    ))
+    OR source_type = 'template'
+);
+
+-- INSERT: Contributor+ OR Assignee
+CREATE POLICY "tcl INSERT" ON public.task_context_links
+FOR INSERT WITH CHECK (
+    (source_type = 'task' AND (
+        public.get_user_permission_level(public.get_task_vertical_id(source_id)) IN ('contributor','editor','admin')
+        OR public.get_task_assigned_to(source_id) = auth.uid()
+    ))
+    OR source_type = 'template'
+);
+
+-- UPDATE: Editor+ OR Assignee
+CREATE POLICY "tcl UPDATE" ON public.task_context_links
+FOR UPDATE USING (
+    (source_type = 'task' AND (
+        public.get_user_permission_level(public.get_task_vertical_id(source_id)) IN ('editor', 'admin')
+        OR public.get_task_assigned_to(source_id) = auth.uid()
+    ))
+    OR source_type = 'template'
+)
+WITH CHECK (
+    (source_type = 'task' AND (
+        public.get_user_permission_level(public.get_task_vertical_id(source_id)) IN ('editor', 'admin')
+        OR public.get_task_assigned_to(source_id) = auth.uid()
+    ))
+    OR source_type = 'template'
+);
+
+-- DELETE: Admin only OR Assignee
+CREATE POLICY "tcl DELETE" ON public.task_context_links
+FOR DELETE USING (
+    (source_type = 'task' AND (
+        public.get_user_permission_level(public.get_task_vertical_id(source_id)) = 'admin'
+        OR public.get_task_assigned_to(source_id) = auth.uid()
+    ))
+    OR source_type = 'template'
+);
+
 -- 4. Set Metadata Documentation
 -- We designate the template's 'assigned_to' column as the 'Senior Manager'.
 -- This column acts as the fallback owner if no specific links are found.
 COMMENT ON COLUMN public.daily_task_templates.assigned_to IS 
   'Acts as the Senior Manager / Parent Owner for all fan-out tasks.';
 
--- 4.1 Ensure Foreign Key for assigned_to exists (Idempotent)
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'daily_task_templates_assigned_to_fkey') THEN
-        ALTER TABLE public.daily_task_templates 
-        ADD CONSTRAINT daily_task_templates_assigned_to_fkey 
-        FOREIGN KEY (assigned_to) REFERENCES public.employees(id) ON DELETE SET NULL;
-    END IF;
-END $$;
+-- 4.1 Ensure Foreign Key for assigned_to exists (Truly Idempotent)
+-- DROP + ADD pattern guarantees the FK points to employees(id),
+-- even if a prior migration created it pointing to a different table.
+ALTER TABLE public.daily_task_templates
+    DROP CONSTRAINT IF EXISTS daily_task_templates_assigned_to_fkey;
+ALTER TABLE public.daily_task_templates
+    ADD CONSTRAINT daily_task_templates_assigned_to_fkey
+    FOREIGN KEY (assigned_to) REFERENCES public.employees(id) ON DELETE SET NULL;
 
 CREATE INDEX IF NOT EXISTS idx_dtt_assigned_to ON public.daily_task_templates(assigned_to);
 
@@ -459,6 +537,7 @@ RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
 STABLE
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 
