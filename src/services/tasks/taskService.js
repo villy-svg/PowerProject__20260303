@@ -29,18 +29,19 @@ export const normalizeTask = (row) => {
     : null;
 
   // 1. Resolve Multi-Hub Data
-  const hubData = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+  const rawHubs = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+  const hubData = rawHubs.filter(Boolean);
 
   // 2. Resolve Assignee Names (PostgREST returns an array via the 'assignees' computed relationship)
-  const assigneeNames = Array.isArray(row.assignees)
-    ? row.assignees.map(e => e.full_name).join(', ')
-    : (row.assignees?.full_name || '');
+  const rawAssignees = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
+  const validAssignees = rawAssignees.filter(Boolean);
+  
+  const assigneeNames = validAssignees.map(e => e.full_name).filter(Boolean).join(', ');
 
   // 3. Flatten nested employee_roles for each assignee in assigneeMeta
-  const rawMeta = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
-  const assigneeMeta = rawMeta.map(e => ({
+  const assigneeMeta = validAssignees.map(e => ({
     ...e,
-    seniority_level: e.employee_roles?.seniority_level || 1
+    seniority_level: e?.employee_roles?.seniority_level || 1
   }));
 
   return {
@@ -53,16 +54,16 @@ export const normalizeTask = (row) => {
 
     // Hub Relationships
     hub_id: row.hub_id,                          // Legacy scalar primary hub
-    hub_ids: hubData.map(h => h.id),             // Multi-hub UUID array
-    hubNames: hubData.map(h => h.name),          // For display
-    hubCodes: hubData.map(h => h.hub_code),      // For badges
+    hub_ids: hubData.map(h => h.id).filter(Boolean),             // Multi-hub UUID array
+    hubNames: hubData.map(h => h.name).filter(Boolean),          // For display
+    hubCodes: hubData.map(h => h.hub_code).filter(Boolean),      // For badges
     hubData: hubData,                            // Full objects for forms
     city: row.city,
 
     function: row.function,
 
     // Assignee Relationships
-    assigned_to: Array.isArray(row.assignees) ? row.assignees.map(a => a.id) : (row.assigned_to ? [row.assigned_to] : []),
+    assigned_to: validAssignees.length > 0 ? validAssignees.map(a => a.id).filter(Boolean) : (Array.isArray(row.assigned_to) ? row.assigned_to : (row.assigned_to ? [row.assigned_to] : [])),
     assigneeName: assigneeNames,
     assigneeMeta,
 
@@ -72,8 +73,8 @@ export const normalizeTask = (row) => {
     isSubTask: !!row.parent_task_id,              // Is this a fan-out child?
 
     // Meta & Audit
-    task_board: row.task_board || [],
-    isDailyTask: Array.isArray(row.task_board) && row.task_board.includes('Hubs Daily'),
+    task_board: Array.isArray(row.task_board) ? row.task_board : (row.task_board ? [row.task_board] : []),
+    isDailyTask: (Array.isArray(row.task_board) ? row.task_board : (row.task_board ? [row.task_board] : [])).includes('Hubs Daily'),
 
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -81,8 +82,8 @@ export const normalizeTask = (row) => {
     lastUpdatedBy: row.last_updated_by,
 
     // Entity Links (Hybrid: Joins for existing tables, Metadata for future placeholders)
-    client_id: Array.isArray(row.clients) ? row.clients.map(c => c.id) : (row.metadata?.entity_links?.client_id || []),
-    employee_id: Array.isArray(row.employees) ? row.employees.map(e => e.id) : (row.metadata?.entity_links?.employee_id || []),
+    client_id: Array.isArray(row.clients) ? row.clients.map(c => c?.id).filter(Boolean) : (row.metadata?.entity_links?.client_id || []),
+    employee_id: Array.isArray(row.employees) ? row.employees.map(e => e?.id).filter(Boolean) : (row.metadata?.entity_links?.employee_id || []),
     partner_id: row.metadata?.entity_links?.partner_id || [],
     vendor_id: row.metadata?.entity_links?.vendor_id || [],
 

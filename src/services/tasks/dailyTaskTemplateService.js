@@ -10,7 +10,8 @@ const normalizeTemplate = (row) => {
   if (!row) return null;
 
   // PostgREST returns an array for the computed 'hubs' relationship
-  const hubData = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+  const rawHubs = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
+  const hubData = rawHubs.filter(Boolean);
 
   return {
     id: row.id,
@@ -20,8 +21,8 @@ const normalizeTemplate = (row) => {
     
     // --- MULTI-HUB SUPPORT ---
     hub_id: row.hub_id,                           // Scalar primary (legacy)
-    hub_ids: hubData.map(h => h.id),              // Array of UUIDs for multi-select
-    hubNames: hubData.map(h => h.name),           // Array of Names for display
+    hub_ids: hubData.map(h => h?.id).filter(Boolean),              // Array of UUIDs for multi-select
+    hubNames: hubData.map(h => h?.name).filter(Boolean),           // Array of Names for display
     hubData: hubData,                             // Full objects for detailed views
     
     // --- BACKWARD COMPATIBILITY ---
