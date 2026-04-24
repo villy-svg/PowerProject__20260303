@@ -79,7 +79,7 @@ export const dailyTaskService = {
     }
 
     if (domainUpdates.stage_id === 'REVIEW') {
-      domainUpdates.submission_by = userId;
+      domainUpdates.submissionBy = userId;
     }
 
     return taskService.bulkUpdateTasks(taskIds, domainUpdates, userId);

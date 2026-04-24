@@ -85,7 +85,7 @@ export const normalizeTask = (row) => {
     vendor_id: row.metadata?.entity_links?.vendor_id || [],
 
     latestSubmission,
-    submissionBy: row.submission_by,
+    submissionBy: latestSubmission?.submitted_by || row.metadata?.submission_by,
   };
 };
 
@@ -112,9 +112,9 @@ export const mapTaskToRow = (task) => ({
       partner_id: Array.isArray(task.partner_id) ? task.partner_id : (task.partner_id ? [task.partner_id] : []),
       vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id : (task.vendor_id ? [task.vendor_id] : []),
       employee_id: Array.isArray(task.employee_id) ? task.employee_id : (task.employee_id ? [task.employee_id] : []),
-    }
+    },
+    submission_by: task.submissionBy || null,
   },
-  submission_by: task.submissionBy || null,
 });
 
 export const TASK_SELECT = `
@@ -123,7 +123,7 @@ export const TASK_SELECT = `
   hubs(id, name, hub_code, city),
   clients(id, name),
   employees(id, full_name),
-  submissions(id, status, rejection_reason, submission_number, created_at),
+  submissions(id, status, rejection_reason, submission_number, created_at, submitted_by),
   children:tasks!parent_task_id(id)
 `;
 
@@ -352,11 +352,41 @@ export const taskService = {
    * @returns {Array} Normalized updated tasks.
    */
   async bulkUpdateTasks(taskIds, updates, userId) {
-    const row = auditService.stamp(updates, userId);
+    const row = { ...updates };
+    
+    // Remap stageId if present
+    if (row.stageId) {
+      row.stage_id = row.stageId;
+      delete row.stageId;
+    }
+
+    // Move future entities and audit fields to metadata if they are present in bulk updates
+    if (row.submissionBy || row.client_id || row.partner_id || row.vendor_id || row.employee_id) {
+      row.metadata = {
+        ...(row.metadata || {}),
+        entity_links: {
+          ...(row.metadata?.entity_links || {}),
+          client_id: row.client_id || row.metadata?.entity_links?.client_id || [],
+          partner_id: row.partner_id || row.metadata?.entity_links?.partner_id || [],
+          vendor_id: row.vendor_id || row.metadata?.entity_links?.vendor_id || [],
+          employee_id: row.employee_id || row.metadata?.entity_links?.employee_id || [],
+        },
+        submission_by: row.submissionBy || row.metadata?.submission_by || null
+      };
+      
+      // Clean up top-level keys that don't belong in the table schema
+      delete row.submissionBy;
+      delete row.client_id;
+      delete row.partner_id;
+      delete row.vendor_id;
+      delete row.employee_id;
+    }
+
+    const stamped = auditService.stamp(row, userId);
 
     const { data, error } = await supabase
       .from('tasks')
-      .update(row)
+      .update(stamped)
       .in('id', taskIds)
       .select(TASK_SELECT);
 
