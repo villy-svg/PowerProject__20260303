@@ -247,9 +247,12 @@ export const taskService = {
     }
 
     let row = {
-      id: taskData.id,
       ...mapTaskToRow(taskData),
     };
+
+    if (taskData.id) {
+      row.id = taskData.id;
+    }
 
     row = auditService.stamp(row, userId, { isNew: true });
 
