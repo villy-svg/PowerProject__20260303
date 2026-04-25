@@ -127,7 +127,6 @@ const syncTemplateHubs = async (templateId, hubConfigs) => {
       source_type: 'template',
       entity_type: 'hub',
       entity_id: hc.hubId,
-      is_active: true,
       metadata: { 
         assignee_ids: hc.assigneeIds || [] // CRITICAL: This is used by the PL/pgSQL generator
       }
@@ -158,8 +157,7 @@ const syncTemplateAssignees = async (templateId, assigneeIds) => {
       source_id: templateId,
       source_type: 'template',
       entity_type: 'assignee',
-      entity_id: aid,
-      is_active: true
+      entity_id: aid
     }));
     const { error } = await supabase.from('task_context_links').insert(rows);
     if (error) throw error;

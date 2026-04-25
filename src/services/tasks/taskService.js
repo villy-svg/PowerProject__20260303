@@ -139,10 +139,10 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
   // Ensure entityIds is a clean array of UUIDs
   const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
   
-  // 1. Deactivate old links for this type (Soft-Archive approach)
+  // 1. Delete old links for this type to ensure clean sync
   await supabase
     .from('task_context_links')
-    .update({ is_active: false })
+    .delete()
     .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
 
   // 2. Batch insert new links
@@ -151,8 +151,7 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
       source_id: sourceId,
       source_type: 'task',
       entity_type: entityType,
-      entity_id: id,
-      is_active: true
+      entity_id: id
     }));
 
     if (linkRows.length === 0) return;
