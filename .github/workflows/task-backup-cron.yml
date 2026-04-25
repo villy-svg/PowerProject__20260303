@@ -1,0 +1,49 @@
+name: Warm Task Backup
+
+on:
+  schedule:
+    - cron: '30 2 * * *'  # 08:00 AM IST daily
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  backup-staging:
+    name: "Backup: Staging"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Staging Task Backup
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/backup_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_STAGING_URL }}/rest/v1/rpc/archive_old_tasks_to_backup" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "apikey: ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}")
+
+          echo "Staging Status: $HTTP_STATUS"
+          cat /tmp/backup_response.json
+
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Backup RPC failed. Status: $HTTP_STATUS"
+            exit 1
+          fi
+
+  backup-production:
+    name: "Backup: Production"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Production Task Backup
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/backup_response.json -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/archive_old_tasks_to_backup" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+
+          echo "Production Status: $HTTP_STATUS"
+          cat /tmp/backup_response.json
+
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Backup RPC failed. Status: $HTTP_STATUS"
+            exit 1
+          fi
