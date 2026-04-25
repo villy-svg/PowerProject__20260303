@@ -74,8 +74,7 @@ export const useTaskFilters = ({
     return tasksWithReviewInfo.filter(t => {
       // 0. Strict Vertical Filter
       const targetVerticalId = rootVerticalId || activeVertical;
-      if (t.verticalId !== targetVerticalId && activeVertical !== 'daily_hub_tasks') return false;
-      if (activeVertical === 'daily_hub_tasks' && t.verticalId !== 'daily_hub_tasks') return false;
+      if (t.verticalId !== targetVerticalId) return false;
 
       // 0.1 Kanban-Specific Visibility
       if (viewMode === 'kanban') {
