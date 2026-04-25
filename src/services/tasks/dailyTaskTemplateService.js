@@ -9,9 +9,13 @@ import { dailyTaskService } from './dailyTaskService';
 const normalizeTemplate = (row) => {
   if (!row) return null;
 
-  // PostgREST returns an array for the computed 'hubs' relationship
+  // PostgREST returns an array for the computed relationships
   const rawHubs = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
   const hubData = rawHubs.filter(Boolean);
+
+  const rawAssignees = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
+  const validAssignees = rawAssignees.filter(Boolean);
+  const assigneeNames = validAssignees.map(e => e.full_name).filter(Boolean).join(', ');
 
   return {
     id: row.id,
@@ -37,8 +41,12 @@ const normalizeTemplate = (row) => {
     timeOfDay: row.time_of_day,
     
     // --- ASSIGNEES & GOVERNANCE ---
-    assignedTo: row.assigned_to || [],            // Scalar primary / Senior Manager
-    assigneeName: row.senior_manager?.full_name || null,
+    // Prefer multi-assignees from context links, fallback to legacy scalar column
+    assignedTo: validAssignees.length > 0 
+      ? validAssignees.map(a => a.id).filter(Boolean) 
+      : (row.assigned_to ? [row.assigned_to] : []),
+    assigneeName: assigneeNames || row.senior_manager?.full_name || null,
+    
     seniorManagerId: row.assigned_to,             // The "Umbrella" owner is the assigned_to column
     seniorManagerName: row.senior_manager?.full_name || null,
     
@@ -166,6 +174,7 @@ const syncTemplateAssignees = async (templateId, assigneeIds) => {
 const TEMPLATE_SELECT = `
   *,
   hubs(id, name, hub_code, city),
+  assignees(id, full_name),
   senior_manager:employees!assigned_to (id, full_name)
 `;
 
@@ -279,14 +288,14 @@ export const dailyTaskTemplateService = {
     const taskData = {
       text: `[SAMPLE] ${template.title}`,
       description: template.description,
-      priority: 'Medium',
+      priority: template.priority || 'Medium',
       stageId: 'BACKLOG',
       verticalId: template.verticalId,
-      hub_id: template.subjectId, // dailyTaskService.addTask handles the mapping to hub_id/client_id etc
-      assigned_to: template.assignedTo,
+      hub_id: template.subjectId, 
+      assigned_to: Array.isArray(template.assignedTo) ? template.assignedTo : (template.assignedTo ? [template.assignedTo] : []),
       is_recurring: true,
       scheduled_date: new Date().toISOString().split('T')[0],
-      is_sample: true // Adding a flag for UI identification if needed
+      is_sample: true 
     };
     return dailyTaskService.addTask(taskData, userId);
   }

@@ -241,7 +241,8 @@ export const taskService = {
 
     // 1. Determine Fan-Out Mode
     const hubIds = Array.isArray(taskData.hub_ids) ? taskData.hub_ids : [];
-    const assigneeIds = Array.isArray(taskData.assigned_to) ? taskData.assigned_to : [];
+    const assignedToInput = taskData.assigned_to;
+    const assigneeIds = Array.isArray(assignedToInput) ? assignedToInput : (assignedToInput ? [assignedToInput] : []);
     const isMultiHub = hubIds.length > 1;
     const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
 
