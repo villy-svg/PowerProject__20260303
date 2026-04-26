@@ -237,6 +237,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               </button>
             )}
           </div>
+        )}
+
         {activeTab === 'details' ? (
           <div className="tab-pane fade-in">
             {step === 1 ? (
