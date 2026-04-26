@@ -288,17 +288,25 @@ export const taskService = {
     const createdTasks = [parentTask];
 
     // 3. Spawn Children if Fan-Out is active
-    if (isMultiHub || isMultiAssignee) {
-      const childRows = [];
-      const loopArray = isMultiHub ? hubIds : assigneeIds;
+    const orchestrationMapping = taskData.orchestration_mapping || [];
+    const isOrchestrated = orchestrationMapping.length > 0;
 
-      for (const entityId of loopArray) {
+    if (isMultiHub || isMultiAssignee || isOrchestrated) {
+      const childRows = [];
+      
+      // Determine targets: either explicit orchestration or simple replication
+      const targets = isOrchestrated ? orchestrationMapping : (isMultiHub ? hubIds : assigneeIds).map(id => ({
+        hub_id: isMultiHub ? id : (taskData.hub_id || null),
+        assigned_to: isMultiAssignee ? [id] : assigneeIds
+      }));
+
+      for (const target of targets) {
         let childRow = {
           ...mapTaskToRow(taskData),
           parent_task_id: parentTask.id,
-          // Special case: if multi-hub, each child gets 1 hub. If multi-assignee, each child gets 1 assignee.
-          hub_id: isMultiHub ? entityId : (taskData.hub_id || null),
-          assigned_to: isMultiAssignee ? entityId : (Array.isArray(taskData.assigned_to) ? taskData.assigned_to[0] : null)
+          hub_id: target.hub_id,
+          // If explicit assignees are provided for this target, use them, otherwise fallback
+          assigned_to: Array.isArray(target.assigned_to) ? target.assigned_to[0] : (target.assigned_to || null)
         };
         childRow = auditService.stamp(childRow, userId, { isNew: true });
         childRows.push(childRow);
@@ -312,13 +320,21 @@ export const taskService = {
       if (childrenError) {
         console.error('Failed to spawn child tasks:', childrenError);
       } else if (childrenData) {
-        for (const childRow of childrenData) {
-          const childTask = normalizeTask(childRow);
-          // Sync context link for the specific entity (hub or assignee) to the child
-          const childEntityId = isMultiHub ? childTask.hub_id : (childTask.assigned_to ? childTask.assigned_to[0] : null);
-          if (childEntityId) {
-            await syncContextLinks(childTask.id, isMultiHub ? 'hub' : 'assignee', [childEntityId]);
+        for (let i = 0; i < childrenData.length; i++) {
+          const childTask = normalizeTask(childrenData[i]);
+          const target = targets[i];
+
+          // 1. Sync Hub Link
+          if (target.hub_id) {
+            await syncContextLinks(childTask.id, 'hub', [target.hub_id]);
           }
+
+          // 2. Sync Assignee Links
+          const targetAssignees = Array.isArray(target.assigned_to) ? target.assigned_to : (target.assigned_to ? [target.assigned_to] : []);
+          if (targetAssignees.length > 0) {
+            await syncContextLinks(childTask.id, 'employee', targetAssignees);
+          }
+
           createdTasks.push(childTask);
         }
       }

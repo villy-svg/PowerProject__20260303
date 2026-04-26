@@ -31,6 +31,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   });
 
   const [activeTab, setActiveTab] = useState('details');
+  const [step, setStep] = useState(1);
+  const [orchestrationMapping, setOrchestrationMapping] = useState([]);
 
   // Check if form has changes
   const isDirty = safeData.id ? Object.keys(formData).some(key => {
@@ -92,6 +94,67 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     });
   };
 
+  /**
+   * PowerOrchestrator: Intelligent Auto-mapping
+   */
+  const handleNextStep = () => {
+    const hubIds = formData.hub_ids;
+    const assigneeIds = formData.assigned_to;
+    
+    const numTasks = Math.max(hubIds.length, assigneeIds.length);
+    const mappings = [];
+    const assignedIds = new Set();
+    const hubsFilled = new Set();
+
+    // 1. Sort assignees by seniority for rule consistency
+    const sortedEmployees = [...assigneeIds]
+      .map(id => allEmployees.find(e => e.id === id))
+      .filter(Boolean)
+      .sort((a, b) => {
+        const badgeA = String(a?.badge_id || '999999');
+        const badgeB = String(b?.badge_id || '999999');
+        if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
+        return (a?.seniority_level || 999) - (b?.seniority_level || 999);
+      });
+
+    const seniorMostId = sortedEmployees[0]?.id || assigneeIds[0];
+
+    // PASS 1: Home Hub Matching (Priority to Senior)
+    sortedEmployees.forEach(emp => {
+      if (emp.hub_id && hubIds.includes(emp.hub_id) && !hubsFilled.has(emp.hub_id)) {
+        mappings.push({ hub_id: emp.hub_id, assigned_to: [emp.id] });
+        assignedIds.add(emp.id);
+        hubsFilled.add(emp.hub_id);
+      }
+    });
+
+    // PASS 2: Fill remaining selected Hubs
+    hubIds.forEach(hId => {
+      if (!hubsFilled.has(hId)) {
+        const orphan = sortedEmployees.find(emp => !assignedIds.has(emp.id));
+        if (orphan) {
+          mappings.push({ hub_id: hId, assigned_to: [orphan.id] });
+          assignedIds.add(orphan.id);
+        } else {
+          mappings.push({ hub_id: hId, assigned_to: [seniorMostId] });
+        }
+        hubsFilled.add(hId);
+      }
+    });
+
+    // PASS 3: Remaining Assignees (Orphans without a hub match)
+    sortedEmployees.forEach(emp => {
+      if (!assignedIds.has(emp.id)) {
+        const targetHub = hubIds[mappings.length % hubIds.length];
+        mappings.push({ hub_id: targetHub, assigned_to: [emp.id] });
+        assignedIds.add(emp.id);
+      }
+    });
+
+    setOrchestrationMapping(mappings.slice(0, numTasks));
+    setStep(2);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -131,7 +194,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       // Pass sorted assignees so parent (index 0) is always the senior-most
       assigned_to: sortedAssigneeIds,
       hub_ids: formData.hub_ids, 
-      hub_id: isMultiHub ? (multiHub?.id || null) : (formData.hub_ids[0] || null) 
+      hub_id: isMultiHub ? (multiHub?.id || null) : (formData.hub_ids[0] || null),
+      orchestration_mapping: orchestrationMapping // NEW: Pass the granular orchestration matrix
     };
 
     console.log('[HubTaskForm] Submitting Payload:', submissionPayload);
@@ -173,121 +237,164 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               </button>
             )}
           </div>
-        )}
-
         {activeTab === 'details' ? (
           <div className="tab-pane fade-in">
-            <div className="form-group">
-              <label>Task Summary</label>
-              <input 
-                type="text" 
-                value={formData.text}
-                onChange={(e) => setFormData({...formData, text: e.target.value})}
-                placeholder="e.g. Inspect Station 4"
-                required
-                disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
-              />
-            </div>
+            {step === 1 ? (
+              <>
+                <div className="form-group">
+                  <label>Task Summary</label>
+                  <input 
+                    type="text" 
+                    value={formData.text}
+                    onChange={(e) => setFormData({...formData, text: e.target.value})}
+                    placeholder="e.g. Inspect Station 4"
+                    required
+                    disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
+                  />
+                </div>
 
-            <div className="form-row-grid">
-              <div className="form-group">
-                <label>City</label>
-                <select 
-                  className="master-dropdown"
-                  value={formData.city}
-                  onChange={handleCityChange}
-                  required
-                  disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
-                >
-                  <option value="">Select City...</option>
-                  {uniqueCities.map(city => (
-                    <option key={city} value={city}>{city}</option>
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>City</label>
+                    <select 
+                      className="master-dropdown"
+                      value={formData.city}
+                      onChange={handleCityChange}
+                      required
+                      disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
+                    >
+                      <option value="">Select City...</option>
+                      {uniqueCities.map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label-with-badge">
+                      Charging Hub(s)
+                      {formData.hub_ids.length > 1 && (
+                        <span className="mode-badge mode-3-badge">🔀 Multi-Hub</span>
+                      )}
+                    </label>
+
+                    <HubSelector 
+                      hubs={filteredHubs}
+                      value={formData.hub_ids}
+                      onChange={(val) => setFormData(p => ({ ...p, hub_ids: val }))}
+                      disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Priority</label>
+                    <select 
+                      className="master-dropdown"
+                      value={formData.priority}
+                      onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                      disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Urgent">Urgent</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Assignee(s) / Batch Team</label>
+                    <AssigneeSelector
+                      value={formData.assigned_to}
+                      onChange={(val) => setFormData({...formData, assigned_to: val})}
+                      currentUser={currentUser}
+                      disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Function Component</label>
+                    <select 
+                      className="master-dropdown"
+                      value={formData.function}
+                      onChange={(e) => setFormData({...formData, function: e.target.value})}
+                      disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
+                    >
+                      <option value="">N/A (General)</option>
+                      {functions.map(fn => (
+                        <option key={fn.name} value={fn.name}>
+                          {fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <TaskHierarchySelector 
+                    value={formData.parentTask}
+                    onChange={(val) => setFormData({...formData, parentTask: val})}
+                    availableTasks={availableTasks}
+                    disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Detailed Description</label>
+                  <textarea 
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    placeholder="Enter task details..."
+                    rows={4}
+                    disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
+                  />
+                </div>
+              </>
+            ) : (
+              /* PAGE 2: ORCHESTRATION */
+              <div className="orchestration-page fade-in">
+                <div className="orchestration-header">
+                  <h3>Task Orchestration</h3>
+                  <p>Assign specific team members to each hub execution.</p>
+                </div>
+
+                <div className="orchestration-list">
+                  {orchestrationMapping.map((item, idx) => (
+                    <div key={idx} className="orchestration-row">
+                      <div className="orch-hub-info">
+                        <span className="orch-index">#{idx + 1}</span>
+                        <span className="orch-hub-code">
+                          {hubs.find(h => h.id === item.hub_id)?.hub_code || 'HUB'}
+                        </span>
+                      </div>
+                      <div className="orch-assignee-select">
+                        <AssigneeSelector
+                          value={item.assigned_to}
+                          onChange={(val) => {
+                            const next = [...orchestrationMapping];
+                            next[idx] = { ...next[idx], assigned_to: val };
+                            setOrchestrationMapping(next);
+                          }}
+                          currentUser={currentUser}
+                        />
+                      </div>
+                    </div>
                   ))}
-                </select>
-              </div>
+                </div>
 
-              <div className="form-group">
-                <label className="form-label-with-badge">
-                  Charging Hub(s)
-                  {formData.hub_ids.length > 1 && (
-                    <span className="mode-badge mode-3-badge">🔀 Multi-Hub Generation</span>
-                  )}
-                </label>
-
-                <HubSelector 
-                  hubs={filteredHubs}
-                  value={formData.hub_ids}
-                  onChange={(val) => setFormData(p => ({ ...p, hub_ids: val }))}
-                  disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
-                />
-              </div>
-            </div>
-
-            <div className="form-row-grid">
-              <div className="form-group">
-                <label>Priority</label>
-                <select 
-                  className="master-dropdown"
-                  value={formData.priority}
-                  onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                  disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
+                <button 
+                  type="button" 
+                  className="orch-back-link"
+                  onClick={() => setStep(1)}
                 >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                  <option value="Urgent">Urgent</option>
-                </select>
+                  ← Back to Details
+                </button>
               </div>
-
-              <div className="form-group">
-                <label>Assigned To</label>
-                <AssigneeSelector
-                  value={formData.assigned_to}
-                  onChange={(val) => setFormData({...formData, assigned_to: val})}
-                  currentUser={currentUser}
-                  disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
-                />
-              </div>
-            </div>
-
-            <div className="form-row-grid">
-              <div className="form-group">
-                <label>Function Component</label>
-                <select 
-                  className="master-dropdown"
-                  value={formData.function}
-                  onChange={(e) => setFormData({...formData, function: e.target.value})}
-                  disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
-                >
-                  <option value="">N/A (General)</option>
-                  {functions.map(fn => (
-                    <option key={fn.name} value={fn.name}>
-                      {fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <TaskHierarchySelector 
-                value={formData.parentTask}
-                onChange={(val) => setFormData({...formData, parentTask: val})}
-                availableTasks={availableTasks}
-                disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Detailed Description</label>
-              <textarea 
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                placeholder="Enter task details..."
-                rows={4}
-                disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
-              />
-            </div>
+            )}
           </div>
         ) : (
+    ) : (
           /* History Tab */
           <div className="history-tab-content fade-in">
             <SubmissionHistory
@@ -310,11 +417,11 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             <div className="prediction-content">
               {formData.hub_ids.length > 1 ? (
                 <div className="prediction-detail">
-                  <p><strong>Multi-Hub Mode (Mode 3) Detected:</strong></p>
-                  <p>This will create <strong>{formData.hub_ids.length + 1}</strong> tasks (1 Umbrella + {formData.hub_ids.length} Hub-specific).</p>
+                  <p><strong>Batch Orchestration (Mode 3) Detected:</strong></p>
+                  <p>This will create <strong>{Math.max(formData.hub_ids.length, formData.assigned_to.length) + 1}</strong> tasks (1 Umbrella + {Math.max(formData.hub_ids.length, formData.assigned_to.length)} Hub-specific).</p>
                   <ul>
                     <li>Umbrella Hub: {formData.city} / MULTI</li>
-                    <li>Total Secondary Links: {formData.hub_ids.length}</li>
+                    <li>Primary Lead: {allEmployees.find(e => e.id === (formData.assigned_to[0]))?.full_name || 'Senior-most'}</li>
                   </ul>
                 </div>
               ) : formData.assigned_to.length > 1 ? (
@@ -330,9 +437,17 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       </div>
 
       <div className="form-footer sticky">
-        {isDirty ? (
+        {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
+          <button 
+            type="button" 
+            className="halo-button save-btn" 
+            onClick={handleNextStep}
+          >
+            Next: Orchestrate Team
+          </button>
+        ) : isDirty ? (
           <button type="submit" className="halo-button save-btn" disabled={loading}>
-            {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Task')}
+            {loading ? 'Saving...' : (safeData.id ? 'Update Task' : 'Create Batch')}
           </button>
         ) : (
           <button type="button" className="halo-button close-btn" onClick={onCancel} style={{ opacity: 0.6 }}>
