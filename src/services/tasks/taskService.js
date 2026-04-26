@@ -135,6 +135,7 @@ export const TASK_SELECT = `
  */
 const syncContextLinks = async (sourceId, entityType, entityIds) => {
   if (!sourceId || !entityType) return;
+  console.log(`[SyncContext] Syncing ${entityType} for ${sourceId}:`, entityIds);
   
   // Ensure entityIds is a clean array of UUIDs
   const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
@@ -246,6 +247,7 @@ export const taskService = {
     const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
 
     // 2. Create Primary/Parent Row
+    console.log(`[TaskService] Adding task: "${taskData.text}"`, { isMultiHub, isMultiAssignee });
     let row = {
       ...mapTaskToRow(taskData),
     };

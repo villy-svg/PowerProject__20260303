@@ -74,7 +74,15 @@ export const useTaskFilters = ({
     return tasksWithReviewInfo.filter(t => {
       // 0. Strict Vertical Filter
       const targetVerticalId = rootVerticalId || activeVertical;
-      if (t.verticalId !== targetVerticalId) return false;
+      const verticalMatch = t.verticalId === targetVerticalId;
+      
+      if (!verticalMatch) {
+        // Log if it belongs to the Daily Board to debug why it's missing
+        if (Array.isArray(t.task_board) && t.task_board.includes('Hubs Daily')) {
+          console.warn(`[TaskFilter] Hiding Daily Task "${t.text}" due to vertical mismatch. Task Vertical: ${t.verticalId}, Expected: ${targetVerticalId}`);
+        }
+        return false;
+      }
 
       // 0.1 Kanban-Specific Visibility
       if (viewMode === 'kanban') {
