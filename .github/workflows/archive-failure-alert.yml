@@ -2,7 +2,7 @@ name: Archive Failure Alert
 
 on:
   schedule:
-    - cron: '30 */6 * * *'  # Check every hour (at the half-hour mark)
+    - cron: '30 */8 * * *'  # Check every 8 hours (at the half-hour mark)
   workflow_dispatch: {}
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Check Staging Failures
         run: |
-          RESPONSE=$(curl -s "${{ secrets.SUPABASE_STAGING_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
+          RESPONSE=$(curl -s "${{ secrets.SUPABASE_STAGING_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '10 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
             -H "apikey: ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}" \
             -H "Prefer: count=exact")
@@ -21,7 +21,7 @@ jobs:
 
       - name: Check Production Failures
         run: |
-          RESPONSE=$(curl -s "${{ secrets.SUPABASE_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
+          RESPONSE=$(curl -s "${{ secrets.SUPABASE_URL }}/rest/v1/archive_logs?status=eq.failure&created_at=gte.$(date -u -d '10 hours ago' +%Y-%m-%dT%H:%M:%SZ)&select=count" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Prefer: count=exact")
