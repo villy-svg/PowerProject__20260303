@@ -5,6 +5,7 @@ import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import SubmissionHistory from '../../components/SubmissionHistory';
 import { taskUtils } from '../../utils/taskUtils';
 import HubSelector from './HubSelector';
+import { useAssignees } from '../../hooks/useAssignees';
 import { IconUpload } from '../../components/Icons';
 import './HubTaskForm.css';
 
@@ -40,6 +41,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const [submissionCount, setSubmissionCount] = useState(0);
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
+  const { assignees: allEmployees } = useAssignees(true);
 
   const fetchHubs = async () => {
     const { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
@@ -95,25 +97,41 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
     // 1. Resolve primary hub for text formatting
     const primaryHub = hubs.find(h => h.id === formData.hub_ids[0]);
-    
-    // 2. Format task text using the established utility
+
+    // 2. Resolve "MULTI" hub for Umbrella task categorization
+    const multiHub = hubs.find(h => h.city === formData.city && h.name === 'MULTI');
+
+    // 3. Resolve Senior-most Assignee for Parent Assignment
+    // We sort the selected IDs based on seniority metadata fetched from useAssignees
+    const sortedAssigneeIds = [...formData.assigned_to].sort((aId, bId) => {
+      const empA = allEmployees.find(e => e.id === aId);
+      const empB = allEmployees.find(e => e.id === bId);
+      
+      // Sort by Badge ID (seniority-style) then seniority level
+      const badgeA = String(empA?.badge_id || '999999');
+      const badgeB = String(empB?.badge_id || '999999');
+      if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
+      
+      return (empA?.seniority_level || 999) - (empB?.seniority_level || 999);
+    });
+
+    // 4. Format task text using the established utility
+    const isMultiHub = formData.hub_ids.length > 1;
     const finalTaskText = taskUtils.formatTaskText(formData.text, {
-      assetCode: primaryHub?.hub_code,
+      // Use "MULTI" prefix for the Umbrella Parent, otherwise use specific hub code
+      assetCode: isMultiHub ? 'MULTI' : primaryHub?.hub_code,
       functionName: formData.function,
       forcePrefix: formData.hub_ids.length > 0
     });
 
-    // 3. Resolve city-specific "MULTI" hub for Umbrella task categorization
-    const multiHub = hubs.find(h => h.city === formData.city && h.name === 'MULTI');
-
-    // 4. Construct Payload
+    // 5. Construct Payload
     const submissionPayload = {
       ...formData,
       text: finalTaskText,
-      // NEW: Pass all selected hubs
+      // Pass sorted assignees so parent (index 0) is always the senior-most
+      assigned_to: sortedAssigneeIds,
       hub_ids: formData.hub_ids, 
-      // IMPROVED: If multi-hub, the parent (umbrella) belongs to the city's "MULTI" hub
-      hub_id: formData.hub_ids.length > 1 ? (multiHub?.id || null) : (formData.hub_ids[0] || null) 
+      hub_id: isMultiHub ? (multiHub?.id || null) : (formData.hub_ids[0] || null) 
     };
 
     console.log('[HubTaskForm] Submitting Payload:', submissionPayload);

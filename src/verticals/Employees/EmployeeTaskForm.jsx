@@ -3,6 +3,7 @@ import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import { taskUtils } from '../../utils/taskUtils';
+import { useAssignees } from '../../hooks/useAssignees';
 
 /**
  * EmployeeTaskForm
@@ -19,6 +20,8 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
     parentTask: safeData.parentTask || ''
   });
 
+  const { assignees: allEmployees } = useAssignees(true);
+
   // Check if form has changes
   const isDirty = initialData.id ? Object.keys(formData).some(key => {
     const initialVal = initialData[key] || '';
@@ -33,6 +36,18 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    // Resolve Senior-most Assignee for Parent Assignment
+    const sortedAssigneeIds = [...formData.assigned_to].sort((aId, bId) => {
+      const empA = allEmployees.find(e => e.id === aId);
+      const empB = allEmployees.find(e => e.id === bId);
+      
+      const badgeA = String(empA?.badge_id || '999999');
+      const badgeB = String(empB?.badge_id || '999999');
+      if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
+      
+      return (empA?.seniority_level || 999) - (empB?.seniority_level || 999);
+    });
+
     // For employees, we'll check for "hiring" keywords in the text as a simple principle
     const isHiring = formData.text.toLowerCase().includes('hire') || formData.text.toLowerCase().includes('onboard');
     
@@ -40,7 +55,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
       functionName: isHiring ? 'hiring' : ''
     });
 
-    onSubmit({ ...formData, text: finalTaskText });
+    onSubmit({ ...formData, assigned_to: sortedAssigneeIds, text: finalTaskText });
   };
 
   return (
