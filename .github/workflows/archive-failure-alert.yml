@@ -1,6 +1,9 @@
 name: Archive Failure Alert
 
 on:
+  push:
+    branches:
+      - staging
   schedule:
     - cron: '30 */8 * * *'  # Check every 8 hours (at the half-hour mark)
   workflow_dispatch: {}
