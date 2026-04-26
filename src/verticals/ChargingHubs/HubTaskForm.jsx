@@ -56,10 +56,22 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   const provisionMultiHub = async (city) => {
     if (!city || city === 'System') return;
-    const { data } = await supabase
+    
+    // Generate a unique code per city to avoid global UNIQUE constraint conflicts
+    const citySlug = city.toUpperCase().replace(/\s+/g, '_');
+    const multiCode = `MULTI-${citySlug}`;
+
+    const { data, error } = await supabase
       .from('hubs')
-      .insert([{ name: 'MULTI', hub_code: 'MULTI', city: city, status: 'Active' }])
+      .upsert(
+        [{ name: 'MULTI', hub_code: multiCode, city: city, status: 'Active' }],
+        { onConflict: 'hub_code' }
+      )
       .select();
+      
+    if (error) {
+      console.warn('[HubTaskForm] Multi-hub provision note:', error.message);
+    }
     if (data) fetchHubs();
   };
 
