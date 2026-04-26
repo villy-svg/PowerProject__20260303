@@ -46,7 +46,11 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const { assignees: allEmployees } = useAssignees(true);
 
   const fetchHubs = async () => {
-    const { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
+    const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
+    if (error) {
+      console.error('[HubTaskForm] Error fetching hubs:', error.message);
+      return;
+    }
     if (data) setHubs(data);
   };
 
@@ -68,13 +72,27 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   }, [formData.city, hubs.length]);
 
   const fetchFunctions = async () => {
-    const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
+    const { data, error } = await supabase.from('hub_functions').select('name, function_code').order('name');
+    if (error) {
+      console.error('[HubTaskForm] Error fetching functions:', error.message);
+      return;
+    }
     if (data) setFunctions(data);
   };
 
   useEffect(() => {
-    fetchHubs();
-    fetchFunctions();
+    let isMounted = true;
+    
+    console.info(`[HubTaskForm] Initializing on ${import.meta.env.VITE_SUPABASE_URL}`);
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      await Promise.all([fetchHubs(), fetchFunctions()]);
+    };
+
+    loadData();
+    
+    return () => { isMounted = false; };
   }, []);
 
   // Get unique cities from the hubs list
