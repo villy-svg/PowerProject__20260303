@@ -171,9 +171,9 @@ const TaskController = (props) => {
               <button
                 className={`halo-button toggle-depri-btn ${showDeprioritized ? 'active' : ''}`}
                 onClick={() => setShowDeprioritized(!showDeprioritized)}
-                title={showDeprioritized ? "Hide Deprioritized" : "Show Deprioritized"}
+                title={showDeprioritized ? "Hide Deferred" : "Show Deferred"}
               >
-                DEPR
+                DEFER
               </button>
 
               <button
@@ -198,7 +198,7 @@ const TaskController = (props) => {
                 className="halo-button clear-board-btn"
                 onClick={handleClearBoard}
                 disabled={saving}
-                title="Move all active tasks to Deprioritized"
+                title="Move all active tasks to Deferred"
                 style={{ fontWeight: 600 }}
               >
                 Clear Board

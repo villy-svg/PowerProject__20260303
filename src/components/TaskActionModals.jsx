@@ -114,7 +114,7 @@ const TaskActionModals = ({
         isOpen={!!mergeTaskCluster}
         onClose={() => setMergeTaskCluster(null)}
         title="Consolidate Duplicate Tasks"
-        description={`We found ${mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deprioritized.`}
+        description={`We found ${mergeTaskCluster?.length} identical tasks. Select one to keep as the primary record; the others will be moved to Deferred.`}
         conflicts={mergeTaskCluster || []}
         strategy="PICK_ONE"
         entityName="Tasks"

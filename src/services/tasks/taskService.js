@@ -246,8 +246,14 @@ export const taskService = {
     const isMultiHub = hubIds.length > 1;
     const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
 
+    console.info(`[TaskService] START addTask: "${taskData.text}"`, { 
+      hubs: hubIds.length, 
+      assignees: assigneeIds.length,
+      parentHub: taskData.hub_id 
+    });
+
     // 2. Create Primary/Parent Row
-    console.log(`[TaskService] Adding task: "${taskData.text}"`, { isMultiHub, isMultiAssignee });
+    console.log(`[TaskService] Step 2: Creating Parent Row...`);
     let row = {
       ...mapTaskToRow(taskData),
     };
@@ -265,7 +271,10 @@ export const taskService = {
       .insert([row])
       .select(TASK_SELECT);
 
-    if (parentError) throw parentError;
+    if (parentError) {
+      console.error('[TaskService] Parent Insert Error:', parentError);
+      throw parentError;
+    }
     const parentTask = normalizeTask(parentData[0]);
 
     // Sync context links for parent

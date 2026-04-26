@@ -57,10 +57,10 @@ const BulkActionBar = ({
           <button
             className="bulk-btn deprio"
             onClick={() => onAction('deprio')}
-            title="Deprioritize Selection"
+            title="Defer Selection"
           >
             <IconChevronDown size={18} strokeWidth={2} />
-            <span className="bulk-btn-text">Deprio</span>
+            <span className="bulk-btn-text">Defer</span>
           </button>
         )}
 

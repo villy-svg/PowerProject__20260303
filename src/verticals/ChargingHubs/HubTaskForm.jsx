@@ -42,26 +42,26 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const [functions, setFunctions] = useState([]);
 
   const fetchHubs = async () => {
-    let { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
-    
-    if (data) {
-      // Find if we already have an 'ALL' hub
-      const allHub = data.find(h => h.name === 'ALL');
-      
-      if (!allHub) {
-        // Automatically provision an 'ALL' hub to satisfy UUID relationships
-        const { data: newHub } = await supabase
-          .from('hubs')
-          .insert([{ name: 'ALL', hub_code: 'ALL', city: 'System', status: 'Active' }])
-          .select();
-          
-        if (newHub) {
-          data = [...newHub, ...data];
-        }
-      }
-      setHubs(data);
-    }
+    const { data } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
+    if (data) setHubs(data);
   };
+
+  const provisionMultiHub = async (city) => {
+    if (!city || city === 'System') return;
+    const { data } = await supabase
+      .from('hubs')
+      .insert([{ name: 'MULTI', hub_code: 'MULTI', city: city, status: 'Active' }])
+      .select();
+    if (data) fetchHubs();
+  };
+
+  // NEW: Auto-provision MULTI hub for the selected city
+  useEffect(() => {
+    if (formData.city && hubs.length > 0) {
+      const hasMulti = hubs.some(h => h.city === formData.city && h.name === 'MULTI');
+      if (!hasMulti) provisionMultiHub(formData.city);
+    }
+  }, [formData.city, hubs.length]);
 
   const fetchFunctions = async () => {
     const { data } = await supabase.from('hub_functions').select('name, function_code').order('name');
@@ -103,14 +103,17 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       forcePrefix: formData.hub_ids.length > 0
     });
 
-    // 3. Construct Payload
+    // 3. Resolve city-specific "MULTI" hub for Umbrella task categorization
+    const multiHub = hubs.find(h => h.city === formData.city && h.name === 'MULTI');
+
+    // 4. Construct Payload
     const submissionPayload = {
       ...formData,
       text: finalTaskText,
       // NEW: Pass all selected hubs
       hub_ids: formData.hub_ids, 
-      // BACKWARD COMPAT: Set single hub_id to the first selection
-      hub_id: formData.hub_ids[0] || null 
+      // IMPROVED: If multi-hub, the parent (umbrella) belongs to the city's "MULTI" hub
+      hub_id: formData.hub_ids.length > 1 ? (multiHub?.id || null) : (formData.hub_ids[0] || null) 
     };
 
     console.log('[HubTaskForm] Submitting Payload:', submissionPayload);
@@ -290,10 +293,10 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               {formData.hub_ids.length > 1 ? (
                 <div className="prediction-detail">
                   <p><strong>Multi-Hub Mode (Mode 3) Detected:</strong></p>
-                  <p>This will create <strong>{formData.hub_ids.length}</strong> identical tasks across selected hubs.</p>
+                  <p>This will create <strong>{formData.hub_ids.length + 1}</strong> tasks (1 Umbrella + {formData.hub_ids.length} Hub-specific).</p>
                   <ul>
-                    <li>Primary Hub: {hubs.find(h => h.id === formData.hub_ids[0])?.hub_code}</li>
-                    <li>Total Secondary Links: {formData.hub_ids.length - 1}</li>
+                    <li>Umbrella Hub: {formData.city} / MULTI</li>
+                    <li>Total Secondary Links: {formData.hub_ids.length}</li>
                   </ul>
                 </div>
               ) : formData.assigned_to.length > 1 ? (

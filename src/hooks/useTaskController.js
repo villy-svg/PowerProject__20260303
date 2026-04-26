@@ -190,7 +190,7 @@ export const useTaskController = (props) => {
     setConfirmDialog({
       isOpen: true,
       title: 'Clear Board',
-      message: `Move ${verticalTasks.length} active tasks to Deprioritized?`,
+      message: `Move ${verticalTasks.length} active tasks to Deferred?`,
       onConfirm: async () => {
         setSaving(true);
         try { await bulkUpdateTasks(verticalTasks.map(t => t.id), { stage_id: 'DEPRIORITIZED' }); }
