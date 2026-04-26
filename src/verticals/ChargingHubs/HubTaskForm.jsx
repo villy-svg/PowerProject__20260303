@@ -396,7 +396,6 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             )}
           </div>
         ) : (
-    ) : (
           /* History Tab */
           <div className="history-tab-content fade-in">
             <SubmissionHistory
