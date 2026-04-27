@@ -62,12 +62,12 @@
 }
 .vertical-task-form label, 
 .form-group label {
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--brand-mint);
-  opacity: 0.9;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary); /* Neutralized */
+  opacity: 0.8;
   padding-left: 4px;
 }
 .vertical-task-form input[type="text"],
@@ -105,6 +105,21 @@
   background: color-mix(in srgb, var(--brand-green), transparent 95%);
   box-shadow: 0 0 15px var(--halo-glow);
   transform: translateY(-1px);
+}
+/* Fix for browser autofill background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-color) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--halo-bg) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  border: 1px solid var(--border-color) !important;
 }
 .vertical-task-form textarea,
 .hub-modal textarea {

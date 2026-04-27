@@ -288,16 +288,17 @@
 }
 
 .orch-index {
-  font-size: 0.7rem;
-  font-weight: 800;
-  opacity: 0.3;
+  font-size: 0.65rem;
+  font-weight: 700;
+  opacity: 0.2;
   font-family: monospace;
 }
 
 .orch-hub-code {
-  font-weight: 700;
-  color: var(--brand-green);
-  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color); /* Neutralized from brand green */
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
 .orch-assignee-select {

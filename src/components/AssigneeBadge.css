@@ -1,30 +1,16 @@
 /* AssigneeBadge.css */
-.assignee-badge-base {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: capitalize;
-  border-radius: var(--radius-pill);
-  padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  opacity: 0.7;
-  border: 1px solid var(--border-color);
-  transition: all 0.2s ease;
-}
+/* Base styling now inherited from globalTheme.css standardized system */
+
 .assignee-you {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-color);
 }
 .assignee-none {
-  color: #ef4444; 
-  background: rgba(239, 68, 68, 0.1); 
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  font-weight: 800;
+  opacity: 0.4;
+  background: transparent;
+  border-style: dashed;
 }
 /* Mini variant for list view */
 .assignee-badge-base.mini {

@@ -60,7 +60,7 @@ export const taskUtils = {
       return first;
     }
 
-    return '...';
+    return task.assigned_to?.length > 0 ? 'Assigned' : 'Unassigned';
   },
 
   /**

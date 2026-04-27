@@ -104,7 +104,6 @@ const HubSelector = ({
                     </div>
                     <div className="hub-info">
                       <span className="hub-code">{hub.hub_code}</span>
-                      <span className="hub-name">{hub.name}</span>
                     </div>
                   </div>
                 );

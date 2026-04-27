@@ -239,33 +239,9 @@
   opacity: 0.5;
 }
 /* Badge Refinement (Halo Glass Language) */
+/* Base badge styling now inherited from globalTheme.css standardized system */
 .dept-badge, .role-badge, .hub-badge, .app-user-badge-mini, .duplicate-badge-mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  line-height: 1;
-  padding: 3px 10px;
-  height: 22px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  transition: all 0.2s ease;
-}
-.dept-badge { 
-  border-color: rgba(45, 212, 191, 0.3); 
-  color: var(--badge-teal-text); 
-}
-.role-badge { 
-  border-color: rgba(255, 255, 255, 0.2); 
-  color: rgba(255, 255, 255, 0.6); 
-}
-.hub-badge { 
-  border-color: rgba(59, 130, 246, 0.4); 
-  color: var(--badge-blue-text); 
+  /* Class names preserved for vertical-specific hover or modifier logic if needed */
 }
 .app-user-badge-mini { 
   border-color: rgba(52, 211, 153, 0.4); 
@@ -622,10 +598,6 @@
   display: flex;
   gap: 8px;
   margin-top: 4px;
-}
-.tree-card-details .role-badge,
-.tree-card-details .hub-badge {
-  color: rgba(255, 255, 255, 0.6);
 }
 .tree-card-actions {
   display: flex;

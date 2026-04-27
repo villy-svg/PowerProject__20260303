@@ -23,7 +23,7 @@
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: var(--radius-button, 8px);
   padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
-  color: var(--brand-green, #00ff9d);
+  color: var(--text-color); /* Neutralized */
   font-family: inherit;
   font-size: 0.95rem;
   cursor: pointer;
@@ -160,8 +160,8 @@
 }
 
 .assignee-option.selected .assignee-name {
-  color: var(--brand-green, #00ff9d);
-  font-weight: 500;
+  color: #5eead4; /* Softer, glowing teal instead of neon */
+  font-weight: 600;
 }
 
 .no-assignees {
