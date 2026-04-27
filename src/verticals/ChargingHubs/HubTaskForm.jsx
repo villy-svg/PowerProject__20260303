@@ -83,7 +83,11 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     });
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     const mapping = orchestrationService.calculateOrchestration(
       formData.hub_ids, 
       formData.assigned_to, 
@@ -94,7 +98,13 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    // Prevent submission if we're in step 1 but need to orchestrate (e.g. on Enter key)
+    if (step === 1 && (formData.hub_ids.length > 1 || formData.assigned_to.length > 1)) {
+      handleNextStep();
+      return;
+    }
 
     const primaryHub = hubs.find(h => h.id === formData.hub_ids[0]);
     const multiHub = hubs.find(h => h.city === formData.city && h.name === 'MULTI');
@@ -145,53 +155,110 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             {step === 1 ? (
               <>
                 <div className="form-group">
-                  <label>Task Summary</label>
-                  <input type="text" value={formData.text} onChange={(e) => updateField('text', e.target.value)} placeholder="e.g. Inspect Station 4" required disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)} />
+                  <label htmlFor="task-summary">Task Summary</label>
+                  <input 
+                    id="task-summary"
+                    name="taskText"
+                    type="text" 
+                    value={formData.text} 
+                    onChange={(e) => updateField('text', e.target.value)} 
+                    placeholder="e.g. Inspect Station 4" 
+                    required 
+                    disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)} 
+                  />
                 </div>
 
                 <div className="form-row-grid">
                   <div className="form-group">
-                    <label>City</label>
-                    <select className="master-dropdown" value={formData.city} onChange={handleCityChange} required disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}>
+                    <label htmlFor="city-select">City</label>
+                    <select 
+                      id="city-select"
+                      name="city"
+                      className="master-dropdown" 
+                      value={formData.city} 
+                      onChange={handleCityChange} 
+                      required 
+                      disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
+                    >
                       <option value="">Select City...</option>
                       {uniqueCities.map(city => <option key={city} value={city}>{city}</option>)}
                     </select>
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label-with-badge">Charging Hub(s) {formData.hub_ids.length > 1 && <span className="mode-badge mode-3-badge">🔀 Multi-Hub</span>}</label>
-                    <HubSelector hubs={filteredHubs} value={formData.hub_ids} onChange={(val) => updateField('hub_ids', val)} disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)} />
+                    <label htmlFor="hub-selector" className="form-label-with-badge">Charging Hub(s) {formData.hub_ids.length > 1 && <span className="mode-badge mode-3-badge">🔀 Multi-Hub</span>}</label>
+                    <HubSelector 
+                      id="hub-selector"
+                      hubs={filteredHubs} 
+                      value={formData.hub_ids} 
+                      onChange={(val) => updateField('hub_ids', val)} 
+                      disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)} 
+                    />
                   </div>
                 </div>
 
                 <div className="form-row-grid">
                   <div className="form-group">
-                    <label>Priority</label>
-                    <select className="master-dropdown" value={formData.priority} onChange={(e) => updateField('priority', e.target.value)} disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}>
+                    <label htmlFor="priority-select">Priority</label>
+                    <select 
+                      id="priority-select"
+                      name="priority"
+                      className="master-dropdown" 
+                      value={formData.priority} 
+                      onChange={(e) => updateField('priority', e.target.value)} 
+                      disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
+                    >
                       <option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option><option value="Urgent">Urgent</option>
                     </select>
                   </div>
 
                   <div className="form-group">
-                    <label>Assignee(s) / Batch Team</label>
-                    <AssigneeSelector value={formData.assigned_to} onChange={(val) => updateField('assigned_to', val)} currentUser={currentUser} disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)} />
+                    <label htmlFor="assignee-selector">Assignee(s) / Batch Team</label>
+                    <AssigneeSelector 
+                      id="assignee-selector"
+                      value={formData.assigned_to} 
+                      onChange={(val) => updateField('assigned_to', val)} 
+                      currentUser={currentUser} 
+                      disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)} 
+                    />
                   </div>
                 </div>
 
                 <div className="form-row-grid">
                   <div className="form-group">
-                    <label>Function Component</label>
-                    <select className="master-dropdown" value={formData.function} onChange={(e) => updateField('function', e.target.value)} disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}>
+                    <label htmlFor="function-select">Function Component</label>
+                    <select 
+                      id="function-select"
+                      name="function"
+                      className="master-dropdown" 
+                      value={formData.function} 
+                      onChange={(e) => updateField('function', e.target.value)} 
+                      disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
+                    >
                       <option value="">N/A (General)</option>
                       {functions.map(fn => <option key={fn.name} value={fn.name}>{fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name}</option>)}
                     </select>
                   </div>
-                  <TaskHierarchySelector value={formData.parentTask} onChange={(val) => updateField('parentTask', val)} availableTasks={availableTasks} disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)} />
+                  <TaskHierarchySelector 
+                    id="parent-task-selector"
+                    value={formData.parentTask} 
+                    onChange={(val) => updateField('parentTask', val)} 
+                    availableTasks={availableTasks} 
+                    disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)} 
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label>Detailed Description</label>
-                  <textarea value={formData.description} onChange={(e) => updateField('description', e.target.value)} placeholder="Enter task details..." rows={4} disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)} />
+                  <label htmlFor="detailed-description">Detailed Description</label>
+                  <textarea 
+                    id="detailed-description"
+                    name="description"
+                    value={formData.description} 
+                    onChange={(e) => updateField('description', e.target.value)} 
+                    placeholder="Enter task details..." 
+                    rows={4} 
+                    disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)} 
+                  />
                 </div>
               </>
             ) : (
@@ -202,11 +269,15 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                     <div key={item.hub_id || idx} className="orchestration-row">
                       <div className="orch-hub-info"><span className="orch-index">#{idx + 1}</span><span className="orch-hub-code">{hubs.find(h => h.id === item.hub_id)?.hub_code || 'HUB'}</span></div>
                       <div className="orch-assignee-select">
-                        <AssigneeSelector value={item.assigned_to} onChange={(val) => {
-                          const next = [...orchestrationMapping];
-                          next[idx] = { ...next[idx], assigned_to: val };
-                          setOrchestrationMapping(next);
-                        }} currentUser={currentUser} />
+                        <AssigneeSelector 
+                          id={`orch-assignee-${idx}`}
+                          value={item.assigned_to} 
+                          onChange={(val) => {
+                            const next = [...orchestrationMapping];
+                            next[idx] = { ...next[idx], assigned_to: val };
+                            setOrchestrationMapping(next);
+                          }} currentUser={currentUser} 
+                        />
                       </div>
                     </div>
                   ))}
@@ -237,11 +308,33 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
       <div className="form-footer sticky">
         {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
-          <button type="button" className="halo-button save-btn" onClick={handleNextStep}>Next: Orchestrate Team</button>
+          <button 
+            key="next-btn"
+            type="button" 
+            className="halo-button save-btn" 
+            onClick={handleNextStep}
+          >
+            Next: Orchestrate Team
+          </button>
         ) : (isDirty || step === 2) ? (
-          <button type="submit" className="halo-button save-btn" disabled={loading}>{loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Batch')}</button>
+          <button 
+            key="save-btn"
+            type="submit" 
+            className="halo-button save-btn" 
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Batch')}
+          </button>
         ) : (
-          <button type="button" className="halo-button close-btn" onClick={onCancel} style={{ opacity: 0.6 }}>Close</button>
+          <button 
+            key="close-btn"
+            type="button" 
+            className="halo-button close-btn" 
+            onClick={onCancel} 
+            style={{ opacity: 0.6 }}
+          >
+            Close
+          </button>
         )}
       </div>
     </form>

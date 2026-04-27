@@ -13,6 +13,7 @@ const AssigneeSelector = ({
   value = [], // Expects an array of UUIDs
   onChange, 
   currentUser, 
+  id,
   disabled = false,
   required = false,
   placeholder = 'Select Assignees...'
@@ -24,16 +25,7 @@ const AssigneeSelector = ({
   // Ensure value is always an array for logic consistency
   const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Removed document listener in favor of a local backdrop for better modal compatibility
 
   const toggleOption = (id) => {
     if (disabled) return;
@@ -73,42 +65,62 @@ const AssigneeSelector = ({
       className={`assignee-selector-container ${isOpen ? 'open' : ''}`} 
       ref={containerRef}
     >
-      <div 
+      <button 
+        type="button"
+        id={id}
         className={`assignee-selector-trigger ${disabled ? 'disabled' : ''}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!disabled) setIsOpen(!isOpen);
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
         <span className="selected-count">{getLabel()}</span>
         <span className="dropdown-arrow">▼</span>
-      </div>
+      </button>
 
       {isOpen && !disabled && (
-        <div className="assignee-dropdown-menu fade-in">
-          {assignees.length === 0 ? (
-            <div className="no-assignees">No employees found</div>
-          ) : (
-            assignees.map(emp => {
-              const isSelected = selectedIds.includes(emp.id);
-              return (
-                <div 
-                  key={emp.id} 
-                  className={`assignee-option ${isSelected ? 'selected' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    toggleOption(emp.id);
-                  }}
-                >
-                  <div className="assignee-checkbox">
-                    {isSelected && '✓'}
+        <>
+          <div 
+            className="selector-backdrop" 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setIsOpen(false);
+            }}
+          />
+          <div className="assignee-dropdown-menu fade-in">
+            {assignees.length === 0 ? (
+              <div className="no-assignees">No employees found</div>
+            ) : (
+              assignees.map(emp => {
+                const isSelected = selectedIds.includes(emp.id);
+                return (
+                  <div 
+                    key={emp.id} 
+                    id={`assignee-option-${emp.id}`}
+                    role="option"
+                    aria-selected={isSelected}
+                    className={`assignee-option ${isSelected ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleOption(emp.id);
+                    }}
+                  >
+                    <div className="assignee-checkbox">
+                      {isSelected && '✓'}
+                    </div>
+                    <span className="assignee-name">
+                      {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
+                    </span>
                   </div>
-                  <span className="assignee-name">
-                    {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
-                  </span>
-                </div>
-              );
-            })
-          )}
-        </div>
+                );
+              })
+            )}
+          </div>
+        </>
       )}
     </div>
   );

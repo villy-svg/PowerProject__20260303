@@ -20,7 +20,15 @@ const TaskModal = ({ isOpen, onClose, title, children, className = '' }) => {
       <div className="task-modal-content" onClick={(e) => e.stopPropagation()}>
         <header className="task-modal-header">
           <h2>{title}</h2>
-          <button className="close-modal-btn" onClick={onClose}>&times;</button>
+          <button 
+            id="close-task-modal"
+            type="button"
+            className="close-modal-btn" 
+            onClick={onClose}
+            aria-label="Close Modal"
+          >
+            &times;
+          </button>
         </header>
         <div className="task-modal-body">
           {children}

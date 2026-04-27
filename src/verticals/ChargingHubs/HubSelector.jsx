@@ -10,6 +10,7 @@ const HubSelector = ({
   hubs = [], 
   value = [], 
   onChange, 
+  id,
   disabled = false,
   placeholder = 'Select Hubs...'
 }) => {
@@ -18,15 +19,7 @@ const HubSelector = ({
 
   const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // Removed document listener in favor of a local backdrop for better modal compatibility
 
   const toggleOption = (id) => {
     if (disabled) return;
@@ -60,43 +53,63 @@ const HubSelector = ({
       className={`hub-selector-container ${isOpen ? 'open' : ''}`} 
       ref={containerRef}
     >
-      <div 
+      <button 
+        type="button"
+        id={id}
         className={`hub-selector-trigger ${disabled ? 'disabled' : ''}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!disabled) setIsOpen(!isOpen);
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
         <span className="selected-count">{getLabel()}</span>
         <span className="dropdown-arrow">▼</span>
-      </div>
+      </button>
 
       {isOpen && !disabled && (
-        <div className="hub-dropdown-menu fade-in">
-          {hubs.length === 0 ? (
-            <div className="no-hubs">No hubs available for this city</div>
-          ) : (
-            hubs.map(hub => {
-              const isSelected = selectedIds.includes(hub.id);
-              return (
-                <div 
-                  key={hub.id} 
-                  className={`hub-option ${isSelected ? 'selected' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    toggleOption(hub.id);
-                  }}
-                >
-                  <div className="hub-checkbox">
-                    {isSelected && '✓'}
+        <>
+          <div 
+            className="selector-backdrop" 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setIsOpen(false);
+            }}
+          />
+          <div className="hub-dropdown-menu fade-in">
+            {hubs.length === 0 ? (
+              <div className="no-hubs">No hubs available for this city</div>
+            ) : (
+              hubs.map(hub => {
+                const isSelected = selectedIds.includes(hub.id);
+                return (
+                  <div 
+                    key={hub.id} 
+                    id={`hub-option-${hub.id}`}
+                    role="option"
+                    aria-selected={isSelected}
+                    className={`hub-option ${isSelected ? 'selected' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      toggleOption(hub.id);
+                    }}
+                  >
+                    <div className="hub-checkbox">
+                      {isSelected && '✓'}
+                    </div>
+                    <div className="hub-info">
+                      <span className="hub-code">{hub.hub_code}</span>
+                      <span className="hub-name">{hub.name}</span>
+                    </div>
                   </div>
-                  <div className="hub-info">
-                    <span className="hub-code">{hub.hub_code}</span>
-                    <span className="hub-name">{hub.name}</span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                );
+              })
+            )}
+          </div>
+        </>
       )}
     </div>
   );

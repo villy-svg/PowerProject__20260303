@@ -4,6 +4,16 @@
   user-select: none;
 }
 
+.selector-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 998; /* Just below the dropdown menu */
+}
+
 .hub-selector-trigger {
   display: flex;
   justify-content: space-between;
@@ -15,6 +25,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 42px;
+  font: inherit;
+  color: inherit;
 }
 
 .hub-selector-trigger:hover {
@@ -140,4 +152,8 @@
 .hub-dropdown-menu::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
+}
+
+.hub-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

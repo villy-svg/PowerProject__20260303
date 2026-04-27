@@ -5,11 +5,13 @@ import React from 'react';
  * A standardized dropdown for selecting a Parent Task.
  * Used across all vertical task forms to ensure consistency.
  */
-const TaskHierarchySelector = ({ value, onChange, availableTasks = [], disabled = false }) => {
+const TaskHierarchySelector = ({ id, value, onChange, availableTasks = [], disabled = false }) => {
   return (
     <div className="form-group">
-      <label>Parent Task</label>
+      <label htmlFor={id}>Parent Task</label>
       <select 
+        id={id}
+        name="parentTask"
         className="master-dropdown"
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
