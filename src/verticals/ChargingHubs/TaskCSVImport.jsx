@@ -25,7 +25,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
       supabase.from('tasks').select('id, text, hub_id, function, task_board')
-        .or(`vertical_id.eq.${verticalId},task_board.cs.{"Hubs Daily"}`)
+        .or(`vertical_id.eq.${verticalId},task_board.cs.["Hubs Daily"]`)
     ]);
 
     const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
@@ -136,7 +136,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
           city: row.city || null,
-          assigned_to: row.assigned_to ? [empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null].filter(Boolean) : [],
+          assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
           updated_at: new Date().toISOString(),
           vertical_id: verticalId,
           stage_id: row.stageid || row.stage_id || 'BACKLOG',
@@ -145,14 +145,6 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
         if (isDaily) {
           taskRow.task_board = ['Hubs Daily'];
-          
-          // Multi-Subject Mapping during Import
-          const vid = verticalId.toUpperCase();
-          if (vid.includes('CLIENT')) taskRow.client_id = resolvedHubId ? [resolvedHubId] : [];
-          else if (vid.includes('EMPLOYEE')) taskRow.employee_id = resolvedHubId ? [resolvedHubId] : [];
-          else if (vid.includes('PARTNER')) taskRow.partner_id = resolvedHubId ? [resolvedHubId] : [];
-          else if (vid.includes('VENDOR')) taskRow.vendor_id = resolvedHubId ? [resolvedHubId] : [];
-          else taskRow.hub_id = resolvedHubId;
         }
 
         return taskRow;

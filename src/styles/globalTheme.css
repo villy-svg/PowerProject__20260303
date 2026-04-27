@@ -57,17 +57,17 @@
   --badge-red-text: #ef4444;
 }
 [data-theme='dark'] {
-  --bg-color: #0b0b0d;        /* Midnight Satin */
+  --bg-color: #050505;        /* Midnight Black */
   --text-color: #d4d4d8;      /* Neutral Zinc-300 (Softer than white) */
   --text-secondary: #71717a;  /* Neutral Zinc-500 (Muted) */
   --brand-mint: #0d9488;      /* Muted Teal-600 */
   --brand-blue: #3b82f6;      
   --brand-green: var(--brand-mint);
-  --border-color: rgba(255, 255, 255, 0.06); /* Subtler satin edges */
-  --panel-bg: #111113;
-  --surface-card: #141416;    
+  --border-color: rgba(255, 255, 255, 0.04); /* Subtler satin edges */
+  --panel-bg: #121214;        /* Slightly lighter for cards (elevation) */
+  --surface-card: #09090b;    /* Deeper workspace background */
   /* Shadows & Depth */
-  --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.8);
+  --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.6);
   --glass-blur: 25px;
   --halo-glow: rgba(13, 148, 136, 0.12); /* Subtler glow */
   --halo-glow-blue: rgba(59, 130, 246, 0.08); 
@@ -364,7 +364,7 @@
   gap: 16px;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-left: 4px solid var(--stage-color, var(--brand-green));
+  border-left: 2px solid color-mix(in srgb, var(--stage-color, var(--brand-green)), transparent 30%);
   border-radius: 12px;
   padding: 4px 16px; 
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

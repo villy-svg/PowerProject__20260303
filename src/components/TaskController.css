@@ -27,12 +27,13 @@
 .clear-board-btn {
   font-size: 0.75rem;
   padding: 6px 14px;
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.2);
+  color: rgba(239, 68, 68, 0.6);
 }
 .clear-board-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: rgba(239, 68, 68, 0.9);
 }
 /* 2. KANBAN BOARD LAYOUT */
 .kanban-board {

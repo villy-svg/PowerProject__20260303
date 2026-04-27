@@ -102,7 +102,7 @@ const TaskCard = ({
         }
       }}
       style={{
-        borderLeft: `4px solid ${stage?.color || 'var(--border-color)'}`,
+        borderLeft: `2px solid color-mix(in srgb, ${stage?.color || 'var(--border-color)'}, transparent 30%)`,
         '--stage-color': stage?.color || 'var(--brand-green)',
         opacity: task.isContextOnly ? 0.7 : 1,
         cursor: task.isContextOnly ? 'default' : 'pointer'
