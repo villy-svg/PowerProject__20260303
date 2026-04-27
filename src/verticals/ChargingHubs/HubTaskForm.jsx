@@ -133,6 +133,16 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     });
   };
 
+  const handleCancelWithConfirm = () => {
+    if (isDirty) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+        onCancel();
+      }
+    } else {
+      onCancel();
+    }
+  };
+
   const fanOutInfo = orchestrationService.predictFanOut(formData.hub_ids, formData.assigned_to);
 
   return (
@@ -271,6 +281,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                       <div className="orch-assignee-select">
                         <AssigneeSelector 
                           id={`orch-assignee-${idx}`}
+                          isSingle={true}
                           value={item.assigned_to} 
                           onChange={(val) => {
                             const next = [...orchestrationMapping];
@@ -282,7 +293,6 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                     </div>
                   ))}
                 </div>
-                <button type="button" className="orch-back-link" onClick={() => setStep(1)}>← Back to Details</button>
               </div>
             )}
           </div>
@@ -307,34 +317,68 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       </div>
 
       <div className="form-footer sticky">
-        {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
-          <button 
-            key="next-btn"
-            type="button" 
-            className="halo-button save-btn" 
-            onClick={handleNextStep}
-          >
-            Next: Orchestrate Team
-          </button>
-        ) : (isDirty || step === 2) ? (
-          <button 
-            key="save-btn"
-            type="submit" 
-            className="halo-button save-btn" 
-            disabled={loading}
-          >
-            {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Batch')}
-          </button>
+        {step === 2 ? (
+          <>
+            <button 
+              key="back-btn"
+              type="button" 
+              className="halo-button close-btn" 
+              onClick={() => setStep(1)}
+              style={{ marginRight: 'auto' }}
+            >
+              ← Back
+            </button>
+            <button 
+              key="close-btn"
+              type="button" 
+              className="halo-button close-btn" 
+              onClick={handleCancelWithConfirm}
+            >
+              Close
+            </button>
+            <button 
+              key="save-btn"
+              type="submit" 
+              className="halo-button save-btn" 
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : (initialData?.id ? 'Save Changes' : 'Create Task')}
+            </button>
+          </>
         ) : (
-          <button 
-            key="close-btn"
-            type="button" 
-            className="halo-button close-btn" 
-            onClick={onCancel} 
-            style={{ opacity: 0.6 }}
-          >
-            Close
-          </button>
+          <>
+            {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
+              <button 
+                key="next-btn"
+                type="button" 
+                className="halo-button save-btn" 
+                onClick={handleNextStep}
+                style={{ marginLeft: 'auto' }}
+              >
+                Next: Orchestrate Team
+              </button>
+            ) : (isDirty || step === 2) ? (
+              <button 
+                key="save-btn"
+                type="submit" 
+                className="halo-button save-btn" 
+                disabled={loading}
+                style={{ marginLeft: 'auto' }}
+              >
+                {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Batch')}
+              </button>
+            ) : (
+              <button 
+                key="close-btn"
+                type="button" 
+                className="halo-button close-btn" 
+                onClick={onCancel} 
+                style={{ opacity: 0.6, marginLeft: 'auto' }}
+              >
+                Close
+              </button>
+            )}
+          </>
         )}
       </div>
     </form>

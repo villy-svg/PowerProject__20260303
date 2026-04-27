@@ -14,6 +14,7 @@ const AssigneeSelector = ({
   onChange, 
   currentUser, 
   id,
+  isSingle = false,
   disabled = false,
   required = false,
   placeholder = 'Select Assignees...'
@@ -25,18 +26,21 @@ const AssigneeSelector = ({
   // Ensure value is always an array for logic consistency
   const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
 
-  // Removed document listener in favor of a local backdrop for better modal compatibility
-
   const toggleOption = (id) => {
     if (disabled) return;
     
     let newSelection;
-    if (selectedIds.includes(id)) {
-      newSelection = selectedIds.filter(item => item !== id);
+    if (isSingle) {
+      newSelection = [id];
     } else {
-      newSelection = [...selectedIds, id];
+      if (selectedIds.includes(id)) {
+        newSelection = selectedIds.filter(item => item !== id);
+      } else {
+        newSelection = [...selectedIds, id];
+      }
     }
     onChange(newSelection);
+    if (isSingle) setIsOpen(false); // Close dropdown immediately for single select
   };
 
   const getLabel = () => {
@@ -109,8 +113,8 @@ const AssigneeSelector = ({
                       toggleOption(emp.id);
                     }}
                   >
-                    <div className="assignee-checkbox">
-                      {isSelected && '✓'}
+                    <div className={`assignee-checkbox ${isSingle ? 'single' : ''}`}>
+                      {isSelected && (isSingle ? <div className="radio-dot" /> : '✓')}
                     </div>
                     <span className="assignee-name">
                       {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
