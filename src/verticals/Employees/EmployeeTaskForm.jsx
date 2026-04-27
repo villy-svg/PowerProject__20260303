@@ -1,51 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import React, { useEffect } from 'react';
 import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import { taskUtils } from '../../utils/taskUtils';
 import { useAssignees } from '../../hooks/useAssignees';
+import { useTaskForm } from '../../hooks/useTaskForm';
+import { orchestrationService } from '../../services/tasks/orchestrationService';
 
 /**
  * EmployeeTaskForm
  * Vertical-specific form for Employee Manager tasks.
- * Basic fields for now — will be extended with employee-specific data in future prompts.
+ * Refactored: Uses useTaskForm for unified state management.
  */
 const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
-  const safeData = initialData || {};
-  const [formData, setFormData] = useState({
-    text: safeData.text || '',
-    priority: safeData.priority || 'Medium',
-    description: safeData.description || '',
-    assigned_to: Array.isArray(safeData.assigned_to) ? safeData.assigned_to : (safeData.assigned_to ? [safeData.assigned_to] : []),
-    parentTask: safeData.parentTask || ''
-  });
+  const {
+    formData,
+    updateField,
+    isDirty
+  } = useTaskForm(initialData);
 
   const { assignees: allEmployees } = useAssignees(true);
-
-  // Check if form has changes
-  const isDirty = initialData.id ? Object.keys(formData).some(key => {
-    const initialVal = initialData[key] || '';
-    const currentVal = formData[key] || '';
-    return String(initialVal) !== String(currentVal);
-  }) : true; // Always dirty for new records
-
-  useEffect(() => {
-    // Other ref data could go here
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
     // Resolve Senior-most Assignee for Parent Assignment
-    const sortedAssigneeIds = [...formData.assigned_to].sort((aId, bId) => {
-      const empA = allEmployees.find(e => e.id === aId);
-      const empB = allEmployees.find(e => e.id === bId);
-      
-      const badgeA = String(empA?.badge_id || '999999');
-      const badgeB = String(empB?.badge_id || '999999');
-      if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
-      
-      return (empA?.seniority_level || 999) - (empB?.seniority_level || 999);
+    const leader = orchestrationService.getSeniorMostAssignee(formData.assigned_to, allEmployees);
+    
+    const sortedAssigneeIds = [...formData.assigned_to].sort((a, b) => {
+      if (a === leader?.id) return -1;
+      if (b === leader?.id) return 1;
+      return 0;
     });
 
     // For employees, we'll check for "hiring" keywords in the text as a simple principle
@@ -65,7 +49,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
         <input
           type="text"
           value={formData.text}
-          onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+          onChange={(e) => updateField('text', e.target.value)}
           placeholder="e.g. Onboard new hire, Conduct performance review"
           required
           disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
@@ -78,7 +62,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
           <select
             className="master-dropdown"
             value={formData.priority}
-            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            onChange={(e) => updateField('priority', e.target.value)}
             disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
           >
             <option value="Low">Low</option>
@@ -92,7 +76,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
           <label>Assigned To</label>
           <AssigneeSelector
             value={formData.assigned_to}
-            onChange={(val) => setFormData({...formData, assigned_to: val})}
+            onChange={(val) => updateField('assigned_to', val)}
             currentUser={currentUser}
             disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
           />
@@ -100,7 +84,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
 
         <TaskHierarchySelector 
           value={formData.parentTask}
-          onChange={(val) => setFormData({...formData, parentTask: val})}
+          onChange={(val) => updateField('parentTask', val)}
           availableTasks={availableTasks}
           disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
         />
@@ -110,7 +94,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
         <label>Detailed Description</label>
         <textarea
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) => updateField('description', e.target.value)}
           placeholder="Enter task details..."
           rows={4}
           disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
@@ -124,7 +108,7 @@ const EmployeeTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, curre
           onClick={isDirty ? undefined : onCancel}
           disabled={loading}
         >
-          {loading ? 'Saving...' : (safeData.id ? (isDirty ? 'Update Task' : 'Close') : 'Create Task')}
+          {loading ? 'Saving...' : (initialData?.id ? (isDirty ? 'Update Task' : 'Close') : 'Create Task')}
         </button>
       </div>
     </form>

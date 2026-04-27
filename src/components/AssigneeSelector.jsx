@@ -92,7 +92,11 @@ const AssigneeSelector = ({
                 <div 
                   key={emp.id} 
                   className={`assignee-option ${isSelected ? 'selected' : ''}`}
-                  onClick={() => toggleOption(emp.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    toggleOption(emp.id);
+                  }}
                 >
                   <div className="assignee-checkbox">
                     {isSelected && '✓'}

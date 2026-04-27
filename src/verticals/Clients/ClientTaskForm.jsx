@@ -3,29 +3,20 @@ import { supabase } from '../../services/core/supabaseClient';
 import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import { taskUtils } from '../../utils/taskUtils';
+import { useTaskForm } from '../../hooks/useTaskForm';
 
 /**
  * ClientTaskForm
  * Vertical-specific form for Client Manager tasks.
- * Allows assigning a task to a specific Client.
+ * Refactored: Uses useTaskForm for unified state management.
  */
 const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
-  const safeData = initialData || {};
-  const [formData, setFormData] = useState({
-    text: safeData.text || '',
-    priority: safeData.priority || 'Medium',
-    description: safeData.description || '',
-    assigned_client_id: safeData.assigned_client_id || '',
-    assigned_to: Array.isArray(safeData.assigned_to) ? safeData.assigned_to : (safeData.assigned_to ? [safeData.assigned_to] : []),
-    parentTask: safeData.parentTask || ''
-  });
+  const {
+    formData,
+    updateField,
+    isDirty
+  } = useTaskForm(initialData);
 
-  // Check if form has changes
-  const isDirty = initialData.id ? Object.keys(formData).some(key => {
-    const initialVal = initialData[key] || '';
-    const currentVal = formData[key] || '';
-    return String(initialVal) !== String(currentVal);
-  }) : true; // Always dirty for new records
   const [clients, setClients] = useState([]);
 
   const fetchClients = async () => {
@@ -63,7 +54,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
         <input
           type="text"
           value={formData.text}
-          onChange={(e) => setFormData({ ...formData, text: e.target.value })}
+          onChange={(e) => updateField('text', e.target.value)}
           placeholder="e.g. Renew retainer, Schedule quarterly review"
           required
           disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
@@ -76,7 +67,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
           <select
             className="master-dropdown"
             value={formData.priority}
-            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            onChange={(e) => updateField('priority', e.target.value)}
             disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
           >
             <option value="Low">Low</option>
@@ -91,7 +82,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
           <select 
             className="master-dropdown"
             value={formData.assigned_client_id}
-            onChange={(e) => setFormData({...formData, assigned_client_id: e.target.value})}
+            onChange={(e) => updateField('assigned_client_id', e.target.value)}
             disabled={!taskUtils.canUserEditField(initialData, 'assigned_client_id', permissions, currentUser)}
           >
             <option value="">N/A (General Client Task)</option>
@@ -107,7 +98,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
           <label>Assigned To</label>
           <AssigneeSelector
             value={formData.assigned_to}
-            onChange={(val) => setFormData({...formData, assigned_to: val})}
+            onChange={(val) => updateField('assigned_to', val)}
             currentUser={currentUser}
             disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
           />
@@ -115,7 +106,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
 
         <TaskHierarchySelector 
           value={formData.parentTask}
-          onChange={(val) => setFormData({...formData, parentTask: val})}
+          onChange={(val) => updateField('parentTask', val)}
           availableTasks={availableTasks}
           disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
         />
@@ -125,7 +116,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
         <label>Detailed Description</label>
         <textarea
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) => updateField('description', e.target.value)}
           placeholder="Enter task details..."
           rows={4}
           disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
@@ -139,7 +130,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
           onClick={isDirty ? undefined : onCancel}
           disabled={loading}
         >
-          {loading ? 'Saving...' : (safeData.id ? (isDirty ? 'Update Task' : 'Close') : 'Create Task')}
+          {loading ? 'Saving...' : (initialData?.id ? (isDirty ? 'Update Task' : 'Close') : 'Create Task')}
         </button>
       </div>
     </form>

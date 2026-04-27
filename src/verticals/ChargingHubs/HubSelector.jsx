@@ -79,7 +79,11 @@ const HubSelector = ({
                 <div 
                   key={hub.id} 
                   className={`hub-option ${isSelected ? 'selected' : ''}`}
-                  onClick={() => toggleOption(hub.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    toggleOption(hub.id);
+                  }}
                 >
                   <div className="hub-checkbox">
                     {isSelected && '✓'}
