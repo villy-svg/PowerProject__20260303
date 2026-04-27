@@ -141,11 +141,8 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           vertical_id: verticalId,
           stage_id: row.stageid || row.stage_id || 'BACKLOG',
           function: resolvedFunc,
+          task_board: row.task_board ? [row.task_board] : (isDaily ? ['Hubs Daily'] : ['Hubs']),
         };
-
-        if (isDaily) {
-          taskRow.task_board = ['Hubs Daily'];
-        }
 
         return taskRow;
       });

@@ -13,20 +13,30 @@ import { supabase } from '../../services/core/supabaseClient';
  *   - Sample row data for templates
  */
 const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['text', 'priority', 'stage_id', 'hub_code', 'function_code', 'assigned_to', 'description', 'city'];
+  const headers = ['text', 'priority', 'stage_id', 'task_board', 'hub_code', 'function_code', 'assigned_to', 'description', 'city'];
 
   const defaultLabel = isTemplate ? "Download Task Template" : "Export Tasks";
   const finalLabel = label || defaultLabel;
 
   const handleDownload = async () => {
-    const [{ data: hubs }, { data: functions }] = await Promise.all([
+    const [{ data: hubs }, { data: functions }, { data: tasksData }] = await Promise.all([
       supabase.from('hubs').select('id, hub_code, name, city').order('hub_code'),
       supabase.from('hub_functions').select('name, function_code').order('function_code'),
+      supabase.from('tasks').select('task_board')
     ]);
 
     const hubCodes = hubs?.map(h => h.hub_code).filter(Boolean) || [];
     const funcCodes = functions?.map(f => f.function_code).filter(Boolean) || [];
     const cityList = [...new Set(hubs?.map(h => h.city).filter(Boolean) || [])].sort();
+    
+    const allBoards = new Set();
+    tasksData?.forEach(t => {
+      if (Array.isArray(t.task_board)) {
+        t.task_board.forEach(b => allBoards.add(b));
+      }
+    });
+    const boardList = [...allBoards].sort();
+
     const priorities = ['Low', 'Medium', 'High', 'Urgent'];
     const stages = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'COMPLETED', 'DEPRIORITIZED'];
 
@@ -35,6 +45,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
         text: 'Sample Task Name',
         priority: priorities[1],
         stage_id: stages[0],
+        task_board: boardList.length > 0 ? boardList[0] : 'Hubs',
         hub_code: hubCodes[0] || 'NYC-001',
         function_code: funcCodes[0] || 'MNT',
         assigned_to: '',
@@ -48,6 +59,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
         text: task.text,
         priority: task.priority || '',
         stage_id: task.stageId || task.stage_id || '',
+        task_board: Array.isArray(task.task_board) ? (task.task_board[0] || '') : '',
         hub_code: hubMap[task.hub_id] || task.hub_id || '',
         function_code: funcMap[task.function] || task.function || '',
         assigned_to: task.assigned_to_name || task.assignedToName || task.assigned_to || '',
@@ -58,19 +70,30 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
   };
 
   const handleValidations = async () => {
-    const [{ data: hubs }, { data: functions }] = await Promise.all([
+    const [{ data: hubs }, { data: functions }, { data: tasksData }] = await Promise.all([
       supabase.from('hubs').select('hub_code, city').order('hub_code'),
       supabase.from('hub_functions').select('function_code').order('function_code'),
+      supabase.from('tasks').select('task_board')
     ]);
     const hubCodes = hubs?.map(h => h.hub_code).filter(Boolean) || [];
     const funcCodes = functions?.map(f => f.function_code).filter(Boolean) || [];
     const cityList = [...new Set(hubs?.map(h => h.city).filter(Boolean))].sort();
+    
+    const allBoards = new Set();
+    tasksData?.forEach(t => {
+      if (Array.isArray(t.task_board)) {
+        t.task_board.forEach(b => allBoards.add(b));
+      }
+    });
+    const boardList = [...allBoards].sort();
+
     return [
       { colLetter: 'B', values: ['Low', 'Medium', 'High', 'Urgent'] },
       { colLetter: 'C', values: ['BACKLOG', 'TODO', 'IN_PROGRESS', 'COMPLETED', 'DEPRIORITIZED'] },
-      { colLetter: 'D', values: hubCodes },
-      { colLetter: 'E', values: funcCodes },
-      { colLetter: 'G', values: cityList },
+      { colLetter: 'D', values: boardList.length > 0 ? boardList : ['Hubs', 'Hubs Daily'] },
+      { colLetter: 'E', values: hubCodes },
+      { colLetter: 'F', values: funcCodes },
+      { colLetter: 'I', values: cityList },
     ];
   };
 
