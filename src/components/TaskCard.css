@@ -251,18 +251,20 @@
 }
 .assignee-badge-mini {
   padding: 1px 5px;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 0.6rem;
+  font-family: 'JetBrains Mono', monospace;
 }
 .assignee-none, .assignee-none-mini {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
   letter-spacing: 0.3px;
-  text-transform: capitalize;
-  border-radius: 20px;
+  text-transform: uppercase;
+  border-radius: 4px;
   color: var(--text-color);
   opacity: 0.4; 
   background: rgba(255, 255, 255, 0.03); 
@@ -274,7 +276,6 @@
 }
 .assignee-none-mini {
   padding: 1px 5px;
-  border-radius: 10px;
   font-size: 0.6rem;
 }
 /* Navigation and Actions */

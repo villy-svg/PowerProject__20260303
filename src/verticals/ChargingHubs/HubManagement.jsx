@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { masterErrorHandler } from '../../services/core/masterErrorHandler';
+import CustomSelect from '../../components/CustomSelect';
 import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
@@ -316,60 +317,71 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Hub Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Downtown Supercharger"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Hub Name</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Downtown Supercharger"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Hub Code (Unique ID)</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.hub_code}
+                        onChange={(e) => setFormData({ ...formData, hub_code: e.target.value })}
+                        placeholder="e.g. NYC-001"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Hub Code (Unique ID)</label>
-                  <input
-                    type="text"
-                    value={formData.hub_code}
-                    onChange={(e) => setFormData({ ...formData, hub_code: e.target.value })}
-                    placeholder="e.g. NYC-001"
-                  />
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>City / Address</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        placeholder="e.g. 5th Avenue, NY"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Status</label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        value={formData.status}
+                        onChange={(val) => setFormData({ ...formData, status: val })}
+                        options={[
+                          { label: 'Active', value: 'active' },
+                          { label: 'Maintenance', value: 'maintenance' },
+                          { label: 'Inactive', value: 'inactive' }
+                        ]}
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>
+                    {statusMsg.text}
+                  </div>
+                )}
               </div>
 
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>City / Address</label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="e.g. 5th Avenue, NY"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Status</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  >
-                    <option value="active">Active</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
-
-              <div className="modal-footer">
+              <div className="modal-footer sticky">
                 <button type="button" className="halo-button cancel-btn" onClick={ui.closeModal}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>
                   {loading ? 'Saving...' : (ui.editingItem ? 'Update' : 'Create')}

@@ -27,15 +27,14 @@
 /* ─── Master Modal Layout (Foundation for Phase 3) ─── */
 .master-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(10px);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: flex-start;
+  padding: clamp(20px, 5vh, 60px) 20px;
+  overflow-y: auto;
   z-index: var(--z-modal);
 }
 
@@ -50,13 +49,15 @@
   flex-direction: column;
   box-shadow: var(--shadow-premium);
   overflow: hidden;
+  margin: auto 0;
 }
 
 /* ─── Standardized Internal Layouts ─── */
 .master-modal-body {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0; /* Allow body to shrink and enable internal scroll */
   overflow: hidden;
   padding: 0 !important;
 }
@@ -64,7 +65,7 @@
 .master-modal-scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: 1.5rem clamp(1.5rem, 5vw, 2.5rem); /* Reduced top/bottom padding */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -75,13 +76,27 @@
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
-  padding: 1.25rem 1.5rem;
+  padding: 0.75rem clamp(1.5rem, 5vw, 2.5rem); /* Reduced vertical padding */
   background: color-mix(in srgb, var(--surface-card), transparent 20%);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--border-color);
   margin-top: auto;
   flex-shrink: 0;
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 480px) {
+  .master-modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem 1.5rem;
+    gap: 10px;
+  }
+
+  .master-modal-footer button {
+    width: 100%;
+    margin: 0 !important;
+  }
 }
 
 .master-modal-footer button {

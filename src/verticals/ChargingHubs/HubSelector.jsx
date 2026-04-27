@@ -80,7 +80,7 @@ const HubSelector = ({
               setIsOpen(false);
             }}
           />
-          <div className="hub-dropdown-menu fade-in">
+          <div className="hub-dropdown-menu custom-dropdown-menu fade-in">
             {hubs.length === 0 ? (
               <div className="no-hubs">No hubs available for this city</div>
             ) : (
@@ -92,14 +92,14 @@ const HubSelector = ({
                     id={`hub-option-${hub.id}`}
                     role="option"
                     aria-selected={isSelected}
-                    className={`hub-option ${isSelected ? 'selected' : ''}`}
+                    className={`custom-dropdown-option ${isSelected ? 'selected' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
                       toggleOption(hub.id);
                     }}
                   >
-                    <div className="hub-checkbox">
+                    <div className="custom-dropdown-checkbox">
                       {isSelected && '✓'}
                     </div>
                     <div className="hub-info">

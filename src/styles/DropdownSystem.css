@@ -3,10 +3,9 @@
    Consistent styling for all select elements across PowerProject.
    ========================================================================== */
 .master-dropdown {
-  /* Use standard form input variables */
   background: var(--halo-bg, rgba(45, 212, 191, 0.05));
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 14px;
   color: var(--brand-green);
   font-weight: 600;
   cursor: pointer;
@@ -18,29 +17,147 @@
   padding-right: 40px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .master-dropdown:focus {
   border-color: var(--brand-green);
   box-shadow: 0 0 10px var(--halo-glow);
   outline: none;
 }
-/* 
-   OPTION STYLING:
-   Native <option> elements have limited styling support but we can control 
-   the background and text color to match the premium dark theme.
-*/
+
 .master-dropdown option {
-  /* 
-     Target Color: perceived dark green/gray blackish color (#0b1314)
-     This matches the background of 'Detailed Description' text boxes 
-     which use var(--halo-bg) on top of the black body.
-  */
   background-color: #0b1314; 
   color: var(--text-color);
   padding: 12px;
-  font-weight: normal;
 }
-/* Light mode support */
-[data-theme='light'] .master-dropdown option {
-  background-color: #fcfcfd;
-  color: #18181b;
+
+/* 
+   CUSTOM DROPDOWN POPUP SYSTEM
+   Used by AssigneeSelector, HubSelector, and other technical multi-selects.
+*/
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: #0a0a0a !important; /* Truly solid dark background to prevent bleed-through */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+  padding: 4px 0;
+}
+
+.custom-dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.custom-dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.custom-dropdown-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-dropdown-option.selected {
+  background: rgba(var(--brand-green-rgb), 0.08);
+}
+
+.custom-dropdown-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #000;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.custom-dropdown-option.selected .custom-dropdown-checkbox {
+  background: var(--brand-green);
+  border-color: var(--brand-green);
+}
+
+.custom-dropdown-option.single .custom-dropdown-checkbox {
+  border-radius: 50%;
+}
+
+.custom-dropdown-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.custom-dropdown-option.selected .custom-dropdown-text {
+  color: var(--brand-green);
+  font-weight: 700;
+}
+
+/* Scrollbar Styling for Dropdowns */
+.custom-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Custom Select Component (Reusable) ─── */
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--brand-green);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  min-height: unset !important;
+}
+
+.custom-select-trigger.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.custom-select-container.open .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+}
+
+.fade-in {
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

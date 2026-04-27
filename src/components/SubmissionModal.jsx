@@ -308,13 +308,15 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
           <div className="submission-guideline-text">
             * Images up to 25MB accepted (auto-optimized to 300KB for field sync)
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div className="submission-actions-group">
             <button
               className="submission-cancel-btn"
               onClick={onClose}
               disabled={submitting}
+              title={isLocked ? 'Close' : 'Cancel'}
             >
-              {isLocked ? 'Close' : 'Cancel'}
+              <span className="btn-icon">{isLocked ? '✕' : '✕'}</span> 
+              <span className="btn-text">{isLocked ? 'Close' : 'Cancel'}</span>
             </button>
 
             {!isLocked && (
@@ -325,7 +327,8 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                   disabled={!canSubmit}
                   title="Save proof without moving task stage"
                 >
-                  {submitting ? 'Uploading...' : '📎 Upload Only'}
+                  <span className="btn-icon">📎</span> 
+                  <span className="btn-text">{submitting ? 'Uploading...' : 'Upload Only'}</span>
                 </button>
                 <button
                   className="halo-button"
@@ -333,7 +336,8 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                   disabled={!canSubmit}
                   title="Save proof and move task to Review"
                 >
-                  {submitting ? 'Submitting...' : '📤 Submit for Review'}
+                  <span className="btn-icon">📤</span> 
+                  <span className="btn-text">{submitting ? 'Submitting...' : 'Submit for Review'}</span>
                 </button>
               </>
             )}

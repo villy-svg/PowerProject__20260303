@@ -83,17 +83,17 @@ const AssigneeSelector = ({
         id={`assignee-option-${emp.id}`}
         role="option"
         aria-selected={isSelected}
-        className={`assignee-option ${isSelected ? 'selected' : ''}`}
+        className={`custom-dropdown-option ${isSelected ? 'selected' : ''} ${isSingle ? 'single' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
           toggleOption(emp.id);
         }}
       >
-        <div className={`assignee-checkbox ${isSingle ? 'single' : ''}`}>
+        <div className="custom-dropdown-checkbox">
           {isSelected && (isSingle ? <div className="radio-dot" /> : '✓')}
         </div>
-        <span className="assignee-name">
+        <span className="custom-dropdown-text">
           {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
         </span>
       </div>
@@ -132,7 +132,7 @@ const AssigneeSelector = ({
               setIsOpen(false);
             }}
           />
-          <div className="assignee-dropdown-menu fade-in">
+          <div className="assignee-dropdown-menu custom-dropdown-menu fade-in">
             {assignees.length === 0 ? (
               <div className="no-assignees">No employees found</div>
             ) : (

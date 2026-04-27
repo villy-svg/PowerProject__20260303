@@ -8,6 +8,7 @@ import AssigneeSelector from '../../components/AssigneeSelector';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { taskUtils } from '../../utils/taskUtils';
 import './DailyTasksManagement.css';
+import CustomSelect from '../../components/CustomSelect';
 
 const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) => {
   const ui = useManagementUI({
@@ -313,115 +314,132 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              
-              {/* Basic Info */}
-              <div className="form-row-grid">
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Task Title *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g., Clean Hub Connectors"
-                  />
-                </div>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Description</label>
-                  <textarea
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Detailed instructions..."
-                  />
-                </div>
-              </div>
-
-              {/* Rules */}
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Vertical</label>
-                  <select
-                    className="master-dropdown"
-                    value={formData.verticalId}
-                    onChange={(e) => setFormData({ ...formData, verticalId: e.target.value, subjectId: '' })}
-                  >
-                    <option value={VERTICALS.CHARGING_HUBS.id}>Charging Hubs</option>
-                    <option value={VERTICALS.CLIENTS.id}>Client Management</option>
-                    <option value={VERTICALS.EMPLOYEES.id}>Employee Management</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Subject (Hub/Client/Etc)</label>
-                  <select
-                    className="master-dropdown"
-                    value={formData.subjectId}
-                    onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                  >
-                    <option value="">-- Generic Task --</option>
-                    {subjectOptions.map(opt => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Frequency</label>
-                  <select
-                    className="master-dropdown"
-                    value={formData.frequency}
-                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                  >
-                    <option value="DAILY">Daily</option>
-                    <option value="WEEKLY">Weekly</option>
-                    <option value="MONTHLY">Monthly</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Default Assignee</label>
-                  <AssigneeSelector
-                    value={formData.assignedTo}
-                    onChange={(val) => setFormData({...formData, assignedTo: val})}
-                    currentUser={currentUser}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Template Status</label>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '100%' }}>
-                     <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}} onClick={() => setFormData({...formData, isActive: !formData.isActive})}>
-                        <div className={`selection-checkbox ${formData.isActive ? 'checked' : ''}`}>
-                          {formData.isActive && '✓'}
-                        </div>
-                        <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>
-                          {formData.isActive ? 'Active (Generating)' : 'Paused'}
-                        </span>
-                      </label>
+              <div className="modal-content-area">
+                {/* Basic Info */}
+                <div className="form-row-grid">
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label>Template Title *</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="e.g. Daily Cleaning Hub"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Upload Link (Future feature)</label>
-                  <input
-                    type="url"
-                    value={formData.uploadLink}
-                    onChange={(e) => setFormData({ ...formData, uploadLink: e.target.value })}
-                    placeholder="https://"
-                    disabled
-                    title="Reserved for future attachments"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Describe the recurring task..."
+                      rows={2}
+                    />
+                  </div>
                 </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Vertical</label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        value={formData.verticalId}
+                        onChange={(val) => setFormData({ ...formData, verticalId: val })}
+                        options={[
+                          { label: 'Charging Hubs', value: VERTICALS.CHARGING_HUBS.id },
+                          { label: 'Client Management', value: VERTICALS.CLIENTS.id },
+                          { label: 'Employee Management', value: VERTICALS.EMPLOYEES.id }
+                        ]}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Subject (Hub/Client/Etc)</label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        value={formData.subjectId}
+                        onChange={(val) => setFormData({ ...formData, subjectId: val })}
+                        options={[
+                          { label: '-- Generic Task --', value: '' },
+                          ...subjectOptions.map(opt => ({ label: opt.label, value: opt.id }))
+                        ]}
+                        placeholder="Select Subject..."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Frequency</label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        value={formData.frequency}
+                        onChange={(val) => setFormData({ ...formData, frequency: val })}
+                        options={[
+                          { label: 'Daily', value: 'DAILY' },
+                          { label: 'Weekly', value: 'WEEKLY' },
+                          { label: 'Monthly', value: 'MONTHLY' }
+                        ]}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Default Assignee</label>
+                    <div className="form-input-container">
+                      <AssigneeSelector
+                        value={formData.assignedTo}
+                        onChange={(val) => setFormData({...formData, assignedTo: val})}
+                        currentUser={currentUser}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Template Status</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '100%' }}>
+                       <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}} onClick={() => setFormData({...formData, isActive: !formData.isActive})}>
+                          <div className={`selection-checkbox ${formData.isActive ? 'checked' : ''}`}>
+                            {formData.isActive && '✓'}
+                          </div>
+                          <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>
+                            {formData.isActive ? 'Active (Generating)' : 'Paused'}
+                          </span>
+                        </label>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Upload Link (Future)</label>
+                    <div className="form-input-container" style={{ opacity: 0.5 }}>
+                      <input
+                        type="url"
+                        value={formData.uploadLink}
+                        onChange={(e) => setFormData({ ...formData, uploadLink: e.target.value })}
+                        placeholder="https://"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>
+                    {statusMsg.text}
+                  </div>
+                )}
               </div>
 
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
-
-              <div className="modal-footer">
+              <div className="modal-footer sticky">
                 <button type="button" className="halo-button cancel-btn" onClick={ui.closeModal}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>
                   {loading ? 'Saving...' : (ui.editingItem ? 'Update Template' : 'Create Template')}

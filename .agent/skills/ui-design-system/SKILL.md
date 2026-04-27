@@ -60,51 +60,37 @@ The **primary interactive element** throughout the app.
 
 ---
 
-## 3. Badges & Tags (`.halo-type`)
-Used for inline metadata chips on task tiles, sidebars, and tables.
+## 3. Standardized Badge System (Neutral Premium)
+All metadata chips (Hub, Dept, Role, Function, Assignee) and Priority indicators MUST use this unified system to ensure pixel-perfect alignment.
 
-### Halo-Type Badge
+### A. Technical Specification
+- **Typography**: `'JetBrains Mono', monospace`, `font-weight: 800`, `font-size: 0.65rem` (`0.6rem` on mobile).
+- **Geometry**: `4px` border-radius (Strict: No pills), `1px 8px` padding, `min-height: 20px` (`18px` on mobile).
+- **Layout**: `display: inline-flex`, `align-items: center`, `line-height: 1`, `text-transform: uppercase`, `letter-spacing: 0.5px`.
+- **Transitions**: `all 0.2s ease`.
+
+### B. The "Neutral Metadata" Rule
+All infrastructure/system metadata MUST be neutralized to avoid visual noise.
+- **Background**: `rgba(255, 255, 255, 0.05)`.
+- **Border**: `1px solid var(--border-color)`.
+- **Text Color**: `var(--text-color)` at `opacity: 0.7`.
+- **Usage**: Hub codes, Function codes, Assignee status, Department/Role names.
+
+### C. The "Semantic Priority" Rule
+Only task status/priority indicators are allowed to use vibrant colors.
+- **Urgent**: `#ef4444` (Red)
+- **High**: `#f97316` (Orange)
+- **Medium**: `#eab308` (Yellow)
+- **Low**: `#22c55e` (Green)
+- **Rule**: These MUST still share the technical typography and geometry of the Neutral badges to maintain alignment.
+
+### D. Implementation (CSS Classes)
 ```css
-/* Applied via: className="[specific-class] halo-type" */
-
-.tile-hub-code.halo-type {
-  background: color-mix(in srgb, var(--stage-color), transparent 90%);
-  color: var(--stage-color);
-  border: 1px solid color-mix(in srgb, var(--stage-color), transparent 70%);
-  font-size: 0.7rem; font-weight: 800; padding: 3px 8px;
-  border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
-}
-
-.tile-function-badge.halo-type {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-color);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.65rem; font-weight: 600; padding: 2px 8px;
-  border-radius: 20px; text-transform: capitalize; opacity: 0.8;
+/* All these MUST inherit from the base definition in globalTheme.css */
+.hub-badge, .dept-badge, .role-badge, .tile-function-badge, .assignee-badge-base, .card-priority {
+   /* Base styles managed centrally */
 }
 ```
-
-### Table Tags (`.v-tag`)
-Used in the User Management table to show vertical access.
-```css
-.v-tag {
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;
-}
-.v-tag.master { 
-  background: rgba(16, 185, 129, 0.1); 
-  border: 1px solid var(--brand-green);
-  color: var(--brand-green);
-}
-```
-
-**Rules**:
-- Tags/badges use **semi-transparent backgrounds** — never solid fills unless specifically for a `master` or critical status.
-- Do NOT introduce red/orange/blue/purple badge colors without explicit permission.
-- `None` access level → gray (`#7f8c8d` tint). All active levels → brand-green tint.
 
 ---
 
@@ -112,32 +98,12 @@ Used in the User Management table to show vertical access.
 For toggle/selector button groups (e.g., capability level selectors in modals):
 
 ```css
-/* Default (unselected, enabled) */
-.v-lvl-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  color: var(--text-color); opacity: 0.5;
-}
-
-/* Hover */
-.v-lvl-btn:hover { opacity: 1; background: rgba(255, 255, 255, 0.1); }
-
 /* Selected (Active) — Halo pattern */
 .v-lvl-btn.active {
   border: 2px solid var(--brand-green);
-  background: rgba(16, 185, 129, 0.15);  /* Subtle tint, NOT solid fill */
+  background: rgba(16, 185, 129, 0.15);
   color: var(--brand-green); opacity: 1;
 }
-
-/* Selected "None" — Neutral gray halo */
-.v-lvl-btn.active.lvl-none {
-  border-color: #7f8c8d;
-  background: rgba(127, 140, 141, 0.15);
-  color: #7f8c8d;
-}
-
-/* Disabled (locked by permission ceiling) */
-.v-lvl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 ```
 
 **Rule**: Selected states use a **2px border + subtle tint** (halo style), NOT solid fills.
@@ -146,31 +112,29 @@ For toggle/selector button groups (e.g., capability level selectors in modals):
 
 ## 5. Modals
 - **Overlay**: `position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);`
-- **Body**: rounded corners (`border-radius: 12px`), border `1px solid var(--border-color)`, background `var(--bg-color)`.
-- **Header**: label + `×` close button (`opacity: 0.5`, hover → `opacity: 1`).
-- **Footer actions**: Cancel (transparent, outlined) + Confirm (`.halo-button`).
+- **Body**: rounded corners (`border-radius: 24px` — Squircle), border `1px solid var(--border-color)`, background `var(--bg-color)`.
+- **Footer actions**: `.halo-button` for confirmations.
 
 ---
 
 ## 6. Typography
-- **Font**: `'Inter', system-ui, sans-serif` (imported from Google Fonts).
-- **Section labels**: `font-weight: 700`, `font-size: 14px`, `opacity: 0.8`.
-- **Card titles**: `font-weight: 600–800`.
-- **Micro-labels / badges**: `font-size: 0.65–0.75rem`, `font-weight: 700–800`, `text-transform: uppercase`, `letter-spacing: 0.5px`.
+- **Technical Metadata**: `'JetBrains Mono', monospace` (Badges, Codes, IDs).
+- **Core Interface**: `'Inter', system-ui, sans-serif` (Body, Labels, Titles).
+- **Micro-labels**: `0.65rem`, `font-weight: 800`, `text-transform: uppercase`, `letter-spacing: 0.5px`.
 
 ---
 
-## 7. Stage/Priority Colors
-Stage colors are always referenced via `var(--stage-color)` (passed as a CSS custom property on the element). This allows context-sensitive tinting without hardcoding.
+## 7. Global Stage/Priority Colors
+Stage colors are referenced via `var(--stage-color)`.
 
 Priority badge convention:
-```css
-.priority-urgent { color: #ef4444; }
-.priority-high   { color: #f97316; }
-.priority-medium { color: #eab308; }
-.priority-low    { color: #22c55e; }
-```
-These are the ONLY allowed priority colors.
+- **Urgent**: `rgba(239, 68, 68, 0.15)` bg, `#ef4444` text.
+- **High**: `rgba(249, 115, 22, 0.15)` bg, `#f97316` text.
+- **Medium**: `rgba(234, 179, 8, 0.1)` bg, `#eab308` text.
+- **Low**: `rgba(34, 197, 94, 0.1)` bg, `#22c55e` text.
+
+**Rule**: These are the ONLY allowed semantic colors. They MUST use the standard badge geometry (4px radius, 20px height).
+
 
 ---
 
@@ -186,25 +150,32 @@ These are the ONLY allowed priority colors.
 | Assignee badges on generic cards | ❌ Only render in vertical-specific tile components (e.g., `HubTaskTile`) |
 ---
 
-## 9. Standard Form Styling
-All forms (Add/Edit wizards) MUST follow these class-based rules to ensure visual parity with the global Halo system. **Avoid inline styles for form inputs.**
+## 9. Standard Form Styling (Block-in-a-Box)
+All management forms (Add/Edit wizards) MUST follow the **"Block-in-a-Box"** architecture to ensure visual parity with the global design system.
 
-### Container Classes
-- **`.form-section`**: Groups related fields with consistent spacing.
-- **`.form-grid`**: Usually a `display: grid` with `template-columns: 1fr 1fr` for side-by-side inputs.
-- **`.form-group`**: Wraps a single label + input pair with `flex-direction: column` and `gap: 0.5rem`.
+### A. Form Blocks (`.form-group`)
+Every label + input pair MUST be wrapped in a `.form-group` block.
+- **Background**: `rgba(255, 255, 255, 0.02)`
+- **Border**: `1px solid var(--border-color)`
+- **Radius**: `12px`
+- **Padding**: `14px`
+- **Interaction**: On focus-within, the block background intensifies and the border lights up in brand-green.
 
-### Input & Select Styling
-- **Background**: `var(--halo-bg)` — ensures the hallmark subtle teal/green tint.
-- **Border**: `1px solid var(--border-color)`.
-- **Text (Selects)**: `color: var(--brand-green)`, `font-weight: 600`.
-- **Focus State**: `border-color: var(--brand-green)`, `box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.2)`.
+### B. Inner Value Box (`.form-input-container`)
+The actual input, select, or selector MUST be nested within a secondary container.
+- **Background**: `var(--halo-bg)`
+- **Border**: `1px solid var(--border-color)`
+- **Radius**: `8px`
+- **Min-Height**: `44px`
+- **Typography**: `font-weight: 600`, `font-size: 0.95rem`.
+- **Value Highlight**: Select values should be highlighted in `var(--brand-green)`.
 
-### View-Only Mode
-- Apply `.view-only-mode` to the parent `<form>`.
-- Inputs should have `cursor: not-allowed`, `opacity: 0.6`, and a darker `rgba(255, 255, 255, 0.02)` background.
+### C. Layout & Density
+- **Grids**: Use `.form-row-grid` for 2-column layouts with a consistent `16px` gap (matches block spacing).
+- **Separation**: The `.vertical-task-form` container uses a `16px` gap between blocks.
+- **Labels**: Labels must be uppercase, technical, and neutralized (`opacity: 0.5`, `font-weight: 800`).
 
-**Rule**: New forms should mirror the implementation in `EmployeeForm.css` or `ClientForm.css`. Never use primitive `rgba(255,255,255,0.05)` for input backgrounds; always use `var(--halo-bg)`.
+**Rule**: All new forms MUST inherit from `ManagementForms.css`. Never use primitive `rgba(255,255,255,0.05)` for input backgrounds; always use the `form-input-container` wrapper.
 
 ---
 

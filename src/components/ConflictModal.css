@@ -1,4 +1,6 @@
 
+@import '../styles/systems/systemModals.css';
+
 .conflict-intro {
   margin-bottom: 24px;
   opacity: 0.8;

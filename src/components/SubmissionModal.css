@@ -2,6 +2,7 @@
    SubmissionModal.css — Proof of Work Modal (Halo/Glassmorphism System)
    Follows: UI Design System §5 (Modals), §12 (Apple Premium Standards)
    ========================================================================== */
+@import '../styles/systems/systemModals.css';
 /* ─── Modal Body Layout ─────────────────────────────────────────────────── */
 
 /* ─── Section Labels ────────────────────────────────────────────────────── */
@@ -307,9 +308,56 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.submission-actions-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.submission-actions-group .btn-icon {
+  display: none; /* Text only on large screens */
+}
+
+.submission-actions-group .btn-text {
+  font-size: 0.8rem; /* Reduced font size on large screens */
+  font-weight: 700;
+}
+
+.submission-actions-group button,
+.submission-actions-group .halo-button {
+  padding: 8px 16px !important; /* Reduced vertical padding */
+  min-height: unset !important;
+}
+
 /* ─── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .submission-file-chip {
     max-width: 100%;
+  }
+  
+  .submission-actions-group {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .submission-actions-group .btn-icon {
+    display: inline-block; /* Symbol/icon only on small screens */
+  }
+
+  .submission-actions-group .btn-text {
+    display: none; /* Hide text on small screens */
+  }
+
+  .submission-actions-group button,
+  .submission-actions-group .halo-button {
+    width: auto !important;
+    flex: 1;
+    padding: 12px 8px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    font-size: 1.2rem !important; /* Make icons larger */
   }
 }

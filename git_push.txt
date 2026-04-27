@@ -1,9 +1,9 @@
 # 1. Build (on Staging)
-npm run build:staging
+npm run build:staging 
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260426 APK -- PWA Phase 1 1.2.1" 
+git commit -m "260426 APK -- PWA Phase 1 1.2.2" 
 git push origin staging
 
 # 3. Merge Staging to Main  

@@ -274,18 +274,20 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
 
               <div className="form-group" style={{ marginTop: '1rem' }}>
                 <label>Billing Model</label>
-                <select
-                  name="billing_model_id"
-                  className="master-dropdown"
-                  value={formData.billing_model_id}
-                  onChange={handleChange}
-                  disabled={isViewOnly}
-                >
-                  <option value="">— Select Billing Model —</option>
-                  {billingModels.map(model => (
-                    <option key={model.id} value={model.id}>{model.name} ({model.code})</option>
-                  ))}
-                </select>
+                <div className="form-input-container">
+                  <CustomSelect
+                    value={formData.billing_model_id}
+                    onChange={(val) => handleChange({ target: { name: 'billing_model_id', value: val } })}
+                    options={[
+                      { label: '— Select Billing Model —', value: '' },
+                      ...billingModels.map(model => ({
+                        label: `${model.name} (${model.code})`,
+                        value: model.id
+                      }))
+                    ]}
+                    disabled={isViewOnly}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -295,38 +297,44 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
             <div className="form-page fade-in">
               <div className="form-group">
                 <label>PoC Name</label>
-                <input
-                  type="text"
-                  name="poc_name"
-                  value={formData.poc_name}
-                  onChange={handleChange}
-                  placeholder="Point of Contact Name"
-                  readOnly={isViewOnly}
-                />
+                <div className="form-input-container">
+                  <input
+                    type="text"
+                    name="poc_name"
+                    value={formData.poc_name}
+                    onChange={handleChange}
+                    placeholder="Point of Contact Name"
+                    readOnly={isViewOnly}
+                  />
+                </div>
               </div>
 
               <div className="form-group">
                 <label>Contact Number</label>
-                <input
-                  type="tel"
-                  name="poc_phone"
-                  value={formData.poc_phone}
-                  onChange={handleChange}
-                  placeholder="+91XXXXXXXXXX"
-                  readOnly={isViewOnly}
-                />
+                <div className="form-input-container">
+                  <input
+                    type="tel"
+                    name="poc_phone"
+                    value={formData.poc_phone}
+                    onChange={handleChange}
+                    placeholder="+91XXXXXXXXXX"
+                    readOnly={isViewOnly}
+                  />
+                </div>
               </div>
 
               <div className="form-group">
                 <label>Email ID</label>
-                <input
-                  type="email"
-                  name="poc_email"
-                  value={formData.poc_email}
-                  onChange={handleChange}
-                  placeholder="poc@client.com"
-                  readOnly={isViewOnly}
-                />
+                <div className="form-input-container">
+                  <input
+                    type="email"
+                    name="poc_email"
+                    value={formData.poc_email}
+                    onChange={handleChange}
+                    placeholder="poc@client.com"
+                    readOnly={isViewOnly}
+                  />
+                </div>
               </div>
             </div>
           )}
