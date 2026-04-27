@@ -1,4 +1,7 @@
 /* globalTheme.css - Shared Design Tokens and Global UI Components */
+@import "./systems/systemLists.css";
+@import "./systems/systemBadges.css";
+
 /* ==========================================================================
    1. THEME VARIABLES (Centralized Source of Truth)
    ========================================================================== */
@@ -64,8 +67,10 @@
   --brand-blue: #3b82f6;      
   --brand-green: var(--brand-mint);
   --border-color: rgba(255, 255, 255, 0.04); /* Subtler satin edges */
-  --panel-bg: #121214;        /* Slightly lighter for cards (elevation) */
-  --surface-card: #09090b;    /* Deeper workspace background */
+  --panel-bg: #060606;        /* Deeper Midnight */
+  --surface-card: #020202;    /* Near Absolute Black */
+
+
   /* Shadows & Depth */
   --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.6);
   --glass-blur: 25px;
@@ -187,6 +192,34 @@
   border: 2px solid var(--brand-green);
   box-shadow: 0 0 20px var(--halo-glow);
 }
+
+/* Secondary Variant (Neutral) */
+.halo-button.secondary {
+  color: var(--text-color);
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+.halo-button.secondary:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+/* Danger Variant (Destructive) */
+.halo-button.danger {
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 95%);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%);
+}
+.halo-button.danger:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border-color: var(--priority-urgent);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
+}
+
 .halo-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -265,6 +298,7 @@
    4. SHARED VERTICAL TOKENS (Badges & Indicators)
    ========================================================================== */
 /* ─── Standardized Badge System (Neutral Premium) ─── */
+.badge-base,
 .hub-badge, 
 .dept-badge, 
 .role-badge, 
@@ -290,6 +324,35 @@
   white-space: nowrap;
   line-height: 1;
   box-sizing: border-box;
+}
+
+/* Badge Semantic Variants */
+.badge-success {
+  color: #22c55e !important;
+  background: rgba(34, 197, 94, 0.1) !important;
+  border-color: rgba(34, 197, 94, 0.2) !important;
+  opacity: 1 !important;
+}
+
+.badge-warning {
+  color: #eab308 !important;
+  background: rgba(234, 179, 8, 0.1) !important;
+  border-color: rgba(234, 179, 8, 0.2) !important;
+  opacity: 1 !important;
+}
+
+.badge-danger {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  opacity: 1 !important;
+}
+
+.badge-info {
+  color: var(--brand-blue) !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+  opacity: 1 !important;
 }
 
 .card-priority {
@@ -352,142 +415,171 @@
   opacity: 0.5;
 }
 
+/* ─── Standardized Bulk Action Bar (Halo Style) ─── */
+.bulk-action-bar {
+  position: fixed;
+  bottom: calc(var(--tray-height, 64px) + var(--safe-bottom, 0px) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 500px;
+  background: rgba(8, 8, 10, 0.95);
+  backdrop-filter: blur(25px) saturate(180%);
+
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 3010;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
+}
+
+.bulk-action-bar.bulk-hidden {
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media screen and (min-width: 1025px) {
+  .bulk-action-bar {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    min-width: 550px; /* Increased to accommodate buttons */
+    max-width: 90vw;
+    border-radius: 50px;
+    padding: 8px 24px;
+    bottom: 2rem;
+    gap: 20px;
+  }
+}
+
+.bulk-info {
+  font-weight: 700;
+  color: var(--brand-mint);
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.bulk-btn {
+  background: var(--halo-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--brand-mint) !important;
+  border-radius: 50px !important;
+  padding: 6px 16px !important;
+  font-size: 0.8rem !important;
+  min-width: 90px !important;
+  height: 34px !important;
+  transition: all 0.2s ease !important;
+}
+
+.bulk-btn:hover {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
+  border-color: var(--brand-mint) !important;
+  box-shadow: 0 0 15px var(--halo-glow);
+  transform: translateY(-1px);
+}
+
+.bulk-btn.delete:hover {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+.bulk-btn.cancel {
+  color: var(--text-color) !important;
+  opacity: 0.7;
+}
+
+.bulk-btn.cancel:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+
 /* ==========================================================================
    SHARED UI SYSTEMS (Universal Layouts)
    ========================================================================== */
 
-/* ─── Universal List Row System ─── */
-.list-task-row {
-  display: flex;
-  justify-content: space-between;
+/* ─── Management Action Icons (Universal) ─── */
+.action-icon-btn,
+.card-nav-button,
+.card-edit-button,
+.card-delete-button,
+.card-deprio-button,
+.card-reprio-button,
+.card-add-sub-button,
+.card-submit-proof-button {
+  background: transparent;
+  border: none;
+  color: #ffffff !important; /* Force high contrast white */
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-left: 2px solid color-mix(in srgb, var(--stage-color, var(--brand-green)), transparent 30%);
-  border-radius: 12px;
-  padding: 4px 16px; 
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: unset;
-  position: relative;
-  overflow: hidden;
+  font-size: 1.1rem;
 }
 
-.list-row-main {
-  display: flex;
-  flex-wrap: nowrap;
+.action-icon-btn:hover,
+.card-edit-button:hover,
+.card-nav-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--brand-green) !important;
+  transform: translateY(-1px);
+}
+
+.card-delete-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444 !important;
+}
+
+.status-toggle-btn {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: auto !important;
+  color: #ffffff !important;
+  font-size: 1.1rem !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
-  padding-right: 12px;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
+  justify-content: center;
+  border-radius: 6px;
 }
 
-.list-row-badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
 
-.list-row-content {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1;
-  line-height: 1.4;
-}
+/* ─── Universal List Row System ─── */
+/* Unified styles are now strictly managed in src/styles/systems/systemLists.css */
+
 
 /* PC Expansion (Hover) */
-@media (min-width: 769px) {
-  .list-row-controls {
-    position: absolute;
-    bottom: -40px; 
-    left: 0;
-    width: 100%;
-    padding: 0 16px;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    height: 44px;
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    background: linear-gradient(to top, var(--panel-bg) 80%, transparent);
-  }
-  .list-task-row:hover .list-row-controls,
-  .list-task-row.is-expanded .list-row-controls {
-    opacity: 1;
-    bottom: 4px;
-    pointer-events: auto;
-  }
-  .list-task-row:hover,
-  .list-task-row.is-expanded {
-    padding-bottom: 40px;
-  }
-  .list-task-row:hover {
-    border-color: var(--stage-color, var(--brand-green));
-    box-shadow: var(--shadow-premium);
-  }
-}
+/* Redundant list-row-controls removed (handled by systemLists.css) */
 
-/* Mobile Adaptation (Inline Expansion) */
-@media (max-width: 768px) {
-  .list-task-row {
-    align-items: flex-start;
-    padding: 10px 12px;
-    flex-direction: column;
-    height: auto;
-  }
-  .list-row-main {
-    flex-wrap: wrap; 
-    gap: 8px;
-    align-items: flex-start; 
-  }
-  .list-row-content {
-    white-space: normal;
-    word-break: break-word;
-    min-width: 100%; 
-    margin-top: 4px;
-    padding-bottom: 4px;
-  }
-  .list-row-controls {
-    position: relative;
-    display: none; 
-    width: 100%;
-    height: auto;
-    padding: 12px 4px 4px 4px;
-    margin-top: 4px;
-    border-top: 1px solid var(--border-color);
-    background: transparent !important; 
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .list-row-controls::-webkit-scrollbar {
-    display: none;
-  }
-  .list-task-row.is-expanded .list-row-controls {
-    display: flex;
-  }
-}
-
-/* ─── Management Action Icons ─── */
 .action-icon-btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85); /* Increased contrast */
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -515,7 +607,7 @@
   width: 28px !important;
   height: 28px !important;
   min-width: auto !important;
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.85) !important; /* Increased contrast */
   font-size: 1.1rem !important;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -524,6 +616,7 @@
   justify-content: center;
   border-radius: 6px;
 }
+
 .status-toggle-btn:hover {
   background: rgba(255, 255, 255, 0.05) !important;
   color: var(--brand-green) !important;

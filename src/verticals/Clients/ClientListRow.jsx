@@ -3,7 +3,7 @@ import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../co
 
 /**
  * ClientListRow
- * Row view item for a client, refactored to match Task Board aesthetics.
+ * Row view item for a client. (North Star: TaskListView / ListViewRow)
  */
 const ClientListRow = ({
   client,
@@ -16,6 +16,8 @@ const ClientListRow = ({
   isExpanded,
   onToggleExpand
 }) => {
+  const pendingTasksCount = tasks.filter(t => t.stage !== 'Done').length;
+
   return (
     <div
       className={`list-task-row client-list-row ${client.status === 'Inactive' ? 'inactive' : ''} ${isExpanded ? 'is-expanded' : ''}`}
@@ -24,59 +26,59 @@ const ClientListRow = ({
         onToggleExpand();
       }}
       onDoubleClick={() => onView(client)}
+      style={{
+        '--stage-color': client.status === 'Active' ? 'var(--brand-green)' : 'var(--priority-urgent)'
+      }}
     >
       <div className="list-row-main">
-        {/* 1. Identity Block */}
-        <div className="list-row-content">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span className="list-name">{client.name}</span>
-            {client.billing_model_name && (
-              <span className="billing-badge" style={{ fontSize: '0.65rem' }}>{client.billing_model_name}</span>
-            )}
-            {tasks.length > 0 && (
-              <span className="pending-tasks-badge" title={`${tasks.length} pending tasks`}>
-                {tasks.length} TASKS
-              </span>
-            )}
-          </div>
-          {isExpanded && (
-            <div className="list-row-subline" style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '4px' }}>
-              <span style={{ marginRight: '16px' }}>👤 {client.poc_name || 'No POC'}</span>
-              <span>📧 {client.poc_email || 'No Email'}</span>
-            </div>
+        {/* 1. Badges / Metadata - Following ListViewRow North Star */}
+        <div className="list-row-badges">
+          <span className={`card-priority ${client.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`} style={{ minWidth: '70px', textAlign: 'center' }}>
+            {client.status}
+          </span>
+          <span className="billing-badge hub-badge" style={{ fontSize: '0.65rem' }}>{client.billing_model_code || 'MODEL'}</span>
+          {pendingTasksCount > 0 && (
+            <span className="badge-base badge-info">
+              {pendingTasksCount} TASKS
+            </span>
           )}
+          <span className="dept-badge" style={{ opacity: 0.7 }}>
+            {Object.keys(client.category_matrix || {}).length} VEH
+          </span>
         </div>
 
-        {/* 2. Badges / Metadata (Hidden on mobile if not expanded) */}
-        {!isExpanded && (
-          <div className="list-row-badges">
-            <span className="poc-name-mini">{client.poc_name || 'No POC'}</span>
-            <span className="category-code-mini">
-              {Object.keys(client.category_matrix || {}).length} VEHICLES
-            </span>
-          </div>
-        )}
+        {/* 2. Content (Name + Subline) */}
+        <div className="list-row-content" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span className="list-name" style={{ fontWeight: 700 }}>{client.name}</span>
+          {client.poc_name && (
+            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>👤 {client.poc_name}</span>
+          )}
+          {client.poc_phone && (
+            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>📞 {client.poc_phone}</span>
+          )}
+        </div>
       </div>
 
-      {/* 3. Controls (Hover/Expand) */}
+      {/* 3. Controls (Actions) - Following ListViewRow North Star */}
       <div className="list-row-controls">
         {permissions.canUpdate && (
           <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(client); }} title="Edit">
             <IconEdit size={14} />
           </button>
         )}
-        {permissions.canDelete && (
-          <button className="card-delete-button" onClick={(e) => { e.stopPropagation(); onDelete(client.id); }} title="Delete">
-            <IconTrash size={14} />
-          </button>
-        )}
-        {client.status !== 'Inactive' && permissions.canUpdate && (
+        {permissions.canUpdate && (
           <button
             className="card-deprio-button"
             onClick={(e) => { e.stopPropagation(); onToggleStatus(client.id, client.status); }}
-            title="Move to Inactive"
+            title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+            style={{ color: client.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
           >
-            <IconChevronDown size={14} />
+            <IconChevronDown size={14} style={{ transform: client.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
+          </button>
+        )}
+        {permissions.canDelete && (
+          <button className="card-delete-button" onClick={(e) => { e.stopPropagation(); onDelete(client.id); }} title="Delete">
+            <IconTrash size={14} />
           </button>
         )}
         <button 

@@ -76,6 +76,34 @@
   border: 2px solid var(--brand-green);
   box-shadow: 0 0 20px var(--halo-glow);
 }
+
+/* Secondary Variant (Neutral) */
+.halo-button.secondary {
+  color: var(--text-color);
+  opacity: 0.7;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+.halo-button.secondary:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+/* Danger Variant (Destructive) */
+.halo-button.danger {
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 95%);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%);
+}
+.halo-button.danger:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border-color: var(--priority-urgent);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
+}
+
 .halo-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;

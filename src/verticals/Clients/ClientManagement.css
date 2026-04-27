@@ -7,132 +7,33 @@
   gap: 1.5rem;
   padding: 1rem 0;
 }
-.client-card, .client-list-row {
-  position: relative;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 20px; /* Matching Squircle standard */
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 280px; /* Force minimum height to ensure visibility */
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+
+/* Local Overrides for ClientCard (North Star) */
+.client-card.task-card-master {
+  min-height: 180px;
 }
-.client-card {
-  border-left: 4px solid var(--brand-green);
-}
-.client-card:hover, .client-list-row:hover {
-  background: color-mix(in srgb, var(--panel-bg), white 2%);
-  border-color: var(--brand-green);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(var(--brand-green-rgb), 0.1);
-}
-.client-card:hover { transform: translateY(-4px); }
-.client-list-row:hover { transform: translateX(4px); }
-.client-card.inactive, .client-list-row.inactive {
+
+.client-card.inactive {
   filter: grayscale(1);
   opacity: 0.5;
-  border-left-color: #666;
+  border-left-color: #666 !important;
 }
-/* Row 1: Badges */
-.client-card-badges {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-  position: relative;
-  z-index: var(--z-card-content);
-}
-.billing-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: var(--badge-blue-bg);
-  color: var(--badge-blue-text);
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 122, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-/* Row 2: Name */
+
 .client-card-name {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  color: var(--text-color); /* Adaptive variable instead of hardcoded white */
+  color: var(--text-color);
   margin: 0;
   line-height: 1.2;
-  letter-spacing: -0.02em;
-  position: relative;
-  z-index: var(--z-card-name-overlay);
 }
-/* Floating Actions Area */
-.client-card-actions {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  z-index: var(--z-card-actions);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.client-card:hover .client-card-actions {
-  opacity: 1;
-}
-/* Row 3: PoC Contact */
+
 .client-card-poc {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.9rem;
-  opacity: 0.9;
-  color: var(--text-color);
+  line-height: 1.4;
 }
-/* Row 4: Footer */
-.client-card-footer {
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  font-size: 0.8rem;
-}
-.client-status-indicator {
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 1px;
-}
-.client-status-indicator.active { color: var(--brand-green); }
-.client-status-indicator.inactive { color: #ff4444; }
-.client-category-label {
-  font-size: 0.75rem;
-  opacity: 0.5;
-}
-.poc-primary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.poc-contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.poc-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  opacity: 0.7;
-}
-.poc-icon {
-  width: 16px;
-  opacity: 0.5;
-}
+
 /* List View */
 .client-list-row {
   min-height: unset;

@@ -139,95 +139,29 @@
 .list-task-row.selected {
   background-color: color-mix(in srgb, var(--brand-green), transparent 94%);
 }
-/* ===== FLOATING BULK ACTION BAR ===== */
-/* Entry animation: uses opacity only so it doesn't conflict with
-   the transform-based transition used for tray-hidden state. */
-@keyframes bulkBarFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* Selection checkboxes now inherit global styling from globalTheme.css */
+.list-task-row:hover .list-row-selection,
+.list-task-row.selected .list-row-selection {
+  opacity: 1;
+  width: 32px;
 }
-.bulk-action-bar {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(14, 14, 14, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 100px;
-  padding: 10px 20px;
+.list-row-selection {
   display: flex;
   align-items: center;
-  gap: 24px;
-  z-index: 2000;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
-  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
-}
-.bulk-action-bar.bulk-hidden {
-  transform: translate(-50%, 150%);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
-}
-.bulk-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  padding-right: 20px;
-}
-.selection-count {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--brand-green);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-}
-.bulk-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-/* All bulk buttons: neutral glass style — no colored borders */
-.bulk-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  color: rgba(255, 255, 255, 0.75);
-  padding: 6px 14px;
-  border-radius: 100px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
+  justify-content: center;
+  width: 0;
+  overflow: hidden;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.bulk-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
+.list-task-row.selected {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 94%);
 }
-/* Specific button accents on HOVER only (no resting border colors) */
-.bulk-btn.deprio:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-.bulk-btn.restore:hover {
-  background: rgba(0, 255, 102, 0.1);
-  color: var(--brand-green);
-}
-.bulk-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-}
-.bulk-btn.cancel:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-}
+
+/* Bulk Action Bar logic is now in globalTheme.css */
+
 /* ===== DUPLICATE MERGE INTERFACE ===== */
 .duplicate-merge-container {
   padding: 12px;
@@ -673,24 +607,9 @@
    DESKTOP BULK BAR OVERRIDES (≥1025px)
    ========================================================================== */
 @media screen and (min-width: 1025px) {
-  .bulk-action-bar {
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-    border-radius: 50px;
-    padding: 8px 1.5rem;
-    bottom: 2rem;
+  .kanban-stage-halo {
+    min-width: 260px;
+    padding: 12px;
   }
-  .bulk-action-bar.tray-hidden {
-    transform: translate(-50%, 0);
-  }
-  .bulk-info {
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: none;
-    padding-right: 16px;
-    padding-bottom: 0;
-  }
-  .bulk-action-bar .bulk-btn .bulk-btn-text {
-    display: inline;
-  }
-}
+}
+

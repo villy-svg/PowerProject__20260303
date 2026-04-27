@@ -33,36 +33,8 @@
 .list-action-group {
   padding-left: 8px; /* Remove the vertical bar setting that breaks on wrapping */
 }
-/* Reusing existing halo styles but ensuring vertical centering */
-.list-task-row .card-nav-button,
-.list-task-row .card-edit-button,
-.list-task-row .card-delete-button,
-.list-task-row .card-add-sub-button,
-.list-task-row .card-submit-proof-button,
-.list-task-row .card-reprio-button,
-.list-task-row .card-deprio-button {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-.list-task-row .card-nav-button:hover,
-.list-task-row .card-edit-button:hover,
-.list-task-row .card-delete-button:hover,
-.list-task-row .card-add-sub-button:hover,
-.list-task-row .card-submit-proof-button:hover {
-  background: var(--halo-bg);
-}
-/* Tree Specific */
-.tree-row {
-  margin-bottom: 4px;
-}
+/* Hierarchy Expansion & Icons */
+
 .tree-expander {
   width: 20px;
   height: 20px;
@@ -121,13 +93,18 @@
   background: var(--halo-bg);
   opacity: 1;
 }
-/* Icon Softening Consistency */
+/* Icon Visibility Consistency */
 .list-task-row .standard-icon {
-  opacity: 0.5 !important;
+  opacity: 0.9 !important; 
+  filter: contrast(1.2);
+  color: #ffffff !important;
 }
 .list-task-row button:hover .standard-icon {
-  opacity: 0.9 !important;
+  opacity: 1 !important;
+  filter: contrast(1.5);
 }
+
+
 .list-task-row .card-delete-button:hover .standard-icon {
   color: #ef4444;
 }
@@ -135,3 +112,11 @@
 .list-task-row .card-reprio-button:hover .standard-icon {
   color: var(--brand-green);
 }
+
+/* Hierarchy Progress Badges Consistency */
+.list-hierarchy-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}

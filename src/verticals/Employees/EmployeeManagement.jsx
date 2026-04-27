@@ -182,7 +182,7 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
             </div>
 
             <button
-              className={`halo-button toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}
+              className={`halo-button secondary toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}
               onClick={() => ui.setShowInactive(!ui.showInactive)}
               title={ui.showInactive ? "Hide Inactive" : "Show Inactive"}
             >
@@ -353,11 +353,11 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
           {ui.selectedIds.length} Selected
         </div>
         <div className="bulk-actions">
-          <button className="bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
+          <button className="halo-button bulk-btn" onClick={() => setIsBulkUpdateModalOpen(true)} title="Bulk Update">
             <IconEdit size={18} />
             <span className="bulk-btn-text">Update</span>
           </button>
-          <button className="bulk-btn cancel" onClick={ui.clearSelection} title="Cancel Selection">
+          <button className="halo-button secondary bulk-btn" onClick={ui.clearSelection} title="Cancel Selection">
             <IconX size={18} />
             <span className="bulk-btn-text">Cancel</span>
           </button>

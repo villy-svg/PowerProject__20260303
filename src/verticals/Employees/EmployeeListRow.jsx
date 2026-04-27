@@ -3,7 +3,7 @@ import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../co
 
 /**
  * EmployeeListRow
- * Row view item for an employee, refactored to match Task Board aesthetics.
+ * Row view item for an employee. (North Star: TaskListView / ListViewRow)
  */
 const EmployeeListRow = ({
   emp,
@@ -17,7 +17,9 @@ const EmployeeListRow = ({
   isSelected = false,
   onSelect,
   isExpanded,
-  onToggleExpand
+  onToggleExpand,
+  isRowExpanded,
+  onToggleRowExpand
 }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
@@ -45,12 +47,15 @@ const EmployeeListRow = ({
 
   return (
     <div
-      className={`list-task-row employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''}`}
+      className={`list-task-row employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''}`}
       onClick={(e) => {
         if (e.target.closest('button') || e.target.closest('.list-row-selection')) return;
-        onToggleExpand();
+        if (onToggleRowExpand) onToggleRowExpand();
       }}
       onDoubleClick={() => onView(emp)}
+      style={{
+        '--stage-color': emp.status === 'Active' ? 'var(--brand-green)' : 'var(--priority-urgent)'
+      }}
     >
       <div className="list-row-main">
         {/* 1. Selection Checkbox */}
@@ -60,20 +65,12 @@ const EmployeeListRow = ({
           </div>
         </div>
 
-        {/* 2. Identity Block */}
-        <div className="list-row-content">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="id-line" style={{ fontSize: '0.75rem', minWidth: '60px' }}>{emp.badge_id}</span>
-            <span className="list-name">{emp.full_name}</span>
-            {emp.isDuplicate && (
-              <span className="duplicate-badge-mini" title={`${emp.duplicateCount} duplicates`}>DUP</span>
-            )}
-          </div>
-        </div>
-
-        {/* 3. Badges / Metadata */}
+        {/* 2. Metadata (Badges) - Following ListViewRow North Star */}
         <div className="list-row-badges">
-          <span className="dept-badge">{emp.dept_code || 'NO DEPT'}</span>
+          <span className={`card-priority ${emp.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`} style={{ minWidth: '70px', textAlign: 'center' }}>
+            {emp.status}
+          </span>
+          <span className="dept-badge">{emp.dept_code || 'DEPT'}</span>
           <span
             className={`hub-badge ${!emp.hub_id ? 'null-hub' : ''} ${isEditingHub ? 'editing' : ''}`}
             onDoubleClick={handleHubDoubleClick}
@@ -91,22 +88,39 @@ const EmployeeListRow = ({
                 {availableHubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
               </select>
             ) : (
-              emp.hub_code || 'NO HUB'
+              emp.hub_code || 'HUB'
             )}
           </span>
-          <span className="role-badge">{emp.role_code || 'NO ROLE'}</span>
+          <span className="role-badge">{emp.role_code || 'ROLE'}</span>
           {emp.is_app_user && <span className="app-user-badge-mini">USER</span>}
-          {emp.manager_name && emp.manager_name !== 'None' && (
-            <span className="manager-info" style={{ opacity: 0.7, fontSize: '0.7rem' }}>👤 {emp.manager_name}</span>
-          )}
+          {emp.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
+        </div>
+
+        {/* 3. Content (Name + Details) */}
+        <div className="list-row-content" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ color: 'var(--text-secondary)', opacity: 0.5, fontSize: '0.7rem', minWidth: '60px' }}>
+            {emp.badge_id || emp.id.slice(0, 5)}
+          </span>
+          <span className="list-name" style={{ fontWeight: 700 }}>{emp.full_name}</span>
+          <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{emp.phone}</span>
         </div>
       </div>
 
-      {/* 4. Controls (Hover/Expand) */}
+      {/* 4. Controls (Actions) - Following ListViewRow North Star */}
       <div className="list-row-controls">
         {permissions.canUpdate && (
           <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit">
             <IconEdit size={14} />
+          </button>
+        )}
+        {permissions.canUpdate && (
+          <button
+            className="card-deprio-button"
+            onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
+            title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+            style={{ color: emp.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
+          >
+            <IconChevronDown size={14} style={{ transform: emp.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
           </button>
         )}
         {permissions.canDelete && (
@@ -114,21 +128,12 @@ const EmployeeListRow = ({
             <IconTrash size={14} />
           </button>
         )}
-        {emp.status !== 'Inactive' && permissions.canUpdate && (
-          <button
-            className="card-deprio-button"
-            onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
-            title="Move to Inactive"
-          >
-            <IconChevronDown size={14} />
-          </button>
-        )}
         <button 
           className="card-nav-button" 
-          onClick={(e) => { e.stopPropagation(); onToggleExpand(); }}
-          title={isExpanded ? "Collapse" : "Expand Details"}
+          onClick={(e) => { e.stopPropagation(); if (onToggleRowExpand) onToggleRowExpand(); }}
+          title={isRowExpanded ? "Collapse" : "Expand Details"}
         >
-          {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+          {isRowExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
         </button>
       </div>
     </div>
