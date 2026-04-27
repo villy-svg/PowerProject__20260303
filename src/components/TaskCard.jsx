@@ -182,147 +182,142 @@ const TaskCard = ({
         <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>
 
-      {/* Row 3: Controls */}
+      {/* Row 3: Unified Controls (Navigation + Management) */}
       <div className="card-row-3">
-        <div className="card-navigation">
-          {(canMoveLeft || canMoveRight) && (
-            <>
-              <button
-                className="action-icon-btn"
-                onClick={() => tva.handleMove(task, 'left')}
-                disabled={!canMoveLeft}
-                title="Move Back"
-              >
-                <IconArrowLeft size={14} />
-              </button>
-              <button
-                className="action-icon-btn"
-                onClick={() => tva.handleMove(task, 'right')}
-                disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
-                title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
-              >
-                <IconArrowRight size={14} />
-              </button>
-            </>
-          )}
-        </div>
+        {(canMoveLeft || canMoveRight) && (
+          <>
+            <button
+              className="action-icon-btn"
+              onClick={() => tva.handleMove(task, 'left')}
+              disabled={!canMoveLeft}
+              title="Move Back"
+            >
+              <IconArrowLeft size={14} />
+            </button>
+            <button
+              className="action-icon-btn"
+              onClick={() => tva.handleMove(task, 'right')}
+              disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
+              title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
+            >
+              <IconArrowRight size={14} />
+            </button>
+          </>
+        )}
 
-        <div className="task-management-actions">
-          {!task.isContextOnly && canManageHierarchy && showHierarchy && (
-            <>
-              {task.parentTask && (
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  {tasks.find(t => t.id === task.parentTask)?.parentTask && (
-                    <button
-                      className="action-icon-btn"
-                      style={{ color: 'var(--brand-blue)' }}
-                      onClick={() => {
-                        const parent = tasks.find(t => t.id === task.parentTask);
-                        if (parent) onMoveToParent(task.id, parent.parentTask);
-                        if (parent) onPromote(task.id, parent.parentTask);
-                      }}
-                      title="Promote to Parent's Sibling (Promote to Grandparent)"
-                    >
-                      <IconDiagonalUp size={14} />
-                    </button>
-                  )}
+        {!task.isContextOnly && canManageHierarchy && showHierarchy && (
+          <>
+            {task.parentTask && (
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {tasks.find(t => t.id === task.parentTask)?.parentTask && (
                   <button
                     className="action-icon-btn"
-                    style={{ color: 'var(--brand-green)' }}
-                    onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
-                    title="Promote to Top Level"
+                    style={{ color: 'var(--brand-blue)' }}
+                    onClick={() => {
+                      const parent = tasks.find(t => t.id === task.parentTask);
+                      if (parent) onMoveToParent(task.id, parent.parentTask);
+                      if (parent) onPromote(task.id, parent.parentTask);
+                    }}
+                    title="Promote to Parent's Sibling (Promote to Grandparent)"
                   >
-                    <IconPromote size={14} />
+                    <IconDiagonalUp size={14} />
                   </button>
-                </div>
-              )}
-              <button
-                className="action-icon-btn"
-                style={{ color: 'var(--brand-green)' }}
-                onClick={() => tva.handleAddSubtask(task.id)}
-                title="Add Subtask Under This"
-              >
-                <IconPlus size={14} />
-              </button>
-            </>
-          )}
-
-          {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
-          {!task.isContextOnly &&
-            (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&
-            task.stageId !== 'DEPRIORITIZED' &&
-            task.stageId !== 'COMPLETED' && (
-              <button
-                className="action-icon-btn"
-                onClick={(e) => { e.stopPropagation(); tva.handleSubmitProof(task); }}
-                title="Submit Proof of Work"
-              >
-                <IconUpload size={14} />
-              </button>
+                )}
+                <button
+                  className="action-icon-btn"
+                  style={{ color: 'var(--brand-green)' }}
+                  onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
+                  title="Promote to Top Level"
+                >
+                  <IconPromote size={14} />
+                </button>
+              </div>
             )}
-
-           {/* MANAGER APPROVE / REJECT */}
-          {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
-            <>
-              <button
-                className="halo-button btn-approve"
-                onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
-                title="Approve Submission"
-              >
-                ✓ Appr
-              </button>
-              <button
-                className="halo-button btn-reject"
-                onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
-                title="Reject Submission & Request Rework"
-              >
-                ✗ Rej
-              </button>
-            </>
-          )}
-
-          {effectiveCanUpdate && (
             <button
               className="action-icon-btn"
-              onClick={() => tva.handleEdit(task)}
-              title="Edit Task"
+              style={{ color: 'var(--brand-green)' }}
+              onClick={() => tva.handleAddSubtask(task.id)}
+              title="Add Subtask Under This"
             >
-              <IconEdit size={14} />
+              <IconPlus size={14} />
             </button>
-          )}
+          </>
+        )}
 
-          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
+        {!task.isContextOnly &&
+          (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&
+          task.stageId !== 'DEPRIORITIZED' &&
+          task.stageId !== 'COMPLETED' && (
             <button
               className="action-icon-btn"
-              onClick={() => updateTaskStage(task.id, 'BACKLOG')}
-              title="Move back to Pending"
-              style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+              onClick={(e) => { e.stopPropagation(); tva.handleSubmitProof(task); }}
+              title="Submit Proof of Work"
             >
-              <IconPromote size={14} />
+              <IconUpload size={14} />
             </button>
           )}
 
-          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
-            <button
-              className="action-icon-btn"
-              onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
-              title="Move to Deprioritized"
-            >
-              <IconChevronDown size={14} />
-            </button>
-          )}
+        {effectiveCanUpdate && (
+          <button
+            className="action-icon-btn"
+            onClick={() => tva.handleEdit(task)}
+            title="Edit Task"
+          >
+            <IconEdit size={14} />
+          </button>
+        )}
 
-          {effectiveCanDelete && (
-            <button
-              className="action-icon-btn delete"
-              onClick={() => tva.handleDelete(task.id)}
-              title="Delete Task"
-            >
-              <IconDelete size={14} />
-            </button>
-          )}
-        </div>
+        {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
+          <button
+            className="action-icon-btn"
+            onClick={() => updateTaskStage(task.id, 'BACKLOG')}
+            title="Move back to Pending"
+            style={{ color: 'var(--brand-green)', fontWeight: 800 }}
+          >
+            <IconPromote size={14} />
+          </button>
+        )}
+
+        {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
+          <button
+            className="action-icon-btn"
+            onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}
+            title="Move to Deprioritized"
+          >
+            <IconChevronDown size={14} />
+          </button>
+        )}
+
+        {effectiveCanDelete && (
+          <button
+            className="action-icon-btn delete"
+            onClick={() => tva.handleDelete(task.id)}
+            title="Delete Task"
+          >
+            <IconDelete size={14} />
+          </button>
+        )}
       </div>
+
+      {/* Row 4: Approval Actions (Dedicated row for Review stage) */}
+      {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+        <div className="card-row-approval">
+          <button
+            className="halo-button btn-approve"
+            onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
+            title="Approve Submission"
+          >
+            ✓ Appr
+          </button>
+          <button
+            className="halo-button btn-reject"
+            onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
+            title="Reject Submission & Request Rework"
+          >
+            ✗ Rej
+          </button>
+        </div>
+      )}
     </div>
   );
 };

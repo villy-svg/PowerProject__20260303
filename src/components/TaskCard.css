@@ -17,9 +17,10 @@
   /* More compact base */
 }
 
-/* Row 0 and Row 3 are collapsed by default */
+/* Row 0, Row 3, and Row 4 are collapsed by default */
 .card-header-row,
-.card-row-3 {
+.card-row-3,
+.card-row-approval {
   display: none;
   /* Reclaim space */
   max-height: 0;
@@ -32,9 +33,10 @@
   pointer-events: none;
 }
 
-/* Selection State reveals Header Row and Action Row even if not hovered */
+/* Selection State reveals Header Row, Action Row, and Approval Row */
 .task-card-master.selected .card-header-row,
-.task-card-master.selected .card-row-3 {
+.task-card-master.selected .card-row-3,
+.task-card-master.selected .card-row-approval {
   display: flex;
   max-height: 100px;
   min-height: 24px;
@@ -52,67 +54,10 @@
   padding-bottom: 12px;
 }
 
-/* Expansion Logic (Hover for Desktops) */
-@media (hover: hover) {
-  .task-card-master:hover {
-    /* Stabilize dimensions to prevent bouncing/jitter */
-    border-color: var(--stage-color, var(--brand-mint));
-    box-shadow: 0 15px 35px var(--halo-glow);
-    z-index: 10;
-    /* Increase vertical breathing room on hover */
-    padding-bottom: 20px;
-  }
-
-  .task-card-master:hover .card-header-row {
-    display: flex;
-    max-height: 40px;
-    min-height: 24px;
-    opacity: 1;
-    margin-bottom: 8px;
-    pointer-events: auto;
-  }
-
-  .task-card-master:hover .card-row-3 {
-    display: flex;
-    max-height: 100px;
-    opacity: 1;
-    padding-top: 12px;
-    margin-top: 10px;
-    pointer-events: auto;
-  }
-}
-
-/* Expansion Logic (Class-based for Touch Devices/Expansion State) */
-.task-card-master.is-expanded {
-  padding: 12px 16px;
-  gap: 10px;
-  border-color: var(--stage-color, var(--brand-mint));
-  box-shadow: 0 15px 35px var(--halo-glow);
-}
-
-.task-card-master.is-expanded .card-header-row {
-  display: flex;
-  max-height: 40px;
-  min-height: 24px;
-  opacity: 1;
-  margin-bottom: 8px;
-  pointer-events: auto;
-}
-
-.task-card-master.is-expanded .card-row-3 {
-  display: flex;
-  max-height: 100px;
-  opacity: 1;
+.task-card-master.selected .card-row-approval {
   padding-top: 12px;
   margin-top: 10px;
-  pointer-events: auto;
-}
-
-.task-card-master.drop-target {
-  border: 2px dashed var(--brand-green) !important;
-  background: rgba(16, 185, 129, 0.05) !important;
-  transform: scale(1.02) !important;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3) !important;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Base Layout (must come BEFORE collapse logic) */
@@ -221,35 +166,41 @@
   }
 }
 
+/* Unified Controls Layout */
 .card-row-3 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* Snapped Left */
   gap: 8px;
-  flex-wrap: wrap;
-  /* Allow wrapping for better density */
+  flex-wrap: wrap; /* Allow wrapping */
   overflow-x: auto;
   scrollbar-width: none;
-  /* Hide scrollbar in Firefox */
   padding-top: 12px;
   border-top: none;
 }
 
 .card-row-3::-webkit-scrollbar {
   display: none;
-  /* Hide scrollbar in Chrome/Safari */
 }
 
-/* Card Priority and colored states now managed in globalTheme.css standardized system */
+/* Row 4: Approval Actions */
+.card-row-approval {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Snapped Left */
+  gap: 12px;
+  padding-top: 12px;
+  margin-top: 10px;
+  border-top: 1px dashed var(--border-color);
+}
 
-
+/* Hierarchy and Badges */
 .subtask-tag {
   font-size: 0.6rem;
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
-  /* Neutralized */
   color: var(--text-color);
   opacity: 0.6;
   border: 1px solid var(--border-color);
@@ -290,7 +241,6 @@
 
 .recursive-progress-badge {
   background-color: rgba(59, 130, 246, 0.1);
-  /* Blue for recursive */
   color: #60a5fa;
   border-color: rgba(59, 130, 246, 0.2);
 }
@@ -362,31 +312,87 @@
   font-size: 0.6rem;
 }
 
-/* Navigation and Actions */
-.card-navigation {
+/* Expansion Logic (Hover for Desktops) */
+@media (hover: hover) {
+  .task-card-master:hover {
+    border-color: var(--stage-color, var(--brand-mint));
+    box-shadow: 0 15px 35px var(--halo-glow);
+    z-index: 10;
+    padding-bottom: 20px;
+  }
+
+  .task-card-master:hover .card-header-row {
+    display: flex;
+    max-height: 40px;
+    min-height: 24px;
+    opacity: 1;
+    margin-bottom: 8px;
+    pointer-events: auto;
+  }
+
+  .task-card-master:hover .card-row-3 {
+    display: flex;
+    max-height: 180px; 
+    opacity: 1;
+    padding-top: 12px;
+    margin-top: 10px;
+    pointer-events: auto;
+  }
+
+  .task-card-master:hover .card-row-approval {
+    display: flex;
+    max-height: 100px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Expansion Logic (Class-based for Touch Devices/Expansion State) */
+.task-card-master.is-expanded {
+  padding: 12px 16px;
+  gap: 10px;
+  border-color: var(--stage-color, var(--brand-mint));
+  box-shadow: 0 15px 35px var(--halo-glow);
+}
+
+.task-card-master.is-expanded .card-header-row {
   display: flex;
-  gap: 4px;
-  opacity: 1 !important;
-  /* Ensure visibility when container expands */
-}
-
-/* Replaced manual opacity toggle with container-level expansion logic above */
-.task-card-master:hover .card-navigation {
+  max-height: 40px;
+  min-height: 24px;
   opacity: 1;
+  margin-bottom: 8px;
+  pointer-events: auto;
 }
 
-.task-management-actions {
-  display: flex !important;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  /* Allow wrapping for better density */
-  justify-content: flex-end;
-  opacity: 0;
-  /* Progressive Disclosure */
-  transition: opacity 0.25s ease;
-}
-
-.task-card-master:hover .task-management-actions {
+.task-card-master.is-expanded .card-row-3 {
+  display: flex;
+  max-height: 350px; 
   opacity: 1;
+  padding-top: 12px;
+  margin-top: 10px;
+  pointer-events: auto;
+}
+
+.task-card-master.is-expanded .card-row-approval {
+  display: flex;
+  max-height: 100px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile Adaptation */
+@media (max-width: 768px) {
+  .card-row-3 {
+    flex-wrap: wrap !important; 
+    overflow-x: visible !important; 
+    justify-content: flex-start !important;
+    gap: 6px; 
+    padding-bottom: 8px;
+  }
+
+  .action-icon-btn {
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+  }
 }
