@@ -301,7 +301,15 @@
 }
 
 .orch-assignee-select {
-  flex: 1;
+  flex: 0 0 220px; /* Fixed elegant width */
+  min-width: 220px;
+}
+
+@media screen and (max-width: 480px) {
+  .orch-assignee-select {
+    flex: 1;
+    min-width: 140px;
+  }
 }
 
 

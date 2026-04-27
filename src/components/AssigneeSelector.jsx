@@ -15,16 +15,27 @@ const AssigneeSelector = ({
   currentUser, 
   id,
   isSingle = false,
+  limitToIds = null, // Optional array of IDs to show first
   disabled = false,
   required = false,
   placeholder = 'Select Assignees...'
 }) => {
   const { assignees, loading } = useAssignees(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [showAll, setShowAll] = useState(!limitToIds); // Default to all if no limit provided
   const containerRef = useRef(null);
 
   // Ensure value is always an array for logic consistency
   const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
+
+  // Split assignees into visible (limited) and hidden (rest)
+  const visibleAssignees = limitToIds 
+    ? assignees.filter(e => limitToIds.includes(e.id))
+    : assignees;
+  
+  const hiddenAssignees = limitToIds
+    ? assignees.filter(e => !limitToIds.includes(e.id))
+    : [];
 
   const toggleOption = (id) => {
     if (disabled) return;
@@ -64,6 +75,31 @@ const AssigneeSelector = ({
     return `Selected (${selectedIds.length})`;
   };
 
+  const renderOption = (emp) => {
+    const isSelected = selectedIds.includes(emp.id);
+    return (
+      <div 
+        key={emp.id} 
+        id={`assignee-option-${emp.id}`}
+        role="option"
+        aria-selected={isSelected}
+        className={`assignee-option ${isSelected ? 'selected' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          toggleOption(emp.id);
+        }}
+      >
+        <div className={`assignee-checkbox ${isSingle ? 'single' : ''}`}>
+          {isSelected && (isSingle ? <div className="radio-dot" /> : '✓')}
+        </div>
+        <span className="assignee-name">
+          {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div 
       className={`assignee-selector-container ${isOpen ? 'open' : ''}`} 
@@ -98,30 +134,24 @@ const AssigneeSelector = ({
             {assignees.length === 0 ? (
               <div className="no-assignees">No employees found</div>
             ) : (
-              assignees.map(emp => {
-                const isSelected = selectedIds.includes(emp.id);
-                return (
-                  <div 
-                    key={emp.id} 
-                    id={`assignee-option-${emp.id}`}
-                    role="option"
-                    aria-selected={isSelected}
-                    className={`assignee-option ${isSelected ? 'selected' : ''}`}
+              <>
+                {visibleAssignees.map(renderOption)}
+                
+                {limitToIds && !showAll && hiddenAssignees.length > 0 && (
+                  <button 
+                    type="button" 
+                    className="load-others-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      e.preventDefault();
-                      toggleOption(emp.id);
+                      setShowAll(true);
                     }}
                   >
-                    <div className={`assignee-checkbox ${isSingle ? 'single' : ''}`}>
-                      {isSelected && (isSingle ? <div className="radio-dot" /> : '✓')}
-                    </div>
-                    <span className="assignee-name">
-                      {taskUtils.formatAssigneeForList(emp.id, emp.full_name, currentUser)}
-                    </span>
-                  </div>
-                );
-              })
+                    + Load other employees ({hiddenAssignees.length})
+                  </button>
+                )}
+
+                {showAll && hiddenAssignees.map(renderOption)}
+              </>
             )}
           </div>
         </>

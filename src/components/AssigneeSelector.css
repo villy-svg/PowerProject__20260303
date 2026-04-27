@@ -60,14 +60,36 @@
   top: calc(100% + 5px);
   left: 0;
   right: 0;
-  background: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #111111; /* More solid dark background */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly brighter border */
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   z-index: 1000;
-  max-height: 250px;
+  max-height: 280px;
+  min-width: 220px; /* Elegant minimum width */
   overflow-y: auto;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+}
+
+.load-others-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--brand-green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.load-others-btn:hover {
+  background: rgba(var(--brand-green-rgb), 0.05);
+  letter-spacing: 1px;
 }
 
 .fade-in {
