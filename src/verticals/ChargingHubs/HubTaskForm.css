@@ -284,7 +284,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 100px;
+  min-width: 80px;
 }
 
 .orch-index {
@@ -301,8 +301,8 @@
 }
 
 .orch-assignee-select {
-  flex: 0 0 220px; /* Fixed elegant width */
-  min-width: 220px;
+  flex: 0 0 240px; /* Fixed elegant width */
+  max-width: 100%;
 }
 
 @media screen and (max-width: 480px) {

@@ -18,15 +18,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.6rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  width: 100%;
+  background: var(--halo-bg, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-button, 8px);
+  padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
+  color: var(--brand-green, #00ff9d);
+  font-family: inherit;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 42px;
-  font: inherit;
-  color: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  min-height: 48px; /* Matching standard input height */
 }
 
 .assignee-selector-trigger:hover {
@@ -66,7 +69,6 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   z-index: 1000;
   max-height: 280px;
-  min-width: 220px; /* Elegant minimum width */
   overflow-y: auto;
   backdrop-filter: blur(20px);
 }

@@ -223,7 +223,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="assignee-selector">Assignee(s) / Batch Team</label>
+                    <label htmlFor="assignee-selector">ASSIGNEE(S)</label>
                     <AssigneeSelector 
                       id="assignee-selector"
                       value={formData.assigned_to} 
