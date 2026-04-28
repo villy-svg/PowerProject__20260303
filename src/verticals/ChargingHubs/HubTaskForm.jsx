@@ -90,6 +90,12 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       e.preventDefault();
       e.stopPropagation();
     }
+    // FIX Bug6: allEmployees is populated asynchronously. If the user clicks "Next"
+    // before the hook resolves, candidates = [] and every hub maps to undefined.
+    if (!allEmployees || allEmployees.length === 0) {
+      alert('Employee data is still loading. Please wait a moment and try again.');
+      return;
+    }
     const mapping = orchestrationService.calculateOrchestration(
       formData.hub_ids,
       formData.assigned_to,
@@ -378,6 +384,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 type="button"
                 className="halo-button save-btn"
                 onClick={handleNextStep}
+                // FIX Bug6: Disable until employee data is loaded to prevent null-assignee crash
+                disabled={!allEmployees || allEmployees.length === 0}
                 style={{ marginLeft: 'auto' }}
               >
                 Next: Orchestrate Team

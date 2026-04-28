@@ -5,6 +5,7 @@ import { taskUtils } from '../../utils/taskUtils';
 import { useAssignees } from '../../hooks/useAssignees';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { orchestrationService } from '../../services/tasks/orchestrationService';
+import CustomSelect from '../../components/CustomSelect'; // FIX Bug10: Was missing — causes runtime crash when Employee task form opens
 
 /**
  * EmployeeTaskForm

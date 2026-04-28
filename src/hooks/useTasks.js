@@ -49,12 +49,32 @@ export const useTasks = (user) => {
   // ---------------------------------------------------------------------------
 
   const addTask = async (taskData) => {
+    // FIX Bug9: Multi-hub fan-out can take 2-4s (serial DB inserts + link syncs).
+    // Show an optimistic placeholder immediately so the board doesn't appear frozen.
+    // On success, replace the placeholder with real server data.
+    // On failure, remove the placeholder and surface an error toast.
+    const tempId = `optimistic-${Date.now()}`;
+    const optimisticTask = {
+      ...taskData,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true,
+    };
+    setTasks(prev => [optimisticTask, ...prev]);
+
     try {
       const result = await taskService.addTask(taskData, user?.id);
       const newTasks = Array.isArray(result) ? result : [result];
-      setTasks(prev => [...prev, ...newTasks]);
+
+      // Replace the optimistic placeholder with real server data; append any children
+      setTasks(prev => {
+        const withoutOptimistic = prev.filter(t => t.id !== tempId);
+        return [...newTasks, ...withoutOptimistic];
+      });
       return newTasks[0]; // Return the primary/parent task for callers
     } catch (err) {
+      // Rollback: remove the optimistic placeholder
+      setTasks(prev => prev.filter(t => t.id !== tempId));
       masterErrorHandler.handleDatabaseError(err, 'useTasks.addTask');
       throw err;
     }

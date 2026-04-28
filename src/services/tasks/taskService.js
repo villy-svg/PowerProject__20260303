@@ -141,10 +141,17 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
   const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
   
   // 1. Delete old links for this type to ensure clean sync
-  await supabase
+  // FIX Bug8: Destructure and check the delete error. An unchecked failure here causes
+  // the subsequent INSERT to create duplicate links (old + new) on every retry.
+  const { error: deleteError } = await supabase
     .from('task_context_links')
     .delete()
     .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
+
+  if (deleteError) {
+    console.error(`[SyncContext] Failed to clear old ${entityType} links for ${sourceId}:`, deleteError);
+    throw deleteError; // Abort before inserting duplicates
+  }
 
   // 2. Batch insert new links
   if (ids.length > 0) {
@@ -246,20 +253,46 @@ export const taskService = {
     const isMultiHub = hubIds.length > 1;
     const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
 
-    console.info(`[TaskService] START addTask: "${taskData.text}"`, { 
+    // --- Autopopulate task_board if missing ---
+    // FIX Bug5: Previous logic used .includes('HUB') on the verticalId string.
+    // If verticalId is a UUID, none of those checks match and everything silently
+    // defaults to 'Hubs', miscategorising Client and Employee tasks.
+    // Solution: use a keyword lookup map against the lowercased verticalId string.
+    const VERTICAL_BOARD_MAP = {
+      'daily_hub': 'Hubs Daily', // Must be checked before 'hub' (more specific)
+      'hub':       'Hubs',
+      'client':    'Clients',
+      'employee':  'Employees',
+    };
+    let taskBoard = taskData.task_board;
+    if (!Array.isArray(taskBoard) || taskBoard.length === 0) {
+      const vid = (taskData.verticalId || taskData.vertical_id || '').toLowerCase();
+      const matchedKey = Object.keys(VERTICAL_BOARD_MAP).find(key => vid.includes(key));
+      taskBoard = matchedKey ? [VERTICAL_BOARD_MAP[matchedKey]] : ['Hubs'];
+      if (!matchedKey) {
+        console.warn(`[TaskService] Could not infer task_board for verticalId="${vid}". Defaulting to 'Hubs'.`);
+      }
+    }
+
+    const enrichedTaskData = {
+      ...taskData,
+      task_board: taskBoard
+    };
+
+    console.info(`[TaskService] START addTask: "${enrichedTaskData.text}"`, { 
       hubs: hubIds.length, 
       assignees: assigneeIds.length,
-      parentHub: taskData.hub_id 
+      parentHub: enrichedTaskData.hub_id 
     });
 
     // 2. Create Primary/Parent Row
     console.log(`[TaskService] Step 2: Creating Parent Row...`);
     let row = {
-      ...mapTaskToRow(taskData),
+      ...mapTaskToRow(enrichedTaskData),
     };
 
-    if (taskData.id) {
-      row.id = taskData.id;
+    if (enrichedTaskData.id) {
+      row.id = enrichedTaskData.id;
     }
 
     row = auditService.stamp(row, userId, { isNew: true });
@@ -282,13 +315,13 @@ export const taskService = {
     if (assigneeIds.length > 0) await syncContextLinks(parentTask.id, 'assignee', assigneeIds);
     
     // Sync other links
-    if (taskData.client_id) await syncContextLinks(parentTask.id, 'client', taskData.client_id);
-    if (taskData.employee_id) await syncContextLinks(parentTask.id, 'employee', taskData.employee_id);
+    if (enrichedTaskData.client_id) await syncContextLinks(parentTask.id, 'client', enrichedTaskData.client_id);
+    if (enrichedTaskData.employee_id) await syncContextLinks(parentTask.id, 'employee', enrichedTaskData.employee_id);
 
     const createdTasks = [parentTask];
 
     // 3. Spawn Children if Fan-Out is active
-    const orchestrationMapping = taskData.orchestration_mapping || [];
+    const orchestrationMapping = enrichedTaskData.orchestration_mapping || [];
     const isOrchestrated = orchestrationMapping.length > 0;
 
     if (isMultiHub || isMultiAssignee || isOrchestrated) {
@@ -296,13 +329,14 @@ export const taskService = {
       
       // Determine targets: either explicit orchestration or simple replication
       const targets = isOrchestrated ? orchestrationMapping : (isMultiHub ? hubIds : assigneeIds).map(id => ({
-        hub_id: isMultiHub ? id : (taskData.hub_id || null),
-        assigned_to: isMultiAssignee ? [id] : assigneeIds
+        hub_id: isMultiHub ? id : (enrichedTaskData.hub_id || null),
+        // Fix: Prevent O(N*M) spam by only assigning the first person in fallback mode
+        assigned_to: isMultiAssignee ? [id] : (isMultiHub && assigneeIds.length > 1 ? [assigneeIds[0]] : assigneeIds)
       }));
 
       for (const target of targets) {
         let childRow = {
-          ...mapTaskToRow(taskData),
+          ...mapTaskToRow(enrichedTaskData),
           parent_task_id: parentTask.id,
           hub_id: target.hub_id,
           // If explicit assignees are provided for this target, use them, otherwise fallback
@@ -318,7 +352,12 @@ export const taskService = {
         .select(TASK_SELECT);
 
       if (childrenError) {
-        console.error('Failed to spawn child tasks:', childrenError);
+        // FIX Bug2: Child insert failed. The parent row already exists in Supabase.
+        // Attempt a best-effort rollback so we don't leave a dangling umbrella task.
+        // Then throw so the caller (useTasks) can surface an error toast to the user.
+        console.error('[TaskService] Child insert failed. Attempting parent rollback:', childrenError);
+        await supabase.from('tasks').delete().eq('id', parentTask.id);
+        throw childrenError;
       } else if (childrenData) {
         for (let i = 0; i < childrenData.length; i++) {
           const childTask = normalizeTask(childrenData[i]);
@@ -330,9 +369,12 @@ export const taskService = {
           }
 
           // 2. Sync Assignee Links
+          // FIX Bug3: Child tasks were syncing with entity_type='employee' while the
+          // parent uses 'assignee'. Using two different strings means RBAC / Sphere-of-Influence
+          // queries that filter on one string silently miss the other. Standardised to 'assignee'.
           const targetAssignees = Array.isArray(target.assigned_to) ? target.assigned_to : (target.assigned_to ? [target.assigned_to] : []);
           if (targetAssignees.length > 0) {
-            await syncContextLinks(childTask.id, 'employee', targetAssignees);
+            await syncContextLinks(childTask.id, 'assignee', targetAssignees);
           }
 
           createdTasks.push(childTask);

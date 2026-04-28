@@ -3,6 +3,19 @@
  * Core logic for intelligent task fan-out and team mapping.
  * Encapsulates the "Multi-Hub" and "Batch" creation principles.
  */
+
+// FIX Bug7/Bug4: Centralised seniority comparator — replaces duplicated sort blocks.
+// Numeric badge IDs are compared numerically to avoid '99' > '100' string-sort bug.
+const bySeniority = (a, b) => {
+  const numA = Number(a?.badge_id);
+  const numB = Number(b?.badge_id);
+  if (!isNaN(numA) && !isNaN(numB) && numA !== numB) return numA - numB;
+  const strA = String(a?.badge_id || '999999');
+  const strB = String(b?.badge_id || '999999');
+  if (strA !== strB) return strA.localeCompare(strB);
+  return (a?.seniority_level || 999) - (b?.seniority_level || 999);
+};
+
 export const orchestrationService = {
   /**
    * Identifies the senior-most assignee from a list.
@@ -16,12 +29,7 @@ export const orchestrationService = {
     const sorted = [...assigneeIds]
       .map(id => allEmployees.find(e => e.id === id))
       .filter(Boolean)
-      .sort((a, b) => {
-        const badgeA = String(a?.badge_id || '999999');
-        const badgeB = String(b?.badge_id || '999999');
-        if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
-        return (a?.seniority_level || 999) - (b?.seniority_level || 999);
-      });
+      .sort(bySeniority); // FIX Bug7: Use shared numeric-safe comparator
 
     return sorted[0] || null;
   },
@@ -31,8 +39,7 @@ export const orchestrationService = {
    * Implements the 3-pass intelligent allocation algorithm.
    */
   calculateOrchestration(hubIds = [], assigneeIds = [], allEmployees = []) {
-    const numTasks = Math.max(hubIds.length, assigneeIds.length);
-    if (numTasks === 0) return [];
+    if (Math.max(hubIds.length, assigneeIds.length) === 0) return [];
 
     const mappings = [];
     const assignedIds = new Set();
@@ -42,50 +49,54 @@ export const orchestrationService = {
     const candidates = [...assigneeIds]
       .map(id => allEmployees.find(e => e.id === id))
       .filter(Boolean)
-      .sort((a, b) => {
-        const badgeA = String(a?.badge_id || '999999');
-        const badgeB = String(b?.badge_id || '999999');
-        if (badgeA !== badgeB) return badgeA.localeCompare(badgeB);
-        return (a?.seniority_level || 999) - (b?.seniority_level || 999);
-      });
+      .sort(bySeniority); // FIX Bug7: Use shared numeric-safe comparator
 
-    const seniorMostId = candidates[0]?.id || assigneeIds[0];
-
-    // PASS 1: Home Hub Matching (Priority to Seniority-aligned affinity)
-    candidates.forEach(emp => {
-      if (emp.hub_id && hubIds.includes(emp.hub_id) && !hubsFilled.has(emp.hub_id)) {
-        mappings.push({ hub_id: emp.hub_id, assigned_to: [emp.id] });
-        assignedIds.add(emp.id);
-        hubsFilled.add(emp.hub_id);
-      }
-    });
-
-    // PASS 2: Fill remaining selected Hubs
+    // PASS 1: Guarantee every selected Hub gets exactly one mapping
     hubIds.forEach(hId => {
-      if (!hubsFilled.has(hId)) {
-        const orphan = candidates.find(emp => !assignedIds.has(emp.id));
-        if (orphan) {
-          mappings.push({ hub_id: hId, assigned_to: [orphan.id] });
-          assignedIds.add(orphan.id);
-        } else {
-          // If we run out of people, double up the senior-most
-          mappings.push({ hub_id: hId, assigned_to: [seniorMostId] });
-        }
-        hubsFilled.add(hId);
+      // 1a. Find senior-most from this home hub
+      let assignee = candidates.find(emp => emp.hub_id === hId && !assignedIds.has(emp.id));
+      
+      // 1b. If none, pick the highest available orphan
+      if (!assignee) {
+        assignee = candidates.find(emp => !assignedIds.has(emp.id));
       }
+
+      // 1c. If everyone is fully booked, double up the absolute senior-most
+      if (!assignee) {
+        assignee = candidates[0];
+      }
+
+      if (assignee) {
+        mappings.push({ hub_id: hId, assigned_to: [assignee.id] });
+        assignedIds.add(assignee.id);
+      }
+      hubsFilled.add(hId);
     });
 
-    // PASS 3: Remaining Assignees (Orphans without a hub match)
+    // PASS 2: Assign remaining employees evenly
+    // FIX Bug4: Use a dedicated orphanIndex counter instead of mappings.length,
+    // which is already N after Pass 1 and never resets — causing all orphans to
+    // pile on hub index 0 rather than distributing evenly.
+    let orphanIndex = 0;
     candidates.forEach(emp => {
       if (!assignedIds.has(emp.id)) {
-        // Round-robin assignment to hubs
-        const targetHub = hubIds[mappings.length % hubIds.length];
+        let targetHub = null;
+        
+        if (hubIds.length > 0) {
+          // Round-robin across all selected hubs to balance workload
+          targetHub = hubIds[orphanIndex % hubIds.length];
+          orphanIndex++;
+        } else {
+          // Absolute fallback for pure assignee fan-out
+          targetHub = emp.hub_id; 
+        }
+
         mappings.push({ hub_id: targetHub, assigned_to: [emp.id] });
         assignedIds.add(emp.id);
       }
     });
 
-    return mappings.slice(0, numTasks);
+    return mappings;
   },
 
   /**
@@ -99,7 +110,9 @@ export const orchestrationService = {
     if (isMultiHub) {
       return {
         mode: 3,
-        totalTasks: Math.max(hubIds.length, assigneeIds.length) + 1,
+        // FIX Bug1: Always 1 parent + 1 child per hub. Assignees are mapped TO hubs,
+        // not multiplied, so the child count equals hubIds.length, not max(hubs,assignees).
+        totalTasks: hubIds.length + 1,
         type: 'Batch Orchestration',
         description: 'Umbrella task + individual hub executions.'
       };

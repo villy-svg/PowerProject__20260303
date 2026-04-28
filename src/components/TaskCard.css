@@ -195,6 +195,39 @@
 }
 
 /* Hierarchy and Badges */
+/* Hide Row 1 badges by default except priority */
+.task-card-master .subtask-tag,
+.task-card-master .duplicate-badge,
+.task-card-master .assignee-badge-base,
+.task-card-master .hub-tile-meta {
+  display: none;
+}
+
+/* Reveal on Hover / Selected / Expanded */
+.task-card-master:hover .subtask-tag,
+.task-card-master.selected .subtask-tag,
+.task-card-master.is-expanded .subtask-tag {
+  display: flex;
+}
+
+.task-card-master:hover .assignee-badge-base,
+.task-card-master.selected .assignee-badge-base,
+.task-card-master.is-expanded .assignee-badge-base {
+  display: inline-flex;
+}
+
+.task-card-master:hover .hub-tile-meta,
+.task-card-master.selected .hub-tile-meta,
+.task-card-master.is-expanded .hub-tile-meta {
+  display: flex;
+}
+
+.task-card-master:hover .duplicate-badge,
+.task-card-master.selected .duplicate-badge,
+.task-card-master.is-expanded .duplicate-badge {
+  display: inline-block;
+}
+
 .subtask-tag {
   font-size: 0.6rem;
   font-weight: 600;
