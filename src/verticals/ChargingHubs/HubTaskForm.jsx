@@ -108,6 +108,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
 
+    const isMultiHub = formData.hub_ids.length > 1;
+
     // Prevent submission if we're in step 1 but need to orchestrate (e.g. on Enter key)
     if (step === 1 && (formData.hub_ids.length > 1 || formData.assigned_to.length > 1)) {
       handleNextStep();
@@ -134,7 +136,6 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       return 0;
     });
 
-    const isMultiHub = formData.hub_ids.length > 1;
     const finalTaskText = taskUtils.formatTaskText(formData.text, {
       assetCode: isMultiHub ? 'MULTI' : primaryHub?.hub_code,
       functionName: formData.function,
