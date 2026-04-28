@@ -13,7 +13,7 @@ import { supabase } from '../../services/core/supabaseClient';
  *   - Sample row data for templates
  */
 const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, className }) => {
-  const headers = ['text', 'priority', 'stage_id', 'task_board', 'hub_code', 'function_code', 'assigned_to', 'description', 'city'];
+  const headers = ['text', 'priority', 'stage_id', 'task_board', 'hub_code', 'function_code', 'assigned_to', 'description'];
 
   const defaultLabel = isTemplate ? "Download Task Template" : "Export Tasks";
   const finalLabel = label || defaultLabel;
@@ -50,7 +50,6 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
         function_code: funcCodes[0] || 'MNT',
         assigned_to: '',
         description: 'Sample description',
-        city: cityList[0] || 'New York',
       }];
     } else {
       const hubMap = Object.fromEntries(hubs?.map(h => [h.id, h.hub_code]) || []);
@@ -64,7 +63,6 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
         function_code: funcMap[task.function] || task.function || '',
         assigned_to: task.assigned_to_name || task.assignedToName || task.assigned_to || '',
         description: task.description || '',
-        city: task.city || '',
       }));
     }
   };
@@ -93,7 +91,6 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
       { colLetter: 'D', values: boardList.length > 0 ? boardList : ['Hubs', 'Hubs Daily'] },
       { colLetter: 'E', values: hubCodes },
       { colLetter: 'F', values: funcCodes },
-      { colLetter: 'I', values: cityList },
     ];
   };
 

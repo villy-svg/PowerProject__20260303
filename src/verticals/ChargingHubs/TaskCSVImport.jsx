@@ -14,6 +14,7 @@ import { STAGE_LIST } from '../../constants/stages';
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
 const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
+  const dbVerticalId = ['CHARGING_HUBS', 'hub_tasks', 'daily_hub_tasks'].includes(verticalId) ? 'CHARGING_HUBS' : verticalId;
   const [importing, setImporting] = React.useState(false);
   const [importContext, setImportContext] = React.useState(null); // { hubCodeMap, hubNameMap, funcCodeMap, existingTasks }
 
@@ -25,13 +26,15 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
       supabase.from('tasks').select('id, text, hub_id, function, task_board')
-        .or(`vertical_id.eq.${verticalId},task_board.cs.["Hubs Daily"]`)
+        .or(`vertical_id.eq.${dbVerticalId},task_board.cs.["Hubs Daily"]`)
     ]);
 
-    const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
+    // Added robust case-insensitive mapping for hub and function codes
+    const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code?.toLowerCase().trim(), h.id]).filter(([k]) => k) || []);
     const hubNameMap = Object.fromEntries(hubs?.map(h => [h.id, h.hub_code || h.name]) || []);
-    const funcCodeMap = Object.fromEntries(functions?.map(f => [f.function_code, f.name]) || []);
-    const hubCityMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.city]) || []);
+    const funcCodeMap = Object.fromEntries(functions?.map(f => [f.function_code?.toLowerCase().trim(), f.name]).filter(([k]) => k) || []);
+    const hubCityMap = Object.fromEntries(hubs?.map(h => [h.hub_code?.toLowerCase().trim(), h.city]).filter(([k]) => k) || []);
+    const hubCityMapById = Object.fromEntries(hubs?.map(h => [h.id, h.city]) || []);
     
     // Create maps for employee lookup by exact name, lowercase name, and emp_code
     const empMap = {};
@@ -41,12 +44,18 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       if (e.emp_code) empMap[e.emp_code] = e.id;
     });
 
-    const ctx = { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap, existingTasks: existingTasks || [] };
+    const ctx = { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap, hubCityMapById, existingTasks: existingTasks || [] };
     setImportContext(ctx);
     return ctx;
   };
 
+  // Load context on mount to ensure reference data is available before user interaction
+  React.useEffect(() => {
+    loadImportContext().catch(err => console.error('Mount load failed:', err));
+  }, []);
+
   const handleFileOpen = async () => {
+    if (importContext) return; // Prevent duplicate loading if already cached
     setImporting(true);
     try {
       await loadImportContext();
@@ -59,9 +68,12 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
   };
 
   // Defines task uniqueness for in-file AND db dedup: same text + hub + function
+  // Normalize conflict key values to be case-insensitive and trimmed
   const getConflictKey = (row) => {
-    const subject = row.hub_code || row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id || '';
-    const func = row.function_code || row.function || '';
+    const rawSubject = row.hub_code || row.hub_id || row.client_id || row.employee_id || row.partner_id || row.vendor_id || '';
+    const subject = rawSubject.toString().toLowerCase().trim();
+    const rawFunc = row.function_code || row.function || '';
+    const func = rawFunc.toString().toLowerCase().trim();
     return `${(row.text || '').toLowerCase().trim()}|${subject}|${func}`;
   };
 
@@ -97,12 +109,13 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
     setImporting(true);
     try {
       const ctx = await loadImportContext();
-      const { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap } = ctx;
+      const { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap, hubCityMapById } = ctx;
 
       const tasksToInsert = rows.map(row => {
         let finalTaskText = row.text?.trim() || 'Untitled Task';
-        const resolvedHubId = hubCodeMap[row.hub_code] || null;
-        const resolvedFunc = funcCodeMap[row.function_code] || row.function || null;
+        // Resolve codes with case-insensitive lookups
+        const resolvedHubId = hubCodeMap[String(row.hub_code || '').toLowerCase().trim()] || null;
+        const resolvedFunc = funcCodeMap[String(row.function_code || '').toLowerCase().trim()] || row.function || null;
         const funcLower = resolvedFunc?.toLowerCase();
 
         // Apply automatic prefix
@@ -125,7 +138,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
                        (t.partner_id?.length ? t.partner_id[0] : null) || 
                        (t.vendor_id?.length ? t.vendor_id[0] : null) || '', 
             function_code: (t.function || t.function_name) || '',
-            vertical_id: t.verticalId || t.vertical_id || verticalId
+            vertical_id: t.verticalId || t.vertical_id || dbVerticalId
           }) === getConflictKey(row)
         );
 
@@ -136,10 +149,11 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           description: row.description || null,
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
-          city: hubCityMap[row.hub_code] || row.city || null,
+          // City automatically calculated from hub code or resolved hub ID
+          city: hubCityMap[String(row.hub_code || '').toLowerCase().trim()] || hubCityMapById[resolvedHubId] || row.city || null,
           assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
           updated_at: new Date().toISOString(),
-          vertical_id: verticalId,
+          vertical_id: dbVerticalId,
           stage_id: row.stageid || row.stage_id || 'BACKLOG',
           function: resolvedFunc,
           task_board: row.task_board ? [row.task_board] : (isDaily ? ['Hubs Daily'] : ['Hubs']),
