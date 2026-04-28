@@ -99,10 +99,10 @@ export const useTaskFilters = ({
       if (filters?.duplicatesOnly && !t.isDuplicate) return false;
 
       // 2. Metadata filters
-      if (filters?.city?.length > 0 && !filters.city.includes(t.city)) return false;
-      if (filters?.hub?.length > 0 && !filters.hub.includes(t.hub_id)) return false;
-      if (filters?.priority?.length > 0 && !filters.priority.includes(t.priority)) return false;
-      if (filters?.function?.length > 0 && !filters.function.includes(t.function)) return false;
+      if (filters?.city?.length > 0 && t.city && !filters.city.includes(t.city)) return false;
+      if (filters?.hub?.length > 0 && t.hub_id && !filters.hub.includes(t.hub_id)) return false;
+      if (filters?.priority?.length > 0 && t.priority && !filters.priority.includes(t.priority)) return false;
+      if (filters?.function?.length > 0 && t.function && !filters.function.includes(t.function)) return false;
       if (filters?.assignee?.length > 0) {
         const formattedAssignee = taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user);
         if (!filters.assignee.includes(formattedAssignee)) return false;
