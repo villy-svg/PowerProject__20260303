@@ -19,22 +19,14 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background: var(--halo-bg, rgba(255, 255, 255, 0.03));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
-  border-radius: var(--radius-button, 8px);
-  padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
-  color: var(--text-color); /* Neutralized */
-  font-family: inherit;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--brand-green);
+  font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: left;
-  min-height: 48px; /* Matching standard input height */
-}
-
-.hub-selector-trigger:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--brand-green-alpha, rgba(0, 255, 157, 0.3));
+  min-height: unset !important;
 }
 
 .hub-selector-trigger.disabled {

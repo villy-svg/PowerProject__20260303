@@ -21,6 +21,7 @@ const TaskHierarchySelector = ({ id, value, onChange, availableTasks = [], disab
         options={options}
         placeholder="Select Parent Task..."
         disabled={disabled}
+        fullWidthDropdown={true}
       />
       {availableTasks.length === 0 && !disabled && (
         <small style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', display: 'block', marginTop: '4px' }}>

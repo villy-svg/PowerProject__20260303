@@ -22,19 +22,45 @@ const AssigneeSelector = ({
 }) => {
   const { assignees, loading } = useAssignees(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showAll, setShowAll] = useState(!limitToIds); // Default to all if no limit provided
   const containerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const fuzzyMatch = (str, pattern) => {
+    if (!pattern) return true;
+    if (!str) return false;
+    pattern = pattern.toLowerCase();
+    str = str.toLowerCase();
+    let patternIdx = 0;
+    let strIdx = 0;
+    while (patternIdx < pattern.length && strIdx < str.length) {
+      if (pattern[patternIdx] === str[strIdx]) {
+        patternIdx++;
+      }
+      strIdx++;
+    }
+    return patternIdx === pattern.length;
+  };
 
   // Ensure value is always an array for logic consistency
   const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
 
+  const filteredAssignees = assignees.filter(e => fuzzyMatch(e.full_name, searchTerm));
+
   // Split assignees into visible (limited) and hidden (rest)
   const visibleAssignees = limitToIds 
-    ? assignees.filter(e => limitToIds.includes(e.id))
-    : assignees;
+    ? filteredAssignees.filter(e => limitToIds.includes(e.id))
+    : filteredAssignees;
   
   const hiddenAssignees = limitToIds
-    ? assignees.filter(e => !limitToIds.includes(e.id))
+    ? filteredAssignees.filter(e => !limitToIds.includes(e.id))
     : [];
 
   const toggleOption = (id) => {
@@ -105,22 +131,49 @@ const AssigneeSelector = ({
       className={`assignee-selector-container ${isOpen ? 'open' : ''}`} 
       ref={containerRef}
     >
-      <button 
-        type="button"
-        id={id}
-        className={`assignee-selector-trigger ${disabled ? 'disabled' : ''}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (!disabled) setIsOpen(!isOpen);
-        }}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
-        <span className="selected-count">{getLabel()}</span>
-        <span className="dropdown-arrow">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </span>
-      </button>
+      {isOpen ? (
+        <div className="custom-select-search-wrapper">
+          <input 
+            ref={inputRef}
+            type="text"
+            className="custom-select-search-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button 
+            type="button" 
+            className="custom-select-clear-btn" 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              setSearchTerm(''); 
+            }}
+            style={{ visibility: searchTerm ? 'visible' : 'hidden' }}
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <button 
+          type="button"
+          id={id}
+          className={`assignee-selector-trigger ${disabled ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!disabled) setIsOpen(true);
+          }}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+        >
+          <span className="selected-count">{getLabel()}</span>
+          <span className="dropdown-arrow">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
+        </button>
+      )}
 
       {isOpen && !disabled && (
         <>
