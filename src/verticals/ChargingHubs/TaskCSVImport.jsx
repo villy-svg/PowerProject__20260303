@@ -21,7 +21,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
   const loadImportContext = async () => {
     if (importContext) return importContext;
     const [{ data: hubs }, { data: functions }, { data: employees }, { data: existingTasks }] = await Promise.all([
-      supabase.from('hubs').select('id, hub_code, name'),
+      supabase.from('hubs').select('id, hub_code, name, city'),
       supabase.from('hub_functions').select('name, function_code'),
       supabase.from('employees').select('id, full_name, emp_code').eq('status', 'Active'),
       supabase.from('tasks').select('id, text, hub_id, function, task_board')
@@ -31,6 +31,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
     const hubCodeMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.id]) || []);
     const hubNameMap = Object.fromEntries(hubs?.map(h => [h.id, h.hub_code || h.name]) || []);
     const funcCodeMap = Object.fromEntries(functions?.map(f => [f.function_code, f.name]) || []);
+    const hubCityMap = Object.fromEntries(hubs?.map(h => [h.hub_code, h.city]) || []);
     
     // Create maps for employee lookup by exact name, lowercase name, and emp_code
     const empMap = {};
@@ -40,7 +41,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       if (e.emp_code) empMap[e.emp_code] = e.id;
     });
 
-    const ctx = { hubCodeMap, hubNameMap, funcCodeMap, empMap, existingTasks: existingTasks || [] };
+    const ctx = { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap, existingTasks: existingTasks || [] };
     setImportContext(ctx);
     return ctx;
   };
@@ -96,7 +97,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
     setImporting(true);
     try {
       const ctx = await loadImportContext();
-      const { hubCodeMap, hubNameMap, funcCodeMap, empMap } = ctx;
+      const { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap } = ctx;
 
       const tasksToInsert = rows.map(row => {
         let finalTaskText = row.text?.trim() || 'Untitled Task';
@@ -135,7 +136,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           description: row.description || null,
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
-          city: row.city || null,
+          city: hubCityMap[row.hub_code] || row.city || null,
           assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
           updated_at: new Date().toISOString(),
           vertical_id: verticalId,

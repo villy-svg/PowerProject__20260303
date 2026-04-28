@@ -45,7 +45,7 @@ const HubSelector = ({
   };
 
   const filteredHubs = hubs.filter(hub => 
-    fuzzyMatch(hub.hub_code, searchTerm) || fuzzyMatch(hub.name, searchTerm)
+    hub.name !== 'MULTI' && (fuzzyMatch(hub.hub_code, searchTerm) || fuzzyMatch(hub.name, searchTerm))
   );
 
   const toggleOption = (id) => {
