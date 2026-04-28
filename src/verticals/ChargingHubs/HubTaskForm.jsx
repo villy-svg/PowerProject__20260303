@@ -116,6 +116,15 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
     const primaryHub = hubs.find(h => h.id === formData.hub_ids[0]);
     const multiHub = hubs.find(h => h.city === formData.city && h.name === 'MULTI');
+
+    // BUG-FIX: multiHub is provisioned asynchronously via provisionMultiHub().
+    // If the useEffect triggering it hasn't resolved by submit time, multiHub is
+    // undefined and the umbrella parent task gets hub_id=null — causing it to
+    // not render in hub-filtered views. Log a warning so this is detectable.
+    if (isMultiHub && !multiHub) {
+      console.warn('[HubTaskForm] MULTI hub not yet provisioned for city:', formData.city, '— umbrella parent will have null hub_id.');
+    }
+
     const leader = orchestrationService.getSeniorMostAssignee(formData.assigned_to, allEmployees);
 
     // Sort all assignees for the parent task, keeping leader at index 0

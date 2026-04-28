@@ -101,14 +101,16 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
     e.preventDefault();
     setLoading(true);
     try {
-      // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
+      // FIX Issue-7: Use currentUser prop (already available) instead of getUser().
+      // getUser() can crash if data is null on network timeout, and is redundant
+      // since App.jsx passes currentUser directly.
+      const userId = currentUser?.id;
       
       if (ui.editingItem) {
-        await dailyTaskTemplateService.updateTemplate({ ...formData, id: ui.editingItem.id }, user.id);
+        await dailyTaskTemplateService.updateTemplate({ ...formData, id: ui.editingItem.id }, userId);
         setStatusMsg({ type: 'success', text: 'Template updated successfully!' });
       } else {
-        await dailyTaskTemplateService.addTemplate(formData, user.id);
+        await dailyTaskTemplateService.addTemplate(formData, userId);
         setStatusMsg({ type: 'success', text: 'Template created successfully!' });
       }
       setTimeout(() => {
@@ -137,8 +139,9 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
 
   const handleToggleStatus = async (template) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      await dailyTaskTemplateService.toggleStatus(template.id, !template.isActive, user.id);
+    // FIX Issue-7: Use currentUser prop — avoids redundant getUser() call and null crash.
+    const userId = currentUser?.id;
+    await dailyTaskTemplateService.toggleStatus(template.id, !template.isActive, userId);
       fetchTemplates();
     } catch (err) {
       masterErrorHandler.handleComponentError(err, 'DailyTasksManagement', 'Toggle Status');
@@ -148,8 +151,9 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
   const handleCreateSample = async (template) => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      await dailyTaskTemplateService.generateSampleTask(template, user.id);
+      // FIX Issue-7: Use currentUser prop — avoids redundant getUser() call and null crash.
+      const userId = currentUser?.id;
+      await dailyTaskTemplateService.generateSampleTask(template, userId);
       if (refreshTasks) refreshTasks(); // Fetch the new task so it's ready in the board
       setStatusMsg({ type: 'success', text: `Sample task created for "${template.title}"! Check the Daily Board.` });
       setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);

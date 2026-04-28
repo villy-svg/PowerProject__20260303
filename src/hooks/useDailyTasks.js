@@ -1,47 +1,114 @@
 import { useMemo } from 'react';
-import { useTasks } from './useTasks';
 import { dailyTaskService } from '../services/tasks/dailyTaskService';
 
 /**
  * useDailyTasks Hook
- * 
- * ARCHITECTURE NOTE:
- * This hook wraps useTasks() to share the global task stream and cache.
- * It applies 'Hubs Daily' filtering and uses dailyTaskService for 
- * board-specific logic (like submission tracking and tagging).
+ *
+ * FIX Issue-1 & Issue-2: Previously this hook called useTasks(user) internally,
+ * creating a THIRD independent task store that was completely disconnected from
+ * App.jsx's task array. That meant:
+ *   - fetchTasks() in App never updated the Daily Board (Issue 1)
+ *   - addTask() returned data into a ghost state nobody could see (Issue 2)
+ *
+ * FIXED ARCHITECTURE:
+ * This hook now accepts the already-resolved `allTasks` array directly from App.jsx
+ * (single source of truth). It only filters for Daily tasks and provides
+ * domain-specific CRUD wrappers that call dailyTaskService. The mutations
+ * (add/update/delete) are expected to trigger the parent's `fetchTasks()` via the
+ * `onRefresh` callback to keep the shared store in sync.
+ *
+ * Usage in App.jsx:
+ *   const { tasks: dailyTasks, addTask: addDailyTask, ... } =
+ *     useDailyTasks(tasks, setTasks, user, fetchTasks);
  */
-export const useDailyTasks = (user) => {
-  const taskHook = useTasks(user);
-
-  // 1. Filter tasks for the Daily Board
-  const dailyTasks = useMemo(() => 
-    taskHook.tasks.filter(t => 
+export const useDailyTasks = (allTasks = [], setAllTasks, user, onRefresh) => {
+  // 1. Filter the shared task array to Daily Board tasks only
+  const dailyTasks = useMemo(() =>
+    allTasks.filter(t =>
       Array.isArray(t.task_board) && t.task_board.includes('Hubs Daily')
-    ), 
-    [taskHook.tasks]
+    ),
+    [allTasks]
   );
 
-  // 2. Hierarchy Logic
-  const parentTasks = useMemo(() => 
-    dailyTasks.filter(t => !t.parentTask), 
+  // 2. Hierarchy Logic (scoped to daily tasks)
+  const parentTasks = useMemo(() =>
+    dailyTasks.filter(t => !t.parentTask),
     [dailyTasks]
   );
 
-  const getSubTasks = (parentId) => 
+  const getSubTasks = (parentId) =>
     dailyTasks.filter(t => t.parentTask === parentId);
 
-  // 3. Export filtered data & override CRUD with domain-specific logic
+  // ---------------------------------------------------------------------------
+  // Domain CRUD — delegates to dailyTaskService, then syncs the shared store.
+  // We optimistically append/update in-place for instant UI feedback, then
+  // trigger a background refresh to reconcile with the server's truth.
+  // ---------------------------------------------------------------------------
+
+  const addTask = async (taskData) => {
+    const result = await dailyTaskService.addTask(taskData, user?.id);
+    const newTasks = Array.isArray(result) ? result : [result];
+
+    // Append to the shared task array so the daily board updates immediately
+    if (setAllTasks) {
+      setAllTasks(prev => [...newTasks, ...prev]);
+    }
+
+    // Background reconciliation with server
+    if (onRefresh) onRefresh(false);
+
+    return newTasks[0];
+  };
+
+  const updateTask = async (taskData) => {
+    const updated = await dailyTaskService.updateTask(taskData, user?.id);
+    if (setAllTasks) {
+      setAllTasks(prev => prev.map(t => t.id === taskData.id ? updated : t));
+    }
+    return updated;
+  };
+
+  const updateTaskStage = async (taskId, newStageId) => {
+    // Optimistic update
+    if (setAllTasks) {
+      setAllTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
+    }
+    try {
+      await dailyTaskService.updateTaskStage(taskId, newStageId, user?.id);
+    } catch (err) {
+      // Revert on failure by triggering a full refresh
+      if (onRefresh) onRefresh(false);
+      throw err;
+    }
+  };
+
+  const bulkUpdateTasks = async (taskIds, updates) => {
+    const updatedTasks = await dailyTaskService.bulkUpdateTasks(taskIds, updates, user?.id);
+    if (setAllTasks) {
+      setAllTasks(prev => prev.map(t => {
+        const updated = updatedTasks.find(u => u.id === t.id);
+        return updated || t;
+      }));
+    }
+  };
+
+  const deleteTask = async (taskId) => {
+    await dailyTaskService.deleteTask(taskId);
+    if (setAllTasks) {
+      setAllTasks(prev => prev.filter(t => t.id !== taskId));
+    }
+  };
+
   return {
-    ...taskHook,
     tasks: dailyTasks,
-    allTasks: taskHook.tasks,
+    allTasks,
     parentTasks,
     getSubTasks,
-    
-    // Domain Overrides
-    addTask: (taskData) => dailyTaskService.addTask(taskData, user?.id),
-    updateTask: (taskData) => dailyTaskService.updateTask(taskData, user?.id),
-    updateTaskStage: (taskId, newStageId) => dailyTaskService.updateTaskStage(taskId, newStageId, user?.id),
-    bulkUpdateTasks: (taskIds, updates) => dailyTaskService.bulkUpdateTasks(taskIds, updates, user?.id),
+    // Domain-scoped CRUD
+    addTask,
+    updateTask,
+    updateTaskStage,
+    bulkUpdateTasks,
+    deleteTask,
   };
 };

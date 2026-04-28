@@ -17,6 +17,33 @@ const TASK_CACHE_VERSION = 5;
 const TASK_CACHE_KEY = 'powerpod_tasks_v5';
 const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
 
+const parseTaskBoard = (boardData) => {
+  if (Array.isArray(boardData)) return boardData;
+  if (typeof boardData === 'string' && boardData.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(boardData);
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {}
+  }
+  return boardData ? [boardData] : [];
+};
+
+// ---------------------------------------------------------------------------
+// FIX Issue-10: Module-level constants — previously duplicated inside addTask
+// AND fixAllTasks. A single definition here prevents silent divergence when
+// new verticals are added.
+// ---------------------------------------------------------------------------
+const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'VENDORS', 'DATA_MANAGER'];
+
+// Maps a lowercase substring of verticalId to the canonical task_board label.
+// Key order matters: 'daily_hub' must precede 'hub' (more-specific first).
+const VERTICAL_BOARD_MAP = {
+  'daily_hub': 'Hubs Daily',
+  'hub':       'Hubs',
+  'client':    'Clients',
+  'employee':  'Employees',
+};
+
 /**
  * Maps a Supabase row (lowercase column names) to the camelCase shape
  * the rest of the app expects. Handles optional joined employee data.
@@ -73,8 +100,8 @@ export const normalizeTask = (row) => {
     isSubTask: !!row.parent_task_id,              // Is this a fan-out child?
 
     // Meta & Audit
-    task_board: Array.isArray(row.task_board) ? row.task_board : (row.task_board ? [row.task_board] : []),
-    isDailyTask: (Array.isArray(row.task_board) ? row.task_board : (row.task_board ? [row.task_board] : [])).includes('Hubs Daily'),
+    task_board: parseTaskBoard(row.task_board),
+    isDailyTask: parseTaskBoard(row.task_board).includes('Hubs Daily'),
 
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -104,6 +131,11 @@ export const mapTaskToRow = (task) => ({
   hub_id: task.hub_id === '' ? null : (task.hub_id || null),
   city: task.city || null,
   function: task.function || null,
+  // FIX Issue-4 (CONTRACT): tasks.assigned_to is a SCALAR UUID in the DB column — it
+  // stores only the primary (first) assignee for legacy compatibility. All multi-assignee
+  // relationships live exclusively in task_context_links (entity_type = 'assignee').
+  // Do NOT read tasks.assigned_to directly for multi-assignee logic; always use the
+  // PostgREST 'assignees' computed join defined in TASK_SELECT.
   assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to[0] : (task.assigned_to || null),
   parent_task_id: task.parentTask || null,
   last_updated_by: task.lastUpdatedBy || null,
@@ -234,11 +266,6 @@ export const taskService = {
     }
   },
 
-  /**
-   * Add a new task. Expects a fully formed task object (use createInitialTask first).
-   * @param {Object} taskData - camelCase task shape.
-   * @returns {Object} The normalized, newly created task.
-   */
   async addTask(taskData, userId) {
     if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
       console.warn('PowerProject: Offline modification (addTask) — data will persist in cache but not database.');
@@ -253,24 +280,33 @@ export const taskService = {
     const isMultiHub = hubIds.length > 1;
     const isMultiAssignee = !isMultiHub && assigneeIds.length > 1;
 
+    // --- Fix legacy verticalId strings before mapping to database row ---
+    // Uses module-level VALID_VERTICALS (FIX Issue-10)
+    let resolvedVid = (taskData.verticalId || taskData.vertical_id || '').toUpperCase();
+    if (!VALID_VERTICALS.includes(resolvedVid)) {
+      if (resolvedVid.includes('HUB')) resolvedVid = 'CHARGING_HUBS';
+      else if (resolvedVid.includes('CLIENT')) resolvedVid = 'CLIENTS';
+      else if (resolvedVid.includes('EMPLOYEE')) resolvedVid = 'EMPLOYEES';
+      else resolvedVid = 'CHARGING_HUBS'; // Default fallback
+    }
+    taskData.verticalId = resolvedVid;
+
     // --- Autopopulate task_board if missing ---
-    // FIX Bug5: Previous logic used .includes('HUB') on the verticalId string.
-    // If verticalId is a UUID, none of those checks match and everything silently
-    // defaults to 'Hubs', miscategorising Client and Employee tasks.
-    // Solution: use a keyword lookup map against the lowercased verticalId string.
-    const VERTICAL_BOARD_MAP = {
-      'daily_hub': 'Hubs Daily', // Must be checked before 'hub' (more specific)
-      'hub':       'Hubs',
-      'client':    'Clients',
-      'employee':  'Employees',
-    };
+    // Uses module-level VERTICAL_BOARD_MAP (FIX Issue-10)
     let taskBoard = taskData.task_board;
+
+    if (typeof taskBoard === 'string' && taskBoard.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(taskBoard);
+        if (Array.isArray(parsed)) taskBoard = parsed;
+      } catch (e) { }
+    }
+
     if (!Array.isArray(taskBoard) || taskBoard.length === 0) {
-      const vid = (taskData.verticalId || taskData.vertical_id || '').toLowerCase();
-      const matchedKey = Object.keys(VERTICAL_BOARD_MAP).find(key => vid.includes(key));
+      const matchedKey = Object.keys(VERTICAL_BOARD_MAP).find(key => resolvedVid.toLowerCase().includes(key));
       taskBoard = matchedKey ? [VERTICAL_BOARD_MAP[matchedKey]] : ['Hubs'];
       if (!matchedKey) {
-        console.warn(`[TaskService] Could not infer task_board for verticalId="${vid}". Defaulting to 'Hubs'.`);
+        console.warn(`[TaskService] Could not infer task_board for verticalId="${resolvedVid}". Defaulting to 'Hubs'.`);
       }
     }
 
@@ -279,14 +315,13 @@ export const taskService = {
       task_board: taskBoard
     };
 
-    console.info(`[TaskService] START addTask: "${enrichedTaskData.text}"`, { 
+    console.info(`[TaskService] START addTask (RPC): "${enrichedTaskData.text}"`, { 
       hubs: hubIds.length, 
       assignees: assigneeIds.length,
       parentHub: enrichedTaskData.hub_id 
     });
 
-    // 2. Create Primary/Parent Row
-    console.log(`[TaskService] Step 2: Creating Parent Row...`);
+    // 2. Map Parent Row
     let row = {
       ...mapTaskToRow(enrichedTaskData),
     };
@@ -297,92 +332,78 @@ export const taskService = {
 
     row = auditService.stamp(row, userId, { isNew: true });
 
-    // For multi-hub, the parent should be unassigned or assigned to a specific person?
-    // Usually parent is an "Umbrella".
-    const { data: parentData, error: parentError } = await supabase
-      .from('tasks')
-      .insert([row])
-      .select(TASK_SELECT);
-
-    if (parentError) {
-      console.error('[TaskService] Parent Insert Error:', parentError);
-      throw parentError;
+    // 3. Build Context Links
+    const contextLinks = {};
+    if (hubIds.length > 0) contextLinks.hub = hubIds;
+    if (assigneeIds.length > 0) contextLinks.assignee = assigneeIds;
+    if (enrichedTaskData.client_id) {
+      contextLinks.client = Array.isArray(enrichedTaskData.client_id) ? enrichedTaskData.client_id : [enrichedTaskData.client_id];
     }
-    const parentTask = normalizeTask(parentData[0]);
+    if (enrichedTaskData.employee_id) {
+      contextLinks.employee = Array.isArray(enrichedTaskData.employee_id) ? enrichedTaskData.employee_id : [enrichedTaskData.employee_id];
+    }
 
-    // Sync context links for parent
-    if (hubIds.length > 0) await syncContextLinks(parentTask.id, 'hub', hubIds);
-    if (assigneeIds.length > 0) await syncContextLinks(parentTask.id, 'assignee', assigneeIds);
-    
-    // Sync other links
-    if (enrichedTaskData.client_id) await syncContextLinks(parentTask.id, 'client', enrichedTaskData.client_id);
-    if (enrichedTaskData.employee_id) await syncContextLinks(parentTask.id, 'employee', enrichedTaskData.employee_id);
-
-    const createdTasks = [parentTask];
-
-    // 3. Spawn Children if Fan-Out is active
+    // 4. Build Fan-Out Targets
     const orchestrationMapping = enrichedTaskData.orchestration_mapping || [];
     const isOrchestrated = orchestrationMapping.length > 0;
-
+    
+    let fanOutTargets = null;
     if (isMultiHub || isMultiAssignee || isOrchestrated) {
-      const childRows = [];
-      
-      // Determine targets: either explicit orchestration or simple replication
-      const targets = isOrchestrated ? orchestrationMapping : (isMultiHub ? hubIds : assigneeIds).map(id => ({
-        hub_id: isMultiHub ? id : (enrichedTaskData.hub_id || null),
-        // Fix: Prevent O(N*M) spam by only assigning the first person in fallback mode
-        assigned_to: isMultiAssignee ? [id] : (isMultiHub && assigneeIds.length > 1 ? [assigneeIds[0]] : assigneeIds)
+      const rawTargets = isOrchestrated
+        ? orchestrationMapping
+        : (isMultiHub ? hubIds : assigneeIds).map(id => ({
+            hub_id: isMultiHub ? id : (enrichedTaskData.hub_id || null),
+            assigned_to: isMultiAssignee ? [id] : (isMultiHub && assigneeIds.length > 1 ? [assigneeIds[0]] : assigneeIds)
+          }));
+
+      // BUG-FIX: Normalize all targets to the RPC's expected shape.
+      // orchestration_mapping from the caller may use different key names or scalar
+      // assigned_to values. The RPC reads hub_id as a UUID string and assigned_to
+      // as a JSON array. Enforce that here so the DB never receives malformed data.
+      fanOutTargets = rawTargets.map(target => ({
+        hub_id: target.hub_id || null,
+        city: target.city || null,
+        assigned_to: Array.isArray(target.assigned_to)
+          ? target.assigned_to
+          : (target.assigned_to ? [target.assigned_to] : [])
       }));
-
-      for (const target of targets) {
-        let childRow = {
-          ...mapTaskToRow(enrichedTaskData),
-          parent_task_id: parentTask.id,
-          hub_id: target.hub_id,
-          // If explicit assignees are provided for this target, use them, otherwise fallback
-          assigned_to: Array.isArray(target.assigned_to) ? target.assigned_to[0] : (target.assigned_to || null)
-        };
-        childRow = auditService.stamp(childRow, userId, { isNew: true });
-        childRows.push(childRow);
-      }
-
-      const { data: childrenData, error: childrenError } = await supabase
-        .from('tasks')
-        .insert(childRows)
-        .select(TASK_SELECT);
-
-      if (childrenError) {
-        // FIX Bug2: Child insert failed. The parent row already exists in Supabase.
-        // Attempt a best-effort rollback so we don't leave a dangling umbrella task.
-        // Then throw so the caller (useTasks) can surface an error toast to the user.
-        console.error('[TaskService] Child insert failed. Attempting parent rollback:', childrenError);
-        await supabase.from('tasks').delete().eq('id', parentTask.id);
-        throw childrenError;
-      } else if (childrenData) {
-        for (let i = 0; i < childrenData.length; i++) {
-          const childTask = normalizeTask(childrenData[i]);
-          const target = targets[i];
-
-          // 1. Sync Hub Link
-          if (target.hub_id) {
-            await syncContextLinks(childTask.id, 'hub', [target.hub_id]);
-          }
-
-          // 2. Sync Assignee Links
-          // FIX Bug3: Child tasks were syncing with entity_type='employee' while the
-          // parent uses 'assignee'. Using two different strings means RBAC / Sphere-of-Influence
-          // queries that filter on one string silently miss the other. Standardised to 'assignee'.
-          const targetAssignees = Array.isArray(target.assigned_to) ? target.assigned_to : (target.assigned_to ? [target.assigned_to] : []);
-          if (targetAssignees.length > 0) {
-            await syncContextLinks(childTask.id, 'assignee', targetAssignees);
-          }
-
-          createdTasks.push(childTask);
-        }
-      }
     }
 
-    return createdTasks;
+    // 5. Construct Payload & Call RPC
+    const payload = {
+      audit_user_id: userId,
+      operations: [
+        {
+          task_data: row,
+          context_links: contextLinks,
+          fan_out_targets: fanOutTargets
+        }
+      ]
+    };
+
+    const { data: createdIds, error: rpcError } = await supabase.rpc('rpc_orchestrate_tasks', { payload });
+
+    if (rpcError) {
+      console.error('[TaskService] RPC Orchestrate Tasks Error:', rpcError);
+      throw rpcError;
+    }
+
+    // 6. Refetch Fully Hydrated Tasks
+    if (!createdIds || createdIds.length === 0) return [];
+
+    const { data: fetchedTasks, error: fetchError } = await supabase
+      .from('tasks')
+      .select(TASK_SELECT)
+      .in('id', createdIds);
+
+    if (fetchError) {
+      console.error('[TaskService] Error fetching tasks after RPC:', fetchError);
+      throw fetchError;
+    }
+
+    // Ensure order is Parent first, then Children (or match createdIds order)
+    const taskMap = Object.fromEntries(fetchedTasks.map(t => [t.id, normalizeTask(t)]));
+    return createdIds.map(id => taskMap[id]).filter(Boolean);
   },
 
   /**
@@ -551,21 +572,51 @@ export const taskService = {
       return acc;
     }, {});
 
-    let updateCount = 0;
+    // 3. Fetch ALL existing hub context links so we know which are missing
+    const { data: existingLinks } = await supabase
+      .from('task_context_links')
+      .select('source_id, entity_id')
+      .eq('source_type', 'task')
+      .eq('entity_type', 'hub');
+
+    // Build a fast lookup: "taskId::hubId" → true
+    const linkedSet = new Set((existingLinks || []).map(l => `${l.source_id}::${l.entity_id}`));
+
+    // -------------------------------------------------------------------------
+    // FIX Issue-3: Collect all patches in memory first, then batch-upsert.
+    // Previously: one sequential await UPDATE per task (N+1 Supabase calls).
+    // On 500+ tasks this could take 60s+ and risk rate-limit failures.
+    // Now: bulk upsert in 100-task chunks + one bulk insert for context links.
+    // -------------------------------------------------------------------------
+    const taskPatches = [];  // { id, ...fields } — for bulk upsert
+    const newLinkRows = [];  // { source_id, source_type, entity_type, entity_id }
 
     for (const task of (allTasks || [])) {
-      let needsUpdate = false;
-      const updates = {};
+      const patch = { id: task.id };
+      let hasPatch = false;
 
-      // A. Fix vertical_id
+      // Parse stringified task_board if needed
+      let taskBoard = task.task_board;
+      if (typeof taskBoard === 'string' && taskBoard.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(taskBoard);
+          if (Array.isArray(parsed)) {
+            taskBoard = parsed;
+            patch.task_board = taskBoard;
+            hasPatch = true;
+          }
+        } catch (e) {}
+      }
+
+      const boards = Array.isArray(taskBoard) ? taskBoard : [];
+
+      // A. Fix vertical_id — uses module-level VALID_VERTICALS (FIX Issue-10)
       const currentVid = (task.vertical_id || '').toUpperCase();
       let correctVid = task.vertical_id;
-      const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'VENDORS', 'DATA_MANAGER'];
-      
+
       if (!VALID_VERTICALS.includes(currentVid)) {
-        needsUpdate = true;
-        const boards = Array.isArray(task.task_board) ? task.task_board : [];
-        if (boards.includes('Hubs') || task.hub_id) {
+        hasPatch = true;
+        if (boards.includes('Hubs') || boards.includes('Hubs Daily') || task.hub_id) {
           correctVid = 'CHARGING_HUBS';
         } else if (boards.includes('Clients')) {
           correctVid = 'CLIENTS';
@@ -574,55 +625,85 @@ export const taskService = {
         } else {
           correctVid = 'CHARGING_HUBS';
         }
-        updates.vertical_id = correctVid;
+        patch.vertical_id = correctVid;
       }
 
-      // B. Fix task_board
-      const boards = Array.isArray(task.task_board) ? task.task_board : [];
+      // B. Fix task_board (empty or null)
       if (boards.length === 0) {
-        needsUpdate = true;
+        hasPatch = true;
         const vidCheck = (correctVid || task.vertical_id || '').toLowerCase();
-        if (vidCheck.includes('hub')) {
-          updates.task_board = ['Hubs'];
-        } else if (vidCheck.includes('client')) {
-          updates.task_board = ['Clients'];
-        } else if (vidCheck.includes('employee')) {
-          updates.task_board = ['Employees'];
-        } else {
-          updates.task_board = ['Hubs'];
-        }
+        // Without a reliable daily signal in the raw row, default ambiguous hub tasks to 'Hubs'.
+        if (vidCheck.includes('hub')) patch.task_board = ['Hubs'];
+        else if (vidCheck.includes('client')) patch.task_board = ['Clients'];
+        else if (vidCheck.includes('employee')) patch.task_board = ['Employees'];
+        else patch.task_board = ['Hubs'];
       }
 
       // C. Fix city
       if (!task.city && task.hub_id) {
         const mappedCity = hubCityMap[task.hub_id];
         if (mappedCity) {
-          needsUpdate = true;
-          updates.city = mappedCity;
+          hasPatch = true;
+          patch.city = mappedCity;
         }
       }
 
-      // D. Fix stage_id
+      // D. Fix stage_id (null or empty string)
       if (!task.stage_id) {
-        needsUpdate = true;
-        updates.stage_id = 'TODO';
+        hasPatch = true;
+        patch.stage_id = 'TODO';
       }
 
-      // E. Fix priority
+      // E. Fix priority (null or empty string)
       if (!task.priority) {
-        needsUpdate = true;
-        updates.priority = 'Medium';
+        hasPatch = true;
+        patch.priority = 'Medium';
       }
 
-      if (needsUpdate) {
-        const { error: updateError } = await supabase
-          .from('tasks')
-          .update(updates)
-          .eq('id', task.id);
-        if (updateError) {
-          console.error(`[TaskService] Failed to repair task ${task.id}:`, updateError);
+      if (hasPatch) taskPatches.push(patch);
+
+      // F. Collect missing hub context links
+      if (task.hub_id && !linkedSet.has(`${task.id}::${task.hub_id}`)) {
+        newLinkRows.push({
+          source_id:   task.id,
+          source_type: 'task',
+          entity_type: 'hub',
+          entity_id:   task.hub_id,
+        });
+        // Pre-mark to prevent duplicate rows if the same task appears twice
+        linkedSet.add(`${task.id}::${task.hub_id}`);
+      }
+    }
+
+    let updateCount = 0;
+    const CHUNK_SIZE = 100;
+
+    // Bulk upsert task field patches in chunks of 100
+    for (let i = 0; i < taskPatches.length; i += CHUNK_SIZE) {
+      const chunk = taskPatches.slice(i, i + CHUNK_SIZE);
+      const { error: upsertError } = await supabase
+        .from('tasks')
+        .upsert(chunk, { onConflict: 'id' });
+
+      if (upsertError) {
+        console.error(`[TaskService] fixAllTasks upsert chunk ${Math.floor(i / CHUNK_SIZE)} failed:`, upsertError);
+      } else {
+        updateCount += chunk.length;
+      }
+    }
+
+    // Bulk insert missing hub context links
+    if (newLinkRows.length > 0) {
+      for (let i = 0; i < newLinkRows.length; i += CHUNK_SIZE) {
+        const chunk = newLinkRows.slice(i, i + CHUNK_SIZE);
+        const { error: linkError } = await supabase
+          .from('task_context_links')
+          .insert(chunk);
+
+        if (linkError) {
+          console.error(`[TaskService] fixAllTasks link insert chunk ${Math.floor(i / CHUNK_SIZE)} failed:`, linkError);
         } else {
-          updateCount++;
+          updateCount += chunk.length;
         }
       }
     }

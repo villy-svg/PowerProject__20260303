@@ -53,29 +53,48 @@ const VerticalWorkspace = ({
     setIsTrayVisible(visible);
   };
 
-  // Auto-populate filters on first load (Select All by default)
+  // Auto-populate filters on first load (Select All by default).
+  // ADDITIVE MERGE: On subsequent task updates (e.g. after CSV import or add-task),
+  // we union any newly-seen metadata values into the existing filter selections.
+  // This prevents newly imported/created tasks from being silently hidden when they
+  // carry a city, hub, function, or assignee not present in the original task set.
   React.useEffect(() => {
-    if (Array.isArray(tasks) && tasks.length > 0 && !isInitialized) {
-      const allCities = [...new Set(tasks.map(t => t.city).filter(Boolean))];
-      const allHubs = [...new Set(tasks.map(t => t.hub_id))];
-      const allPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))]; // Dynamically get priorities
-      const allFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
-      // Map underlying names to visually formatted names including "YOU"
-      const allAssignees = [...new Set(tasks.map(t => 
-        taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user)
-      ))];
+    if (!Array.isArray(tasks) || tasks.length === 0) return;
 
+    const newCities    = [...new Set(tasks.map(t => t.city).filter(Boolean))];
+    const newHubs      = [...new Set(tasks.map(t => t.hub_id).filter(Boolean))];
+    const newPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))];
+    const newFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
+    const newAssignees = [...new Set(tasks.map(t =>
+      taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user)
+    ).filter(Boolean))];
+
+    if (!isInitialized) {
+      // First load: select ALL values so nothing is hidden by default
       setFilters(prev => ({
         ...prev,
-        city: allCities,
-        hub: allHubs,
-        priority: allPriorities,
-        function: allFunctions,
-        assignee: allAssignees
+        city:     newCities,
+        hub:      newHubs,
+        priority: newPriorities,
+        function: newFunctions,
+        assignee: newAssignees,
       }));
       setIsInitialized(true);
+    } else {
+      // Subsequent updates: additive merge — add any new values so that
+      // tasks imported or created after the initial load always pass the filter gate.
+      setFilters(prev => ({
+        ...prev,
+        city:     [...new Set([...(prev.city     || []), ...newCities])],
+        hub:      [...new Set([...(prev.hub      || []), ...newHubs])],
+        priority: [...new Set([...(prev.priority || []), ...newPriorities])],
+        function: [...new Set([...(prev.function || []), ...newFunctions])],
+        assignee: [...new Set([...(prev.assignee || []), ...newAssignees])],
+      }));
     }
-  }, [tasks, isInitialized]);
+  // FIX Issue-6: Added `user` to dep array — formatAssigneeForList uses user.id to label
+  // the current user's tasks as "Me". Without it, the label is stale on first load.
+  }, [tasks, user, isInitialized]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => {
@@ -112,9 +131,12 @@ const VerticalWorkspace = ({
     (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? verticals.CHARGING_HUBS?.id :
     (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? verticals.CLIENTS?.id :
     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? verticals.EMPLOYEES?.id :
-    activeVertical.toUpperCase();
+    // BUG-FIX: activeVertical can be null/undefined during initial render
+    // before App state resolves. .toUpperCase() on null throws a blank screen crash.
+    (activeVertical || '').toUpperCase();
 
-  const isFeatureView = activeVertical.includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;
+  // FIX Issue-5: Use optional fallback to prevent crash if activeVertical is null/undefined
+  const isFeatureView = (activeVertical || '').includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;
   const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
 

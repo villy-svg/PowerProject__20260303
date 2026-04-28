@@ -111,7 +111,12 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
       const ctx = await loadImportContext();
       const { hubCodeMap, hubNameMap, funcCodeMap, empMap, hubCityMap, hubCityMapById } = ctx;
 
-      const tasksToInsert = rows.map(row => {
+      // BUG-FIX: Safe session fetch — direct destructure of { data: { session } }
+      // crashes if data is null/undefined (can happen on network error or auth timeout).
+      const sessionResult = await supabase.auth.getSession();
+      const userId = sessionResult?.data?.session?.user?.id || null;
+
+      const operations = rows.map(row => {
         let finalTaskText = row.text?.trim() || 'Untitled Task';
         // Resolve codes with case-insensitive lookups
         const resolvedHubId = hubCodeMap[String(row.hub_code || '').toLowerCase().trim()] || null;
@@ -143,39 +148,107 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
         );
 
         const isDaily = verticalId === 'daily_hub_tasks';
+        let parsedTaskBoard = isDaily ? ['Hubs Daily'] : ['Hubs'];
+        if (row.task_board) {
+          if (typeof row.task_board === 'string') {
+            try {
+              const cleanStr = row.task_board.trim();
+              if (cleanStr.startsWith('[')) {
+                const parsed = JSON.parse(cleanStr);
+                parsedTaskBoard = Array.isArray(parsed) ? parsed : [row.task_board];
+              } else {
+                parsedTaskBoard = [cleanStr];
+              }
+            } catch (e) {
+              parsedTaskBoard = [row.task_board.trim()];
+            }
+          } else if (Array.isArray(row.task_board)) {
+            parsedTaskBoard = row.task_board;
+          }
+        }
+
+        const resolvedAssignee = row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null;
+
         const taskRow = {
           id: existingMatch?.id || row.id || crypto.randomUUID(),
           text: finalTaskText,
           description: row.description || null,
           priority: row.priority || 'Medium',
           hub_id: resolvedHubId,
-          // City automatically calculated from hub code or resolved hub ID
           city: hubCityMap[String(row.hub_code || '').toLowerCase().trim()] || hubCityMapById[resolvedHubId] || row.city || null,
-          assigned_to: row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null,
+          assigned_to: resolvedAssignee,
+          // FIX: Populate created_at for genuinely new rows. Omitted for upserts over existing tasks
+          // so we don't overwrite the original creation timestamp on conflict resolution.
+          ...(!existingMatch?.id && { created_at: new Date().toISOString() }),
           updated_at: new Date().toISOString(),
           vertical_id: dbVerticalId,
           stage_id: row.stageid || row.stage_id || 'BACKLOG',
           function: resolvedFunc,
-          task_board: row.task_board ? [row.task_board] : (isDaily ? ['Hubs Daily'] : ['Hubs']),
+          task_board: parsedTaskBoard,
         };
 
-        return taskRow;
+        const contextLinks = {};
+        if (resolvedHubId) contextLinks.hub = [resolvedHubId];
+        if (resolvedAssignee) contextLinks.assignee = [resolvedAssignee];
+
+        return {
+          task_data: taskRow,
+          context_links: contextLinks,
+          fan_out_targets: null
+        };
       });
 
-      const { error } = await supabase
-        .from('tasks')
-        .upsert(tasksToInsert, { onConflict: 'id' });
+      // PERF-FIX: Chunk large imports to avoid Supabase's default 30s statement
+      // timeout. Each chunk is an independent atomic transaction. If a chunk fails,
+      // we report exactly how many tasks were already committed so the user can
+      // safely retry only the remaining rows without creating duplicates (the RPC
+      // uses ON CONFLICT DO UPDATE so re-submitting committed rows is idempotent).
+      const CHUNK_SIZE = 100;
+      const allCreatedIds = [];
+      let failedChunkIndex = -1;
+      let chunkError = null;
 
-      if (error) throw error;
+      for (let i = 0; i < operations.length; i += CHUNK_SIZE) {
+        const chunk = operations.slice(i, i + CHUNK_SIZE);
+        const payload = { audit_user_id: userId, operations: chunk };
 
-      alert(`Successfully processed ${tasksToInsert.length} tasks.`);
-      setImportContext(null); // Reset context for next import
+        const { data: chunkIds, error } = await supabase.rpc('rpc_orchestrate_tasks', { payload });
+
+        if (error) {
+          failedChunkIndex = Math.floor(i / CHUNK_SIZE);
+          chunkError = error;
+          break; // Stop processing; report partial success below
+        }
+
+        if (chunkIds) allCreatedIds.push(...chunkIds);
+      }
+
+      if (chunkError) {
+        const committedCount = allCreatedIds.length;
+        const remainingCount = operations.length - committedCount;
+        console.error('[TaskCSVImport] Chunk failure:', chunkError);
+        alert(
+          `Partial import: ${committedCount} of ${operations.length} tasks were saved successfully.\n` +
+          `${remainingCount} tasks failed (starting at row ~${allCreatedIds.length + 1}).\n\n` +
+          `Error: ${chunkError.message}\n\n` +
+          `The saved tasks are already in the database. You can safely re-import only the remaining rows.`
+        );
+        // Still call onImportComplete for the tasks that did succeed
+        if (committedCount > 0 && onImportComplete) onImportComplete();
+        return;
+      }
+
+      alert(`Successfully processed ${allCreatedIds.length} tasks.`);
       if (onImportComplete) onImportComplete();
     } catch (err) {
       console.error('Finalize Error:', err);
       alert(`Failed to finalize import: ${err.message}`);
     } finally {
       setImporting(false);
+      // FIX Issue-8: Always reset context so the next import re-fetches fresh existingTasks.
+      // Previously this only ran on success, leaving stale context after a partial-chunk failure
+      // and silently skipping conflict detection for newly committed rows.
+      setImportContext(null);
     }
   };
 

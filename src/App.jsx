@@ -83,17 +83,16 @@ function App() {
   } = useTasks(user);
 
   // 3. Daily Task state
+  // FIX Issue-1 & Issue-2: useDailyTasks now accepts the SHARED tasks/setTasks from
+  // useTasks above — no longer creates a disconnected third task store.
   const {
     tasks: dailyTasks,
-    setTasks: setDailyTasks,
-    loading: dailyTasksLoading,
-    fetchTasks: fetchDailyTasks,
     addTask: addDailyTask,
     updateTask: updateDailyTask,
     updateTaskStage: updateDailyTaskStage,
     bulkUpdateTasks: bulkUpdateDailyTasks,
     deleteTask: deleteDailyTask,
-  } = useDailyTasks(user);
+  } = useDailyTasks(tasks, setTasks, user, fetchTasks);
 
   // Unified Initial Data Load
   useEffect(() => {
@@ -120,9 +119,9 @@ function App() {
           await fetchUserProfile(sessionData.user.id);
 
           // Step 3: Trigger Data (Non-blocking / Progressive)
-          // We don't 'await' these here so the app can start showing the UI immediately
+          // FIX Issue-1: Only one fetch needed — useDailyTasks now filters from
+          // the shared tasks array, so a single fetchTasks() populates both boards.
           fetchTasks();
-          fetchDailyTasks();
         }
       } catch (err) {
         console.error('App Initialization Error:', err);
@@ -132,7 +131,7 @@ function App() {
     };
 
     initAppData();
-  }, [fetchTasks, fetchDailyTasks]);
+  }, [fetchTasks]);
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
@@ -175,6 +174,13 @@ function App() {
   }, []);
 
   // Auth State Listener
+  // FIX Issue-11: Guard against the double fetchUserProfile on startup.
+  // initAppData() already fetches the profile on boot. The auth state listener fires
+  // immediately with the current session, which would trigger a second concurrent fetch.
+  // The ref below lets the listener ignore the initial fire and only react to real
+  // auth changes (login / logout) that happen after the app has bootstrapped.
+  const hasBootstrapped = React.useRef(false);
+
   useEffect(() => {
     authService.getSession().then(session => {
       setSession(session);
@@ -182,6 +188,11 @@ function App() {
     });
 
     const subscription = authService.onAuthStateChange((_event, session) => {
+      // Skip the immediate fire during bootstrap — initAppData handles the first load
+      if (!hasBootstrapped.current) {
+        hasBootstrapped.current = true;
+        return;
+      }
       setSession(session);
       if (session) {
         fetchUserProfile(session.user.id);
@@ -461,8 +472,10 @@ function App() {
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
                 setTasks={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
                 addTask={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
-                actualSetTasks={activeVertical === 'daily_hub_tasks' ? setDailyTasks : setTasks}
-                refreshTasks={activeVertical === 'daily_hub_tasks' ? fetchDailyTasks : fetchTasks}
+                // FIX Issue-1: useDailyTasks now reads from the shared setTasks/fetchTasks.
+                // setDailyTasks and fetchDailyTasks no longer exist as separate functions.
+                actualSetTasks={setTasks}
+                refreshTasks={fetchTasks}
                 updateTask={activeVertical === 'daily_hub_tasks' ? updateDailyTask : updateTask}
                 bulkUpdateTasks={activeVertical === 'daily_hub_tasks' ? bulkUpdateDailyTasks : bulkUpdateTasks}
                 deleteTask={activeVertical === 'daily_hub_tasks' ? deleteDailyTask : deleteTask}
@@ -520,7 +533,7 @@ function App() {
                 {activeVertical === 'daily_task_templates' && (
                   <DailyTasksManagement
                     permissions={currentUserPermissions}
-                    refreshTasks={fetchDailyTasks}
+                    refreshTasks={fetchTasks}
                     currentUser={user}
                   />
                 )}

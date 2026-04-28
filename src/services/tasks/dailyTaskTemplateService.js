@@ -147,10 +147,14 @@ const syncTemplateHubs = async (templateId, hubConfigs) => {
 const syncTemplateAssignees = async (templateId, assigneeIds) => {
   if (!templateId) return;
 
-  await supabase
+  // FIX Issue-12: Capture the delete error. Previously this was silently swallowed,
+  // allowing the subsequent insert to create duplicate links on retry.
+  const { error: delError } = await supabase
     .from('task_context_links')
     .delete()
     .match({ source_id: templateId, source_type: 'template', entity_type: 'assignee' });
+
+  if (delError) throw delError;
 
   if (assigneeIds && assigneeIds.length > 0) {
     const rows = assigneeIds.map(aid => ({
