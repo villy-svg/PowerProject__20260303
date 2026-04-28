@@ -528,4 +528,105 @@ export const taskService = {
     if (error) throw error;
     return (data || []).map(normalizeTask);
   },
+  /**
+   * Fix Tasks tool for Master Admin.
+   * Goes through the columns and fixes all the rows with incorrect values in any column
+   * in ALL the tasks including the unrendered tasks present in the tasks table ONLY.
+   */
+  async fixAllTasks() {
+    // 1. Fetch ALL tasks
+    const { data: allTasks, error: tasksError } = await supabase
+      .from('tasks')
+      .select('*');
+    if (tasksError) throw tasksError;
+
+    // 2. Fetch ALL hubs to map cities
+    const { data: allHubs, error: hubsError } = await supabase
+      .from('hubs')
+      .select('id, city');
+    if (hubsError) throw hubsError;
+
+    const hubCityMap = (allHubs || []).reduce((acc, hub) => {
+      if (hub.id && hub.city) acc[hub.id] = hub.city;
+      return acc;
+    }, {});
+
+    let updateCount = 0;
+
+    for (const task of (allTasks || [])) {
+      let needsUpdate = false;
+      const updates = {};
+
+      // A. Fix vertical_id
+      const currentVid = (task.vertical_id || '').toUpperCase();
+      let correctVid = task.vertical_id;
+      const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'VENDORS', 'DATA_MANAGER'];
+      
+      if (!VALID_VERTICALS.includes(currentVid)) {
+        needsUpdate = true;
+        const boards = Array.isArray(task.task_board) ? task.task_board : [];
+        if (boards.includes('Hubs') || task.hub_id) {
+          correctVid = 'CHARGING_HUBS';
+        } else if (boards.includes('Clients')) {
+          correctVid = 'CLIENTS';
+        } else if (boards.includes('Employees')) {
+          correctVid = 'EMPLOYEES';
+        } else {
+          correctVid = 'CHARGING_HUBS';
+        }
+        updates.vertical_id = correctVid;
+      }
+
+      // B. Fix task_board
+      const boards = Array.isArray(task.task_board) ? task.task_board : [];
+      if (boards.length === 0) {
+        needsUpdate = true;
+        const vidCheck = (correctVid || task.vertical_id || '').toLowerCase();
+        if (vidCheck.includes('hub')) {
+          updates.task_board = ['Hubs'];
+        } else if (vidCheck.includes('client')) {
+          updates.task_board = ['Clients'];
+        } else if (vidCheck.includes('employee')) {
+          updates.task_board = ['Employees'];
+        } else {
+          updates.task_board = ['Hubs'];
+        }
+      }
+
+      // C. Fix city
+      if (!task.city && task.hub_id) {
+        const mappedCity = hubCityMap[task.hub_id];
+        if (mappedCity) {
+          needsUpdate = true;
+          updates.city = mappedCity;
+        }
+      }
+
+      // D. Fix stage_id
+      if (!task.stage_id) {
+        needsUpdate = true;
+        updates.stage_id = 'TODO';
+      }
+
+      // E. Fix priority
+      if (!task.priority) {
+        needsUpdate = true;
+        updates.priority = 'Medium';
+      }
+
+      if (needsUpdate) {
+        const { error: updateError } = await supabase
+          .from('tasks')
+          .update(updates)
+          .eq('id', task.id);
+        if (updateError) {
+          console.error(`[TaskService] Failed to repair task ${task.id}:`, updateError);
+        } else {
+          updateCount++;
+        }
+      }
+    }
+
+    return updateCount;
+  },
 };

@@ -13,6 +13,7 @@ import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import RejectionModal from './RejectionModal';
 import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
+import FixTasksButton from './FixTasksButton';
 
 /**
  * TaskController Component
@@ -71,6 +72,8 @@ const TaskController = (props) => {
     toggleStageSelection,
     canEditTask
   } = controller;
+
+
 
   // ─── Proof of Work Submission Modal State ────────────────────────────
   const [submissionTask, setSubmissionTask] = useState(null);
@@ -213,6 +216,7 @@ const TaskController = (props) => {
                 <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
                 <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
+                <FixTasksButton permissions={permissions} refreshTasks={refreshTasks} />
               </>
             )}
           </>
