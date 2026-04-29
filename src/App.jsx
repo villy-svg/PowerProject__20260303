@@ -367,12 +367,6 @@ function App() {
 
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
-      <ImpersonationBanner
-        realUser={realUser}
-        impersonatedUser={impersonatedUser}
-        impersonationUsers={impersonationUsers}
-        onImpersonate={handleImpersonate}
-      />
       <div className="app-layout">
         <button className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
@@ -400,10 +394,41 @@ function App() {
               {/* Title moved to top-level for static positioning */}
             </div>
             <div className="header-right">
-              {user?.roleId === 'master_admin' && activeVertical && activeVertical !== 'home' && (
-                <ThemeToggle darkMode={darkMode} toggleTheme={toggleTheme} />
+              {realUser?.roleId === 'master_admin' && (
+                <div className="impersonation-header-wrapper" style={{ marginRight: '16px' }}>
+                  {impersonatedUser ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        View: <strong>{impersonatedUser.name}</strong>
+                        <span className="neutral-badge" style={{ fontSize: '0.75rem', padding: '2px 6px', opacity: 0.8, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                          {impersonatedUser.roleId}
+                        </span>
+                      </span>
+                      <button 
+                        className="halo-button" 
+                        style={{ padding: '4px 8px', fontSize: '0.75rem', borderColor: 'var(--border-color)', color: 'var(--brand-green)', cursor: 'pointer' }}
+                        onClick={() => handleImpersonate(null)}
+                      >
+                        Stop
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      className="impersonation-select master-dropdown"
+                      style={{ padding: '6px 12px', borderRadius: '8px', minHeight: '36px', minWidth: '160px', fontSize: '0.85rem', background: 'var(--halo-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)', cursor: 'pointer' }}
+                      onChange={(e) => handleImpersonate(e.target.value)}
+                      defaultValue=""
+                    >
+                      <option value="" disabled style={{ background: 'var(--surface-card)', color: 'var(--text-color)' }}>Simulate User...</option>
+                      {impersonationUsers.map(u => (
+                        <option key={u.id} value={u.id} style={{ background: 'var(--surface-card)', color: 'var(--text-color)' }}>
+                          {u.name} ({u.role_id})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
               )}
-              <div style={{ width: '16px' }} />
               <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
             </div>
           </header>
