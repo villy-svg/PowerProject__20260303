@@ -36,6 +36,55 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const [functions, setFunctions] = useState([]);
   const { assignees: allEmployees } = useAssignees(true);
 
+  // --- Auto-Save Draft Logic ---
+  const stateRef = React.useRef({ formData, orchestrationMapping, isDirty, hubs, allEmployees });
+  const onSubmitRef = React.useRef(onSubmit);
+  const isSubmitted = React.useRef(false);
+
+  React.useEffect(() => {
+    stateRef.current = { formData, orchestrationMapping, isDirty, hubs, allEmployees };
+  }, [formData, orchestrationMapping, isDirty, hubs, allEmployees]);
+
+  React.useEffect(() => {
+    onSubmitRef.current = onSubmit;
+  }, [onSubmit]);
+
+  React.useEffect(() => {
+    return () => {
+      const { formData: latestData, orchestrationMapping: latestMapping, isDirty: latestDirty, hubs: latestHubs, allEmployees: latestEmployees } = stateRef.current;
+
+      if (latestDirty && !isSubmitted.current && latestData.text) {
+        const draftText = latestData.text.startsWith('[DRAFT]') 
+          ? latestData.text 
+          : `[DRAFT] ${latestData.text}`;
+          
+        const isMultiHub = latestData.hub_ids.length > 1;
+        const primaryHub = latestHubs.find(h => h.id === latestData.hub_ids[0]);
+        const multiHub = latestHubs.find(h => h.city === latestData.city && h.name === 'MULTI');
+        
+        const leader = latestEmployees && latestEmployees.length > 0 
+          ? latestData.assigned_to.map(id => latestEmployees.find(e => e.id === id || e.employeeId === id)).filter(Boolean).sort((a, b) => (a.seniority_level ?? 999) - (b.seniority_level ?? 999))[0]
+          : null;
+
+        const sortedAssigneeIds = [...latestData.assigned_to].sort((a, b) => {
+          if (a === leader?.id || a === leader?.employeeId) return -1;
+          if (b === leader?.id || b === leader?.employeeId) return 1;
+          return 0;
+        });
+
+        if (onSubmitRef.current) {
+          onSubmitRef.current({
+            ...latestData,
+            text: draftText,
+            assigned_to: sortedAssigneeIds,
+            hub_id: isMultiHub ? (multiHub?.id || null) : (latestData.hub_ids[0] || null),
+            orchestration_mapping: latestMapping
+          });
+        }
+      }
+    };
+  }, []);
+
   // --- Data Fetching ---
   const fetchHubs = async () => {
     const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
@@ -107,6 +156,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
+    isSubmitted.current = true;
 
     const isMultiHub = formData.hub_ids.length > 1;
 

@@ -102,7 +102,7 @@ const TaskCard = ({
         }
       }}
       style={{
-        borderLeft: `2px solid color-mix(in srgb, ${stage?.color || 'var(--border-color)'}, transparent 30%)`,
+        borderLeft: (task.parentTask || task.isSubTask) ? 'none' : `2px solid color-mix(in srgb, ${stage?.color || 'var(--border-color)'}, transparent 30%)`,
         '--stage-color': stage?.color || 'var(--brand-green)',
         opacity: task.isContextOnly ? 0.7 : 1,
         cursor: task.isContextOnly ? 'default' : 'pointer'
@@ -178,6 +178,9 @@ const TaskCard = ({
         )}
         {permissions.canUpdate && !!task.hasReviewDescendant && (
           <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
+        )}
+        {task.text?.startsWith('[DRAFT]') && (
+          <span className="draft-gray-dot" title="Draft Task" />
         )}
         <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>

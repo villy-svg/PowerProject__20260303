@@ -139,15 +139,6 @@ const TaskKanbanView = ({
       <div className="kanban-board">
         {visibleStages.map((stage) => {
           const isActive = activeStageId === stage.id;
-          const getPriorityWeight = (p) => {
-            if (!p) return 0;
-            const lowerP = p.toLowerCase();
-            if (lowerP === 'high') return 3;
-            if (lowerP === 'medium') return 2;
-            if (lowerP === 'low') return 1;
-            return 0;
-          };
-
           const tasksInColumn = filteredTasks.filter((t) => t.stageId === stage.id);
           
           // --- HIERARCHY NESTING LOGIC ---
@@ -170,25 +161,39 @@ const TaskKanbanView = ({
           stageTasks.push(...orphans);
 
           // Standard sorting for top-level (parents + orphans)
-          // Note: Children follow parents immediately, so we only sort the 'stageTasks' 
-          // array if we want a global sort, but Runbook suggests this insertion model.
-          // We'll apply the priority sort to parents/orphans first.
           stageTasks.sort((a, b) => {
-            // Keep children with parents: if b is child of a, a comes first
+            // 0. Keep children with parents: if b is child of a, a comes first
             if (b.parentTask === a.id) return -1;
             if (a.parentTask === b.id) return 1;
-            // If they share same parent, or are both top-level, sort by priority
-            
-            // 1. Rework Priority
+
+            // 1. Rework Priority (Rejected tasks always first)
             const isReworkA = a.latestSubmission?.status === 'rejected';
             const isReworkB = b.latestSubmission?.status === 'rejected';
             if (isReworkA && !isReworkB) return -1;
             if (!isReworkA && isReworkB) return 1;
 
-            // 2. Standard Priority weight
-            const weightA = getPriorityWeight(a.priority);
-            const weightB = getPriorityWeight(b.priority);
-            if (weightA !== weightB) return weightB - weightA;
+            // 2. Review Priority (Children in review)
+            const isReviewA = !!a.hasReviewDescendant;
+            const isReviewB = !!b.hasReviewDescendant;
+            if (isReviewA && !isReviewB) return -1;
+            if (!isReviewA && isReviewB) return 1;
+
+            // 3. Draft Priority (Starts with [DRAFT])
+            const isDraftA = a.text?.startsWith('[DRAFT]');
+            const isDraftB = b.text?.startsWith('[DRAFT]');
+            if (isDraftA && !isDraftB) return -1;
+            if (!isDraftA && isDraftB) return 1;
+
+            // 4. Standard Priority Level
+            const priorityOrder = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
+            const pA = priorityOrder[(a.priority || '').toLowerCase()] ?? 99;
+            const pB = priorityOrder[(b.priority || '').toLowerCase()] ?? 99;
+            if (pA !== pB) return pA - pB;
+
+            // 5. Fallback: Latest First (createdAt descending)
+            const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
+            const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
+            if (dateA !== dateB) return dateB - dateA;
 
             return 0;
           });

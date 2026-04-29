@@ -392,34 +392,34 @@ const TaskListView = ({
         const rawStageTasks = tasks
           .filter(t => allMemberIds.has(t.id))
           .sort((a, b) => {
-            // 0. Rework Priority (Rejected tasks always first)
+            // 1. Rework Priority (Rejected tasks always first)
             const isReworkA = a.latestSubmission?.status === 'rejected';
             const isReworkB = b.latestSubmission?.status === 'rejected';
             if (isReworkA && !isReworkB) return -1;
             if (!isReworkA && isReworkB) return 1;
 
-            // 1. Review Priority (Children in review)
-            // Only relevant for managers (canUpdate)
-            if (canUpdate) {
-              const isReviewA = !!a.hasReviewDescendant;
-              const isReviewB = !!b.hasReviewDescendant;
-              if (isReviewA && !isReviewB) return -1;
-              if (!isReviewA && isReviewB) return 1;
-            }
+            // 2. Review Priority (Children in review)
+            const isReviewA = !!a.hasReviewDescendant;
+            const isReviewB = !!b.hasReviewDescendant;
+            if (isReviewA && !isReviewB) return -1;
+            if (!isReviewA && isReviewB) return 1;
 
-            const pA = priorityOrder[a.priority] ?? 99;
-            const pB = priorityOrder[b.priority] ?? 99;
+            // 3. Draft Priority (Starts with [DRAFT])
+            const isDraftA = a.text?.startsWith('[DRAFT]');
+            const isDraftB = b.text?.startsWith('[DRAFT]');
+            if (isDraftA && !isDraftB) return -1;
+            if (!isDraftA && isDraftB) return 1;
+
+            // 4. Standard Priority Level
+            const priorityOrderMap = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
+            const pA = priorityOrderMap[(a.priority || '').toLowerCase()] ?? 99;
+            const pB = priorityOrderMap[(b.priority || '').toLowerCase()] ?? 99;
             if (pA !== pB) return pA - pB;
 
-            // Secondary: Hub codes (alphabetical)
-            const hubA = a.hub_code || '';
-            const hubB = b.hub_code || '';
-            if (hubA !== hubB) return hubA.localeCompare(hubB);
-
-            // Tertiary: Function codes (alphabetical)
-            const funcA = a.function || '';
-            const funcB = b.function || '';
-            if (funcA !== funcB) return funcA.localeCompare(funcB);
+            // 5. Fallback: Latest First (createdAt descending)
+            const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
+            const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
+            if (dateA !== dateB) return dateB - dateA;
 
             return 0;
           });
