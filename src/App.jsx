@@ -51,7 +51,6 @@ import ClientTaskForm from './verticals/Clients/ClientTaskForm';
 import ClientTaskTile from './verticals/Clients/ClientTaskTile';
 import ClientServiceManagement from './verticals/Clients/ClientServiceManagement';
 import Login from './components/Login';
-import { ImpersonationBanner } from './components/ImpersonationBanner';
 
 // Assets
 import powerLogo from './assets/logo.svg';
