@@ -97,7 +97,6 @@
   position: relative;
 }
 .task-card-master.selected {
-  outline: 1.5px solid var(--brand-green);
   background-color: color-mix(in srgb, var(--brand-green), transparent 93%);
 }
 .task-card-master:hover .task-selection-area,

@@ -31,7 +31,6 @@
 /* Note: These classes are applied to the parent TaskCard container via TaskKanbanView logic */
 .is-subtask-render {
   margin-left: 24px !important;
-  border-left: 2px solid var(--brand-green) !important;
   opacity: 0.9;
   position: relative;
 }
