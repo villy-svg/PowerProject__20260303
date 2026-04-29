@@ -42,8 +42,10 @@
 }
 /* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
 .management-view-container {
-  padding: 0 40px;
+  padding: clamp(1rem, 3vw, 2.5rem) 40px 40px 40px;
   width: 100%;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.4s ease-out;

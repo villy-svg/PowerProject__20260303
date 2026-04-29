@@ -16,6 +16,7 @@ import { useTasks } from './hooks/useTasks';
 import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
+import { userService } from './services/auth/userService';
 
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
@@ -50,6 +51,7 @@ import ClientTaskForm from './verticals/Clients/ClientTaskForm';
 import ClientTaskTile from './verticals/Clients/ClientTaskTile';
 import ClientServiceManagement from './verticals/Clients/ClientServiceManagement';
 import Login from './components/Login';
+import { ImpersonationBanner } from './components/ImpersonationBanner';
 
 // Assets
 import powerLogo from './assets/logo.svg';
@@ -64,8 +66,12 @@ function App() {
   // 1. Auth and User Identity
   const [isAppInitializing, setIsAppInitializing] = useState(true);
   const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
+  const [realUser, setRealUser] = useState(null);
+  const [impersonatedUser, setImpersonatedUser] = useState(null);
+  const [impersonationUsers, setImpersonationUsers] = useState([]);
   const [profileError, setProfileError] = useState(null);
+
+  const user = impersonatedUser || realUser;
   const [verticals, setVerticals] = useState(STATIC_VERTICALS);
   const [verticalList, setVerticalList] = useState(STATIC_VERTICAL_LIST);
 
@@ -150,6 +156,27 @@ function App() {
     }
   });
 
+  useEffect(() => {
+    if (realUser?.roleId === 'master_admin') {
+      userService.fetchUsers()
+        .then(data => setImpersonationUsers(data))
+        .catch(err => console.error("Impersonation setup failed to load users:", err));
+    }
+  }, [realUser]);
+
+  const handleImpersonate = async (targetUserId) => {
+    if (!targetUserId) {
+      setImpersonatedUser(null);
+      return;
+    }
+    try {
+      const targetProfile = await profileService.fetchUserProfile(targetUserId);
+      setImpersonatedUser(targetProfile);
+    } catch (error) {
+      console.error("Impersonation failed:", error);
+    }
+  };
+
   // Persistent UI states
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => localStorage.getItem('sidebar_state') === 'true');
   const [isSubSidebarOpen, setIsSubSidebarOpen] = useState(() => {
@@ -197,7 +224,7 @@ function App() {
       if (session) {
         fetchUserProfile(session.user.id);
       } else {
-        setUser(null);
+        setRealUser(null);
       }
     });
 
@@ -207,7 +234,7 @@ function App() {
   const fetchUserProfile = async (userId) => {
     try {
       const userData = await profileService.fetchUserProfile(userId);
-      setUser(userData);
+      setRealUser(userData);
       setProfileError(null);
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -272,7 +299,7 @@ function App() {
   };
 
   // Sync Local Preferences
-  useEffect(() => { if (user) localStorage.setItem('power_project_user', JSON.stringify(user)); }, [user]);
+  useEffect(() => { if (realUser) localStorage.setItem('power_project_user', JSON.stringify(realUser)); }, [realUser]);
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
@@ -340,6 +367,12 @@ function App() {
 
   return (
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
+      <ImpersonationBanner
+        realUser={realUser}
+        impersonatedUser={impersonatedUser}
+        impersonationUsers={impersonationUsers}
+        onImpersonate={handleImpersonate}
+      />
       <div className="app-layout">
         <button className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           <img src={powerLogo} alt="Logo" className="logo-svg" />
