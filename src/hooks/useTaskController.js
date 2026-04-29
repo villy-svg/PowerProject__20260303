@@ -56,7 +56,15 @@ export const useTaskController = (props) => {
   const { selectedTaskIds, setSelectedTaskIds, clearSelection, toggleTaskSelection, selectedTasks, sameStage, commonStageId, toggleStageSelection } = selectionInfo;
 
   const permissionsInfo = useTaskPermissions({ ...props });
-  const { canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy, canEditTask } = permissionsInfo;
+  const {
+    canUserCreate,
+    canUserUpdate,
+    canUserDelete,
+    canManageHierarchy,
+    canEditTask,
+    canAddSubtask   // <-- Contextual subtask creation capability
+  } = permissionsInfo;
+
 
   // 3. Persistence & Derived State
   useEffect(() => {
@@ -203,12 +211,40 @@ export const useTaskController = (props) => {
   const openAddModal = () => { setEditingTask(null); setIsModalOpen(true); };
   const openEditModal = (task) => { setEditingTask(task); setIsModalOpen(true); };
   const handleAddSubtask = (parentId) => {
+    // Step 1: Resolve the parent task node safely
     const parentTask = tasks.find(t => t.id === parentId);
-    if (!canManageHierarchy(parentTask)) {
-      alert("Permission Denied: You do not have rights to add subtasks to this record.");
+
+    // Step 2: Null safety guard — parent must exist in the current task list
+    if (!parentTask) {
+      alert("Error: Parent task node not found. The task list may be stale. Please refresh.");
       return;
     }
-    setEditingTask({ parentTask: parentId }); setIsModalOpen(true);
+
+    // Step 3: Capability gate — use canAddSubtask instead of canManageHierarchy.
+    // canAddSubtask grants access to managers, task creators, AND assigned field staff.
+    // canManageHierarchy (the old gate) only allowed managers and creators.
+    if (!canAddSubtask(parentTask)) {
+      alert("Permission Denied: You do not have rights to add subtasks under this task.");
+      return;
+    }
+
+    // Step 4: Cascade parent context fields to the child.
+    // This pre-populates the creation modal so the user doesn't have to re-enter context.
+    // All fields use nullish coalescing (|| '') to guarantee safe defaults.
+    setEditingTask({
+      parentTask: parentId,                                                // Link to parent
+      city: parentTask.city || '',                                         // Geographic context
+      hub_ids: parentTask.hub_ids || (parentTask.hub_id ? [parentTask.hub_id] : []), // Hub context (supports both array and single)
+      hub_id: parentTask.hub_id || null,                                  // Legacy single-hub field
+      function: parentTask.function || '',                                 // Task domain/function
+      assigned_to: parentTask.assigned_to || [],                          // Inherit assignees
+      priority: parentTask.priority || 'Medium',                          // Inherit priority
+      assigned_client_id: parentTask.assigned_client_id || '',            // Client context
+      metadata: parentTask.metadata || {}                                  // Arbitrary metadata
+    });
+
+    // Step 5: Open the task creation modal
+    setIsModalOpen(true);
   };
 
   return {

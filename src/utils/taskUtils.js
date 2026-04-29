@@ -20,6 +20,49 @@ const isAssignee = (task, user) => {
 
 export const taskUtils = {
   /**
+   * PUBLIC: Checks if a user is in the task's assigned_to array.
+   * Handles both employeeId and auth user.id comparisons.
+   * This is the public counterpart to the private `const isAssignee` above.
+   * Use this when calling from outside this file (hooks, components).
+   *
+   * @param {Object} task - The task entity. Must have an `assigned_to` array.
+   * @param {Object} user - The current logged-in user. Has `.id` and optionally `.employeeId`.
+   * @returns {boolean} True if the user is assigned to the task.
+   */
+  isAssignee(task, user) {
+    if (!task?.assigned_to?.length) return false;
+    return (
+      (user?.employeeId && task.assigned_to.includes(user.employeeId)) ||
+      (user?.id && task.assigned_to.includes(user.id))
+    );
+  },
+
+  /**
+   * Evaluates if user meets the seniority threshold for management.
+   * Seniority level GREATER THAN 6 constitutes managerial authority.
+   * Seniority level 6 or below is considered field staff.
+   *
+   * @param {Object} user - The current logged-in user. Must have `.seniority`.
+   * @returns {boolean} True if the user is a manager (seniority > 6).
+   */
+  isManager(user) {
+    return user?.seniority > 6;
+  },
+
+  /**
+   * Validates task creation ownership.
+   * Checks both camelCase (createdBy) and snake_case (created_by) field names.
+   *
+   * @param {Object} task - The task entity.
+   * @param {Object} user - The current logged-in user. Must have `.id`.
+   * @returns {boolean} True if the user created the task.
+   */
+  isCreator(task, user) {
+    if (!task || !user) return false;
+    return (task.createdBy || task.created_by) === user.id;
+  },
+
+  /**
    * Returns "You" if the task is assigned to the current user,
    * otherwise returns the assignee's first name.
    * For multi-assignee tasks, returns the first assignee name.

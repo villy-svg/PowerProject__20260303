@@ -30,7 +30,9 @@ const TaskCard = ({
   canUpdate,
   canDelete,
   canManageHierarchy = false,
+  canAddSubtask = false,   // <-- New prop. This is a PRE-EVALUATED BOOLEAN (not a function).
   updateTaskStage,
+
   deleteTask,
   openEditModal,
   openAddSubtaskModal,
@@ -208,44 +210,46 @@ const TaskCard = ({
           </>
         )}
 
-        {!task.isContextOnly && canManageHierarchy && showHierarchy && (
-          <>
-            {task.parentTask && (
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {tasks.find(t => t.id === task.parentTask)?.parentTask && (
-                  <button
-                    className="action-icon-btn"
-                    style={{ color: 'var(--brand-blue)' }}
-                    onClick={() => {
-                      const parent = tasks.find(t => t.id === task.parentTask);
-                      if (parent) onMoveToParent(task.id, parent.parentTask);
-                      if (parent) onPromote(task.id, parent.parentTask);
-                    }}
-                    title="Promote to Parent's Sibling (Promote to Grandparent)"
-                  >
-                    <IconDiagonalUp size={14} />
-                  </button>
-                )}
-                <button
-                  className="action-icon-btn"
-                  style={{ color: 'var(--brand-green)' }}
-                  onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
-                  title="Promote to Top Level"
-                >
-                  <IconPromote size={14} />
-                </button>
-              </div>
+        {/* Hierarchy Navigation (Promote buttons) — restricted to managers/creators */}
+        {!task.isContextOnly && canManageHierarchy && showHierarchy && task.parentTask && (
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {tasks.find(t => t.id === task.parentTask)?.parentTask && (
+              <button
+                className="action-icon-btn"
+                style={{ color: 'var(--brand-blue)' }}
+                onClick={() => {
+                  const parent = tasks.find(t => t.id === task.parentTask);
+                  if (parent) onMoveToParent(task.id, parent.parentTask);
+                  if (parent) onPromote(task.id, parent.parentTask);
+                }}
+                title="Promote to Parent's Sibling (Promote to Grandparent)"
+              >
+                <IconDiagonalUp size={14} />
+              </button>
             )}
             <button
               className="action-icon-btn"
               style={{ color: 'var(--brand-green)' }}
-              onClick={() => tva.handleAddSubtask(task.id)}
-              title="Add Subtask Under This"
+              onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
+              title="Promote to Top Level"
             >
-              <IconPlus size={14} />
+              <IconPromote size={14} />
             </button>
-          </>
+          </div>
         )}
+
+        {/* Subtask Creation Trigger — available to managers, creators, AND assignees */}
+        {!task.isContextOnly && canAddSubtask && showHierarchy && (
+          <button
+            className="action-icon-btn"
+            style={{ color: 'var(--brand-green)' }}
+            onClick={() => tva.handleAddSubtask(task.id)}
+            title="Add Subtask Under This"
+          >
+            <IconPlus size={14} />
+          </button>
+        )}
+
 
         {!task.isContextOnly &&
           (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&

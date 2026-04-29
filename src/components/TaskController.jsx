@@ -59,8 +59,9 @@ const TaskController = (props) => {
     mergeTaskCluster, setMergeTaskCluster,
     hierarchyFilteredTasks,
     filteredTasks,
-    canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy,
+    canUserCreate, canUserUpdate, canUserDelete, canManageHierarchy, canAddSubtask,
     handleBulkAction,
+
     handleUIMoveTask,
     handleInternalDelete,
     handleMoveToParent,
@@ -305,7 +306,9 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canUserDelete={canUserDelete}
             canManageHierarchy={canManageHierarchy}
+            canAddSubtask={canAddSubtask}
             updateTaskStage={handleUIMoveTask}
+
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             openAddSubtaskModal={handleAddSubtask}
@@ -327,7 +330,9 @@ const TaskController = (props) => {
             canUpdate={canUserUpdate}
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
+            canAddSubtask={canAddSubtask}
             canDelete={canUserDelete}
+
             updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
@@ -354,7 +359,9 @@ const TaskController = (props) => {
             canUpdate={canUserUpdate}
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
+            canAddSubtask={canAddSubtask}
             canDelete={canUserDelete}
+
             updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}

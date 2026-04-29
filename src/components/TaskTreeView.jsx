@@ -26,7 +26,9 @@ const TaskTreeView = ({
   canUpdate,
   canEditTask,
   canManageHierarchy,
+  canAddSubtask,      // <-- Add here (will be in closure scope for TreeRow)
   canDelete,
+
   deleteTask,
   updateTaskStage,
   openEditModal,
@@ -272,9 +274,10 @@ const TaskTreeView = ({
           })()}
 
           <div className="list-action-group">
-            {!task.isContextOnly && effectiveCanUpdate && canManageHierarchy(task) && (
+            {!task.isContextOnly && (
               <React.Fragment>
-                {task.parentTask && (
+                {/* Hierarchy Actions — restricted to managers/creators (canManageHierarchy) */}
+                {effectiveCanUpdate && canManageHierarchy(task) && task.parentTask && (
                   <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
                     {tasks.find(t => t.id === task.parentTask)?.parentTask && (
                       <button
@@ -303,7 +306,8 @@ const TaskTreeView = ({
                     </button>
                   </div>
                 )}
-                {canCreate && (
+                {/* Subtask Creation — available to managers, creators, AND assignees */}
+                {canAddSubtask && canAddSubtask(task) && (
                   <button
                     className="card-add-sub-button"
                     onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
@@ -315,6 +319,7 @@ const TaskTreeView = ({
                 )}
               </React.Fragment>
             )}
+
 
             {/* RBAC: Only Contributor+ (non-creator) can submit proof on active tasks */}
             {!task.isContextOnly &&

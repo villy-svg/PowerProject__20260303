@@ -39,7 +39,9 @@ const ListViewRow = ({
   onDuplicateMerge,
   currentUser,
   canCreate,
+  canAddSubtask,      // <-- Add here (receives the function, not a boolean)
   isExpanded,
+
   onToggleExpand,
   hasChildren,
   tasks,
@@ -212,9 +214,10 @@ const ListViewRow = ({
         )}
 
         <div className="list-action-group">
-          {!task.isContextOnly && canManage && (
+          {!task.isContextOnly && (
             <>
-              {task.parentTask && (
+              {/* Hierarchy Promotion Actions — restricted to managers/creators only */}
+              {canManage && task.parentTask && (
                 <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
                   {tasks?.find(t => t.id === task.parentTask)?.parentTask && (
                     <button
@@ -243,7 +246,8 @@ const ListViewRow = ({
                   </button>
                 </div>
               )}
-              {canCreate && (
+              {/* Subtask Creation — available to managers, creators, AND assignees */}
+              {canAddSubtask && canAddSubtask(task) && (
                 <button
                   className="card-add-sub-button"
                   onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
@@ -254,6 +258,7 @@ const ListViewRow = ({
               )}
             </>
           )}
+
 
           {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
           {!task.isContextOnly &&
@@ -341,7 +346,9 @@ const TaskListView = ({
   canUpdate,
   canEditTask,
   canManageHierarchy,
+  canAddSubtask,      // <-- Add here
   canDelete,
+
   deleteTask,
   updateTaskStage,
   openEditModal,
@@ -477,7 +484,9 @@ const TaskListView = ({
                   canUpdate={canUpdate}
                   canEditTask={canEditTask}
                   canManageHierarchy={canManageHierarchy}
+                  canAddSubtask={canAddSubtask}
                   canDelete={canDelete}
+
                   deleteTask={deleteTask}
                   updateTaskStage={updateTaskStage}
                   openEditModal={openEditModal}

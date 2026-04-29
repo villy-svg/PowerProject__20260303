@@ -1,5 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
+import { taskUtils } from '../utils/taskUtils';
+
 
 /**
  * useTaskPermissions Hook
@@ -75,12 +77,38 @@ export const useTaskPermissions = ({
     return false;
   }, [canUserUpdate, user.id, user.employeeId, permissions.level]);
 
+  // 6. Subtask Creation Capability
+  // Context-aware delegation: allows assignees (not just managers) to add child tasks.
+  // Unlike canManageHierarchy which is reserved for managers/creators only,
+  // canAddSubtask also grants permission to any assigned user.
+  const canAddSubtask = useCallback((task) => {
+    // Defensive Guard: Prevent runtime crashes on empty task evaluation
+    if (!task) return false;
+
+    // Virtual Node Guard: Context nodes are grouping nodes (view-only), not actionable records.
+    // isContextOnly is set by useTaskFilters when it creates synthetic grouping rows.
+    if (task.isContextOnly) return false;
+
+    // RBAC Guard: User must possess baseline creation permissions for this vertical.
+    // This is the featurized canCreate flag that accounts for vertical-specific access.
+    if (!canUserCreate) return false;
+
+    // Escalation 1: Managerial Authority — managers can always add subtasks
+    if (taskUtils.isManager(user)) return true;
+
+    // Escalation 2: Ownership Authority — task creators can always add subtasks
+    if (taskUtils.isCreator(task, user)) return true;
+
+    // Escalation 3: Delegated Assignee Authority — assignees can add subtasks
+    return taskUtils.isAssignee(task, user);
+  }, [canUserCreate, user]);
 
   return {
     canUserCreate,
     canUserUpdate,
     canUserDelete,
     canManageHierarchy,
-    canEditTask
+    canEditTask,
+    canAddSubtask
   };
 };

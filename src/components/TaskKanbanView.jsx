@@ -72,7 +72,9 @@ const TaskKanbanView = ({
   canEditTask,
   canUserDelete,
   canManageHierarchy,
+  canAddSubtask,      // <-- Add here
   updateTaskStage,
+
   deleteTask,
   openEditModal,
   openAddSubtaskModal,
@@ -253,7 +255,9 @@ const TaskKanbanView = ({
                       canUpdate={canEditTask ? canEditTask(task) : canUserUpdate}
                       canDelete={canUserDelete}
                       canManageHierarchy={canManageHierarchy(task)}
+                      canAddSubtask={canAddSubtask ? canAddSubtask(task) : false}
                       updateTaskStage={updateTaskStage}
+
                       deleteTask={deleteTask}
                       openEditModal={openEditModal}
                       openAddSubtaskModal={openAddSubtaskModal}

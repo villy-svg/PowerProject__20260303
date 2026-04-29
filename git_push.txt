@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260428 APK -- PWA Phase 1 1.0.2"
+git commit -m "260428 APK -- PWA Phase 1 1.0.3"
 git push origin staging
 
 # 3. Merge Staging to Main  
@@ -35,3 +35,17 @@ git branch --show-current
 #npx supabase functions deploy entity-archive --project-ref eeoibqxhfkrgbylnluvk
 
 Get-Content supabase\.temp\project-ref
+
+
+
+
+go through the runbooks in runbook_subtasks_permissions
+make them extremely detailed so that any very low context model can follow it verbatim & NOT break anything
+take inspiration from runbooks written using Sonnet model to add the level of detail and granularity to maximize context leverage we will ONLY update runbook 01 in this chat so expand the runbook and your context as much as you can
+
+go through the runbooks in runbook_subtasks_permissions
+make them extremely detailed so that any very low context model can follow it verbatim & NOT break anything
+take inspiration from runbooks written using Sonnet model to add the level of detail and granularity to maximize context leverage we will ONLY update runbook 03 in this chat so expand the runbook and your context as much as you can
+expand your context to the maximum to make the runbook detailed -- we don't want MORE features beyond this runbook we want better understand of what we're doing
+
+if you were to further expand your context span then how will you make this runbook even more detailed
