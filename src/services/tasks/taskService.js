@@ -171,6 +171,8 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
   
   // Ensure entityIds is a clean array of UUIDs
   const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
+  // Enforce deduplication to prevent UNIQUE constraint violations on batch insert
+  const uniqueIds = [...new Set(ids.filter(id => !!id))];
   
   // 1. Delete old links for this type to ensure clean sync
   // FIX Bug8: Destructure and check the delete error. An unchecked failure here causes
@@ -186,8 +188,8 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
   }
 
   // 2. Batch insert new links
-  if (ids.length > 0) {
-    const linkRows = ids.filter(id => !!id).map(id => ({
+  if (uniqueIds.length > 0) {
+    const linkRows = uniqueIds.map(id => ({
       source_id: sourceId,
       source_type: 'task',
       entity_type: entityType,

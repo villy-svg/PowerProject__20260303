@@ -122,13 +122,25 @@ const syncTemplateHubs = async (templateId, hubConfigs) => {
 
   // 2. Insert new configurations with metadata
   if (hubConfigs && hubConfigs.length > 0) {
-    const rows = hubConfigs.map(hc => ({
+    // Deduplicate configurations by hubId
+    const seenHubs = new Set();
+    const uniqueConfigs = [];
+    for (const hc of hubConfigs) {
+      if (hc && hc.hubId && !seenHubs.has(hc.hubId)) {
+        seenHubs.add(hc.hubId);
+        uniqueConfigs.push(hc);
+      }
+    }
+
+    if (uniqueConfigs.length === 0) return;
+
+    const rows = uniqueConfigs.map(hc => ({
       source_id: templateId,
       source_type: 'template',
       entity_type: 'hub',
       entity_id: hc.hubId,
       metadata: { 
-        assignee_ids: hc.assigneeIds || [] // CRITICAL: This is used by the PL/pgSQL generator
+        assignee_ids: [...new Set((hc.assigneeIds || []).filter(id => !!id))] 
       }
     }));
 
@@ -157,7 +169,10 @@ const syncTemplateAssignees = async (templateId, assigneeIds) => {
   if (delError) throw delError;
 
   if (assigneeIds && assigneeIds.length > 0) {
-    const rows = assigneeIds.map(aid => ({
+    const uniqueIds = [...new Set(assigneeIds.filter(id => !!id))];
+    if (uniqueIds.length === 0) return;
+
+    const rows = uniqueIds.map(aid => ({
       source_id: templateId,
       source_type: 'template',
       entity_type: 'assignee',
