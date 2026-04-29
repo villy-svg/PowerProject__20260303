@@ -201,3 +201,205 @@
 .custom-select-clear-btn:hover {
   opacity: 1;
 }
+
+/* ── BaseDropdown: Trigger Action Area ── */
+.bd-trigger-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.bd-trigger:hover .dropdown-arrow {
+  transform: translateY(1px);
+  color: var(--brand-green);
+  opacity: 1;
+}
+
+/* ── BaseDropdown: Clear Button ── */
+.bd-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+}
+
+.bd-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* ── BaseDropdown: Option Content ── */
+.bd-option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;  /* allows text-overflow to work */
+}
+
+.bd-option-sublabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── BaseDropdown: At-Max Option State ── */
+.bd-option.at-max {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(1) blur(0.5px);
+  pointer-events: none;
+}
+
+/* ── BaseDropdown: Keyboard Focused Option ── */
+.bd-option.focused {
+  background: rgba(var(--brand-green-rgb, 0, 180, 160), 0.05);
+  border-left: 3px solid var(--brand-green);
+  outline: none;
+  padding-left: 13px; /* 16px - 3px for consistency */
+}
+
+/* ── BaseDropdown: Select All Button ── */
+.bd-select-all-btn {
+  width: calc(100% - 16px);
+  margin: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: var(--brand-green);
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bd-select-all-btn:hover {
+  background: rgba(var(--brand-green-rgb, 0, 180, 160), 0.1);
+  border-color: rgba(var(--brand-green-rgb, 0, 180, 160), 0.2);
+  box-shadow: 0 0 12px rgba(var(--brand-green-rgb, 0, 180, 160), 0.15);
+}
+
+/* ── BaseDropdown: Option Groups ── */
+.bd-option-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.bd-option-group-header {
+  padding: 8px 16px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  cursor: default;
+  user-select: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bd-option-group:first-child .bd-option-group-header {
+  border-top: none;
+}
+
+/* ── BaseDropdown: Pills Display Mode ── */
+.bd-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: calc(100% - 32px);
+  padding: 4px 0;
+}
+
+.bd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 12px;
+  border-radius: 100px;
+  background: rgba(var(--brand-green-rgb, 0, 180, 160), 0.08);
+  border: 1px solid rgba(var(--brand-green-rgb, 0, 180, 160), 0.25);
+  color: var(--brand-green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.bd-pill:hover {
+  background: rgba(var(--brand-green-rgb, 0, 180, 160), 0.15);
+  border-color: rgba(var(--brand-green-rgb, 0, 180, 160), 0.4);
+  box-shadow: 0 2px 8px rgba(var(--brand-green-rgb, 0, 180, 160), 0.1);
+}
+
+.bd-pill-remove {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  color: var(--brand-green);
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bd-pill-remove:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* ── BaseDropdown: Custom Empty State ── */
+.bd-empty-state {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* ── BaseDropdown: Footer Slot ── */
+.bd-footer-slot {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* ── BaseDropdown: Loading State ── */
+.bd-trigger.loading {
+  animation: bd-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes bd-pulse {
+  0%, 100% { opacity: 1; filter: brightness(1); }
+  50% { opacity: 0.6; filter: brightness(0.8); }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import CustomSelect from '../../components/CustomSelect';
 import './ClientForm.css';
 import '../ChargingHubs/HubManagement.css'; // For switch/slider styles
 
