@@ -178,14 +178,33 @@ export const useTaskController = (props) => {
         if (addTask) await addTask(newTask); else setTasks(prev => [...prev, newTask]);
       }
       setIsModalOpen(false); setEditingTask(null);
-    } catch (err) { alert(`Failed to save: ${err.message || 'Unknown error'}`); }
+    } catch (err) {
+      const msg = err.message || 'Unknown error';
+      if (msg.includes('ORPHAN_DETECTED')) {
+        setConfirmDialog({
+          isOpen: true,
+          title: 'Removal Blocked',
+          message: msg.split('ORPHAN_DETECTED: ')[1] || msg,
+          confirmText: 'Understood',
+          onConfirm: () => setConfirmDialog(p => ({ ...p, isOpen: false })),
+          onCancel: null // Single button alert mode
+        });
+      } else {
+        alert(`Failed to save: ${msg}`);
+      }
+    }
     finally { setSaving(false); }
   };
 
   const executeMerge = async (primaryTaskId) => {
     const primaryTask = tasks.find(t => t.id === primaryTaskId);
     if (!primaryTask) return;
-    const duplicates = tasks.filter(t => t.id !== primaryTaskId && t.text === primaryTask.text && t.verticalId === primaryTask.verticalId);
+    const duplicates = tasks.filter(t => 
+      t.id !== primaryTaskId && 
+      t.text === primaryTask.text && 
+      t.verticalId === primaryTask.verticalId &&
+      t.parentTask === primaryTask.parentTask // DUP safety: Only merge within the same hierarchy
+    );
     try {
       await bulkUpdateTasks(duplicates.map(t => t.id), { stage_id: 'DEPRIORITIZED' });
       setMergeTaskCluster(null);

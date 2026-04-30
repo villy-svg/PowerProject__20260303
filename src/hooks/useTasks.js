@@ -86,9 +86,17 @@ export const useTasks = (user) => {
 
   const updateTask = async (taskData) => {
     try {
-      const updated = await taskService.updateTask(taskData, user?.id);
-      setTasks(prev => prev.map(t => t.id === taskData.id ? updated : t));
-      return updated;
+      const result = await taskService.updateTask(taskData, user?.id);
+      const updatedTasks = Array.isArray(result) ? result : [result];
+
+      setTasks(prev => {
+        const affectedIds = new Set(updatedTasks.map(t => t.id));
+        const filtered = prev.filter(t => !affectedIds.has(t.id));
+        return [...updatedTasks, ...filtered];
+      });
+
+      // Return the primary task (the one with the original ID) for callers
+      return updatedTasks.find(t => t.id === taskData.id) || updatedTasks[0];
     } catch (err) {
       masterErrorHandler.handleDatabaseError(err, 'useTasks.updateTask');
       throw err;

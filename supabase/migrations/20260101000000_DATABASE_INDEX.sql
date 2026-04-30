@@ -18,9 +18,9 @@
 ## 2. TASK & CONTEXT LINK ENGINE
 | Entity Type | Name | Primary Migration | Last Modified By |
 | :--- | :--- | :--- | :--- |
-| Table | public.tasks | 20260101000001 | 20260423102600 |
+| Table | public.tasks | 20260101000001 | 20260430103000 |
 | Table | public.task_context_links | 20260423102600 | 20260429220000 |
-| RPC | public.rpc_orchestrate_tasks | 20260428153400 | 20260429220000 |
+| RPC | public.rpc_orchestrate_tasks | 20260428153400 | 20260430103000 |
 | Function | public.generate_daily_tasks | 20260423203000 | 20260423203000 |
 
 ## 3. SECURITY & AUDITING
@@ -29,7 +29,7 @@
 | Table | public.security_audit_logs | 20260421110000 | 20260429220000 |
 | Table | public.tasks_history | 20260429220000 | 20260429220000 |
 | Trigger | public.log_task_history | 20260429220000 | 20260429220000 |
-| Trigger | public.protect_task_columns | 20260423102600 | 20260423102600 |
+| Trigger | public.protect_task_columns | 20260423102600 | 20260430103000 |
 
 ## 4. ROLE-BASED ACCESS CONTROL (RLS)
 | Table | Security Strategy | Key Migration |
@@ -62,7 +62,8 @@
 | 20260423203000 | Multi-Hub & Fan-Out | Consolidated tasks. Implemented Hub-based Fan-Out engine. |
 | 20260425150000 | Backup System | Implemented automated task state backup/restore logic. |
 | 20260428153400 | Orchestration RPC | Atomic multi-task/link orchestrator for frontend/CSV. |
-| 20260429220000 | Auditing & Support | **[LATEST]** Lean Task History auditing + Idempotent RPC. |
+| 20260429220000 | Auditing & Support | Lean Task History auditing + Idempotent RPC. |
+| 20260430103000 | Orchestration Hardening | **[LATEST]** UUID safety, Orphan protection, Workflow Guard repair. |
 
 =========================================================================
 */

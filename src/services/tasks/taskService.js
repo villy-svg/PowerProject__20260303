@@ -484,15 +484,20 @@ export const taskService = {
         throw rpcError;
       }
 
-      // Fetch the updated parent
-      const { data: fetched, error: fetchError } = await supabase
+      if (!updatedIds || updatedIds.length === 0) return [];
+
+      // Fetch ALL updated tasks (Parent + Children) to ensure UI reflects new subtasks
+      const { data: fetchedTasks, error: fetchError } = await supabase
         .from('tasks')
         .select(TASK_SELECT)
-        .eq('id', taskData.id)
-        .single();
+        .in('id', updatedIds);
 
-      if (fetchError) throw fetchError;
-      return normalizeTask(fetched);
+      if (fetchError) {
+        console.error('[TaskService] Error fetching tasks after orchestration update:', fetchError);
+        throw fetchError;
+      }
+
+      return fetchedTasks.map(normalizeTask);
     }
 
     // SCENARIO B: Simple CRUD Update
