@@ -62,7 +62,7 @@
   font-family: inherit;
   font-size: 0.9rem;
   backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--shadow-premium);
+  box-shadow: 0 0 3px var(--halo-glow);
 }
 .halo-button:hover {
   background: color-mix(in srgb, var(--brand-green), transparent 90%);

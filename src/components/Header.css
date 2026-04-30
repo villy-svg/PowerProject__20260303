@@ -57,6 +57,21 @@
   justify-content: flex-end;
   align-items: center;
 }
+.impersonation-header-wrapper {
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 4px 12px;
+  min-height: 40px;
+  transition: all 0.2s ease;
+}
+.impersonation-header-wrapper:hover {
+  border-color: var(--brand-green);
+  box-shadow: 0 0 15px var(--halo-glow);
+}
 .brand-title-centered {
   position: fixed;
   left: 50%;
@@ -141,6 +156,9 @@
   }
 }
 @media screen and (max-width: 480px) {
+  .logo-button {
+    display: none !important;
+  }
   .brand-title-centered {
     font-size: 1rem;
     max-width: 140px;

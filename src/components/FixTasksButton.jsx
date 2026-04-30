@@ -32,7 +32,6 @@ const FixTasksButton = ({ permissions, refreshTasks, className = '' }) => {
       onClick={handleFixTasks} 
       disabled={fixingTasks}
       title="Fix missing or incorrect fields for all rows in the tasks table"
-      style={{ marginLeft: '8px' }}
     >
       {fixingTasks ? 'Fixing...' : 'Fix Tasks'}
     </button>

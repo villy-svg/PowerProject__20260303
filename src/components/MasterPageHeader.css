@@ -6,6 +6,7 @@
   width: 100%;
   transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
+
 .master-page-header .header-row-1 h1 {
   margin: 0;
   font-size: 1.85rem;
@@ -15,6 +16,7 @@
   color: var(--brand-green);
   line-height: 1.2;
 }
+
 .master-page-header .header-row-2 p {
   margin: 0;
   color: var(--text-color);
@@ -23,7 +25,9 @@
   line-height: 1.5;
   max-width: 900px;
 }
-.master-header-actions-row, .expanded-menu-row {
+
+.master-header-actions-row,
+.expanded-menu-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,9 +35,11 @@
   flex-wrap: wrap;
   width: 100%;
 }
+
 .expanded-menu-row {
   padding: 12px 16px;
-  background: var(--panel-bg);
+  background: transparent;
+  /* Seamlessly inherits the parent background color */
   border: 1px solid color-mix(in srgb, var(--brand-green), transparent 85%);
   border-radius: 16px;
   backdrop-filter: blur(20px);
@@ -52,55 +58,77 @@
 .mobile-menu-header {
   display: none;
 }
+
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.master-header-left, .master-header-right {
+
+.master-header-left,
+.master-header-right {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
+
 .master-header-left {
-  position: relative; /* Anchor for dropdown */
+  position: relative;
+  /* Anchor for dropdown */
 }
+
 .menu-trigger-btn {
   gap: 8px;
   min-width: 100px;
   color: var(--text-color);
   opacity: 0.7;
 }
+
 .menu-trigger-btn .menu-icon {
   font-size: 0.7rem;
   transition: transform 0.2s;
   color: var(--brand-green);
 }
+
 .menu-trigger-btn.active .menu-icon {
   transform: rotate(0);
 }
+
 .menu-trigger-btn.active {
   color: var(--text-color) !important;
   opacity: 1;
 }
+
 .menu-trigger-btn.active:hover {
   color: var(--text-color) !important;
 }
+
 /* Ensure halo buttons have consistent vertical alignment */
-.master-header-actions-row .halo-button, .expanded-menu-row .halo-button {
+.master-header-actions-row .halo-button,
+.expanded-menu-row .halo-button {
   padding: 8px 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
 }
+
 /* Specific fix for view-mode-toggle positioning */
 .master-header-left .view-mode-toggle {
   margin-right: 4px;
 }
+
 .mobile-action-tray {
   display: none;
 }
+
 @media (max-width: 1024px) {
   .master-page-header .header-row-1 h1 {
     font-size: 1.25rem;
@@ -139,8 +167,13 @@
   }
 
   @keyframes slidePaneDown {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(-100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
 
   .mobile-menu-header {
@@ -158,6 +191,44 @@
     z-index: 2000;
     transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
   }
+
+  .master-header-left,
+  .master-header-right {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .master-header-left .view-mode-toggle {
+    margin-right: 0;
+    width: 100%;
+  }
+
+    /* Ultra-compact screen refinements (320px / iPhone SE) */
+    @media screen and (max-width: 360px) {
+      .expanded-menu-row {
+        padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
+        gap: 12px;
+        max-height: 90vh;
+      }
+      .master-header-left, .master-header-right {
+        gap: 12px;
+      }
+      .view-mode-toggle, .header-filter-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 8px !important;
+      }
+      .view-mode-toggle .view-toggle-btn,
+      .header-filter-group .toggle-depri-btn {
+        width: 100% !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        justify-content: center;
+      }
+    }
 
   .master-page-header {
     padding-top: 12px;
@@ -251,7 +322,7 @@
     max-width: 52px;
     opacity: 0.9 !important;
   }
-  
+
   .mobile-action-tray .mobile-add-btn:active {
     transform: scale(0.95);
   }
@@ -262,33 +333,34 @@
     opacity: 1 !important;
   }
 
-  /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
-  @media screen and (max-width: 360px) {
-    .mobile-action-tray-container {
-      padding: 0 0.5rem var(--safe-bottom, 0px) 0.5rem;
+    /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
+    @media screen and (max-width: 360px) {
+      .mobile-action-tray-container {
+        padding: 0 0.5rem var(--safe-bottom, 0px) 0.5rem;
+      }
+      .mobile-action-tray .mobile-tray-btn {
+        max-width: 64px;
+      }
     }
-    .mobile-action-tray .mobile-tray-btn {
-      max-width: 64px;
-    }
-  }
 
-  @media screen and (max-width: 330px) {
-    .mobile-action-tray-container {
-      padding: 0 0.25rem var(--safe-bottom, 0px) 0.25rem;
+    @media screen and (max-width: 330px) {
+      .mobile-action-tray-container {
+        padding: 0 0.25rem var(--safe-bottom, 0px) 0.25rem;
+      }
+      .mobile-action-tray .mobile-tray-btn {
+        max-width: 56px;
+      }
+      .mobile-action-tray .mobile-tray-btn .standard-icon {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      .mobile-action-tray .mobile-add-btn {
+        transform: scale(1.05);
+        max-width: 48px;
+      }
     }
-    .mobile-action-tray .mobile-tray-btn {
-      max-width: 56px;
-    }
-    .mobile-action-tray .mobile-tray-btn .standard-icon {
-      width: 18px !important;
-      height: 18px !important;
-    }
-    .mobile-action-tray .mobile-add-btn {
-      transform: scale(1.05);
-      max-width: 48px;
-    }
-  }
 }
+
 /* Scroll Lock Utility */
 body.no-scroll {
   overflow: hidden !important;

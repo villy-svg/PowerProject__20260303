@@ -70,7 +70,7 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
       {status.text && (
         <div className={`status-banner ${status.type}`} style={{ marginTop: '20px' }}>
           <span>{status.text}</span>
-          <button className="status-close" onClick={() => setStatus({ type: '', text: '' })}>×</button>
+          <button className="action-icon-btn" onClick={() => setStatus({ type: '', text: '' })}>×</button>
         </div>
       )}
 

@@ -31,6 +31,7 @@ import Configuration from './components/Configuration';
 import UserProfile from './components/UserProfile';
 import UserRoleManagement from './components/UserRoleManagement';
 import UserManagement from './components/UserManagement';
+import CustomSelect from './components/CustomSelect';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
 import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
@@ -394,7 +395,7 @@ function App() {
             </div>
             <div className="header-right">
               {realUser?.roleId === 'master_admin' && (
-                <div className="impersonation-header-wrapper" style={{ marginRight: '16px' }}>
+                <div className="impersonation-header-wrapper">
                   {impersonatedUser ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -412,19 +413,15 @@ function App() {
                       </button>
                     </div>
                   ) : (
-                    <select
-                      className="impersonation-select master-dropdown"
-                      style={{ padding: '6px 12px', borderRadius: '8px', minHeight: '36px', minWidth: '160px', fontSize: '0.85rem', background: 'var(--halo-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)', cursor: 'pointer' }}
-                      onChange={(e) => handleImpersonate(e.target.value)}
-                      defaultValue=""
-                    >
-                      <option value="" disabled style={{ background: 'var(--surface-card)', color: 'var(--text-color)' }}>Simulate User...</option>
-                      {impersonationUsers.map(u => (
-                        <option key={u.id} value={u.id} style={{ background: 'var(--surface-card)', color: 'var(--text-color)' }}>
-                          {u.name} ({u.role_id})
-                        </option>
-                      ))}
-                    </select>
+                    <CustomSelect
+                      id="impersonation-select"
+                      placeholder="Simulate User..."
+                      options={impersonationUsers.map(u => ({
+                        value: u.id,
+                        label: `${u.name} (${u.role_id})`
+                      }))}
+                      onChange={(val) => handleImpersonate(val)}
+                    />
                   )}
                 </div>
               )}
