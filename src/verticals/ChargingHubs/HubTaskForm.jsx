@@ -87,7 +87,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   // --- Data Fetching ---
   const fetchHubs = async () => {
-    const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
+    const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code, city_code').order('name');
     if (error) console.error('[HubTaskForm] Error fetching hubs:', error.message);
     else if (data) setHubs(data);
   };
@@ -125,13 +125,26 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   // --- UI Logic ---
   const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();
-  const filteredHubs = formData.city ? hubs.filter(h => h.city === formData.city) : [];
+  // BUG-FIX: Allow selecting ANY hub if city isn't set yet (enables Hub -> City deduction)
+  const filteredHubs = formData.city ? hubs.filter(h => h.city === formData.city) : hubs;
 
   const handleCityChange = (e) => {
     updateFields({
       city: e.target.value,
       hub_ids: [] // Reset selection on city change
     });
+  };
+
+  const handleHubChange = (val) => {
+    updateField('hub_ids', val);
+    
+    // AUTO-DEDUCE CITY: If no city is selected but a hub is picked, deduce city from hub
+    if (!formData.city && val.length > 0) {
+      const selectedHub = hubs.find(h => h.id === val[0]);
+      if (selectedHub && selectedHub.city) {
+        updateField('city', selectedHub.city);
+      }
+    }
   };
 
   const handleNextStep = (e) => {
@@ -188,6 +201,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
     const finalTaskText = taskUtils.formatTaskText(formData.text, {
       assetCode: isMultiHub ? 'MULTI' : primaryHub?.hub_code,
+      cityCode: primaryHub?.city_code || hubs.find(h => h.id === formData.hub_ids[0])?.city_code,
       functionName: formData.function,
       forcePrefix: formData.hub_ids.length > 0
     });
@@ -270,8 +284,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                         id="hub-selector"
                         hubs={filteredHubs}
                         value={formData.hub_ids}
-                        onChange={(val) => updateField('hub_ids', val)}
-                        disabled={!formData.city || !taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
+                        onChange={handleHubChange}
+                        disabled={!taskUtils.canUserEditField(initialData, 'hub_id', permissions, currentUser)}
                       />
                     </div>
                   </div>

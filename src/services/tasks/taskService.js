@@ -165,68 +165,48 @@ export const TASK_SELECT = `
 /**
  * Synchronizes many-to-many links in task_context_links.
  */
-const syncContextLinks = async (sourceId, entityType, entityIds) => {
-  if (!sourceId || !entityType) return;
-  console.log(`[SyncContext] Syncing ${entityType} for ${sourceId}:`, entityIds);
-  
-  // Ensure entityIds is a clean array of UUIDs
-  const ids = Array.isArray(entityIds) ? entityIds : (entityIds ? [entityIds] : []);
-  // Enforce deduplication to prevent UNIQUE constraint violations on batch insert
-  const uniqueIds = [...new Set(ids.filter(id => !!id))];
-  
-  // 1. Optimization: Fetch existing links to detect changes
-  // This prevents redundant DELETE/INSERT cycles which trigger 409 conflicts for 
-  // users with restricted DELETE permissions (e.g. contributors promoting tasks).
-  const { data: existing, error: fetchError } = await supabase
-    .from('task_context_links')
-    .select('entity_id')
-    .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
+export const syncContextLinks = async (sourceId, sourceType, entityType, entityIds) => {
+  // 1. Sanitize and flatten: Ensure we have a flat array of valid string UUIDs
+  const rawIds = Array.isArray(entityIds) ? entityIds.flat() : [entityIds];
+  const validIds = [...new Set(rawIds.filter(id => 
+    typeof id === 'string' && 
+    id.length === 36 && 
+    id !== 'null' && 
+    id !== 'undefined'
+  ))].sort();
 
-  if (fetchError) {
-    console.error(`[SyncContext] Failed to fetch existing ${entityType} links:`, fetchError);
-    // Continue anyway to try and sync, but this fetch might fail if RLS is broken
-  } else {
-    const existingIds = (existing || []).map(l => l.entity_id).sort();
-    const sortedNewIds = uniqueIds.sort();
-    
-    if (JSON.stringify(existingIds) === JSON.stringify(sortedNewIds)) {
-      console.log(`[SyncContext] No change detected for ${entityType} on ${sourceId}. Skipping sync.`);
-      return;
-    }
-  }
-
-  // 2. Delete old links for this type to ensure clean sync
-  // FIX Bug8: Destructure and check the delete error. An unchecked failure here causes
-  // the subsequent INSERT to create duplicate links (old + new) on every retry.
-  const { error: deleteError } = await supabase
-    .from('task_context_links')
-    .delete()
-    .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
-
-  if (deleteError) {
-    console.error(`[SyncContext] Failed to clear old ${entityType} links for ${sourceId}:`, deleteError);
-    throw deleteError; // Abort before inserting duplicates
-  }
-
-  // 3. Batch insert new links
-  if (uniqueIds.length > 0) {
-    const linkRows = uniqueIds.map(id => ({
-      source_id: sourceId,
-      source_type: 'task',
-      entity_type: entityType,
-      entity_id: id
-    }));
-
-    if (linkRows.length === 0) return;
-
-    const { error } = await supabase
+  try {
+    // 2. Optimization: Fetch existing links to detect changes
+    // This prevents redundant DELETE/INSERT cycles which trigger 409 conflicts for 
+    // users with restricted DELETE permissions (e.g. contributors promoting tasks).
+    const { data: existing, error: fetchError } = await supabase
       .from('task_context_links')
-      .insert(linkRows);
+      .select('entity_id')
+      .match({ source_id: sourceId, source_type: sourceType, entity_type: entityType });
 
-    if (error) {
-      console.error(`Error syncing ${entityType} links:`, error);
-      throw error;
+    if (!fetchError) {
+      const existingIds = (existing || []).map(l => l.entity_id).sort();
+      if (JSON.stringify(existingIds) === JSON.stringify(validIds)) {
+        return; // No changes needed
+      }
     }
+
+    // 3. Apply changes (Delete then Insert)
+    await supabase.from('task_context_links').delete().match({ source_id: sourceId, source_type: sourceType, entity_type: entityType });
+
+    if (validIds.length > 0) {
+      const links = validIds.map(eId => ({
+        source_id: sourceId,
+        source_type: sourceType,
+        entity_type: entityType,
+        entity_id: eId
+      }));
+
+      const { error } = await supabase.from('task_context_links').insert(links);
+      if (error) throw error;
+    }
+  } catch (err) {
+    console.error(`[taskService] Error syncing ${entityType} links for ${sourceId}:`, err);
   }
 };
 
@@ -512,15 +492,16 @@ export const taskService = {
     if (error) throw error;
 
     // --- Sync Context Links (Simple Mode) ---
-    if (taskData.hub_ids) {
-      await syncContextLinks(taskData.id, 'hub', taskData.hub_ids);
-    }
-    if (taskData.assigned_to) {
-      await syncContextLinks(taskData.id, 'assignee', taskData.assigned_to);
-    }
-    if (taskData.client_id) {
-      await syncContextLinks(taskData.id, 'client', [taskData.client_id]);
-    }
+    // Note: syncContextLinks now handles array vs single-value flattening internally.
+    const syncOps = [];
+    if (taskData.client_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'client', taskData.client_id));
+    if (taskData.partner_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'partner', taskData.partner_id));
+    if (taskData.vendor_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'vendor', taskData.vendor_id));
+    if (taskData.employee_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'employee', taskData.employee_id));
+    if (taskData.hub_ids !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'hub', taskData.hub_ids));
+    if (taskData.assigned_to !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'assignee', taskData.assigned_to));
+
+    await Promise.all(syncOps);
 
     // Refetch the updated record
     const { data: fetched, error: fetchError } = await supabase
