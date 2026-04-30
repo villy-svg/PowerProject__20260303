@@ -87,7 +87,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   // --- Data Fetching ---
   const fetchHubs = async () => {
-    const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code, city_code').order('name');
+    const { data, error } = await supabase.from('hubs').select('id, name, city, hub_code').order('name');
     if (error) console.error('[HubTaskForm] Error fetching hubs:', error.message);
     else if (data) setHubs(data);
   };
@@ -122,6 +122,17 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       if (!hasMulti) provisionMultiHub(formData.city);
     }
   }, [formData.city, hubs.length]);
+
+  // AUTO-DEDUCE CITY ON LOAD: For subtasks where hub_ids are pre-set
+  useEffect(() => {
+    if (!formData.city && formData.hub_ids?.length > 0 && hubs.length > 0) {
+      const firstHubId = formData.hub_ids[0];
+      const hub = hubs.find(h => h.id === firstHubId);
+      if (hub?.city) {
+        updateField('city', hub.city);
+      }
+    }
+  }, [formData.hub_ids, hubs.length]);
 
   // --- UI Logic ---
   const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();
@@ -201,7 +212,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
     const finalTaskText = taskUtils.formatTaskText(formData.text, {
       assetCode: isMultiHub ? 'MULTI' : primaryHub?.hub_code,
-      cityCode: primaryHub?.city_code || hubs.find(h => h.id === formData.hub_ids[0])?.city_code,
+      cityCode: primaryHub?.city || hubs.find(h => h.id === formData.hub_ids[0])?.city,
       functionName: formData.function,
       forcePrefix: formData.hub_ids.length > 0
     });

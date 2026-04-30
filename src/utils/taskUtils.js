@@ -148,7 +148,9 @@ export const taskUtils = {
     }
     else if (options.assetCode && (funcLower === 'facility' || options.forcePrefix)) {
       const code = options.assetCode;
-      const cityPrefix = options.cityCode ? `${options.cityCode} : ` : '';
+      const cityPrefix = (options.cityCode && options.cityCode !== code && !code.startsWith(`${options.cityCode}-`)) 
+        ? `${options.cityCode} : ` 
+        : '';
       const prefix = `${cityPrefix}${code} : `;
 
       if (!finalTaskText.includes(" : ")) {

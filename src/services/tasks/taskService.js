@@ -494,12 +494,22 @@ export const taskService = {
     // --- Sync Context Links (Simple Mode) ---
     // Note: syncContextLinks now handles array vs single-value flattening internally.
     const syncOps = [];
-    if (taskData.client_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'client', taskData.client_id));
-    if (taskData.partner_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'partner', taskData.partner_id));
-    if (taskData.vendor_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'vendor', taskData.vendor_id));
-    if (taskData.employee_id !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'employee', taskData.employee_id));
-    if (taskData.hub_ids !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'hub', taskData.hub_ids));
-    if (taskData.assigned_to !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'assignee', taskData.assigned_to));
+    const getField = (snake, camel) => taskData[snake] !== undefined ? taskData[snake] : taskData[camel];
+
+    // Clients, Partners, Vendors, Employees
+    const clientId = getField('client_id', 'clientId');
+    const partnerId = getField('partner_id', 'partnerId');
+    const vendorId = getField('vendor_id', 'vendorId');
+    const employeeId = getField('employee_id', 'employeeId');
+    const hubIds = getField('hub_ids', 'hubIds') || getField('hub_id', 'hubId');
+    const assignedTo = getField('assigned_to', 'assignedTo');
+
+    if (clientId !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'client', clientId));
+    if (partnerId !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'partner', partnerId));
+    if (vendorId !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'vendor', vendorId));
+    if (employeeId !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'employee', employeeId));
+    if (hubIds !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'hub', hubIds));
+    if (assignedTo !== undefined) syncOps.push(syncContextLinks(taskData.id, 'task', 'assignee', assignedTo));
 
     await Promise.all(syncOps);
 
