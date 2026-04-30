@@ -51,12 +51,15 @@ DECLARE
   v_target_assignees    jsonb;
   v_target_assignee_id  uuid;
 
-  v_audit_user_id   uuid;
-  v_perm_level      text;
-  v_vertical_id     text;
+  v_audit_user_id       uuid;
+  v_perm_level          text;
+  v_vertical_id         text;
   
-  v_orphan_count    integer;
-  v_orphan_names    text;
+  v_orphan_count        integer;
+  v_orphan_names        text;
+  v_hub_ids             text[];
+  v_hub_id_scalar       uuid;
+  v_orphan_hubs         text[];
 BEGIN
   v_audit_user_id := public.safe_uuid(payload->>'audit_user_id');
 
@@ -88,29 +91,47 @@ BEGIN
       v_task_data := jsonb_set(v_task_data, '{id}', to_jsonb(v_parent_id::text));
     END IF;
 
-    -- 2. ORPHAN CHECK (The "Elegant Modal" Logic)
-    -- If this is an update to an existing parent, check if any hubs/assignees
-    -- are being removed that still have active child tasks.
+    -- 1.1 Pre-fetch incoming hub list for self-healing
+    v_hub_ids := (
+        SELECT array_agg(DISTINCT elem)
+        FROM jsonb_array_elements_text(COALESCE(v_context_links->'hub', '[]'::jsonb)) AS elem
+        WHERE elem IS NOT NULL AND elem != ''
+    );
+
+    -- 2. ORPHAN CHECK (Self-Healing Logic)
+    -- If this is an update to an existing parent, identify any hubs 
+    -- being removed that still have active child tasks.
     IF v_fan_out_targets IS NOT NULL AND jsonb_typeof(v_fan_out_targets) = 'array' THEN
-        SELECT count(*), string_agg(h.name, ', ')
-        INTO v_orphan_count, v_orphan_names
+        SELECT array_agg(DISTINCT child.hub_id::text)
+        INTO v_orphan_hubs
         FROM public.tasks child
-        LEFT JOIN public.hubs h ON h.id = child.hub_id
         WHERE child.parent_task_id = v_parent_id
-          AND (child.hub_id, child.assigned_to) NOT IN (
-              SELECT 
-                public.safe_uuid(t->>'hub_id'),
-                public.safe_uuid(CASE 
-                  WHEN jsonb_typeof(t->'assigned_to') = 'array' AND jsonb_array_length(t->'assigned_to') > 0 THEN t->'assigned_to'->>0
-                  WHEN jsonb_typeof(t->'assigned_to') = 'string' THEN t->>'assigned_to'
-                  ELSE NULL 
-                END)
+          AND child.hub_id IS NOT NULL
+          AND child.hub_id::text NOT IN (
+              SELECT t->>'hub_id'
               FROM jsonb_array_elements(v_fan_out_targets) AS t
+              WHERE t->>'hub_id' IS NOT NULL AND t->>'hub_id' != ''
           );
 
-        IF v_orphan_count > 0 THEN
-            RAISE EXCEPTION 'ORPHAN_DETECTED: You are trying to remove hubs (%) that still have active sub-tasks. Please delete the sub-tasks first.', v_orphan_names;
+        -- SELF-HEALING: Auto-append orphans back to the orchestration list
+        IF v_orphan_hubs IS NOT NULL AND array_length(v_orphan_hubs, 1) > 0 THEN
+          RAISE WARNING '[Orchestrator] Self-Healed orphan hubs: %', v_orphan_hubs;
+          v_hub_ids := (
+            SELECT array_agg(DISTINCT x)
+            FROM unnest(array_cat(v_hub_ids, v_orphan_hubs)) x
+            WHERE x IS NOT NULL AND x != ''
+          );
         END IF;
+    END IF;
+
+    -- 2.1 Calculate Parent Hub Scalar
+    -- If multiple hubs exist, set to NULL (Multi), otherwise use the single ID.
+    IF v_hub_ids IS NOT NULL AND array_length(v_hub_ids, 1) > 1 THEN
+      v_hub_id_scalar := NULL; 
+    ELSIF v_hub_ids IS NOT NULL AND array_length(v_hub_ids, 1) = 1 THEN
+      v_hub_id_scalar := public.safe_uuid(v_hub_ids[1]);
+    ELSE
+      v_hub_id_scalar := public.safe_uuid(v_task_data->>'hub_id');
     END IF;
 
     -- 3. Upsert Parent Task
@@ -125,7 +146,7 @@ BEGIN
       COALESCE(v_task_data->>'stage_id', 'BACKLOG'),
       COALESCE(v_task_data->>'priority', 'Medium'),
       v_task_data->>'description',
-      public.safe_uuid(v_task_data->>'hub_id'),
+      v_hub_id_scalar,
       v_task_data->>'city',
       v_task_data->>'function',
       public.safe_uuid(v_task_data->>'assigned_to'),

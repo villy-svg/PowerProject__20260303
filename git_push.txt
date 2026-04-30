@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260430 APK -- PWA Phase 1 1.0.3"
+git commit -m "260430 APK -- PWA Phase 1 1.0.4"
 git push origin staging
 
 # 3. Merge Staging to Main  
@@ -19,8 +19,7 @@ git checkout staging
 #git pull origin main
 # 5. Change Back to Staging
 #git checkout staging
-
-
+ 
 #Check Current Git Branch
 git branch --show-current
 
@@ -35,7 +34,8 @@ git branch --show-current
 #npx supabase migration repair --status reverted 20260429220000
 
 #npx supabase link --project-ref eeoibqxhfkrgbylnluvk; npx supabase migration repair --status reverted 20260429220000; npx supabase db push --include-all
+#npx supabase link --project-ref eeoibqxhfkrgbylnluvk; npx supabase migration repair --status reverted 20260430103000; npx supabase db push --include-all
 #npx supabase link --project-ref eeoibqxhfkrgbylnluvk; npx supabase db push --include-all --yes
 
-
 Get-Content supabase\.temp\project-ref
+

@@ -524,10 +524,8 @@ function App() {
                 }
                 activeVertical={activeVertical}
                 tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
-                setTasks={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
+                setTasks={setTasks}
                 addTask={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
-                // FIX Issue-1: useDailyTasks now reads from the shared setTasks/fetchTasks.
-                // setDailyTasks and fetchDailyTasks no longer exist as separate functions.
                 actualSetTasks={setTasks}
                 refreshTasks={fetchTasks}
                 updateTask={activeVertical === 'daily_hub_tasks' ? updateDailyTask : updateTask}

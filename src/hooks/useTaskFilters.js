@@ -22,7 +22,7 @@ export const useTaskFilters = ({
 }) => {
   // 1. Duplicate Detection
   const tasksWithDuplicateInfo = useDuplicateDetection(tasks, {
-    fields: ['text', 'priority', 'hub_id', 'function'],
+    fields: ['text', 'priority', 'hub_id', 'function', 'parentTask', 'assigned_to'],
     activeVertical: rootVerticalId || activeVertical,
     sortByDuplicates: true
   });

@@ -203,7 +203,8 @@ export const useTaskController = (props) => {
       t.id !== primaryTaskId && 
       t.text === primaryTask.text && 
       t.verticalId === primaryTask.verticalId &&
-      t.parentTask === primaryTask.parentTask // DUP safety: Only merge within the same hierarchy
+      t.parentTask === primaryTask.parentTask && // DUP safety: Only merge within the same hierarchy
+      t.assigned_to === primaryTask.assigned_to // DUP safety: Only merge if assigned to the same person
     );
     try {
       await bulkUpdateTasks(duplicates.map(t => t.id), { stage_id: 'DEPRIORITIZED' });
