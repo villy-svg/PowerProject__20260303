@@ -174,7 +174,28 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
   // Enforce deduplication to prevent UNIQUE constraint violations on batch insert
   const uniqueIds = [...new Set(ids.filter(id => !!id))];
   
-  // 1. Delete old links for this type to ensure clean sync
+  // 1. Optimization: Fetch existing links to detect changes
+  // This prevents redundant DELETE/INSERT cycles which trigger 409 conflicts for 
+  // users with restricted DELETE permissions (e.g. contributors promoting tasks).
+  const { data: existing, error: fetchError } = await supabase
+    .from('task_context_links')
+    .select('entity_id')
+    .match({ source_id: sourceId, source_type: 'task', entity_type: entityType });
+
+  if (fetchError) {
+    console.error(`[SyncContext] Failed to fetch existing ${entityType} links:`, fetchError);
+    // Continue anyway to try and sync, but this fetch might fail if RLS is broken
+  } else {
+    const existingIds = (existing || []).map(l => l.entity_id).sort();
+    const sortedNewIds = uniqueIds.sort();
+    
+    if (JSON.stringify(existingIds) === JSON.stringify(sortedNewIds)) {
+      console.log(`[SyncContext] No change detected for ${entityType} on ${sourceId}. Skipping sync.`);
+      return;
+    }
+  }
+
+  // 2. Delete old links for this type to ensure clean sync
   // FIX Bug8: Destructure and check the delete error. An unchecked failure here causes
   // the subsequent INSERT to create duplicate links (old + new) on every retry.
   const { error: deleteError } = await supabase
@@ -187,7 +208,7 @@ const syncContextLinks = async (sourceId, entityType, entityIds) => {
     throw deleteError; // Abort before inserting duplicates
   }
 
-  // 2. Batch insert new links
+  // 3. Batch insert new links
   if (uniqueIds.length > 0) {
     const linkRows = uniqueIds.map(id => ({
       source_id: sourceId,
@@ -419,6 +440,62 @@ export const taskService = {
       return taskData;
     }
 
+    const { orchestration_mapping: orchMapping, ...rest } = taskData;
+
+    // SCENARIO A: Orchestration / Fan-Out Update
+    if (orchMapping && orchMapping.length > 0) {
+      console.info(`[TaskService] START updateTask (Orchestration): "${taskData.id}" - "${taskData.text}"`, { 
+        targets: orchMapping.length 
+      });
+
+      const row = auditService.stamp(mapTaskToRow(rest), userId);
+      row.id = taskData.id; // CRITICAL FIX: Ensure ID is preserved so RPC performs DO UPDATE instead of INSERT
+
+      const hubIds = taskData.hub_ids || [];
+      const assigneeIds = taskData.assigned_to || [];
+
+      const contextLinks = {};
+      if (hubIds.length > 0) contextLinks.hub = hubIds;
+      if (assigneeIds.length > 0) contextLinks.assignee = assigneeIds;
+
+      // Normalize targets to the shape expected by rpc_orchestrate_tasks
+      const fanOutTargets = orchMapping.map(target => ({
+        hub_id: target.hub_id || null,
+        city: target.city || null,
+        assigned_to: Array.isArray(target.assigned_to)
+          ? target.assigned_to
+          : (target.assigned_to ? [target.assigned_to] : [])
+      }));
+
+      const payload = {
+        audit_user_id: userId,
+        operations: [
+          {
+            task_data: row,
+            context_links: contextLinks,
+            fan_out_targets: fanOutTargets
+          }
+        ]
+      };
+
+      const { data: updatedIds, error: rpcError } = await supabase.rpc('rpc_orchestrate_tasks', { payload });
+      if (rpcError) {
+        console.error('[TaskService] Orchestration Update Error:', rpcError);
+        throw rpcError;
+      }
+
+      // Fetch the updated parent
+      const { data: fetched, error: fetchError } = await supabase
+        .from('tasks')
+        .select(TASK_SELECT)
+        .eq('id', taskData.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+      return normalizeTask(fetched);
+    }
+
+    // SCENARIO B: Simple CRUD Update
     let row = mapTaskToRow(taskData);
     row = auditService.stamp(row, userId);
 
@@ -429,7 +506,7 @@ export const taskService = {
 
     if (error) throw error;
 
-    // --- NEW: Sync Context Links ---
+    // --- Sync Context Links (Simple Mode) ---
     if (taskData.hub_ids) {
       await syncContextLinks(taskData.id, 'hub', taskData.hub_ids);
     }
@@ -437,21 +514,18 @@ export const taskService = {
       await syncContextLinks(taskData.id, 'assignee', taskData.assigned_to);
     }
     if (taskData.client_id) {
-      await syncContextLinks(taskData.id, 'client', Array.isArray(taskData.client_id) ? taskData.client_id : [taskData.client_id]);
-    }
-    if (taskData.employee_id) {
-      await syncContextLinks(taskData.id, 'employee', Array.isArray(taskData.employee_id) ? taskData.employee_id : [taskData.employee_id]);
+      await syncContextLinks(taskData.id, 'client', [taskData.client_id]);
     }
 
-    // Fetch fresh data with links
-    const { data: refreshed, error: fetchError } = await supabase
+    // Refetch the updated record
+    const { data: fetched, error: fetchError } = await supabase
       .from('tasks')
       .select(TASK_SELECT)
       .eq('id', taskData.id)
       .single();
 
     if (fetchError) throw fetchError;
-    return normalizeTask(refreshed);
+    return normalizeTask(fetched);
   },
 
   /**

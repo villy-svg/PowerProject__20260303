@@ -112,7 +112,27 @@ const mapTemplateToRow = (template) => {
 const syncTemplateHubs = async (templateId, hubConfigs) => {
   if (!templateId) return;
 
-  // 1. Purge existing Hub links for this template
+  // 1. Optimization: Fetch existing links to detect changes
+  const { data: existing, error: fetchError } = await supabase
+    .from('task_context_links')
+    .select('entity_id, metadata')
+    .match({ source_id: templateId, source_type: 'template', entity_type: 'hub' });
+
+  if (!fetchError) {
+    const existingConfigs = (existing || []).map(d => ({ hubId: d.entity_id, assigneeIds: d.metadata?.assignee_ids || [] }));
+    const newConfigs = (hubConfigs || []).map(hc => ({ hubId: hc.hubId, assigneeIds: [...new Set((hc.assigneeIds || []).filter(id => !!id))].sort() }));
+    
+    // Deep comparison of configs
+    const existingStr = JSON.stringify(existingConfigs.sort((a,b) => a.hubId.localeCompare(b.hubId)));
+    const newStr = JSON.stringify(newConfigs.sort((a,b) => a.hubId.localeCompare(b.hubId)));
+
+    if (existingStr === newStr) {
+      console.log(`[SyncTemplateHubs] No change for template ${templateId}. Skipping sync.`);
+      return;
+    }
+  }
+
+  // 2. Purge existing Hub links for this template
   const { error: delError } = await supabase
     .from('task_context_links')
     .delete()
@@ -120,7 +140,7 @@ const syncTemplateHubs = async (templateId, hubConfigs) => {
 
   if (delError) throw delError;
 
-  // 2. Insert new configurations with metadata
+  // 3. Insert new configurations with metadata
   if (hubConfigs && hubConfigs.length > 0) {
     // Deduplicate configurations by hubId
     const seenHubs = new Set();
@@ -159,7 +179,23 @@ const syncTemplateHubs = async (templateId, hubConfigs) => {
 const syncTemplateAssignees = async (templateId, assigneeIds) => {
   if (!templateId) return;
 
-  // FIX Issue-12: Capture the delete error. Previously this was silently swallowed,
+  // 1. Optimization: Fetch existing links to detect changes
+  const { data: existing, error: fetchError } = await supabase
+    .from('task_context_links')
+    .select('entity_id')
+    .match({ source_id: templateId, source_type: 'template', entity_type: 'assignee' });
+
+  const uniqueIds = [...new Set((assigneeIds || []).filter(id => !!id))].sort();
+
+  if (!fetchError) {
+    const existingIds = (existing || []).map(l => l.entity_id).sort();
+    if (JSON.stringify(existingIds) === JSON.stringify(uniqueIds)) {
+      console.log(`[SyncTemplateAssignees] No change for template ${templateId}. Skipping sync.`);
+      return;
+    }
+  }
+
+  // 2. FIX Issue-12: Capture the delete error. Previously this was silently swallowed,
   // allowing the subsequent insert to create duplicate links on retry.
   const { error: delError } = await supabase
     .from('task_context_links')
@@ -168,10 +204,7 @@ const syncTemplateAssignees = async (templateId, assigneeIds) => {
 
   if (delError) throw delError;
 
-  if (assigneeIds && assigneeIds.length > 0) {
-    const uniqueIds = [...new Set(assigneeIds.filter(id => !!id))];
-    if (uniqueIds.length === 0) return;
-
+  if (uniqueIds.length > 0) {
     const rows = uniqueIds.map(aid => ({
       source_id: templateId,
       source_type: 'template',
