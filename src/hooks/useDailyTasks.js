@@ -75,6 +75,8 @@ export const useDailyTasks = (allTasks = [], setAllTasks, user, onRefresh) => {
     }
     try {
       await dailyTaskService.updateTaskStage(taskId, newStageId, user?.id);
+      // Background reconciliation on success
+      if (onRefresh) onRefresh(false);
     } catch (err) {
       // Revert on failure by triggering a full refresh
       if (onRefresh) onRefresh(false);

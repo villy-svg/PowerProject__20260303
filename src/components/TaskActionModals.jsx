@@ -145,6 +145,7 @@ const TaskActionModals = ({
           <p className="confirm-message">{confirmDialog.message}</p>
           <div className="confirm-actions">
             <button
+              type="button"
               className="halo-button confirm-btn"
               onClick={confirmDialog.onConfirm}
               disabled={saving}
@@ -153,6 +154,7 @@ const TaskActionModals = ({
               {saving ? 'Working...' : 'Confirm'}
             </button>
             <button
+              type="button"
               className="halo-button cancel-btn"
               onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
               style={{ opacity: 0.6, fontWeight: 600 }}

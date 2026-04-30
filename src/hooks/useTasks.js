@@ -95,6 +95,9 @@ export const useTasks = (user) => {
         return [...updatedTasks, ...filtered];
       });
 
+      // Background reconciliation on success
+      await fetchTasks(false);
+
       // Return the primary task (the one with the original ID) for callers
       return updatedTasks.find(t => t.id === taskData.id) || updatedTasks[0];
     } catch (err) {
@@ -108,6 +111,8 @@ export const useTasks = (user) => {
     setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
     try {
       await taskService.updateTaskStage(taskId, newStageId, user?.id);
+      // Background reconciliation on success
+      await fetchTasks(false);
     } catch (err) {
       masterErrorHandler.handleDatabaseError(err, 'useTasks.updateTaskStage');
       // Revert on failure

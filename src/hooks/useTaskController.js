@@ -170,7 +170,7 @@ export const useTaskController = (props) => {
       // Use the dedicated SECURITY DEFINER RPC so contributors and assignees
       // can promote without needing DELETE rights on task_context_links.
       const { error } = await supabase.rpc('rpc_promote_task', {
-        p_task_id:   childId,
+        p_task_id: childId,
         p_parent_id: parentId ?? null,
       });
       if (error) throw error;
@@ -179,6 +179,9 @@ export const useTaskController = (props) => {
       setTasks(prev => prev.map(t =>
         t.id === childId ? { ...t, parentTask: parentId ?? null, isSubTask: !!parentId } : t
       ));
+
+      // Background reconciliation to ensure triggers and computed fields are synced
+      if (refreshTasks) refreshTasks(false);
     } catch (err) {
       alert(`Failed to promote task: ${err.message || 'Unknown error'}`);
     } finally {
@@ -188,6 +191,10 @@ export const useTaskController = (props) => {
 
   const handleSaveTask = async (formData) => {
     const isEditing = !!(editingTask && editingTask.id);
+    if (!formData || (!isEditing && !formData.text)) {
+      console.warn('[TaskController] Blocked invalid handleSaveTask call:', { isEditing, formData });
+      return;
+    }
     if (isEditing && (editingTask.isContextOnly || !canUserUpdate)) return;
     if (!isEditing && !canUserCreate) return;
 
@@ -220,9 +227,9 @@ export const useTaskController = (props) => {
   const executeMerge = async (primaryTaskId) => {
     const primaryTask = tasks.find(t => t.id === primaryTaskId);
     if (!primaryTask) return;
-    const duplicates = tasks.filter(t => 
-      t.id !== primaryTaskId && 
-      t.text === primaryTask.text && 
+    const duplicates = tasks.filter(t =>
+      t.id !== primaryTaskId &&
+      t.text === primaryTask.text &&
       t.verticalId === primaryTask.verticalId &&
       t.parentTask === primaryTask.parentTask && // DUP safety: Only merge within the same hierarchy
       t.assigned_to === primaryTask.assigned_to // DUP safety: Only merge if assigned to the same person
@@ -270,18 +277,21 @@ export const useTaskController = (props) => {
     }
 
     // Step 4: Cascade parent context fields to the child.
-    // This pre-populates the creation modal so the user doesn't have to re-enter context.
-    // All fields use nullish coalescing (|| '') to guarantee safe defaults.
+    // Sanitize metadata to prevent recursive fan-out (remove fan_out config if present)
+    const sanitizedMetadata = { ...(parentTask.metadata || {}) };
+    delete sanitizedMetadata.fan_out;
+    delete sanitizedMetadata.is_fan_out_parent;
+
     setEditingTask({
       parentTask: parentId,                                                // Link to parent
       city: parentTask.city || '',                                         // Geographic context
-      hub_ids: parentTask.hub_ids || (parentTask.hub_id ? [parentTask.hub_id] : []), // Hub context (supports both array and single)
-      hub_id: parentTask.hub_id || null,                                  // Legacy single-hub field
-      function: parentTask.function || '',                                 // Task domain/function
-      assigned_to: parentTask.assigned_to || [],                          // Inherit assignees
+      hub_ids: parentTask.hub_ids || (parentTask.hub_id ? [parentTask.hub_id] : []), // Hub context
+      hub_id: parentTask.hub_id || null,                                  // Legacy field
+      function: parentTask.function || '',                                 // Task domain
+      assigned_to: [],                                                    // Subtasks start unassigned
       priority: parentTask.priority || 'Medium',                          // Inherit priority
       assigned_client_id: parentTask.assigned_client_id || '',            // Client context
-      metadata: parentTask.metadata || {}                                  // Arbitrary metadata
+      metadata: sanitizedMetadata                                          // Cleaned metadata
     });
 
     // Step 5: Open the task creation modal

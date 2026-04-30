@@ -47,9 +47,7 @@ export const useTaskViewActions = ({
 
   // ─── 2. Delete Confirmation ───────────────────────────────────────────
   const handleDelete = useCallback((taskId) => {
-    if (window.confirm("Are you sure you want to permanently delete this task?")) {
-      onDeleteTask(taskId);
-    }
+    onDeleteTask(taskId);
   }, [onDeleteTask]);
 
   // ─── 3. Action Toggles (Modals) ────────────────────────────────────────
