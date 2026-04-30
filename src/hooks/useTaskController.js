@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { createInitialTask } from '../constants/taskSchema';
 import { taskUtils } from '../utils/taskUtils';
+import { supabase } from '../services/core/supabaseClient';
 
 // Sub-hooks
 import { useTaskFilters } from './useTaskFilters';
@@ -156,13 +157,33 @@ export const useTaskController = (props) => {
   };
 
   const handleMoveToParent = async (childId, parentId) => {
-    if (!canUserUpdate || childId === parentId) return;
+    // Guard: cannot promote a task to itself
+    if (childId === parentId) return;
     const task = tasks.find(t => t.id === childId);
     if (!task || task.isContextOnly) return;
+
+    // Guard: no-op if already at the requested level
+    if (task.parentTask === (parentId ?? null)) return;
+
+    setSaving(true);
     try {
-      await updateTask({ ...task, parentTask: parentId });
-    } catch (err) { alert('Failed to update relationship.'); }
-    finally { setSaving(false); }
+      // Use the dedicated SECURITY DEFINER RPC so contributors and assignees
+      // can promote without needing DELETE rights on task_context_links.
+      const { error } = await supabase.rpc('rpc_promote_task', {
+        p_task_id:   childId,
+        p_parent_id: parentId ?? null,
+      });
+      if (error) throw error;
+
+      // Optimistic local update so the UI responds immediately
+      setTasks(prev => prev.map(t =>
+        t.id === childId ? { ...t, parentTask: parentId ?? null, isSubTask: !!parentId } : t
+      ));
+    } catch (err) {
+      alert(`Failed to promote task: ${err.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSaveTask = async (formData) => {
