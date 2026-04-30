@@ -13,5 +13,20 @@ FOR DELETE USING (
     OR source_type = 'template'
 );
 
+-- 3. FIX SECURITY AUDIT LOG CONSTRAINTS (Idempotent Repair)
+-- Relaxes target_id and actor_id foreign keys to reference public.user_profiles instead of auth.users.
+-- This prevents 409 Conflict sync failures when user records are slightly out of sync.
+ALTER TABLE public.security_audit_logs 
+    DROP CONSTRAINT IF EXISTS security_audit_logs_actor_id_fkey,
+    DROP CONSTRAINT IF EXISTS security_audit_logs_target_id_fkey;
+
+ALTER TABLE public.security_audit_logs
+    ADD CONSTRAINT security_audit_logs_actor_id_fkey 
+    FOREIGN KEY (actor_id) REFERENCES public.user_profiles(id) ON DELETE SET NULL;
+
+ALTER TABLE public.security_audit_logs
+    ADD CONSTRAINT security_audit_logs_target_id_fkey 
+    FOREIGN KEY (target_id) REFERENCES public.user_profiles(id) ON DELETE SET NULL;
+
 -- Trigger schema reload
 NOTIFY pgrst, 'reload schema';
