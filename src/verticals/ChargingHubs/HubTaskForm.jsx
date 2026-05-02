@@ -10,6 +10,7 @@ import { IconUpload } from '../../components/Icons';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { orchestrationService } from '../../services/tasks/orchestrationService';
 import CustomSelect from '../../components/CustomSelect';
+import AnonToggle from '../../components/AnonToggle';
 import './HubTaskForm.css';
 
 /** Fixed missing import */
@@ -258,7 +259,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             {step === 1 ? (
               <>
                 <div className="form-group">
-                  <label htmlFor="task-summary">Task Summary</label>
+                  <label htmlFor="task-summary">{activeVertical === 'escalation_tasks' ? 'Escalation Summary' : 'Task Summary'}</label>
                   <div className="form-input-container">
                     <input
                       id="task-summary"
@@ -272,6 +273,18 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                     />
                   </div>
                 </div>
+
+                {activeVertical === 'escalation_tasks' && (
+                  <div className="form-group anonymity-toggle-group">
+                    <AnonToggle
+                      id="anonymity-toggle"
+                      label="Submit Anonymously"
+                      description="Your identity will be hidden on the public board."
+                      checked={formData.is_anonymous || false}
+                      onChange={(val) => updateField('is_anonymous', val)}
+                    />
+                  </div>
+                )}
 
                 <div className="form-row-grid">
                   {activeVertical !== 'escalation_tasks' && (
