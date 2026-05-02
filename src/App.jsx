@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTheme } from './theme/useTheme';
 import ThemeToggle from './theme/themeToggle';
 import './App.css';
