@@ -40,7 +40,13 @@ const TaskActionModals = ({
       <TaskModal
         isOpen={isModalOpen}
         onClose={handleClose}
-        title={editingTask ? `Edit Task` : `Add New ${activeVertical?.replace('_', ' ')} Task`}
+        title={
+          editingTask 
+            ? `Edit Task` 
+            : activeVertical === 'escalation_tasks' 
+              ? 'Add Escalation' 
+              : `Add New ${activeVertical?.replace('_', ' ')} Task`
+        }
       >
         {TaskFormComponent ? (
           <TaskFormComponent

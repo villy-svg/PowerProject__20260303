@@ -274,19 +274,21 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 </div>
 
                 <div className="form-row-grid">
-                  <div className="form-group">
-                    <label htmlFor="city-select">City</label>
-                    <div className="form-input-container">
-                      <CustomSelect
-                        id="city-select"
-                        value={formData.city}
-                        onChange={(val) => handleCityChange({ target: { value: val } })}
-                        options={uniqueCities.map(city => ({ label: city, value: city }))}
-                        placeholder="Select City..."
-                        disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
-                      />
+                  {activeVertical !== 'escalation_tasks' && (
+                    <div className="form-group">
+                      <label htmlFor="city-select">City</label>
+                      <div className="form-input-container">
+                        <CustomSelect
+                          id="city-select"
+                          value={formData.city}
+                          onChange={(val) => handleCityChange({ target: { value: val } })}
+                          options={uniqueCities.map(city => ({ label: city, value: city }))}
+                          placeholder="Select City..."
+                          disabled={!taskUtils.canUserEditField(initialData, 'city', permissions, currentUser)}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="form-group">
                     <label htmlFor="hub-selector">CHARGING HUB(S)</label>
@@ -336,40 +338,42 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                   </div>
                 </div>
 
-                <div className="form-row-grid">
-                  <div className="form-group">
-                    <label htmlFor="function-select">FUNCTION</label>
-                    <div className="form-input-container">
-                      <CustomSelect
-                        id="function-select"
-                        value={formData.function}
-                        onChange={(val) => updateField('function', val)}
-                        options={[
-                          { label: 'N/A (General)', value: '' },
-                          ...functions.map(fn => ({ 
-                            label: fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name, 
-                            value: fn.name 
-                          }))
-                        ]}
-                        placeholder="Select Function..."
-                        disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
-                      />
+                {activeVertical !== 'escalation_tasks' && (
+                  <div className="form-row-grid">
+                    <div className="form-group">
+                      <label htmlFor="function-select">FUNCTION</label>
+                      <div className="form-input-container">
+                        <CustomSelect
+                          id="function-select"
+                          value={formData.function}
+                          onChange={(val) => updateField('function', val)}
+                          options={[
+                            { label: 'N/A (General)', value: '' },
+                            ...functions.map(fn => ({ 
+                              label: fn.function_code ? `[${fn.function_code}] ${fn.name}` : fn.name, 
+                              value: fn.name 
+                            }))
+                          ]}
+                          placeholder="Select Function..."
+                          disabled={!taskUtils.canUserEditField(initialData, 'function', permissions, currentUser)}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="form-group">
-                    <label htmlFor="parent-task-selector">PARENT TASK</label>
-                    <div className="form-input-container">
-                      <TaskHierarchySelector
-                        id="parent-task-selector"
-                        value={formData.parentTask}
-                        onChange={(val) => updateField('parentTask', val)}
-                        availableTasks={availableTasks}
-                        disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
-                      />
+                    <div className="form-group">
+                      <label htmlFor="parent-task-selector">PARENT TASK</label>
+                      <div className="form-input-container">
+                        <TaskHierarchySelector
+                          id="parent-task-selector"
+                          value={formData.parentTask}
+                          onChange={(val) => updateField('parentTask', val)}
+                          availableTasks={availableTasks}
+                          disabled={!taskUtils.canUserEditField(initialData, 'parentTask', permissions, currentUser)}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="form-group">
                   <label htmlFor="detailed-description">Detailed Description</label>

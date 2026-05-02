@@ -23,11 +23,7 @@ const TaskHierarchySelector = ({ id, value, onChange, availableTasks = [], disab
         disabled={disabled}
         fullWidthDropdown={true}
       />
-      {availableTasks.length === 0 && !disabled && (
-        <small style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', display: 'block', marginTop: '4px' }}>
-          No other tasks available to nest under.
-        </small>
-      )}
+
     </>
   );
 };
