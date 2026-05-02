@@ -39,6 +39,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessHubTasks: true,
         canAccessDailyHubTasks: true,
         canAccessDailyTaskTemplates: true,
+        canAccessEscalationTasks: true,
         canViewKanbanHierarchy,
       };
 
@@ -65,7 +66,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
 
     // Normalize sub-views back to their root vertical ID
     const rootVerticalId = 
-      (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks' || current === 'daily_task_templates') ? verticals.CHARGING_HUBS?.id :
+      (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks' || current === 'daily_task_templates' || current === 'escalation_tasks') ? verticals.CHARGING_HUBS?.id :
       (current === verticals.CLIENTS?.id || current === 'client_tasks' || current === 'leads_funnel') ? verticals.CLIENTS?.id :
       (current === verticals.EMPLOYEES?.id || current === 'employee_tasks') ? verticals.EMPLOYEES?.id :
       current.toUpperCase();
@@ -108,6 +109,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       scope: 'assigned',
       canAccessConfig: verticalLevel === 'admin',
       canViewKanbanHierarchy,
+      canAccessEscalationTasks: !!(featureLevels['canAccessHubTasks'] || verticalLevel !== 'none'),
     };
 
     // 4. Feature-granular CRUD flags
@@ -128,6 +130,12 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       finalPerms[`canUpdate${featureName}`] = featureCaps.canUpdate;
       finalPerms[`canDelete${featureName}`] = featureCaps.canDelete;
     });
+
+    // --- ESCALATION BOARD CRUD ALIASING ---
+    finalPerms.canCreateEscalationTasks = !!(finalPerms.canCreateHubTasks || finalPerms.canCreate);
+    finalPerms.canReadEscalationTasks   = !!(finalPerms.canReadHubTasks   || finalPerms.canRead);
+    finalPerms.canUpdateEscalationTasks = !!(finalPerms.canUpdateHubTasks || finalPerms.canUpdate);
+    finalPerms.canDeleteEscalationTasks = !!(finalPerms.canDeleteHubTasks || finalPerms.canDelete);
 
      return finalPerms;
   }, [user, activeVertical, verticals]);

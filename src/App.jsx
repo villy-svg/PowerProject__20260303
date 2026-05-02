@@ -100,6 +100,25 @@ function App() {
     deleteTask: deleteDailyTask,
   } = useDailyTasks(tasks, setTasks, user, fetchTasks);
 
+  // 4. Escalation Task state (Filtered from global tasks)
+  const escalationTasks = useMemo(() => {
+    const hubId = verticals.CHARGING_HUBS?.id;
+    if (!hubId) return [];
+
+    return tasks.filter(t => {
+      const isHubTask = t.verticalId === hubId;
+      if (!isHubTask) return false;
+
+      const isLive = t.stageId !== 'COMPLETED' && t.stageId !== 'DEPRIORITIZED';
+      if (!isLive) return false;
+
+      const isHighPriority = t.priority === 'High' || t.priority === 'Urgent';
+      const isManuallyEscalated = Array.isArray(t.task_board) && t.task_board.includes('Escalations');
+
+      return isHighPriority || isManuallyEscalated;
+    });
+  }, [tasks, verticals.CHARGING_HUBS?.id]);
+
   // Unified Initial Data Load
   useEffect(() => {
     const initAppData = async () => {
@@ -306,7 +325,7 @@ function App() {
   useEffect(() => {
     if (activeVertical) {
       // Don't save transient management sub-views
-      const persistentVerticals = ['home', verticals.CHARGING_HUBS?.id, 'hub_tasks', 'daily_hub_tasks', 'daily_task_templates', verticals.EMPLOYEES?.id, 'employee_tasks', verticals.CLIENTS?.id, 'client_tasks', 'leads_funnel'];
+      const persistentVerticals = ['home', verticals.CHARGING_HUBS?.id, 'hub_tasks', 'daily_hub_tasks', 'daily_task_templates', 'escalation_tasks', verticals.EMPLOYEES?.id, 'employee_tasks', verticals.CLIENTS?.id, 'client_tasks', 'leads_funnel'];
       if (persistentVerticals.includes(activeVertical)) {
         localStorage.setItem('power_project_active_vertical', activeVertical);
       }
@@ -515,15 +534,20 @@ function App() {
                 }
                 boardLabel={
                   (activeVertical === 'daily_task_templates') ? 'Daily Task Templates' :
-                    (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
-                      (activeVertical === 'hub_tasks') ? 'Hub Task Board' :
-                        (activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs Task Board' :
-                          (activeVertical === 'employee_tasks') ? 'Employee Task Board' :
-                            (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
-                              verticals[activeVertical]?.label || 'Board'
+                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
+                  (activeVertical === 'escalation_tasks') ? 'Escalation Task Board' :
+                  (activeVertical === 'hub_tasks') ? 'Hub Task Board' :
+                  (activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs Task Board' :
+                  (activeVertical === 'employee_tasks') ? 'Employee Task Board' :
+                  (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
+                  verticals[activeVertical]?.label || 'Board'
                 }
                 activeVertical={activeVertical}
-                tasks={activeVertical === 'daily_hub_tasks' ? dailyTasks : tasks}
+                tasks={
+                  activeVertical === 'daily_hub_tasks' ? dailyTasks : 
+                  activeVertical === 'escalation_tasks' ? escalationTasks :
+                  tasks
+                }
                 setTasks={setTasks}
                 addTask={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
                 actualSetTasks={setTasks}

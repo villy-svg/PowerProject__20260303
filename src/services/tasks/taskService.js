@@ -39,6 +39,7 @@ const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'V
 // Key order matters: 'daily_hub' must precede 'hub' (more-specific first).
 const VERTICAL_BOARD_MAP = {
   'daily_hub': 'Hubs Daily',
+  'escalation': 'Escalations',
   'hub':       'Hubs',
   'client':    'Clients',
   'employee':  'Employees',

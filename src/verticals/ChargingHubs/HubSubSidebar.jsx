@@ -158,7 +158,14 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         <div style={{ padding: '12px', marginBottom: '8px' }}>
           <button
             className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'hub_tasks' ? 1 : 0.7 }}
+            style={{ 
+              width: '100%', 
+              opacity: activeVertical === 'hub_tasks' ? 1 : 0.7,
+              border: activeVertical === 'hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
+              fontWeight: activeVertical === 'hub_tasks' ? 600 : 400,
+              transition: 'all 0.2s ease-in-out',
+              padding: '10px 12px'
+            }}
             onClick={() => setActiveVertical('hub_tasks')}
           >
             Hubs Task Board
@@ -170,10 +177,37 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
           <button
             className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7 }}
+            style={{ 
+              width: '100%', 
+              opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7,
+              border: activeVertical === 'daily_hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
+              fontWeight: activeVertical === 'daily_hub_tasks' ? 600 : 400,
+              transition: 'all 0.2s ease-in-out',
+              padding: '10px 12px'
+            }}
             onClick={() => setActiveVertical('daily_hub_tasks')}
           >
             Daily Task Board
+          </button>
+        </div>
+      )}
+
+      {permissions?.canAccessEscalationTasks && (
+        <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+          <button
+            id="btn-nav-escalation"
+            className="halo-button"
+            style={{ 
+              width: '100%', 
+              opacity: activeVertical === 'escalation_tasks' ? 1 : 0.7,
+              border: activeVertical === 'escalation_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
+              fontWeight: activeVertical === 'escalation_tasks' ? 600 : 400,
+              transition: 'all 0.2s ease-in-out',
+              padding: '10px 12px'
+            }}
+            onClick={() => setActiveVertical('escalation_tasks')}
+          >
+            Escalation Task Board
           </button>
         </div>
       )}
@@ -182,7 +216,14 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
           <button
             className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'daily_task_templates' ? 1 : 0.7 }}
+            style={{ 
+              width: '100%', 
+              opacity: activeVertical === 'daily_task_templates' ? 1 : 0.7,
+              border: activeVertical === 'daily_task_templates' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
+              fontWeight: activeVertical === 'daily_task_templates' ? 600 : 400,
+              transition: 'all 0.2s ease-in-out',
+              padding: '10px 12px'
+            }}
             onClick={() => setActiveVertical('daily_task_templates')}
           >
             Daily Task Templates
