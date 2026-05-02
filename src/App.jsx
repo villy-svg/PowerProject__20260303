@@ -527,7 +527,7 @@ function App() {
             ) : (
               <VerticalWorkspace
                 label={
-                  (activeVertical === 'daily_task_templates' || activeVertical === 'daily_hub_tasks' || activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs List' :
+                  (activeVertical === 'daily_task_templates' || activeVertical === 'daily_hub_tasks' || activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'escalation_tasks') ? 'Hubs List' :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
                       (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
                         verticals[activeVertical]?.label
@@ -562,19 +562,19 @@ function App() {
                 setActiveVertical={setActiveVertical}
                 onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
                 SidebarComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubSubSidebar :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubSubSidebar :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
                       (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
                         null
                 }
                 TaskFormComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskForm :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubTaskForm :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
                       (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
                         null
                 }
                 TaskTileComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates') ? HubTaskTile :
+                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubTaskTile :
                     (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
                       (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
                         null

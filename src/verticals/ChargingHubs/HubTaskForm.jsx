@@ -18,7 +18,7 @@ import './HubTaskForm.css';
  * Vertical-specific form for Charging Hub tasks.
  * Refactored: Now uses useTaskForm hook and orchestrationService for clean separation.
  */
-const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate, onUploadProof }) => {
+const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableTasks = [], permissions = {}, currentUser = {}, onSubmissionStatusUpdate, onUploadProof, activeVertical }) => {
   const {
     formData,
     updateField,
@@ -330,6 +330,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                         onChange={(val) => updateField('assigned_to', val)}
                         currentUser={currentUser}
                         disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
+                        filter={activeVertical === 'escalation_tasks' ? (emp) => (emp.seniority_level >= 3) : null}
                       />
                     </div>
                   </div>

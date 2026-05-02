@@ -14,10 +14,13 @@ const AssigneeSelector = ({
   disabled = false,
   required = false,
   placeholder = 'Select Assignees...',
+  filter = null,
 }) => {
   const { assignees, loading } = useAssignees(true);
 
-  const options = assignees.map(emp => ({
+  const filteredAssignees = filter ? assignees.filter(filter) : assignees;
+
+  const options = filteredAssignees.map(emp => ({
     label: emp.full_name,
     value: emp.id,
   }));

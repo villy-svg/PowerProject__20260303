@@ -288,7 +288,7 @@ export const taskService = {
     // Uses module-level VALID_VERTICALS (FIX Issue-10)
     let resolvedVid = (taskData.verticalId || taskData.vertical_id || '').toUpperCase();
     if (!VALID_VERTICALS.includes(resolvedVid)) {
-      if (resolvedVid.includes('HUB')) resolvedVid = 'CHARGING_HUBS';
+      if (resolvedVid.includes('HUB') || resolvedVid.includes('ESCALATION')) resolvedVid = 'CHARGING_HUBS';
       else if (resolvedVid.includes('CLIENT')) resolvedVid = 'CLIENTS';
       else if (resolvedVid.includes('EMPLOYEE')) resolvedVid = 'EMPLOYEES';
       else resolvedVid = 'CHARGING_HUBS'; // Default fallback

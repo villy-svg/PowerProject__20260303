@@ -52,6 +52,7 @@ const TaskActionModals = ({
             currentUser={user}
             permissions={permissions}
             onSubmissionStatusUpdate={onSubmissionReview}
+            activeVertical={activeVertical}
             availableTasks={(tasks || []).filter(t => {
               if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
               if (!editingTask) return true;
