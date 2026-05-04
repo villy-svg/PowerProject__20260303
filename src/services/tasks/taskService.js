@@ -7,6 +7,7 @@
  */
 import { supabase } from '../core/supabaseClient';
 import { auditService } from '../core/auditService';
+import { TASK_BOARD_MAP } from '../../constants/taskBoards';
 
 // ---------------------------------------------------------------------------
 // Constants & Internal Utilities
@@ -36,14 +37,7 @@ const parseTaskBoard = (boardData) => {
 const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'VENDORS', 'DATA_MANAGER'];
 
 // Maps a lowercase substring of verticalId to the canonical task_board label.
-// Key order matters: 'daily_hub' must precede 'hub' (more-specific first).
-const VERTICAL_BOARD_MAP = {
-  'daily_hub': 'Hubs Daily',
-  'escalation': 'Escalations',
-  'hub':       'Hubs',
-  'client':    'Clients',
-  'employee':  'Employees',
-};
+// Removed local definition: now imported from src/constants/taskBoards.js
 
 /**
  * Maps a Supabase row (lowercase column names) to the camelCase shape
@@ -307,10 +301,14 @@ export const taskService = {
     }
 
     if (!Array.isArray(taskBoard) || taskBoard.length === 0) {
-      const matchedKey = Object.keys(VERTICAL_BOARD_MAP).find(key => resolvedVid.toLowerCase().includes(key));
-      taskBoard = matchedKey ? [VERTICAL_BOARD_MAP[matchedKey]] : ['Hubs'];
+      // FIX: Use the ORIGINAL verticalId from taskData for inference,
+      // NOT the resolved/normalized one which may have stripped context.
+      const rawVid = (taskData.verticalId || taskData.vertical_id || '').toLowerCase();
+      const matchedKey = Object.keys(TASK_BOARD_MAP).find(key => rawVid.includes(key));
+      taskBoard = matchedKey ? [TASK_BOARD_MAP[matchedKey]] : ['Hubs'];
+      
       if (!matchedKey) {
-        console.warn(`[TaskService] Could not infer task_board for verticalId="${resolvedVid}". Defaulting to 'Hubs'.`);
+        console.warn(`[TaskService] Could not infer task_board for raw verticalId="${rawVid}". Defaulting to 'Hubs'.`);
       }
     }
 

@@ -202,7 +202,13 @@ export const useTaskController = (props) => {
     try {
       if (isEditing) await updateTask({ ...editingTask, ...formData });
       else {
-        const newTask = { ...createInitialTask(formData.text, rootVerticalId || activeVertical), ...formData };
+        // Pass the activeVertical context (e.g., 'escalation_tasks') rather than the normalized rootVerticalId.
+        // This ensures taskService.addTask can correctly infer the task_board label.
+        const contextVid = (activeVertical && typeof activeVertical === 'string' && (activeVertical.includes('_') || activeVertical.includes('tasks'))) 
+          ? activeVertical 
+          : (rootVerticalId || activeVertical);
+        
+        const newTask = { ...createInitialTask(formData.text, contextVid), ...formData };
         if (addTask) await addTask(newTask); else setTasks(prev => [...prev, newTask]);
       }
       setIsModalOpen(false); setEditingTask(null);

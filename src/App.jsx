@@ -109,13 +109,10 @@ function App() {
       const isHubTask = t.verticalId === hubId;
       if (!isHubTask) return false;
 
-      const isLive = t.stageId !== 'COMPLETED' && t.stageId !== 'DEPRIORITIZED';
-      if (!isLive) return false;
-
-      const isHighPriority = t.priority === 'High' || t.priority === 'Urgent';
-      const isManuallyEscalated = Array.isArray(t.task_board) && t.task_board.includes('Escalations');
-
-      return isHighPriority || isManuallyEscalated;
+      // STRICT ESCALATION FILTER: Only show tasks explicitly marked for the Escalations board.
+      // Removed isHighPriority (priority === 'High' || 'Urgent') because it was causing
+      // normal hub tasks to leak into this board erroneously.
+      return Array.isArray(t.task_board) && t.task_board.includes('Escalations');
     });
   }, [tasks, verticals.CHARGING_HUBS?.id]);
 

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useDuplicateDetection } from './useDuplicateDetection';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
+import { getBoardLabelForVertical } from '../constants/taskBoards';
 
 /**
  * useTaskFilters Hook
@@ -81,6 +82,15 @@ export const useTaskFilters = ({
         if (Array.isArray(t.task_board) && t.task_board.includes('Hubs Daily')) {
           console.warn(`[TaskFilter] Hiding Daily Task "${t.text}" due to vertical mismatch. Task Vertical: ${t.verticalId}, Expected: ${targetVerticalId}`);
         }
+        return false;
+      }
+
+      // 0.1 Task Board Segment Filter
+      // Ensures that sub-view tasks (Daily, Escalations) don't leak into the main vertical board
+      // and vice versa. Each task must carry the board label corresponding to the active view.
+      const expectedBoard = getBoardLabelForVertical(activeVertical);
+      const taskBoards = Array.isArray(t.task_board) ? t.task_board : [];
+      if (expectedBoard && !taskBoards.includes(expectedBoard)) {
         return false;
       }
 

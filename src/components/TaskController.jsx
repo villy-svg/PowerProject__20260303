@@ -212,9 +212,9 @@ const TaskController = (props) => {
         }
         expandedRight={
           <>
-            {(activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks') && (
+            {(activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'escalation_tasks') && (
               <>
-                <TaskCSVDownload className="master-action-btn" data={(tasks || []).filter(t => activeVertical === 'daily_hub_tasks' || t.verticalId === (rootVerticalId || activeVertical))} label="Export Tasks" />
+                <TaskCSVDownload className="master-action-btn" data={filteredTasks} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
                 <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
                 <FixTasksButton permissions={permissions} refreshTasks={refreshTasks} />
