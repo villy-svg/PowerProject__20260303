@@ -9,7 +9,8 @@ import {
   IconPromote, 
   IconDiagonalUp,
   IconChevronDown,
-  IconChevronRight
+  IconChevronRight,
+  IconCopy
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../hooks/useTaskViewActions';

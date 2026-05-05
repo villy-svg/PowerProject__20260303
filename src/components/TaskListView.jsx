@@ -9,7 +9,8 @@ import {
   IconPromote, 
   IconDiagonalUp,
   IconChevronDown,
-  IconChevronRight
+  IconChevronRight,
+  IconCopy
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../hooks/useTaskViewActions';
@@ -515,7 +516,6 @@ const TaskListView = ({
                   onDuplicateMerge={onDuplicateMerge}
                   currentUser={currentUser}
                   canCreate={canCreate}
-                  canAddSubtask={canAddSubtask}
                   canCloneTask={canCloneTask}
                   isExpanded={expandedIds.has(task.id)}
                   onToggleExpand={() => toggleExpand(task.id)}

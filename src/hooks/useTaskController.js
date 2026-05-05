@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { createInitialTask } from '../constants/taskSchema';
 import { taskUtils } from '../utils/taskUtils';
+import { cloneUtils } from '../utils/cloneUtils';
 import { supabase } from '../services/core/supabaseClient';
 
 // Sub-hooks
@@ -308,25 +309,10 @@ export const useTaskController = (props) => {
   const handleCloneTask = (task) => {
     if (!task || task.isContextOnly) return;
     
-    // Strip unique identifiers and metadata that shouldn't be duplicated
-    const { 
-      id, 
-      created_at, 
-      createdAt,
-      updated_at, 
-      updatedAt,
-      latestSubmission, 
-      is_duplicate, 
-      duplicateCount, 
-      isFirstInCluster, 
-      status_history,
-      ...cloneData 
-    } = task;
+    // Use modular clone utility to strip IDs and timestamps
+    const cloneData = cloneUtils.prepareClone(task, { titleField: 'text' });
 
-    setEditingTask({
-      ...cloneData,
-      text: `${task.text} (Copy)`
-    });
+    setEditingTask(cloneData);
     setIsModalOpen(true);
   };
 
