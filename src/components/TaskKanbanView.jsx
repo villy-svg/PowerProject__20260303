@@ -72,11 +72,13 @@ const TaskKanbanView = ({
   canEditTask,
   canUserDelete,
   canManageHierarchy,
-  canAddSubtask,      // <-- Add here
+  canAddSubtask,
+  canCloneTask,      // <-- Add here
   updateTaskStage,
 
   deleteTask,
   openEditModal,
+  onCloneTask,
   openAddSubtaskModal,
   openSubmissionModal,
   onMoveToParent,
@@ -256,10 +258,12 @@ const TaskKanbanView = ({
                       canDelete={canUserDelete}
                       canManageHierarchy={canManageHierarchy(task)}
                       canAddSubtask={canAddSubtask ? canAddSubtask(task) : false}
+                      canCloneTask={canCloneTask ? canCloneTask(task) : false}
                       updateTaskStage={updateTaskStage}
 
                       deleteTask={deleteTask}
                       openEditModal={openEditModal}
+                      onCloneTask={onCloneTask}
                       openAddSubtaskModal={openAddSubtaskModal}
                       openSubmissionModal={openSubmissionModal}
                       handleApproveSubmission={handleApproveSubmission}

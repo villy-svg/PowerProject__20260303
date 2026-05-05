@@ -26,12 +26,14 @@ const TaskTreeView = ({
   canUpdate,
   canEditTask,
   canManageHierarchy,
-  canAddSubtask,      // <-- Add here (will be in closure scope for TreeRow)
+  canAddSubtask,
+  canCloneTask,      // <-- Add here
   canDelete,
 
   deleteTask,
   updateTaskStage,
   openEditModal,
+  onCloneTask,
   openAddSubtaskModal,
   openSubmissionModal,
   onMoveToParent,
@@ -148,6 +150,7 @@ const TaskTreeView = ({
       permissions,
       currentUser,
       openEditModal,
+      onCloneTask,
       openSubmissionModal,
       openAddSubtaskModal
     });
@@ -365,6 +368,16 @@ const TaskTreeView = ({
                 title="Edit Task"
               >
                 <IconEdit size={14} />
+              </button>
+            )}
+
+            {canCloneTask && canCloneTask(task) && (
+              <button
+                className="card-clone-button"
+                onClick={(e) => { e.stopPropagation(); tva.handleClone(task); }}
+                title="Clone Task"
+              >
+                <IconCopy size={14} />
               </button>
             )}
 

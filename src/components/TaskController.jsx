@@ -69,9 +69,9 @@ const TaskController = (props) => {
     updateTaskStage,
     executeMerge,
     handleClearBoard,
-    openAddModal, openEditModal, handleAddSubtask,
+    openAddModal, openEditModal, handleAddSubtask, handleCloneTask,
     toggleStageSelection,
-    canEditTask
+    canEditTask, canCloneTask
   } = controller;
 
 
@@ -177,7 +177,7 @@ const TaskController = (props) => {
                 onClick={() => setShowDeprioritized(!showDeprioritized)}
                 title={showDeprioritized ? "Hide Deferred" : "Show Deferred"}
               >
-                DEFER
+                Defer
               </button>
 
               <button
@@ -307,10 +307,12 @@ const TaskController = (props) => {
             canUserDelete={canUserDelete}
             canManageHierarchy={canManageHierarchy}
             canAddSubtask={canAddSubtask}
+            canCloneTask={canCloneTask}
             updateTaskStage={handleUIMoveTask}
 
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
+            onCloneTask={handleCloneTask}
             openAddSubtaskModal={handleAddSubtask}
             onMoveToParent={handleMoveToParent}
             onDuplicateMerge={openEditModal}
@@ -331,11 +333,13 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canAddSubtask={canAddSubtask}
+            canCloneTask={canCloneTask}
             canDelete={canUserDelete}
 
             updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
+            onCloneTask={handleCloneTask}
             openAddSubtaskModal={handleAddSubtask}
             onMoveToParent={handleMoveToParent}
             onDuplicateMerge={openEditModal}
@@ -360,11 +364,13 @@ const TaskController = (props) => {
             canEditTask={canEditTask}
             canManageHierarchy={canManageHierarchy}
             canAddSubtask={canAddSubtask}
+            canCloneTask={canCloneTask}
             canDelete={canUserDelete}
 
             updateTaskStage={handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
+            onCloneTask={handleCloneTask}
             openAddSubtaskModal={handleAddSubtask}
             onMoveToParent={handleMoveToParent}
             TaskTileComponent={TaskTileComponent}

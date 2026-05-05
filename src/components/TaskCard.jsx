@@ -8,7 +8,8 @@ import {
   IconArrowRight, 
   IconPromote, 
   IconDiagonalUp,
-  IconChevronDown 
+  IconChevronDown,
+  IconCopy
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../hooks/useTaskViewActions';
@@ -30,11 +31,13 @@ const TaskCard = ({
   canUpdate,
   canDelete,
   canManageHierarchy = false,
-  canAddSubtask = false,   // <-- New prop. This is a PRE-EVALUATED BOOLEAN (not a function).
+  canAddSubtask = false,
+  canCloneTask = false,
   updateTaskStage,
 
   deleteTask,
   openEditModal,
+  onCloneTask,
   openAddSubtaskModal,
   openSubmissionModal,
   handleApproveSubmission,
@@ -60,6 +63,7 @@ const TaskCard = ({
     permissions,
     currentUser,
     openEditModal,
+    onCloneTask,
     openSubmissionModal,
     openAddSubtaskModal
   });
@@ -271,6 +275,16 @@ const TaskCard = ({
             title="Edit Task"
           >
             <IconEdit size={14} />
+          </button>
+        )}
+
+        {canCloneTask && (
+          <button
+            className="action-icon-btn"
+            onClick={() => tva.handleClone(task)}
+            title="Clone Task"
+          >
+            <IconCopy size={14} />
           </button>
         )}
 

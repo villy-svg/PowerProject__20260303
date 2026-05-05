@@ -30,6 +30,7 @@ const ListViewRow = ({
   deleteTask,
   updateTaskStage,
   openEditModal,
+  onCloneTask,
   openAddSubtaskModal,
   openSubmissionModal,
   onMoveToParent,
@@ -39,7 +40,8 @@ const ListViewRow = ({
   onDuplicateMerge,
   currentUser,
   canCreate,
-  canAddSubtask,      // <-- Add here (receives the function, not a boolean)
+  canAddSubtask,
+  canCloneTask,      // <-- Add here (receives the function, not a boolean)
   isExpanded,
 
   onToggleExpand,
@@ -57,6 +59,7 @@ const ListViewRow = ({
     permissions,
     currentUser,
     openEditModal,
+    onCloneTask,
     openSubmissionModal,
     openAddSubtaskModal
   });
@@ -305,6 +308,16 @@ const ListViewRow = ({
               <IconEdit size={14} />
             </button>
           )}
+
+          {canCloneTask && canCloneTask(task) && (
+            <button
+              className="card-clone-button"
+              onClick={(e) => { e.stopPropagation(); tva.handleClone(task); }}
+              title="Clone Task"
+            >
+              <IconCopy size={14} />
+            </button>
+          )}
           {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
             <button
               className="card-reprio-button"
@@ -346,12 +359,14 @@ const TaskListView = ({
   canUpdate,
   canEditTask,
   canManageHierarchy,
-  canAddSubtask,      // <-- Add here
+  canAddSubtask,
+  canCloneTask,      // <-- Add here
   canDelete,
 
   deleteTask,
   updateTaskStage,
   openEditModal,
+  onCloneTask,
   openAddSubtaskModal,
   openSubmissionModal,
   onMoveToParent,
@@ -490,6 +505,7 @@ const TaskListView = ({
                   deleteTask={deleteTask}
                   updateTaskStage={updateTaskStage}
                   openEditModal={openEditModal}
+                  onCloneTask={onCloneTask}
                   openAddSubtaskModal={openAddSubtaskModal}
                   openSubmissionModal={openSubmissionModal}
                   onMoveToParent={onMoveToParent}
@@ -499,6 +515,8 @@ const TaskListView = ({
                   onDuplicateMerge={onDuplicateMerge}
                   currentUser={currentUser}
                   canCreate={canCreate}
+                  canAddSubtask={canAddSubtask}
+                  canCloneTask={canCloneTask}
                   isExpanded={expandedIds.has(task.id)}
                   onToggleExpand={() => toggleExpand(task.id)}
                   hasChildren={tasks.some(child => child.parentTask === task.id)}

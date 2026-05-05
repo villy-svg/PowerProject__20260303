@@ -63,7 +63,8 @@ export const useTaskController = (props) => {
     canUserDelete,
     canManageHierarchy,
     canEditTask,
-    canAddSubtask   // <-- Contextual subtask creation capability
+    canAddSubtask,
+    canCloneTask
   } = permissionsInfo;
 
 
@@ -304,6 +305,31 @@ export const useTaskController = (props) => {
     setIsModalOpen(true);
   };
 
+  const handleCloneTask = (task) => {
+    if (!task || task.isContextOnly) return;
+    
+    // Strip unique identifiers and metadata that shouldn't be duplicated
+    const { 
+      id, 
+      created_at, 
+      createdAt,
+      updated_at, 
+      updatedAt,
+      latestSubmission, 
+      is_duplicate, 
+      duplicateCount, 
+      isFirstInCluster, 
+      status_history,
+      ...cloneData 
+    } = task;
+
+    setEditingTask({
+      ...cloneData,
+      text: `${task.text} (Copy)`
+    });
+    setIsModalOpen(true);
+  };
+
   return {
     ...filtersInfo,
     ...selectionInfo,
@@ -327,7 +353,7 @@ export const useTaskController = (props) => {
     handleSaveTask,
     executeMerge,
     handleClearBoard,
-    openAddModal, openEditModal, handleAddSubtask,
-    canEditTask
+    openAddModal, openEditModal, handleAddSubtask, handleCloneTask,
+    canEditTask, canCloneTask
   };
 };

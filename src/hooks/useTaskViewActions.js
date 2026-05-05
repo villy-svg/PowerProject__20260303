@@ -22,6 +22,7 @@ export const useTaskViewActions = ({
   permissions,
   currentUser,
   openEditModal,
+  onCloneTask,
   openSubmissionModal,
   openAddSubtaskModal
 }) => {
@@ -55,6 +56,10 @@ export const useTaskViewActions = ({
     if (openEditModal) openEditModal(task);
   }, [openEditModal]);
 
+  const handleClone = useCallback((task) => {
+    if (onCloneTask) onCloneTask(task);
+  }, [onCloneTask]);
+
   const handleSubmitProof = useCallback((task) => {
     if (openSubmissionModal) openSubmissionModal(task);
   }, [openSubmissionModal]);
@@ -78,6 +83,7 @@ export const useTaskViewActions = ({
     handleMove,
     handleDelete,
     handleEdit,
+    handleClone,
     handleSubmitProof,
     handleAddSubtask,
     getTaskPermissions

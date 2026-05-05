@@ -103,12 +103,27 @@ export const useTaskPermissions = ({
     return taskUtils.isAssignee(task, user);
   }, [canUserCreate, user]);
 
+  // 7. Cloning Capability
+  // Clones are essentially pre-filled creations. 
+  // Restricted to those who have create rights AND have authority over the source task.
+  const canCloneTask = useCallback((task) => {
+    if (!task || task.isContextOnly) return false;
+    if (!canUserCreate) return false;
+
+    // Managers can clone anything they see
+    if (taskUtils.isManager(user)) return true;
+
+    // Contributors can only clone tasks they can edit (creator or assignee)
+    return canEditTask(task);
+  }, [canUserCreate, user, canEditTask]);
+
   return {
     canUserCreate,
     canUserUpdate,
     canUserDelete,
     canManageHierarchy,
     canEditTask,
-    canAddSubtask
+    canAddSubtask,
+    canCloneTask
   };
 };
