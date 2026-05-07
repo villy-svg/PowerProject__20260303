@@ -109,7 +109,8 @@
   color: #ef4444;
 }
 .list-task-row .card-add-sub-button:hover .standard-icon,
-.list-task-row .card-reprio-button:hover .standard-icon {
+.list-task-row .card-reprio-button:hover .standard-icon,
+.list-task-row .card-clone-button:hover .standard-icon {
   color: var(--brand-green);
 }
 

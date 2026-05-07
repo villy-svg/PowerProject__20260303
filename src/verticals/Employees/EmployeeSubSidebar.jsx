@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
 
 /**
  * EmployeeSubSidebar
@@ -70,7 +71,7 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
     <div style={filterSectionStyle}>
       <div style={groupHeaderStyle} onClick={onToggle}>
         <span style={groupLabelStyle}>{label}</span>
-        <span style={{ fontSize: '0.7rem', opacity: 0.5 }}>{isExpanded ? '▲' : '▼'}</span>
+        <span style={{ opacity: 0.5 }}>{isExpanded ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</span>
       </div>
 
       {isExpanded && (
@@ -189,7 +190,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         className="filters-row-toggle" 
         onClick={() => setShowFilters(!showFilters)}
       >
-        <p>FILTERS {showFilters ? '▲' : '▼'}</p>
+        <p>FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
         <div style={{ display: 'flex', gap: '4px' }}>
           <button
             onClick={(e) => { e.stopPropagation(); onReset(); }}

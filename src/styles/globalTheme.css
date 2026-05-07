@@ -518,6 +518,7 @@
 .action-icon-btn,
 .card-nav-button,
 .card-edit-button,
+.card-clone-button,
 .card-delete-button,
 .card-deprio-button,
 .card-reprio-button,
@@ -539,6 +540,7 @@
 
 .action-icon-btn:hover,
 .card-edit-button:hover,
+.card-clone-button:hover,
 .card-nav-button:hover {
   background: rgba(255, 255, 255, 0.08);
   color: var(--brand-green) !important;
