@@ -136,6 +136,38 @@ const EmployeeListRow = ({
           {isRowExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
         </button>
       </div>
+
+      {/* 5. Expanded Details (North Star: TaskListView details) */}
+      {isRowExpanded && (
+        <div className="list-row-details fade-in" style={{ padding: '12px 12px 12px 36px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)', fontSize: '0.85rem' }}>
+          <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div className="detail-col">
+              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Personal Info</h6>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div>🎂 DOB: {emp.dob ? new Date(emp.dob).toLocaleDateString() : 'Not set'}</div>
+                <div>📅 Joined: {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString() : 'N/A'}</div>
+                <div>👤 Gender: {emp.gender || 'N/A'}</div>
+              </div>
+            </div>
+            <div className="detail-col">
+              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Bank Details</h6>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div>💳 Acc: {emp.account_number || 'Missing'}</div>
+                <div>🏦 IFSC: {emp.ifsc_code || 'Missing'}</div>
+                <div>🆔 PAN: {emp.pan_number || 'Missing'}</div>
+              </div>
+            </div>
+            <div className="detail-col">
+              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Organization</h6>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div>🏢 Dept: {emp.dept_code}</div>
+                <div>📍 Hub: {emp.hub_code}</div>
+                <div>👤 Manager: {emp.manager_name}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

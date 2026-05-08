@@ -24,10 +24,15 @@ export const calculateBadgeId = async (metadata, hireDate) => {
   let dCode = metadata.dept_code;
 
   if (!rCode || !dCode) {
-    const [{ data: role }, { data: dept }] = await Promise.all([
-      supabase.from('employee_roles').select('role_code').eq('id', metadata.role_id).single(),
-      supabase.from('departments').select('dept_code').eq('id', metadata.department_id).single()
-    ]);
+    const rolePromise = (metadata.role_id && metadata.role_id !== 'ALL') 
+      ? supabase.from('employee_roles').select('role_code').eq('id', metadata.role_id).single()
+      : Promise.resolve({ data: null });
+      
+    const deptPromise = (metadata.department_id && metadata.department_id !== 'ALL')
+      ? supabase.from('departments').select('dept_code').eq('id', metadata.department_id).single()
+      : Promise.resolve({ data: null });
+
+    const [{ data: role }, { data: dept }] = await Promise.all([rolePromise, deptPromise]);
     rCode = role?.role_code;
     dCode = dept?.dept_code;
   }

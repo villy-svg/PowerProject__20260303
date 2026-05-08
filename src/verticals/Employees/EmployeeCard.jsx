@@ -106,7 +106,8 @@ const EmployeeCard = ({
       {/* Detail Row (Contact) - Clean and Neutralized */}
       <div className="employee-card-contact" style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.8rem', opacity: 0.6, marginTop: '4px' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <span>ID: {emp.badge_id || emp.id}</span>
+          <span>ID: {emp.badge_id || emp.id.slice(0, 8)}</span>
+          {emp.hire_date && <span style={{ fontWeight: 600, color: 'var(--brand-green)' }}>📅 Joined: {new Date(emp.hire_date).toLocaleDateString()}</span>}
           <span>📞 {emp.phone || 'N/A'}</span>
           {emp.email && <span style={{ opacity: 0.8 }}>✉️ {emp.email}</span>}
         </div>

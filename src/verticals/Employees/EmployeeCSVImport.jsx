@@ -122,17 +122,24 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
     try {
       const ctx = await loadContext();
 
+      const uuidv4 = () => {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
       const parseDateForDB = (rawDate) => {
-        if (!rawDate) return new Date().toISOString().split('T')[0];
+        if (!rawDate) return null;
         const parsed = new Date(rawDate);
         if (!isNaN(parsed.valueOf())) {
-          // Extract local YYYY-MM-DD to avoid GMT offset string issues in Postgres
           const year = parsed.getFullYear();
           const month = String(parsed.getMonth() + 1).padStart(2, '0');
           const day = String(parsed.getDate()).padStart(2, '0');
           return `${year}-${month}-${day}`;
         }
-        return new Date().toISOString().split('T')[0];
+        return null;
       };
 
       const empsToInsert = await Promise.all(rows.map(async (row) => {
@@ -151,7 +158,8 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         const role_id = lookup(row.role_code, ctx.roleMap);
         const department_id = lookup(row.dept_code, ctx.deptMap);
         const manager_id = lookup(row.manager || row.Manager, ctx.managerMap);
-        const hire_date = parseDateForDB(row.hire_date);
+        const hire_date = parseDateForDB(row.hire_date) || new Date().toISOString().split('T')[0];
+        const dob = parseDateForDB(row.dob);
 
         // ID & Badge Logic
         let emp_code = existingMatch?.emp_code;
@@ -167,7 +175,7 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         }
 
         const mapped = {
-          id: existingMatch?.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 11)),
+          id: existingMatch?.id || uuidv4(),
           full_name: name.trim(),
           email: row.email || null,
           phone: row.phone || null,
