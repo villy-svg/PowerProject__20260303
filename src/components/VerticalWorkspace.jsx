@@ -3,6 +3,7 @@ import TaskController from './TaskController';
 import { taskUtils } from '../utils/taskUtils';
 import { IconChevronLeft, IconChevronRight } from './Icons';
 import { resolveVerticalRootId } from '../registry/verticalRegistry';
+import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 
 import './VerticalWorkspace.css';
 
@@ -25,7 +26,6 @@ const VerticalWorkspace = ({
   updateTaskStage,
   isSubSidebarOpen,
   setIsSubSidebarOpen,
-  setActiveVertical,
   onShowBottomNav,
   SidebarComponent, 
   onHeaderClick,
@@ -38,6 +38,7 @@ const VerticalWorkspace = ({
   children,
   isMainSidebarOpen
 }) => {
+  const { setActiveVertical } = useAppNavigation();
   const [filters, setFilters] = React.useState({ 
     city: [], 
     hub: [], 
@@ -266,7 +267,6 @@ const VerticalWorkspace = ({
             setIsSubSidebarOpen={setIsSubSidebarOpen}
             isMainSidebarOpen={isMainSidebarOpen}
             onShowBottomNav={onShowBottomNav}
-            setActiveVertical={setActiveVertical}
             onTrayVisibilityChange={handleTrayVisibilityChange}
           />
         )}

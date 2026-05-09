@@ -10,6 +10,7 @@ import {
 } from './Icons';
 import './MasterPageHeader.css';
 import MasterHeaderMenu from './MasterHeaderMenu';
+import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 
 /**
  * MasterPageHeader
@@ -37,13 +38,13 @@ const MasterPageHeader = ({
   onAddClick,
   isTaskModalOpen,
   onShowBottomNav,
-  setActiveVertical,
   onTrayVisibilityChange,
   isMenuOpen: controlledIsMenuOpen,
   setIsMenuOpen: controlledSetIsMenuOpen,
   hideMenuClose,
   isSidebarOpen
 }) => {
+  const { setActiveVertical } = useAppNavigation();
   const isScrollVisible = useScrollDirection(10, 100);
   const pressTimer = useRef(null);
 

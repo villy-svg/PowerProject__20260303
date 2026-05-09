@@ -37,8 +37,7 @@ const TaskController = (props) => {
     user,
     isSubSidebarOpen,
     setIsSubSidebarOpen,
-    onShowBottomNav,
-    setActiveVertical
+    onShowBottomNav
   } = props;
 
   const controller = useTaskController(props);
@@ -156,7 +155,6 @@ const TaskController = (props) => {
         onAddClick={openAddModal}
         isTaskModalOpen={isModalOpen}
         onShowBottomNav={onShowBottomNav}
-        setActiveVertical={setActiveVertical}
         onTrayVisibilityChange={handleTrayVisibilityChange}
         expandedLeft={
           <>
