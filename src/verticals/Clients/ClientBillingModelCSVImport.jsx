@@ -2,6 +2,7 @@ import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
 import { supabase } from '../../services/core/supabaseClient';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
+import './ClientBillingModelCSVImport.css';
 
 /**
  * ClientBillingModelCSVImport — Thin Wrapper
@@ -45,18 +46,18 @@ const ClientBillingModelCSVImport = ({ onImportComplete, className, label = 'Imp
   };
 
   const renderConflictTile = (conflict) => (
-    <div className="tile-content">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-        <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
+    <div className="tile-content csv-conflict-tile">
+      <div className="csv-tile-header">
+        <h5 className="csv-tile-title">
           {conflict.csvRow.model_name || conflict.csvRow.name}
         </h5>
         {conflict.matchMode === 'hard' && (
-          <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+          <span className="csv-match-badge hard-match">
             Code Match
           </span>
         )}
       </div>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>Code: {conflict.csvRow.code || 'None'}</p>
+      <p className="csv-tile-meta">Code: {conflict.csvRow.code || 'None'}</p>
     </div>
   );
 

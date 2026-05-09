@@ -120,4 +120,74 @@
   align-items: center;
   gap: 6px;
   flex-wrap: nowrap;
-}
+}
+
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage-label-text {
+  font-weight: 700;
+}
+
+.stage-select-all-btn {
+  background: none;
+  border: none;
+  color: var(--brand-green);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 8px;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.task-count-badge {
+  font-weight: 700;
+}
+
+.hierarchy-arrow {
+  color: var(--text-secondary);
+  margin-right: 4px;
+  opacity: 0.5;
+}
+
+.context-viewer-badge {
+  background-color: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.hierarchy-nav-group {
+  display: flex;
+  gap: 4px;
+}
+
+.review-action-btn {
+  margin-left: 4px;
+}
+
+.promote-button {
+  color: var(--brand-blue) !important;
+}
+
+.card-reprio-button {
+  color: var(--brand-green) !important;
+}
+
+.list-row-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tree-expander {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}

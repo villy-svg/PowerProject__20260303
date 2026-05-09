@@ -102,6 +102,13 @@
 /* 7. Dropdown & Sub-nav Styling */
 .nav-parent-item {
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.lock-icon {
+  font-size: 12px;
+  opacity: 0.5;
 }
 .v-actions-wrapper {
   display: flex;

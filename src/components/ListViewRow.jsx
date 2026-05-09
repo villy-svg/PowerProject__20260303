@@ -130,12 +130,12 @@ const ListViewRow = ({
         <div
           className="tree-expander"
           onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
-          style={{ width: '20px', display: 'flex', justifyContent: 'center', cursor: 'pointer', opacity: hasChildren ? 1 : 0 }}
+          style={{ opacity: hasChildren ? 1 : 0 }}
         >
           {hasChildren ? (isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
         </div>
         {task.depth > 0 && (
-          <span style={{ color: 'var(--text-secondary)', marginRight: '4px', opacity: 0.5 }}>↳</span>
+          <span className="hierarchy-arrow">↳</span>
         )}
         {/* 1. Select Checkbox */}
         <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
@@ -146,7 +146,7 @@ const ListViewRow = ({
 
         {/* 2. Priority */}
         {task.isContextOnly && (
-          <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+          <span className="card-priority context-viewer-badge" title="Context Only">
             VIEWER
           </span>
         )}
@@ -193,7 +193,7 @@ const ListViewRow = ({
         </div>
 
         {/* 6. Task Summary */}
-        <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="list-row-content" title={task.text}>
           {isRejected && task.stageId === 'IN_PROGRESS' && (
             <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
           )}
@@ -232,7 +232,7 @@ const ListViewRow = ({
             <>
               {/* Hierarchy Promotion Actions — restricted to managers/creators only */}
               {canManage && task.parentTask && (
-                <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
+                <div className="hierarchy-nav-group">
                   {tasks?.find(t => t.id === task.parentTask)?.parentTask && (
                     <button
                       className="card-nav-button promote-button"
@@ -242,7 +242,6 @@ const ListViewRow = ({
                         if (parent) onMoveToParent(task.id, parent.parentTask);
                       }}
                       title="Promote to Parent's Sibling (Promote to Grandparent)"
-                      style={{ color: 'var(--brand-blue)' }}
                     >
                       <IconDiagonalUp size={14} />
                     </button>
@@ -254,7 +253,6 @@ const ListViewRow = ({
                       onMoveToParent(task.id, null);
                     }}
                     title="Make Top Level Task"
-                    style={{ color: 'var(--brand-blue)' }}
                   >
                     <IconPromote size={14} />
                   </button>
@@ -292,16 +290,14 @@ const ListViewRow = ({
           {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
             <>
               <button
-                className="halo-button btn-approve"
-                style={{ marginLeft: '4px' }}
+                className="halo-button btn-approve review-action-btn"
                 onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
                 title="Approve Submission"
               >
                 ✓ Appr
               </button>
               <button
-                className="halo-button btn-reject"
-                style={{ marginLeft: '4px' }}
+                className="halo-button btn-reject review-action-btn"
                 onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
                 title="Reject Submission & Request Rework"
               >
@@ -334,7 +330,6 @@ const ListViewRow = ({
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
               title="Move back to Pending"
-              style={{ color: 'var(--brand-green)' }}
             >
               <IconPromote size={14} />
             </button>

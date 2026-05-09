@@ -142,7 +142,7 @@ function AppShell({ verticals, verticalList }) {
           {profileError ? (
             <>
               <h2 className="error-heading">Profile Error</h2>
-              <p style={{ maxWidth: '400px', textAlign: 'center' }}>{profileError}</p>
+              <p className="error-message-text">{profileError}</p>
               <button onClick={handleLogout} className="halo-button error-logout-btn">
                 Sign Out & Try Again
               </button>
@@ -191,7 +191,7 @@ function AppShell({ verticals, verticalList }) {
               {realUser?.roleId === 'master_admin' && (
                 <div className="impersonation-header-wrapper">
                   {impersonatedUser ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="impersonation-active-container">
                       <span className="impersonation-active-label">
                         View: <strong>{impersonatedUser.name}</strong>
                         <span className="neutral-badge impersonation-role-badge">

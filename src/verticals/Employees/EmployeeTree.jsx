@@ -94,7 +94,7 @@ const EmployeeTree = ({
 
     return (
       <div key={node.id} className={`tree-node-wrapper ${hasChildren ? (isExpanded ? 'is-expanded' : 'is-collapsed') : 'is-leaf'}`}>
-        <div className="card-container" style={{ position: 'relative' }}>
+        <div className="card-container">
           <EmployeeTreeCard 
             emp={node}
             user={user}

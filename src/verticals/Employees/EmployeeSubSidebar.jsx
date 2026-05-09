@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
+import './EmployeeSubSidebar.css';
 
 /**
  * EmployeeSubSidebar
@@ -8,81 +9,24 @@ import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons'
  * Vertical-specific sidebar content for the Employee Manager.
  * Contains filters for employee records.
  */
-const filterSectionStyle = {
-  borderBottom: '1px solid var(--border-color)',
-  transition: 'all 0.3s ease'
-};
-
-const groupHeaderStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '12px',
-  cursor: 'pointer',
-  userSelect: 'none'
-};
-
-const groupLabelStyle = {
-  fontSize: '0.75rem',
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  color: 'var(--brand-green)',
-  letterSpacing: '0.5px'
-};
-
-const checkboxGroupStyle = (isExpanded) => ({
-  display: isExpanded ? 'flex' : 'none',
-  flexDirection: 'column',
-  gap: '8px',
-  maxHeight: '180px',
-  overflowY: 'auto',
-  padding: '0 12px 16px 12px',
-  transition: 'opacity 0.2s ease'
-});
-
-const checkboxItemStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  cursor: 'pointer',
-  fontSize: '0.85rem',
-  color: 'var(--text-color)',
-  padding: '4px 0',
-  opacity: 0.8
-};
-
-const checkMarkStyle = (isSelected) => ({
-  width: '16px',
-  height: '16px',
-  borderRadius: '4px',
-  border: '2px solid var(--border-color)',
-  backgroundColor: isSelected ? 'var(--brand-green)' : 'transparent',
-  borderColor: isSelected ? 'var(--brand-green)' : 'var(--border-color)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '10px',
-  color: 'white',
-  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-});
 
 const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange }) => {
   return (
-    <div style={filterSectionStyle}>
-      <div style={groupHeaderStyle} onClick={onToggle}>
-        <span style={groupLabelStyle}>{label}</span>
-        <span style={{ opacity: 0.5 }}>{isExpanded ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</span>
+    <div className="filter-section">
+      <div className="filter-group-header" onClick={onToggle}>
+        <span className="filter-group-label">{label}</span>
+        <span className="opacity-50">{isExpanded ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</span>
       </div>
 
       {isExpanded && (
-        <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
+        <div className="filter-actions-row">
           <button
             onClick={(e) => {
               e.stopPropagation();
               const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
               onBatchFilter(filterKey, allVals);
             }}
-            style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+            className="filter-batch-btn select-all"
           >
             SELECT ALL
           </button>
@@ -91,14 +35,14 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
               e.stopPropagation();
               onBatchFilter(filterKey, []);
             }}
-            style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+            className="filter-batch-btn clear"
           >
             CLEAR
           </button>
         </div>
       )}
 
-      <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
+      <div className={`filter-checkbox-group custom-scrollbar ${!isExpanded ? 'hidden' : ''}`}>
         {options.map(opt => {
           const val = valueKey ? opt[valueKey] : opt;
           const labelText = displayKey ? opt[displayKey] : opt;
@@ -106,10 +50,11 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
           return (
             <div
               key={val}
-              style={{ ...checkboxItemStyle, opacity: isSelected ? 1 : 0.6 }}
+              className="filter-checkbox-item"
+              style={{ opacity: isSelected ? 1 : 0.6 }}
               onClick={() => onFilterChange(filterKey, val)}
             >
-              <div style={checkMarkStyle(isSelected)}>
+              <div className={`filter-check-mark ${isSelected ? 'selected' : ''}`}>
                 {isSelected && '✓'}
               </div>
               <span style={{ fontWeight: isSelected ? 600 : 400 }}>{labelText}</span>
@@ -166,10 +111,10 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
   return (
     <div className="sub-sidebar-body">
       {permissions?.canAccessEmployeeTasks && (
-        <div style={{ padding: '12px', marginBottom: '8px' }}>
+        <div className="employee-tasks-btn-wrapper">
           <button
-            className="halo-button"
-            style={{ width: '100%', opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
+            className="halo-button employee-tasks-nav-btn"
+            style={{ opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('employee_tasks')}
           >
             Employee Tasks
@@ -178,11 +123,11 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
       )}
 
       {/* Nav Toggle Header */}
-      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
+      <div className="sidebar-title-row">
         {permissions?.canAccessEmployees ? (
-           <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', letterSpacing: '0.5px' }}>Employees</p>
+           <p className="sidebar-title-text">Employees</p>
         ) : (
-           <p style={{ margin: 0, fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5, letterSpacing: '0.5px' }}>Employees</p>
+           <p className="sidebar-title-text disabled">Employees</p>
         )}
       </div>
 
@@ -191,7 +136,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         onClick={() => setShowFilters(!showFilters)}
       >
         <p>FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div className="filters-reset-wrapper">
           <button
             onClick={(e) => { e.stopPropagation(); onReset(); }}
             className="filters-action-btn"
@@ -244,7 +189,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         </div>
       )}
 
-      <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
+      <div className="sub-nav-item sidebar-footer-info">
         <div className="sub-nav-text">
           <p>Employee Manager</p>
           <small>Task Board Active</small>

@@ -24,8 +24,18 @@
   align-items: center;
   gap: 12px;
 }
+
+.view-toggle-btn {
+  text-transform: capitalize;
+  font-weight: 400;
+}
+
+.view-toggle-btn.active {
+  font-weight: 600;
+}
 .clear-board-btn {
   font-size: 0.75rem;
+  font-weight: 600;
   padding: 6px 14px;
   border-color: rgba(239, 68, 68, 0.2);
   color: rgba(239, 68, 68, 0.6);

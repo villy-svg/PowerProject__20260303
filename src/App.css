@@ -91,6 +91,22 @@
   }
 }
 
+.loading-screen-layout .halo-button {
+  margin-top: 1rem;
+}
+
+/* RB-10 Utility Classes */
+.error-message-text {
+  max-width: 400px;
+  text-align: center;
+}
+
+.impersonation-active-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* RB-07 Extraction - Loading & Error Utilities */
 .loading-screen-layout {
   display: flex;

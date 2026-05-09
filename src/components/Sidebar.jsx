@@ -98,11 +98,10 @@ const Sidebar = ({ isOpen, onClose, activeVertical, setActiveVertical, user, per
                         className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''} nav-parent-item`}
                         onClick={() => !isLocked && setActiveVertical(vertical.id)}
                         title={isLocked ? "Coming Soon / No Access" : ""}
-                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                       >
                         <span className="v-label-text">{vertical.label}</span>
                         <div className="v-actions-wrapper">
-                          {isLocked && <span className="lock-icon" style={{ fontSize: '12px', opacity: 0.5 }}>🔒</span>}
+                          {isLocked && <span className="lock-icon">🔒</span>}
                           {!isLocked && canManage && verticalList.length > 0 && (vertical.id === verticalList.find(v=>v.id.includes('HUB'))?.id || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
                             <button
                               className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}

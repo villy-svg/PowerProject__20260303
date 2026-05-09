@@ -163,7 +163,6 @@ const TaskController = (props) => {
                   key={mode}
                   className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
                   onClick={() => setViewMode(mode)}
-                  style={{ fontWeight: viewMode === mode ? 600 : 400, textTransform: 'capitalize' }}
                 >
                   {mode}
                 </button>
@@ -202,7 +201,7 @@ const TaskController = (props) => {
                 onClick={handleClearBoard}
                 disabled={saving}
                 title="Move all active tasks to Deferred"
-                style={{ fontWeight: 600 }}
+                className="halo-button clear-board-btn"
               >
                 Clear Board
               </button>

@@ -1,0 +1,35 @@
+.csv-conflict-tile {
+  padding: 8px;
+}
+
+.csv-tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.csv-tile-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--brand-green);
+}
+
+.csv-match-badge {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.csv-match-badge.hard-match {
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+}
+
+.csv-tile-meta {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0;
+}

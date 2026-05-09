@@ -9,12 +9,11 @@ const EmployeeTaskTile = ({ task }) => {
   if (!task.description && !task.city) return null;
 
   return (
-    <div className="hub-tile-meta" style={{ gap: '6px' }}>
+    <div className="hub-tile-meta">
       {task.city && (
         <span
           className="tile-hub-code halo-type"
           title={`Department: ${task.city}`}
-          style={{ opacity: 0.8 }}
         >
           {task.city}
         </span>
