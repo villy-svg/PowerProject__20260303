@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { useDuplicateDetection } from './useDuplicateDetection';
-import { hierarchyService } from '../services/rules/hierarchyService';
-import { taskUtils } from '../utils/taskUtils';
-import { getBoardLabelForVertical } from '../constants/taskBoards';
+import { useDuplicateDetection } from '../../../hooks/useDuplicateDetection';
+import { hierarchyService } from '../../../services/rules/hierarchyService';
+import { taskUtils } from '../../../utils/taskUtils';
+import { getBoardLabelForVertical } from '../../../constants/taskBoards';
 
 /**
  * useTaskFilters Hook

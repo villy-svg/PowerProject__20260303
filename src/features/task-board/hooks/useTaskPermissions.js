@@ -1,7 +1,6 @@
 import { useMemo, useCallback } from 'react';
-import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
-import { taskUtils } from '../utils/taskUtils';
-
+import { MANAGER_SENIORITY_THRESHOLD } from '../../../constants/roles';
+import { taskUtils } from '../../../utils/taskUtils';
 
 /**
  * useTaskPermissions Hook

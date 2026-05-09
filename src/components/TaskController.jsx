@@ -7,7 +7,7 @@ import SubmissionModal from './SubmissionModal';
 import { TaskCSVDownload, TaskCSVImport } from '../verticals/ChargingHubs';
 import MasterPageHeader from './MasterPageHeader';
 import TaskTreeView from './TaskTreeView';
-import { useTaskController } from '../hooks/useTaskController';
+import { useTaskController } from '../features/task-board/hooks/useTaskController';
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import RejectionModal from './RejectionModal';
 import BulkActionBar from './BulkActionBar';

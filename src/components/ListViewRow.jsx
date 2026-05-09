@@ -25,7 +25,7 @@ import {
   IconCopy,
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
-import { useTaskViewActions } from '../hooks/useTaskViewActions';
+import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
 import AssigneeBadge from './AssigneeBadge';

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { taskUtils } from '../utils/taskUtils';
+import { taskUtils } from '../../../utils/taskUtils';
 
 /**
  * useTaskViewActions

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { STAGE_LIST } from '../constants/stages';
-import { createInitialTask } from '../constants/taskSchema';
-import { taskUtils } from '../utils/taskUtils';
-import { cloneUtils } from '../utils/cloneUtils';
-import { supabase } from '../services/core/supabaseClient';
+import { STAGE_LIST } from '../../../constants/stages';
+import { createInitialTask } from '../../../constants/taskSchema';
+import { taskUtils } from '../../../utils/taskUtils';
+import { cloneUtils } from '../../../utils/cloneUtils';
+import { supabase } from '../../../services/core/supabaseClient';
 
 // Sub-hooks
 import { useTaskFilters } from './useTaskFilters';
