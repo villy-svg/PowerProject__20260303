@@ -10,13 +10,12 @@ import { verticalService } from './services/core/verticalService';
 // Services — Auth
 import { taskService } from './services/tasks/taskService';
 import { authService } from './services/auth/authService';
-import { profileService } from './services/auth/profileService';
 // Hooks
+import { useAuth } from './app/contexts/AuthContext';
 import { useTasks } from './hooks/useTasks';
 import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
-import { userService } from './services/auth/userService';
 import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from './registry/verticalRegistry';
 
 
@@ -57,15 +56,15 @@ function App() {
     return (saved === 'home' || !saved) ? null : saved;
   });
 
-  // 1. Auth and User Identity
-  const [isAppInitializing, setIsAppInitializing] = useState(true);
-  const [session, setSession] = useState(null);
-  const [realUser, setRealUser] = useState(null);
-  const [impersonatedUser, setImpersonatedUser] = useState(null);
-  const [impersonationUsers, setImpersonationUsers] = useState([]);
-  const [profileError, setProfileError] = useState(null);
-
-  const user = impersonatedUser || realUser;
+  const {
+    isAppInitializing, setIsAppInitializing,
+    session, setSession,
+    user, realUser, impersonatedUser, impersonationUsers,
+    profileError,
+    fetchUserProfile,
+    handleImpersonate,
+    handleLogout,
+  } = useAuth();
   const [verticals, setVerticals] = useState(STATIC_VERTICALS);
   const [verticalList, setVerticalList] = useState(STATIC_VERTICAL_LIST);
 
@@ -114,29 +113,21 @@ function App() {
   useEffect(() => {
     const initAppData = async () => {
       try {
-        // Parallel Step 1: Critical infrastructure (Verticals and Session)
         const [vResult, sessionData] = await Promise.all([
           verticalService.getVerticals().catch(err => {
             console.warn('Falling back to static verticals.', err);
             return { list: null, map: null };
           }),
-          authService.getSession()
+          authService.getSession()  // NOTE: authService is still needed here
         ]);
-
         if (vResult.list && vResult.list.length > 0) {
           setVerticals(vResult.map);
           setVerticalList(vResult.list);
           updateStaticVerticals(vResult.list);
         }
         setSession(sessionData);
-
-        // Step 2: Fetch Identity (Blocking)
         if (sessionData) {
           await fetchUserProfile(sessionData.user.id);
-
-          // Step 3: Trigger Data (Non-blocking / Progressive)
-          // FIX Issue-1: Only one fetch needed — useDailyTasks now filters from
-          // the shared tasks array, so a single fetchTasks() populates both boards.
           fetchTasks();
         }
       } catch (err) {
@@ -145,7 +136,6 @@ function App() {
         setIsAppInitializing(false);
       }
     };
-
     initAppData();
   }, [fetchTasks]);
 
@@ -166,26 +156,6 @@ function App() {
     }
   });
 
-  useEffect(() => {
-    if (realUser?.roleId === 'master_admin') {
-      userService.fetchUsers()
-        .then(data => setImpersonationUsers(data))
-        .catch(err => console.error("Impersonation setup failed to load users:", err));
-    }
-  }, [realUser]);
-
-  const handleImpersonate = async (targetUserId) => {
-    if (!targetUserId) {
-      setImpersonatedUser(null);
-      return;
-    }
-    try {
-      const targetProfile = await profileService.fetchUserProfile(targetUserId);
-      setImpersonatedUser(targetProfile);
-    } catch (error) {
-      console.error("Impersonation failed:", error);
-    }
-  };
 
   // Persistent UI states
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => localStorage.getItem('sidebar_state') === 'true');
@@ -210,47 +180,6 @@ function App() {
     masterErrorHandler.testDatabaseConnection();
   }, []);
 
-  // Auth State Listener
-  // FIX Issue-11: Guard against the double fetchUserProfile on startup.
-  // initAppData() already fetches the profile on boot. The auth state listener fires
-  // immediately with the current session, which would trigger a second concurrent fetch.
-  // The ref below lets the listener ignore the initial fire and only react to real
-  // auth changes (login / logout) that happen after the app has bootstrapped.
-  const hasBootstrapped = React.useRef(false);
-
-  useEffect(() => {
-    authService.getSession().then(session => {
-      setSession(session);
-      if (session) fetchUserProfile(session.user.id);
-    });
-
-    const subscription = authService.onAuthStateChange((_event, session) => {
-      // Skip the immediate fire during bootstrap — initAppData handles the first load
-      if (!hasBootstrapped.current) {
-        hasBootstrapped.current = true;
-        return;
-      }
-      setSession(session);
-      if (session) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setRealUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserProfile = async (userId) => {
-    try {
-      const userData = await profileService.fetchUserProfile(userId);
-      setRealUser(userData);
-      setProfileError(null);
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setProfileError(error.message);
-    }
-  };
 
 
   /**
@@ -303,13 +232,8 @@ function App() {
     }
   }, [user, activeVertical, currentUserPermissions, verticals]);
 
-  const handleLogout = async () => {
-    await authService.signOut();
-    setProfileError(null);
-  };
 
   // Sync Local Preferences
-  useEffect(() => { if (realUser) localStorage.setItem('power_project_user', JSON.stringify(realUser)); }, [realUser]);
   useEffect(() => { localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); }, [rolePermissions]);
   useEffect(() => { localStorage.setItem('sidebar_state', isSidebarOpen); }, [isSidebarOpen]);
   useEffect(() => { localStorage.setItem('sub_sidebar_state', isSubSidebarOpen); }, [isSubSidebarOpen]);
