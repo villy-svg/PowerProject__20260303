@@ -31,16 +31,15 @@ import UserProfile from './components/UserProfile';
 import UserRoleManagement from './components/UserRoleManagement';
 import UserManagement from './components/UserManagement';
 import CustomSelect from './components/CustomSelect';
-import HubManagement from './verticals/ChargingHubs/HubManagement';
-import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
-import DailyTasksManagement from './verticals/ChargingHubs/DailyTasksManagement';
-import EmployeeManagement from './verticals/Employees/EmployeeManagement';
-import DepartmentManagement from './verticals/Employees/DepartmentManagement';
-import EmployeeRoleManagement from './verticals/Employees/EmployeeRoleManagement';
-import ClientManagement from './verticals/Clients/ClientManagement';
-import ClientCategoryManagement from './verticals/Clients/ClientCategoryManagement';
-import ClientBillingModelManagement from './verticals/Clients/ClientBillingModelManagement';
-import ClientServiceManagement from './verticals/Clients/ClientServiceManagement';
+import {
+  HubManagement, HubFunctionManagement, DailyTasksManagement,
+} from './verticals/ChargingHubs';
+import {
+  EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
+} from './verticals/Employees';
+import {
+  ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
+} from './verticals/Clients';
 
 import Login from './components/Login';
 

@@ -6,15 +6,17 @@
  * RULE: When adding a new vertical, ONLY update this file.
  * No other file should contain vertical-routing ternaries.
  */
-import HubSubSidebar from '../verticals/ChargingHubs/HubSubSidebar';
-import HubTaskForm from '../verticals/ChargingHubs/HubTaskForm';
-import HubTaskTile from '../verticals/ChargingHubs/HubTaskTile';
-import EmployeeSubSidebar from '../verticals/Employees/EmployeeSubSidebar';
-import EmployeeTaskForm from '../verticals/Employees/EmployeeTaskForm';
-import EmployeeTaskTile from '../verticals/Employees/EmployeeTaskTile';
-import ClientSubSidebar from '../verticals/Clients/ClientSubSidebar';
-import ClientTaskForm from '../verticals/Clients/ClientTaskForm';
-import ClientTaskTile from '../verticals/Clients/ClientTaskTile';
+import {
+  HubSubSidebar, HubTaskForm, HubTaskTile,
+} from '../verticals/ChargingHubs';
+
+import {
+  EmployeeSubSidebar, EmployeeTaskForm, EmployeeTaskTile,
+} from '../verticals/Employees';
+
+import {
+  ClientSubSidebar, ClientTaskForm, ClientTaskTile,
+} from '../verticals/Clients';
 
 /** All activeVertical values belonging to ChargingHubs vertical */
 export const HUB_VIEWS = [
