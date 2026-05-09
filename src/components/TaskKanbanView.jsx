@@ -8,6 +8,7 @@ import {
   IconArchive,
   IconChevronRightSingle
 } from './Icons';
+import './TaskKanbanView.css';
 
 /**
  * StageNavigationTray

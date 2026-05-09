@@ -8,6 +8,7 @@ import {
   IconX,
   IconChevronDown,
 } from './Icons';
+import './BulkActionBar.css';
 
 /**
  * BulkActionBar Component
