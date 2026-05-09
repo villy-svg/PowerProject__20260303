@@ -25,7 +25,7 @@
 }
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr; /* Stacked layout for better focus (Hub Task Form style) */
   gap: 1.5rem;
 }
 .employee-form .form-group {
@@ -64,8 +64,42 @@
 .employee-form .form-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem;
+  margin-top: auto; /* Push footer to bottom */
+  padding-top: 1.5rem;
 }
+
+/* Modal Scroll Container Hardening */
+.modal-content-area {
+  max-height: 60vh; /* Responsive height */
+  overflow-y: auto;
+  padding-right: 8px; /* Room for scrollbar */
+  margin-bottom: 1rem;
+}
+
+.form-content-area {
+  padding-bottom: 120px; /* Essential: Room for the bottom-most dropdown to open without clipping */
+}
+
+/* Scrollbar styling for the form */
+.modal-content-area::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content-area::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+.modal-content-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.employee-form .form-footer.sticky {
+  position: sticky;
+  bottom: -1rem; /* Adjust for padding */
+  background: #0b1314; /* Match modal background */
+  padding-bottom: 1rem;
+  z-index: 10;
+  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.4);
+}
+
 .employee-form .page-controls {
   display: flex;
   justify-content: space-between;
@@ -178,4 +212,32 @@
 @keyframes pageFadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Overrides */
+@media screen and (max-width: 768px) {
+  .modal-content-area {
+    max-height: 70vh;
+  }
+  
+  .form-wizard-header {
+    gap: 0.75rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 1rem;
+  }
+  
+  .step {
+    font-size: 0.75rem;
+  }
+  
+  .form-grid {
+    gap: 1.25rem;
+  }
+  
+  .employee-form .save-btn,
+  .employee-form .next-btn {
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+  }
 }
