@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { billingModelService } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
@@ -20,12 +20,12 @@ const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onS
 
   const fetchModels = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('client_billing_models')
-      .select('*')
-      .order('name', { ascending: true });
-    if (!error) setModels(data || []);
-    else console.error('BillingModel fetch error:', error);
+    try {
+      const data = await billingModelService.getBillingModels();
+      setModels(data);
+    } catch (error) {
+      console.error('BillingModel fetch error:', error);
+    }
     setLoading(false);
   };
 
@@ -48,20 +48,16 @@ const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onS
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
-    const payload = { ...formData, updated_at: new Date().toISOString() };
-    let error;
-
-    if (editingModel) {
-      ({ error } = await supabase.from('client_billing_models').update(payload).eq('id', editingModel.id));
-    } else {
-      ({ error } = await supabase.from('client_billing_models').insert([payload]));
-    }
-
-    if (error) {
-      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
-    } else {
+    try {
+      if (editingModel) {
+        await billingModelService.updateBillingModel(editingModel.id, formData);
+      } else {
+        await billingModelService.addBillingModel(formData);
+      }
       setStatusMsg({ type: 'success', text: `Billing model ${editingModel ? 'updated' : 'created'} successfully!` });
       setTimeout(() => { setIsModalOpen(false); fetchModels(); }, 1000);
+    } catch (error) {
+      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
     }
     setLoading(false);
   };
@@ -69,9 +65,12 @@ const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onS
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this billing model? Clients using it will be unlinked.')) return;
     setLoading(true);
-    const { error } = await supabase.from('client_billing_models').delete().eq('id', id);
-    if (error) alert(`Delete failed: ${error.message}`);
-    else fetchModels();
+    try {
+      await billingModelService.deleteBillingModel(id);
+      fetchModels();
+    } catch (error) {
+      alert(`Delete failed: ${error.message}`);
+    }
     setLoading(false);
   };
 

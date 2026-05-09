@@ -20,19 +20,16 @@ export const useClients = () => {
   const fetchClients = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const result = await clientService.getClients();
-      setClients(result.clients);
-      setCategories(result.categories);
-      setServices(result.services);
-      setBillingModels(result.billingModels);
+      const [clientsData, refData] = await Promise.all([
+        clientService.getClients(),
+        clientService.getAllReferenceData()
+      ]);
+      setClients(clientsData);
+      setCategories(refData.categories);
+      setServices(refData.services);
+      setBillingModels(refData.billingModels);
     } catch (error) {
       masterErrorHandler.handleDatabaseError(error, 'useClients.fetchClients');
-      // Graceful fallback: raw client data without joins
-      try {
-        const { supabase } = await import('../services/core/supabaseClient');
-        const { data } = await supabase.from('clients').select('*').order('name');
-        setClients(data || []);
-      } catch (_) { /* swallow fallback error */ }
     } finally {
       if (showLoading) setLoading(false);
     }

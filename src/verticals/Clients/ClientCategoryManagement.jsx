@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { clientCategoryService, clientServiceManager } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
@@ -21,21 +21,22 @@ const ClientCategoryManagement = ({ permissions = {}, setActiveVertical, onShowB
 
   const fetchCategories = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('client_categories')
-      .select('*')
-      .order('name', { ascending: true });
-    if (!error) setCategories(data || []);
-    else console.error('ClientCategory fetch error:', error);
+    try {
+      const data = await clientCategoryService.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('ClientCategory fetch error:', error);
+    }
     setLoading(false);
   };
 
   const fetchServices = async () => {
-    const { data, error } = await supabase
-      .from('client_services')
-      .select('id, name, code')
-      .order('name');
-    if (!error) setServices(data || []);
+    try {
+      const data = await clientServiceManager.getServices();
+      setServices(data);
+    } catch (error) {
+      console.error('ClientService fetch error:', error);
+    }
   };
 
   useEffect(() => { 
@@ -65,23 +66,16 @@ const ClientCategoryManagement = ({ permissions = {}, setActiveVertical, onShowB
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
-    const payload = { 
-      ...formData, 
-      updated_at: new Date().toISOString() 
-    };
-    let error;
-
-    if (editingCat) {
-      ({ error } = await supabase.from('client_categories').update(payload).eq('id', editingCat.id));
-    } else {
-      ({ error } = await supabase.from('client_categories').insert([payload]));
-    }
-
-    if (error) {
-      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
-    } else {
+    try {
+      if (editingCat) {
+        await clientCategoryService.updateCategory(editingCat.id, formData);
+      } else {
+        await clientCategoryService.addCategory(formData);
+      }
       setStatusMsg({ type: 'success', text: `Category ${editingCat ? 'updated' : 'created'} successfully!` });
       setTimeout(() => { setIsModalOpen(false); fetchCategories(); }, 1000);
+    } catch (error) {
+      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
     }
     setLoading(false);
   };
@@ -89,9 +83,12 @@ const ClientCategoryManagement = ({ permissions = {}, setActiveVertical, onShowB
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this category? Clients using it will be unlinked.')) return;
     setLoading(true);
-    const { error } = await supabase.from('client_categories').delete().eq('id', id);
-    if (error) alert(`Delete failed: ${error.message}`);
-    else fetchCategories();
+    try {
+      await clientCategoryService.deleteCategory(id);
+      fetchCategories();
+    } catch (error) {
+      alert(`Delete failed: ${error.message}`);
+    }
     setLoading(false);
   };
 

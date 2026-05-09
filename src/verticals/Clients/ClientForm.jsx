@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { clientService } from '../../services/clients/clientService';
 import CustomSelect from '../../components/CustomSelect';
 import './ClientForm.css';
 import '../ChargingHubs/HubManagement.css'; // For switch/slider styles
@@ -19,14 +19,14 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
 
   useEffect(() => {
     const fetchDropdowns = async () => {
-      const [catRes, serviceRes, modelRes] = await Promise.all([
-        supabase.from('client_categories').select('id, name, code, default_service_code').order('name'),
-        supabase.from('client_services').select('id, name, code').order('name'),
-        supabase.from('client_billing_models').select('id, name, code').order('name'),
-      ]);
-      if (catRes.data) setVehicleCategories(catRes.data);
-      if (serviceRes.data) setServiceCategories(serviceRes.data);
-      if (modelRes.data) setBillingModels(modelRes.data);
+      try {
+        const result = await clientService.getAllReferenceData();
+        setVehicleCategories(result.categories);
+        setServiceCategories(result.services);
+        setBillingModels(result.billingModels);
+      } catch (error) {
+        console.error('ClientForm: Dropdown fetch error:', error);
+      }
     };
     fetchDropdowns();
   }, []);

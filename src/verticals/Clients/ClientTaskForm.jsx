@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { clientService } from '../../services/clients/clientService';
 import AssigneeSelector from '../../components/AssigneeSelector';
 import TaskHierarchySelector from '../../components/TaskHierarchySelector';
 import CustomSelect from '../../components/CustomSelect';
@@ -21,12 +21,13 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
   const [clients, setClients] = useState([]);
 
   const fetchClients = async () => {
-    const { data } = await supabase
-      .from('clients')
-      .select('id, name')
-      .eq('status', 'Active')
-      .order('name');
-    if (data) setClients(data);
+    try {
+      const data = await clientService.getClients();
+      // Only show active clients in the task dropdown
+      setClients(data.filter(c => c.status === 'Active'));
+    } catch (error) {
+      console.error('ClientTaskForm: Client fetch error:', error);
+    }
   };
 
   useEffect(() => {

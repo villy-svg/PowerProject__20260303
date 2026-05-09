@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { clientService } from '../../services/clients/clientService';
 import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
 
 /**
@@ -134,20 +134,12 @@ const ClientSubSidebar = ({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const [
-          { data: cats },
-          { data: svcs },
-          { data: models }
-        ] = await Promise.all([
-          supabase.from('client_categories').select('id, name, code').order('name'),
-          supabase.from('client_services').select('id, name, code').order('name'),
-          supabase.from('client_billing_models').select('id, name, code').order('name'),
-        ]);
+        const result = await clientService.getAllReferenceData();
 
         setFilterOptions({
-          vehicleCategories: cats || [],
-          serviceCategories: svcs || [],
-          billingModels: models || [],
+          vehicleCategories: result.categories,
+          serviceCategories: result.services,
+          billingModels: result.billingModels,
         });
       } catch (err) {
         console.error('ClientSubSidebar: Fetch error:', err);

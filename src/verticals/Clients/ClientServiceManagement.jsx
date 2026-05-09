@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import { clientServiceManager } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
@@ -20,12 +20,12 @@ const ClientServiceManagement = ({ permissions = {}, setActiveVertical, onShowBo
 
   const fetchCategories = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('client_services')
-      .select('*')
-      .order('name', { ascending: true });
-    if (!error) setCategories(data || []);
-    else console.error('ClientService fetch error:', error);
+    try {
+      const data = await clientServiceManager.getServices();
+      setCategories(data);
+    } catch (error) {
+      console.error('ClientService fetch error:', error);
+    }
     setLoading(false);
   };
 
@@ -48,23 +48,16 @@ const ClientServiceManagement = ({ permissions = {}, setActiveVertical, onShowBo
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
-    const payload = { 
-      ...formData, 
-      updated_at: new Date().toISOString() 
-    };
-    let error;
-
-    if (editingCat) {
-      ({ error } = await supabase.from('client_services').update(payload).eq('id', editingCat.id));
-    } else {
-      ({ error } = await supabase.from('client_services').insert([payload]));
-    }
-
-    if (error) {
-      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
-    } else {
+    try {
+      if (editingCat) {
+        await clientServiceManager.updateService(editingCat.id, formData);
+      } else {
+        await clientServiceManager.addService(formData);
+      }
       setStatusMsg({ type: 'success', text: `Service ${editingCat ? 'updated' : 'created'} successfully!` });
       setTimeout(() => { setIsModalOpen(false); fetchCategories(); }, 1000);
+    } catch (error) {
+      setStatusMsg({ type: 'error', text: `Error: ${error.message}` });
     }
     setLoading(false);
   };
@@ -72,9 +65,12 @@ const ClientServiceManagement = ({ permissions = {}, setActiveVertical, onShowBo
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this service category? Clients using it will be unlinked.')) return;
     setLoading(true);
-    const { error } = await supabase.from('client_services').delete().eq('id', id);
-    if (error) alert(`Delete failed: ${error.message}`);
-    else fetchCategories();
+    try {
+      await clientServiceManager.deleteService(id);
+      fetchCategories();
+    } catch (error) {
+      alert(`Delete failed: ${error.message}`);
+    }
     setLoading(false);
   };
 
