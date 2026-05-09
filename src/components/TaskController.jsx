@@ -14,6 +14,8 @@ import RejectionModal from './RejectionModal';
 import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
 import FixTasksButton from './FixTasksButton';
+import { HUB_VIEWS } from '../registry/verticalRegistry';
+
 
 /**
  * TaskController Component
@@ -212,7 +214,8 @@ const TaskController = (props) => {
         }
         expandedRight={
           <>
-            {(activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'escalation_tasks') && (
+            {(activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
+
               <>
                 <TaskCSVDownload className="master-action-btn" data={filteredTasks} label="Export Tasks" />
                 <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import TaskController from './TaskController';
 import { taskUtils } from '../utils/taskUtils';
 import { IconChevronLeft, IconChevronRight } from './Icons';
+import { resolveVerticalRootId } from '../registry/verticalRegistry';
+
 import './VerticalWorkspace.css';
 
 /**
@@ -127,13 +129,8 @@ const VerticalWorkspace = ({
    * LAYOUT GUARD
    * Determines if the user has permission to view this vertical or sub-feature.
    */
-  const rootVerticalId = 
-    (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? verticals.CHARGING_HUBS?.id :
-    (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? verticals.CLIENTS?.id :
-    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? verticals.EMPLOYEES?.id :
-    // BUG-FIX: activeVertical can be null/undefined during initial render
-    // before App state resolves. .toUpperCase() on null throws a blank screen crash.
-    (activeVertical || '').toUpperCase();
+  const rootVerticalId = resolveVerticalRootId(activeVertical, verticals);
+
 
   // FIX Issue-5: Use optional fallback to prevent crash if activeVertical is null/undefined
   const isFeatureView = (activeVertical || '').includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;

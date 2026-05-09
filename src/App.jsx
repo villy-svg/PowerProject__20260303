@@ -17,6 +17,8 @@ import { useDailyTasks } from './hooks/useDailyTasks';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
 import { userService } from './services/auth/userService';
+import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from './registry/verticalRegistry';
+
 
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
@@ -34,23 +36,15 @@ import UserManagement from './components/UserManagement';
 import CustomSelect from './components/CustomSelect';
 import HubManagement from './verticals/ChargingHubs/HubManagement';
 import HubFunctionManagement from './verticals/ChargingHubs/HubFunctionManagement';
-import HubSubSidebar from './verticals/ChargingHubs/HubSubSidebar';
 import DailyTasksManagement from './verticals/ChargingHubs/DailyTasksManagement';
-import HubTaskForm from './verticals/ChargingHubs/HubTaskForm';
-import HubTaskTile from './verticals/ChargingHubs/HubTaskTile';
-import EmployeeSubSidebar from './verticals/Employees/EmployeeSubSidebar';
-import EmployeeTaskForm from './verticals/Employees/EmployeeTaskForm';
-import EmployeeTaskTile from './verticals/Employees/EmployeeTaskTile';
 import EmployeeManagement from './verticals/Employees/EmployeeManagement';
 import DepartmentManagement from './verticals/Employees/DepartmentManagement';
 import EmployeeRoleManagement from './verticals/Employees/EmployeeRoleManagement';
-import ClientSubSidebar from './verticals/Clients/ClientSubSidebar';
 import ClientManagement from './verticals/Clients/ClientManagement';
 import ClientCategoryManagement from './verticals/Clients/ClientCategoryManagement';
 import ClientBillingModelManagement from './verticals/Clients/ClientBillingModelManagement';
-import ClientTaskForm from './verticals/Clients/ClientTaskForm';
-import ClientTaskTile from './verticals/Clients/ClientTaskTile';
 import ClientServiceManagement from './verticals/Clients/ClientServiceManagement';
+
 import Login from './components/Login';
 
 // Assets
@@ -381,7 +375,15 @@ function App() {
   }
 
 
+  const { SidebarComponent, TaskFormComponent, TaskTileComponent } =
+    resolveVerticalComponents(activeVertical, verticals);
+  const { label: workspaceLabel, boardLabel: workspaceBoardLabel } =
+    resolveVerticalLabels(activeVertical, verticals);
+  const headerClickTarget =
+    resolveHeaderClickTarget(activeVertical, verticals, currentUserPermissions);
+
   return (
+
     <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
       <div className="app-layout">
         <button className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
@@ -523,22 +525,8 @@ function App() {
               />
             ) : (
               <VerticalWorkspace
-                label={
-                  (activeVertical === 'daily_task_templates' || activeVertical === 'daily_hub_tasks' || activeVertical === 'hub_tasks' || activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'escalation_tasks') ? 'Hubs List' :
-                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? 'Employees' :
-                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Clients' :
-                        verticals[activeVertical]?.label
-                }
-                boardLabel={
-                  (activeVertical === 'daily_task_templates') ? 'Daily Task Templates' :
-                  (activeVertical === 'daily_hub_tasks') ? 'Daily Task Board' :
-                  (activeVertical === 'escalation_tasks') ? 'Escalation Task Board' :
-                  (activeVertical === 'hub_tasks') ? 'Hub Task Board' :
-                  (activeVertical === verticals.CHARGING_HUBS?.id) ? 'Hubs Task Board' :
-                  (activeVertical === 'employee_tasks') ? 'Employee Task Board' :
-                  (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? 'Client Task Board' :
-                  verticals[activeVertical]?.label || 'Board'
-                }
+                label={workspaceLabel}
+                boardLabel={workspaceBoardLabel}
                 activeVertical={activeVertical}
                 tasks={
                   activeVertical === 'daily_hub_tasks' ? dailyTasks : 
@@ -558,33 +546,11 @@ function App() {
                 isMainSidebarOpen={isSidebarOpen}
                 setActiveVertical={setActiveVertical}
                 onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-                SidebarComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubSubSidebar :
-                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeSubSidebar :
-                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientSubSidebar :
-                        null
-                }
-                TaskFormComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubTaskForm :
-                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskForm :
-                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskForm :
-                        null
-                }
-                TaskTileComponent={
-                  (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates' || activeVertical === 'escalation_tasks') ? HubTaskTile :
-                    (activeVertical === verticals.EMPLOYEES?.id || activeVertical === 'employee_tasks') ? EmployeeTaskTile :
-                      (activeVertical === verticals.CLIENTS?.id || activeVertical === 'client_tasks' || activeVertical === 'leads_funnel') ? ClientTaskTile :
-                        null
-                }
-                onHeaderClick={
-                  (activeVertical === 'employee_tasks')
-                    ? () => setActiveVertical(verticals.EMPLOYEES?.id)
-                    : (activeVertical === 'client_tasks' || activeVertical === 'leads_funnel')
-                      ? () => setActiveVertical(verticals.CLIENTS?.id)
-                      : (currentUserPermissions.canAccessConfig && (activeVertical === verticals.CHARGING_HUBS?.id || activeVertical === 'hub_tasks' || activeVertical === 'daily_hub_tasks' || activeVertical === 'daily_task_templates'))
-                        ? () => setActiveVertical('hub_management')
-                        : null
-                }
+                SidebarComponent={SidebarComponent}
+                TaskFormComponent={TaskFormComponent}
+                TaskTileComponent={TaskTileComponent}
+                onHeaderClick={headerClickTarget ? () => setActiveVertical(headerClickTarget) : null}
+
                 user={user}
                 permissions={currentUserPermissions}
                 verticals={verticals}
