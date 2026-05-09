@@ -8,6 +8,8 @@
 import { supabase } from '../core/supabaseClient';
 import { auditService } from '../core/auditService';
 import { TASK_BOARD_MAP } from '../../constants/taskBoards';
+import { normalizeTask, mapTaskToRow, TASK_SELECT } from './taskNormalizer';
+import { fixAllTasks } from './taskFixService';
 
 // ---------------------------------------------------------------------------
 // Constants & Internal Utilities
@@ -18,16 +20,6 @@ const TASK_CACHE_VERSION = 5;
 const TASK_CACHE_KEY = 'powerpod_tasks_v5';
 const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
 
-const parseTaskBoard = (boardData) => {
-  if (Array.isArray(boardData)) return boardData;
-  if (typeof boardData === 'string' && boardData.trim().startsWith('[')) {
-    try {
-      const parsed = JSON.parse(boardData);
-      if (Array.isArray(parsed)) return parsed;
-    } catch (e) {}
-  }
-  return boardData ? [boardData] : [];
-};
 
 // ---------------------------------------------------------------------------
 // FIX Issue-10: Module-level constants — previously duplicated inside addTask
@@ -43,119 +35,11 @@ const VALID_VERTICALS = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES', 'PARTNERS', 'V
  * Maps a Supabase row (lowercase column names) to the camelCase shape
  * the rest of the app expects. Handles optional joined employee data.
  */
-export const normalizeTask = (row) => {
-  // Safeguard: Ensure submissions is an array before processing
-  const submissions = Array.isArray(row.submissions) ? row.submissions : [];
-  const latestSubmission = submissions.length > 0
-    ? [...submissions].sort((a, b) => (b.submission_number || 0) - (a.submission_number || 0))[0]
-    : null;
-
-  // 1. Resolve Multi-Hub Data
-  const rawHubs = Array.isArray(row.hubs) ? row.hubs : (row.hubs ? [row.hubs] : []);
-  const hubData = rawHubs.filter(Boolean);
-
-  // 2. Resolve Assignee Names (PostgREST returns an array via the 'assignees' computed relationship)
-  const rawAssignees = Array.isArray(row.assignees) ? row.assignees : (row.assignees ? [row.assignees] : []);
-  const validAssignees = rawAssignees.filter(Boolean);
-  
-  const assigneeNames = validAssignees.map(e => e.full_name).filter(Boolean).join(', ');
-
-  // 3. Flatten nested employee_roles for each assignee in assigneeMeta
-  const assigneeMeta = validAssignees.map(e => ({
-    ...e,
-    seniority_level: e?.employee_roles?.seniority_level || 1
-  }));
-
-  return {
-    id: row.id,
-    text: row.text,
-    verticalId: row.vertical_id,
-    stageId: row.stage_id,
-    priority: row.priority,
-    description: row.description,
-
-    // Hub Relationships
-    hub_id: row.hub_id,                          // Legacy scalar primary hub
-    hub_ids: hubData.map(h => h.id).filter(Boolean),             // Multi-hub UUID array
-    hubNames: hubData.map(h => h.name).filter(Boolean),          // For display
-    hubCodes: hubData.map(h => h.hub_code).filter(Boolean),      // For badges
-    hubData: hubData,                            // Full objects for forms
-    city: row.city,
-
-    function: row.function,
-
-    // Assignee Relationships
-    assigned_to: validAssignees.length > 0 ? validAssignees.map(a => a.id).filter(Boolean) : (Array.isArray(row.assigned_to) ? row.assigned_to : (row.assigned_to ? [row.assigned_to] : [])),
-    assigneeName: assigneeNames,
-    assigneeMeta,
-
-    // Hierarchy
-    parentTask: row.parent_task_id || null,
-    childCount: row.children?.length || 0,        // Count of child tasks
-    isSubTask: !!row.parent_task_id,              // Is this a fan-out child?
-
-    // Meta & Audit
-    task_board: parseTaskBoard(row.task_board),
-    isDailyTask: parseTaskBoard(row.task_board).includes('Hubs Daily'),
-
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    createdBy: row.created_by,
-    lastUpdatedBy: row.last_updated_by,
-
-    // Entity Links (Hybrid: Joins for existing tables, Metadata for future placeholders)
-    client_id: Array.isArray(row.clients) ? row.clients.map(c => c?.id).filter(Boolean) : (row.metadata?.entity_links?.client_id || []),
-    employee_id: Array.isArray(row.employees) ? row.employees.map(e => e?.id).filter(Boolean) : (row.metadata?.entity_links?.employee_id || []),
-    partner_id: row.metadata?.entity_links?.partner_id || [],
-    vendor_id: row.metadata?.entity_links?.vendor_id || [],
-
-    latestSubmission,
-    submissionBy: latestSubmission?.submitted_by || row.metadata?.submission_by,
-  };
-};
 
 /**
  * Maps a camelCase task object to the Supabase column-name shape for inserts/updates.
  */
-export const mapTaskToRow = (task) => ({
-  text: task.text,
-  vertical_id: task.verticalId,
-  stage_id: task.stageId,
-  priority: task.priority || null,
-  description: task.description || null,
-  hub_id: task.hub_id === '' ? null : (task.hub_id || null),
-  city: task.city || null,
-  function: task.function || null,
-  // FIX Issue-4 (CONTRACT): tasks.assigned_to is a SCALAR UUID in the DB column — it
-  // stores only the primary (first) assignee for legacy compatibility. All multi-assignee
-  // relationships live exclusively in task_context_links (entity_type = 'assignee').
-  // Do NOT read tasks.assigned_to directly for multi-assignee logic; always use the
-  // PostgREST 'assignees' computed join defined in TASK_SELECT.
-  assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to[0] : (task.assigned_to || null),
-  parent_task_id: task.parentTask || null,
-  last_updated_by: task.lastUpdatedBy || null,
-  task_board: task.task_board || [],
-  metadata: {
-    ...(task.metadata || {}),
-    entity_links: {
-      client_id: Array.isArray(task.client_id) ? task.client_id : (task.client_id ? [task.client_id] : []),
-      partner_id: Array.isArray(task.partner_id) ? task.partner_id : (task.partner_id ? [task.partner_id] : []),
-      vendor_id: Array.isArray(task.vendor_id) ? task.vendor_id : (task.vendor_id ? [task.vendor_id] : []),
-      employee_id: Array.isArray(task.employee_id) ? task.employee_id : (task.employee_id ? [task.employee_id] : []),
-    },
-    submission_by: task.submissionBy || null,
-  },
-});
 
-export const TASK_SELECT = `
-  *,
-  assignees(id, full_name, badge_id, employee_roles(seniority_level)),
-  hubs(id, name, hub_code, city),
-  clients(id, name),
-  employees(id, full_name),
-  submissions(id, status, rejection_reason, submission_number, created_at, submitted_by),
-  children:tasks!parent_task_id(id)
-`;
 
 /**
  * Synchronizes many-to-many links in task_context_links.
@@ -625,160 +509,6 @@ export const taskService = {
    * Goes through the columns and fixes all the rows with incorrect values in any column
    * in ALL the tasks including the unrendered tasks present in the tasks table ONLY.
    */
-  async fixAllTasks() {
-    // 1. Fetch ALL tasks
-    const { data: allTasks, error: tasksError } = await supabase
-      .from('tasks')
-      .select('*');
-    if (tasksError) throw tasksError;
-
-    // 2. Fetch ALL hubs to map cities
-    const { data: allHubs, error: hubsError } = await supabase
-      .from('hubs')
-      .select('id, city');
-    if (hubsError) throw hubsError;
-
-    const hubCityMap = (allHubs || []).reduce((acc, hub) => {
-      if (hub.id && hub.city) acc[hub.id] = hub.city;
-      return acc;
-    }, {});
-
-    // 3. Fetch ALL existing hub context links so we know which are missing
-    const { data: existingLinks } = await supabase
-      .from('task_context_links')
-      .select('source_id, entity_id')
-      .eq('source_type', 'task')
-      .eq('entity_type', 'hub');
-
-    // Build a fast lookup: "taskId::hubId" → true
-    const linkedSet = new Set((existingLinks || []).map(l => `${l.source_id}::${l.entity_id}`));
-
-    // -------------------------------------------------------------------------
-    // FIX Issue-3: Collect all patches in memory first, then batch-upsert.
-    // Previously: one sequential await UPDATE per task (N+1 Supabase calls).
-    // On 500+ tasks this could take 60s+ and risk rate-limit failures.
-    // Now: bulk upsert in 100-task chunks + one bulk insert for context links.
-    // -------------------------------------------------------------------------
-    const taskPatches = [];  // { id, ...fields } — for bulk upsert
-    const newLinkRows = [];  // { source_id, source_type, entity_type, entity_id }
-
-    for (const task of (allTasks || [])) {
-      const patch = { id: task.id };
-      let hasPatch = false;
-
-      // Parse stringified task_board if needed
-      let taskBoard = task.task_board;
-      if (typeof taskBoard === 'string' && taskBoard.trim().startsWith('[')) {
-        try {
-          const parsed = JSON.parse(taskBoard);
-          if (Array.isArray(parsed)) {
-            taskBoard = parsed;
-            patch.task_board = taskBoard;
-            hasPatch = true;
-          }
-        } catch (e) {}
-      }
-
-      const boards = Array.isArray(taskBoard) ? taskBoard : [];
-
-      // A. Fix vertical_id — uses module-level VALID_VERTICALS (FIX Issue-10)
-      const currentVid = (task.vertical_id || '').toUpperCase();
-      let correctVid = task.vertical_id;
-
-      if (!VALID_VERTICALS.includes(currentVid)) {
-        hasPatch = true;
-        if (boards.includes('Hubs') || boards.includes('Hubs Daily') || task.hub_id) {
-          correctVid = 'CHARGING_HUBS';
-        } else if (boards.includes('Clients')) {
-          correctVid = 'CLIENTS';
-        } else if (boards.includes('Employees')) {
-          correctVid = 'EMPLOYEES';
-        } else {
-          correctVid = 'CHARGING_HUBS';
-        }
-        patch.vertical_id = correctVid;
-      }
-
-      // B. Fix task_board (empty or null)
-      if (boards.length === 0) {
-        hasPatch = true;
-        const vidCheck = (correctVid || task.vertical_id || '').toLowerCase();
-        // Without a reliable daily signal in the raw row, default ambiguous hub tasks to 'Hubs'.
-        if (vidCheck.includes('hub')) patch.task_board = ['Hubs'];
-        else if (vidCheck.includes('client')) patch.task_board = ['Clients'];
-        else if (vidCheck.includes('employee')) patch.task_board = ['Employees'];
-        else patch.task_board = ['Hubs'];
-      }
-
-      // C. Fix city
-      if (!task.city && task.hub_id) {
-        const mappedCity = hubCityMap[task.hub_id];
-        if (mappedCity) {
-          hasPatch = true;
-          patch.city = mappedCity;
-        }
-      }
-
-      // D. Fix stage_id (null or empty string)
-      if (!task.stage_id) {
-        hasPatch = true;
-        patch.stage_id = 'TODO';
-      }
-
-      // E. Fix priority (null or empty string)
-      if (!task.priority) {
-        hasPatch = true;
-        patch.priority = 'Medium';
-      }
-
-      if (hasPatch) taskPatches.push(patch);
-
-      // F. Collect missing hub context links
-      if (task.hub_id && !linkedSet.has(`${task.id}::${task.hub_id}`)) {
-        newLinkRows.push({
-          source_id:   task.id,
-          source_type: 'task',
-          entity_type: 'hub',
-          entity_id:   task.hub_id,
-        });
-        // Pre-mark to prevent duplicate rows if the same task appears twice
-        linkedSet.add(`${task.id}::${task.hub_id}`);
-      }
-    }
-
-    let updateCount = 0;
-    const CHUNK_SIZE = 100;
-
-    // Bulk upsert task field patches in chunks of 100
-    for (let i = 0; i < taskPatches.length; i += CHUNK_SIZE) {
-      const chunk = taskPatches.slice(i, i + CHUNK_SIZE);
-      const { error: upsertError } = await supabase
-        .from('tasks')
-        .upsert(chunk, { onConflict: 'id' });
-
-      if (upsertError) {
-        console.error(`[TaskService] fixAllTasks upsert chunk ${Math.floor(i / CHUNK_SIZE)} failed:`, upsertError);
-      } else {
-        updateCount += chunk.length;
-      }
-    }
-
-    // Bulk insert missing hub context links
-    if (newLinkRows.length > 0) {
-      for (let i = 0; i < newLinkRows.length; i += CHUNK_SIZE) {
-        const chunk = newLinkRows.slice(i, i + CHUNK_SIZE);
-        const { error: linkError } = await supabase
-          .from('task_context_links')
-          .insert(chunk);
-
-        if (linkError) {
-          console.error(`[TaskService] fixAllTasks link insert chunk ${Math.floor(i / CHUNK_SIZE)} failed:`, linkError);
-        } else {
-          updateCount += chunk.length;
-        }
-      }
-    }
-
-    return updateCount;
-  },
+  /** Fix all tasks — delegated to taskFixService for separation of concerns */
+  fixAllTasks,
 };

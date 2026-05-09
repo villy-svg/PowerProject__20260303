@@ -4,7 +4,8 @@
  * Targets the unified `tasks` table.
  */
 import { supabase } from '../core/supabaseClient';
-import { taskService, normalizeTask, TASK_SELECT } from './taskService';
+import { taskService } from './taskService';
+import { normalizeTask, TASK_SELECT } from './taskNormalizer';
 
 const BOARD_TAG = 'Hubs Daily';
 
