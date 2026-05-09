@@ -1,0 +1,112 @@
+/**
+ * TaskBoardContext.jsx
+ * Owns all task state for the application. Resolves which task set is active
+ * (regular / daily / escalation) based on the current activeVertical.
+ *
+ * CRITICAL IMPLEMENTATION NOTES:
+ * 1. useDailyTasks depends on the SHARED tasks + setTasks from useTasks.
+ *    Do NOT create a separate tasks array for daily tasks.
+ * 2. escalationTasks is a derived memo of the main tasks array — it is NOT
+ *    a separate fetch. It is filtered from the global tasks by task_board.
+ * 3. The 'active' variants (activeTasks, activeAddTask, etc.) resolve which
+ *    set is used based on the current activeVertical from AppNavigationContext.
+ */
+import React, { createContext, useContext, useMemo } from 'react';
+import { useTasks } from '../../hooks/useTasks';
+import { useDailyTasks } from '../../hooks/useDailyTasks';
+import { useAppNavigation } from './AppNavigationContext';
+
+const TaskBoardContext = createContext(null);
+
+export function TaskBoardProvider({ user, verticals = {}, children }) {
+  const { activeVertical } = useAppNavigation();
+
+  // ── Primary Task Store ────────────────────────────────────────────────────
+  const {
+    tasks,
+    setTasks,
+    loading: tasksLoading,
+    fetchTasks,
+    addTask,
+    updateTask,
+    updateTaskStage,
+    bulkUpdateTasks,
+    deleteTask,
+  } = useTasks(user);
+
+  // ── Daily Task Overlay ────────────────────────────────────────────────────
+  // useDailyTasks uses the SAME tasks/setTasks — it does NOT create a third store.
+  const {
+    tasks: dailyTasks,
+    addTask: addDailyTask,
+    updateTask: updateDailyTask,
+    updateTaskStage: updateDailyTaskStage,
+    bulkUpdateTasks: bulkUpdateDailyTasks,
+    deleteTask: deleteDailyTask,
+  } = useDailyTasks(tasks, setTasks, user, fetchTasks);
+
+  // ── Escalation Task Filter ────────────────────────────────────────────────
+  // Strict filter: only tasks explicitly in the 'Escalations' task_board array.
+  const escalationTasks = useMemo(() => {
+    const hubId = verticals?.CHARGING_HUBS?.id;
+    if (!hubId) return [];
+    return tasks.filter(t =>
+      t.verticalId === hubId &&
+      Array.isArray(t.task_board) &&
+      t.task_board.includes('Escalations')
+    );
+  }, [tasks, verticals?.CHARGING_HUBS?.id]);
+
+  // ── Active Set Resolution ─────────────────────────────────────────────────
+  // Which task set + CRUD actions are active for the current view?
+  const isDaily      = activeVertical === 'daily_hub_tasks';
+  const isEscalation = activeVertical === 'escalation_tasks';
+
+  const activeTasks          = isDaily ? dailyTasks      : isEscalation ? escalationTasks : tasks;
+  const activeAddTask        = isDaily ? addDailyTask    : addTask;
+  const activeUpdateTask     = isDaily ? updateDailyTask : updateTask;
+  const activeUpdateTaskStage = isDaily ? updateDailyTaskStage : updateTaskStage;
+  const activeBulkUpdateTasks = isDaily ? bulkUpdateDailyTasks : bulkUpdateTasks;
+  const activeDeleteTask     = isDaily ? deleteDailyTask : deleteTask;
+
+  // ── Context Value ─────────────────────────────────────────────────────────
+  const value = {
+    // Raw stores (for components that need the full unfiltered list)
+    tasks,
+    setTasks,
+    tasksLoading,
+    fetchTasks,
+    dailyTasks,
+    escalationTasks,
+    // Active-view-resolved accessors (preferred for TaskController)
+    activeTasks,
+    activeAddTask,
+    activeUpdateTask,
+    activeUpdateTaskStage,
+    activeBulkUpdateTasks,
+    activeDeleteTask,
+    // Raw CRUD (for special cases — e.g. EmployeeManagement filtering tasks)
+    addTask,
+    updateTask,
+    updateTaskStage,
+    bulkUpdateTasks,
+    deleteTask,
+  };
+
+  return (
+    <TaskBoardContext.Provider value={value}>
+      {children}
+    </TaskBoardContext.Provider>
+  );
+}
+
+/**
+ * useTaskBoard — Consume task state from any component.
+ */
+export function useTaskBoard() {
+  const ctx = useContext(TaskBoardContext);
+  if (!ctx) {
+    throw new Error('[useTaskBoard] Must be used inside <TaskBoardProvider>.');
+  }
+  return ctx;
+}

@@ -13,8 +13,7 @@ import { authService } from './services/auth/authService';
 // Hooks
 import { useAuth } from './app/contexts/AuthContext';
 import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavigationContext';
-import { useTasks } from './hooks/useTasks';
-import { useDailyTasks } from './hooks/useDailyTasks';
+import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
 import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from './registry/verticalRegistry';
@@ -66,40 +65,12 @@ function AppShell({ verticals, verticalList }) {
     handleLogout,
   } = useAuth();
 
-  // 2. Main Task state
   const {
-    tasks,
-    setTasks,
-    loading: tasksLoading,
-    fetchTasks,
-    addTask,
-    updateTask,
-    updateTaskStage,
-    bulkUpdateTasks,
-    deleteTask,
-  } = useTasks(user);
-
-  // 3. Daily Task state
-  const {
-    tasks: dailyTasks,
-    addTask: addDailyTask,
-    updateTask: updateDailyTask,
-    updateTaskStage: updateDailyTaskStage,
-    bulkUpdateTasks: bulkUpdateDailyTasks,
-    deleteTask: deleteDailyTask,
-  } = useDailyTasks(tasks, setTasks, user, fetchTasks);
-
-  // 4. Escalation Task state (Filtered from global tasks)
-  const escalationTasks = useMemo(() => {
-    const hubId = verticals.CHARGING_HUBS?.id;
-    if (!hubId) return [];
-
-    return tasks.filter(t => {
-      const isHubTask = t.verticalId === hubId;
-      if (!isHubTask) return false;
-      return Array.isArray(t.task_board) && t.task_board.includes('Escalations');
-    });
-  }, [tasks, verticals.CHARGING_HUBS?.id]);
+    tasks, setTasks, tasksLoading, fetchTasks,
+    activeTasks, activeAddTask, activeUpdateTask,
+    activeUpdateTaskStage, activeBulkUpdateTasks, activeDeleteTask,
+    escalationTasks, dailyTasks,
+  } = useTaskBoard();
 
   const [rolePermissions, setRolePermissions] = useState(() => {
     const saved = localStorage.getItem('power_project_permissions');
@@ -346,19 +317,15 @@ function AppShell({ verticals, verticalList }) {
                 label={workspaceLabel}
                 boardLabel={workspaceBoardLabel}
                 activeVertical={activeVertical}
-                tasks={
-                  activeVertical === 'daily_hub_tasks' ? dailyTasks : 
-                  activeVertical === 'escalation_tasks' ? escalationTasks :
-                  tasks
-                }
+                tasks={activeTasks}
                 setTasks={setTasks}
-                addTask={activeVertical === 'daily_hub_tasks' ? addDailyTask : addTask}
+                addTask={activeAddTask}
                 actualSetTasks={setTasks}
                 refreshTasks={fetchTasks}
-                updateTask={activeVertical === 'daily_hub_tasks' ? updateDailyTask : updateTask}
-                bulkUpdateTasks={activeVertical === 'daily_hub_tasks' ? bulkUpdateDailyTasks : bulkUpdateTasks}
-                deleteTask={activeVertical === 'daily_hub_tasks' ? deleteDailyTask : deleteTask}
-                updateTaskStage={activeVertical === 'daily_hub_tasks' ? updateDailyTaskStage : updateTaskStage}
+                updateTask={activeUpdateTask}
+                bulkUpdateTasks={activeBulkUpdateTasks}
+                deleteTask={activeDeleteTask}
+                updateTaskStage={activeUpdateTaskStage}
                 isSubSidebarOpen={isSubSidebarOpen}
                 setIsSubSidebarOpen={setIsSubSidebarOpen}
                 isMainSidebarOpen={isSidebarOpen}
@@ -415,6 +382,7 @@ function App() {
   const {
     isAppInitializing, setIsAppInitializing,
     session, setSession,
+    user,
     fetchUserProfile,
   } = useAuth();
   const [verticals, setVerticals] = useState(STATIC_VERTICALS);
@@ -477,7 +445,9 @@ function App() {
 
   return (
     <AppNavigationProvider verticals={verticals}>
-      <AppShell verticals={verticals} verticalList={verticalList} />
+      <TaskBoardProvider user={user} verticals={verticals}>
+        <AppShell verticals={verticals} verticalList={verticalList} />
+      </TaskBoardProvider>
     </AppNavigationProvider>
   );
 }
