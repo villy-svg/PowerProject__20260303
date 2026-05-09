@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from './theme/useTheme';
 import ThemeToggle from './theme/themeToggle';
 import './App.css';
 import './components/Header.css';
 
 // Services — Core
-import { masterErrorHandler } from './services/core/masterErrorHandler';
 import { verticalService } from './services/core/verticalService';
-// Services — Auth
-import { taskService } from './services/tasks/taskService';
 import { authService } from './services/auth/authService';
+import { masterErrorHandler } from './services/core/masterErrorHandler';
+
 // Hooks
 import { useAuth } from './app/contexts/AuthContext';
 import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavigationContext';
@@ -17,7 +16,6 @@ import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
 import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from './registry/verticalRegistry';
-
 
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
@@ -49,6 +47,10 @@ import Login from './components/Login';
 // Assets
 import powerLogo from './assets/logo.svg';
 
+/**
+ * AppShell handles the main authenticated UI layout.
+ * It consumes context from Auth, Navigation, and TaskBoard providers.
+ */
 function AppShell({ verticals, verticalList }) {
   const { darkMode } = useTheme();
   const {
@@ -69,7 +71,6 @@ function AppShell({ verticals, verticalList }) {
     tasks, setTasks, tasksLoading, fetchTasks,
     activeTasks, activeAddTask, activeUpdateTask,
     activeUpdateTaskStage, activeBulkUpdateTasks, activeDeleteTask,
-    escalationTasks, dailyTasks,
   } = useTaskBoard();
 
   const [rolePermissions, setRolePermissions] = useState(() => {
@@ -88,27 +89,19 @@ function AppShell({ verticals, verticalList }) {
     }
   });
 
-  // Compute current permissions via dedicated RBAC hook
   const currentUserPermissions = useRBAC(user, activeVertical, verticals);
-
-  // OTA Update Hook
   useOTAUpdate();
 
-  /**
-   * SECURITY VALIDATION:
-   * Ensures the user has permissions for the currently 'activeVertical'.
-   */
+  // SECURITY VALIDATION: Enforces vertical access based on RBAC rules.
   useEffect(() => {
     if (!user || !activeVertical) return;
 
     const isMasterAdmin = user.roleId === 'master_admin';
     const isGlobalScope = currentUserPermissions.scope === 'global';
-    const isConfigView = ['configuration', 'role_management', 'user_management'].includes(activeVertical);
-
+    
+    // Special admin-only views
     const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
-    const hasSpecialAccess = isMasterAdmin;
-
-    if (isSpecialAdminView && !hasSpecialAccess) {
+    if (isSpecialAdminView && !isMasterAdmin) {
       setActiveVertical(null);
       return;
     }
@@ -135,9 +128,9 @@ function AppShell({ verticals, verticalList }) {
         setActiveVertical(null);
       }
     }
-  }, [user, activeVertical, currentUserPermissions, verticals]);
+  }, [user, activeVertical, currentUserPermissions, verticals, setActiveVertical]);
 
-  // Sync Local Preferences (Non-nav)
+  // Sync Local Preferences
   useEffect(() => { 
     localStorage.setItem('power_project_permissions', JSON.stringify(rolePermissions)); 
   }, [rolePermissions]);
@@ -146,15 +139,12 @@ function AppShell({ verticals, verticalList }) {
   if (!user) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
-        <div className="loading-screen" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="loading-screen-layout">
           {profileError ? (
             <>
-              <h2 style={{ color: '#ff4444' }}>Profile Error</h2>
+              <h2 className="error-heading">Profile Error</h2>
               <p style={{ maxWidth: '400px', textAlign: 'center' }}>{profileError}</p>
-              <button
-                onClick={handleLogout}
-                style={{ marginTop: '1rem', padding: '10px 20px', backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-              >
+              <button onClick={handleLogout} className="halo-button error-logout-btn">
                 Sign Out & Try Again
               </button>
             </>
@@ -192,10 +182,8 @@ function AppShell({ verticals, verticalList }) {
           verticalList={verticalList}
         />
         <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
-        <div 
-          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
-          onClick={() => setIsSidebarOpen(false)} 
-        />
+        <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)} />
+        
         <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
           <header className={`app-header ${activeVertical ? 'mobile-hidden' : ''}`}>
             <div className="header-left"></div>
@@ -205,17 +193,13 @@ function AppShell({ verticals, verticalList }) {
                 <div className="impersonation-header-wrapper">
                   {impersonatedUser ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="impersonation-active-label">
                         View: <strong>{impersonatedUser.name}</strong>
-                        <span className="neutral-badge" style={{ fontSize: '0.75rem', padding: '2px 6px', opacity: 0.8, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-color)', borderRadius: '4px', fontFamily: 'var(--font-mono)' }}>
+                        <span className="neutral-badge impersonation-role-badge">
                           {impersonatedUser.roleId}
                         </span>
                       </span>
-                      <button 
-                        className="halo-button" 
-                        style={{ padding: '4px 8px', fontSize: '0.75rem', borderColor: 'var(--border-color)', color: 'var(--brand-green)', cursor: 'pointer' }}
-                        onClick={() => handleImpersonate(null)}
-                      >
+                      <button className="halo-button impersonation-stop-btn" onClick={() => handleImpersonate(null)}>
                         Stop
                       </button>
                     </div>
@@ -235,6 +219,7 @@ function AppShell({ verticals, verticalList }) {
               <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
             </div>
           </header>
+          
           <main className="app-content">
             {!activeVertical ? (
               <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} verticalList={verticalList} loading={tasksLoading} />
@@ -258,60 +243,21 @@ function AppShell({ verticals, verticalList }) {
                 onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
               />
             ) : activeVertical === 'user_management' ? (
-              <UserManagement 
-                currentUser={user} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <UserManagement currentUser={user} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'hub_management' ? (
-              <HubManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <HubManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'hub_function_management' ? (
-              <HubFunctionManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <HubFunctionManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'department_management' ? (
-              <DepartmentManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <DepartmentManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'employee_role_management' ? (
-              <EmployeeRoleManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <EmployeeRoleManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'client_category_management' ? (
-              <ClientCategoryManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <ClientCategoryManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'client_service_management' ? (
-              <ClientServiceManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <ClientServiceManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : activeVertical === 'client_billing_model_management' ? (
-              <ClientBillingModelManagement 
-                user={user} 
-                permissions={currentUserPermissions} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
+              <ClientBillingModelManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
             ) : (
               <VerticalWorkspace
                 label={workspaceLabel}
@@ -340,25 +286,13 @@ function AppShell({ verticals, verticalList }) {
                 verticals={verticals}
               >
                 {activeVertical === verticals.EMPLOYEES?.id && (
-                  <EmployeeManagement
-                    user={user}
-                    permissions={currentUserPermissions}
-                    tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)}
-                  />
+                  <EmployeeManagement user={user} permissions={currentUserPermissions} tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} />
                 )}
                 {activeVertical === verticals.CLIENTS?.id && (
-                  <ClientManagement
-                    user={user}
-                    permissions={currentUserPermissions}
-                    tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)}
-                  />
+                  <ClientManagement user={user} permissions={currentUserPermissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
                 )}
                 {activeVertical === 'daily_task_templates' && (
-                  <DailyTasksManagement
-                    permissions={currentUserPermissions}
-                    refreshTasks={fetchTasks}
-                    currentUser={user}
-                  />
+                  <DailyTasksManagement permissions={currentUserPermissions} refreshTasks={fetchTasks} currentUser={user} />
                 )}
               </VerticalWorkspace>
             )}
@@ -385,6 +319,7 @@ function App() {
     user,
     fetchUserProfile,
   } = useAuth();
+  
   const [verticals, setVerticals] = useState(STATIC_VERTICALS);
   const [verticalList, setVerticalList] = useState(STATIC_VERTICAL_LIST);
 
@@ -415,26 +350,23 @@ function App() {
       }
     };
     initAppData();
-  }, []); // fetchTasks dependency removed as it's now in AppShell/Context
+  }, [fetchUserProfile, setIsAppInitializing, setSession]);
 
-  // Test database connection on app start
   useEffect(() => {
     masterErrorHandler.testDatabaseConnection();
   }, []);
 
-  // Unified Loading Screen for initial boot
   if (isAppInitializing) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
-        <div className="loading-screen" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <img src={powerLogo} className="loading-logo" alt="logo" style={{ width: '80px', marginBottom: '1rem' }} />
+        <div className="loading-screen-layout">
+          <img src={powerLogo} className="loading-logo" alt="logo" />
           <h2>Connecting to Cloud Database...</h2>
         </div>
       </div>
     );
   }
 
-  // Not Logged In
   if (!session) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>

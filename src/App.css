@@ -87,8 +87,52 @@
   }
   /* Content area padding for mobile */
   .app-content {
-    padding: 12px;
+    padding: 8px;
   }
+}
+
+/* RB-07 Extraction - Loading & Error Utilities */
+.loading-screen-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.loading-logo {
+  width: 80px;
+  margin-bottom: 1rem;
+}
+.error-heading {
+  color: var(--status-danger);
+}
+.error-logout-btn {
+  margin-top: 1rem;
+}
+
+/* Impersonation UI */
+.impersonation-active-label {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.impersonation-role-badge {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+}
+.impersonation-stop-btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  color: var(--brand-green);
 }
 /* ── Phone-Specific Layout ── */
 @media screen and (max-width: 480px) {
