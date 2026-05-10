@@ -201,7 +201,6 @@ const TaskController = (props) => {
                 onClick={handleClearBoard}
                 disabled={saving}
                 title="Move all active tasks to Deferred"
-                className="halo-button clear-board-btn"
               >
                 Clear Board
               </button>

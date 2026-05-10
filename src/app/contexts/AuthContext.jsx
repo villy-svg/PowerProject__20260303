@@ -11,7 +11,7 @@
  *    fetch without this guard.
  * 2. fetchUserProfile is exposed so App.jsx can call it from initAppData().
  */
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { authService } from '../../services/auth/authService';
 import { profileService } from '../../services/auth/profileService';
 import { userService } from '../../services/auth/userService';
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
    * Called by: initAppData() in App.jsx, and the auth state listener below.
    * EXPOSED in context so App.jsx can call it during app initialization.
    */
-  const fetchUserProfile = async (userId) => {
+  const fetchUserProfile = useCallback(async (userId) => {
     try {
       const userData = await profileService.fetchUserProfile(userId);
       setRealUser(userData);
@@ -62,13 +62,13 @@ export function AuthProvider({ children }) {
       setProfileError(error.message);
       return null;
     }
-  };
+  }, []);
 
   /**
    * handleImpersonate — Switch the effective user identity.
    * Passing null stops impersonation and restores the real user.
    */
-  const handleImpersonate = async (targetUserId) => {
+  const handleImpersonate = useCallback(async (targetUserId) => {
     if (!targetUserId) {
       setImpersonatedUser(null);
       return;
@@ -79,15 +79,15 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('[AuthContext] Impersonation failed:', error);
     }
-  };
+  }, []);
 
   /**
    * handleLogout — Sign out and clear profile error state.
    */
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await authService.signOut();
     setProfileError(null);
-  };
+  }, []);
 
   // ── Auth State Listener ───────────────────────────────────────────────────
   // Listens for login / logout events AFTER the initial bootstrap.

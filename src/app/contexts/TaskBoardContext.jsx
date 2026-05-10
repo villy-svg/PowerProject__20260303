@@ -11,7 +11,7 @@
  * 3. The 'active' variants (activeTasks, activeAddTask, etc.) resolve which
  *    set is used based on the current activeVertical from AppNavigationContext.
  */
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useEffect } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import { useDailyTasks } from '../../hooks/useDailyTasks';
 import { useAppNavigation } from './AppNavigationContext';
@@ -33,6 +33,13 @@ export function TaskBoardProvider({ user, verticals = {}, children }) {
     bulkUpdateTasks,
     deleteTask,
   } = useTasks(user);
+
+  // ── Initial Data Load ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (user?.id) {
+      fetchTasks();
+    }
+  }, [user?.id, fetchTasks]);
 
   // ── Daily Task Overlay ────────────────────────────────────────────────────
   // useDailyTasks uses the SAME tasks/setTasks — it does NOT create a third store.
@@ -70,7 +77,7 @@ export function TaskBoardProvider({ user, verticals = {}, children }) {
   const activeDeleteTask     = isDaily ? deleteDailyTask : deleteTask;
 
   // ── Context Value ─────────────────────────────────────────────────────────
-  const value = {
+  const value = useMemo(() => ({
     // Raw stores (for components that need the full unfiltered list)
     tasks,
     setTasks,
@@ -91,7 +98,12 @@ export function TaskBoardProvider({ user, verticals = {}, children }) {
     updateTaskStage,
     bulkUpdateTasks,
     deleteTask,
-  };
+  }), [
+    tasks, setTasks, tasksLoading, fetchTasks, dailyTasks, escalationTasks,
+    activeTasks, activeAddTask, activeUpdateTask, activeUpdateTaskStage,
+    activeBulkUpdateTasks, activeDeleteTask, addTask, updateTask,
+    updateTaskStage, bulkUpdateTasks, deleteTask
+  ]);
 
   return (
     <TaskBoardContext.Provider value={value}>
