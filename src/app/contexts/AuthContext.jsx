@@ -11,7 +11,7 @@
  *    fetch without this guard.
  * 2. fetchUserProfile is exposed so App.jsx can call it from initAppData().
  */
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { authService } from '../../services/auth/authService';
 import { profileService } from '../../services/auth/profileService';
 import { userService } from '../../services/auth/userService';
@@ -128,7 +128,10 @@ export function AuthProvider({ children }) {
   }, [realUser]);
 
   // ── Context Value ─────────────────────────────────────────────────────────
-  const value = {
+  // B5 FIX: Wrap in useMemo to prevent all useAuth() consumers from re-rendering
+  // on every AuthContext state change. Without this, any state update (e.g. localStorage
+  // write) triggers a re-render cascade across the entire app.
+  const value = useMemo(() => ({
     // State
     isAppInitializing,
     setIsAppInitializing,
@@ -143,7 +146,14 @@ export function AuthProvider({ children }) {
     fetchUserProfile,
     handleImpersonate,
     handleLogout,
-  };
+  }), [
+    isAppInitializing, setIsAppInitializing,
+    session, setSession,
+    user, realUser,
+    impersonatedUser, impersonationUsers,
+    profileError,
+    fetchUserProfile, handleImpersonate, handleLogout,
+  ]);
 
   return (
     <AuthContext.Provider value={value}>

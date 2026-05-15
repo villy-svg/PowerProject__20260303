@@ -133,9 +133,10 @@ const VerticalWorkspace = ({
   const rootVerticalId = resolveVerticalRootId(activeVertical, verticals);
 
 
-  // FIX Issue-5: Use optional fallback to prevent crash if activeVertical is null/undefined
+  // FIX Issue-5 (B3): Apply the same null guard to featureBaseName as isFeatureView above.
+  // Without this, activeVertical.split() throws TypeError if activeVertical is null.
   const isFeatureView = (activeVertical || '').includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;
-  const featureBaseName = activeVertical.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+  const featureBaseName = (activeVertical || '').split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
 
   // Mapping main vertical IDs to their primary feature access flags if they act as feature views

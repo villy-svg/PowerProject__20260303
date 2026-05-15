@@ -76,10 +76,12 @@
   font-size: var(--font-sm);
   font-weight: 500;
   transition: all 0.25s ease;
-  white-space: nowrap; 
+  white-space: nowrap;
   overflow: hidden;
   display: block;
 }
+/* B1 FIX: overflow:hidden from .sidebar-nav li was clipping the chevron
+   button on large screens. Canonical override is on .nav-parent-item below. */
 .sidebar-nav li:not(.locked):hover {
   background-color: var(--border-color);
   color: var(--brand-mint);
@@ -100,11 +102,16 @@
   color: var(--text-color);
 }
 /* 7. Dropdown & Sub-nav Styling */
-.nav-parent-item {
+/* B1 REAL FIX: Specificity battle.
+   .sidebar-nav li         = (0,1,1) = 11  → sets display:block, overflow:hidden
+   .nav-parent-item        = (0,1,0) = 10  → LOSES, flex never applied
+   .sidebar-nav li.nav-parent-item = (0,2,1) = 21 → WINS */
+.sidebar-nav li.nav-parent-item {
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  overflow: visible;
 }
 .lock-icon {
   font-size: 12px;
@@ -168,6 +175,10 @@
 }
 .v-label-text {
   flex: 1;
+  min-width: 0;           /* Allow text to shrink below content size */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Truncate long labels gracefully */
+  white-space: nowrap;
 }
 /* 7. Dividers & Cleanup */
 .nav-divider {

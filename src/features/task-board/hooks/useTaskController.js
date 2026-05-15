@@ -21,6 +21,7 @@ export const useTaskController = (props) => {
     tasks = [],
     setTasks,
     actualSetTasks,
+    refreshTasks,        // B2 FIX: was missing — used in handleMoveToParent for board reconciliation
     addTask,
     bulkUpdateTasks,
     deleteTask,
@@ -151,7 +152,9 @@ export const useTaskController = (props) => {
         setSaving(true);
         try {
           await deleteTask(taskId);
-          setTasks(prev => prev.filter(t => t.id !== taskId));
+          // B6 FIX: use actualSetTasks (global store) not setTasks (view-scoped),
+          // consistent with handleBulkAction's delete path.
+          actualSetTasks(prev => prev.filter(t => t.id !== taskId));
         } catch (err) { alert("Delete failed."); }
         finally { setSaving(false); setConfirmDialog(p => ({ ...p, isOpen: false })); }
       }

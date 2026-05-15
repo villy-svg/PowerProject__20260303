@@ -1,6 +1,7 @@
 import React from 'react';
 import CSVImportButton from '../../components/CSVImportButton';
-import { supabase } from '../../services/core/supabaseClient';
+// B7 FIX: Use service layer instead of direct Supabase calls (repository pattern).
+import { billingModelService } from '../../services/clients/clientService';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
 import './ClientBillingModelCSVImport.css';
 
@@ -16,14 +17,10 @@ const ClientBillingModelCSVImport = ({ onImportComplete, className, label = 'Imp
   const loadContext = async () => {
     if (existingModels) return { existingModels };
 
-    const { data: models, error } = await supabase
-      .from('client_billing_models')
-      .select('id, name, code');
-
-    if (error) throw error;
-
-    setExistingModels(models || []);
-    return { existingModels: models || [] };
+    // B7 FIX: was a direct supabase.from() call — now goes through billingModelService.
+    const models = await billingModelService.getBillingModelsRaw();
+    setExistingModels(models);
+    return { existingModels: models };
   };
 
   const handleFocus = async () => {
@@ -84,11 +81,8 @@ const ClientBillingModelCSVImport = ({ onImportComplete, className, label = 'Imp
 
       if (modelsToUpsert.length === 0) throw new Error('No valid billing model records found.');
 
-      const { error } = await supabase
-        .from('client_billing_models')
-        .upsert(modelsToUpsert, { onConflict: 'id' });
-
-      if (error) throw error;
+      // B7 FIX: was a direct supabase.from().upsert() call — now goes through billingModelService.
+      await billingModelService.upsertBillingModels(modelsToUpsert);
 
       alert(`Successfully processed ${modelsToUpsert.length} billing models.`);
       setExistingModels(null);

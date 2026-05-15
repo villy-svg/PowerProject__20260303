@@ -228,6 +228,32 @@ export const billingModelService = {
     const { error } = await supabase.from('client_billing_models').delete().eq('id', id);
     if (error) throw error;
   },
+
+  /**
+   * getBillingModelsRaw() — Minimal field fetch for CSV conflict checking.
+   * B7 FIX: Extracted from ClientBillingModelCSVImport so the component
+   * no longer makes direct supabase calls.
+   */
+  async getBillingModelsRaw() {
+    const { data, error } = await supabase
+      .from('client_billing_models')
+      .select('id, name, code');
+    if (error) throw error;
+    return data || [];
+  },
+
+  /**
+   * upsertBillingModels(rows) — Batch upsert for CSV import.
+   * B7 FIX: Extracted from ClientBillingModelCSVImport so the component
+   * no longer makes direct supabase calls.
+   * @param {Array} rows — Array of {id, name, code, description, updated_at}
+   */
+  async upsertBillingModels(rows) {
+    const { error } = await supabase
+      .from('client_billing_models')
+      .upsert(rows, { onConflict: 'id' });
+    if (error) throw error;
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

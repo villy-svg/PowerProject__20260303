@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { clientServiceManager } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
-import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
-import ClientCategoryCSVImport from './ClientCategoryCSVImport';
+// B4 FIX: ClientCategoryCSVDownload/Import are fully generic via tableName/entityName/requiredFields props.
+// Imported under neutral local names to make the intent clear and avoid misleading file references.
+import CSVDownload from './ClientCategoryCSVDownload';
+import CSVImport from './ClientCategoryCSVImport';
 
 /**
  * ClientServiceManagement
@@ -103,27 +105,27 @@ const ClientServiceManagement = ({ permissions = {}, setActiveVertical, onShowBo
         }
         expandedRight={
           <>
-            <ClientCategoryCSVDownload 
-              className="master-action-btn" 
-              data={categories} 
-              label="Export Services" 
+            <CSVDownload
+              className="master-action-btn"
+              data={categories}
+              label="Export Services"
               tableName="client_services"
               entityName="Client Services"
               headers={['Service Name', 'Code', 'Description']}
             />
-            <ClientCategoryCSVDownload 
-              className="master-action-btn" 
-              isTemplate 
-              label="Download Template" 
+            <CSVDownload
+              className="master-action-btn"
+              isTemplate
+              label="Download Template"
               tableName="client_services"
               entityName="Client Services"
               headers={['Service Name', 'Code', 'Description']}
             />
             {permissions.canCreate && (
-              <ClientCategoryCSVImport 
-                className="master-action-btn" 
-                label="Import Services" 
-                onImportComplete={fetchCategories} 
+              <CSVImport
+                className="master-action-btn"
+                label="Import Services"
+                onImportComplete={fetchCategories}
                 tableName="client_services"
                 entityName="Client Services"
                 requiredFields={['service_name']}
