@@ -21,8 +21,7 @@ import { supabase } from '../core/supabaseClient';
 const CLIENT_SELECT = `
   *,
   client_categories(id, name),
-  client_billing_models(id, name, code),
-  client_services(id, name)
+  client_billing_models(id, name, code)
 `;
 
 // ─────────────────────────────────────────────────────────────────────────────
