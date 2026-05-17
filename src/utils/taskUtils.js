@@ -148,21 +148,24 @@ export const taskUtils = {
     }
     else if (options.assetCode && (funcLower === 'facility' || options.forcePrefix)) {
       const code = options.assetCode;
-      const cityPrefix = (options.cityCode && options.cityCode !== code && !code.startsWith(`${options.cityCode}-`)) 
-        ? `${options.cityCode} : ` 
-        : '';
-      const prefix = `${cityPrefix}${code} : `;
+      // Do NOT add "ALL" as the prefix to tasks — keep other prefixes except "ALL"
+      if (code && code.toUpperCase() !== 'ALL') {
+        const cityPrefix = (options.cityCode && options.cityCode !== code && !code.startsWith(`${options.cityCode}-`)) 
+          ? `${options.cityCode} : ` 
+          : '';
+        const prefix = `${cityPrefix}${code} : `;
 
-      if (!finalTaskText.includes(" : ")) {
-        finalTaskText = `${prefix}${finalTaskText}`;
-      } else if (!finalTaskText.startsWith(prefix)) {
-        const parts = finalTaskText.split(" : ");
-        if (parts.length > 1) {
-          // If it already has a prefix, replace it with the new one
-          // We look for the last part as the actual task text
-          finalTaskText = `${prefix}${parts[parts.length - 1]}`;
-        } else {
+        if (!finalTaskText.includes(" : ")) {
           finalTaskText = `${prefix}${finalTaskText}`;
+        } else if (!finalTaskText.startsWith(prefix)) {
+          const parts = finalTaskText.split(" : ");
+          if (parts.length > 1) {
+            // If it already has a prefix, replace it with the new one
+            // We look for the last part as the actual task text
+            finalTaskText = `${prefix}${parts[parts.length - 1]}`;
+          } else {
+            finalTaskText = `${prefix}${finalTaskText}`;
+          }
         }
       }
     }

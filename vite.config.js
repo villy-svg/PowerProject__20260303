@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
-        registerType: 'prompt',
+        registerType: 'autoUpdate',
         injectRegister: 'auto',
         includeAssets: ['screenshot-mobile.png', 'screenshot-desktop.png', 'powerpod-logo-512.png'],
         manifest: {

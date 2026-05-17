@@ -5,6 +5,7 @@ import './Configuration.css';
 
 const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, onShowBottomNav, verticals = {}, verticalList = [] }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
+  const [testRunning, setTestRunning] = useState(false);
   
   const canManageSystem = permissions.canManageRoles;
   const canClearAll = permissions.canDelete && permissions.scope === 'global';
@@ -12,6 +13,62 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
   const toggleViewMode = (mode) => {
     setViewMode(mode);
     localStorage.setItem('config_view_mode', mode);
+  };
+
+  const handleTestRun = async () => {
+    if (user?.roleId !== 'master_admin') {
+      alert("Unauthorized: Only Master Admins can execute test runs.");
+      return;
+    }
+
+    const confirmed = window.confirm("Dev Tool: Run script to strip 'ALL : ' prefixes from all tasks in the database?");
+    if (!confirmed) return;
+
+    setTestRunning(true);
+    try {
+      // Fetch all tasks where text starts with 'ALL : ' or 'ALL:' (case-insensitive)
+      const { data: matchedTasks, error: fetchError } = await supabase
+        .from('tasks')
+        .select('id, text')
+        .or('text.ilike.all : %,text.ilike.all:%');
+
+      if (fetchError) throw fetchError;
+
+      if (!matchedTasks || matchedTasks.length === 0) {
+        alert("No tasks found starting with 'ALL : ' or 'ALL:' prefix in the database.");
+        return;
+      }
+
+      // Loop over matched tasks, strip the prefix, and perform individual updates
+      let successCount = 0;
+      const updatePromises = matchedTasks.map(async (task) => {
+        if (!task.text) return;
+        const cleanText = task.text.replace(/^[aA][lL][lL]\s*:\s*/, '');
+        const { error: updateError } = await supabase
+          .from('tasks')
+          .update({ text: cleanText })
+          .eq('id', task.id);
+        
+        if (!updateError) successCount++;
+      });
+
+      await Promise.all(updatePromises);
+
+      // Update the local state so the UI reflects changes immediately
+      setTasks(prev => prev.map(t => {
+        if (t.text && t.text.toLowerCase().replace(/^[aA][lL][lL]\s*:\s*/, '') !== t.text.toLowerCase()) {
+          return { ...t, text: t.text.replace(/^[aA][lL][lL]\s*:\s*/, '') };
+        }
+        return t;
+      }));
+
+      alert(`Success! Removed 'ALL' prefix from ${successCount} tasks in the database.`);
+    } catch (err) {
+      console.error('Test run execution failed:', err);
+      alert(`Execution failed: ${err.message || err}`);
+    } finally {
+      setTestRunning(false);
+    }
   };
 
   const handleClearAllTasks = async () => {
@@ -205,6 +262,17 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                     </button>
                   </div>
                 </div>
+                {user?.roleId === 'master_admin' && (
+                  <div className="config-tile" onClick={handleTestRun}>
+                    <div className="tile-info">
+                      <h4>🛠️ Dev: Test Run</h4>
+                      <p>Execute custom one-time database scripts (Master Admin only).</p>
+                      <button className="halo-button" style={{ marginTop: '16px', width: '100%', borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }} disabled={testRunning}>
+                        {testRunning ? 'Running Script...' : 'Execute Test Run'}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {canClearAll && (
                   <div className="config-tile destructive" onClick={handleClearAllTasks}>
                     <div className="tile-info">

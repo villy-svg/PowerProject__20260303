@@ -129,8 +129,11 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
           if (!finalTaskText.startsWith(prefix)) finalTaskText = `${prefix}${finalTaskText}`;
         } else if (funcLower === 'facility' && resolvedHubId) {
           const hubName = hubNameMap[resolvedHubId] || 'Hub';
-          const prefix = `${hubName} : `;
-          if (!finalTaskText.startsWith(prefix)) finalTaskText = `${prefix}${finalTaskText}`;
+          // Do NOT add "ALL" as the prefix to tasks — keep other prefixes except "ALL"
+          if (hubName && hubName.toUpperCase() !== 'ALL') {
+            const prefix = `${hubName} : `;
+            if (!finalTaskText.startsWith(prefix)) finalTaskText = `${prefix}${finalTaskText}`;
+          }
         }
 
         // Attach existing ID if this row came from conflict resolution
