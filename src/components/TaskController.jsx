@@ -14,6 +14,7 @@ import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
 import FixTasksButton from './FixTasksButton';
 import { HUB_VIEWS } from '../registry/verticalRegistry';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 
 /**
@@ -94,6 +95,9 @@ const TaskController = (props) => {
       props.onTrayVisibilityChange(visible);
     }
   }, [props.onTrayVisibilityChange]);
+
+  // ─── Viewport Detection (guards backdrop + blur to mobile/tablet only) ────
+  const { isDesktop } = useIsMobile();
 
   // ─── Header Menu State ───────────────────────────────────────────
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
@@ -276,14 +280,19 @@ const TaskController = (props) => {
         onSubmit={submitRejection}
       />
 
-      {isHeaderMenuOpen && (
+      {/* Backdrop only exists in the DOM on mobile/tablet (≤ 1024px).
+           On desktop the header menu is an inline row — no overlay needed. */}
+      {!isDesktop && isHeaderMenuOpen && (
         <div 
           className="menu-backdrop" 
           onClick={() => setIsHeaderMenuOpen(false)} 
         />
       )}
 
-      <div className={`workspace-main-view ${(isHeaderMenuOpen || isSubSidebarOpen) ? 'is-blurred' : ''}`}>
+      {/* Blur is a mobile-only UX cue for when an overlay panel covers content.
+           On desktop the sub-sidebar is an inline panel and the menu is an inline
+           row — blurring the board would block access to controls. */}
+      <div className={`workspace-main-view ${(!isDesktop && (isHeaderMenuOpen || isSubSidebarOpen)) ? 'is-blurred' : ''}`}>
         {viewMode === 'kanban' ? (
           <TaskKanbanView
             tasks={hierarchyFilteredTasks}

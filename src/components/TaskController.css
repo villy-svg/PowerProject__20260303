@@ -80,6 +80,12 @@
   font-style: italic;
 }
 
+/*
+ * .menu-backdrop — Base class definition.
+ * Rendering is now guarded in JS (TaskController.jsx) via useIsMobile().
+ * This element is ONLY inserted into the DOM on mobile/tablet (≤ 1024px),
+ * so no media-query wrapper is needed here.
+ */
 .menu-backdrop {
   position: fixed;
   top: 0;
@@ -91,16 +97,36 @@
   z-index: 1000;
 }
 
+/*
+ * .workspace-main-view — Desktop scroll fix.
+ *
+ * On desktop, .workspace-content (the parent) is the scroll owner (overflow-y: auto).
+ * Setting overflow: visible here lets tall list content propagate upward to that
+ * scroll container, rather than being clipped inside this flex child.
+ * min-height: 0 is the standard flexbox safety valve that allows shrinking below
+ * intrinsic content size (required for flex children that should scroll their parent).
+ *
+ * On mobile/tablet (≤ 1024px) the sidebar becomes a fixed overlay, so we restore
+ * overflow: hidden to contain the layout properly within the constrained viewport.
+ */
 .workspace-main-view {
   flex: 1;
-  overflow: hidden;
+  overflow: visible;     /* Desktop: let .workspace-content own the scroll */
+  min-height: 0;         /* Flexbox safety: allows content to scroll the parent */
   display: flex;
   flex-direction: column;
   transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.workspace-main-view.is-blurred {
-  filter: blur(8px);
+/* Mobile/tablet: restore clip so fixed-position overlays stay contained */
+@media (max-width: 1024px) {
+  .workspace-main-view {
+    overflow: hidden;
+  }
+  /* Blur applied only on mobile/tablet where blur+backdrop UX makes sense */
+  .workspace-main-view.is-blurred {
+    filter: blur(8px);
+  }
 }
 
 /* Modal and Interface Styles */

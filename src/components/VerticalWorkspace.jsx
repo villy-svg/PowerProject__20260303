@@ -4,6 +4,7 @@ import { taskUtils } from '../utils/taskUtils';
 import { IconChevronLeft, IconChevronRight } from './Icons';
 import { resolveVerticalRootId } from '../registry/verticalRegistry';
 import { useAppNavigation } from '../app/contexts/AppNavigationContext';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 import './VerticalWorkspace.css';
 
@@ -39,6 +40,9 @@ const VerticalWorkspace = ({
   isMainSidebarOpen
 }) => {
   const { setActiveVertical } = useAppNavigation();
+  // Viewport detection: sidebar-backdrop is only needed on mobile/tablet (≤ 1024px)
+  // where the sub-sidebar becomes a fixed overlay. On desktop it is an inline panel.
+  const { isDesktop } = useIsMobile();
   const [filters, setFilters] = React.useState({ 
     city: [], 
     hub: [], 
@@ -215,7 +219,9 @@ const VerticalWorkspace = ({
         )}
       </aside>
 
-      {isSubSidebarOpen && (
+      {/* Backdrop only needed on mobile/tablet where the sub-sidebar is a fixed overlay.
+           On desktop it is an inline flex panel — no backdrop is required or correct. */}
+      {!isDesktop && isSubSidebarOpen && (
         <div 
           className="sidebar-backdrop" 
           onClick={() => setIsSubSidebarOpen(false)} 
