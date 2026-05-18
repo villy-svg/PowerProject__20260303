@@ -85,9 +85,24 @@ function ClientManagement() {
 - **Animations**: Use `transform: translate3d` for hardware acceleration. Keep mobile transitions shorter (200ms vs 300ms).
 - **Hidden Content**: Use `display: none` for mobile elements on desktop and vice-versa to reduce accessibility tree bloat.
 
-## 8. Verification Checklist
+## 8. Shell Architecture Integration
+
+Starting with Phase 2, adaptive rendering is enforced at the **shell level** rather than via inline `useIsMobile` guards:
+
+- **`LayoutShell`** orchestrates which shell (Desktop vs Mobile) to render
+- **`DesktopLayout`** and **`MobileLayout`** swap the chrome around shared content
+- **`ContentRouter`** renders page content with zero shell-awareness
+
+For complete details, see:
+- [Shell Architecture System](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/shell-architecture-system/SKILL.md) — rules for the shell system
+- [Phased Refactoring Roadmap](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/phased-refactoring-roadmap/SKILL.md) — tracks Phase 1/2/3 progress
+- `runbooks_phase2/` — verbatim implementation runbooks
+
+## 9. Verification Checklist
 - [ ] Does the UI work at `360px` (Small Phone)?
 - [ ] Does the UI work at `1024px` (Small Laptop)?
 - [ ] Are all touch targets at least `44px`?
 - [ ] Did you swap components for complex views (Adaptive) rather than just resizing (Responsive)?
 - [ ] Is there **ZERO** impact on desktop layout when adding mobile styles?
+- [ ] Are shell-specific styles in the correct CSS file (DesktopLayout.css vs MobileLayout.css)?
+- [ ] Does ContentRouter have zero awareness of the active shell?
