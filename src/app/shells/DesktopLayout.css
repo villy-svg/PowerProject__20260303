@@ -1,0 +1,23 @@
+/* ==========================================================================
+   DESKTOP LAYOUT SHELL — Phase 2 Adaptive UI
+   Only loaded when shellType === 'desktop' (> 768px viewport).
+   
+   RULE: No @media (max-width: 768px) blocks allowed in this file.
+   Mobile-specific styles belong EXCLUSIVELY in MobileLayout.css.
+   ========================================================================== */
+
+.desktop-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.desktop-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0; /* Flexbox safety — prevents content blowout */
+}
