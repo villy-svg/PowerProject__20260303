@@ -121,7 +121,7 @@
 /* Mobile/tablet: restore clip so fixed-position overlays stay contained */
 @media (max-width: 1024px) {
   .workspace-main-view {
-    overflow: hidden;
+    overflow: visible; /* Mobile: let tall task cards and lists expand and scroll within workspace-content */
   }
   /* Blur applied only on mobile/tablet where blur+backdrop UX makes sense */
   .workspace-main-view.is-blurred {

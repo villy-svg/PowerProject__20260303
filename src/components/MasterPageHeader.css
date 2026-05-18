@@ -159,12 +159,22 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     max-height: 85vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Inertial scrolling on iOS */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
     border-radius: 0 0 24px 24px;
     animation: slidePaneDown 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+
+    /* Disable backdrop blur on fixed overlay menu to avoid browser rendering blank out on overflow-y scrolling */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    /* GPU rendering acceleration layers */
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    backface-visibility: hidden;
   }
 
   @keyframes slidePaneDown {
@@ -199,6 +209,7 @@
     align-items: stretch;
     width: 100%;
     gap: 16px;
+    flex-shrink: 0; /* Prevent flex children from shrinking/collapsing inside scrolling mobile menu overlay */
   }
 
   .master-header-left .view-mode-toggle {
@@ -206,30 +217,35 @@
     width: 100%;
   }
 
-    /* Ultra-compact screen refinements (320px / iPhone SE) */
-    @media screen and (max-width: 360px) {
-      .expanded-menu-row {
-        padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
-        gap: 12px;
-        max-height: 90vh;
-      }
-      .master-header-left, .master-header-right {
-        gap: 12px;
-      }
-      .view-mode-toggle, .header-filter-group {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        width: 100% !important;
-        gap: 8px !important;
-      }
-      .view-mode-toggle .view-toggle-btn,
-      .header-filter-group .toggle-depri-btn {
-        width: 100% !important;
-        min-height: 44px !important;
-        margin: 0 !important;
-        justify-content: center;
-      }
+  /* Ultra-compact screen refinements (320px / iPhone SE) */
+  @media screen and (max-width: 360px) {
+    .expanded-menu-row {
+      padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
+      gap: 12px;
+      max-height: 90vh;
     }
+
+    .master-header-left,
+    .master-header-right {
+      gap: 12px;
+    }
+
+    .view-mode-toggle,
+    .header-filter-group {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      gap: 8px !important;
+    }
+
+    .view-mode-toggle .view-toggle-btn,
+    .header-filter-group .toggle-depri-btn {
+      width: 100% !important;
+      min-height: 44px !important;
+      margin: 0 !important;
+      justify-content: center;
+    }
+  }
 
   .master-page-header {
     padding-top: 12px;
@@ -334,32 +350,36 @@
     opacity: 1 !important;
   }
 
-    /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
-    @media screen and (max-width: 360px) {
-      .mobile-action-tray-container {
-        padding: 0 0.5rem var(--safe-bottom, 0px) 0.5rem;
-      }
-      .mobile-action-tray .mobile-tray-btn {
-        max-width: 64px;
-      }
+  /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
+  @media screen and (max-width: 360px) {
+    .mobile-action-tray-container {
+      padding: 0 0.5rem var(--safe-bottom, 0px) 0.5rem;
     }
 
-    @media screen and (max-width: 330px) {
-      .mobile-action-tray-container {
-        padding: 0 0.25rem var(--safe-bottom, 0px) 0.25rem;
-      }
-      .mobile-action-tray .mobile-tray-btn {
-        max-width: 56px;
-      }
-      .mobile-action-tray .mobile-tray-btn .standard-icon {
-        width: 18px !important;
-        height: 18px !important;
-      }
-      .mobile-action-tray .mobile-add-btn {
-        transform: scale(1.05);
-        max-width: 48px;
-      }
+    .mobile-action-tray .mobile-tray-btn {
+      max-width: 64px;
     }
+  }
+
+  @media screen and (max-width: 330px) {
+    .mobile-action-tray-container {
+      padding: 0 0.25rem var(--safe-bottom, 0px) 0.25rem;
+    }
+
+    .mobile-action-tray .mobile-tray-btn {
+      max-width: 56px;
+    }
+
+    .mobile-action-tray .mobile-tray-btn .standard-icon {
+      width: 18px !important;
+      height: 18px !important;
+    }
+
+    .mobile-action-tray .mobile-add-btn {
+      transform: scale(1.05);
+      max-width: 48px;
+    }
+  }
 }
 
 /* Scroll Lock Utility */

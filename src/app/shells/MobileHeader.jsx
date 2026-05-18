@@ -69,19 +69,19 @@ const MobileHeader = ({
         </div>
 
         {/* Row 2: Description — HIDDEN on mobile (adaptive-ui-strategy §6) */}
-
-        {/* Expanded Menu Overlay (slides down from top on mobile) */}
-        <div className="header-actions-area">
-          {hasExpandedContent && isMenuOpen && (
-            <MasterHeaderMenu
-              expandedLeft={expandedLeft}
-              expandedRight={expandedRight}
-              onClose={() => setIsMenuOpen(false)}
-              hideCloseButton={hideMenuClose}
-            />
-          )}
-        </div>
       </header>
+
+      {/* Expanded Menu Overlay (slides down from top on mobile) */}
+      {/* RENDERED OUTSIDE header to prevent sticky container/compositing and transform bugs on mobile */}
+      {hasExpandedContent && isMenuOpen && (
+        <MasterHeaderMenu
+          expandedLeft={expandedLeft}
+          expandedRight={expandedRight}
+          onClose={() => setIsMenuOpen(false)}
+          hideCloseButton={hideMenuClose}
+          isVisible={isMenuOpen}
+        />
+      )}
 
       {/* MOBILE ACTION TRAY (bottom pill bar) */}
       <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen) ? '' : 'tray-hidden'}`}>
