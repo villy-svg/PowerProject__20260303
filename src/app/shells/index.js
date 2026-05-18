@@ -11,5 +11,6 @@ export { default as DesktopSidebar } from './DesktopSidebar';
 export { default as MobileSidebar } from './MobileSidebar';
 export { default as MobileBottomNav } from './MobileBottomNav';
 export { default as WorkspaceSubSidebar } from './WorkspaceSubSidebar';
+export { default as ContentRouter } from './ContentRouter';
 export { useLayoutShell } from './useLayoutShell';
 export { useHeaderState } from './useHeaderState';

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './theme/useTheme';
-import ThemeToggle from './theme/themeToggle';
 import './App.css';
 import './components/Header.css';
 
@@ -15,31 +14,14 @@ import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavig
 import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
-import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from './registry/verticalRegistry';
+
+// Shell components
+import LayoutShell from './app/shells/LayoutShell';
+import ContentRouter from './app/shells/ContentRouter';
 
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
-
-// Components
-import Sidebar from './components/Sidebar';
-import BottomNav from './components/BottomNav';
-import VerticalWorkspace from './components/VerticalWorkspace';
-import ExecutiveSummary from './components/ExecutiveSummary';
-import Configuration from './components/Configuration';
-import UserProfile from './components/UserProfile';
-import UserRoleManagement from './components/UserRoleManagement';
-import UserManagement from './components/UserManagement';
-import CustomSelect from './components/CustomSelect';
-import {
-  HubManagement, HubFunctionManagement, DailyTasksManagement,
-} from './verticals/ChargingHubs';
-import {
-  EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
-} from './verticals/Employees';
-import {
-  ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
-} from './verticals/Clients';
 
 import Login from './components/Login';
 
@@ -54,9 +36,6 @@ function AppShell({ verticals, verticalList }) {
   const { darkMode } = useTheme();
   const {
     activeVertical, setActiveVertical,
-    isSidebarOpen, setIsSidebarOpen,
-    isSubSidebarOpen, setIsSubSidebarOpen,
-    showBottomNavOverlay, setShowBottomNavOverlay,
   } = useAppNavigation();
 
   const {
@@ -67,9 +46,7 @@ function AppShell({ verticals, verticalList }) {
   } = useAuth();
 
   const {
-    tasks, setTasks, tasksLoading, fetchTasks,
-    activeTasks, activeAddTask, activeUpdateTask,
-    activeUpdateTaskStage, activeBulkUpdateTasks, activeDeleteTask,
+    fetchTasks,
   } = useTaskBoard();
 
   const [rolePermissions, setRolePermissions] = useState(() => {
@@ -158,155 +135,29 @@ function AppShell({ verticals, verticalList }) {
     );
   }
 
-  const { SidebarComponent, TaskFormComponent, TaskTileComponent } =
-    resolveVerticalComponents(activeVertical, verticals);
-  const { label: workspaceLabel, boardLabel: workspaceBoardLabel } =
-    resolveVerticalLabels(activeVertical, verticals);
-  const headerClickTarget =
-    resolveHeaderClickTarget(activeVertical, verticals, currentUserPermissions);
-
+  // ─── LAYOUT SHELL SWITCHOVER ───────────────────────────────────────
+  // All chrome (sidebar, header, nav) is now handled by LayoutShell.
+  // AppShell only provides data props and renders ContentRouter.
   return (
-    <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
-      <div className="app-layout">
-        <button className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-          <img src={powerLogo} alt="Logo" className="logo-svg" />
-        </button>
-        <Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          setActiveVertical={setActiveVertical}
-          activeVertical={activeVertical}
-          user={user}
-          permissions={currentUserPermissions}
-          verticalList={verticalList}
-        />
-        <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
-        <div className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} onClick={() => setIsSidebarOpen(false)} />
-        
-        <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
-          <header className={`app-header ${activeVertical ? 'mobile-hidden' : ''}`}>
-            <div className="header-left"></div>
-            <div className="header-center"></div>
-            <div className="header-right">
-              {realUser?.roleId === 'master_admin' && (
-                <div className="impersonation-header-wrapper">
-                  {impersonatedUser ? (
-                    <div className="impersonation-active-container">
-                      <span className="impersonation-active-label">
-                        View: <strong>{impersonatedUser.name}</strong>
-                        <span className="neutral-badge impersonation-role-badge">
-                          {impersonatedUser.roleId}
-                        </span>
-                      </span>
-                      <button className="halo-button impersonation-stop-btn" onClick={() => handleImpersonate(null)}>
-                        Stop
-                      </button>
-                    </div>
-                  ) : (
-                    <CustomSelect
-                      id="impersonation-select"
-                      placeholder="Simulate User..."
-                      options={impersonationUsers.map(u => ({
-                        value: u.id,
-                        label: `${u.name} (${u.role_id})`
-                      }))}
-                      onChange={(val) => handleImpersonate(val)}
-                    />
-                  )}
-                </div>
-              )}
-              <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={handleLogout} />
-            </div>
-          </header>
-          
-          <main className="app-content">
-            {!activeVertical ? (
-              <ExecutiveSummary tasks={tasks} user={user} permissions={currentUserPermissions} verticals={verticals} verticalList={verticalList} loading={tasksLoading} />
-            ) : activeVertical === 'configuration' ? (
-              <Configuration
-                tasks={tasks}
-                setTasks={setTasks}
-                user={user}
-                permissions={currentUserPermissions}
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-                verticals={verticals}
-                verticalList={verticalList}
-              />
-            ) : activeVertical === 'role_management' ? (
-              <UserRoleManagement 
-                permissions={rolePermissions} 
-                setPermissions={setRolePermissions} 
-                onBack={() => setActiveVertical('configuration')} 
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-              />
-            ) : activeVertical === 'user_management' ? (
-              <UserManagement currentUser={user} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'hub_management' ? (
-              <HubManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'hub_function_management' ? (
-              <HubFunctionManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'department_management' ? (
-              <DepartmentManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'employee_role_management' ? (
-              <EmployeeRoleManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'client_category_management' ? (
-              <ClientCategoryManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'client_service_management' ? (
-              <ClientServiceManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : activeVertical === 'client_billing_model_management' ? (
-              <ClientBillingModelManagement user={user} permissions={currentUserPermissions} setActiveVertical={setActiveVertical} onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)} />
-            ) : (
-              <VerticalWorkspace
-                label={workspaceLabel}
-                boardLabel={workspaceBoardLabel}
-                activeVertical={activeVertical}
-                tasks={activeTasks}
-                setTasks={setTasks}
-                addTask={activeAddTask}
-                actualSetTasks={setTasks}
-                refreshTasks={fetchTasks}
-                updateTask={activeUpdateTask}
-                bulkUpdateTasks={activeBulkUpdateTasks}
-                deleteTask={activeDeleteTask}
-                updateTaskStage={activeUpdateTaskStage}
-                isSubSidebarOpen={isSubSidebarOpen}
-                setIsSubSidebarOpen={setIsSubSidebarOpen}
-                isMainSidebarOpen={isSidebarOpen}
-                setActiveVertical={setActiveVertical}
-                onShowBottomNav={() => setShowBottomNavOverlay(prev => !prev)}
-                SidebarComponent={SidebarComponent}
-                TaskFormComponent={TaskFormComponent}
-                TaskTileComponent={TaskTileComponent}
-                onHeaderClick={headerClickTarget ? () => setActiveVertical(headerClickTarget) : null}
-                user={user}
-                permissions={currentUserPermissions}
-                verticals={verticals}
-              >
-                {activeVertical === verticals.EMPLOYEES?.id && (
-                  <EmployeeManagement user={user} permissions={currentUserPermissions} tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} />
-                )}
-                {activeVertical === verticals.CLIENTS?.id && (
-                  <ClientManagement user={user} permissions={currentUserPermissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
-                )}
-                {activeVertical === 'daily_task_templates' && (
-                  <DailyTasksManagement permissions={currentUserPermissions} refreshTasks={fetchTasks} currentUser={user} />
-                )}
-              </VerticalWorkspace>
-            )}
-          </main>
-        </div>
-      </div>
-      <BottomNav 
-        activeVertical={activeVertical} 
-        setActiveVertical={setActiveVertical} 
-        onMenuClick={() => setIsSidebarOpen(true)}
+    <LayoutShell
+      user={user}
+      permissions={currentUserPermissions}
+      verticals={verticals}
+      verticalList={verticalList}
+      onLogout={handleLogout}
+      realUser={realUser}
+      impersonatedUser={impersonatedUser}
+      impersonationUsers={impersonationUsers}
+      onImpersonate={handleImpersonate}
+    >
+      <ContentRouter
         verticals={verticals}
-        showOverlay={showBottomNavOverlay}
-        onCloseOverlay={() => setShowBottomNavOverlay(false)}
+        verticalList={verticalList}
+        permissions={currentUserPermissions}
+        rolePermissions={rolePermissions}
+        setRolePermissions={setRolePermissions}
       />
-    </div>
+    </LayoutShell>
   );
 }
 
