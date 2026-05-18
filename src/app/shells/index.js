@@ -7,5 +7,8 @@ export { default as DesktopLayout } from './DesktopLayout';
 export { default as MobileLayout } from './MobileLayout';
 export { default as DesktopHeader } from './DesktopHeader';
 export { default as MobileHeader } from './MobileHeader';
+export { default as DesktopSidebar } from './DesktopSidebar';
+export { default as MobileSidebar } from './MobileSidebar';
+export { default as MobileBottomNav } from './MobileBottomNav';
 export { useLayoutShell } from './useLayoutShell';
 export { useHeaderState } from './useHeaderState';
