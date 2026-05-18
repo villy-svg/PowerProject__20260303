@@ -1,23 +1,132 @@
 /* ==========================================================================
    DESKTOP LAYOUT SHELL — Phase 2 Adaptive UI
-   Only loaded when shellType === 'desktop' (> 768px viewport).
    
-   RULE: No @media (max-width: 768px) blocks allowed in this file.
-   Mobile-specific styles belong EXCLUSIVELY in MobileLayout.css.
+   RULE: NO @media (max-width: 768px) blocks in this file.
+   All mobile-specific styles belong in MobileLayout.css.
+   
+   This file contains:
+   1. Desktop layout grid (sidebar + main content)
+   2. Desktop header bar (inline, always visible)
+   3. Desktop sidebar (inline panel, not overlay)
+   4. Desktop workspace adjustments
    ========================================================================== */
 
+/* ── 1. Desktop Shell Container ──────────────────────────────────────── */
 .desktop-layout {
   display: flex;
   width: 100%;
   height: 100%;
   overflow: hidden;
   position: relative;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.desktop-content-area {
+.desktop-layout .app-main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  transition: all var(--transition-main);
+  background-color: var(--surface-card);
+  position: relative;
+  min-height: 0;
+}
+
+.desktop-layout .app-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 0; /* Flexbox safety — prevents content blowout */
+  padding-top: 0;
+}
+
+/* ── 2. Desktop Header ───────────────────────────────────────────────── */
+/* The desktop header is always visible — no scroll-aware hiding */
+.desktop-header-shell {
+  /* Inherits from .master-page-header base styles */
+  /* No sticky behavior, no transform animations */
+}
+
+.desktop-header-shell .header-row-2 {
+  /* Description is always visible on desktop */
+  display: block;
+}
+
+.desktop-header-shell .master-header-actions-row {
+  /* Always visible on desktop — no hiding */
+  display: flex !important;
+}
+
+/* Desktop expanded menu is inline, not a fixed overlay */
+.desktop-header-shell .expanded-menu-row {
+  position: relative;
+  top: auto;
+  left: auto;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  animation: slideDown 0.2s ease-out;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 255, 135, 0.05);
+}
+
+/* ── 3. Desktop Sidebar ──────────────────────────────────────────────── */
+/* Sidebar is an inline flex panel on desktop — never fixed/overlay */
+.desktop-layout .sidebar {
+  position: relative;
+  height: 100vh;
+  z-index: 10;
+  /* No fixed positioning, no translateX */
+}
+
+/* ── 4. Desktop Workspace ────────────────────────────────────────────── */
+/* Sub-sidebar is inline on desktop — no backdrop needed */
+.desktop-layout .sidebar-backdrop,
+.desktop-layout .menu-backdrop {
+  display: none !important;
+}
+
+/* No blur on desktop — sub-sidebar and menu are inline */
+.desktop-layout .workspace-main-view.is-blurred {
+  filter: none !important;
+}
+
+/* Desktop workspace content gets generous padding */
+.desktop-layout .workspace-content {
+  padding: 32px;
+}
+
+@media (max-width: 1280px) {
+  .desktop-layout .workspace-content {
+    padding: 24px;
+  }
+  .desktop-layout .sub-sidebar {
+    width: 240px;
+  }
+}
+
+/* ── 5. Desktop-Only Utilities ───────────────────────────────────────── */
+/* Hide mobile-only elements on desktop */
+.desktop-layout .mobile-action-tray {
+  display: none !important;
+}
+
+.desktop-layout .bottom-nav {
+  display: none !important;
+}
+
+/* Logo is always visible on desktop */
+.desktop-layout .logo-button {
+  display: flex;
+}
+
+/* Desktop mobile-menu-header is hidden */
+.desktop-layout .mobile-menu-header {
+  display: none;
 }

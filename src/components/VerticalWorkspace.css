@@ -1,5 +1,6 @@
 /* ==========================================================================
    VERTICAL WORKSPACE LAYOUT
+   MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below
    ========================================================================== */
 .workspace-container {
   display: flex;

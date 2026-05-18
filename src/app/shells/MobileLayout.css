@@ -1,11 +1,19 @@
 /* ==========================================================================
    MOBILE LAYOUT SHELL — Phase 2 Adaptive UI
-   Only loaded when shellType === 'mobile' (≤ 768px viewport).
    
-   RULE: No min-width desktop styles in this file.
-   Desktop-specific styles belong EXCLUSIVELY in DesktopLayout.css.
+   RULE: NO min-width desktop assumptions in this file.
+   All desktop-specific styles belong in DesktopLayout.css.
+   
+   This file contains:
+   1. Mobile layout container
+   2. Mobile header (sticky, scroll-aware)
+   3. Mobile sidebar (off-canvas drawer)
+   4. Mobile action tray (bottom pill bar)
+   5. Mobile workspace adjustments
+   6. Touch target sizing
    ========================================================================== */
 
+/* ── 1. Mobile Shell Container ───────────────────────────────────────── */
 .mobile-layout {
   display: flex;
   flex-direction: column;
@@ -13,12 +21,247 @@
   height: 100%;
   overflow: hidden;
   position: relative;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding-top: var(--safe-top, 0px);
+  padding-left: var(--safe-left, 0px);
+  padding-right: var(--safe-right, 0px);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.mobile-content-area {
+.mobile-layout .app-main-area {
+  margin-left: 0 !important;
+  width: 100% !important;
+  padding-bottom: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-width: 0;
+  background-color: var(--surface-card);
+  position: relative;
+  min-height: 0;
+}
+
+.mobile-layout .app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 8px;
+}
+
+/* ── 2. Mobile Header ────────────────────────────────────────────────── */
+.mobile-header-shell {
+  padding-top: 12px;
+  margin-bottom: 16px;
+}
+
+.mobile-header-shell .header-row-1 h1 {
+  font-size: 1.25rem;
+  text-align: center;
+  width: 100%;
+  opacity: 0.9;
+  text-shadow: 0 0 20px var(--halo-glow);
+}
+
+/* Description hidden on mobile for space */
+.mobile-header-shell .header-row-2 {
+  display: none;
+}
+
+/* Actions row hidden on mobile — replaced by tray */
+.mobile-header-shell .master-header-actions-row {
+  display: none !important;
+}
+
+/* Mobile scroll-aware hide */
+.mobile-header-shell.header-hidden {
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2000;
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
+}
+
+/* Mobile sticky state */
+.mobile-header-shell.is-sticky {
+  position: sticky !important;
+  top: 0;
+  z-index: 2000;
+  background: var(--bg-color);
+  margin-bottom: 0px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Mobile expanded menu is a full-screen overlay */
+.mobile-header-shell .expanded-menu-row {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2100;
+  margin-top: 0;
+  padding: calc(var(--safe-top, 0px) + 20px) 20px 30px 20px;
+  background: var(--bg-color);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  border-radius: 0 0 24px 24px;
+  animation: slidePaneDown 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes slidePaneDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.mobile-header-shell .mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.mobile-header-shell .master-header-left,
+.mobile-header-shell .master-header-right {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 16px;
+}
+
+.mobile-header-shell .master-header-left .view-mode-toggle {
+  margin-right: 0;
+  width: 100%;
+}
+
+/* ── 3. Mobile Sidebar ───────────────────────────────────────────────── */
+.mobile-layout .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 80vw;
+  max-width: 300px;
+  transform: translateX(-100%);
+  opacity: 1 !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+  z-index: 3010;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-layout .sidebar.open {
+  transform: translateX(0);
+}
+
+.mobile-layout .sidebar:not(.open) {
+  width: 80vw;
+  max-width: 300px;
+  transform: translateX(-100%);
+}
+
+/* ── 4. Mobile Sub-Sidebar ───────────────────────────────────────────── */
+.mobile-layout .sub-sidebar {
+  width: 240px;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-layout .sub-sidebar.tray-visible {
+  bottom: 64px;
+}
+
+.mobile-layout .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
+  transform: translateX(0);
+}
+
+.mobile-layout .sidebar-backdrop,
+.mobile-layout .menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ── 5. Mobile Workspace ─────────────────────────────────────────────── */
+.mobile-layout .workspace-content {
+  padding: 0 12px 12px 12px;
+  padding-bottom: calc(100px + var(--safe-bottom, 0px));
+  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-layout .workspace-main-view.is-blurred {
+  filter: blur(8px);
+  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 6. Mobile Logo / Brand ──────────────────────────────────────────── */
+.mobile-layout .mobile-hidden {
+  display: none !important;
+}
+
+.mobile-layout .mobile-logo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 1rem;
+  top: calc(10px + var(--safe-top, 0px));
+  z-index: 3011;
+  transition: transform 0.2s ease;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+}
+
+/* ── 7. Ultra-Compact Viewport (≤360px, iPhone SE) ───────────────────── */
+@media screen and (max-width: 360px) {
+  .mobile-header-shell .expanded-menu-row {
+    padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
+    gap: 12px;
+    max-height: 90vh;
+  }
+  .mobile-header-shell .master-header-left,
+  .mobile-header-shell .master-header-right {
+    gap: 12px;
+  }
+  .mobile-header-shell .view-mode-toggle,
+  .mobile-header-shell .header-filter-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .mobile-header-shell .view-mode-toggle .view-toggle-btn,
+  .mobile-header-shell .header-filter-group .toggle-depri-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .mobile-layout .sidebar {
+    width: 100%;
+  }
 }
