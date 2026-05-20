@@ -1,25 +1,24 @@
 /**
  * MobileLayout.jsx
- * 
+ *
  * Mobile-optimized shell. Renders:
- * - Sticky header with scroll-aware show/hide
- * - Mobile Action Tray (bottom pill bar)
- * - Bottom Nav (for primary vertical switching)
+ * - Sidebar (off-canvas drawer with backdrop)
  * - Content area (children)
- * 
- * This shell is ONLY rendered on viewports ≤ 768px.
- * Overlays, backdrops, and blur effects are exclusive to this shell.
- * 
- * PHASE 3 HOOK:
- * - Accepts a `managementShell` prop that wraps children in a mobile management
- *   layout (card stacks, bottom sheets) when isManagementView is true.
- * 
+ * - BottomNav (fixed bottom bar)
+ *
+ * Logo and brand title are hidden on mobile when in a vertical.
+ * The mobile header is handled by MasterPageHeader's delegation (RB2-02).
+ *
  * Skill compliance:
  * - adaptive-ui-strategy §5 Mobile Layout
- * - adaptive-ui-strategy §4 Mobile Interactions (Touch)
  */
 
 import React from 'react';
+import MobileSidebar from './MobileSidebar';
+import MobileBottomNav from './MobileBottomNav';
+import { useAppNavigation } from '../contexts/AppNavigationContext';
+import { useTheme } from '../../theme/useTheme';
+import powerLogo from '../../assets/logo.svg';
 import './MobileLayout.css';
 
 const MobileLayout = ({
@@ -35,17 +34,63 @@ const MobileLayout = ({
   layout,
   children,
 }) => {
-  // SKELETON — Full wiring happens in RB2-02 through RB2-05.
+  const { darkMode } = useTheme();
+  const {
+    activeVertical, setActiveVertical,
+    isSidebarOpen, setIsSidebarOpen,
+    showBottomNavOverlay, setShowBottomNavOverlay,
+  } = useAppNavigation();
+
   return (
-    <div className="mobile-layout" data-shell="mobile">
-      {/* 
-        RB2-02 will add: <MobileHeader />
-        RB2-03 will add: <BottomNav /> (fixed bottom)
-        RB2-05 will wire the full content routing 
-      */}
-      <div className="mobile-content-area">
-        {children}
+    <div className="mobile-layout" data-shell="mobile" data-theme={darkMode ? 'dark' : 'light'}>
+      {/* Logo — hidden when in a vertical */}
+      <button
+        className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`}
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <img src={powerLogo} alt="Logo" className="logo-svg" />
+      </button>
+
+      {/* Brand Title — hidden when in a vertical */}
+      <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
+
+      {/* Sidebar Drawer */}
+      <MobileSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        activeVertical={activeVertical}
+        setActiveVertical={setActiveVertical}
+        user={user}
+        permissions={permissions}
+        verticalList={verticalList}
+      />
+
+      {/* Main Content Area */}
+      <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
+        {/* Mobile header bar — only shown on dashboard (no vertical active) */}
+        <header className={`app-header ${activeVertical ? 'mobile-hidden' : ''}`}>
+          <div className="header-left"></div>
+          <div className="header-center"></div>
+          <div className="header-right">
+            {/* Impersonation controls are desktop-only — too complex for mobile header */}
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="app-content">
+          {children}
+        </main>
       </div>
+
+      {/* Bottom Nav — mobile only */}
+      <MobileBottomNav
+        activeVertical={activeVertical}
+        setActiveVertical={setActiveVertical}
+        onMenuClick={() => setIsSidebarOpen(true)}
+        verticals={verticals}
+        showOverlay={showBottomNavOverlay}
+        onCloseOverlay={() => setShowBottomNavOverlay(false)}
+      />
     </div>
   );
 };

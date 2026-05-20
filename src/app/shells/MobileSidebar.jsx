@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import { IconChevronDown, IconChevronRight } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
+import '../../components/Sidebar.css';
 
 const MobileSidebar = ({
   isOpen,

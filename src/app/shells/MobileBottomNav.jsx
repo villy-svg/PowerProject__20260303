@@ -23,6 +23,7 @@ import {
   IconPeople,
   IconDatabase,
 } from '../../components/Icons';
+import '../../components/BottomNav.css';
 
 const MobileBottomNav = ({
   activeVertical,

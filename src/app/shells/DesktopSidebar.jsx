@@ -20,8 +20,10 @@
 import React, { useState } from 'react';
 import { IconChevronDown, IconChevronRight } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
+import '../../components/Sidebar.css';
 
 const DesktopSidebar = ({
+  isOpen,
   activeVertical,
   setActiveVertical,
   user,
@@ -50,7 +52,7 @@ const DesktopSidebar = ({
   const showUserMgmt = permissions?.scope === 'global' && permissions?.canManageRoles;
 
   return (
-    <aside className="sidebar desktop-sidebar-shell">
+    <aside className={`sidebar desktop-sidebar-shell ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-content-wrapper">
         <div className="sidebar-top-section">
           <div className="sidebar-header">

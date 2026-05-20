@@ -127,6 +127,11 @@
   display: flex;
 }
 
+/* Hide duplicate sidebar header logo on desktop to prevent overlap with floating logo-button */
+.desktop-layout .desktop-logo-wrapper {
+  display: none !important;
+}
+
 /* Desktop mobile-menu-header is hidden */
 .desktop-layout .mobile-menu-header {
   display: none;
