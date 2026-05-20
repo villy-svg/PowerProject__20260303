@@ -463,5 +463,14 @@
 
 /* Specific styling for the Mark as Completed button if needed */
 .btn-mark-completed {
-  /* No specific color applied as requested */
+  color: var(--brand-mint) !important;
+  opacity: 0.75;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-mark-completed:hover {
+  color: #22c55e !important; /* Semantic success green on hover */
+  background: rgba(34, 197, 94, 0.1) !important;
+  opacity: 1;
+  transform: translateY(-1px);
 }
