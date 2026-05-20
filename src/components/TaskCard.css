@@ -460,3 +460,8 @@
     padding: 0 !important;
   }
 }
+
+/* Specific styling for the Mark as Completed button if needed */
+.btn-mark-completed {
+  /* No specific color applied as requested */
+}

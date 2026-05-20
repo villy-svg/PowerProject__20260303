@@ -9,7 +9,8 @@ import {
   IconPromote, 
   IconDiagonalUp,
   IconChevronDown,
-  IconCopy
+  IconCopy,
+  IconCheck
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActions';
@@ -275,6 +276,16 @@ const TaskCard = ({
             title="Edit Task"
           >
             <IconEdit size={14} />
+          </button>
+        )}
+
+        {permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
+          <button
+            className="action-icon-btn btn-mark-completed"
+            onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'COMPLETED'); }}
+            title="Mark as Completed (Admin Only)"
+          >
+            <IconCheck size={14} />
           </button>
         )}
 
