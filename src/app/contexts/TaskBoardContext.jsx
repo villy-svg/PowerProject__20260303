@@ -53,15 +53,23 @@ export function TaskBoardProvider({ user, verticals = {}, children }) {
   } = useDailyTasks(tasks, setTasks, user, fetchTasks);
 
   // ── Escalation Task Filter ────────────────────────────────────────────────
-  // Strict filter: only tasks explicitly in the 'Escalations' task_board array.
+  // Escalations include both explicitly tagged 'Escalations' and implicitly high-priority tasks
   const escalationTasks = useMemo(() => {
-    const hubId = verticals?.CHARGING_HUBS?.id;
+    const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
     if (!hubId) return [];
-    return tasks.filter(t =>
-      t.verticalId === hubId &&
-      Array.isArray(t.task_board) &&
-      t.task_board.includes('Escalations')
-    );
+
+    return tasks.filter(t => {
+      const isHubTask = t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS';
+      if (!isHubTask) return false;
+
+      const isLive = t.stageId !== 'COMPLETED' && t.stageId !== 'DEPRIORITIZED';
+      if (!isLive) return false;
+
+      const isHighPriority = t.priority === 'High' || t.priority === 'Urgent';
+      const isManuallyEscalated = Array.isArray(t.task_board) && t.task_board.includes('Escalations');
+
+      return isHighPriority || isManuallyEscalated;
+    });
   }, [tasks, verticals?.CHARGING_HUBS?.id]);
 
   // ── Active Set Resolution ─────────────────────────────────────────────────

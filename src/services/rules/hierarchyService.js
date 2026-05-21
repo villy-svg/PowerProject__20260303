@@ -72,7 +72,11 @@ export const hierarchyService = {
                                       (user.reporteeEmployeeIds || []).includes(creatorId) || 
                                       isCreatedByMe;
         
-        return isAssignedToMe || isCreatedByTreeMember;
+        const isAssignedToTreeMember = assignees.some(id => 
+                                      (reporteeUserIds || []).includes(id) || 
+                                      (user.reporteeEmployeeIds || []).includes(id));
+        
+        return isAssignedToMe || isCreatedByTreeMember || isAssignedToTreeMember;
       });
 
       const directMatchIds = new Set(directMatches.map(t => t.id));
