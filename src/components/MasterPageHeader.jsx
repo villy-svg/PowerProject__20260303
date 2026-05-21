@@ -35,7 +35,18 @@ const MasterPageHeader = ({
   isMenuOpen: controlledIsMenuOpen,
   setIsMenuOpen: controlledSetIsMenuOpen,
   hideMenuClose,
-  isSidebarOpen
+  isSidebarOpen,
+  SidebarComponent,
+  onFilterChange,
+  onReset,
+  onBatchFilter,
+  filters,
+  tasks,
+  setActiveVertical,
+  activeVertical,
+  permissions,
+  user,
+  verticals,
 }) => {
   const { shellType } = useLayoutShell();
   
@@ -87,6 +98,17 @@ const MasterPageHeader = ({
       onShowBottomNav={onShowBottomNav}
       hideMenuClose={hideMenuClose}
       isSidebarOpen={isSidebarOpen}
+      SidebarComponent={SidebarComponent}
+      onFilterChange={onFilterChange}
+      onReset={onReset}
+      onBatchFilter={onBatchFilter}
+      filters={filters}
+      tasks={tasks}
+      setActiveVertical={setActiveVertical}
+      activeVertical={activeVertical}
+      permissions={permissions}
+      user={user}
+      verticals={verticals}
     />
   );
 };

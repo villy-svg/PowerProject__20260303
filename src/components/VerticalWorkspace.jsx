@@ -144,30 +144,29 @@ const VerticalWorkspace = ({
     );
   }
 
-  return (
-    <div className={`workspace-container ${!isSubSidebarOpen ? 'sub-sidebar-collapsed' : ''}`}>
-      <WorkspaceSubSidebar
-        label={label}
-        isSubSidebarOpen={isSubSidebarOpen}
-        setIsSubSidebarOpen={setIsSubSidebarOpen}
-        isTrayVisible={isTrayVisible}
-        onHeaderClick={onHeaderClick}
-        SidebarComponent={SidebarComponent}
-        user={user}
-        permissions={permissions}
-        activeVertical={activeVertical}
-        setActiveVertical={setActiveVertical}
-        handleFilterChange={handleFilterChange}
-        resetFilters={resetFilters}
-        filters={filters}
-        tasks={tasks}
-        setFilters={setFilters}
-      />
+  const handleBatchFilter = (key, values) => {
+    setFilters(prev => ({ ...prev, [key]: values }));
+  };
 
-      {!isDesktop && isSubSidebarOpen && (
-        <div 
-          className="sidebar-backdrop" 
-          onClick={() => setIsSubSidebarOpen(false)} 
+  return (
+    <div className={`workspace-container ${(!isDesktop || !isSubSidebarOpen) ? 'sub-sidebar-collapsed' : ''}`}>
+      {isDesktop && (
+        <WorkspaceSubSidebar
+          label={label}
+          isSubSidebarOpen={isSubSidebarOpen}
+          setIsSubSidebarOpen={setIsSubSidebarOpen}
+          isTrayVisible={isTrayVisible}
+          onHeaderClick={onHeaderClick}
+          SidebarComponent={SidebarComponent}
+          user={user}
+          permissions={permissions}
+          activeVertical={activeVertical}
+          setActiveVertical={setActiveVertical}
+          handleFilterChange={handleFilterChange}
+          resetFilters={resetFilters}
+          filters={filters}
+          tasks={tasks}
+          setFilters={setFilters}
         />
       )}
 
@@ -203,6 +202,10 @@ const VerticalWorkspace = ({
             updateTaskStage={updateTaskStage}
             handleFilterChange={handleFilterChange}
             resetFilters={resetFilters}
+            setFilters={setFilters}
+            onBatchFilter={handleBatchFilter}
+            SidebarComponent={SidebarComponent}
+            setActiveVertical={setActiveVertical}
             label={label}
             TaskFormComponent={TaskFormComponent}
             TaskTileComponent={TaskTileComponent}

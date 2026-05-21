@@ -118,6 +118,7 @@ const ClientSubSidebar = ({
   onReset,
   onBatchFilter,
   filters,
+  hideNavigation,
 }) => {
   const [expandedGroups, setExpandedGroups] = useState({
     vehicle: false,
@@ -156,53 +157,57 @@ const ClientSubSidebar = ({
 
   return (
     <div className="sub-sidebar-body">
-      <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {permissions?.canAccessClientTasks && (
-        <button
-          className="halo-button"
-          style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
-          onClick={() => setActiveVertical('client_tasks')}
-        >
-          Client Task Board
-        </button>
-      )}
-      {permissions?.canAccessLeadsFunnel && (
-        <button
-          className="halo-button"
-          style={{ width: '100%', opacity: activeVertical === 'leads_funnel' ? 1 : 0.7 }}
-          onClick={() => setActiveVertical('leads_funnel')}
-        >
-          Leads Funnel
-        </button>
-      )}
-      </div>
+      {!hideNavigation && (
+        <>
+          <div style={{ padding: '12px', marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {permissions?.canAccessClientTasks && (
+            <button
+              className="halo-button"
+              style={{ width: '100%', opacity: activeVertical === 'client_tasks' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('client_tasks')}
+            >
+              Client Task Board
+            </button>
+          )}
+          {permissions?.canAccessLeadsFunnel && (
+            <button
+              className="halo-button"
+              style={{ width: '100%', opacity: activeVertical === 'leads_funnel' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('leads_funnel')}
+            >
+              Leads Funnel
+            </button>
+          )}
+          </div>
 
-      {/* Nav Toggle Header */}
-      <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
-        {permissions?.canAccessClients ? (
-          <button
-            onClick={() => setActiveVertical('CLIENTS')}
-            style={{
-              margin: 0,
-              fontWeight: 700,
-              fontSize: '1rem',
-              color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
-              letterSpacing: '0.5px',
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
-              transition: 'all 0.2s ease'
-            }}
-            className="sidebar-header-nav-btn"
-          >
-            Clients
-          </button>
-        ) : (
-          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
-        )}
-      </div>
+          {/* Nav Toggle Header */}
+          <div style={{ padding: '16px 12px 8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
+            {permissions?.canAccessClients ? (
+              <button
+                onClick={() => setActiveVertical('CLIENTS')}
+                style={{
+                  margin: 0,
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
+                  letterSpacing: '0.5px',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
+                  transition: 'all 0.2s ease'
+                }}
+                className="sidebar-header-nav-btn"
+              >
+                Clients
+              </button>
+            ) : (
+              <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
+            )}
+          </div>
+        </>
+      )}
 
       <div 
         className="filters-row-toggle" 
@@ -262,12 +267,14 @@ const ClientSubSidebar = ({
         </div>
       )}
 
-      <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
-        <div className="sub-nav-text">
-          <p>Client Manager</p>
-          <small>Records Active</small>
+      {!hideNavigation && (
+        <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
+          <div className="sub-nav-text">
+            <p>Client Manager</p>
+            <small>Records Active</small>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

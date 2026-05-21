@@ -66,7 +66,7 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
   );
 };
 
-const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters }) => {
+const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, hideNavigation }) => {
   const [expandedGroups, setExpandedGroups] = useState({
     role: false,
     hub: false,
@@ -110,26 +110,30 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
 
   return (
     <div className="sub-sidebar-body">
-      {permissions?.canAccessEmployeeTasks && (
-        <div className="employee-tasks-btn-wrapper">
-          <button
-            className="halo-button employee-tasks-nav-btn"
-            style={{ opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
-            onClick={() => setActiveVertical('employee_tasks')}
-          >
-            Employee Tasks
-          </button>
-        </div>
-      )}
+      {!hideNavigation && (
+        <>
+          {permissions?.canAccessEmployeeTasks && (
+            <div className="employee-tasks-btn-wrapper">
+              <button
+                className="halo-button employee-tasks-nav-btn"
+                style={{ opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
+                onClick={() => setActiveVertical('employee_tasks')}
+              >
+                Employee Tasks
+              </button>
+            </div>
+          )}
 
-      {/* Nav Toggle Header */}
-      <div className="sidebar-title-row">
-        {permissions?.canAccessEmployees ? (
-           <p className="sidebar-title-text">Employees</p>
-        ) : (
-           <p className="sidebar-title-text disabled">Employees</p>
-        )}
-      </div>
+          {/* Nav Toggle Header */}
+          <div className="sidebar-title-row">
+            {permissions?.canAccessEmployees ? (
+               <p className="sidebar-title-text">Employees</p>
+            ) : (
+               <p className="sidebar-title-text disabled">Employees</p>
+            )}
+          </div>
+        </>
+      )}
 
       <div 
         className="filters-row-toggle" 
@@ -189,12 +193,14 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         </div>
       )}
 
-      <div className="sub-nav-item sidebar-footer-info">
-        <div className="sub-nav-text">
-          <p>Employee Manager</p>
-          <small>Task Board Active</small>
+      {!hideNavigation && (
+        <div className="sub-nav-item sidebar-footer-info">
+          <div className="sub-nav-text">
+            <p>Employee Manager</p>
+            <small>Task Board Active</small>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

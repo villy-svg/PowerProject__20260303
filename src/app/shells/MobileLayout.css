@@ -265,18 +265,24 @@
 
   .mobile-header-shell .view-mode-toggle,
   .mobile-header-shell .header-filter-group {
-    flex-direction: column !important;
-    align-items: stretch !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
     width: 100% !important;
-    gap: 8px !important;
+    gap: 4px !important;
   }
 
   .mobile-header-shell .view-mode-toggle .view-toggle-btn,
   .mobile-header-shell .header-filter-group .toggle-depri-btn {
-    width: 100% !important;
-    min-height: 44px !important;
-    margin: 0 !important;
-    justify-content: center;
+    flex: 1 !important;
+    width: auto !important;
+    min-height: 38px !important;
+    font-size: 0.65rem !important;
+    padding: 6px 2px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 }
 

@@ -232,18 +232,24 @@
 
     .view-mode-toggle,
     .header-filter-group {
-      flex-direction: column !important;
-      align-items: stretch !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
       width: 100% !important;
-      gap: 8px !important;
+      gap: 4px !important;
     }
 
     .view-mode-toggle .view-toggle-btn,
     .header-filter-group .toggle-depri-btn {
-      width: 100% !important;
-      min-height: 44px !important;
-      margin: 0 !important;
-      justify-content: center;
+      flex: 1 !important;
+      width: auto !important;
+      min-height: 38px !important;
+      font-size: 0.65rem !important;
+      padding: 6px 2px !important;
+      white-space: nowrap !important;
+      display: inline-flex !important;
+      justify-content: center !important;
+      align-items: center !important;
     }
   }
 
@@ -386,4 +392,141 @@
 body.no-scroll {
   overflow: hidden !important;
   touch-action: none;
+}
+
+/* Mobile Board Sub-Tray Styles */
+.mobile-board-sub-tray {
+  position: fixed;
+  bottom: calc(64px + var(--safe-bottom, 0px) + 12px);
+  left: 12px;
+  right: 12px;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 16px;
+  z-index: 4000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(45, 212, 191, 0.05);
+  animation: slideUpSubTray 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s ease;
+}
+
+.mobile-board-sub-tray.tray-hidden {
+  transform: translateY(150%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes slideUpSubTray {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mobile-board-sub-tray-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mobile-board-sub-tray-header h4 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-green);
+}
+
+.sub-tray-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.sub-tray-close-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mobile-board-sub-tray-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.sub-tray-option-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sub-tray-option-btn:hover,
+.sub-tray-option-btn.active {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.2);
+  color: var(--brand-green);
+}
+
+.sub-tray-option-btn.active {
+  font-weight: 600;
+}
+
+.sub-tray-option-btn .active-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--brand-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--brand-green);
+}
+
+.sub-tray-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3999;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: pointer;
+  animation: fadeInSubTrayBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInSubTrayBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-menu-sidebar-filters {
+  width: 100%;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }

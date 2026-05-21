@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260521 -- Refactor Code Master Implementation 1.0.4"
+git commit -m "260521 -- Update the Mobile Layout Tray 2.0.0"
 git push origin staging 
  
 # 3. Merge Staging to Main  

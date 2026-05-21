@@ -164,7 +164,8 @@ export const taskService = {
 
     // --- Fix legacy verticalId strings before mapping to database row ---
     // Uses module-level VALID_VERTICALS (FIX Issue-10)
-    let resolvedVid = (taskData.verticalId || taskData.vertical_id || '').toUpperCase();
+    const originalVid = taskData.verticalId || taskData.vertical_id || '';
+    let resolvedVid = originalVid.toUpperCase();
     if (!VALID_VERTICALS.includes(resolvedVid)) {
       if (resolvedVid.includes('HUB') || resolvedVid.includes('ESCALATION')) resolvedVid = 'CHARGING_HUBS';
       else if (resolvedVid.includes('CLIENT')) resolvedVid = 'CLIENTS';
@@ -187,7 +188,7 @@ export const taskService = {
     if (!Array.isArray(taskBoard) || taskBoard.length === 0) {
       // FIX: Use the ORIGINAL verticalId from taskData for inference,
       // NOT the resolved/normalized one which may have stripped context.
-      const rawVid = (taskData.verticalId || taskData.vertical_id || '').toLowerCase();
+      const rawVid = originalVid.toLowerCase();
       const matchedKey = Object.keys(TASK_BOARD_MAP).find(key => rawVid.includes(key));
       taskBoard = matchedKey ? [TASK_BOARD_MAP[matchedKey]] : ['Hubs'];
       

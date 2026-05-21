@@ -37,7 +37,14 @@ const TaskController = (props) => {
     user,
     isSubSidebarOpen,
     setIsSubSidebarOpen,
-    onShowBottomNav
+    onShowBottomNav,
+    SidebarComponent,
+    handleFilterChange,
+    resetFilters,
+    setFilters,
+    onBatchFilter,
+    filters,
+    setActiveVertical,
   } = props;
 
   const controller = useTaskController(props);
@@ -140,6 +147,14 @@ const TaskController = (props) => {
         setIsMenuOpen={setIsHeaderMenuOpen}
         hideMenuClose={label?.includes('Hub')}
         isSidebarOpen={props.isMainSidebarOpen}
+        SidebarComponent={SidebarComponent}
+        onFilterChange={handleFilterChange}
+        onReset={resetFilters}
+        onBatchFilter={onBatchFilter}
+        filters={filters}
+        tasks={tasks}
+        setActiveVertical={setActiveVertical}
+        activeVertical={activeVertical}
         rightActions={
           <>
             {canUserCreate && !activeVertical.includes('daily') && (
