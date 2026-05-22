@@ -66,20 +66,19 @@ const MobileSidebar = ({
           <button className="sub-tray-close-btn" onClick={onClose} title="Close Menu">✕</button>
         </div>
 
-        <div className="mobile-board-sub-tray-content custom-scrollbar">
+        <div className="mobile-board-sub-tray-content custom-scrollbar tray-layout">
           {/* Primary Apps */}
-          <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Apps</h5>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div className="tray-section">
+            <h5 className="tray-section-title">Apps</h5>
+            <div className="tray-grid">
               <button 
-                className={`sub-tray-option-btn ${activeVertical === null ? 'active' : ''}`}
+                className={`tray-card ${activeVertical === null ? 'active' : ''}`}
                 onClick={() => handleNavigate(null)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <IconHome size={18} style={{ color: activeVertical === null ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                  <span>Dashboard</span>
+                <div className="tray-icon">
+                  <IconHome size={20} />
                 </div>
-                {activeVertical === null && <span className="active-dot" />}
+                <span>Dashboard</span>
               </button>
 
               {!isHydrating && filteredVerticals.map(vertical => {
@@ -91,15 +90,15 @@ const MobileSidebar = ({
                 return (
                   <button
                     key={vertical.id}
-                    className={`sub-tray-option-btn ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                    className={`tray-card ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
                     onClick={() => !isLocked && handleNavigate(vertical.id)}
+                    disabled={isLocked}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Icon size={18} style={{ color: isActive ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                      <span>{vertical.label}</span>
+                    <div className="tray-icon">
+                      <Icon size={20} />
+                      {isLocked && <span className="tray-lock">🔒</span>}
                     </div>
-                    {isActive && <span className="active-dot" />}
-                    {isLocked && <span style={{ fontSize: '11px', opacity: 0.5 }}>🔒</span>}
+                    <span>{vertical.label}</span>
                   </button>
                 );
               })}
@@ -108,31 +107,29 @@ const MobileSidebar = ({
 
           {/* Management Modules (Sub-navs) */}
           {canSeeConfig && !isHydrating && (
-            <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-              <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Management</h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div className="tray-section">
+              <h5 className="tray-section-title">Management</h5>
+              <div className="tray-grid">
                 {/* Charging Hubs Managers */}
                 {filteredVerticals.find(v => v.id === 'CHARGING_HUBS' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
                   <>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'hub_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'hub_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('hub_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconZap size={18} style={{ color: activeVertical === 'hub_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Hub Admin</span>
+                      <div className="tray-icon">
+                        <IconZap size={20} />
                       </div>
-                      {activeVertical === 'hub_management' && <span className="active-dot" />}
+                      <span>Hub Admin</span>
                     </button>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'hub_function_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'hub_function_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('hub_function_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconBoards size={18} style={{ color: activeVertical === 'hub_function_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Functions</span>
+                      <div className="tray-icon">
+                        <IconBoards size={20} />
                       </div>
-                      {activeVertical === 'hub_function_management' && <span className="active-dot" />}
+                      <span>Functions</span>
                     </button>
                   </>
                 )}
@@ -141,34 +138,31 @@ const MobileSidebar = ({
                 {filteredVerticals.find(v => v.id === 'CLIENTS' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
                   <>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'client_category_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'client_category_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('client_category_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconDatabase size={18} style={{ color: activeVertical === 'client_category_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Categories</span>
+                      <div className="tray-icon">
+                        <IconDatabase size={20} />
                       </div>
-                      {activeVertical === 'client_category_management' && <span className="active-dot" />}
+                      <span>Categories</span>
                     </button>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'client_service_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'client_service_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('client_service_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconDatabase size={18} style={{ color: activeVertical === 'client_service_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Services</span>
+                      <div className="tray-icon">
+                        <IconDatabase size={20} />
                       </div>
-                      {activeVertical === 'client_service_management' && <span className="active-dot" />}
+                      <span>Services</span>
                     </button>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'client_billing_model_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'client_billing_model_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('client_billing_model_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconDatabase size={18} style={{ color: activeVertical === 'client_billing_model_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Billing</span>
+                      <div className="tray-icon">
+                        <IconDatabase size={20} />
                       </div>
-                      {activeVertical === 'client_billing_model_management' && <span className="active-dot" />}
+                      <span>Billing</span>
                     </button>
                   </>
                 )}
@@ -177,24 +171,22 @@ const MobileSidebar = ({
                 {filteredVerticals.find(v => v.id === 'EMPLOYEES' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
                   <>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'department_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'department_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('department_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconPeople size={18} style={{ color: activeVertical === 'department_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Departments</span>
+                      <div className="tray-icon">
+                        <IconPeople size={20} />
                       </div>
-                      {activeVertical === 'department_management' && <span className="active-dot" />}
+                      <span>Departments</span>
                     </button>
                     <button 
-                      className={`sub-tray-option-btn ${activeVertical === 'employee_role_management' ? 'active' : ''}`} 
+                      className={`tray-card ${activeVertical === 'employee_role_management' ? 'active' : ''}`} 
                       onClick={() => handleNavigate('employee_role_management')}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <IconPeople size={18} style={{ color: activeVertical === 'employee_role_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                        <span>Roles</span>
+                      <div className="tray-icon">
+                        <IconPeople size={20} />
                       </div>
-                      {activeVertical === 'employee_role_management' && <span className="active-dot" />}
+                      <span>Roles</span>
                     </button>
                   </>
                 )}
@@ -204,30 +196,28 @@ const MobileSidebar = ({
 
           {/* System */}
           {canSeeConfig && (
-            <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-              <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>System</h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div className="tray-section">
+              <h5 className="tray-section-title">System</h5>
+              <div className="tray-grid">
                 {showUserMgmt && (
                   <button 
-                    className={`sub-tray-option-btn ${activeVertical === 'user_management' ? 'active' : ''}`} 
+                    className={`tray-card ${activeVertical === 'user_management' ? 'active' : ''}`} 
                     onClick={() => handleNavigate('user_management')}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <IconPeople size={18} style={{ color: activeVertical === 'user_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                      <span>Users</span>
+                    <div className="tray-icon">
+                      <IconPeople size={20} />
                     </div>
-                    {activeVertical === 'user_management' && <span className="active-dot" />}
+                    <span>Users</span>
                   </button>
                 )}
                 <button 
-                  className={`sub-tray-option-btn ${activeVertical === 'configuration' ? 'active' : ''}`} 
+                  className={`tray-card ${activeVertical === 'configuration' ? 'active' : ''}`} 
                   onClick={() => handleNavigate('configuration')}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <IconSettings size={18} style={{ color: activeVertical === 'configuration' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
-                    <span>Config</span>
+                  <div className="tray-icon">
+                    <IconSettings size={20} />
                   </div>
-                  {activeVertical === 'configuration' && <span className="active-dot" />}
+                  <span>Config</span>
                 </button>
               </div>
             </div>

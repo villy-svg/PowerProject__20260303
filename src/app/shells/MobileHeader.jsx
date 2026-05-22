@@ -66,6 +66,8 @@ const MobileHeader = ({
     setIsMobileMenuOpen: setIsMenuOpen,
     isMobileBoardSubTrayOpen: isBoardSubTrayOpen,
     setIsMobileBoardSubTrayOpen: setIsBoardSubTrayOpen,
+    isMobileAddTrayOpen,
+    setIsMobileAddTrayOpen,
     showBottomNavOverlay,
   } = useAppNavigation();
 
@@ -127,7 +129,7 @@ const MobileHeader = ({
   const boards = getBoardsForActiveVertical();
 
   // ─── Compute header visibility ────────────────────────────────────
-  const isHeaderHidden = !isScrollVisible && !isMenuOpen && !isSubSidebarOpen && !isSidebarOpen && !isBoardSubTrayOpen;
+  const isHeaderHidden = !isScrollVisible && !isMenuOpen && !isSubSidebarOpen && !isSidebarOpen && !isBoardSubTrayOpen && !isMobileAddTrayOpen;
 
   return (
     <>
@@ -163,10 +165,13 @@ const MobileHeader = ({
       )}
 
       {/* SUB-TRAY BACKDROP MASK */}
-      {isBoardSubTrayOpen && (
+      {(isBoardSubTrayOpen || isMobileAddTrayOpen) && (
         <div 
           className="sub-tray-backdrop" 
-          onClick={() => setIsBoardSubTrayOpen(false)} 
+          onClick={() => {
+            setIsBoardSubTrayOpen(false);
+            setIsMobileAddTrayOpen(false);
+          }} 
         />
       )}
 
@@ -204,8 +209,49 @@ const MobileHeader = ({
         </div>
       )}
 
+      {/* QUICK ACTIONS FLOATING SUB-TRAY SHEET */}
+      {isMobileAddTrayOpen && (
+        <div className={`mobile-board-sub-tray mobile-add-sub-tray ${isHeaderHidden ? 'tray-hidden' : ''}`}>
+          <div className="mobile-board-sub-tray-header">
+            <h4>Quick Actions</h4>
+            <button 
+              className="sub-tray-close-btn"
+              onClick={() => setIsMobileAddTrayOpen(false)}
+              title="Close Quick Actions"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="mobile-board-sub-tray-content custom-scrollbar">
+            {/* Create New Task Action Button */}
+            <button
+              className="sub-tray-option-btn primary-action-btn"
+              onClick={() => {
+                onAddClick();
+                setIsMobileAddTrayOpen(false);
+              }}
+            >
+              <span className="option-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+                <IconPlus size={16} style={{ color: 'var(--brand-green)' }} />
+                Create New Task
+              </span>
+            </button>
+
+            {/* Contextual Data Operations */}
+            {expandedRight && (
+              <div className="mobile-sub-tray-expanded-actions">
+                <div className="sub-tray-section-title" style={{ margin: '12px 0 6px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Data Operations</div>
+                <div className="expanded-actions-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {expandedRight}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* MOBILE ACTION TRAY (bottom pill bar) */}
-      <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen || isBoardSubTrayOpen) ? '' : 'tray-hidden'}`}>
+      <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen || isBoardSubTrayOpen || isMobileAddTrayOpen) ? '' : 'tray-hidden'}`}>
         <div className="bottom-nav-container mobile-action-tray-container">
           {/* Home / Switch Vertical */}
           <button
@@ -214,11 +260,12 @@ const MobileHeader = ({
             onClick={() => { 
               if (onShowBottomNav) onShowBottomNav(); 
               setIsBoardSubTrayOpen(false);
+              setIsMobileAddTrayOpen(false);
               setIsMenuOpen(false);
             }}
           >
             <div className="icon-wrapper">
-              <IconHome size={24} />
+              <IconHome size={16} strokeWidth={showBottomNavOverlay ? 2.2 : 1.8} />
             </div>
             <span className="nav-label">Switch</span>
           </button>
@@ -230,12 +277,13 @@ const MobileHeader = ({
               onClick={() => {
                 const nextState = !isBoardSubTrayOpen;
                 setIsBoardSubTrayOpen(nextState);
+                setIsMobileAddTrayOpen(false);
                 if (nextState) setIsMenuOpen(false);
               }}
               title="Select Board"
             >
               <div className="icon-wrapper">
-                <IconBoards size={24} />
+                <IconBoards size={16} strokeWidth={isBoardSubTrayOpen ? 2.2 : 1.8} />
               </div>
               <span className="nav-label">Boards</span>
             </button>
@@ -249,12 +297,13 @@ const MobileHeader = ({
                 const nextMenuState = !isMenuOpen;
                 setIsMenuOpen(nextMenuState);
                 setIsBoardSubTrayOpen(false);
+                setIsMobileAddTrayOpen(false);
                 if (nextMenuState && onSidebarToggle) onSidebarToggle(false);
               }}
               title="Toggle Filters"
             >
               <div className="icon-wrapper">
-                <IconFilter size={24} />
+                <IconFilter size={16} strokeWidth={isMenuOpen ? 2.2 : 1.8} />
               </div>
               <span className="nav-label">Filters</span>
             </button>
@@ -263,16 +312,17 @@ const MobileHeader = ({
           {/* Add Button */}
           {canAdd && (
             <button
-              className={`nav-item mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`}
+              className={`nav-item mobile-tray-btn mobile-add-btn ${(isTaskModalOpen || isMobileAddTrayOpen) ? 'active' : ''}`}
               onClick={() => {
-                onAddClick();
+                const nextAddTrayState = !isMobileAddTrayOpen;
+                setIsMobileAddTrayOpen(nextAddTrayState);
                 setIsBoardSubTrayOpen(false);
                 setIsMenuOpen(false);
               }}
-              title="Add New"
+              title="Add / Actions"
             >
               <div className="icon-wrapper">
-                <IconPlus size={24} />
+                <IconPlus size={16} strokeWidth={(isTaskModalOpen || isMobileAddTrayOpen) ? 2.2 : 1.8} />
               </div>
               <span className="nav-label">Add</span>
             </button>

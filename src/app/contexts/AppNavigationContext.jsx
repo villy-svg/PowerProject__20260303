@@ -75,6 +75,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
   // back button handler can dismiss them without prop drilling.
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileBoardSubTrayOpen, setIsMobileBoardSubTrayOpen] = useState(false);
+  const [isMobileAddTrayOpen, setIsMobileAddTrayOpen] = useState(false);
 
   // ── Exit App Modal ────────────────────────────────────────────────────────
   const [showExitModal, setShowExitModal] = useState(false);
@@ -93,6 +94,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     // Close all mobile overlays whenever the active vertical changes
     setIsMobileMenuOpen(false);
     setIsMobileBoardSubTrayOpen(false);
+    setIsMobileAddTrayOpen(false);
     setShowBottomNavOverlay(false);
 
     setActiveVerticalRaw(id);
@@ -146,6 +148,10 @@ export function AppNavigationProvider({ verticals = {}, children }) {
       setIsMobileBoardSubTrayOpen(false);
       return;
     }
+    if (isMobileAddTrayOpen) {
+      setIsMobileAddTrayOpen(false);
+      return;
+    }
     if (showBottomNavOverlay) {
       setShowBottomNavOverlay(false);
       return;
@@ -166,7 +172,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     // Step 3: Dashboard → show Exit App confirmation modal
     setShowExitModal(true);
   }, [
-    isSidebarOpen, isMobileMenuOpen, isMobileBoardSubTrayOpen,
+    isSidebarOpen, isMobileMenuOpen, isMobileBoardSubTrayOpen, isMobileAddTrayOpen,
     showBottomNavOverlay, activeVertical, setActiveVertical,
   ]);
 
@@ -205,6 +211,8 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     setIsMobileMenuOpen,
     isMobileBoardSubTrayOpen,
     setIsMobileBoardSubTrayOpen,
+    isMobileAddTrayOpen,
+    setIsMobileAddTrayOpen,
     // Exit App modal
     showExitModal,
     setShowExitModal,
