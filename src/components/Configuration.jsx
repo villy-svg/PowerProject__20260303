@@ -1,14 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/core/supabaseClient';
 import { IconHome, IconMenu } from './Icons';
+import ConfigBottomNav from './ConfigBottomNav';
 import './Configuration.css';
 
 const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, onShowBottomNav, verticals = {}, verticalList = [] }) => {
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   const [testRunning, setTestRunning] = useState(false);
+  // Tracks which config section is currently in the viewport (drives ConfigBottomNav active tab)
+  const [activeSection, setActiveSection] = useState('hubs');
   
   const canManageSystem = permissions.canManageRoles;
   const canClearAll = permissions.canDelete && permissions.scope === 'global';
+
+  // ── IntersectionObserver: track which section is visible on mobile ────────
+  // Watches the four config section anchors and updates activeSection state.
+  // Uses a top-biased rootMargin so the tab activates as sections enter from below.
+  useEffect(() => {
+    const sectionIds = ['hubs', 'team', 'clients', 'general'];
+    const elements = sectionIds
+      .map(id => document.getElementById(`config-section-${id}`))
+      .filter(Boolean);
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section and activate its tab
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          const id = visible[0].target.id.replace('config-section-', '');
+          setActiveSection(id);
+        }
+      },
+      { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
+    );
+
+    elements.forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, [verticalList]); // Re-run if vertical list changes (sections may appear/disappear)
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
@@ -198,8 +230,13 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
             const hasVerticalAccess = permissions.scope === 'global' || user.assignedVerticals?.includes(vertical.id);
             if (!hasVerticalAccess) return null;
 
+            let sectionId = '';
+            if (vertical.id === verticals.CHARGING_HUBS?.id) sectionId = 'config-section-hubs';
+            else if (vertical.id === verticals.EMPLOYEES?.id) sectionId = 'config-section-team';
+            else if (vertical.id === verticals.CLIENTS?.id) sectionId = 'config-section-clients';
+
             return (
-              <div key={vertical.id} className="config-group">
+              <div key={vertical.id} id={sectionId} className="config-group">
                 <h3 className="group-label">{vertical.label}</h3>
                 <div className="config-items-container">
                   {items.map(item => {
@@ -227,7 +264,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
           })}
 
           {/* Global Settings (Accessible to all) */}
-          <div className="config-group">
+          <div id="config-section-general" className="config-group">
             <h3 className="group-label">General Settings</h3>
             <div className="config-items-container">
               <div className="config-tile non-clickable">
@@ -286,6 +323,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
           )}
         </div>
       </div>
+      <ConfigBottomNav activeSection={activeSection} />
     </div>
   );
 };

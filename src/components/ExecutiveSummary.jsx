@@ -3,6 +3,8 @@ import { STAGE_LIST } from '../constants/stages';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useAppNavigation } from '../app/contexts/AppNavigationContext';
+import { IconPeople, IconSettings } from './Icons';
 import './ExecutiveSummary.css';
 
 /**
@@ -13,6 +15,7 @@ import './ExecutiveSummary.css';
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false }) => {
   const { isMobile } = useIsMobile();
   const [expandedStageId, setExpandedStageId] = useState(null);
+  const { setActiveVertical } = useAppNavigation();
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -35,11 +38,21 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
    */
   const showVerticalBreakdown = true;
 
+  const canSeeConfig = permissions?.canAccessConfig;
+  const showUserMgmt = permissions?.scope === 'global' && permissions?.canManageRoles;
+
+  // Filter out the locked/unassigned verticals to show as "Coming Soon / Locked"
+  const lockedVerticals = (verticalList.length > 0 ? verticalList : VERTICAL_LIST).filter(vertical => {
+    const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
+    return vertical.locked || !isAssigned;
+  });
+
   return (
     <div className="home-summary-view">
       <div className="summary-header">
         <h2>Executive Summary</h2>
       </div>
+      
       
       <div className="summary-grid">
         {STAGE_LIST.map((stage) => {

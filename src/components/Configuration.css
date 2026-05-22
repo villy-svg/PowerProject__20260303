@@ -153,4 +153,7 @@
     flex-direction: column;
     gap: 20px;
   }
+  .config-inner-wrap {
+    padding-bottom: 88px; /* Prevent content hiding behind fixed bottom nav */
+  }
 }

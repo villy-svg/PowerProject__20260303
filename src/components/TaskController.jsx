@@ -155,6 +155,9 @@ const TaskController = (props) => {
         tasks={tasks}
         setActiveVertical={setActiveVertical}
         activeVertical={activeVertical}
+        permissions={permissions}
+        user={user}
+        verticals={verticals}
         rightActions={
           <>
             {canUserCreate && !activeVertical.includes('daily') && (

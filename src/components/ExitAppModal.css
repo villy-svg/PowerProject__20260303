@@ -1,0 +1,118 @@
+/* ==========================================================================
+   EXIT APP MODAL — Native confirmation modal on dashboard back press
+   Design system: ui-design-system §5 Modals, §12 Apple-Inspired Premium
+   All colors use CSS variables — no hardcoded hex.
+   ========================================================================== */
+
+.exit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(var(--glass-blur, 16px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end; /* Slide up from bottom — native feel */
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: exit-modal-backdrop-in 0.25s ease;
+}
+
+@keyframes exit-modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.exit-modal-body {
+  background: var(--bg-color);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+  border-radius: var(--radius-squircle, 24px) var(--radius-squircle, 24px) 0 0;
+  padding: 32px 28px calc(28px + env(safe-area-inset-bottom, 0px));
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+  animation: exit-modal-slide-up 0.3s cubic-bezier(0.32, 0, 0.37, 1);
+}
+
+@keyframes exit-modal-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Icon ring ─────────────────────────────────────────────────────────────── */
+.exit-modal-icon-wrap {
+  margin-bottom: 12px;
+}
+
+.exit-modal-icon-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  box-shadow: 0 0 16px var(--halo-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-green);
+}
+
+/* ── Text ──────────────────────────────────────────────────────────────────── */
+.exit-modal-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0 0 4px;
+  text-align: center;
+  letter-spacing: -0.3px;
+}
+
+.exit-modal-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.55;
+  margin: 0 0 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ── Actions ───────────────────────────────────────────────────────────────── */
+.exit-modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.exit-modal-stay {
+  flex: 1;
+  min-height: 48px;
+  font-size: 0.9rem;
+}
+
+/* Exit button — uses a subtle destructive style (no solid fills per design system) */
+.exit-modal-exit-btn {
+  flex: 1;
+  min-height: 48px;
+  border-radius: var(--radius-button, 12px);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exit-modal-exit-btn:hover,
+.exit-modal-exit-btn:active {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+}

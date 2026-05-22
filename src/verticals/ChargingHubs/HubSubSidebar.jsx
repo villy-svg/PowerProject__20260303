@@ -30,12 +30,13 @@ const groupLabelStyle = {
   letterSpacing: '0.5px'
 };
 
-const checkboxGroupStyle = (isExpanded) => ({
+const checkboxGroupStyle = (isExpanded, isMobileMenu) => ({
   display: isExpanded ? 'flex' : 'none',
   flexDirection: 'column',
   gap: '8px',
-  maxHeight: '180px',
-  overflowY: 'auto',
+  /* In mobile menu, the outer overlay scrolls — remove per-group maxHeight so filters flow naturally */
+  maxHeight: isMobileMenu ? 'none' : '180px',
+  overflowY: isMobileMenu ? 'visible' : 'auto',
   padding: '0 12px 16px 12px',
   transition: 'opacity 0.2s ease'
 });
@@ -66,7 +67,7 @@ const checkMarkStyle = (isSelected) => ({
   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
 });
 
-const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange }) => {
+const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange, isMobileMenu }) => {
   return (
     <div style={filterSectionStyle}>
       <div style={groupHeaderStyle} onClick={onToggle}>
@@ -102,7 +103,7 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
         </div>
       )}
 
-      <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
+      <div style={checkboxGroupStyle(isExpanded, isMobileMenu)} className="custom-scrollbar">
         {options.map(opt => {
           const val = valueKey ? opt[valueKey] : opt;
           const labelText = displayKey ? opt[displayKey] : opt;
@@ -128,6 +129,9 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
 const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, tasks, hideNavigation }) => {
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
+  /* All filter groups start collapsed in the mobile menu (hideNavigation=true).
+     The mobile overlay unmounts/remounts on each open/close, so this initial state
+     effectively resets to collapsed every time the menu is opened. */
   const [expandedGroups, setExpandedGroups] = useState({
     city: false,
     hub: false,
@@ -272,6 +276,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             onToggle={() => toggleGroup('city')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -285,6 +290,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             onToggle={() => toggleGroup('hub')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -296,6 +302,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             onToggle={() => toggleGroup('priority')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -309,6 +316,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             onToggle={() => toggleGroup('function')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -320,6 +328,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             onToggle={() => toggleGroup('assignee')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
         </div>
       )}

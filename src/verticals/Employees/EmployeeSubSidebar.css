@@ -34,6 +34,14 @@
   display: none;
 }
 
+/* In mobile menu overlay, the outer panel handles scrolling.
+   Remove the per-group 180px cap so filters flow naturally and the
+   outer overlay scrolls vertically. */
+.filter-checkbox-group.mobile-menu {
+  max-height: none;
+  overflow-y: visible;
+}
+
 .filter-checkbox-item {
   display: flex;
   align-items: center;

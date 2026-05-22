@@ -91,7 +91,7 @@
   padding: 16px;
   overflow-y: auto;
 }
-.workspace-container.sub-sidebar-collapsed .sub-sidebar-body {
+.workspace-container.sub-sidebar-collapsed .sub-sidebar .sub-sidebar-body {
   display: none;
 }
 /* 4. MAIN CONTENT AREA */

@@ -26,16 +26,16 @@ const MasterHeaderMenu = ({
 }) => {
   return (
     <div className={`expanded-menu-row ${isVisible ? 'visible' : ''}`}>
-      <div className="mobile-menu-header">
-        {!hideCloseButton && (
+      {!hideCloseButton && (
+        <div className="mobile-menu-header">
           <button 
             className="halo-button mobile-menu-close" 
             onClick={onClose}
           >
             CLOSE
           </button>
-        )}
-      </div>
+        </div>
+      )}
       <div className="master-header-left">
         {expandedLeft}
       </div>

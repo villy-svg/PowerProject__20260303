@@ -22,7 +22,7 @@ import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Ic
  * The primary view for the Employee Manager vertical.
  * Displays employee records, profiles, and administrative summaries.
  */
-const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
+const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen, SidebarComponent, onFilterChange, onReset, onBatchFilter, verticals, activeVertical }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
@@ -157,6 +157,16 @@ const EmployeeManagement = ({ user, permissions, filters, setActiveVertical, onS
         hideMenuClose={true}
         title="Employee Records Manager"
         description="Centralized database for personnel profiles, performance tracking, and organizational assignments."
+        SidebarComponent={SidebarComponent}
+        onFilterChange={onFilterChange}
+        onReset={onReset}
+        onBatchFilter={onBatchFilter}
+        filters={filters}
+        tasks={tasks}
+        permissions={permissions}
+        user={user}
+        verticals={verticals}
+        activeVertical={activeVertical}
         rightActions={
           permissions.canCreateEmployees && (
             <button className="halo-button master-action-btn" onClick={ui.openAddModal}>

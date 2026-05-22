@@ -23,6 +23,7 @@
     "apk:prod-release": "npm run build && npx cap sync android && cd android && .\\gradlew.bat assembleProductionRelease"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.1",
     "@capgo/capacitor-updater": "8.45.9",
     "@supabase/supabase-js": "^2.98.0",

@@ -19,6 +19,7 @@ import MobileBottomNav from './MobileBottomNav';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
+import ExitAppModal from '../../components/ExitAppModal';
 import './MobileLayout.css';
 
 const MobileLayout = ({
@@ -42,7 +43,12 @@ const MobileLayout = ({
   } = useAppNavigation();
 
   return (
-    <div className="mobile-layout" data-shell="mobile" data-theme={darkMode ? 'dark' : 'light'}>
+    <div
+      className="mobile-layout"
+      data-shell="mobile"
+      data-theme={darkMode ? 'dark' : 'light'}
+      data-view-state={activeVertical ? 'vertical' : 'home'}
+    >
       {/* Logo — hidden when in a vertical */}
       <button
         className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`}
@@ -91,6 +97,9 @@ const MobileLayout = ({
         showOverlay={showBottomNavOverlay}
         onCloseOverlay={() => setShowBottomNavOverlay(false)}
       />
+
+      {/* Exit App Confirmation Modal — shown on dashboard back press */}
+      <ExitAppModal />
     </div>
   );
 };

@@ -78,22 +78,23 @@ function AppShell({ verticals, verticalList }) {
     // Special admin-only views
     const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
     if (isSpecialAdminView && !isMasterAdmin) {
-      setActiveVertical(null);
+      // 'rbac_guard' source: security rejection — not a real user navigation
+      setActiveVertical(null, 'rbac_guard');
       return;
     }
 
     if (activeVertical === 'configuration' && !currentUserPermissions.canAccessConfig) {
-      setActiveVertical(null);
+      setActiveVertical(null, 'rbac_guard');
       return;
     }
 
     if (activeVertical === 'hub_management' && !isMasterAdmin && !currentUserPermissions.canAccessConfig) {
-      setActiveVertical(null);
+      setActiveVertical(null, 'rbac_guard');
       return;
     }
 
     if (activeVertical === 'daily_task_templates' && !currentUserPermissions.canAccessDailyTaskTemplates) {
-      setActiveVertical(null);
+      setActiveVertical(null, 'rbac_guard');
       return;
     }
 
@@ -101,7 +102,7 @@ function AppShell({ verticals, verticalList }) {
     if (verticalKeys.includes(activeVertical)) {
       const isAssigned = user.assignedVerticals?.includes(activeVertical);
       if (!isAssigned && !isGlobalScope) {
-        setActiveVertical(null);
+        setActiveVertical(null, 'rbac_guard');
       }
     }
   }, [user, activeVertical, currentUserPermissions, verticals, setActiveVertical]);

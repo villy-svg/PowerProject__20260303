@@ -96,6 +96,7 @@
 }
 
 /* Mobile expanded menu is a full-screen overlay */
+.mobile-layout .expanded-menu-row,
 .mobile-header-shell .expanded-menu-row {
   position: fixed !important;
   top: 0;
@@ -112,6 +113,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: flex-start !important; /* Overrides space-between distribution in vertical flexbox to prevent scroll mutilation and top empty space */
   gap: 16px;
   border-radius: 0 0 24px 24px;
   animation: slidePaneDown 0.4s cubic-bezier(0.19, 1, 0.22, 1);
@@ -136,6 +138,7 @@
   }
 }
 
+.mobile-layout .mobile-menu-header,
 .mobile-header-shell .mobile-menu-header {
   display: flex;
   align-items: center;
@@ -144,7 +147,9 @@
   margin-bottom: 12px;
 }
 
+.mobile-layout .master-header-left,
 .mobile-header-shell .master-header-left,
+.mobile-layout .master-header-right,
 .mobile-header-shell .master-header-right {
   flex-direction: column;
   align-items: stretch;
@@ -153,36 +158,46 @@
   flex-shrink: 0; /* Prevent flex elements from shrinking/collapsing inside scrolling flex container */
 }
 
+.mobile-layout .master-header-left .view-mode-toggle,
 .mobile-header-shell .master-header-left .view-mode-toggle {
   margin-right: 0;
   width: 100%;
 }
 
-/* ── 3. Mobile Sidebar ───────────────────────────────────────────────── */
+/* ── 3. Mobile Sidebar (Sub-Bottom Tray) ─────────────────────────────── */
 .mobile-layout .sidebar {
   position: fixed;
-  top: 0;
+  top: auto;
+  bottom: 0;
   left: 0;
-  height: 100vh;
-  width: 80vw;
-  max-width: 300px;
-  transform: translateX(-100%);
+  height: auto;
+  max-height: 85vh;
+  width: 100vw;
+  max-width: 100%;
+  transform: translateY(100%);
   opacity: 1 !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 24px 24px 0 0;
   z-index: 3010;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+.mobile-layout .sidebar .sidebar-content-wrapper {
+  width: 100%;
+  height: auto;
+  min-height: 40vh;
+}
+
 .mobile-layout .sidebar.open {
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .mobile-layout .sidebar:not(.open) {
-  width: 80vw;
-  max-width: 300px;
-  transform: translateX(-100%);
+  width: 100vw;
+  max-width: 100%;
+  transform: translateY(100%);
 }
 
 /* ── 4. Mobile Sub-Sidebar ───────────────────────────────────────────── */
@@ -252,19 +267,54 @@
 
 /* ── 7. Ultra-Compact Viewport (≤360px, iPhone SE) ───────────────────── */
 @media screen and (max-width: 360px) {
-  .mobile-header-shell .expanded-menu-row {
-    padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
-    gap: 12px;
-    max-height: 90vh;
+  .expanded-menu-row {
+    padding: calc(var(--safe-top, 0px) + 8px) 8px 12px 8px !important;
+    gap: 6px !important;
+    max-height: 95vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
   }
 
-  .mobile-header-shell .master-header-left,
-  .mobile-header-shell .master-header-right {
-    gap: 12px;
+  .master-header-left {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 6px !important;
   }
 
-  .mobile-header-shell .view-mode-toggle,
-  .mobile-header-shell .header-filter-group {
+  .master-header-left,
+  .master-header-right {
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .master-header-right {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    flex-direction: row !important;
+  }
+
+  .master-header-right > *,
+  .master-header-right .halo-button,
+  .master-header-right button {
+    width: 100% !important;
+    min-height: 30px !important;
+    font-size: 0.62rem !important;
+    padding: 4px 2px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .view-mode-toggle,
+  .header-filter-group {
+    display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
@@ -272,14 +322,27 @@
     gap: 4px !important;
   }
 
-  .mobile-header-shell .view-mode-toggle .view-toggle-btn,
-  .mobile-header-shell .header-filter-group .toggle-depri-btn {
+  .view-mode-toggle .view-toggle-btn,
+  .header-filter-group .toggle-depri-btn {
     flex: 1 !important;
     width: auto !important;
-    min-height: 38px !important;
-    font-size: 0.65rem !important;
-    padding: 6px 2px !important;
+    min-width: unset !important;
+    min-height: 30px !important;
+    font-size: 0.62rem !important;
+    padding: 4px 2px !important;
     white-space: nowrap !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .clear-board-btn,
+  .expanded-menu-row .clear-board-btn {
+    width: 100% !important;
+    min-height: 30px !important;
+    font-size: 0.65rem !important;
+    padding: 4px 2px !important;
+    margin: 0 !important;
     display: inline-flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -290,4 +353,29 @@
   .mobile-layout .sidebar {
     width: 100%;
   }
+}
+
+.mobile-menu-sidebar-filters {
+  width: 100% !important;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  /* flex-shrink: 0 prevents this section from being squashed in the flex column */
+  flex-shrink: 0 !important;
+  /* display:block breaks out of any inherited flex context so children flow naturally */
+  display: block !important;
+}
+
+/* Ensure the sub-sidebar-body within the mobile expanded menu has natural height and flows correctly without collapsing.
+   The global .sub-sidebar-body rule sets flex:1 + overflow-y:auto which collapses it inside a flex column
+   when the parent has no explicit height. These overrides restore natural block flow. */
+.mobile-menu-sidebar-filters .sub-sidebar-body {
+  overflow: visible !important;
+  overflow-y: visible !important;
+  height: auto !important;
+  min-height: 1px !important;        /* Prevent total collapse if children are lazy-loading */
+  flex: none !important;
+  display: block !important;         /* Restore block flow; not a flex item here */
+  padding: 0 !important;
+  width: 100% !important;
 }

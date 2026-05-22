@@ -21,7 +21,7 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
  * Primary view for the Client Manager vertical.
  * Displays client records grouped by category.
  */
-const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen }) => {
+const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen, SidebarComponent, onFilterChange, onReset, onBatchFilter, verticals, activeVertical }) => {
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
   const ui = useManagementUI({ storageKey: 'powerpod_client_view' });
@@ -149,6 +149,16 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
         hideMenuClose={true}
         title="Client Records Manager"
         description="Centralized database for client profiles, billing arrangements, and point-of-contact information."
+        SidebarComponent={SidebarComponent}
+        onFilterChange={onFilterChange}
+        onReset={onReset}
+        onBatchFilter={onBatchFilter}
+        filters={filters}
+        tasks={tasks}
+        permissions={permissions}
+        user={user}
+        verticals={verticals}
+        activeVertical={activeVertical}
         rightActions={
           permissions.canCreateClients && (
             <button

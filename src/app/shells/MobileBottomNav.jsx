@@ -35,9 +35,8 @@ const MobileBottomNav = ({
 }) => {
   const isScrollVisible = useScrollDirection(10, 100);
 
-  const inVertical = activeVertical !== null;
   const forceShow = showOverlay;
-  const isEffectivelyVisible = forceShow || (!inVertical && isScrollVisible);
+  const isEffectivelyVisible = forceShow || isScrollVisible;
 
   const navItems = [
     { id: null, label: 'Dashboard', Icon: IconHome },
@@ -63,7 +62,7 @@ const MobileBottomNav = ({
                 }}
               >
                 <div className="icon-wrapper">
-                  <item.Icon size={24} strokeWidth={isActive ? 2.2 : 1.8} />
+                  <item.Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
                 </div>
                 <span className="nav-label">{item.label}</span>
               </button>
@@ -78,7 +77,7 @@ const MobileBottomNav = ({
             }}
           >
             <div className="icon-wrapper">
-              <IconMenu size={24} />
+              <IconMenu size={16} />
             </div>
             <span className="nav-label">More</span>
           </button>

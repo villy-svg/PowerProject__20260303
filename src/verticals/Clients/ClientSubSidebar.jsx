@@ -28,12 +28,13 @@ const groupLabelStyle = {
   color: 'var(--brand-green)',
   letterSpacing: '0.5px',
 };
-const checkboxGroupStyle = (isExpanded) => ({
+const checkboxGroupStyle = (isExpanded, isMobileMenu) => ({
   display: isExpanded ? 'flex' : 'none',
   flexDirection: 'column',
   gap: '8px',
-  maxHeight: '180px',
-  overflowY: 'auto',
+  /* In mobile menu, the outer overlay scrolls — remove per-group maxHeight so filters flow naturally */
+  maxHeight: isMobileMenu ? 'none' : '180px',
+  overflowY: isMobileMenu ? 'visible' : 'auto',
   padding: '0 12px 16px 12px',
   transition: 'opacity 0.2s ease',
 });
@@ -62,7 +63,7 @@ const checkMarkStyle = (isSelected) => ({
   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
 });
 
-const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange }) => {
+const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange, isMobileMenu }) => {
   return (
     <div style={filterSectionStyle}>
       <div style={groupHeaderStyle} onClick={onToggle}>
@@ -87,7 +88,7 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
         </div>
       )}
 
-      <div style={checkboxGroupStyle(isExpanded)} className="custom-scrollbar">
+      <div style={checkboxGroupStyle(isExpanded, isMobileMenu)} className="custom-scrollbar">
         {options.map(opt => {
           const val = valueKey ? opt[valueKey] : opt;
           const labelText = displayKey ? opt[displayKey] : opt;
@@ -120,6 +121,9 @@ const ClientSubSidebar = ({
   filters,
   hideNavigation,
 }) => {
+  /* All filter groups start collapsed in the mobile menu (hideNavigation=true).
+     The mobile overlay unmounts/remounts on each open/close, so this initial state
+     effectively resets to collapsed every time the menu is opened. */
   const [expandedGroups, setExpandedGroups] = useState({
     vehicle: false,
     service: false,
@@ -237,6 +241,7 @@ const ClientSubSidebar = ({
             onToggle={() => toggleGroup('vehicle')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -250,6 +255,7 @@ const ClientSubSidebar = ({
             onToggle={() => toggleGroup('service')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -263,6 +269,7 @@ const ClientSubSidebar = ({
             onToggle={() => toggleGroup('billing_model')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
         </div>
       )}

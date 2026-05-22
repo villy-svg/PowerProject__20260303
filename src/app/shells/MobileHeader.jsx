@@ -27,6 +27,8 @@ import {
   IconFilter,
 } from '../../components/Icons';
 import MasterHeaderMenu from '../../components/MasterHeaderMenu';
+import '../../components/BottomNav.css';
+import { useAppNavigation } from '../contexts/AppNavigationContext';
 
 const MobileHeader = ({
   title,
@@ -34,8 +36,6 @@ const MobileHeader = ({
   rightActions,
   expandedLeft,
   expandedRight,
-  isMenuOpen,
-  setIsMenuOpen,
   isScrollVisible,
   isSubSidebarOpen,
   onSidebarToggle,
@@ -59,7 +59,15 @@ const MobileHeader = ({
   verticals,
 }) => {
   const hasExpandedContent = !!(expandedLeft || expandedRight || SidebarComponent);
-  const [isBoardSubTrayOpen, setIsBoardSubTrayOpen] = useState(false);
+  // isBoardSubTrayOpen and isMenuOpen lifted to AppNavigationContext so the
+  // hardware back button can dismiss them. They remain functionally identical.
+  const {
+    isMobileMenuOpen: isMenuOpen,
+    setIsMobileMenuOpen: setIsMenuOpen,
+    isMobileBoardSubTrayOpen: isBoardSubTrayOpen,
+    setIsMobileBoardSubTrayOpen: setIsBoardSubTrayOpen,
+    showBottomNavOverlay,
+  } = useAppNavigation();
 
   // ─── Body scroll lock for mobile menu ─────────────────────────────
   useEffect(() => {
@@ -198,10 +206,10 @@ const MobileHeader = ({
 
       {/* MOBILE ACTION TRAY (bottom pill bar) */}
       <div className={`mobile-action-tray ${(isScrollVisible || isMenuOpen || isSubSidebarOpen || isSidebarOpen || isBoardSubTrayOpen) ? '' : 'tray-hidden'}`}>
-        <div className="mobile-action-tray-container">
+        <div className="bottom-nav-container mobile-action-tray-container">
           {/* Home / Switch Vertical */}
           <button
-            className="halo-button mobile-tray-btn"
+            className={`nav-item mobile-tray-btn ${showBottomNavOverlay ? 'active' : ''}`}
             title="Switch Vertical"
             onClick={() => { 
               if (onShowBottomNav) onShowBottomNav(); 
@@ -209,13 +217,16 @@ const MobileHeader = ({
               setIsMenuOpen(false);
             }}
           >
-            <IconHome size={22} />
+            <div className="icon-wrapper">
+              <IconHome size={24} />
+            </div>
+            <span className="nav-label">Switch</span>
           </button>
 
           {/* Board Switcher Toggle (Icon 1) */}
           {boards.length > 0 && (
             <button
-              className={`halo-button mobile-tray-btn ${isBoardSubTrayOpen ? 'active' : ''}`}
+              className={`nav-item mobile-tray-btn ${isBoardSubTrayOpen ? 'active' : ''}`}
               onClick={() => {
                 const nextState = !isBoardSubTrayOpen;
                 setIsBoardSubTrayOpen(nextState);
@@ -223,14 +234,17 @@ const MobileHeader = ({
               }}
               title="Select Board"
             >
-              <IconBoards size={20} />
+              <div className="icon-wrapper">
+                <IconBoards size={24} />
+              </div>
+              <span className="nav-label">Boards</span>
             </button>
           )}
 
           {/* Filters Overlay Toggle (Icon 2 - Funnel replacing legacy Menu Toggle) */}
           {hasExpandedContent && (
             <button
-              className={`halo-button mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
+              className={`nav-item mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
               onClick={() => {
                 const nextMenuState = !isMenuOpen;
                 setIsMenuOpen(nextMenuState);
@@ -239,14 +253,17 @@ const MobileHeader = ({
               }}
               title="Toggle Filters"
             >
-              <IconFilter size={20} />
+              <div className="icon-wrapper">
+                <IconFilter size={24} />
+              </div>
+              <span className="nav-label">Filters</span>
             </button>
           )}
 
           {/* Add Button */}
           {canAdd && (
             <button
-              className={`halo-button mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`}
+              className={`nav-item mobile-tray-btn mobile-add-btn ${isTaskModalOpen ? 'active' : ''}`}
               onClick={() => {
                 onAddClick();
                 setIsBoardSubTrayOpen(false);
@@ -254,7 +271,10 @@ const MobileHeader = ({
               }}
               title="Add New"
             >
-              <IconPlus size={24} />
+              <div className="icon-wrapper">
+                <IconPlus size={24} />
+              </div>
+              <span className="nav-label">Add</span>
             </button>
           )}
         </div>

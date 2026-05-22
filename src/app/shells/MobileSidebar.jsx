@@ -16,8 +16,10 @@
  * - adaptive-ui-strategy §5 Mobile Layout
  */
 
-import React, { useState } from 'react';
-import { IconChevronDown, IconChevronRight } from '../../components/Icons';
+import React from 'react';
+import { 
+  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile
+} from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
 import '../../components/Sidebar.css';
 
@@ -30,22 +32,13 @@ const MobileSidebar = ({
   permissions = {},
   verticalList = [],
 }) => {
-  const [expandedVerticals, setExpandedVerticals] = useState([]);
-
-  const toggleVertical = (e, vId) => {
-    e.stopPropagation();
-    setExpandedVerticals(prev =>
-      prev.includes(vId) ? prev.filter(id => id !== vId) : [...prev, vId]
-    );
-  };
-
   const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
 
   const filteredVerticals = verticalList.filter(vertical => {
-    const isExplicitlyAssigned = user?.assignedVerticals?.includes(vertical.id);
-    if (isHydrating) return isExplicitlyAssigned;
-    if (permissions.scope === 'global') return true;
-    return isExplicitlyAssigned;
+    const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
+    const isLocked = vertical.locked || !isAssigned;
+    if (isHydrating) return vertical.locked;
+    return isLocked;
   });
 
   const canSeeConfig = permissions?.canAccessConfig;
@@ -53,126 +46,192 @@ const MobileSidebar = ({
 
   const handleNavigate = (vId) => {
     setActiveVertical(vId);
-    if (onClose) onClose(); // Auto-close drawer on navigation
+    if (onClose) onClose();
+  };
+
+  const getIconForVertical = (id) => {
+    if (id === 'CHARGING_HUBS') return IconHubs;
+    if (id === 'CLIENTS') return IconDatabase;
+    if (id === 'EMPLOYEES') return IconPeople;
+    return IconFile;
   };
 
   return (
     <>
-      {/* Backdrop overlay for off-canvas drawer */}
-      {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
+      {isOpen && <div className="sub-tray-backdrop" onClick={onClose} />}
 
-      <aside className={`sidebar mobile-sidebar-shell ${isOpen ? 'open' : ''}`}>
-        <div className="sidebar-content-wrapper">
-          <div className="sidebar-top-section">
-            <div className="sidebar-header">
-              {/* Brand space wraps close button for easy tapping */}
-              <button className="mobile-logo-btn" onClick={onClose} aria-label="Close Sidebar">
-                <img src={powerLogo} alt="Logo" className="logo-svg" />
+      <aside className={`mobile-board-sub-tray mobile-sidebar-shell ${isOpen ? '' : 'tray-hidden'}`}>
+        <div className="mobile-board-sub-tray-header">
+          <h4>Menu</h4>
+          <button className="sub-tray-close-btn" onClick={onClose} title="Close Menu">✕</button>
+        </div>
+
+        <div className="mobile-board-sub-tray-content custom-scrollbar">
+          {/* Primary Apps */}
+          <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Apps</h5>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <button 
+                className={`sub-tray-option-btn ${activeVertical === null ? 'active' : ''}`}
+                onClick={() => handleNavigate(null)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <IconHome size={18} style={{ color: activeVertical === null ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                  <span>Dashboard</span>
+                </div>
+                {activeVertical === null && <span className="active-dot" />}
               </button>
+
+              {!isHydrating && filteredVerticals.map(vertical => {
+                const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
+                const isLocked = vertical.locked || !isAssigned;
+                const Icon = getIconForVertical(vertical.id);
+                const isActive = activeVertical === vertical.id;
+
+                return (
+                  <button
+                    key={vertical.id}
+                    className={`sub-tray-option-btn ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                    onClick={() => !isLocked && handleNavigate(vertical.id)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Icon size={18} style={{ color: isActive ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                      <span>{vertical.label}</span>
+                    </div>
+                    {isActive && <span className="active-dot" />}
+                    {isLocked && <span style={{ fontSize: '11px', opacity: 0.5 }}>🔒</span>}
+                  </button>
+                );
+              })}
             </div>
-
-            <nav className="sidebar-nav">
-              <ul>
-                <li
-                  className={activeVertical === null ? 'active' : ''}
-                  onClick={() => handleNavigate(null)}
-                >
-                  Dashboard
-                </li>
-
-                <hr className="nav-divider" />
-
-                {isHydrating ? (
-                  verticalList.map((v) => (
-                    <li key={v.id} className="nav-loading-pulse">{v.label}</li>
-                  ))
-                ) : filteredVerticals.length > 0 ? (
-                  filteredVerticals.map((vertical) => {
-                    const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
-                    const isLocked = vertical.locked || !isAssigned;
-                    const isExpanded = expandedVerticals.includes(vertical.id);
-                    const canManage = permissions?.canAccessConfig;
-
-                    return (
-                      <React.Fragment key={vertical.id}>
-                        <li
-                          className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''} nav-parent-item`}
-                          onClick={() => !isLocked && handleNavigate(vertical.id)}
-                          title={isLocked ? "Coming Soon / No Access" : ""}
-                        >
-                          <span className="v-label-text">{vertical.label}</span>
-                          <div className="v-actions-wrapper">
-                            {isLocked && <span className="lock-icon">🔒</span>}
-                            {!isLocked && canManage && verticalList.length > 0 && 
-                              (vertical.id === 'CHARGING_HUBS' || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
-                              <button
-                                className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}
-                                onClick={(e) => toggleVertical(e, vertical.id)}
-                              >
-                                {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-                              </button>
-                            )}
-                          </div>
-                        </li>
-
-                        {!isLocked && isExpanded && canManage && (
-                          <ul className="sub-nav-list">
-                            {vertical.id === 'CHARGING_HUBS' && (
-                              <>
-                                <li className={activeVertical === 'hub_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('hub_management')}>Hub Administration</li>
-                                <li className={activeVertical === 'hub_function_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('hub_function_management')}>Function Manager</li>
-                              </>
-                            )}
-                            {vertical.id === 'CLIENTS' && (
-                              <>
-                                <li className={activeVertical === 'client_category_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('client_category_management')}>Category Manager</li>
-                                <li className={activeVertical === 'client_service_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('client_service_management')}>Service Manager</li>
-                                <li className={activeVertical === 'client_billing_model_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('client_billing_model_management')}>Billing Model Manager</li>
-                              </>
-                            )}
-                            {vertical.id === 'EMPLOYEES' && (
-                              <>
-                                <li className={activeVertical === 'department_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('department_management')}>Department Manager</li>
-                                <li className={activeVertical === 'employee_role_management' ? 'active sub-active' : ''} onClick={() => handleNavigate('employee_role_management')}>Role Manager</li>
-                              </>
-                            )}
-                          </ul>
-                        )}
-                      </React.Fragment>
-                    );
-                  })
-                ) : (
-                  <li className="nav-empty-state">No Access</li>
-                )}
-              </ul>
-            </nav>
           </div>
 
-          <div className="sidebar-bottom-section">
-            <nav className="sidebar-nav">
-              <ul>
-                {canSeeConfig && (
+          {/* Management Modules (Sub-navs) */}
+          {canSeeConfig && !isHydrating && (
+            <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+              <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Management</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {/* Charging Hubs Managers */}
+                {filteredVerticals.find(v => v.id === 'CHARGING_HUBS' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
                   <>
-                    <hr className="nav-divider" />
-                    {showUserMgmt && (
-                      <li
-                        className={activeVertical === 'user_management' ? 'active' : ''}
-                        onClick={() => handleNavigate('user_management')}
-                      >
-                        User Management
-                      </li>
-                    )}
-                    <li
-                      className={activeVertical === 'configuration' ? 'active' : ''}
-                      onClick={() => handleNavigate('configuration')}
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'hub_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('hub_management')}
                     >
-                      Configuration
-                    </li>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconZap size={18} style={{ color: activeVertical === 'hub_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Hub Admin</span>
+                      </div>
+                      {activeVertical === 'hub_management' && <span className="active-dot" />}
+                    </button>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'hub_function_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('hub_function_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconBoards size={18} style={{ color: activeVertical === 'hub_function_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Functions</span>
+                      </div>
+                      {activeVertical === 'hub_function_management' && <span className="active-dot" />}
+                    </button>
                   </>
                 )}
-              </ul>
-            </nav>
-          </div>
+
+                {/* Clients Managers */}
+                {filteredVerticals.find(v => v.id === 'CLIENTS' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
+                  <>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'client_category_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('client_category_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconDatabase size={18} style={{ color: activeVertical === 'client_category_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Categories</span>
+                      </div>
+                      {activeVertical === 'client_category_management' && <span className="active-dot" />}
+                    </button>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'client_service_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('client_service_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconDatabase size={18} style={{ color: activeVertical === 'client_service_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Services</span>
+                      </div>
+                      {activeVertical === 'client_service_management' && <span className="active-dot" />}
+                    </button>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'client_billing_model_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('client_billing_model_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconDatabase size={18} style={{ color: activeVertical === 'client_billing_model_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Billing</span>
+                      </div>
+                      {activeVertical === 'client_billing_model_management' && <span className="active-dot" />}
+                    </button>
+                  </>
+                )}
+
+                {/* Employees Managers */}
+                {filteredVerticals.find(v => v.id === 'EMPLOYEES' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
+                  <>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'department_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('department_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconPeople size={18} style={{ color: activeVertical === 'department_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Departments</span>
+                      </div>
+                      {activeVertical === 'department_management' && <span className="active-dot" />}
+                    </button>
+                    <button 
+                      className={`sub-tray-option-btn ${activeVertical === 'employee_role_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('employee_role_management')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <IconPeople size={18} style={{ color: activeVertical === 'employee_role_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                        <span>Roles</span>
+                      </div>
+                      {activeVertical === 'employee_role_management' && <span className="active-dot" />}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* System */}
+          {canSeeConfig && (
+            <div className="tray-section" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+              <h5 className="tray-section-title" style={{ margin: '4px 0 4px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>System</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {showUserMgmt && (
+                  <button 
+                    className={`sub-tray-option-btn ${activeVertical === 'user_management' ? 'active' : ''}`} 
+                    onClick={() => handleNavigate('user_management')}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <IconPeople size={18} style={{ color: activeVertical === 'user_management' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                      <span>Users</span>
+                    </div>
+                    {activeVertical === 'user_management' && <span className="active-dot" />}
+                  </button>
+                )}
+                <button 
+                  className={`sub-tray-option-btn ${activeVertical === 'configuration' ? 'active' : ''}`} 
+                  onClick={() => handleNavigate('configuration')}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <IconSettings size={18} style={{ color: activeVertical === 'configuration' ? 'var(--brand-green)' : 'rgba(255, 255, 255, 0.5)', transition: 'color 0.2s' }} />
+                    <span>Config</span>
+                  </div>
+                  {activeVertical === 'configuration' && <span className="active-dot" />}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </aside>
     </>

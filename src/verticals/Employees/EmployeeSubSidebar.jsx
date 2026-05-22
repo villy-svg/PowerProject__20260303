@@ -10,7 +10,7 @@ import './EmployeeSubSidebar.css';
  * Contains filters for employee records.
  */
 
-const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange }) => {
+const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, valueKey, isExpanded, onToggle, onBatchFilter, onFilterChange, isMobileMenu }) => {
   return (
     <div className="filter-section">
       <div className="filter-group-header" onClick={onToggle}>
@@ -42,7 +42,8 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
         </div>
       )}
 
-      <div className={`filter-checkbox-group custom-scrollbar ${!isExpanded ? 'hidden' : ''}`}>
+      {/* isMobileMenu adds 'mobile-menu' class to remove the 180px per-group cap */}
+      <div className={`filter-checkbox-group custom-scrollbar ${!isExpanded ? 'hidden' : ''} ${isMobileMenu ? 'mobile-menu' : ''}`}>
         {options.map(opt => {
           const val = valueKey ? opt[valueKey] : opt;
           const labelText = displayKey ? opt[displayKey] : opt;
@@ -67,6 +68,9 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
 };
 
 const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, hideNavigation }) => {
+  /* All filter groups start collapsed in the mobile menu (hideNavigation=true).
+     The mobile overlay unmounts/remounts on each open/close, so this initial state
+     effectively resets to collapsed every time the menu is opened. */
   const [expandedGroups, setExpandedGroups] = useState({
     role: false,
     hub: false,
@@ -163,6 +167,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
             onToggle={() => toggleGroup('role')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -176,6 +181,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
             onToggle={() => toggleGroup('hub')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
 
           <FilterGroup
@@ -189,6 +195,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
             onToggle={() => toggleGroup('department')}
             onBatchFilter={onBatchFilter}
             onFilterChange={onFilterChange}
+            isMobileMenu={!!hideNavigation}
           />
         </div>
       )}
