@@ -625,21 +625,24 @@
   gap: 6px;
 }
 
-/* Deactivate button — warning tone */
+/* Deactivate button — warning tone (muted by default to reduce cognitive load) */
 .deactivate-btn {
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(239, 68, 68, 0.08) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  color: #f87171 !important;
+  background: transparent !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  opacity: 0.6;
   border-radius: 6px;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
 .deactivate-btn:hover {
-  background: rgba(239, 68, 68, 0.18) !important;
-  border-color: rgba(239, 68, 68, 0.5) !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #f87171 !important;
+  opacity: 1;
   transform: translateY(-1px);
 }
 
