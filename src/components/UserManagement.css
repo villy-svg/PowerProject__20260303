@@ -530,6 +530,137 @@
   border: 1px solid var(--border-color);
   color: var(--text-color);
 }
+/* Active employee link — subtle green tint, same palette as brand-green */
+.v-tag.linked-active {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.28);
+  color: #34d399;
+}
+/* Inactive employee link — faded red; eye-friendly, clearly distinct from normal */
+.v-tag.linked-inactive {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  color: #f87171;
+  opacity: 0.85; /* Slight fade-back — communicates "impaired" state without alarming */
+}
+
+/* ==========================================================================
+   USER ACTIVE / INACTIVE STATUS SYSTEM
+   ========================================================================== */
+
+/* Status badge pills */
+.user-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.user-status-badge--active {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #34d399;
+}
+.user-status-badge--active::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px #34d399;
+  animation: pulse-dot 2s infinite;
+}
+.user-status-badge--inactive {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+.user-status-badge--inactive::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f87171;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Faded row for inactive users in list view */
+.user-row--inactive td {
+  opacity: 0.5;
+}
+.user-row--inactive:hover td {
+  opacity: 0.75;
+}
+
+/* Faded card for inactive users in grid view */
+.user-card--inactive {
+  opacity: 0.55;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+.user-card--inactive:hover {
+  opacity: 0.85;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Card header right slot — status badge + role badge stacked */
+.user-card-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* Action buttons row in list view */
+.user-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Deactivate button — warning tone */
+.deactivate-btn {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #f87171 !important;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.deactivate-btn:hover {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* Reactivate button — muted green tone */
+.reactivate-btn {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(52, 211, 153, 0.08) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  color: #34d399 !important;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.reactivate-btn:hover {
+  background: rgba(52, 211, 153, 0.18) !important;
+  border-color: rgba(52, 211, 153, 0.5) !important;
+  transform: translateY(-1px);
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */

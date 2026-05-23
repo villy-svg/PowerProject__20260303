@@ -134,7 +134,6 @@ export const profileService = {
         .from('employees')
         .select('id')
         .ilike('email', profile.email) // Use .ilike for case-insensitive matching
-        .eq('status', 'Active')
         .maybeSingle();
 
       if (matchedEmp) {

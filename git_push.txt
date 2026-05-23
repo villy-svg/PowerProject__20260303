@@ -25,8 +25,8 @@ git branch --show-current
 
 #Check Current Supabase Link : staging : eeoibqxhfkrgbylnluvk | prod : dhhbdgzutlltiojbsboi
 #npx supabase link --project-ref dhhbdgzutlltiojbsboi
-#npx supabase link --project-ref eeoibqxhfkrgbylnluvk 
 #npx supabase db push
+#npx supabase link --project-ref eeoibqxhfkrgbylnluvk 
 #npx supabase deploy functions entity-create
 #npx supabase functions deploy entity-create --no-verify-jwt
 #npx supabase functions deploy entity-read --project-ref dhhbdgzutlltiojbsboi

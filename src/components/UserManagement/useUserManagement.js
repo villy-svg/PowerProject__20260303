@@ -9,7 +9,7 @@ export const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admi
 /**
  * useUserManagement Hook
  * Logic engine for the User Management dashboard.
- * Handles user list fetching and atomic permission syncing.
+ * Handles user list fetching, atomic permission syncing, and user activation toggling.
  */
 export const useUserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -151,7 +151,58 @@ export const useUserManagement = () => {
     }
   };
 
-  // 4. Permission Helpers (Capping Logic)
+  // 4. Deactivate User
+  // Optimistically updates local state, then calls the RPC, then refreshes.
+  const handleDeactivate = async (userId) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return;
+
+    // Optimistic update
+    setUsers(prev => prev.map(u =>
+      u.id === userId ? { ...u, is_active: false, role_id: 'vertical_viewer', verticalPermissions: {} } : u
+    ));
+    setStatus({ type: '', text: '' });
+
+    try {
+      await userService.deactivateUser(userId);
+      setStatus({ type: 'success', text: `${targetUser.name} has been deactivated and all access removed.` });
+      await fetchUsers(false);
+    } catch (err) {
+      // Rollback optimistic update on failure
+      setUsers(prev => prev.map(u => u.id === userId ? targetUser : u));
+      console.error("Deactivation failed:", err.message);
+      setStatus({ type: 'error', text: `Deactivation failed: ${err.message}` });
+    }
+  };
+
+  // 5. Reactivate User
+  // Optimistically updates local state, then calls the RPC, then refreshes.
+  const handleReactivate = async (userId) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return;
+
+    // Optimistic update
+    setUsers(prev => prev.map(u =>
+      u.id === userId ? { ...u, is_active: true } : u
+    ));
+    setStatus({ type: '', text: '' });
+
+    try {
+      await userService.reactivateUser(userId);
+      setStatus({
+        type: 'success',
+        text: `${targetUser.name} reactivated. They have base access only — re-grant permissions via the Permission Editor.`
+      });
+      await fetchUsers(false);
+    } catch (err) {
+      // Rollback optimistic update on failure
+      setUsers(prev => prev.map(u => u.id === userId ? targetUser : u));
+      console.error("Reactivation failed:", err.message);
+      setStatus({ type: 'error', text: `Reactivation failed: ${err.message}` });
+    }
+  };
+
+  // 6. Permission Helpers (Capping Logic)
   const handleLevelChange = (newLevel) => {
     setEditRoleLevel(newLevel);
     const newMaxRank = LEVEL_RANKS[newLevel];
@@ -217,9 +268,12 @@ export const useUserManagement = () => {
   return {
     users, loading, viewMode, setViewMode, status, setStatus,
     editingUser, openEditor, closeEditor, handleSyncPermissions,
+    handleDeactivate, handleReactivate,
     editRoleScope, setEditRoleScope,
     editRoleLevel, handleLevelChange,
     editVerticalPermissions, updateVerticalLevel, updateFeatureLevel,
     expandedFeatures, setExpandedFeatures
   };
 };
+
+

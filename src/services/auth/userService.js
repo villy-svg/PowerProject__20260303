@@ -48,8 +48,9 @@ export const userService = {
   /**
    * Performs an ATOMIC sync of user permissions via the sync_user_permissions RPC.
    * Ensures either all tables update or none do.
+   * Optionally pass isActive to also set the is_active flag atomically.
    */
-  async syncPermissions({ userId, roleId, verticalGrants, featureGrants }) {
+  async syncPermissions({ userId, roleId, verticalGrants, featureGrants, isActive = true }) {
     // 1. Sanitize Data (Ensure 'none' levels aren't sent)
     const vAccess = verticalGrants
       .filter(v => v.access_level !== 'none')
@@ -68,10 +69,40 @@ export const userService = {
       p_target_id: userId,
       p_role_id: roleId,
       p_v_access: vAccess,
-      p_f_access: fAccess
+      p_f_access: fAccess,
+      p_is_active: isActive
     });
 
     if (error) throw error;
     return { success: true };
-  }
+  },
+
+  /**
+   * Deactivates a user account.
+   * Strips all vertical/feature access and sets role to vertical_viewer.
+   * Master admin only — enforced server-side.
+   * @param {string} userId - The user_profiles.id of the user to deactivate.
+   */
+  async deactivateUser(userId) {
+    const { error } = await supabase.rpc('deactivate_user', {
+      p_target_id: userId
+    });
+    if (error) throw error;
+    return { success: true };
+  },
+
+  /**
+   * Reactivates a previously deactivated user account.
+   * Sets is_active = true; permissions remain at vertical_viewer.
+   * The admin must manually re-grant access via the Permission Editor.
+   * Master admin only — enforced server-side.
+   * @param {string} userId - The user_profiles.id of the user to reactivate.
+   */
+  async reactivateUser(userId) {
+    const { error } = await supabase.rpc('reactivate_user', {
+      p_target_id: userId
+    });
+    if (error) throw error;
+    return { success: true };
+  },
 };

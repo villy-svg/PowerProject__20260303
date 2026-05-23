@@ -22,6 +22,8 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
     openEditor,
     closeEditor,
     handleSyncPermissions,
+    handleDeactivate,
+    handleReactivate,
     editRoleScope,
     setEditRoleScope,
     editRoleLevel,
@@ -77,7 +79,9 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
       <UserList 
         users={users} 
         viewMode={viewMode} 
-        onEdit={openEditor} 
+        onEdit={openEditor}
+        onDeactivate={handleDeactivate}
+        onReactivate={handleReactivate}
       />
 
       {editingUser && (
