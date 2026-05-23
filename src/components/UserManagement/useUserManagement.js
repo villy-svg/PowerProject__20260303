@@ -6,30 +6,56 @@ import { ROLE_LEVELS } from '../../constants/roles';
 
 export const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
 
-/**
- * Sorts users based on:
- * 1. Active status above Inactive status (user.is_active !== false).
- * 2. Higher Employee Role seniority_level above Lower Employee Role seniority_level.
- * 3. Stable alphabetical order by name as fallback.
- */
 const sortUsers = (userList) => {
-  return [...userList].sort((a, b) => {
+  const sorted = [...userList].sort((a, b) => {
+    // Rule 1: Active above Inactive
     const aActive = a.is_active !== false;
     const bActive = b.is_active !== false;
     if (aActive !== bActive) {
       return aActive ? -1 : 1;
     }
 
-    const aSeniority = a.linkedEmployee?.employee_roles?.seniority_level ?? 0;
-    const bSeniority = b.linkedEmployee?.employee_roles?.seniority_level ?? 0;
+    // Helper to get seniority level from multiple possible database relation paths
+    const getSeniority = (u) => {
+      const emp = u.linkedEmployee;
+      if (!emp) return 0;
+      
+      // 1. Check if seniority_level is already flattened
+      if (typeof emp.seniority_level === 'number') {
+        return emp.seniority_level;
+      }
+      
+      // 2. Check if employee_roles is joined
+      const roles = emp.employee_roles;
+      if (!roles) return 0;
+      
+      // Support array of roles or single role object
+      if (Array.isArray(roles)) {
+        return roles[0]?.seniority_level ?? 0;
+      }
+      return roles.seniority_level ?? 0;
+    };
+
+    const aSeniority = getSeniority(a);
+    const bSeniority = getSeniority(b);
     if (aSeniority !== bSeniority) {
-      return bSeniority - aSeniority;
+      return bSeniority - aSeniority; // Higher seniority (larger number) comes first
     }
 
+    // Stable fallback: Alphabetical by Name
     const aName = a.name || '';
     const bName = b.name || '';
     return aName.localeCompare(bName);
   });
+
+  // Diagnostic log to verify sorting scores in the browser console
+  console.log('[UserManagement] Sorted users list:', sorted.map(u => ({
+    name: u.name,
+    active: u.is_active !== false,
+    seniority: u.linkedEmployee ? (u.linkedEmployee.seniority_level || u.linkedEmployee.employee_roles?.seniority_level || u.linkedEmployee.employee_roles?.[0]?.seniority_level || 0) : 0
+  })));
+
+  return sorted;
 };
 
 /**
