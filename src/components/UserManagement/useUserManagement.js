@@ -80,22 +80,48 @@ export const useUserManagement = () => {
   const fetchUsers = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      // 1a. Fetch basic profile & employee link
-      const profiles = await userService.fetchUsers();
+      // 1a. Fetch basic profiles, all employees (for self-healing matching), and vertical access
+      const [profiles, { data: allEmployees }, { data: vAccess }] = await Promise.all([
+        userService.fetchUsers(),
+        supabase.from('employees').select('*, employee_roles(seniority_level)'),
+        supabase.from('vertical_access').select('user_id, vertical_id, access_level')
+      ]);
 
-      // 1b. Fetch all vertical access for mapping (Batch fetch for list view)
-      const { data: vAccess } = await supabase
-        .from('vertical_access')
-        .select('user_id, vertical_id, access_level');
-
-      // 1c. Merge data
+      // 1b. Merge data and self-heal missing employee links
       const merged = (profiles || []).map(u => {
         const uAccess = (vAccess || []).filter(va => va.user_id === u.id);
         const vPerms = {};
         uAccess.forEach(va => {
             vPerms[va.vertical_id] = { level: va.access_level };
         });
-        return { ...u, verticalPermissions: vPerms };
+
+        let linkedEmployee = u.linkedEmployee;
+
+        // Self-heal: If database link is missing, match by email case-insensitively
+        if (!linkedEmployee && u.email && allEmployees) {
+          const matched = allEmployees.find(emp => emp.email && emp.email.toLowerCase() === u.email.toLowerCase());
+          if (matched) {
+            linkedEmployee = {
+              ...matched,
+              // Format employee_roles joined data so it matches the structure expected by UserList and sortUsers
+              employee_roles: matched.employee_roles
+            };
+
+            // Proactively heal database reference in background (non-blocking)
+            supabase.from('user_profiles')
+              .update({ employee_id: matched.id })
+              .eq('id', u.id)
+              .then(({ error }) => {
+                if (error) {
+                  console.warn(`[SelfHealing] Failed to heal employee link for user ${u.name}:`, error.message);
+                } else {
+                  console.log(`[SelfHealing] Successfully linked employee ${matched.full_name} to user ${u.name} in DB`);
+                }
+              });
+          }
+        }
+
+        return { ...u, linkedEmployee, verticalPermissions: vPerms };
       });
 
       setUsers(sortUsers(merged));
