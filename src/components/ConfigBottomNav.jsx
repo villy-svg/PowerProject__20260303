@@ -31,35 +31,54 @@ import { useAppNavigation } from '../app/contexts/AppNavigationContext';
  * The Dashboard tab is special: it navigates away from config entirely.
  */
 const CONFIG_TABS = [
-  { id: 'home',    label: 'Dashboard', Icon: IconHome,     section: null },
+  { id: 'switch',  label: 'Switch',    Icon: IconHome,     section: null },
   { id: 'hubs',    label: 'Hubs',      Icon: IconHubs,     section: 'config-section-hubs' },
   { id: 'team',    label: 'Team',      Icon: IconPeople,   section: 'config-section-team' },
   { id: 'clients', label: 'Clients',   Icon: IconDatabase, section: 'config-section-clients' },
   { id: 'general', label: 'General',   Icon: IconSettings, section: 'config-section-general' },
 ];
 
-const ConfigBottomNav = ({ activeSection }) => {
-  const { setActiveVertical } = useAppNavigation();
+const ConfigBottomNav = ({ 
+  activeSection, 
+  setActiveSection, 
+  permissions = {}, 
+  user = {}, 
+  verticals = {} 
+}) => {
+  const { showBottomNavOverlay, setShowBottomNavOverlay } = useAppNavigation();
+
+  // Filter tabs based on vertical permissions
+  const filteredTabs = CONFIG_TABS.filter(tab => {
+    if (tab.id === 'switch') return true;
+    if (tab.id === 'general') return true;
+    if (tab.id === 'hubs') {
+      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id);
+    }
+    if (tab.id === 'team') {
+      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id);
+    }
+    if (tab.id === 'clients') {
+      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id);
+    }
+    return false;
+  });
 
   const handleTabClick = (tab) => {
-    if (tab.id === 'home') {
-      // Navigate away from Configuration to the Dashboard
-      setActiveVertical(null);
+    if (tab.id === 'switch') {
+      setShowBottomNavOverlay(prev => !prev);
       return;
     }
-    // Smooth-scroll to the section anchor within the config page
-    const el = document.getElementById(tab.section);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (setActiveSection) {
+      setActiveSection(tab.id);
     }
   };
 
   return (
     <nav className="bottom-nav config-bottom-nav" aria-label="Configuration Sections">
       <div className="bottom-nav-container">
-        {CONFIG_TABS.map((tab) => {
-          const isActive = tab.id === 'home'
-            ? false // Home tab never shows as "active" — it navigates away
+        {filteredTabs.map((tab) => {
+          const isActive = tab.id === 'switch'
+            ? showBottomNavOverlay
             : activeSection === tab.id;
 
           return (

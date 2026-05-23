@@ -2,45 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../services/core/supabaseClient';
 import { IconHome, IconMenu } from './Icons';
 import ConfigBottomNav from './ConfigBottomNav';
+import { useIsMobile } from '../hooks/useIsMobile';
 import './Configuration.css';
 
 const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, onShowBottomNav, verticals = {}, verticalList = [] }) => {
+  const { isMobile } = useIsMobile();
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   const [testRunning, setTestRunning] = useState(false);
-  // Tracks which config section is currently in the viewport (drives ConfigBottomNav active tab)
-  const [activeSection, setActiveSection] = useState('hubs');
+  
+  // Determine first available configuration section based on permissions and assignment
+  const getFirstAvailableSection = () => {
+    if (!permissions || !permissions.scope) return 'hubs';
+    const hasHubs = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id);
+    if (hasHubs) return 'hubs';
+    const hasTeam = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id);
+    if (hasTeam) return 'team';
+    const hasClients = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id);
+    if (hasClients) return 'clients';
+    return 'general';
+  };
+
+  const [activeSection, setActiveSection] = useState(() => getFirstAvailableSection());
   
   const canManageSystem = permissions.canManageRoles;
   const canClearAll = permissions.canDelete && permissions.scope === 'global';
 
-  // ── IntersectionObserver: track which section is visible on mobile ────────
-  // Watches the four config section anchors and updates activeSection state.
-  // Uses a top-biased rootMargin so the tab activates as sections enter from below.
+  // Keep activeSection in sync with permission changes
   useEffect(() => {
-    const sectionIds = ['hubs', 'team', 'clients', 'general'];
-    const elements = sectionIds
-      .map(id => document.getElementById(`config-section-${id}`))
-      .filter(Boolean);
-
-    if (elements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the topmost visible section and activate its tab
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) {
-          const id = visible[0].target.id.replace('config-section-', '');
-          setActiveSection(id);
-        }
-      },
-      { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
-    );
-
-    elements.forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, [verticalList]); // Re-run if vertical list changes (sections may appear/disappear)
+    setActiveSection(getFirstAvailableSection());
+  }, [permissions.scope, user.assignedVerticals, verticals]);
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
@@ -202,22 +192,24 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
             <h2>System Configuration</h2>
             <p>Manage groupings and global application settings.</p>
           </div>
-          <div className="view-toggle">
-            <button 
-              className={viewMode === 'grid' ? 'active' : ''} 
-              onClick={() => toggleViewMode('grid')}
-              title="Grid View"
-            >
-              <IconHome size={18} />
-            </button>
-            <button 
-              className={viewMode === 'horizontal' ? 'active' : ''} 
-              onClick={() => toggleViewMode('horizontal')}
-              title="List View"
-            >
-              <IconMenu size={18} />
-            </button>
-          </div>
+          {!isMobile && (
+            <div className="view-toggle">
+              <button 
+                className={viewMode === 'grid' ? 'active' : ''} 
+                onClick={() => toggleViewMode('grid')}
+                title="Grid View"
+              >
+                <IconHome size={18} />
+              </button>
+              <button 
+                className={viewMode === 'horizontal' ? 'active' : ''} 
+                onClick={() => toggleViewMode('horizontal')}
+                title="List View"
+              >
+                <IconMenu size={18} />
+              </button>
+            </div>
+          )}
         </header>
 
         <div className="config-content">
@@ -231,9 +223,20 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
             if (!hasVerticalAccess) return null;
 
             let sectionId = '';
-            if (vertical.id === verticals.CHARGING_HUBS?.id) sectionId = 'config-section-hubs';
-            else if (vertical.id === verticals.EMPLOYEES?.id) sectionId = 'config-section-team';
-            else if (vertical.id === verticals.CLIENTS?.id) sectionId = 'config-section-clients';
+            let groupSectionKey = '';
+            if (vertical.id === verticals.CHARGING_HUBS?.id) {
+              sectionId = 'config-section-hubs';
+              groupSectionKey = 'hubs';
+            } else if (vertical.id === verticals.EMPLOYEES?.id) {
+              sectionId = 'config-section-team';
+              groupSectionKey = 'team';
+            } else if (vertical.id === verticals.CLIENTS?.id) {
+              sectionId = 'config-section-clients';
+              groupSectionKey = 'clients';
+            }
+
+            // On mobile, only render the active sub-page section
+            if (isMobile && activeSection !== groupSectionKey) return null;
 
             return (
               <div key={vertical.id} id={sectionId} className="config-group">
@@ -264,20 +267,22 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
           })}
 
           {/* Global Settings (Accessible to all) */}
-          <div id="config-section-general" className="config-group">
-            <h3 className="group-label">General Settings</h3>
-            <div className="config-items-container">
-              <div className="config-tile non-clickable">
-                <div className="tile-info">
-                  <h4>Display Preferences</h4>
-                  <p>Theme and UI scaling are managed via the header.</p>
+          {(!isMobile || activeSection === 'general') && (
+            <div id="config-section-general" className="config-group">
+              <h3 className="group-label">General Settings</h3>
+              <div className="config-items-container">
+                <div className="config-tile non-clickable">
+                  <div className="tile-info">
+                    <h4>Display Preferences</h4>
+                    <p>Theme and UI scaling are managed via the header.</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Master Admin Controls at the Bottom */}
-          {canManageSystem && (
+          {canManageSystem && (!isMobile || activeSection === 'general') && (
             <div className="config-group master-controls">
               <h3 className="group-label master-label">🔒 Master Admin Controls</h3>
               <div className="config-items-container">
@@ -323,7 +328,13 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
           )}
         </div>
       </div>
-      <ConfigBottomNav activeSection={activeSection} />
+      <ConfigBottomNav 
+        activeSection={activeSection} 
+        setActiveSection={setActiveSection}
+        permissions={permissions}
+        user={user}
+        verticals={verticals}
+      />
     </div>
   );
 };

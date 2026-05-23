@@ -164,4 +164,9 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* --- CONFIG BOTTOM NAV LAYER --- */
+.config-bottom-nav {
+  z-index: 4001; /* Sits on top of the un-overlayed MobileBottomNav */
 }
