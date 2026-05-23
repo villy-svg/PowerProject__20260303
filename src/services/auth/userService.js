@@ -21,7 +21,10 @@ export const userService = {
           emp_code,
           email,
           status,
-          role_id
+          role_id,
+          employee_roles (
+            seniority_level
+          )
         )
       `)
       .order('name', { ascending: true });

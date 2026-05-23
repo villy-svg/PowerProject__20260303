@@ -7,6 +7,32 @@ import { ROLE_LEVELS } from '../../constants/roles';
 export const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
 
 /**
+ * Sorts users based on:
+ * 1. Active status above Inactive status (user.is_active !== false).
+ * 2. Higher Employee Role seniority_level above Lower Employee Role seniority_level.
+ * 3. Stable alphabetical order by name as fallback.
+ */
+const sortUsers = (userList) => {
+  return [...userList].sort((a, b) => {
+    const aActive = a.is_active !== false;
+    const bActive = b.is_active !== false;
+    if (aActive !== bActive) {
+      return aActive ? -1 : 1;
+    }
+
+    const aSeniority = a.linkedEmployee?.employee_roles?.seniority_level ?? 0;
+    const bSeniority = b.linkedEmployee?.employee_roles?.seniority_level ?? 0;
+    if (aSeniority !== bSeniority) {
+      return bSeniority - aSeniority;
+    }
+
+    const aName = a.name || '';
+    const bName = b.name || '';
+    return aName.localeCompare(bName);
+  });
+};
+
+/**
  * useUserManagement Hook
  * Logic engine for the User Management dashboard.
  * Handles user list fetching, atomic permission syncing, and user activation toggling.
@@ -46,7 +72,7 @@ export const useUserManagement = () => {
         return { ...u, verticalPermissions: vPerms };
       });
 
-      setUsers(merged);
+      setUsers(sortUsers(merged));
     } catch (err) {
       console.error("Error fetching users:", err.message);
       setStatus({ type: 'error', text: 'Failed to load user records.' });
@@ -158,9 +184,9 @@ export const useUserManagement = () => {
     if (!targetUser) return;
 
     // Optimistic update
-    setUsers(prev => prev.map(u =>
+    setUsers(prev => sortUsers(prev.map(u =>
       u.id === userId ? { ...u, is_active: false, role_id: 'vertical_viewer', verticalPermissions: {} } : u
-    ));
+    )));
     setStatus({ type: '', text: '' });
 
     try {
@@ -169,7 +195,7 @@ export const useUserManagement = () => {
       await fetchUsers(false);
     } catch (err) {
       // Rollback optimistic update on failure
-      setUsers(prev => prev.map(u => u.id === userId ? targetUser : u));
+      setUsers(prev => sortUsers(prev.map(u => u.id === userId ? targetUser : u)));
       console.error("Deactivation failed:", err.message);
       setStatus({ type: 'error', text: `Deactivation failed: ${err.message}` });
     }
@@ -182,9 +208,9 @@ export const useUserManagement = () => {
     if (!targetUser) return;
 
     // Optimistic update
-    setUsers(prev => prev.map(u =>
+    setUsers(prev => sortUsers(prev.map(u =>
       u.id === userId ? { ...u, is_active: true } : u
-    ));
+    )));
     setStatus({ type: '', text: '' });
 
     try {
@@ -196,7 +222,7 @@ export const useUserManagement = () => {
       await fetchUsers(false);
     } catch (err) {
       // Rollback optimistic update on failure
-      setUsers(prev => prev.map(u => u.id === userId ? targetUser : u));
+      setUsers(prev => sortUsers(prev.map(u => u.id === userId ? targetUser : u)));
       console.error("Reactivation failed:", err.message);
       setStatus({ type: 'error', text: `Reactivation failed: ${err.message}` });
     }
