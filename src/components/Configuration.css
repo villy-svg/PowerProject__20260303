@@ -17,9 +17,9 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 24px;
+  padding-bottom: 16px;
 }
 .header-text h2 {
   font-size: 1.8rem;
@@ -31,7 +31,7 @@
 .header-text p {
   font-size: 1rem;
   opacity: 0.7;
-  margin-bottom: 32px;
+  margin-bottom: 0;
   line-height: 1.5;
 }
 /* View Toggle */
