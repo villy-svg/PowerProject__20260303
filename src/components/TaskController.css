@@ -18,10 +18,10 @@
   opacity: 0.7;
 }
 
-.toggle-depri-btn.active {
-  background: rgba(0, 255, 133, 0.15) !important;
-  color: var(--brand-mint) !important;
-  border: 1px solid var(--brand-mint) !important;
+.halo-button.toggle-depri-btn.active {
+  background: rgba(0, 255, 133, 0.15);
+  color: var(--brand-mint);
+  border: 1px solid var(--brand-mint);
   opacity: 1;
 }
 
@@ -239,10 +239,10 @@
   justify-content: flex-end;
 }
 
-.confirm-btn {
-  background: rgba(0, 255, 133, 0.1) !important;
-  color: var(--brand-mint) !important;
-  border: 1px solid var(--brand-mint) !important;
+.halo-button.confirm-btn {
+  background: rgba(0, 255, 133, 0.1);
+  color: var(--brand-mint);
+  border: 1px solid var(--brand-mint);
   font-weight: 700;
   min-width: 100px;
 }
@@ -264,15 +264,15 @@
 @media screen and (max-width: 768px) {
   .view-mode-toggle {
     width: 100%;
-    display: flex !important;
-    gap: 4px !important;
+    display: flex;
+    gap: 4px;
   }
 
   .view-mode-toggle .view-toggle-btn {
     flex: 1;
     text-align: center;
-    padding: 8px 4px !important;
-    min-width: unset !important;
+    padding: 8px 4px;
+    min-width: unset;
   }
 
   .header-filter-group {
@@ -284,9 +284,9 @@
   .header-filter-group .toggle-depri-btn {
     flex: 1;
     text-align: center;
-    padding: 8px 2px !important;
-    font-size: 0.7rem !important;
-    min-width: unset !important;
+    padding: 8px 2px;
+    font-size: 0.7rem;
+    min-width: unset;
     white-space: nowrap;
   }
 
@@ -313,9 +313,9 @@
 
 /* Matches naturally taller filters trigger button size */
 .actions-dropdown-container .filters-row-toggle {
-  padding: 13px 16px !important;
-  min-height: 48px !important;
-  display: flex !important;
+  padding: 13px 16px;
+  min-height: 48px;
+  display: flex;
   align-items: center;
 }
 
@@ -402,80 +402,80 @@
 @media (max-width: 1024px) {
   /* Ensure Data Operations matches the naturally taller height of the Filters container */
   .actions-dropdown-container .filters-row-toggle {
-    padding: 13px 16px !important;
-    min-height: 48px !important;
-    display: flex !important;
-    align-items: center !important;
-    box-sizing: border-box !important;
+    padding: 13px 16px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
   }
 
   /* Push Data Operations button a little lower for clean vertical separation */
   .data-operations-wrapper {
-    margin-top: 8px !important;
+    margin-top: 8px;
   }
 
   /* Further tighten the space between data ops and filters in the mobile menu */
   .mobile-menu-sidebar-filters {
-    margin-top: 4px !important;
-    padding-top: 8px !important;
+    margin-top: 4px;
+    padding-top: 8px;
   }
 
   .actions-dropdown-menu {
-    position: relative !important;
-    top: auto !important;
-    right: auto !important;
-    left: auto !important;
-    width: 100% !important;
-    margin-top: 8px !important;
-    box-shadow: var(--shadow-premium) !important;
-    border: 1px solid var(--border-color) !important;
-    background: var(--bg-color) !important;
-    border-radius: var(--radius-button) !important;
-    padding: 0 !important;
-    backdrop-filter: blur(var(--glass-blur)) !important;
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: var(--shadow-premium);
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    border-radius: var(--radius-button);
+    padding: 0;
+    backdrop-filter: blur(var(--glass-blur));
   }
 
   .actions-dropdown-menu .master-action-btn,
   .actions-dropdown-menu .halo-button {
-    color: var(--brand-green) !important;
-    font-size: 0.75rem !important;
-    padding: 14px 18px !important;
+    color: var(--brand-green);
+    font-size: 0.75rem;
+    padding: 14px 18px;
   }
   .actions-dropdown-menu .clear-board-btn {
-    color: rgba(239, 68, 68, 0.6) !important;
+    color: rgba(239, 68, 68, 0.6);
   }
   .actions-dropdown-menu .clear-board-btn:hover {
-    color: rgba(239, 68, 68, 0.9) !important;
+    color: rgba(239, 68, 68, 0.9);
   }
 }
 
 /* Automatically flatten actions dropdown inside mobile bottom actions sheet for perfect integration */
 .expanded-actions-list .data-operations-wrapper {
-  display: block !important;
-  width: 100% !important;
+  display: block;
+  width: 100%;
 }
 
 .expanded-actions-list .actions-dropdown-container {
-  display: block !important;
-  width: 100% !important;
+  display: block;
+  width: 100%;
 }
 
 .expanded-actions-list .filters-row-toggle {
-  display: none !important; /* Hide trigger in bottom drawer actions list */
+  display: none; /* Hide trigger in bottom drawer actions list */
 }
 
 .expanded-actions-list .actions-dropdown-menu {
-  display: flex !important; /* Force inline list rendering */
-  position: relative !important;
-  top: auto !important;
-  right: auto !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin-top: 0 !important;
-  width: 100% !important;
-  backdrop-filter: none !important;
+  display: flex; /* Force inline list rendering */
+  position: relative;
+  top: auto;
+  right: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 0;
+  width: 100%;
+  backdrop-filter: none;
 }
 
 /* Ultra-compact screen refinements (320px / iPhone SE) */
