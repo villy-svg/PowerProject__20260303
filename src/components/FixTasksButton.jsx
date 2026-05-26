@@ -5,7 +5,7 @@ import { taskService } from '../services/tasks/taskService';
  * FixTasksButton Component
  * Available to Master Admins to repair task structural data.
  */
-const FixTasksButton = ({ permissions, refreshTasks, className = '' }) => {
+const FixTasksButton = ({ permissions, refreshTasks, className = '', label }) => {
   const [fixingTasks, setFixingTasks] = useState(false);
 
   const handleFixTasks = async () => {
@@ -33,7 +33,7 @@ const FixTasksButton = ({ permissions, refreshTasks, className = '' }) => {
       disabled={fixingTasks}
       title="Fix missing or incorrect fields for all rows in the tasks table"
     >
-      {fixingTasks ? 'Fixing...' : 'Fix Tasks'}
+      {fixingTasks ? 'Fixing...' : (label || 'Fix Tasks')}
     </button>
   );
 };

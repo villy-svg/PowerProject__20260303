@@ -71,15 +71,7 @@ const MobileHeader = ({
     showBottomNavOverlay,
   } = useAppNavigation();
 
-  // ─── Body scroll lock for mobile menu ─────────────────────────────
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.classList.add('no-scroll');
-    } else {
-      document.body.classList.remove('no-scroll');
-    }
-    return () => document.body.classList.remove('no-scroll');
-  }, [isMenuOpen]);
+  // No-op body scroll lock: Mobile menu is now inline and scrolls naturally with the page.
 
   // ─── Compute available boards for active vertical ─────────────────
   const getBoardsForActiveVertical = () => {
@@ -240,8 +232,8 @@ const MobileHeader = ({
             {/* Contextual Data Operations */}
             {expandedRight && (
               <div className="mobile-sub-tray-expanded-actions">
-                <div className="sub-tray-section-title" style={{ margin: '12px 0 6px 4px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-green)', opacity: 0.8, fontWeight: 700, letterSpacing: '0.5px' }}>Data Operations</div>
-                <div className="expanded-actions-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="sub-tray-section-title">Data Operations</div>
+                <div className="expanded-actions-list">
                   {expandedRight}
                 </div>
               </div>

@@ -262,11 +262,6 @@
 }
 
 @media screen and (max-width: 768px) {
-  .header-expanded-controls {
-    flex-direction: column;
-    width: 100%;
-  }
-
   .view-mode-toggle {
     width: 100%;
     display: flex !important;
@@ -299,3 +294,211 @@
     width: 100%;
   }
 }
+
+/* Custom Actions Dropdown System — mirrors .filters-row-toggle aesthetic */
+.data-operations-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.actions-dropdown-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Matches naturally taller filters trigger button size */
+.actions-dropdown-container .filters-row-toggle {
+  padding: 13px 16px !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center;
+}
+
+
+/* Dropdown panel */
+.actions-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button);
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  box-shadow: var(--shadow-premium);
+  backdrop-filter: blur(var(--glass-blur));
+  overflow: hidden;
+}
+
+/* Each action item inside the dropdown — matches .filters-row-toggle group-header row style */
+.actions-dropdown-menu .master-action-btn,
+.actions-dropdown-menu .halo-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 0;
+  color: var(--brand-green);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+  box-shadow: none;
+  backdrop-filter: none;
+  white-space: nowrap;
+}
+
+/* The import wrapper is a div — just make it fill the width so its inner button aligns */
+.actions-dropdown-menu .csv-import-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.actions-dropdown-menu .csv-import-wrapper:last-child {
+  border-bottom: none;
+}
+
+.actions-dropdown-menu .master-action-btn:last-child,
+.actions-dropdown-menu .halo-button:last-child {
+  border-bottom: none;
+}
+
+.actions-dropdown-menu .master-action-btn:hover,
+.actions-dropdown-menu .halo-button:hover {
+  background: var(--halo-bg);
+  transform: none;
+}
+
+/* Special danger styling for Clear Board only */
+.actions-dropdown-menu .clear-board-btn {
+  color: rgba(239, 68, 68, 0.6);
+  border-color: transparent;
+}
+
+.actions-dropdown-menu .clear-board-btn:hover {
+  background: rgba(239, 68, 68, 0.06);
+  color: rgba(239, 68, 68, 0.9);
+}
+
+/* On mobile/tablet, flow inline (relative) inside the menu but retain solid panel aesthetics and colors */
+@media (max-width: 1024px) {
+  /* Ensure Data Operations matches the naturally taller height of the Filters container */
+  .actions-dropdown-container .filters-row-toggle {
+    padding: 13px 16px !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Push Data Operations button a little lower for clean vertical separation */
+  .data-operations-wrapper {
+    margin-top: 8px !important;
+  }
+
+  /* Further tighten the space between data ops and filters in the mobile menu */
+  .mobile-menu-sidebar-filters {
+    margin-top: 4px !important;
+    padding-top: 8px !important;
+  }
+
+  .actions-dropdown-menu {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    box-shadow: var(--shadow-premium) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-color) !important;
+    border-radius: var(--radius-button) !important;
+    padding: 0 !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+  }
+
+  .actions-dropdown-menu .master-action-btn,
+  .actions-dropdown-menu .halo-button {
+    color: var(--brand-green) !important;
+    font-size: 0.75rem !important;
+    padding: 14px 18px !important;
+  }
+  .actions-dropdown-menu .clear-board-btn {
+    color: rgba(239, 68, 68, 0.6) !important;
+  }
+  .actions-dropdown-menu .clear-board-btn:hover {
+    color: rgba(239, 68, 68, 0.9) !important;
+  }
+}
+
+/* Automatically flatten actions dropdown inside mobile bottom actions sheet for perfect integration */
+.expanded-actions-list .data-operations-wrapper {
+  display: block !important;
+  width: 100% !important;
+}
+
+.expanded-actions-list .actions-dropdown-container {
+  display: block !important;
+  width: 100% !important;
+}
+
+.expanded-actions-list .filters-row-toggle {
+  display: none !important; /* Hide trigger in bottom drawer actions list */
+}
+
+.expanded-actions-list .actions-dropdown-menu {
+  display: flex !important; /* Force inline list rendering */
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+  backdrop-filter: none !important;
+}
+
+/* Ultra-compact screen refinements (320px / iPhone SE) */
+@media screen and (max-width: 360px) {
+  .view-mode-toggle,
+  .header-filter-group {
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 4px !important;
+  }
+
+  .view-mode-toggle .view-toggle-btn,
+  .header-filter-group .toggle-depri-btn {
+    flex: 1 !important;
+    width: auto !important;
+    min-height: 38px !important;
+    font-size: 0.65rem !important;
+    padding: 6px 2px !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+}

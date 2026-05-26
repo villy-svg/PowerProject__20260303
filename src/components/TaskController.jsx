@@ -15,6 +15,8 @@ import './TaskController.css';
 import FixTasksButton from './FixTasksButton';
 import { HUB_VIEWS } from '../registry/verticalRegistry';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { IconChevronDown, IconChevronRightSingle } from './Icons';
+
 
 
 /**
@@ -111,6 +113,10 @@ const TaskController = (props) => {
 
   // ─── Compact Tiles Expansion State (For Touch Devices) ──────────
   const [expandedTaskId, setExpandedTaskId] = useState(null);
+
+  // ─── Actions Dropdown Menu State (Export, Import, Template, Repair) ─────
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
+
 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
@@ -216,29 +222,69 @@ const TaskController = (props) => {
                 Rework
               </button>
             </div>
-
-            {permissions.roleId === 'master_admin' && (
-              <button
-                className="halo-button clear-board-btn"
-                onClick={handleClearBoard}
-                disabled={saving}
-                title="Move all active tasks to Deferred"
-              >
-                Clear Board
-              </button>
-            )}
           </>
         }
         expandedRight={
           <>
             {(activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
-
-              <>
-                <TaskCSVDownload className="master-action-btn" data={filteredTasks} label="Export Tasks" />
-                <TaskCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-                <TaskCSVImport className="master-action-btn" verticalId={activeVertical} onImportComplete={() => refreshTasks(false)} />
-                <FixTasksButton permissions={permissions} refreshTasks={refreshTasks} />
-              </>
+              <div className="data-operations-wrapper">
+                <div className="actions-dropdown-container">
+                  <div
+                    className="filters-row-toggle"
+                    onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                  >
+                    <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                    <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                      <IconChevronDown size={10} />
+                    </span>
+                  </div>
+                  {isActionsDropdownOpen && (
+                    <div className="actions-dropdown-menu">
+                      {permissions.roleId === 'master_admin' && (
+                        <button
+                          className="halo-button clear-board-btn master-action-btn"
+                          onClick={() => {
+                            handleClearBoard();
+                            setIsActionsDropdownOpen(false);
+                          }}
+                          disabled={saving}
+                          title="Move all active tasks to Deferred"
+                        >
+                          Clear Board
+                        </button>
+                      )}
+                      <TaskCSVDownload 
+                        className="master-action-btn" 
+                        data={filteredTasks} 
+                        label="Export Tasks" 
+                      />
+                      <TaskCSVDownload 
+                        className="master-action-btn" 
+                        isTemplate 
+                        label="Download Template" 
+                      />
+                      <TaskCSVImport 
+                        className="master-action-btn" 
+                        verticalId={activeVertical} 
+                        onImportComplete={() => {
+                          refreshTasks(false);
+                          setIsActionsDropdownOpen(false);
+                        }} 
+                        label="Import Tasks"
+                      />
+                      <FixTasksButton 
+                        className="master-action-btn" 
+                        permissions={permissions} 
+                        refreshTasks={(b) => {
+                          refreshTasks(b);
+                          setIsActionsDropdownOpen(false);
+                        }} 
+                        label="Fix Tasks"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </>
         }

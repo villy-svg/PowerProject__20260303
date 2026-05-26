@@ -13,7 +13,7 @@ import { STAGE_LIST } from '../../constants/stages';
  *
  * All duplicate detection (in-file + DB) is handled by CSVImportButton.
  */
-const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
+const TaskCSVImport = ({ verticalId, onImportComplete, className, label }) => {
   const dbVerticalId = ['CHARGING_HUBS', 'hub_tasks', 'daily_hub_tasks'].includes(verticalId) ? 'CHARGING_HUBS' : verticalId;
   const [importing, setImporting] = React.useState(false);
   const [importContext, setImportContext] = React.useState(null); // { hubCodeMap, hubNameMap, funcCodeMap, existingTasks }
@@ -257,7 +257,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className }) => {
 
   return (
     <CSVImportButton
-      label={importing ? 'Importing...' : 'Import Tasks'}
+      label={label || (importing ? 'Importing...' : 'Import Tasks')}
       onDataParsed={handleDataParsed}
       requiredFields={['text']}
       getConflictKey={getConflictKey}
