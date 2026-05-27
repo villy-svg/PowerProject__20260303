@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260527 -- Push Notification Setup 1.0.1"
+git commit -m "260527 -- Push Notification Setup 1.0.2"
 git push origin staging 
 
 npm run apk:staging-debug
@@ -43,3 +43,20 @@ npx supabase link --project-ref eeoibqxhfkrgbylnluvk
 
 Get-Content supabase\.temp\project-ref
 
+
+
+What events should trigger a notification? Candidates:
+
+Task assigned to you
+Task status changed (e.g., moved to Rework, Deferred)
+Task comment / mention
+Task overdue reminder
+Announcement / broadcast from admin -- this will be done in future -- just keep provision for now 
+
+UI : 
+Mobile -- use Native
+Desktop/Webapp -- make your design
+
+Do NOT make multiple new migrations -- only make 1 if needed
+
+For now the table is only tasks -- but keep provision for various tables in future with completely different set of columns

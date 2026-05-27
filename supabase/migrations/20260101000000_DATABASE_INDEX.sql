@@ -68,7 +68,8 @@
 | 20260430103000 | Orchestration Hardening | UUID safety, Orphan protection, Workflow Guard repair. |
 | 20260523160000 | Employee/User Sync | Deactivation logic, employee-user account linking. |
 | 20260523170000 | RLS Recursion Fix | Fixed user_profiles RLS infinite recursion bug. |
-| 20260527120000 | Push Notifications | **[LATEST]** fcm_tokens + notifications tables, RLS, send-push Edge Function. |
+| 20260527120000 | Push Notifications | fcm_tokens + notifications tables, RLS, send-push Edge Function. |
+| 20260527123000 | Push Triggers | **[LATEST]** DB webhooks, pg_net, generic invoker, tasks trigger, pg_cron. |
 
 =========================================================================
 */

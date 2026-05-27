@@ -23,6 +23,7 @@ import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
 import SearchBar from '../../components/SearchBar';
+import NotificationBell from '../../components/NotificationBell';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -105,6 +106,7 @@ const DesktopLayout = ({
                 )}
               </div>
             )}
+            <NotificationBell />
             <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={onLogout} />
           </div>
         </header>
