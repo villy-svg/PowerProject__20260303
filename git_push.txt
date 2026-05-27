@@ -3,8 +3,10 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260527 -- Push Notification Setup 1.0.0"
+git commit -m "260527 -- Push Notification Setup 1.0.1"
 git push origin staging 
+
+npm run apk:staging-debug
  
 # 3. Merge Staging to Main  
 git checkout main
@@ -28,6 +30,7 @@ npx supabase link --project-ref dhhbdgzutlltiojbsboi
 npx supabase migration repair --status reverted 20260523170000
 npx supabase db push
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk 
+#npx supabase functions deploy send-push
 #npx supabase deploy functions entity-create
 #npx supabase functions deploy entity-create --no-verify-jwt
 #npx supabase functions deploy entity-read --project-ref dhhbdgzutlltiojbsboi
