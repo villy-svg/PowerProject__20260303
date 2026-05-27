@@ -22,6 +22,7 @@ import CustomSelect from '../../components/CustomSelect';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
+import SearchBar from '../../components/SearchBar';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -66,6 +67,9 @@ const DesktopLayout = ({
 
       {/* Brand Title */}
       <h1 className="brand-title-centered">PowerProject</h1>
+
+      {/* Global Search Bar (Dashboard Only) */}
+      {!activeVertical && <SearchBar context="dashboard" />}
 
       {/* Main Content Area */}
       <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>

@@ -19,6 +19,7 @@ import MobileBottomNav from './MobileBottomNav';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
+import SearchBar from '../../components/SearchBar';
 import ExitAppModal from '../../components/ExitAppModal';
 import './MobileLayout.css';
 
@@ -73,14 +74,18 @@ const MobileLayout = ({
 
       {/* Main Content Area */}
       <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
-        {/* Mobile header bar — only shown on dashboard (no vertical active) */}
-        <header className={`app-header ${activeVertical ? 'mobile-hidden' : ''}`}>
-          <div className="header-left"></div>
-          <div className="header-center"></div>
-          <div className="header-right">
-            {/* Impersonation controls are desktop-only — too complex for mobile header */}
+        {/* NOTE: app-header is intentionally omitted on mobile dashboard —
+             it has no content and would create blank space below the fixed brand title.
+             The brand title (position:fixed) already serves as the dashboard header. */}
+
+        {/* Global Search Bar — dashboard only.
+             Placed inside app-main-area (normal flow) so the fixed brand-title-centered
+             cannot overlap it. Small top margin gives breathing room below the title. */}
+        {!activeVertical && (
+          <div className="mobile-dashboard-search">
+            <SearchBar context="dashboard" />
           </div>
-        </header>
+        )}
 
         {/* Content */}
         <main className="app-content">

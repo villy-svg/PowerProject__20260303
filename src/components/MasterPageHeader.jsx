@@ -47,6 +47,10 @@ const MasterPageHeader = ({
   permissions,
   user,
   verticals,
+  // Optional records-mode search props
+  searchRecords,
+  recordType,
+  onSearchSelect,
 }) => {
   const { shellType } = useLayoutShell();
   
@@ -76,6 +80,9 @@ const MasterPageHeader = ({
         isMenuOpen={headerState.isMenuOpen}
         setIsMenuOpen={headerState.setIsMenuOpen}
         hideMenuClose={hideMenuClose}
+        searchRecords={searchRecords}
+        recordType={recordType}
+        onSearchSelect={onSearchSelect}
       />
     );
   }
@@ -109,6 +116,9 @@ const MasterPageHeader = ({
       permissions={permissions}
       user={user}
       verticals={verticals}
+      searchRecords={searchRecords}
+      recordType={recordType}
+      onSearchSelect={onSearchSelect}
     />
   );
 };

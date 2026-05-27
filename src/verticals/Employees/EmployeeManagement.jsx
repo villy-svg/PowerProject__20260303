@@ -167,6 +167,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         user={user}
         verticals={verticals}
         activeVertical={activeVertical}
+        searchRecords={employees}
+        recordType="Employee"
+        onSearchSelect={(emp) => ui.openViewModal(emp)}
         rightActions={
           permissions.canCreateEmployees && (
             <button className="halo-button master-action-btn" onClick={ui.openAddModal}>

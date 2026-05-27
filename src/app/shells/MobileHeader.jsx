@@ -27,6 +27,7 @@ import {
   IconFilter,
 } from '../../components/Icons';
 import MasterHeaderMenu from '../../components/MasterHeaderMenu';
+import SearchBar from '../../components/SearchBar';
 import '../../components/BottomNav.css';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 
@@ -57,6 +58,10 @@ const MobileHeader = ({
   permissions,
   user,
   verticals,
+  // Optional records-mode props
+  searchRecords,
+  recordType,
+  onSearchSelect,
 }) => {
   const hasExpandedContent = !!(expandedLeft || expandedRight || SidebarComponent);
   // isBoardSubTrayOpen and isMenuOpen lifted to AppNavigationContext so the
@@ -130,6 +135,14 @@ const MobileHeader = ({
         <div className="header-row-1">
           <h1>{title}</h1>
         </div>
+
+        {/* Global Search Bar (Board Context) — task-scoped or records-mode */}
+        <SearchBar
+          context="board"
+          records={searchRecords}
+          recordType={recordType}
+          onSelect={onSearchSelect}
+        />
 
         {/* Row 2: Description — HIDDEN on mobile (adaptive-ui-strategy §6) */}
       </header>

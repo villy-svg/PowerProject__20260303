@@ -1,0 +1,275 @@
+/* ============================================================
+   SearchBar.css — Universal task search bar
+   Design system compliant: glassmorphism, halo style, CSS vars only
+   ============================================================ */
+
+/* ── Root container ───────────────────────────────────────── */
+.search-bar-root {
+  position: relative;
+  width: 100%;
+  z-index: 200;
+}
+
+/* Dashboard context: centred, max-width capped */
+.search-bar-root.dashboard-ctx {
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Board context: full-width strip below the header title */
+.search-bar-root.board-ctx {
+  max-width: 100%;
+  margin: 0 0 0.25rem;
+  padding: 0 0.25rem;
+}
+
+/* ── Input pill ───────────────────────────────────────────── */
+.search-input-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 36px;
+  padding: 0 0.75rem;
+  background: var(--halo-bg, rgba(13, 148, 136, 0.05));
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  backdrop-filter: blur(var(--glass-blur, 12px));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.search-input-pill.pill-focused {
+  border-color: color-mix(in srgb, var(--brand-green), transparent 40%);
+  background: color-mix(in srgb, var(--brand-green), transparent 92%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-green), transparent 84%);
+}
+
+/* ── Search icon ─────────────────────────────────────────── */
+.pill-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary, var(--text-color));
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.search-input-pill.pill-focused .pill-icon {
+  opacity: 0.85;
+  color: var(--brand-green);
+}
+
+/* ── Text input ──────────────────────────────────────────── */
+.search-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.search-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.35;
+  font-weight: 400;
+}
+
+/* Prevent iOS zoom — must be at least 16px on mobile */
+@media screen and (max-width: 768px) {
+  .search-input {
+    font-size: 16px;
+  }
+}
+
+/* ── Clear button ────────────────────────────────────────── */
+.search-clear-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  opacity: 0.85;
+  background: color-mix(in srgb, var(--text-color), transparent 88%);
+}
+
+/* ── Dropdown ────────────────────────────────────────────── */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-color, #09090b);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0, 0, 0, 0.35));
+  backdrop-filter: blur(var(--glass-blur, 20px));
+  overflow: hidden;
+  animation: sb-slide-in 0.15s ease;
+}
+
+@keyframes sb-slide-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Dropdown header (result count) ─────────────────────── */
+.search-dropdown-header {
+  padding: 0.5rem 0.875rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--brand-green);
+  opacity: 0.7;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ── Results list ────────────────────────────────────────── */
+.search-results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 0;
+}
+
+.search-result-item:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 92%);
+}
+
+/* ── Result title text ───────────────────────────────────── */
+.result-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Record mode: stacked name + secondary info */
+.result-record-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.result-sub {
+  font-size: 0.72rem;
+  color: var(--text-color);
+  opacity: 0.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Search highlight (matching chars) ───────────────────── */
+.search-highlight {
+  background: color-mix(in srgb, var(--brand-green), transparent 72%);
+  color: var(--brand-green);
+  border-radius: 2px;
+  padding: 0 1px;
+  font-style: normal;
+}
+
+/* ── Result badge row ────────────────────────────────────── */
+.result-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+/* Base badge (badge system — §3 of design system) */
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 1px 6px;
+  min-height: 18px;
+  white-space: nowrap;
+  /* Neutral default */
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+/* Stage variants */
+.result-badge.stage-completed    { color: #2dd4bf; background: rgba(45, 212, 191, 0.08); border-color: rgba(45, 212, 191, 0.2); }
+.result-badge.stage-in-progress  { color: #60a5fa; background: rgba(96, 165, 250, 0.08); border-color: rgba(96, 165, 250, 0.2); }
+.result-badge.stage-review       { color: #eab308; background: rgba(234, 179, 8, 0.08);  border-color: rgba(234, 179, 8, 0.2); }
+.result-badge.stage-backlog      { color: var(--text-color); opacity: 0.5; }
+.result-badge.stage-deprioritized{ color: var(--text-color); opacity: 0.35; }
+
+/* Priority variants */
+.result-badge.pri-urgent { color: #ef4444; background: rgba(239, 68, 68, 0.1);   border-color: rgba(239, 68, 68, 0.2); }
+.result-badge.pri-high   { color: #f97316; background: rgba(249, 115, 22, 0.1);  border-color: rgba(249, 115, 22, 0.2); }
+.result-badge.pri-medium { color: #eab308; background: rgba(234, 179, 8, 0.1);   border-color: rgba(234, 179, 8, 0.2); }
+.result-badge.pri-low    { color: #22c55e; background: rgba(34, 197, 94, 0.1);   border-color: rgba(34, 197, 94, 0.2); }
+
+/* ── No results ──────────────────────────────────────────── */
+.search-no-results {
+  padding: 1rem 0.875rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-color);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* ── Mobile touch targets ────────────────────────────────── */
+@media screen and (max-width: 768px) {
+  /* Dashboard: wrapper .mobile-dashboard-search controls position; override inner margins */
+  .search-bar-root.dashboard-ctx {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .search-input-pill {
+    height: 44px;   /* min touch target per HIG */
+    border-radius: 10px;
+  }
+
+  .search-result-item {
+    padding: 0.7rem 0.875rem;
+    min-height: 44px;
+  }
+}

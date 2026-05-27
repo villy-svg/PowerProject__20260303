@@ -379,3 +379,13 @@
   padding: 0 !important;
   width: 100% !important;
 }
+
+/* ── 8. Dashboard Search Bar ─────────────────────────────────────────── */
+/* Clears the fixed brand-title-centered overlay (position:fixed, ~30-45px tall)
+   with a small top offset. No app-header is rendered on mobile dashboard,
+   so this value only needs to be slightly larger than the title's fixed height. */
+.mobile-dashboard-search {
+  padding: 55px 1rem 0.25rem;
+  width: 100%;
+  flex-shrink: 0;
+}

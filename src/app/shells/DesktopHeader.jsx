@@ -27,6 +27,7 @@ import {
   IconChevronDown,
 } from '../../components/Icons';
 import MasterHeaderMenu from '../../components/MasterHeaderMenu';
+import SearchBar from '../../components/SearchBar';
 
 const DesktopHeader = ({
   title,
@@ -38,6 +39,10 @@ const DesktopHeader = ({
   isMenuOpen,
   setIsMenuOpen,
   hideMenuClose,
+  // Optional records-mode props (for records managers)
+  searchRecords,
+  recordType,
+  onSearchSelect,
 }) => {
   const hasExpandedContent = !!(expandedLeft || expandedRight);
 
@@ -54,6 +59,14 @@ const DesktopHeader = ({
           <p>{description}</p>
         </div>
       )}
+
+      {/* Row 2.5: Search Bar — task-scoped or records-mode */}
+      <SearchBar
+        context="board"
+        records={searchRecords}
+        recordType={recordType}
+        onSelect={onSearchSelect}
+      />
 
       {/* Row 3: Actions */}
       <div className="header-actions-area">
