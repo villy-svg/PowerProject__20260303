@@ -3,8 +3,8 @@ import { usePushNotifications } from '../hooks/usePushNotifications';
 import { IconBell, IconCheck } from './Icons';
 import './NotificationBell.css';
 
-const NotificationBell = () => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = usePushNotifications();
+const NotificationBell = ({ user }) => {
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = usePushNotifications({ user });
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 

@@ -103,7 +103,7 @@ const DesktopLayout = ({
                 )}
               </div>
             )}
-            <NotificationBell />
+            <NotificationBell user={user} />
             <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={onLogout} />
           </div>
         </header>
