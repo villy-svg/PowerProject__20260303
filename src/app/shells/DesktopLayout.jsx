@@ -69,9 +69,6 @@ const DesktopLayout = ({
       {/* Brand Title */}
       <h1 className="brand-title-centered">PowerProject</h1>
 
-      {/* Global Search Bar (Dashboard Only) */}
-      {!activeVertical && <SearchBar context="dashboard" />}
-
       {/* Main Content Area */}
       <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
         {/* Desktop Header Bar */}
