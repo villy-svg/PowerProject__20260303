@@ -97,11 +97,16 @@ async function deleteFCMToken(token) {
  */
 async function fetchNotifications(limit = 30) {
   try {
+    const { data: authData } = await supabase.auth.getUser();
+    console.log('[pushNotificationService] fetchNotifications called for Auth ID:', authData?.user?.id);
+
     const { data, error } = await supabase
       .from('notifications')
       .select('id, title, body, type, entity_id, entity_type, read, created_at')
       .order('created_at', { ascending: false })
       .limit(limit);
+
+    console.log('[pushNotificationService] Raw Database Response:', { data, error });
 
     if (error) {
       console.error('[pushNotificationService] Failed to fetch notifications:', error);
