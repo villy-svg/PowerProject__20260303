@@ -14,6 +14,8 @@
 | Table | public.employees | 20260101000001 | 20260423102600 |
 | Table | public.hubs | 20260101000001 | 20260423102600 |
 | Function | public.get_user_permission_level | 20260101000001 | 20260423203000 |
+| Table | public.fcm_tokens | 20260527120000 | 20260527120000 |
+| Table | public.notifications | 20260527120000 | 20260527120000 |
 
 ## 2. TASK & CONTEXT LINK ENGINE
 | Entity Type | Name | Primary Migration | Last Modified By |
@@ -63,7 +65,10 @@
 | 20260425150000 | Backup System | Implemented automated task state backup/restore logic. |
 | 20260428153400 | Orchestration RPC | Atomic multi-task/link orchestrator for frontend/CSV. |
 | 20260429220000 | Auditing & Support | Lean Task History auditing + Idempotent RPC. |
-| 20260430103000 | Orchestration Hardening | **[LATEST]** UUID safety, Orphan protection, Workflow Guard repair. |
+| 20260430103000 | Orchestration Hardening | UUID safety, Orphan protection, Workflow Guard repair. |
+| 20260523160000 | Employee/User Sync | Deactivation logic, employee-user account linking. |
+| 20260523170000 | RLS Recursion Fix | Fixed user_profiles RLS infinite recursion bug. |
+| 20260527120000 | Push Notifications | **[LATEST]** fcm_tokens + notifications tables, RLS, send-push Edge Function. |
 
 =========================================================================
 */

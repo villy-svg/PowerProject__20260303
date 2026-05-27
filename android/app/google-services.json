@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "830325531575",
+    "project_id": "powerproject-72982",
+    "storage_bucket": "powerproject-72982.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830325531575:android:38392bd5f8a8dc0ead7e32",
+        "android_client_info": {
+          "package_name": "in.powerproject.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV4nbzhKzdC-ITwrOo_R3kf8pkg705vJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:830325531575:android:b35095ff5f3f7b81ad7e32",
+        "android_client_info": {
+          "package_name": "in.powerproject.app.staging"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV4nbzhKzdC-ITwrOo_R3kf8pkg705vJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

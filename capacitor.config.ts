@@ -37,6 +37,12 @@ const config: CapacitorConfig = {
       // autoUpdate: false prevents the plugin from downloading bundles on its own
       autoUpdate: false,
     },
+    PushNotifications: {
+      // Show badge, play sound, and display alert when a push arrives
+      // while the app is in the foreground (iOS behaviour — Android handles
+      // foreground notifications via the pushNotificationReceived listener).
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
   },
 };
 

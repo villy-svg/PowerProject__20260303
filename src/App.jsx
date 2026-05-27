@@ -14,6 +14,7 @@ import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavig
 import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 // Shell components
 import LayoutShell from './app/shells/LayoutShell';
@@ -67,6 +68,9 @@ function AppShell({ verticals, verticalList }) {
 
   const currentUserPermissions = useRBAC(user, activeVertical, verticals);
   useOTAUpdate();
+  // Push notification registration + in-app bell state.
+  // Mounted here so it is active for the entire authenticated session.
+  usePushNotifications({ user });
 
   // SECURITY VALIDATION: Enforces vertical access based on RBAC rules.
   useEffect(() => {
