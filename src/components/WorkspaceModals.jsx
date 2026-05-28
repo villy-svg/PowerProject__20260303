@@ -35,8 +35,17 @@ const WorkspaceModals = ({
   setMergeTaskCluster,
   executeMerge,
   confirmDialog,
-  setConfirmDialog
+  setConfirmDialog,
+  
+  // Optional vertical overrides passed by TaskController
+  activeVertical,
+  rootVerticalId,
+  TaskFormComponent
 }) => {
+  const resolvedActiveVertical = activeVertical || editingTask?.verticalId || 'CHARGING_HUBS';
+  const resolvedRootVerticalId = rootVerticalId || editingTask?.verticalId || resolvedActiveVertical;
+  const resolvedTaskFormComponent = TaskFormComponent || (editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null);
+
   return (
     <>
       <TaskActionModals
@@ -45,13 +54,13 @@ const WorkspaceModals = ({
         editingTask={editingTask}
         setEditingTask={setEditingTask}
         saving={saving}
-        activeVertical={editingTask?.verticalId || 'CHARGING_HUBS'}
-        TaskFormComponent={editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null}
+        activeVertical={resolvedActiveVertical}
+        TaskFormComponent={resolvedTaskFormComponent}
         handleSaveTask={handleSaveTask}
         user={user}
         permissions={permissions}
         tasks={tasks}
-        rootVerticalId={editingTask?.verticalId}
+        rootVerticalId={resolvedRootVerticalId}
         mergeTaskCluster={mergeTaskCluster}
         setMergeTaskCluster={setMergeTaskCluster}
         executeMerge={executeMerge}

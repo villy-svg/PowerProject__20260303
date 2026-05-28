@@ -2,14 +2,12 @@ import React, { useState, useCallback } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import TaskListView from './TaskListView';
 import TaskKanbanView from './TaskKanbanView';
-import TaskActionModals from './TaskActionModals';
-import SubmissionModal from './SubmissionModal';
+import WorkspaceModals from './WorkspaceModals';
 import { TaskCSVDownload, TaskCSVImport } from '../verticals/ChargingHubs';
 import MasterPageHeader from './MasterPageHeader';
 import TaskTreeView from './TaskTreeView';
 import { useTaskController } from '../features/task-board/hooks/useTaskController';
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
-import RejectionModal from './RejectionModal';
 import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
 import FixTasksButton from './FixTasksButton';
@@ -290,58 +288,34 @@ const TaskController = (props) => {
         }
       />
 
-      <TaskActionModals
+      {/* Shared Consolidation Workspace Modals */}
+      <WorkspaceModals
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         editingTask={editingTask}
         setEditingTask={setEditingTask}
         saving={saving}
-        activeVertical={activeVertical}
-        TaskFormComponent={TaskFormComponent}
-        handleSaveTask={handleSaveTask}
         user={props.user}
         permissions={permissions}
         tasks={tasks}
-        rootVerticalId={rootVerticalId}
+        verticals={verticals}
+        handleSaveTask={handleSaveTask}
+        updateTaskStage={updateTaskStage}
+        fetchTasks={props.refreshTasks}
+        submissionTask={submissionTask}
+        closeSubmissionModal={closeSubmissionModal}
+        openSubmissionModal={openSubmissionModal}
+        rejectionModalState={rejectionModalState}
+        setRejectionModalState={setRejectionModalState}
+        submitRejection={submitRejection}
         mergeTaskCluster={mergeTaskCluster}
         setMergeTaskCluster={setMergeTaskCluster}
         executeMerge={executeMerge}
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
-        onSubmissionReview={(subId, status) => {
-          if (status === 'rejected' && editingTask) {
-            updateTaskStage(editingTask.id, 'IN_PROGRESS');
-          } else if (status === 'approved' && editingTask) {
-            updateTaskStage(editingTask.id, 'COMPLETED');
-          }
-          // Close the edit modal so the board immediately reflects the change
-          setIsModalOpen(false);
-          setEditingTask(null);
-          if (props.refreshTasks) props.refreshTasks(false);
-        }}
-        openSubmissionModal={openSubmissionModal}
-      />
-
-      <SubmissionModal
-        isOpen={!!submissionTask}
-        onClose={closeSubmissionModal}
-        task={submissionTask}
-        user={props.user}
-        onSubmitSuccess={(result) => {
-          const taskId = submissionTask.id;
-          closeSubmissionModal();
-          // Optimistically move to REVIEW (instant UI feedback)
-          updateTaskStage(taskId, 'REVIEW');
-          // Then refresh in the background
-          if (props.refreshTasks) props.refreshTasks(false);
-        }}
-      />
-
-      <RejectionModal
-        isOpen={rejectionModalState.isOpen}
-        onClose={() => setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' })}
-        task={{ text: rejectionModalState.taskText }}
-        onSubmit={submitRejection}
+        activeVertical={activeVertical}
+        rootVerticalId={rootVerticalId}
+        TaskFormComponent={TaskFormComponent}
       />
 
       {/* Backdrop only exists in the DOM on mobile/tablet (≤ 1024px).

@@ -20,7 +20,21 @@ const AssigneeSelector = ({
 
   const filteredAssignees = filter ? assignees.filter(filter) : assignees;
 
-  const options = filteredAssignees.map(emp => ({
+  // Robust check for selected values (supporting both arrays and single values)
+  const selectedIds = Array.isArray(value)
+    ? value
+    : (value ? [value] : []);
+
+  // Sort selected assignees to the top, retaining alphabetical order otherwise
+  const sortedAssignees = [...filteredAssignees].sort((a, b) => {
+    const aSelected = selectedIds.includes(a.id);
+    const bSelected = selectedIds.includes(b.id);
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    return 0; // retain original order (which is alphabetical from hook)
+  });
+
+  const options = sortedAssignees.map(emp => ({
     label: emp.full_name,
     value: emp.id,
   }));
