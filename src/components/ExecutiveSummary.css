@@ -688,7 +688,7 @@
     background: transparent;
     border: none;
     color: var(--text-color);
-    opacity: 0.5;
+    opacity: 0.35; /* Softened inactive state opacity */
     gap: 2px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -721,26 +721,26 @@
     position: absolute;
     top: 4px;
     right: 2px;
-    background: var(--brand-green);
+    background: var(--stage-accent); /* Mapped to individual --stage-accent */
     color: #000;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
+    font-size: 0.56rem;
     font-weight: 800;
-    min-width: 15px;
-    height: 15px;
+    min-width: 14px;
+    height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 2px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
 
   .summary-nav-label {
-    font-size: 0.62rem;
-    font-weight: 700;
+    font-size: 0.58rem; /* Refined from 0.62rem */
+    font-weight: 600; /* Softer, high-end weight from 700 */
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px; /* Sleeker tracking */
     transition: all 0.2s ease;
     white-space: nowrap;
   }
@@ -748,7 +748,7 @@
   /* Active Switcher State (Kanban Stage switcher styling compliance) */
   .summary-nav-item.active {
     opacity: 1;
-    color: var(--brand-green);
+    color: var(--stage-accent); /* Dynamic teal/zinc colors */
     border: none;
     background: transparent;
     box-shadow: none;
@@ -756,7 +756,7 @@
 
   .summary-nav-item.active .summary-icon-wrapper {
     background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 15px -8px var(--brand-green);
+    box-shadow: 0 0 15px -8px var(--stage-accent);
   }
 
   /* Animations for switching tabs */

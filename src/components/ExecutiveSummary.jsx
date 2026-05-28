@@ -58,9 +58,10 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {isMobile && (
         <nav className="summary-navigation-tray">
           <div className="summary-nav-container">
-            <button
+             <button
               className={`summary-nav-item ${activeView === 'centralised_task_view' ? 'active' : ''}`}
               onClick={() => setActiveView('centralised_task_view')}
+              style={{ '--stage-accent': 'var(--brand-green)' }}
             >
               <div className="summary-icon-wrapper">
                 <IconBoards size={18} />
@@ -73,6 +74,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
             <button
               className={`summary-nav-item ${activeView === 'executive_summary' ? 'active' : ''}`}
               onClick={() => setActiveView('executive_summary')}
+              style={{ '--stage-accent': '#94a3b8' }}
             >
               <div className="summary-icon-wrapper">
                 <IconEye size={18} />
