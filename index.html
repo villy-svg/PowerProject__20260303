@@ -19,6 +19,12 @@
       (function() {
         const theme = localStorage.getItem('theme') || 'dark';
         document.documentElement.className = theme;
+        
+        // Fix PWA bottom gap by syncing theme-color with the active theme
+        const metaThemeColor = document.createElement('meta');
+        metaThemeColor.name = 'theme-color';
+        metaThemeColor.content = theme === 'dark' ? '#050505' : '#fcfcfd';
+        document.head.appendChild(metaThemeColor);
       })();
     </script>
     <meta name="apple-mobile-web-app-capable" content="yes">
