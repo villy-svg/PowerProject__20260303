@@ -10,7 +10,6 @@
   color: var(--text-color);
   height: 100vh;
   height: 100dvh;
-  min-height: -webkit-fill-available;
   width: 100%;
   display: flex;
   flex-direction: column;
