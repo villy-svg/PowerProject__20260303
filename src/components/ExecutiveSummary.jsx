@@ -37,7 +37,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     addTask, 
     updateTask, 
     deleteTask: rawDeleteTask, 
-    fetchTasks 
+    fetchTasks,
+    bulkUpdateTasks
   } = useTaskBoard();
 
   // Modal and interaction states
@@ -262,8 +263,32 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     }
   };
 
+  const executeMerge = async (primaryTaskId) => {
+    const primaryTask = tasks.find(t => t.id === primaryTaskId);
+    if (!primaryTask) return;
+    const duplicates = tasks.filter(t =>
+      t.id !== primaryTaskId &&
+      t.text === primaryTask.text &&
+      t.verticalId === primaryTask.verticalId &&
+      t.parentTask === primaryTask.parentTask &&
+      t.assigned_to === primaryTask.assigned_to
+    );
+    try {
+      await bulkUpdateTasks(duplicates.map(t => t.id), { stage_id: 'DEPRIORITIZED' });
+      setMergeTaskCluster(null);
+      if (fetchTasks) fetchTasks(false);
+    } catch (err) {
+      alert(`Merge failed: ${err.message}`);
+    }
+  };
+
   const openSubmissionModal = (task) => setSubmissionTask(task);
   const closeSubmissionModal = () => setSubmissionTask(null);
+
+  const openEditModal = (task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -556,6 +581,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                                       currentUser={user}
                                       tasks={tasks}
                                       onPromote={handleMoveToParent}
+                                      onDrillDown={() => {}}
                                       showHierarchy={permissions.canViewKanbanHierarchy !== false}
                                       permissions={permissions}
                                       isExpanded={expandedTaskId === task.id}
@@ -600,7 +626,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         rootVerticalId={editingTask?.verticalId}
         mergeTaskCluster={mergeTaskCluster}
         setMergeTaskCluster={setMergeTaskCluster}
-        executeMerge={() => {}}
+        executeMerge={executeMerge}
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
         onSubmissionReview={(subId, status) => {
