@@ -161,6 +161,14 @@
   margin: 0 auto;
 }
 
+.centralised-actions-row {
+  margin-top: -8px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
 /* Responsive Refinements */
 @media screen and (max-width: 1024px) {
   .centralised-board {
@@ -291,5 +299,12 @@
   .centralised-stage-nav-item.active .centralised-stage-icon-wrapper {
     background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 0 15px -8px var(--stage-accent);
+  }
+
+  .add-escalation-btn {
+    font-size: 1.15rem;
+    padding: 14px 28px;
+    width: 100%;
+    text-align: center;
   }
 }

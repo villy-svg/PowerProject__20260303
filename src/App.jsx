@@ -25,6 +25,7 @@ import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, u
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 
 import Login from './components/Login';
+import PendingActivation from './components/PendingActivation';
 
 // Assets
 import powerLogo from './assets/logo.svg';
@@ -138,6 +139,11 @@ function AppShell({ verticals, verticalList }) {
         </div>
       </div>
     );
+  }
+
+  // Security gate: Block inactive users from entering the layout or fetching any further workspace data
+  if (user.isActive === false) {
+    return <PendingActivation onLogout={handleLogout} />;
   }
 
   // ─── LAYOUT SHELL SWITCHOVER ───────────────────────────────────────

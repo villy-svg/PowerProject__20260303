@@ -9,6 +9,7 @@ import { supabase } from '../../../services/core/supabaseClient';
 import { useTaskFilters } from './useTaskFilters';
 import { useTaskSelection } from './useTaskSelection';
 import { useTaskPermissions } from './useTaskPermissions';
+import { submitProofOfWork } from '../../../services/tasks/submissionService';
 
 /**
  * useTaskController Hook (Orchestrator)
@@ -213,8 +214,31 @@ export const useTaskController = (props) => {
           ? activeVertical 
           : (rootVerticalId || activeVertical);
         
-        const newTask = { ...createInitialTask(formData.text, contextVid), ...formData };
-        if (addTask) await addTask(newTask); else setTasks(prev => [...prev, newTask]);
+        // Destructure files to prevent attempting to save the files array directly to tasks table columns
+        const { files, ...taskPayload } = formData;
+        const newTask = { ...createInitialTask(taskPayload.text, contextVid), ...taskPayload };
+        
+        let createdTask;
+        if (addTask) {
+          createdTask = await addTask(newTask);
+        } else {
+          setTasks(prev => {
+            const temp = [...prev, newTask];
+            createdTask = newTask;
+            return temp;
+          });
+        }
+
+        // Chaining Phase 2: If files are provided and the task exists, run the sequential upload
+        if (files && files.length > 0 && createdTask && createdTask.id) {
+          await submitProofOfWork({
+            taskId: createdTask.id,
+            userId: user?.id,
+            comment: taskPayload.description || `Attached photos during task creation.`,
+            files,
+            moveToReview: false
+          });
+        }
       }
       setIsModalOpen(false); setEditingTask(null);
     } catch (err) {

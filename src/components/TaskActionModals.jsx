@@ -41,7 +41,7 @@ const TaskActionModals = ({
         isOpen={isModalOpen}
         onClose={handleClose}
         title={
-          editingTask 
+          (editingTask && editingTask.id) 
             ? `Edit Task` 
             : activeVertical === 'escalation_tasks' 
               ? 'Add Escalation' 
@@ -61,7 +61,7 @@ const TaskActionModals = ({
             activeVertical={activeVertical}
             availableTasks={(tasks || []).filter(t => {
               if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
-              if (!editingTask) return true;
+              if (!(editingTask && editingTask.id)) return true;
               if (t.id === editingTask.id) return false;
               return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
             })}
@@ -94,7 +94,7 @@ const TaskActionModals = ({
                 {(tasks || [])
                   .filter(t => {
                     if (t.verticalId !== (rootVerticalId || activeVertical)) return false;
-                    if (!editingTask) return true;
+                    if (!(editingTask && editingTask.id)) return true;
                     if (t.id === editingTask.id) return false;
                     return !hierarchyUtils.detectCycle(tasks || [], editingTask.id, t.id, 'id', 'parentTask');
                   })
@@ -104,9 +104,9 @@ const TaskActionModals = ({
                 }
               </select>
             </div>
-            {((editingTask && permissions.canUpdate) || (!editingTask && permissions.canCreate)) ? (
+            {(((editingTask && editingTask.id) && permissions.canUpdate) || (!(editingTask && editingTask.id) && permissions.canCreate)) ? (
               <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
-                {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Create Task')}
+                {saving ? 'Saving...' : ((editingTask && editingTask.id) ? 'Update Task' : 'Create Task')}
               </button>
             ) : (
               <button type="button" className="halo-button close-read-only-btn" onClick={handleClose} style={{ marginTop: '1rem', width: '100%', fontWeight: 600, opacity: 0.6 }}>

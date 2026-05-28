@@ -45,6 +45,9 @@ const WorkspaceModals = ({
   const resolvedActiveVertical = activeVertical || editingTask?.verticalId || 'CHARGING_HUBS';
   const resolvedRootVerticalId = rootVerticalId || editingTask?.verticalId || resolvedActiveVertical;
   const resolvedTaskFormComponent = TaskFormComponent || (editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null);
+  const resolvedPermissions = resolvedActiveVertical === 'escalation_tasks'
+    ? { ...permissions, canCreate: true, canUpdate: true, level: 'admin', canCreateEscalationTasks: true }
+    : permissions;
 
   return (
     <>
@@ -58,7 +61,7 @@ const WorkspaceModals = ({
         TaskFormComponent={resolvedTaskFormComponent}
         handleSaveTask={handleSaveTask}
         user={user}
-        permissions={permissions}
+        permissions={resolvedPermissions}
         tasks={tasks}
         rootVerticalId={resolvedRootVerticalId}
         mergeTaskCluster={mergeTaskCluster}

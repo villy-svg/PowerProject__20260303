@@ -41,6 +41,7 @@ export const profileService = {
         name: 'Dev Admin (Offline)',
         email: 'dev@powerpod.in',
         roleId: 'master_admin',
+        isActive: true,
         seniority: 10,
         assignedVerticals: ['charging_hubs', 'employees', 'clients'],
         verticalPermissions: {
@@ -83,7 +84,8 @@ export const profileService = {
           id: userId,
           email: user?.email,
           name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
-          role_id: 'vertical_viewer'
+          role_id: 'vertical_viewer',
+          is_active: false
         })
         .select()
         .single();
@@ -196,6 +198,7 @@ export const profileService = {
       email: profile.email,
       role: profile.role_id,
       roleId: profile.role_id,
+      isActive: profile.is_active,
       employeeId: employeeData?.id || null,
       seniority: seniority,
       reporteeUserIds: reporteeUserIds,

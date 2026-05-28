@@ -1,0 +1,182 @@
+.pending-activation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #050505;
+  color: var(--text-color);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Apple-style background glow behind the card */
+.pending-activation-container::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, rgba(249, 115, 22, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+.pending-activation-card {
+  width: 100%;
+  max-width: 480px;
+  padding: clamp(24px, 5vw, 48px);
+  background-color: rgba(18, 18, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Satin border */
+  border-radius: var(--radius-squircle, 24px); /* Squircle continuous curve */
+  box-shadow: var(--shadow-premium, 0 20px 50px rgba(0, 0, 0, 0.5));
+  backdrop-filter: blur(var(--glass-blur, 20px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 28px;
+  position: relative;
+  z-index: 1;
+  animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pending-activation-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pending-activation-header h1.brand-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo-svg-large {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+}
+
+/* Beautiful custom Warning Badge */
+.activation-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 999px; /* Pill for status indicator */
+  padding: 6px 16px;
+  position: relative;
+}
+
+.badge-glow {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #f97316;
+  position: relative;
+}
+
+.badge-glow::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background-color: rgba(249, 115, 22, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+.badge-text {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #f97316;
+}
+
+.pending-activation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pending-activation-content h2 {
+  font-size: clamp(20px, 4vw, 24px);
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+}
+
+.pending-activation-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-color);
+  opacity: 0.85;
+  margin: 0;
+}
+
+.pending-activation-content .instruction-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.support-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+
+.support-icon {
+  font-size: 16px;
+}
+
+.support-notice span:last-child {
+  font-size: 13px;
+  color: var(--text-color);
+  opacity: 0.6;
+  text-align: left;
+}
+
+/* Premium sign out button */
+.pending-activation-card button.logout-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}

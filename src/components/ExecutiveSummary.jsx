@@ -15,6 +15,8 @@ import { cloneUtils } from '../utils/cloneUtils';
 import { supabase } from '../services/core/supabaseClient';
 import { useTaskBoard } from '../app/contexts/TaskBoardContext';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
+import { useRBAC } from '../hooks/useRBAC';
+
 
 /**
  * ExecutiveSummary Component
@@ -24,6 +26,13 @@ import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false, updateTaskStage }) => {
   const { isMobile } = useIsMobile();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
+
+  const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
+  const openAddEscalationModal = () => {
+    setEditingTask({ verticalId: 'escalation_tasks', priority: 'High' });
+    setIsModalOpen(true);
+  };
+
 
   // Task board context hooks
   const { 
@@ -139,7 +148,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         await updateTask({ ...editingTask, ...formData });
       } else {
         const parentTask = editingTask?.parentTask ? tasks.find(t => t.id === editingTask.parentTask) : null;
-        const targetVerticalId = parentTask ? parentTask.verticalId : 'CHARGING_HUBS';
+        const targetVerticalId = parentTask ? parentTask.verticalId : (editingTask?.verticalId || 'CHARGING_HUBS');
         const newTask = {
           text: formData.text,
           verticalId: targetVerticalId,
@@ -294,6 +303,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     ? hierarchyFiltered 
     : hierarchyFiltered.filter(t => user?.assignedVerticals?.includes(t.verticalId));
 
+  const topLevelVisibleCount = visibleTasks.filter(t => !t.parentTask).length;
+
   const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
 
   return (
@@ -322,8 +333,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
             >
               <div className="summary-icon-wrapper">
                 <IconEye size={18} />
-                {visibleTasks.length > 0 && (
-                  <span className="summary-badge-count">{visibleTasks.length}</span>
+                {topLevelVisibleCount > 0 && (
+                  <span className="summary-badge-count">{topLevelVisibleCount}</span>
                 )}
               </div>
               <span className="summary-nav-label">Executive Summary</span>
@@ -368,6 +379,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           setMergeTaskCluster={setMergeTaskCluster}
           expandedTaskId={expandedTaskId}
           setExpandedTaskId={setExpandedTaskId}
+          canCreateEscalation={!!user}
+          openAddEscalationModal={openAddEscalationModal}
         />
       )}
 

@@ -35,7 +35,9 @@ const CentralisedTaskBoard = ({
   handleMoveToParent,
   setMergeTaskCluster,
   expandedTaskId,
-  setExpandedTaskId
+  setExpandedTaskId,
+  canCreateEscalation = false,
+  openAddEscalationModal
 }) => {
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   
@@ -50,6 +52,16 @@ const CentralisedTaskBoard = ({
             <h2>Centralised Task View</h2>
           </div>
           <p className="section-description">A unified, interactive workspace showing all active tasks assigned to you across all verticals.</p>
+          {canCreateEscalation && (
+            <div className="centralised-actions-row">
+              <button
+                className="halo-button add-escalation-btn"
+                onClick={openAddEscalationModal}
+              >
+                + Add Escalation
+              </button>
+            </div>
+          )}
           <div className="centralised-board-empty">
             <div className="empty-glow" />
             <span className="empty-icon">✓</span>
@@ -68,6 +80,16 @@ const CentralisedTaskBoard = ({
           <h2>Centralised Task View</h2>
         </div>
         <p className="section-description">A unified, interactive workspace showing all active tasks assigned to you across all verticals.</p>
+        {canCreateEscalation && (
+          <div className="centralised-actions-row">
+            <button
+              className="halo-button add-escalation-btn"
+              onClick={openAddEscalationModal}
+            >
+              + Add Escalation
+            </button>
+          </div>
+        )}
 
         {/* Full-Fledged Stage Navigation Switcher Tray for Mobile Viewports */}
         {isMobile && (

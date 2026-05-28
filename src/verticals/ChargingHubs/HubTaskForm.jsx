@@ -37,6 +37,41 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   const [functions, setFunctions] = useState([]);
   const { assignees: allEmployees } = useAssignees(true);
 
+  // Initial photo upload capability for new tasks and escalations
+  const [files, setFiles] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = React.useRef(null);
+
+  const handleFiles = (newFiles) => {
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    const MAX_FILE_SIZE = 25 * 1024 * 1024;
+    const BATCH_LIMIT = 10;
+    const fileArray = Array.from(newFiles);
+
+    const invalidFiles = fileArray.filter(f => !ALLOWED_TYPES.includes(f.type));
+    if (invalidFiles.length > 0) {
+      alert(`Invalid file type(s) detected: ${invalidFiles.map(f => f.name).join(', ')}. \n\nOnly JPG, PNG, and WEBP are allowed.`);
+      return;
+    }
+
+    if (files.length + fileArray.length > BATCH_LIMIT) {
+      alert(`Batch limit exceeded. You can only upload a maximum of ${BATCH_LIMIT} images.`);
+      return;
+    }
+
+    const oversizedFiles = fileArray.filter(f => f.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert("One or more images exceed the 25MB limit. Please select smaller files.");
+      return;
+    }
+
+    setFiles((prev) => [...prev, ...fileArray]);
+  };
+
+  const removeFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // --- Auto-Save Draft Logic ---
   const stateRef = React.useRef({ formData, orchestrationMapping, isDirty, hubs, allEmployees });
   const onSubmitRef = React.useRef(onSubmit);
@@ -223,12 +258,13 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       text: finalTaskText,
       assigned_to: sortedAssigneeIds,
       hub_id: isMultiHub ? (multiHub?.id || null) : (formData.hub_ids[0] || null),
-      orchestration_mapping: orchestrationMapping
+      orchestration_mapping: orchestrationMapping,
+      files: files
     });
   };
 
   const handleCancelWithConfirm = () => {
-    if (isDirty) {
+    if (isDirty || files.length > 0) {
       if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
         onCancel();
       }
@@ -317,27 +353,9 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                   </div>
                 </div>
 
-                <div className="form-row-grid">
+                {activeVertical === 'escalation_tasks' ? (
                   <div className="form-group">
-                    <label htmlFor="priority-select">Priority</label>
-                    <div className="form-input-container">
-                      <CustomSelect
-                        id="priority-select"
-                        value={formData.priority}
-                        onChange={(val) => updateField('priority', val)}
-                        options={[
-                          { label: 'Low', value: 'Low' },
-                          { label: 'Medium', value: 'Medium' },
-                          { label: 'High', value: 'High' },
-                          { label: 'Urgent', value: 'Urgent' }
-                        ]}
-                        disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="assignee-selector">ASSIGNEE(S)</label>
+                    <label htmlFor="assignee-selector">TAG MANAGER(S)</label>
                     <div className="form-input-container">
                       <AssigneeSelector
                         id="assignee-selector"
@@ -345,11 +363,44 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                         onChange={(val) => updateField('assigned_to', val)}
                         currentUser={currentUser}
                         disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
-                        filter={activeVertical === 'escalation_tasks' ? (emp) => (emp.seniority_level >= 3) : null}
+                        filter={(emp) => (emp.seniority_level >= 3)}
                       />
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="form-row-grid">
+                    <div className="form-group">
+                      <label htmlFor="priority-select">Priority</label>
+                      <div className="form-input-container">
+                        <CustomSelect
+                          id="priority-select"
+                          value={formData.priority}
+                          onChange={(val) => updateField('priority', val)}
+                          options={[
+                            { label: 'Low', value: 'Low' },
+                            { label: 'Medium', value: 'Medium' },
+                            { label: 'High', value: 'High' },
+                            { label: 'Urgent', value: 'Urgent' }
+                          ]}
+                          disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="assignee-selector">ASSIGNEE(S)</label>
+                      <div className="form-input-container">
+                        <AssigneeSelector
+                          id="assignee-selector"
+                          value={formData.assigned_to}
+                          onChange={(val) => updateField('assigned_to', val)}
+                          currentUser={currentUser}
+                          disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {activeVertical !== 'escalation_tasks' && (
                   <div className="form-row-grid">
@@ -402,6 +453,61 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                     />
                   </div>
                 </div>
+
+                {!initialData?.id && (
+                  <div className="form-group upload-section" style={{ marginTop: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <label className="section-label">Attach Photo(s)</label>
+                      {files.length > 0 && (
+                        <span className="batch-counter" style={{ fontSize: '0.85rem', opacity: 0.6 }}>
+                          {files.length} / 10 images
+                        </span>
+                      )}
+                    </div>
+                    <div 
+                      className={`form-upload-zone ${dragActive ? 'drag-active' : ''}`}
+                      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
+                      onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDragActive(false);
+                        if (e.dataTransfer.files?.length > 0) {
+                          handleFiles(e.dataTransfer.files);
+                        }
+                      }}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input 
+                        ref={fileInputRef}
+                        type="file" 
+                        multiple 
+                        accept="image/jpeg,image/png,image/webp" 
+                        onChange={(e) => {
+                          if (e.target.files?.length > 0) {
+                            handleFiles(e.target.files);
+                          }
+                        }} 
+                        style={{ display: 'none' }}
+                      />
+                      <div className="upload-icon">📸</div>
+                      <div className="upload-text">
+                        <strong>Click to browse</strong> or drag & drop photos here
+                      </div>
+                    </div>
+                    {files.length > 0 && (
+                      <div className="form-file-preview-strip">
+                        {files.map((file, idx) => (
+                          <div key={idx} className="file-chip">
+                            <img src={URL.createObjectURL(file)} alt="Preview" />
+                            <span className="file-chip-name">{file.name}</span>
+                            <button type="button" className="file-chip-remove" onClick={(e) => { e.stopPropagation(); removeFile(idx); }}>×</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div className="orchestration-page fade-in">
@@ -508,7 +614,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 key="close-btn"
                 type="button"
                 className="halo-button close-btn"
-                onClick={onCancel}
+                onClick={handleCancelWithConfirm}
                 style={{ opacity: 0.6, marginLeft: 'auto' }}
               >
                 Close
