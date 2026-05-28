@@ -8,6 +8,18 @@ import { IconPeople, IconSettings, IconArrowLeft, IconArrowRight, IconBoards, Ic
 import { taskUtils } from '../utils/taskUtils';
 import './ExecutiveSummary.css';
 
+// Parity Imports for full task card actions & modals
+import TaskCard from './TaskCard';
+import TaskActionModals from './TaskActionModals';
+import SubmissionModal from './SubmissionModal';
+import RejectionModal from './RejectionModal';
+import { resolveVerticalComponents } from '../registry/verticalRegistry';
+import { updateSubmissionStatus } from '../services/tasks/submissionService';
+import { cloneUtils } from '../utils/cloneUtils';
+import { supabase } from '../services/core/supabaseClient';
+import { useTaskBoard } from '../app/contexts/TaskBoardContext';
+import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
+
 /**
  * ExecutiveSummary Component
  * Displays task aggregates based on user permissions.
@@ -19,6 +31,239 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const { setActiveVertical } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
+
+  // Task board context hooks
+  const { 
+    addTask, 
+    updateTask, 
+    deleteTask: rawDeleteTask, 
+    fetchTasks 
+  } = useTaskBoard();
+
+  // Modal and interaction states
+  const [editingTask, setEditingTask] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submissionTask, setSubmissionTask] = useState(null);
+  const [rejectionModalState, setRejectionModalState] = useState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
+  const [saving, setSaving] = useState(false);
+  const [expandedTaskId, setExpandedTaskId] = useState(null);
+  const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+
+  // Dynamic CRUD permission resolver per vertical
+  const getTaskCRUD = (task) => {
+    if (!task) return { canUserCreate: false, canUserUpdate: false, canUserDelete: false, hasVerticalAccess: false };
+    const rootVerticalId = task.verticalId;
+    const hasVerticalAccess = permissions.scope === 'global' || user?.assignedVerticals?.includes(rootVerticalId);
+
+    let featureBaseName = '';
+    if (rootVerticalId === 'CHARGING_HUBS') featureBaseName = 'HubTasks';
+    else if (rootVerticalId === 'EMPLOYEES') featureBaseName = 'EmployeeTasks';
+    else if (rootVerticalId === 'CLIENTS') featureBaseName = 'ClientTasks';
+
+    const fCanCreate = (featureBaseName && permissions[`canCreate${featureBaseName}`] !== undefined)
+      ? permissions[`canCreate${featureBaseName}`]
+      : permissions.canCreate;
+
+    const fCanUpdate = (featureBaseName && permissions[`canUpdate${featureBaseName}`] !== undefined)
+      ? permissions[`canUpdate${featureBaseName}`]
+      : permissions.canUpdate;
+
+    const fCanDelete = (featureBaseName && permissions[`canDelete${featureBaseName}`] !== undefined)
+      ? permissions[`canDelete${featureBaseName}`]
+      : permissions.canDelete;
+
+    return {
+      canUserCreate: fCanCreate && hasVerticalAccess,
+      canUserUpdate: fCanUpdate && hasVerticalAccess,
+      canUserDelete: fCanDelete && hasVerticalAccess,
+      hasVerticalAccess
+    };
+  };
+
+  // Capability checks matching useTaskPermissions
+  const canEditTask = (task) => {
+    if (!task) return false;
+    if (task.isContextOnly) return false;
+
+    const { canUserUpdate } = getTaskCRUD(task);
+    if (canUserUpdate) return true;
+
+    const isCreator = (task.createdBy || task.created_by) === user?.id;
+    const assignedTo = task.assigned_to || [];
+    const isAssignee = (user?.employeeId && assignedTo.includes(user.employeeId)) || (user?.id && assignedTo.includes(user.id));
+
+    if (['contributor', 'viewer'].includes(permissions.level) && (isCreator || isAssignee)) {
+      return true;
+    }
+    return false;
+  };
+
+  const canUserDelete = (task) => {
+    return getTaskCRUD(task).canUserDelete;
+  };
+
+  const canManageHierarchy = (task) => {
+    if (!task) return false;
+    if (task.isContextOnly) return false;
+    if (user?.seniority > MANAGER_SENIORITY_THRESHOLD) return true;
+    const isCreator = (task.createdBy || task.created_by) === user?.id;
+    return isCreator;
+  };
+
+  const canAddSubtask = (task) => {
+    if (!task) return false;
+    if (task.isContextOnly) return false;
+
+    const { canUserCreate } = getTaskCRUD(task);
+    if (!canUserCreate) return false;
+
+    if (taskUtils.isManager(user)) return true;
+    if (taskUtils.isCreator(task, user)) return true;
+    return taskUtils.isAssignee(task, user);
+  };
+
+  const canCloneTask = (task) => {
+    if (!task || task.isContextOnly) return false;
+    const { canUserCreate } = getTaskCRUD(task);
+    if (!canUserCreate) return false;
+    if (taskUtils.isManager(user)) return true;
+    return canEditTask(task);
+  };
+
+  // Local CRUD and RPC Handlers
+  const handleSaveTask = async (formData) => {
+    const isEditing = !!(editingTask && editingTask.id);
+    if (!formData || (!isEditing && !formData.text)) {
+      console.warn('[ExecutiveSummary] Blocked invalid handleSaveTask call:', { isEditing, formData });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (isEditing) {
+        await updateTask({ ...editingTask, ...formData });
+      } else {
+        const parentTask = editingTask?.parentTask ? tasks.find(t => t.id === editingTask.parentTask) : null;
+        const targetVerticalId = parentTask ? parentTask.verticalId : 'CHARGING_HUBS';
+        const newTask = {
+          text: formData.text,
+          verticalId: targetVerticalId,
+          stageId: 'BACKLOG',
+          parentTask: editingTask?.parentTask || null,
+          isSubTask: !!editingTask?.parentTask,
+          priority: formData.priority || 'Medium',
+          assigned_to: formData.assigned_to || [],
+          createdBy: user?.id,
+          ...formData
+        };
+        await addTask(newTask);
+      }
+      setIsModalOpen(false);
+      setEditingTask(null);
+      if (fetchTasks) fetchTasks(false);
+    } catch (err) {
+      alert(`Failed to save: ${err.message || 'Unknown error'}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleInternalDelete = (taskId) => {
+    if (window.confirm("Delete this task permanently?")) {
+      setSaving(true);
+      rawDeleteTask(taskId)
+        .then(() => {
+          if (fetchTasks) fetchTasks(false);
+        })
+        .catch((err) => alert(`Delete failed: ${err.message}`))
+        .finally(() => setSaving(false));
+    }
+  };
+
+  const handleMoveToParent = async (childId, parentId) => {
+    if (childId === parentId) return;
+    const task = tasks.find(t => t.id === childId);
+    if (!task || task.isContextOnly) return;
+    if (task.parentTask === (parentId ?? null)) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.rpc('rpc_promote_task', {
+        p_task_id: childId,
+        p_parent_id: parentId ?? null,
+      });
+      if (error) throw error;
+      if (fetchTasks) fetchTasks(false);
+    } catch (err) {
+      alert(`Failed to promote task: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCloneTask = (task) => {
+    if (!task || task.isContextOnly) return;
+    const cloneData = cloneUtils.prepareClone(task, { titleField: 'text' });
+    setEditingTask(cloneData);
+    setIsModalOpen(true);
+  };
+
+  const handleAddSubtask = (parentId) => {
+    const parentTask = tasks.find(t => t.id === parentId);
+    if (!parentTask) {
+      alert("Error: Parent task node not found.");
+      return;
+    }
+
+    if (!canAddSubtask(parentTask)) {
+      alert("Permission Denied: You do not have rights to add subtasks under this task.");
+      return;
+    }
+
+    const sanitizedMetadata = { ...(parentTask.metadata || {}) };
+    delete sanitizedMetadata.fan_out;
+    delete sanitizedMetadata.is_fan_out_parent;
+
+    setEditingTask({
+      parentTask: parentId,
+      city: parentTask.city || '',
+      hub_ids: parentTask.hub_ids || (parentTask.hub_id ? [parentTask.hub_id] : []),
+      hub_id: parentTask.hub_id || null,
+      function: parentTask.function || '',
+      assigned_to: [],
+      priority: parentTask.priority || 'Medium',
+      assigned_client_id: parentTask.assigned_client_id || '',
+      metadata: sanitizedMetadata,
+      verticalId: parentTask.verticalId
+    });
+
+    setIsModalOpen(true);
+  };
+
+  const handleApproveSubmission = async (taskId, submissionId) => {
+    try {
+      await updateSubmissionStatus(submissionId, 'approved');
+      await updateTaskStage(taskId, 'COMPLETED');
+      if (fetchTasks) fetchTasks(false);
+    } catch (err) {
+      alert(`Approval failed: ${err.message}`);
+    }
+  };
+
+  const submitRejection = async (reason) => {
+    try {
+      await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
+      await updateTaskStage(rejectionModalState.taskId, 'IN_PROGRESS');
+      setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
+      if (fetchTasks) fetchTasks(false);
+    } catch (err) {
+      alert(`Rejection failed: ${err.message}`);
+    }
+  };
+
+  const openSubmissionModal = (task) => setSubmissionTask(task);
+  const closeSubmissionModal = () => setSubmissionTask(null);
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -279,49 +524,50 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                               </div>
                             ) : (
                               stageTasks.map(task => {
-                                const verticalLabel = getVerticalLabel(task.verticalId);
-                                const moveLeftAllowed = canMoveLeft(task);
-                                const moveRightAllowed = canMoveRight(task);
-                                
+                                const { TaskTileComponent: DynTileComponent } = resolveVerticalComponents(task.verticalId, verticals);
+
                                 return (
-                                  <div key={task.id} className="centralised-task-card" style={{ borderLeftColor: stage.color }}>
-                                    <div className="card-top-row">
-                                      <span className="vertical-meta-badge" title="Vertical Workspace">
-                                        {verticalLabel}
-                                      </span>
-                                      {task.priority && (
-                                        <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
-                                          {task.priority}
-                                        </span>
+                                  <div
+                                    key={task.id}
+                                    className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
+                                  >
+                                    <TaskCard
+                                      task={task}
+                                      stage={stage}
+                                      canUpdate={canEditTask(task)}
+                                      canDelete={canUserDelete(task)}
+                                      canManageHierarchy={canManageHierarchy(task)}
+                                      canAddSubtask={canAddSubtask(task)}
+                                      canCloneTask={canCloneTask(task)}
+                                      updateTaskStage={updateTaskStage}
+
+                                      deleteTask={handleInternalDelete}
+                                      openEditModal={openEditModal}
+                                      onCloneTask={handleCloneTask}
+                                      openAddSubtaskModal={handleAddSubtask}
+                                      openSubmissionModal={openSubmissionModal}
+                                      handleApproveSubmission={handleApproveSubmission}
+                                      handleRejectClick={handleRejectClick}
+                                      onMoveToParent={handleMoveToParent}
+                                      onDuplicateMerge={openEditModal}
+                                      STAGE_LIST={STAGE_LIST}
+                                      isSelected={false}
+                                      onSelect={() => {}}
+                                      currentUser={user}
+                                      tasks={tasks}
+                                      onPromote={handleMoveToParent}
+                                      showHierarchy={permissions.canViewKanbanHierarchy !== false}
+                                      permissions={permissions}
+                                      isExpanded={expandedTaskId === task.id}
+                                      onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                                    >
+                                      {DynTileComponent && (
+                                        <DynTileComponent
+                                          task={task}
+                                          stage={stage}
+                                        />
                                       )}
-                                    </div>
-                                    
-                                    <h4 className="card-title" title={task.text}>{task.text}</h4>
-                                    
-                                    <div className="card-actions-row">
-                                      {updateTaskStage ? (
-                                        <>
-                                          <button
-                                            className="action-icon-btn"
-                                            onClick={() => handleMoveLeft(task)}
-                                            disabled={!moveLeftAllowed}
-                                            title="Move Back"
-                                          >
-                                            <IconArrowLeft size={14} />
-                                          </button>
-                                          <button
-                                            className="action-icon-btn"
-                                            onClick={() => handleMoveRight(task)}
-                                            disabled={!moveRightAllowed}
-                                            title="Move Forward"
-                                          >
-                                            <IconArrowRight size={14} />
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <span className="action-view-only" title="Interactivity disabled">View Only</span>
-                                      )}
-                                    </div>
+                                    </TaskCard>
                                   </div>
                                 );
                               })
@@ -337,6 +583,58 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           </div>
         </div>
       )}
+
+      {/* Dynamic Task Action Modals */}
+      <TaskActionModals
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        editingTask={editingTask}
+        setEditingTask={setEditingTask}
+        saving={saving}
+        activeVertical={editingTask?.verticalId || 'CHARGING_HUBS'}
+        TaskFormComponent={editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null}
+        handleSaveTask={handleSaveTask}
+        user={user}
+        permissions={permissions}
+        tasks={tasks}
+        rootVerticalId={editingTask?.verticalId}
+        mergeTaskCluster={mergeTaskCluster}
+        setMergeTaskCluster={setMergeTaskCluster}
+        executeMerge={() => {}}
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
+        onSubmissionReview={(subId, status) => {
+          if (status === 'rejected' && editingTask) {
+            updateTaskStage(editingTask.id, 'IN_PROGRESS');
+          } else if (status === 'approved' && editingTask) {
+            updateTaskStage(editingTask.id, 'COMPLETED');
+          }
+          setIsModalOpen(false);
+          setEditingTask(null);
+          if (fetchTasks) fetchTasks(false);
+        }}
+        openSubmissionModal={openSubmissionModal}
+      />
+
+      <SubmissionModal
+        isOpen={!!submissionTask}
+        onClose={closeSubmissionModal}
+        task={submissionTask}
+        user={user}
+        onSubmitSuccess={(result) => {
+          const taskId = submissionTask.id;
+          closeSubmissionModal();
+          updateTaskStage(taskId, 'REVIEW');
+          if (fetchTasks) fetchTasks(false);
+        }}
+      />
+
+      <RejectionModal
+        isOpen={rejectionModalState.isOpen}
+        onClose={() => setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' })}
+        task={{ text: rejectionModalState.taskText }}
+        onSubmit={submitRejection}
+      />
     </div>
   );
 };
