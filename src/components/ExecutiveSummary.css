@@ -536,4 +536,137 @@
   .column-cards-container {
     min-height: auto;
   }
+
+  /* ==========================================================================
+     MOBILE VIEW SWITCHER TRAY
+     ========================================================================== */
+  .summary-navigation-tray {
+    display: block;
+    padding: 0;
+    background: color-mix(in srgb, var(--bg-color), transparent 10%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: sticky;
+    top: -16px; /* Sits snug at top of mobile shell main scroll */
+    z-index: 40;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 8px;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .summary-nav-container {
+    display: flex;
+    height: 68px; /* High-density standard mobile tray height */
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 4px;
+  }
+
+  .summary-nav-item {
+    flex: 1;
+    min-width: 0; /* Allow shrinking below content size */
+    display: flex;
+    flex-direction: column; /* Icon on top, label at bottom */
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    opacity: 0.5;
+    gap: 2px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 44px;
+    border-radius: 12px;
+    margin: 2px;
+    position: relative;
+    box-shadow: none; /* Override any global button borders/shadows */
+  }
+
+  .summary-nav-item:active {
+    background: transparent;
+  }
+
+  .summary-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 50%; /* Perfect circle */
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .summary-icon-wrapper svg {
+    opacity: 1 !important; /* Ensure icons in tray are beautifully visible */
+  }
+
+  .summary-badge-count {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    background: var(--brand-green);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 800;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .summary-nav-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  /* Active Switcher State (Kanban Stage switcher styling compliance) */
+  .summary-nav-item.active {
+    opacity: 1;
+    color: var(--brand-green);
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .summary-nav-item.active .summary-icon-wrapper {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 15px -8px var(--brand-green);
+  }
+
+  /* Animations for switching tabs */
+  .animate-fade-in {
+    animation: simpleFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+}
+
+/* Desktop Hide Rules */
+@media screen and (min-width: 769px) {
+  .summary-navigation-tray {
+    display: none;
+  }
+}
+
+@keyframes simpleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
