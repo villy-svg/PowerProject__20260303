@@ -83,6 +83,7 @@ const ContentRouter = ({
         verticals={verticals}
         verticalList={verticalList}
         loading={tasksLoading}
+        updateTaskStage={activeUpdateTaskStage}
       />
     );
   }
