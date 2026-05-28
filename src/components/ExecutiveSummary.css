@@ -537,6 +537,10 @@
     min-height: auto;
   }
 
+  .home-summary-view {
+    padding-top: 0 !important;
+  }
+
   /* ==========================================================================
      MOBILE VIEW SWITCHER TRAY
      ========================================================================== */
@@ -547,7 +551,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: sticky;
-    top: -16px; /* Sits snug at top of mobile shell main scroll */
+    top: 0; /* Sits snug at top of mobile shell main scroll since padding-top is 0 */
     z-index: 40;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: 8px;
