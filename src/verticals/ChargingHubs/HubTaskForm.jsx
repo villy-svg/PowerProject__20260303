@@ -221,7 +221,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     const isMultiHub = formData.hub_ids.length > 1;
 
     // Prevent submission if we're in step 1 but need to orchestrate (e.g. on Enter key)
-    if (step === 1 && (formData.hub_ids.length > 1 || formData.assigned_to.length > 1)) {
+    if (activeVertical !== 'escalation_tasks' && step === 1 && (formData.hub_ids.length > 1 || formData.assigned_to.length > 1)) {
       handleNextStep();
       return;
     }
@@ -237,10 +237,29 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
       console.warn('[HubTaskForm] MULTI hub not yet provisioned for city:', formData.city, '— umbrella parent will have null hub_id.');
     }
 
-    const leader = orchestrationService.getSeniorMostAssignee(formData.assigned_to, allEmployees);
+    // Hierarchy Expansion for Escalations
+    let finalAssignees = [...formData.assigned_to];
+    if (activeVertical === 'escalation_tasks') {
+      const expandedSet = new Set(finalAssignees);
+      for (const assigneeId of formData.assigned_to) {
+        let currentId = assigneeId;
+        while (currentId) {
+          const emp = allEmployees.find(e => e.id === currentId || e.employeeId === currentId);
+          if (emp && emp.manager_id) {
+            expandedSet.add(emp.manager_id);
+            currentId = emp.manager_id;
+          } else {
+            currentId = null;
+          }
+        }
+      }
+      finalAssignees = Array.from(expandedSet);
+    }
+
+    const leader = orchestrationService.getSeniorMostAssignee(finalAssignees, allEmployees);
 
     // Sort all assignees for the parent task, keeping leader at index 0
-    const sortedAssigneeIds = [...formData.assigned_to].sort((a, b) => {
+    const sortedAssigneeIds = finalAssignees.sort((a, b) => {
       if (a === leader?.id) return -1;
       if (b === leader?.id) return 1;
       return 0;
@@ -587,7 +606,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
           </>
         ) : (
           <>
-            {(formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
+            {activeVertical !== 'escalation_tasks' && (formData.hub_ids.length > 1 || formData.assigned_to.length > 1) && step === 1 ? (
               <button
                 key="next-btn"
                 type="button"

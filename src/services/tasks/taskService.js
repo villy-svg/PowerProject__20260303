@@ -236,11 +236,14 @@ export const taskService = {
     
     let fanOutTargets = null;
     if (isMultiHub || isMultiAssignee || isOrchestrated) {
+      const isEscalation = (enrichedTaskData.task_board || []).includes('Escalations');
       const rawTargets = isOrchestrated
         ? orchestrationMapping
         : (isMultiHub ? hubIds : assigneeIds).map(id => ({
             hub_id: isMultiHub ? id : (enrichedTaskData.hub_id || null),
-            assigned_to: isMultiAssignee ? [id] : (isMultiHub && assigneeIds.length > 1 ? [assigneeIds[0]] : assigneeIds)
+            assigned_to: isEscalation 
+              ? assigneeIds // Escalations assign ALL managers to the same task
+              : (isMultiAssignee ? [id] : (isMultiHub && assigneeIds.length > 1 ? [assigneeIds[0]] : assigneeIds))
           }));
 
       // BUG-FIX: Normalize all targets to the RPC's expected shape.
