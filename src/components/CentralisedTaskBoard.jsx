@@ -37,7 +37,9 @@ const CentralisedTaskBoard = ({
   expandedTaskId,
   setExpandedTaskId,
   canCreateEscalation = false,
-  openAddEscalationModal
+  openAddEscalationModal,
+  title = "Centralised Task View",
+  description = "A unified, interactive workspace showing all active tasks assigned to you across all verticals."
 }) => {
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   
@@ -49,9 +51,9 @@ const CentralisedTaskBoard = ({
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
           <div className="summary-header secondary-header">
-            <h2>Centralised Task View</h2>
+            <h2>{title}</h2>
           </div>
-          <p className="section-description">A unified, interactive workspace showing all active tasks assigned to you across all verticals.</p>
+          <p className="section-description">{description}</p>
           {canCreateEscalation && (
             <div className="centralised-actions-row">
               <button
@@ -77,9 +79,9 @@ const CentralisedTaskBoard = ({
     <div className="centralised-task-view-wrapper animate-fade-in">
       <div className="centralised-task-view">
         <div className="summary-header secondary-header">
-          <h2>Centralised Task View</h2>
+          <h2>{title}</h2>
         </div>
-        <p className="section-description">A unified, interactive workspace showing all active tasks assigned to you across all verticals.</p>
+        <p className="section-description">{description}</p>
         {canCreateEscalation && (
           <div className="centralised-actions-row">
             <button

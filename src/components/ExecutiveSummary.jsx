@@ -8,6 +8,7 @@ import './ExecutiveSummary.css';
 // Core Sub-Components
 import ExecutiveMetricsSection from './ExecutiveMetricsSection';
 import CentralisedTaskBoard from './CentralisedTaskBoard';
+import HomeEscalationsBoard from './HomeEscalationsBoard';
 import WorkspaceModals from './WorkspaceModals';
 
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
@@ -306,6 +307,16 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const topLevelVisibleCount = visibleTasks.filter(t => !t.parentTask).length;
 
   const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
+  const escalationTasks = myTasks.filter(t => t.verticalId === 'escalation_tasks');
+  const regularMyTasks = myTasks.filter(t => t.verticalId !== 'escalation_tasks');
+  const hasEscalations = escalationTasks.length > 0;
+
+  // Auto-switch away from escalations if they disappear
+  React.useEffect(() => {
+    if (!hasEscalations && activeView === 'escalations') {
+      setActiveView('centralised_task_view');
+    }
+  }, [hasEscalations, activeView]);
 
   return (
     <div className="home-summary-view">
@@ -313,6 +324,19 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {isMobile && (
         <nav className="summary-navigation-tray">
           <div className="summary-nav-container">
+            {hasEscalations && (
+              <button
+                className={`summary-nav-item ${activeView === 'escalations' ? 'active' : ''}`}
+                onClick={() => setActiveView('escalations')}
+                style={{ '--stage-accent': 'var(--brand-red, #ef4444)' }}
+              >
+                <div className="summary-icon-wrapper">
+                  <IconZap size={18} />
+                  <span className="summary-badge-count">{escalationTasks.length}</span>
+                </div>
+                <span className="summary-nav-label">Escalations</span>
+              </button>
+            )}
              <button
               className={`summary-nav-item ${activeView === 'centralised_task_view' ? 'active' : ''}`}
               onClick={() => setActiveView('centralised_task_view')}
@@ -320,11 +344,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
             >
               <div className="summary-icon-wrapper">
                 <IconBoards size={18} />
-                {myTasks.length > 0 && (
-                  <span className="summary-badge-count">{myTasks.length}</span>
+                {regularMyTasks.length > 0 && (
+                  <span className="summary-badge-count">{regularMyTasks.length}</span>
                 )}
               </div>
-              <span className="summary-nav-label">Centralised Task View</span>
+              <span className="summary-nav-label">Centralised Tasks</span>
             </button>
             <button
               className={`summary-nav-item ${activeView === 'executive_summary' ? 'active' : ''}`}
@@ -343,20 +367,10 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         </nav>
       )}
 
-      {/* 1. Executive Summary Grid Metrics Section */}
-      {(!isMobile || activeView === 'executive_summary') && (
-        <ExecutiveMetricsSection
-          visibleTasks={visibleTasks}
-          verticalList={verticalList}
-          loading={loading}
-          isMobile={isMobile}
-        />
-      )}
-
-      {/* 2. Centralised Task View Section */}
-      {(!isMobile || activeView === 'centralised_task_view') && (
-        <CentralisedTaskBoard
-          tasks={tasks}
+      {/* 0. Escalations Section */}
+      {hasEscalations && (!isMobile || activeView === 'escalations') && (
+        <HomeEscalationsBoard
+          tasks={tasks.filter(t => t.verticalId === 'escalation_tasks')}
           user={user}
           permissions={permissions}
           verticals={verticals}
@@ -381,6 +395,49 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           setExpandedTaskId={setExpandedTaskId}
           canCreateEscalation={!!user}
           openAddEscalationModal={openAddEscalationModal}
+        />
+      )}
+
+      {/* 1. Centralised Task View Section */}
+      {(!isMobile || activeView === 'centralised_task_view') && (
+        <CentralisedTaskBoard
+          title="Centralised Task View"
+          description="A unified, interactive workspace showing all active tasks assigned to you across all verticals."
+          tasks={tasks.filter(t => t.verticalId !== 'escalation_tasks')}
+          user={user}
+          permissions={permissions}
+          verticals={verticals}
+          verticalList={verticalList}
+          isMobile={isMobile}
+          updateTaskStage={updateTaskStage}
+          canEditTask={canEditTask}
+          canUserDelete={canUserDelete}
+          canManageHierarchy={canManageHierarchy}
+          canAddSubtask={canAddSubtask}
+          canCloneTask={canCloneTask}
+          handleInternalDelete={handleInternalDelete}
+          openEditModal={openEditModal}
+          handleCloneTask={handleCloneTask}
+          handleAddSubtask={handleAddSubtask}
+          openSubmissionModal={openSubmissionModal}
+          handleApproveSubmission={handleApproveSubmission}
+          handleRejectClick={handleRejectClick}
+          handleMoveToParent={handleMoveToParent}
+          setMergeTaskCluster={setMergeTaskCluster}
+          expandedTaskId={expandedTaskId}
+          setExpandedTaskId={setExpandedTaskId}
+          canCreateEscalation={!!user}
+          openAddEscalationModal={openAddEscalationModal}
+        />
+      )}
+
+      {/* 2. Executive Summary Grid Metrics Section */}
+      {(!isMobile || activeView === 'executive_summary') && (
+        <ExecutiveMetricsSection
+          visibleTasks={visibleTasks}
+          verticalList={verticalList}
+          loading={loading}
+          isMobile={isMobile}
         />
       )}
 

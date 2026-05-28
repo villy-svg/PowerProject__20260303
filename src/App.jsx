@@ -23,6 +23,7 @@ import ContentRouter from './app/shells/ContentRouter';
 // Constants
 import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, updateStaticVerticals } from './constants/verticals';
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
+import { APP_VERSION } from './constants/appVersion';
 
 import Login from './components/Login';
 import PendingActivation from './components/PendingActivation';
@@ -188,6 +189,22 @@ function App() {
   useEffect(() => {
     const initAppData = async () => {
       try {
+        // --- Cache Auto-Clean Logic ---
+        const cachedVersion = localStorage.getItem('last_app_version');
+        if (cachedVersion !== APP_VERSION) {
+          console.log(`[Cache] Version mismatch: ${cachedVersion} -> ${APP_VERSION}. Clearing caches...`);
+          try {
+            if (window.caches) {
+              const keys = await window.caches.keys();
+              await Promise.all(keys.map(key => window.caches.delete(key)));
+            }
+          } catch (e) {
+            console.warn('[Cache] Failed to clear caches:', e);
+          }
+          localStorage.setItem('last_app_version', APP_VERSION);
+        }
+        // ------------------------------
+
         const [vResult, sessionData] = await Promise.all([
           verticalService.getVerticals().catch(err => {
             console.warn('Falling back to static verticals.', err);
