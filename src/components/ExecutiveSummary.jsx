@@ -4,7 +4,7 @@ import { VERTICAL_LIST } from '../constants/verticals';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { useAppNavigation } from '../app/contexts/AppNavigationContext';
-import { IconPeople, IconSettings, IconArrowLeft, IconArrowRight, IconBoards, IconEye } from './Icons';
+import { IconPeople, IconSettings, IconArrowLeft, IconArrowRight, IconBoards, IconEye, IconClock, IconZap, IconCheck } from './Icons';
 import { taskUtils } from '../utils/taskUtils';
 import './ExecutiveSummary.css';
 
@@ -18,6 +18,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const [expandedStageId, setExpandedStageId] = useState(null);
   const { setActiveVertical } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
+  const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   
   /**
     * REFACTORED SCOPE LOGIC
@@ -219,77 +220,116 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               }
 
               return (
-                <div className="centralised-board">
-                  {boardStages.map(stage => {
-                    const stageTasks = myTasks.filter(t => t.stageId === stage.id);
-                    
-                    return (
-                      <div key={stage.id} className="centralised-column" style={{ '--column-accent': stage.color }}>
-                        <div className="column-header">
-                          <span className="column-dot" style={{ backgroundColor: stage.color }} />
-                          <span className="column-title">{stage.label}</span>
-                          <span className="column-count">{stageTasks.length}</span>
-                        </div>
-                        
-                        <div className="column-cards-container">
-                          {stageTasks.length === 0 ? (
-                            <div className="column-empty-state">
-                              <span>No tasks in this stage</span>
-                            </div>
-                          ) : (
-                            stageTasks.map(task => {
-                              const verticalLabel = getVerticalLabel(task.verticalId);
-                              const moveLeftAllowed = canMoveLeft(task);
-                              const moveRightAllowed = canMoveRight(task);
-                              
-                              return (
-                                <div key={task.id} className="centralised-task-card" style={{ borderLeftColor: stage.color }}>
-                                  <div className="card-top-row">
-                                    <span className="vertical-meta-badge" title="Vertical Workspace">
-                                      {verticalLabel}
-                                    </span>
-                                    {task.priority && (
-                                      <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
-                                        {task.priority}
-                                      </span>
-                                    )}
-                                  </div>
-                                  
-                                  <h4 className="card-title" title={task.text}>{task.text}</h4>
-                                  
-                                  <div className="card-actions-row">
-                                    {updateTaskStage ? (
-                                      <>
-                                        <button
-                                          className="action-icon-btn"
-                                          onClick={() => handleMoveLeft(task)}
-                                          disabled={!moveLeftAllowed}
-                                          title="Move Back"
-                                        >
-                                          <IconArrowLeft size={14} />
-                                        </button>
-                                        <button
-                                          className="action-icon-btn"
-                                          onClick={() => handleMoveRight(task)}
-                                          disabled={!moveRightAllowed}
-                                          title="Move Forward"
-                                        >
-                                          <IconArrowRight size={14} />
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <span className="action-view-only" title="Interactivity disabled">View Only</span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })
-                          )}
-                        </div>
+                <>
+                  {/* Full-Fledged Stage Navigation Switcher Tray for Mobile Viewports */}
+                  {isMobile && (
+                    <nav className="centralised-stage-navigation-tray">
+                      <div className="centralised-stage-nav-container">
+                        {boardStages.map((stage) => {
+                          const count = myTasks.filter(t => t.stageId === stage.id).length;
+                          const isActive = activeBoardStageId === stage.id;
+                          
+                          return (
+                            <button 
+                              key={stage.id}
+                              className={`centralised-stage-nav-item ${isActive ? 'active' : ''}`}
+                              onClick={() => setActiveBoardStageId(stage.id)}
+                              style={{ '--stage-accent': stage.color }}
+                            >
+                              <div className="centralised-stage-icon-wrapper">
+                                {stage.id === 'BACKLOG' && <IconClock size={20} />}
+                                {stage.id === 'IN_PROGRESS' && <IconZap size={18} />}
+                                {stage.id === 'REVIEW' && <IconEye size={20} />}
+                                {stage.id === 'COMPLETED' && <IconCheck size={20} />}
+                                {count > 0 && <span className="centralised-stage-badge-count">{count}</span>}
+                              </div>
+                              <span className="centralised-stage-nav-label">{stage.label}</span>
+                            </button>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
+                    </nav>
+                  )}
+
+                  <div className="centralised-board">
+                    {boardStages.map(stage => {
+                      const stageTasks = myTasks.filter(t => t.stageId === stage.id);
+                      const isColumnActive = !isMobile || activeBoardStageId === stage.id;
+                      
+                      if (!isColumnActive) return null;
+                      
+                      return (
+                        <div 
+                          key={stage.id} 
+                          className={`centralised-column ${isMobile ? 'active' : ''}`} 
+                          style={{ '--column-accent': stage.color }}
+                        >
+                          <div className="column-header">
+                            <span className="column-dot" style={{ backgroundColor: stage.color }} />
+                            <span className="column-title">{stage.label}</span>
+                            <span className="column-count">{stageTasks.length}</span>
+                          </div>
+                          
+                          <div className="column-cards-container">
+                            {stageTasks.length === 0 ? (
+                              <div className="column-empty-state">
+                                <span>No tasks in this stage</span>
+                              </div>
+                            ) : (
+                              stageTasks.map(task => {
+                                const verticalLabel = getVerticalLabel(task.verticalId);
+                                const moveLeftAllowed = canMoveLeft(task);
+                                const moveRightAllowed = canMoveRight(task);
+                                
+                                return (
+                                  <div key={task.id} className="centralised-task-card" style={{ borderLeftColor: stage.color }}>
+                                    <div className="card-top-row">
+                                      <span className="vertical-meta-badge" title="Vertical Workspace">
+                                        {verticalLabel}
+                                      </span>
+                                      {task.priority && (
+                                        <span className={`card-priority priority-${task.priority.toLowerCase()}`}>
+                                          {task.priority}
+                                        </span>
+                                      )}
+                                    </div>
+                                    
+                                    <h4 className="card-title" title={task.text}>{task.text}</h4>
+                                    
+                                    <div className="card-actions-row">
+                                      {updateTaskStage ? (
+                                        <>
+                                          <button
+                                            className="action-icon-btn"
+                                            onClick={() => handleMoveLeft(task)}
+                                            disabled={!moveLeftAllowed}
+                                            title="Move Back"
+                                          >
+                                            <IconArrowLeft size={14} />
+                                          </button>
+                                          <button
+                                            className="action-icon-btn"
+                                            onClick={() => handleMoveRight(task)}
+                                            disabled={!moveRightAllowed}
+                                            title="Move Forward"
+                                          >
+                                            <IconArrowRight size={14} />
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <span className="action-view-only" title="Interactivity disabled">View Only</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
               );
             })()}
           </div>
