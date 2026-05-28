@@ -263,6 +263,10 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     }
   };
 
+  const handleRejectClick = (taskId, submissionId, taskText) => {
+    setRejectionModalState({ isOpen: true, taskId, submissionId, taskText });
+  };
+
   const executeMerge = async (primaryTaskId) => {
     const primaryTask = tasks.find(t => t.id === primaryTaskId);
     if (!primaryTask) return;
@@ -574,7 +578,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                                       handleApproveSubmission={handleApproveSubmission}
                                       handleRejectClick={handleRejectClick}
                                       onMoveToParent={handleMoveToParent}
-                                      onDuplicateMerge={openEditModal}
+                                      onDuplicateMerge={setMergeTaskCluster}
                                       STAGE_LIST={STAGE_LIST}
                                       isSelected={false}
                                       onSelect={() => {}}
