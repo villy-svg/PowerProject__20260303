@@ -32,6 +32,7 @@ const MANAGEMENT_VIEWS = [
   'client_category_management',
   'client_service_management',
   'client_billing_model_management',
+  'tutorial',
 ];
 
 export function useLayoutShell() {

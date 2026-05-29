@@ -255,9 +255,64 @@
   transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── 6. Mobile Logo / Brand ──────────────────────────────────────────── */
 .mobile-layout .mobile-hidden {
   display: none !important;
+}
+
+/* Ensure the centered title is perfectly sized and never squished or truncated on mobile */
+.mobile-layout .brand-title-centered {
+  position: fixed !important;
+  left: 50% !important;
+  top: clamp(30px, 4.2vh, 45px) !important; /* Perfectly centered vertically in the header */
+  transform: translate(-50%, -50%) !important;
+  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
+  font-weight: 800 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  z-index: calc(var(--z-header) + 20) !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+.mobile-layout .brand-title-centered.mobile-hidden {
+  display: none !important;
+}
+
+.mobile-header-tutorial-btn {
+  position: fixed !important;
+  right: 16px !important;
+  left: auto !important; /* Prevent from stretching or centering */
+  top: clamp(30px, 4.2vh, 45px) !important; /* Vertically center in header area */
+  transform: translateY(-50%) !important;
+  width: auto !important; /* Prevent from stretching */
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  min-height: 32px;
+  height: auto;
+  border-radius: var(--radius-button, 12px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  font-weight: 800;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 3px var(--halo-glow);
+  z-index: calc(var(--z-header) + 30) !important;
+}
+
+.mobile-header-tutorial-btn.mobile-hidden {
+  display: none !important;
+}
+
+.mobile-header-tutorial-btn.active {
+  border-color: var(--brand-green) !important;
+  background: var(--halo-bg) !important;
+  box-shadow: 0 0 10px var(--halo-glow) !important;
+  opacity: 1 !important;
 }
 
 .mobile-layout .mobile-logo-btn {

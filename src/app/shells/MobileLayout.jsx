@@ -61,6 +61,14 @@ const MobileLayout = ({
       {/* Brand Title — hidden when in a vertical */}
       <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
 
+      {/* Tutorials Button — top right corner, hidden when in a vertical */}
+      <button 
+        className={`halo-button mobile-header-tutorial-btn ${activeVertical ? 'mobile-hidden' : ''} ${activeVertical === 'tutorial' ? 'active' : ''}`}
+        onClick={() => setActiveVertical('tutorial')}
+      >
+        💡 Tutorials
+      </button>
+
       {/* Sidebar Drawer */}
       <MobileSidebar
         isOpen={isSidebarOpen}

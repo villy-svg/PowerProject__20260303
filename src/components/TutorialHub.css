@@ -1,0 +1,588 @@
+/* ==========================================================================
+   TUTORIAL HUB & SLIDESHOW VIEWER STYLES
+   ========================================================================== */
+
+/* Tutorial Hub Page Container */
+.tutorial-hub-page {
+  animation: fadeIn 0.4s ease-out;
+  padding: clamp(16px, 4vw, 32px);
+}
+
+/* Target Environment Toggle */
+.platform-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.platform-toggle-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+}
+
+.platform-selector-group {
+  display: flex;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  padding: 3px;
+  gap: 4px;
+}
+
+.platform-toggle-btn {
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: auto;
+}
+
+.platform-toggle-btn.active {
+  background: var(--brand-green);
+  color: #000 !important;
+  opacity: 1;
+}
+
+.header-back-dashboard-btn {
+  font-size: 0.8rem;
+  padding: 8px 16px;
+  height: auto;
+  min-height: 44px;
+}
+
+/* Categories Grid Layout */
+.tutorial-categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 24px;
+  padding-bottom: 40px;
+}
+
+.category-section-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0 0 16px 0;
+  border-left: 3px solid var(--brand-green);
+  padding-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-flows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* Flow Cards */
+.tutorial-flow-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tutorial-flow-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-green);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--halo-glow);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.flow-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.access-level-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.flow-indicator-icon {
+  font-size: 0.75rem;
+  opacity: 0.3;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+
+.tutorial-flow-card:hover .flow-indicator-icon {
+  opacity: 1;
+  color: var(--brand-green);
+  transform: scale(1.1);
+}
+
+.flow-card-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.flow-card-description {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  opacity: 0.55;
+  margin: 0 0 20px 0;
+  flex: 1;
+}
+
+.flow-card-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 16px;
+  margin-top: auto; /* Ensure it stays at the bottom of the card */
+}
+
+.flow-version-btn {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-height: 48px;
+  gap: 3px;
+  cursor: pointer;
+  pointer-events: auto !important; /* Enable mouse/touch interactions explicitly */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-button, 12px);
+  width: 100%;
+}
+
+.version-btn-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.version-btn-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+/* Active version highlight matching the current platform selection */
+.flow-version-btn.active-version {
+  border-color: var(--brand-green) !important;
+  background: var(--halo-bg) !important;
+  box-shadow: 0 0 12px var(--halo-glow) !important;
+  opacity: 1 !important;
+}
+
+.flow-version-btn.active-version .version-btn-subtitle {
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   TUTORIAL SLIDESHOW MODAL OVERLAY
+   ========================================================================== */
+.tutorial-slideshow-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.slideshow-modal-card {
+  width: 100%;
+  max-width: 1100px;
+  height: 90vh;
+  background: #09090b;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+/* Slideshow Modal Header */
+.slideshow-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.flow-category-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--brand-green);
+  letter-spacing: 1px;
+}
+
+.slideshow-flow-title {
+  margin: 2px 0 0 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-color);
+}
+
+.slideshow-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  min-width: 38px;
+}
+
+.slideshow-close-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--brand-red, #ef4444);
+}
+
+/* Slideshow Content Body */
+.slideshow-content-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #020202;
+  overflow: auto;
+  padding: 20px;
+}
+
+.screenshot-wrapper-container {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: inline-block;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.tutorial-screenshot-img {
+  max-width: 100%;
+  max-height: 55vh;
+  display: block;
+  object-fit: contain;
+  background: #121214;
+}
+
+/* Annotations Layer Overlay */
+.annotations-overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Annotation Highlight Circles */
+.annotation-highlight-circle {
+  position: absolute;
+  border: 2px solid var(--brand-green);
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 15px var(--halo-glow);
+  transform: translate(0, 0);
+  animation: pulseHighlightCircle 2s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.circle-annotation-label-box {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand-green);
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+@keyframes pulseHighlightCircle {
+  0% {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 8px var(--halo-glow);
+    border-color: var(--brand-green);
+  }
+  50% {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 25px rgba(45, 212, 191, 0.4);
+    border-color: #fff;
+  }
+  100% {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 8px var(--halo-glow);
+    border-color: var(--brand-green);
+  }
+}
+
+/* Annotation Thought/Speech Bubbles */
+.annotation-thought-bubble {
+  position: absolute;
+  background: rgba(18, 18, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 16px;
+  width: 240px;
+  box-shadow: var(--shadow-premium), 0 0 10px rgba(45, 212, 191, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  z-index: 100;
+}
+
+.thought-bubble-pulse {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--brand-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--brand-green);
+}
+
+.thought-bubble-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.thought-bubble-pointer {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(18, 18, 20, 0.85);
+}
+
+/* Annotation SVG Overlay (Arrows) */
+.annotations-svg-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.arrow-text-label {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border-color);
+  color: var(--brand-green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Slideshow Modal Footer */
+.slideshow-modal-footer {
+  padding: 20px 28px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.01);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slideshow-caption-box {
+  background: rgba(255, 255, 255, 0.01);
+  border-left: 4px solid var(--brand-green);
+  padding: 10px 18px;
+  border-radius: 0 8px 8px 0;
+}
+
+.slideshow-caption-text {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+/* Slideshow Navigation Controls */
+.slideshow-nav-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slideshow-control-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  height: auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slideshow-control-btn.disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.slideshow-step-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.step-dot-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.step-dot-indicator:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.step-dot-indicator.active {
+  background: var(--brand-green);
+  transform: scale(1.2);
+  box-shadow: 0 0 8px var(--halo-glow);
+}
+
+/* ==========================================================================
+   RESPONSIVENESS (FLUID LAPTOP SCALINGS)
+   ========================================================================== */
+@media screen and (max-width: 1200px) {
+  .slideshow-modal-card {
+    max-width: 92%;
+    height: 85vh;
+  }
+  .tutorial-screenshot-img {
+    max-height: 48vh;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .tutorial-categories-grid {
+    gap: 20px;
+  }
+  .category-flows-grid {
+    grid-template-columns: 1fr; /* Full width list on mobile */
+  }
+  .tutorial-slideshow-overlay {
+    padding: 10px;
+  }
+  .slideshow-modal-card {
+    max-width: 100%;
+    height: 95vh;
+  }
+  .slideshow-modal-header {
+    padding: 14px 20px;
+  }
+  .slideshow-flow-title {
+    font-size: 1.05rem;
+  }
+  .slideshow-modal-footer {
+    padding: 16px 20px;
+  }
+  .slideshow-caption-text {
+    font-size: 0.85rem;
+  }
+  .tutorial-screenshot-img {
+    max-height: 42vh;
+  }
+  .annotation-thought-bubble {
+    width: 180px;
+    padding: 8px 12px;
+  }
+  .thought-bubble-text {
+    font-size: 0.72rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .flow-card-footer {
+    gap: 8px;
+    padding-top: 12px;
+  }
+  .flow-version-btn {
+    padding: 6px 8px;
+    min-height: 44px;
+    gap: 2px;
+  }
+  .version-btn-title {
+    font-size: 0.64rem;
+  }
+  .version-btn-subtitle {
+    font-size: 0.55rem;
+  }
+}

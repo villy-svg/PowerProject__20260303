@@ -21,6 +21,7 @@ import ExecutiveSummary from '../../components/ExecutiveSummary';
 import Configuration from '../../components/Configuration';
 import UserRoleManagement from '../../components/UserRoleManagement';
 import UserManagement from '../../components/UserManagement';
+import TutorialHub from '../../components/TutorialHub';
 
 // Vertical Management Pages
 import {
@@ -194,6 +195,17 @@ const ContentRouter = ({
   if (activeVertical === 'client_billing_model_management') {
     return (
       <ClientBillingModelManagement
+        user={user}
+        permissions={permissions}
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+      />
+    );
+  }
+
+  if (activeVertical === 'tutorial') {
+    return (
+      <TutorialHub
         user={user}
         permissions={permissions}
         setActiveVertical={setActiveVertical}

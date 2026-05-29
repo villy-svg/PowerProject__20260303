@@ -10,6 +10,7 @@ import ExecutiveMetricsSection from './ExecutiveMetricsSection';
 import CentralisedTaskBoard from './CentralisedTaskBoard';
 import HomeEscalationsBoard from './HomeEscalationsBoard';
 import WorkspaceModals from './WorkspaceModals';
+import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 
 import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import { cloneUtils } from '../utils/cloneUtils';
@@ -26,6 +27,7 @@ import { useRBAC } from '../hooks/useRBAC';
  */
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false, updateTaskStage }) => {
   const { isMobile } = useIsMobile();
+  const { setActiveVertical } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
@@ -325,6 +327,14 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   return (
     <div className="home-summary-view">
+      {/* Welcome Header & Tutorial Quick Start */}
+      <div className="home-dashboard-header">
+        <div className="welcome-greeting">
+          <h2>Welcome back, <span className="highlight-name">{user?.name || 'User'}</span></h2>
+          <p className="welcome-subtitle">Manage your escalations and centralized tasks in a unified workspace.</p>
+        </div>
+      </div>
+
       {/* Mobile-Only Summary View Navigation Switcher Tray */}
       {isMobile && (
         <nav className="summary-navigation-tray">

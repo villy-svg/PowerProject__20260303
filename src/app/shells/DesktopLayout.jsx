@@ -76,6 +76,12 @@ const DesktopLayout = ({
           <div className="header-left"></div>
           <div className="header-center"></div>
           <div className="header-right">
+            <button 
+              className={`halo-button header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
+              onClick={() => setActiveVertical('tutorial')}
+            >
+              💡 Tutorials
+            </button>
             {realUser?.roleId === 'master_admin' && (
               <div className="impersonation-header-wrapper">
                 {impersonatedUser ? (
