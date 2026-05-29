@@ -17,7 +17,7 @@ export const useAssignees = (autoFetch = false) => {
     try {
       const { data, error: fetchError } = await supabase
         .from('employees')
-        .select('id, full_name, emp_code, email, badge_id, employee_roles(seniority_level)')
+        .select('id, full_name, emp_code, email, badge_id, manager_id, employee_roles(seniority_level)')
         .eq('status', 'Active')
         .order('full_name');
 

@@ -307,8 +307,13 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const topLevelVisibleCount = visibleTasks.filter(t => !t.parentTask).length;
 
   const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
-  const escalationTasks = myTasks.filter(t => t.verticalId === 'escalation_tasks');
-  const regularMyTasks = myTasks.filter(t => t.verticalId !== 'escalation_tasks');
+  const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
+  const escalationTasks = myTasks.filter(t => 
+    t.verticalId === 'escalation_tasks' || 
+    ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') && 
+     (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+  );
+  const regularMyTasks = myTasks.filter(t => !escalationTasks.some(et => et.id === t.id));
   const hasEscalations = escalationTasks.length > 0;
 
   // Auto-switch away from escalations if they disappear
@@ -370,7 +375,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {/* 0. Escalations Section */}
       {hasEscalations && (!isMobile || activeView === 'escalations') && (
         <HomeEscalationsBoard
-          tasks={tasks.filter(t => t.verticalId === 'escalation_tasks')}
+          tasks={tasks.filter(t => 
+            t.verticalId === 'escalation_tasks' || 
+            ((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 
+             (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+          )}
           user={user}
           permissions={permissions}
           verticals={verticals}
@@ -403,7 +412,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         <CentralisedTaskBoard
           title="Centralised Task View"
           description="A unified, interactive workspace showing all active tasks assigned to you across all verticals."
-          tasks={tasks.filter(t => t.verticalId !== 'escalation_tasks')}
+          tasks={tasks.filter(t => 
+            t.verticalId !== 'escalation_tasks' && 
+            !((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 
+              (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+          )}
           user={user}
           permissions={permissions}
           verticals={verticals}
