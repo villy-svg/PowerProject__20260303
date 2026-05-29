@@ -15,7 +15,7 @@
  * - adaptive-ui-strategy §5 Desktop Layout
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import DesktopSidebar from './DesktopSidebar';
 import UserProfile from '../../components/UserProfile';
 import CustomSelect from '../../components/CustomSelect';
@@ -24,6 +24,7 @@ import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
 import SearchBar from '../../components/SearchBar';
 import NotificationBell from '../../components/NotificationBell';
+import SandboxManagerModal from '../../components/SandboxManagerModal';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -44,6 +45,9 @@ const DesktopLayout = ({
     activeVertical, setActiveVertical,
     isSidebarOpen, setIsSidebarOpen,
   } = useAppNavigation();
+
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   return (
     <div className="desktop-layout" data-shell="desktop" data-theme={darkMode ? 'dark' : 'light'}>
@@ -82,6 +86,21 @@ const DesktopLayout = ({
             >
               💡 Tutorials
             </button>
+            {isBypassActive && (
+              <button 
+                className="halo-button header-sandbox-btn"
+                onClick={() => setIsSandboxOpen(true)}
+                style={{
+                  color: '#f59e0b',
+                  borderColor: 'rgba(245, 158, 11, 0.3)',
+                  background: 'rgba(245, 158, 11, 0.05)',
+                  boxShadow: '0 0 5px rgba(245, 158, 11, 0.1)',
+                  fontWeight: 800
+                }}
+              >
+                ⚠️ Sandbox Active
+              </button>
+            )}
             {realUser?.roleId === 'master_admin' && (
               <div className="impersonation-header-wrapper">
                 {impersonatedUser ? (
@@ -119,6 +138,9 @@ const DesktopLayout = ({
           {children}
         </main>
       </div>
+
+      {/* Dev-Only Sandbox Management Portal */}
+      <SandboxManagerModal isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} />
     </div>
   );
 };

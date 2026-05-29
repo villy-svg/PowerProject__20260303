@@ -27,6 +27,8 @@ import { APP_VERSION } from './constants/appVersion';
 
 import Login from './components/Login';
 import PendingActivation from './components/PendingActivation';
+import OnlineSyncBanner from './components/OnlineSyncBanner';
+
 
 // Assets
 import powerLogo from './assets/logo.svg';
@@ -256,6 +258,7 @@ function App() {
   return (
     <AppNavigationProvider verticals={verticals}>
       <TaskBoardProvider user={user} verticals={verticals}>
+        <OnlineSyncBanner />
         <AppShell verticals={verticals} verticalList={verticalList} />
       </TaskBoardProvider>
     </AppNavigationProvider>

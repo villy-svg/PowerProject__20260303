@@ -1,0 +1,137 @@
+/* OnlineSyncBanner.css */
+
+.online-sync-banner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10001; /* Above layout headers and standard modals */
+  padding: 16px;
+  pointer-events: none; /* Let clicks pass through overlay background */
+}
+
+.online-sync-banner {
+  pointer-events: auto; /* Active cursor events on the banner itself */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 760px;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.2); /* Emerald green stroke */
+  border-radius: var(--radius-button, 12px);
+  padding: 12px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.1);
+  animation: slideDownIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 16px;
+}
+
+.sync-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Pulsing Online Dot */
+.online-indicator-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #10b981; /* Emerald Green */
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulseGreen 2s infinite;
+}
+
+.sync-banner-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-color, #f4f4f5);
+}
+
+.sync-banner-text strong {
+  color: #10b981;
+}
+
+.sync-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dismiss-banner-btn {
+  font-size: 0.75rem !important;
+  color: var(--text-color, #f4f4f5) !important;
+  opacity: 0.6;
+  border-color: transparent !important;
+  background: none !important;
+  padding: 0 12px !important;
+  height: 32px !important;
+}
+
+.dismiss-banner-btn:hover {
+  opacity: 1;
+}
+
+.reconnect-sync-btn {
+  font-size: 0.75rem !important;
+  color: #10b981 !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  background: rgba(16, 185, 129, 0.05) !important;
+  padding: 0 16px !important;
+  height: 32px !important;
+}
+
+.reconnect-sync-btn:hover {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Animations */
+@keyframes slideDownIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGreen {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* Mobile responsive scaling */
+@media screen and (max-width: 640px) {
+  .online-sync-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .sync-banner-right {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}

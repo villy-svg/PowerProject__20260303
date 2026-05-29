@@ -13,7 +13,7 @@
  * - adaptive-ui-strategy §5 Mobile Layout
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import MobileSidebar from './MobileSidebar';
 import MobileBottomNav from './MobileBottomNav';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
@@ -21,6 +21,7 @@ import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
 import SearchBar from '../../components/SearchBar';
 import ExitAppModal from '../../components/ExitAppModal';
+import SandboxManagerModal from '../../components/SandboxManagerModal';
 import './MobileLayout.css';
 
 const MobileLayout = ({
@@ -42,6 +43,9 @@ const MobileLayout = ({
     isSidebarOpen, setIsSidebarOpen,
     showBottomNavOverlay, setShowBottomNavOverlay,
   } = useAppNavigation();
+
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   return (
     <div
@@ -68,6 +72,28 @@ const MobileLayout = ({
       >
         💡 Tutorials
       </button>
+
+      {isBypassActive && (
+        <button 
+          className="halo-button mobile-header-sandbox-btn"
+          onClick={() => setIsSandboxOpen(true)}
+          style={{
+            position: 'fixed',
+            top: '16px',
+            right: activeVertical ? '16px' : '124px',
+            zIndex: 101,
+            color: '#f59e0b',
+            borderColor: 'rgba(245, 158, 11, 0.3)',
+            background: 'rgba(245, 158, 11, 0.05)',
+            fontWeight: 800,
+            fontSize: '0.75rem',
+            padding: '0 8px',
+            height: '32px'
+          }}
+        >
+          ⚠️ Sandbox
+        </button>
+      )}
 
       {/* Sidebar Drawer */}
       <MobileSidebar
@@ -113,6 +139,9 @@ const MobileLayout = ({
 
       {/* Exit App Confirmation Modal — shown on dashboard back press */}
       <ExitAppModal />
+
+      {/* Dev-Only Sandbox Management Portal */}
+      <SandboxManagerModal isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} />
     </div>
   );
 };
