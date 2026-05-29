@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { IconEye, IconBoards } from './Icons';
+import { IconEye, IconBoards, IconZap } from './Icons';
 import { taskUtils } from '../utils/taskUtils';
 import './ExecutiveSummary.css';
 
@@ -404,6 +404,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           setExpandedTaskId={setExpandedTaskId}
           canCreateEscalation={!!user}
           openAddEscalationModal={openAddEscalationModal}
+          defaultCollapsed={false}
         />
       )}
 
@@ -441,6 +442,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           setExpandedTaskId={setExpandedTaskId}
           canCreateEscalation={!!user}
           openAddEscalationModal={openAddEscalationModal}
+          defaultCollapsed={true}
         />
       )}
 

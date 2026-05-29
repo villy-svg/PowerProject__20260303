@@ -308,3 +308,59 @@
     text-align: center;
   }
 }
+
+/* ==========================================================================
+   DESKTOP ACCORDION & COLLAPSE STYLES
+   ========================================================================== */
+.board-collapse-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: var(--brand-green);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 32px;
+  min-width: 32px;
+}
+
+.board-collapse-toggle-btn:hover {
+  transform: translateY(-1px);
+}
+
+.board-collapse-toggle-btn:focus-visible {
+  outline: 2px solid var(--brand-green);
+  outline-offset: 2px;
+}
+
+.collapse-chevron-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1 !important; /* Keep icon nice and crisp */
+  color: var(--brand-green);
+}
+
+.collapse-chevron-icon.collapsed {
+  transform: rotate(-90deg); /* Points to the right when closed */
+}
+
+/* Premium smooth height grid transition */
+.centralised-board-collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.centralised-board-collapsible-wrapper.collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.centralised-board-collapsible-content {
+  min-height: 0;
+}
+

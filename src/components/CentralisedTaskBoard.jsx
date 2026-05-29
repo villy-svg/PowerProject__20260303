@@ -4,7 +4,8 @@ import { VERTICAL_LIST } from '../constants/verticals';
 import { taskUtils } from '../utils/taskUtils';
 import { resolveVerticalComponents } from '../registry/verticalRegistry';
 import TaskCard from './TaskCard';
-import { IconClock, IconZap, IconEye, IconCheck } from './Icons';
+import TaskListView from './TaskListView';
+import { IconClock, IconZap, IconEye, IconCheck, IconChevronDown } from './Icons';
 import './CentralisedTaskBoard.css';
 
 /**
@@ -39,9 +40,11 @@ const CentralisedTaskBoard = ({
   canCreateEscalation = false,
   openAddEscalationModal,
   title = "Centralised Task View",
-  description = "A unified, interactive workspace showing all active tasks assigned to you across all verticals."
+  description = "A unified, interactive workspace showing all active tasks assigned to you across all verticals.",
+  defaultCollapsed = false
 }) => {
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   
   const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
   const boardStages = STAGE_LIST.filter(s => s.id !== 'DEPRIORITIZED');
@@ -50,8 +53,23 @@ const CentralisedTaskBoard = ({
     return (
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
-          <div className="summary-header secondary-header">
-            <h2>{title}</h2>
+          <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h2>{title}</h2>
+              {!isMobile && (
+                <button 
+                  className="board-collapse-toggle-btn"
+                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  aria-expanded={!isCollapsed}
+                  title={isCollapsed ? "Expand section" : "Collapse section"}
+                >
+                  <IconChevronDown 
+                    className={`collapse-chevron-icon ${isCollapsed ? 'collapsed' : ''}`} 
+                    size={20}
+                  />
+                </button>
+              )}
+            </div>
           </div>
           <p className="section-description">{description}</p>
           {canCreateEscalation && (
@@ -64,22 +82,47 @@ const CentralisedTaskBoard = ({
               </button>
             </div>
           )}
-          <div className="centralised-board-empty">
-            <div className="empty-glow" />
-            <span className="empty-icon">✓</span>
-            <h3>All Caught Up!</h3>
-            <p>You have no active tasks assigned to you right now. Enjoy your clear queue!</p>
+          <div className={`centralised-board-collapsible-wrapper ${isCollapsed ? 'collapsed' : ''}`}>
+            <div className="centralised-board-collapsible-content">
+              <div className="centralised-board-empty">
+                <div className="empty-glow" />
+                <span className="empty-icon">✓</span>
+                <h3>All Caught Up!</h3>
+                <p>You have no active tasks assigned to you right now. Enjoy your clear queue!</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  const DynamicTaskTile = ({ task, stage }) => {
+    const { TaskTileComponent: DynTileComponent } = resolveVerticalComponents(task.verticalId, verticals);
+    if (!DynTileComponent) return null;
+    return <DynTileComponent task={task} stage={stage} />;
+  };
+
   return (
     <div className="centralised-task-view-wrapper animate-fade-in">
       <div className="centralised-task-view">
-        <div className="summary-header secondary-header">
-          <h2>{title}</h2>
+        <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h2>{title}</h2>
+            {!isMobile && (
+              <button 
+                className="board-collapse-toggle-btn"
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                aria-expanded={!isCollapsed}
+                title={isCollapsed ? "Expand section" : "Collapse section"}
+              >
+                <IconChevronDown 
+                  className={`collapse-chevron-icon ${isCollapsed ? 'collapsed' : ''}`} 
+                  size={20}
+                />
+              </button>
+            )}
+          </div>
         </div>
         <p className="section-description">{description}</p>
         {canCreateEscalation && (
@@ -123,86 +166,121 @@ const CentralisedTaskBoard = ({
           </nav>
         )}
 
-        <div className="centralised-board">
-          {boardStages.map(stage => {
-            const stageTasks = myTasks.filter(t => t.stageId === stage.id);
-            const isColumnActive = !isMobile || activeBoardStageId === stage.id;
-            
-            if (!isColumnActive) return null;
-            
-            return (
-              <div 
-                key={stage.id} 
-                className={`centralised-column ${isMobile ? 'active' : ''}`} 
-                style={{ '--column-accent': stage.color }}
-              >
-                <div className="column-header">
-                  <span className="column-dot" style={{ backgroundColor: stage.color }} />
-                  <span className="column-title">{stage.label}</span>
-                  <span className="column-count">{stageTasks.length}</span>
-                </div>
-                
-                <div className="column-cards-container">
-                  {stageTasks.length === 0 ? (
-                    <div className="column-empty-state">
-                      <span>No tasks in this stage</span>
-                    </div>
-                  ) : (
-                    stageTasks.map(task => {
-                      const { TaskTileComponent: DynTileComponent } = resolveVerticalComponents(task.verticalId, verticals);
+        {isMobile ? (
+          <div className="centralised-board">
+            {boardStages.map(stage => {
+              const stageTasks = myTasks.filter(t => t.stageId === stage.id);
+              const isColumnActive = activeBoardStageId === stage.id;
+              
+              if (!isColumnActive) return null;
+              
+              return (
+                <div 
+                  key={stage.id} 
+                  className="centralised-column active" 
+                  style={{ '--column-accent': stage.color }}
+                >
+                  <div className="column-header">
+                    <span className="column-dot" style={{ backgroundColor: stage.color }} />
+                    <span className="column-title">{stage.label}</span>
+                    <span className="column-count">{stageTasks.length}</span>
+                  </div>
+                  
+                  <div className="column-cards-container">
+                    {stageTasks.length === 0 ? (
+                      <div className="column-empty-state">
+                        <span>No tasks in this stage</span>
+                      </div>
+                    ) : (
+                      stageTasks.map(task => {
+                        const { TaskTileComponent: DynTileComponent } = resolveVerticalComponents(task.verticalId, verticals);
 
-                      return (
-                        <div
-                          key={task.id}
-                          className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
-                        >
-                          <TaskCard
-                            task={task}
-                            stage={stage}
-                            canUpdate={canEditTask(task)}
-                            canDelete={canUserDelete(task)}
-                            canManageHierarchy={canManageHierarchy(task)}
-                            canAddSubtask={canAddSubtask(task)}
-                            canCloneTask={canCloneTask(task)}
-                            updateTaskStage={updateTaskStage}
-
-                            deleteTask={handleInternalDelete}
-                            openEditModal={openEditModal}
-                            onCloneTask={handleCloneTask}
-                            openAddSubtaskModal={handleAddSubtask}
-                            openSubmissionModal={openSubmissionModal}
-                            handleApproveSubmission={handleApproveSubmission}
-                            handleRejectClick={handleRejectClick}
-                            onMoveToParent={handleMoveToParent}
-                            onDuplicateMerge={setMergeTaskCluster}
-                            STAGE_LIST={STAGE_LIST}
-                            isSelected={false}
-                            onSelect={() => {}}
-                            currentUser={user}
-                            tasks={tasks}
-                            onPromote={handleMoveToParent}
-                            onDrillDown={() => {}}
-                            showHierarchy={permissions.canViewKanbanHierarchy !== false}
-                            permissions={permissions}
-                            isExpanded={expandedTaskId === task.id}
-                            onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                        return (
+                          <div
+                            key={task.id}
+                            className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
                           >
-                            {DynTileComponent && (
-                              <DynTileComponent
-                                task={task}
-                                stage={stage}
-                              />
-                            )}
-                          </TaskCard>
-                        </div>
-                      );
-                    })
-                  )}
+                            <TaskCard
+                              task={task}
+                              stage={stage}
+                              canUpdate={canEditTask(task)}
+                              canDelete={canUserDelete(task)}
+                              canManageHierarchy={canManageHierarchy(task)}
+                              canAddSubtask={canAddSubtask(task)}
+                              canCloneTask={canCloneTask(task)}
+                              updateTaskStage={updateTaskStage}
+
+                              deleteTask={handleInternalDelete}
+                              openEditModal={openEditModal}
+                              onCloneTask={handleCloneTask}
+                              openAddSubtaskModal={handleAddSubtask}
+                              openSubmissionModal={openSubmissionModal}
+                              handleApproveSubmission={handleApproveSubmission}
+                              handleRejectClick={handleRejectClick}
+                              onMoveToParent={handleMoveToParent}
+                              onDuplicateMerge={setMergeTaskCluster}
+                              STAGE_LIST={STAGE_LIST}
+                              isSelected={false}
+                              onSelect={() => {}}
+                              currentUser={user}
+                              tasks={tasks}
+                              onPromote={handleMoveToParent}
+                              onDrillDown={() => {}}
+                              showHierarchy={permissions.canViewKanbanHierarchy !== false}
+                              permissions={permissions}
+                              isExpanded={expandedTaskId === task.id}
+                              onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+                            >
+                              {DynTileComponent && (
+                                <DynTileComponent
+                                  task={task}
+                                  stage={stage}
+                                />
+                              )}
+                            </TaskCard>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className={`centralised-board-collapsible-wrapper ${isCollapsed ? 'collapsed' : ''}`}>
+            <div className="centralised-board-collapsible-content">
+              <TaskListView
+                tasks={myTasks}
+                stageList={boardStages}
+                activeVertical={null}
+                canUpdate={permissions.canUpdate}
+                canEditTask={canEditTask}
+                canManageHierarchy={canManageHierarchy}
+                canAddSubtask={canAddSubtask}
+                canCloneTask={canCloneTask}
+                canDelete={permissions.canDelete}
+
+                updateTaskStage={updateTaskStage}
+                deleteTask={handleInternalDelete}
+                openEditModal={openEditModal}
+                onCloneTask={handleCloneTask}
+                openAddSubtaskModal={handleAddSubtask}
+                openSubmissionModal={openSubmissionModal}
+                onMoveToParent={handleMoveToParent}
+                onDuplicateMerge={setMergeTaskCluster}
+                TaskTileComponent={DynamicTaskTile}
+                currentUser={user}
+                canCreate={permissions.canCreate}
+                permissions={permissions}
+                handleApproveSubmission={handleApproveSubmission}
+                handleRejectClick={handleRejectClick}
+                expandedTaskId={expandedTaskId}
+                setExpandedTaskId={setExpandedTaskId}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
