@@ -105,13 +105,50 @@ export const taskService = {
       // -------------------------------------------------------------------------
       if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
         const cachedVersion = parseInt(localStorage.getItem(TASK_CACHE_VERSION_KEY) || '0', 10);
-        const cached = (cachedVersion === TASK_CACHE_VERSION)
+        let cached = (cachedVersion === TASK_CACHE_VERSION)
           ? localStorage.getItem(TASK_CACHE_KEY)
           : null;
 
         if (cachedVersion !== TASK_CACHE_VERSION) {
           localStorage.removeItem(TASK_CACHE_KEY);
           localStorage.removeItem(TASK_CACHE_VERSION_KEY);
+        }
+
+        if (!cached) {
+          // SEED DEFAULT MOCK TASKS IF CACHE IS EMPTY IN OFFLINE MODE
+          const defaultMockTasks = [
+            {
+              id: 'mock-escalation-1',
+              text: 'Urgent: Charger Offline at Hub-02',
+              verticalId: 'escalation_tasks',
+              stageId: 'BACKLOG',
+              priority: 'High',
+              assigned_to: ['dev-bypass-employee-id'],
+              task_board: ['Escalations'],
+              city: 'Mumbai',
+              function: 'Facility',
+              createdBy: 'dev-bypass-user-id',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            {
+              id: 'mock-task-1',
+              text: 'Perform Preventive Maintenance',
+              verticalId: 'CHARGING_HUBS',
+              stageId: 'BACKLOG',
+              priority: 'Medium',
+              assigned_to: ['dev-bypass-employee-id'],
+              task_board: ['Hubs'],
+              city: 'Mumbai',
+              function: 'Facility',
+              createdBy: 'dev-bypass-user-id',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          ];
+          localStorage.setItem(TASK_CACHE_KEY, JSON.stringify(defaultMockTasks));
+          localStorage.setItem(TASK_CACHE_VERSION_KEY, String(TASK_CACHE_VERSION));
+          cached = JSON.stringify(defaultMockTasks);
         }
 
         if (cached) {

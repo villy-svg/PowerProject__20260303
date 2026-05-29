@@ -41,7 +41,7 @@
     top: 0; /* Sits snug at top of mobile shell main scroll since padding-top is 0 */
     z-index: 40;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     margin-left: -16px;
     margin-right: -16px;
     padding-left: 16px;
@@ -50,7 +50,7 @@
 
   .summary-nav-container {
     display: flex;
-    height: 68px; /* High-density standard mobile tray height */
+    height: 54px; /* Tightened from 68px */
     width: 100%;
     justify-content: space-around;
     align-items: center;
@@ -68,10 +68,10 @@
     border: none;
     color: var(--text-color);
     opacity: 0.35; /* Softened inactive state opacity */
-    gap: 2px;
+    gap: 1px; /* Tightened gap */
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 44px;
+    min-height: 38px; /* Tightened from 44px */
     border-radius: 12px;
     margin: 2px;
     position: relative;
@@ -86,7 +86,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 6px; /* Tightened from 8px */
     border-radius: 50%; /* Perfect circle */
     transition: all 0.3s ease;
     position: relative;
@@ -230,7 +230,11 @@
     align-items: flex-start;
     gap: 4px;
     padding: 12px 16px;
-    margin-bottom: 12px;
+    margin-bottom: 2px !important; /* Snug spacing above mobile navigation switcher tray */
     margin-top: -8px !important; /* Pull card up snug against the search bar */
+  }
+
+  .welcome-greeting h2 {
+    font-size: 0.98rem !important; /* Reduced font size for bigger mobile text, leaving subtitle unchanged */
   }
 }

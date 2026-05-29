@@ -43,15 +43,16 @@ export const profileService = {
         roleId: 'master_admin',
         isActive: true,
         seniority: 10,
-        assignedVerticals: ['charging_hubs', 'employees', 'clients'],
+        employeeId: 'dev-bypass-employee-id',
+        assignedVerticals: ['CHARGING_HUBS', 'EMPLOYEES', 'CLIENTS', 'escalation_tasks'],
         verticalPermissions: {
-          charging_hubs: { level: 'admin', features: {} },
-          employees: { level: 'admin', features: {} },
-          clients: { level: 'admin', features: {} }
+          CHARGING_HUBS: { level: 'admin', features: {} },
+          EMPLOYEES: { level: 'admin', features: {} },
+          CLIENTS: { level: 'admin', features: {} }
         },
         baseCapabilities: { 
           canCreate: true, canRead: true, canUpdate: true, canDelete: true, 
-          canAccessConfig: true, canManageRoles: true 
+          canAccessConfig: true, canManageRoles: true, scope: 'global'
         }
       };
     }

@@ -7,13 +7,19 @@
   padding-left: 15px;
 }
 .summary-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 3px;
+  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
+  font-weight: 800 !important; /* Bold, premium weight */
+  letter-spacing: -0.5px !important; /* Premium tighter tracking */
+  text-transform: uppercase !important; /* Preserve styling convention */
   color: var(--text-color);
   opacity: 0.9;
   margin: 0;
+}
+
+@media screen and (min-width: 769px) {
+  .summary-header h2 {
+    font-size: 1.4rem !important; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
+  }
 }
 .summary-grid {
   display: grid;
@@ -163,6 +169,15 @@
   }
 }
 @media screen and (max-width: 768px) {
+  .executive-summary-section {
+    margin-top: 32px !important; /* Matches vertical spacing below switcher tray */
+  }
+  .summary-header {
+    margin-bottom: 8px !important;
+  }
+  .summary-header h2 {
+    /* Inherits expanded clamp font-size from baseline */
+  }
   .summary-grid {
     grid-template-columns: 1fr;
     gap: 12px;

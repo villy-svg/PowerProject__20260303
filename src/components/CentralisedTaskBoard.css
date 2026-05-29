@@ -11,11 +11,24 @@
   border-left-color: var(--brand-blue) !important;
 }
 
+.centralised-task-view .summary-header h2 {
+  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
+  font-weight: 800 !important; /* Bold, premium weight */
+  letter-spacing: -0.5px !important; /* Premium tighter tracking */
+  text-transform: uppercase !important; /* Preserve styling convention */
+}
+
+@media screen and (min-width: 769px) {
+  .centralised-task-view .summary-header h2 {
+    font-size: 1.4rem !important; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
+  }
+}
+
 .section-description {
   font-size: 0.9rem;
   opacity: 0.7;
   color: var(--text-color);
-  margin-top: -10px;
+  margin-top: 8px; /* Positive spacing to create breathing room below the title */
   margin-bottom: 24px;
   max-width: 600px;
   line-height: 1.5;
@@ -180,6 +193,13 @@
 }
 
 @media screen and (max-width: 768px) {
+  .centralised-task-view {
+    margin-top: 32px !important; /* Expanded margin to give breathing room below the switcher tray */
+    padding-bottom: 20px;
+  }
+  .section-description {
+    margin-bottom: 24px !important; /* Expanded margin to space it beautifully above column contents */
+  }
   .centralised-board {
     display: block !important;
     overflow-x: hidden !important;
@@ -215,7 +235,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 16px;
+    margin-bottom: 8px; /* Tightened from 16px */
     margin-left: -16px;
     margin-right: -16px;
     padding-left: 16px;
@@ -224,7 +244,7 @@
 
   .centralised-stage-nav-container {
     display: flex;
-    height: 68px;
+    height: 54px; /* Tightened from 68px */
     width: 100%;
     justify-content: space-around;
     align-items: center;
@@ -242,10 +262,10 @@
     border: none;
     color: var(--text-color);
     opacity: 0.5;
-    gap: 2px;
+    gap: 1px; /* Tightened gap */
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 44px;
+    min-height: 38px; /* Tightened from 44px */
     border-radius: 12px;
     margin: 2px;
     position: relative;
@@ -256,7 +276,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
+    padding: 6px; /* Tightened from 8px */
     border-radius: 50%;
     transition: all 0.3s ease;
     position: relative;

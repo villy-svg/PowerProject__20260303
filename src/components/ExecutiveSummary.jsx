@@ -327,13 +327,15 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   return (
     <div className="home-summary-view">
-      {/* Welcome Header & Tutorial Quick Start */}
-      <div className="home-dashboard-header">
-        <div className="welcome-greeting">
-          <h2>Welcome back, <span className="highlight-name">{user?.name || 'User'}</span></h2>
-          <p className="welcome-subtitle">Manage your escalations and centralized tasks in a unified workspace.</p>
+      {/* Welcome Header & Tutorial Quick Start (Desktop Only) */}
+      {!isMobile && (
+        <div className="home-dashboard-header">
+          <div className="welcome-greeting">
+            <h2>Welcome back, <span className="highlight-name">{user?.name || 'User'}</span></h2>
+            <p className="welcome-subtitle">Manage your escalations and centralized tasks in a unified workspace.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile-Only Summary View Navigation Switcher Tray */}
       {isMobile && (
