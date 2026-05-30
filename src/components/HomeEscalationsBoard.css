@@ -1,8 +1,3 @@
 .home-escalations-board-wrapper {
-  /* Add any specific styling for the home escalations view wrapper here */
   width: 100%;
-}
-
-.home-escalations-board-wrapper .centralised-actions-row {
-  /* Red accent for the escalations button if desired */
 }

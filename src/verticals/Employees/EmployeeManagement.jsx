@@ -27,6 +27,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
 
   const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
 
   // Bulk Context
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
@@ -138,7 +139,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     if (!acc[sortKey]) acc[sortKey] = { roleName, overrideKey: sortKey, emps: [] };
     acc[sortKey].emps.push(emp);
     return acc;
-  }, {});  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
+  }, {});  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
@@ -205,13 +206,31 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           </>
         }
         expandedRight={
-          <>
-            <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
-            <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-            {permissions.canCreateEmployees && (
-              <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={fetchEmployees} />
-            )}
-          </>
+          <div className="data-operations-wrapper">
+            <div className="actions-dropdown-container">
+              <div
+                className="filters-row-toggle"
+                onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+              >
+                <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                  <IconChevronDown size={10} />
+                </span>
+              </div>
+              {isActionsDropdownOpen && (
+                <div className="actions-dropdown-menu">
+                  <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
+                  <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+                  {permissions.canCreateEmployees && (
+                    <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={() => {
+                      fetchEmployees();
+                      setIsActionsDropdownOpen(false);
+                    }} />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         }
       />
 

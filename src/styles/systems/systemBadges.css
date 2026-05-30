@@ -13,10 +13,7 @@
 /* Standardized badges now managed in globalTheme.css */
 
 
-.hub-badge.null-hub {
-  opacity: 0.4;
-  border-style: dashed;
-}
+/* .hub-badge.null-hub — full version (+ .assignee-none + background:transparent) is in globalTheme.css */
 
 .employee-status-indicator {
   font-size: 0.75rem;

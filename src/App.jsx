@@ -28,6 +28,8 @@ import { APP_VERSION } from './constants/appVersion';
 import Login from './components/Login';
 import PendingActivation from './components/PendingActivation';
 import OnlineSyncBanner from './components/OnlineSyncBanner';
+import TutorialSlideshowViewer from './components/TutorialSlideshowViewer';
+import { TUTORIAL_FLOWS } from './components/TutorialHub';
 
 
 // Assets
@@ -75,6 +77,24 @@ function AppShell({ verticals, verticalList }) {
   // Push notification registration + in-app bell state.
   // Mounted here so it is active for the entire authenticated session.
   usePushNotifications({ user });
+
+  // Onboarding Slideshow Autoplay State
+  const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+  const onboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
+
+  useEffect(() => {
+    if (user && user.isActive !== false) {
+      const seen = localStorage.getItem(`intro_tutorial_seen_${APP_VERSION}`);
+      if (!seen) {
+        setShowIntroTutorial(true);
+      }
+    }
+  }, [user]);
+
+  const handleCloseIntro = () => {
+    localStorage.setItem(`intro_tutorial_seen_${APP_VERSION}`, 'true');
+    setShowIntroTutorial(false);
+  };
 
   // SECURITY VALIDATION: Enforces vertical access based on RBAC rules.
   useEffect(() => {
@@ -153,25 +173,35 @@ function AppShell({ verticals, verticalList }) {
   // All chrome (sidebar, header, nav) is now handled by LayoutShell.
   // AppShell only provides data props and renders ContentRouter.
   return (
-    <LayoutShell
-      user={user}
-      permissions={currentUserPermissions}
-      verticals={verticals}
-      verticalList={verticalList}
-      onLogout={handleLogout}
-      realUser={realUser}
-      impersonatedUser={impersonatedUser}
-      impersonationUsers={impersonationUsers}
-      onImpersonate={handleImpersonate}
-    >
-      <ContentRouter
+    <>
+      <LayoutShell
+        user={user}
+        permissions={currentUserPermissions}
         verticals={verticals}
         verticalList={verticalList}
-        permissions={currentUserPermissions}
-        rolePermissions={rolePermissions}
-        setRolePermissions={setRolePermissions}
-      />
-    </LayoutShell>
+        onLogout={handleLogout}
+        realUser={realUser}
+        impersonatedUser={impersonatedUser}
+        impersonationUsers={impersonationUsers}
+        onImpersonate={handleImpersonate}
+      >
+        <ContentRouter
+          verticals={verticals}
+          verticalList={verticalList}
+          permissions={currentUserPermissions}
+          rolePermissions={rolePermissions}
+          setRolePermissions={setRolePermissions}
+        />
+      </LayoutShell>
+
+      {showIntroTutorial && onboardingFlow && (
+        <TutorialSlideshowViewer
+          flow={onboardingFlow}
+          platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
+          onClose={handleCloseIntro}
+        />
+      )}
+    </>
   );
 }
 

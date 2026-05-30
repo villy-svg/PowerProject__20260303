@@ -6,10 +6,10 @@ import './TutorialHub.css';
 /**
  * Categorized Tutorial Flows
  */
-const TUTORIAL_FLOWS = [
+export const TUTORIAL_FLOWS = [
   {
     id: 'customer_support',
-    title: 'Customer Support',
+    title: 'Introduction to PowerProject',
     category: 'Getting Started',
     description: 'Learn how to request support across various entities and escalate to company leadership.',
     accessLevel: 'All Users',
@@ -27,20 +27,22 @@ const TUTORIAL_FLOWS = [
       {
         image: '/Tutorial Screenshots/customer_support_illustration.png',
         fallbackImage: '/Tutorial Screenshots/customer_support_illustration.png',
-        title: 'Customer Support',
-        text: 'This app will help you request support across various entities (hubs, clients, drivers, managers) and escalating to company leadership.',
+        title: 'Request Support',
+        text: 'You can request support for ALL things like hubs, clients, drivers, managers and also for escalating to company leadership',
         annotations: []
       },
       {
         image: '/Tutorial Screenshots/task_manager_illustration.png',
         fallbackImage: '/Tutorial Screenshots/task_manager_illustration.png',
         title: 'Task Manager',
-        text: 'Track all your tasks in one place. Your manager will be able to assign you tasks here and you will be able to submit photos, videos for completed tasks for review.',
+        text: `Track all your tasks in one place.
+Your manager will be able to assign you tasks here.
+You will be able to submit photos, videos for completed tasks for review.`,
         annotations: []
       },
       {
-        image: '/Tutorial Screenshots/all_set_illustration.png',
-        fallbackImage: '/Tutorial Screenshots/all_set_illustration.png',
+        image: '/Tutorial Screenshots/lightbulb_illustration.png',
+        fallbackImage: '/Tutorial Screenshots/lightbulb_illustration.png',
         title: 'All set for PowerProject!',
         text: 'For more tutorials access the "Tutorials" button on the HomePage.',
         annotations: []
@@ -57,20 +59,22 @@ const TUTORIAL_FLOWS = [
       {
         image: '/Tutorial Screenshots/customer_support_illustration.png',
         fallbackImage: '/Tutorial Screenshots/customer_support_illustration.png',
-        title: 'Customer Support',
-        text: 'This app will help you request support across various entities (hubs, clients, drivers, managers) and escalating to company leadership.',
+        title: 'Request Support',
+        text: 'You can request support for ALL things like hubs, clients, drivers, managers and also for escalating to company leadership',
         annotations: []
       },
       {
         image: '/Tutorial Screenshots/task_manager_illustration.png',
         fallbackImage: '/Tutorial Screenshots/task_manager_illustration.png',
         title: 'Task Manager',
-        text: 'Track all your tasks in one place. Your manager will be able to assign you tasks here and you will be able to submit photos, videos for completed tasks for review.',
+        text: `Track all your tasks in one place.
+Your manager will be able to assign you tasks here.
+You will be able to submit photos, videos for completed tasks for review.`,
         annotations: []
       },
       {
-        image: '/Tutorial Screenshots/all_set_illustration.png',
-        fallbackImage: '/Tutorial Screenshots/all_set_illustration.png',
+        image: '/Tutorial Screenshots/lightbulb_illustration.png',
+        fallbackImage: '/Tutorial Screenshots/lightbulb_illustration.png',
         title: 'All set for PowerProject!',
         text: 'For more tutorials access the "Tutorials" button on the HomePage.',
         annotations: []

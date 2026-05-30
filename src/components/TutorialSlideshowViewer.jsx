@@ -25,11 +25,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
     }
   };
 
-  // Convert root public URLs to relative URLs if running in subfolders, or leave as absolute
-  const getImageUrl = (slide) => {
-    // If the copied public path fails or is empty, fallback to the direct screenshot path
-    return slide.image;
-  };
+
 
   if (flow.layout === 'onboarding') {
     return (
@@ -49,7 +45,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
           <div className="onboarding-content-body">
             <div className="onboarding-image-container">
                <img 
-                 src={getImageUrl(currentSlide)} 
+                 src={currentSlide.image} 
                  alt={currentSlide.title} 
                  className="onboarding-image"
                  onError={(e) => {
@@ -104,7 +100,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
         <div className="slideshow-content-body">
           <div className="screenshot-wrapper-container">
             <img 
-              src={getImageUrl(currentSlide)} 
+              src={currentSlide.image} 
               alt={`Slide ${slideIndex + 1}`} 
               className="tutorial-screenshot-img"
               onError={(e) => {

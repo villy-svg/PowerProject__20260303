@@ -27,14 +27,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
   const ui = useManagementUI({ storageKey: 'powerpod_client_view' });
   const [pendingConflict, setPendingConflict] = useState(null);
   const isScrollVisible = useScrollDirection(10, 100);
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (permissions?.canAccessClients) {
       fetchClients();
     }
   }, [fetchClients, permissions?.canAccessClients]);
-
-
 
   if (!permissions?.canAccessClients && !(permissions?.scope === 'global')) {
     return (
@@ -198,13 +197,31 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
           </>
         }
         expandedRight={
-          <>
-            <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
-            <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
-            {permissions.canCreateClients && (
-              <ClientCSVImport label="Import Clients" onImportComplete={fetchClients} className="master-action-btn" />
-            )}
-          </>
+          <div className="data-operations-wrapper">
+            <div className="actions-dropdown-container">
+              <div
+                className="filters-row-toggle"
+                onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+              >
+                <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                  <IconChevronDown size={10} />
+                </span>
+              </div>
+              {isActionsDropdownOpen && (
+                <div className="actions-dropdown-menu">
+                  <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
+                  <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
+                  {permissions.canCreateClients && (
+                    <ClientCSVImport label="Import Clients" onImportComplete={() => {
+                      fetchClients();
+                      setIsActionsDropdownOpen(false);
+                    }} className="master-action-btn" />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         }
       />
 
