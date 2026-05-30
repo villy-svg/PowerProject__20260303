@@ -70,15 +70,13 @@ const DesktopLayout = ({
         verticalList={verticalList}
       />
 
-      {/* Brand Title */}
-      <h1 className="brand-title-centered">PowerProject</h1>
-
       {/* Main Content Area */}
       <div className={`app-main-area ${activeVertical ? 'no-padding' : ''}`} data-view-state={activeVertical ? 'vertical' : 'home'}>
         {/* Desktop Header Bar */}
         <header className="app-header">
-          <div className="header-left"></div>
-          <div className="header-center"></div>
+          <div className="header-left">
+            <h1 className="brand-title-centered">PowerProject</h1>
+          </div>
           <div className="header-right">
             <button 
               className={`halo-button header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
@@ -90,46 +88,20 @@ const DesktopLayout = ({
               <button 
                 className="halo-button header-sandbox-btn"
                 onClick={() => setIsSandboxOpen(true)}
-                style={{
-                  color: '#f59e0b',
-                  borderColor: 'rgba(245, 158, 11, 0.3)',
-                  background: 'rgba(245, 158, 11, 0.05)',
-                  boxShadow: '0 0 5px rgba(245, 158, 11, 0.1)',
-                  fontWeight: 800
-                }}
               >
                 ⚠️ Sandbox Active
               </button>
             )}
-            {realUser?.roleId === 'master_admin' && (
-              <div className="impersonation-header-wrapper">
-                {impersonatedUser ? (
-                  <div className="impersonation-active-container">
-                    <span className="impersonation-active-label">
-                      View: <strong>{impersonatedUser.name}</strong>
-                      <span className="neutral-badge impersonation-role-badge">
-                        {impersonatedUser.roleId}
-                      </span>
-                    </span>
-                    <button className="halo-button impersonation-stop-btn" onClick={() => onImpersonate(null)}>
-                      Stop
-                    </button>
-                  </div>
-                ) : (
-                  <CustomSelect
-                    id="impersonation-select"
-                    placeholder="Simulate User..."
-                    options={impersonationUsers.map(u => ({
-                      value: u.id,
-                      label: `${u.name} (${u.role_id})`
-                    }))}
-                    onChange={(val) => onImpersonate(val)}
-                  />
-                )}
-              </div>
-            )}
             <NotificationBell user={user} />
-            <UserProfile user={user} onConfigClick={() => setActiveVertical('configuration')} onLogout={onLogout} />
+            <UserProfile 
+              user={user} 
+              onConfigClick={() => setActiveVertical('configuration')} 
+              onLogout={onLogout} 
+              realUser={realUser}
+              impersonatedUser={impersonatedUser}
+              impersonationUsers={impersonationUsers}
+              onImpersonate={onImpersonate}
+            />
           </div>
         </header>
 

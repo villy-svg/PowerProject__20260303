@@ -787,3 +787,23 @@
     padding-top: 16px;
   }
 }
+
+/* Responsive Adaptive UI for Onboarding (Desktop Preview View) */
+@media screen and (min-width: 769px) {
+  .tutorial-slideshow-overlay.onboarding-overlay {
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .slideshow-onboarding-card {
+    max-width: 410px; /* Constrain width on desktop to mimic a real mobile viewport */
+    height: 74vh; /* Proportional card height */
+    max-height: 620px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-squircle, 24px); /* Beautiful squircle corners on desktop */
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
+  }
+}
+

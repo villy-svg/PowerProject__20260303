@@ -16,6 +16,10 @@
   backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--shadow-premium);
 }
+/* Ensure the desktop header has zero left padding so header-left aligns exactly with the sidebar edge */
+.desktop-layout .app-header {
+  padding-left: 0 !important;
+}
 .header-left {
   flex: 1;
   display: flex;
@@ -52,7 +56,7 @@
   align-items: center;
 }
 .header-right {
-  flex: 1;
+  flex: 0 0 auto; /* Do not expand, allowing header-left to take up all remaining space */
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -94,6 +98,17 @@
   text-transform: none;
   text-shadow: 0 0 8px var(--halo-glow);
 }
+
+/* Force static relative positioning for desktop brand title to let flexbox center it between sidebar and buttons */
+.desktop-layout .brand-title-centered {
+  position: static !important;
+  transform: none !important;
+  left: auto !important;
+  top: auto !important;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .theme-toggle-btn {
   padding: 8px;
   cursor: pointer;
@@ -126,6 +141,24 @@
   box-shadow: 0 0 15px var(--halo-glow) !important;
   opacity: 1 !important;
 }
+.header-sandbox-btn {
+  color: #f59e0b !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  background: rgba(245, 158, 11, 0.05) !important;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.1) !important;
+  font-weight: 800;
+  margin-right: 16px;
+  font-size: 0.8rem;
+  padding: 0 16px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 /* ==========================================================================
    RESPONSIVE DESIGN (HEADER)
    ========================================================================== */
@@ -138,9 +171,71 @@
     left: 1.5rem;
     top: 15px; /* (70px - 40px) / 2 */
   }
-  .brand-title-centered {
-    font-size: 1.3rem;
-    top: 35px;
+  
+  /* Centering adjustment in tablet layout */
+  .desktop-layout .brand-title-centered {
+    font-size: 1.3rem !important;
+  }
+  
+  /* Completely remove borders and backgrounds of collapsed buttons, centering icons perfectly */
+  .header-tutorial-btn,
+  .header-tutorial-btn.active {
+    font-size: 0 !important; /* Hide original text & emoji */
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 8px;
+  }
+  .header-tutorial-btn::after {
+    content: "💡";
+    font-size: 1.35rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+  }
+  
+  .header-sandbox-btn {
+    font-size: 0 !important; /* Hide original text & emoji */
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-right: 8px;
+  }
+  .header-sandbox-btn::after {
+    content: "⚠️";
+    font-size: 1.35rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+  }
+  
+  .impersonation-header-wrapper {
+    margin-right: 8px;
+    padding: 2px 8px;
   }
 }
 @media screen and (max-width: 1024px) {

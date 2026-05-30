@@ -1,9 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VERTICAL_LIST } from '../constants/verticals';
 import { ROLE_LIST } from '../constants/roles';
+import CustomSelect from './CustomSelect';
 import './UserProfile.css';
 
-const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
+const UserProfile = ({ 
+  user, 
+  onRoleChange, 
+  onConfigClick, 
+  onLogout,
+  realUser,
+  impersonatedUser,
+  impersonationUsers,
+  onImpersonate
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -62,6 +72,38 @@ const UserProfile = ({ user, onRoleChange, onConfigClick, onLogout }) => {
             <span className="role-label">{user?.roleId?.replace('_', ' ').toUpperCase()}</span>
           </div>
           
+          {realUser?.roleId === 'master_admin' && (
+            <>
+              <div className="dropdown-divider" />
+              <div className="dropdown-header impersonation-section-title">Impersonation Simulator</div>
+              <div className="dropdown-impersonation-container">
+                {impersonatedUser ? (
+                  <div className="impersonation-menu-active">
+                    <span className="impersonation-menu-label">
+                      Viewing: <strong>{impersonatedUser.name}</strong>
+                    </span>
+                    <button 
+                      className="halo-button impersonation-menu-stop-btn" 
+                      onClick={() => { onImpersonate(null); setIsOpen(false); }}
+                    >
+                      Stop Simulation
+                    </button>
+                  </div>
+                ) : (
+                  <CustomSelect
+                    id="impersonation-select-menu"
+                    placeholder="Simulate User..."
+                    options={impersonationUsers?.map(u => ({
+                      value: u.id,
+                      label: `${u.name} (${u.role_id})`
+                    })) || []}
+                    onChange={(val) => { onImpersonate(val); setIsOpen(false); }}
+                  />
+                )}
+              </div>
+            </>
+          )}
+
           <div className="dropdown-divider" />
           
           <button className="dropdown-item config-link" onClick={() => { onConfigClick(); setIsOpen(false); }}>
