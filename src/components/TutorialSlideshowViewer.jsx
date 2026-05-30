@@ -31,6 +31,61 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
     return slide.image;
   };
 
+  if (flow.layout === 'onboarding') {
+    return (
+      <div className="tutorial-slideshow-overlay onboarding-overlay animate-fade-in">
+        <div className="slideshow-onboarding-card">
+          <div className="onboarding-header">
+            {slideIndex > 0 ? (
+              <button className="onboarding-back-btn" onClick={handlePrev} aria-label="Go back">
+                <IconChevronLeft size={20} />
+              </button>
+            ) : (
+              <div className="onboarding-back-placeholder" />
+            )}
+            <button className="onboarding-skip-btn" onClick={onClose}>Skip</button>
+          </div>
+          
+          <div className="onboarding-content-body">
+            <div className="onboarding-image-container">
+               <img 
+                 src={getImageUrl(currentSlide)} 
+                 alt={currentSlide.title} 
+                 className="onboarding-image"
+                 onError={(e) => {
+                   e.target.src = currentSlide.fallbackImage || currentSlide.image;
+                 }}
+               />
+            </div>
+            
+            <h2 className="onboarding-title">{currentSlide.title}</h2>
+            <p className="onboarding-text">{currentSlide.text}</p>
+          </div>
+          
+          <div className="onboarding-footer">
+            <div className="slideshow-step-dots onboarding-dots">
+              {slides.map((_, idx) => (
+                <div 
+                  key={idx} 
+                  className={`step-dot-indicator ${slideIndex === idx ? 'active' : ''}`}
+                  onClick={() => setSlideIndex(idx)}
+                />
+              ))}
+            </div>
+            
+            <button 
+              className="halo-button onboarding-next-btn"
+              onClick={handleNext}
+              style={{ '--stage-accent': 'var(--brand-green)' }}
+            >
+              {slideIndex === slides.length - 1 ? 'Get Started' : 'Next'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="tutorial-slideshow-overlay animate-fade-in">
       <div className="slideshow-modal-card">

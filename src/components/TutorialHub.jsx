@@ -8,6 +8,84 @@ import './TutorialHub.css';
  */
 const TUTORIAL_FLOWS = [
   {
+    id: 'customer_support',
+    title: 'Customer Support',
+    category: 'Getting Started',
+    description: 'Learn how to request support across various entities and escalate to company leadership.',
+    accessLevel: 'All Users',
+    badgeColor: 'rgba(59, 130, 246, 0.1)',
+    badgeText: '#3b82f6',
+    layout: 'onboarding',
+    desktopSlides: [],
+    mobileSlides: [
+      {
+        image: '/powerpod-logo.svg',
+        fallbackImage: '/powerpod-logo.svg',
+        title: 'Introduction to PowerProject',
+        text: 'The PowerPod app for all in-house operations and team support',
+        annotations: []
+      },
+      {
+        image: '/Tutorial Screenshots/customer_support_illustration.png',
+        fallbackImage: '/Tutorial Screenshots/customer_support_illustration.png',
+        title: 'Customer Support',
+        text: 'This app will help you request support across various entities (hubs, clients, drivers, managers) and escalating to company leadership.',
+        annotations: []
+      },
+      {
+        image: '/Tutorial Screenshots/task_manager_illustration.png',
+        fallbackImage: '/Tutorial Screenshots/task_manager_illustration.png',
+        title: 'Task Manager',
+        text: 'Track all your tasks in one place. Your manager will be able to assign you tasks here and you will be able to submit photos, videos for completed tasks for review.',
+        annotations: []
+      },
+      {
+        image: '/Tutorial Screenshots/all_set_illustration.png',
+        fallbackImage: '/Tutorial Screenshots/all_set_illustration.png',
+        title: 'All set for PowerProject!',
+        text: 'For more tutorials access the "Tutorials" button on the HomePage.',
+        annotations: []
+      }
+    ]
+  },
+  {
+    id: 'operator_intro',
+    title: 'Operator Introduction',
+    category: 'Getting Started',
+    description: 'Learn how to request support and track your assigned tasks with proof of work.',
+    accessLevel: 'All Users',
+    badgeColor: 'rgba(59, 130, 246, 0.1)',
+    badgeText: '#3b82f6',
+    desktopSlides: [
+      {
+        image: '/Tutorial Screenshots/support_request_ui.png',
+        fallbackImage: '/Tutorial Screenshots/support_request_ui.png',
+        caption: 'Slide 1: Support Requests. Request support related to hubs, clients, drivers, or managers, and direct inquiries to leadership.',
+        annotations: []
+      },
+      {
+        image: '/Tutorial Screenshots/task_management_ui.png',
+        fallbackImage: '/Tutorial Screenshots/task_management_ui.png',
+        caption: 'Slide 2: Task Management & Proof of Work. Track assigned tasks and log completed work using evidence like photos and screenshots.',
+        annotations: []
+      }
+    ],
+    mobileSlides: [
+      {
+        image: '/Tutorial Screenshots/support_request_ui.png',
+        fallbackImage: '/Tutorial Screenshots/support_request_ui.png',
+        caption: 'Slide 1: Support Requests. Request support related to hubs, clients, drivers, or managers, and direct inquiries to leadership.',
+        annotations: []
+      },
+      {
+        image: '/Tutorial Screenshots/task_management_ui.png',
+        fallbackImage: '/Tutorial Screenshots/task_management_ui.png',
+        caption: 'Slide 2: Task Management & Proof of Work. Track assigned tasks and log completed work using evidence like photos and screenshots.',
+        annotations: []
+      }
+    ]
+  },
+  {
     id: 'read_homepage',
     title: 'How to read the homepage',
     category: 'Getting Started',

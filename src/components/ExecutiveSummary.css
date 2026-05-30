@@ -121,7 +121,10 @@
     text-transform: uppercase;
     letter-spacing: 0.5px; /* Sleeker tracking */
     transition: all 0.2s ease;
-    white-space: nowrap;
+    white-space: normal; /* Wrap words into 2 rows */
+    text-align: center;
+    line-height: 1.1;
+    max-width: 90px;
   }
 
   /* Active Switcher State (Kanban Stage switcher styling compliance) */

@@ -44,7 +44,7 @@ const TaskActionModals = ({
           (editingTask && editingTask.id) 
             ? `Edit Task` 
             : activeVertical === 'escalation_tasks' 
-              ? 'Add Escalation' 
+              ? 'Request Support' 
               : `Add New ${activeVertical?.replace('_', ' ')} Task`
         }
       >

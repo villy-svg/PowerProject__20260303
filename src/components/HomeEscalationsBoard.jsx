@@ -10,7 +10,7 @@ const HomeEscalationsBoard = (props) => {
   return (
     <div className="home-escalations-board-wrapper">
       <CentralisedTaskBoard
-        title="Escalations"
+        title="Team Support"
         description="High priority issues and blocks that require your immediate attention."
         {...props}
       />

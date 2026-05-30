@@ -78,7 +78,7 @@ const CentralisedTaskBoard = ({
                 className="halo-button add-escalation-btn"
                 onClick={openAddEscalationModal}
               >
-                + Add Escalation
+                + Request Support
               </button>
             </div>
           )}
@@ -131,7 +131,7 @@ const CentralisedTaskBoard = ({
               className="halo-button add-escalation-btn"
               onClick={openAddEscalationModal}
             >
-              + Add Escalation
+              + Request Support
             </button>
           </div>
         )}

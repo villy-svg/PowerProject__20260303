@@ -314,7 +314,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             {step === 1 ? (
               <>
                 <div className="form-group">
-                  <label htmlFor="task-summary">{activeVertical === 'escalation_tasks' ? 'Escalation Summary' : 'Task Summary'}</label>
+                  <label htmlFor="task-summary">{activeVertical === 'escalation_tasks' ? 'Support Request Summary' : 'Task Summary'}</label>
                   <div className="form-input-container">
                     <input
                       id="task-summary"

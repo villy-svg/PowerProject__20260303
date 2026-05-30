@@ -230,8 +230,8 @@
 
 .slideshow-modal-card {
   width: 100%;
-  max-width: 1100px;
-  height: 90vh;
+  max-width: 1620px;
+  height: 94vh;
   background: #09090b;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle, 24px);
@@ -247,7 +247,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 28px;
+  padding: 14px 24px;
   border-bottom: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.01);
 }
@@ -264,7 +264,7 @@
 .slideshow-flow-title {
   margin: 2px 0 0 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: var(--text-color);
 }
@@ -291,7 +291,6 @@
   color: var(--brand-red, #ef4444);
 }
 
-/* Slideshow Content Body */
 .slideshow-content-body {
   flex: 1;
   display: flex;
@@ -299,7 +298,7 @@
   justify-content: center;
   background: #020202;
   overflow: auto;
-  padding: 20px;
+  padding: 10px;
 }
 
 .screenshot-wrapper-container {
@@ -315,7 +314,7 @@
 
 .tutorial-screenshot-img {
   max-width: 100%;
-  max-height: 55vh;
+  max-height: 88vh;
   display: block;
   object-fit: contain;
   background: #121214;
@@ -447,26 +446,26 @@
 
 /* Slideshow Modal Footer */
 .slideshow-modal-footer {
-  padding: 20px 28px;
+  padding: 4px 24px 4px 24px;
   border-top: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.01);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 6px;
 }
 
 .slideshow-caption-box {
   background: rgba(255, 255, 255, 0.01);
   border-left: 4px solid var(--brand-green);
-  padding: 10px 18px;
+  padding: 4px 12px;
   border-radius: 0 8px 8px 0;
 }
 
 .slideshow-caption-text {
   margin: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.84rem;
+  line-height: 1.45;
   color: var(--text-color);
 }
 
@@ -478,14 +477,16 @@
 }
 
 .slideshow-control-btn {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 8px 18px;
+  padding: 6px 12px;
   height: auto;
-  min-height: 40px;
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .slideshow-control-btn.disabled {
@@ -523,11 +524,11 @@
    ========================================================================== */
 @media screen and (max-width: 1200px) {
   .slideshow-modal-card {
-    max-width: 92%;
-    height: 85vh;
+    max-width: 98%;
+    height: 94vh;
   }
   .tutorial-screenshot-img {
-    max-height: 48vh;
+    max-height: 86vh;
   }
 }
 
@@ -546,19 +547,20 @@
     height: 95vh;
   }
   .slideshow-modal-header {
-    padding: 14px 20px;
+    padding: 10px 16px;
   }
   .slideshow-flow-title {
-    font-size: 1.05rem;
+    font-size: 0.9rem;
   }
   .slideshow-modal-footer {
-    padding: 16px 20px;
+    padding: 4px 12px 2px 12px;
+    gap: 4px;
   }
   .slideshow-caption-text {
-    font-size: 0.85rem;
+    font-size: 0.74rem;
   }
   .tutorial-screenshot-img {
-    max-height: 42vh;
+    max-height: 82vh;
   }
   .annotation-thought-bubble {
     width: 180px;
@@ -584,5 +586,204 @@
   }
   .version-btn-subtitle {
     font-size: 0.55rem;
+  }
+}
+
+/* ==========================================================================
+   ONBOARDING LAYOUT (Customer Support Tutorial)
+   ========================================================================== */
+.tutorial-slideshow-overlay.onboarding-overlay {
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* Remove overlay padding entirely to eliminate all gaps */
+  background: #09090b; /* Match card background exactly for seamless edge-to-edge feel */
+}
+
+.slideshow-onboarding-card {
+  width: 100%;
+  max-width: 100%; /* Take full screen width */
+  height: 100%; /* Take full screen height */
+  max-height: 100%; /* Force fill */
+  background: #09090b; /* in-house dark mode */
+  border: none; /* Remove borders */
+  border-radius: 0; /* Edge-to-edge clean fullscreen */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: none;
+  position: relative;
+  padding: 0;
+}
+
+.onboarding-header {
+  position: absolute;
+  top: 24px; /* Native top spacing */
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.onboarding-back-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-back-btn:hover {
+  opacity: 1;
+  color: #fff;
+  transform: translateX(-2px);
+}
+
+.onboarding-back-placeholder {
+  width: 28px;
+  height: 28px;
+}
+
+.onboarding-skip-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.5;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  padding: 2px 6px;
+}
+
+.onboarding-skip-btn:hover {
+  opacity: 1;
+  color: #fff;
+}
+
+.onboarding-content-body {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 64px 24px 112px 24px; /* Clears top header (64px) and bottom absolute footer (112px) cleanly in fullscreen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-y: auto; /* Allow scrolling if screen is extremely small, preventing any truncation */
+}
+
+.onboarding-image-container {
+  width: 100%;
+  max-width: 160px;
+  height: 120px; /* Highly optimized smaller height to maximize text space */
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent image shrinking */
+}
+
+.onboarding-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+}
+
+.onboarding-title {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.onboarding-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  opacity: 0.65;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.onboarding-footer {
+  position: absolute;
+  bottom: 24px; /* Sits at native bottom margin */
+  left: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+
+.onboarding-dots {
+  justify-content: center;
+  gap: 10px;
+}
+
+.onboarding-dots .step-dot-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.onboarding-dots .step-dot-indicator.active {
+  width: 24px; /* elongated dot for active */
+  background: var(--brand-green);
+  border-radius: 4px;
+  transform: none;
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
+}
+
+.onboarding-next-btn {
+  width: 100%;
+  padding: 12px !important; /* Shrunk vertical padding of next button */
+  font-size: 1rem !important;
+  border-radius: 12px !important;
+  background: var(--brand-green) !important;
+  color: #000 !important;
+  font-weight: 800 !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.onboarding-next-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.35) !important;
+}
+
+@media screen and (max-height: 700px) {
+  .onboarding-image-container {
+    max-width: 200px;
+    margin-bottom: 20px;
+  }
+  .onboarding-title {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  .onboarding-text {
+    font-size: 0.85rem;
+  }
+  .onboarding-footer {
+    gap: 20px;
+    padding-top: 16px;
   }
 }

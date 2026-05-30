@@ -351,7 +351,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                   <IconZap size={18} />
                   <span className="summary-badge-count">{escalationTasks.length}</span>
                 </div>
-                <span className="summary-nav-label">Escalations</span>
+                <span className="summary-nav-label">Team Support</span>
               </button>
             )}
              <button

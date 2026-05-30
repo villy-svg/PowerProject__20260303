@@ -31,16 +31,16 @@ Outline the exact logical steps a user must take to navigate to, interact with, 
 - **Be sequential:** Steps must flow linearly from start to finish.
 - **Focus on the "Happy Path" first:** Document the primary intended use case before mentioning edge cases.
 
-### 2. Outline Required Screenshots
-Specify the exact screenshots the user needs to capture. You must provide distinct, complete guidelines for both environments:
-- **Desktop View:** Describe the expected state of the master page header, sidebars, and main content area.
-- **Mobile View:** Describe the expected state of the mobile layout, including navigation drawers, bottom sheets, or mobile-specific responsive stacks.
+### 2. Global Design Rules
+- **Faux Interface over Standard UI**: Do NOT use standard pagination circles or generic tooltip dots unless absolutely necessary.
+- **Interactive Mockups**: Instead, design fullscreen slides that act as "faux pages" (mockups of the actual app interface).
+- **Glowing Dummy Buttons**: Place glowing, interactive dummy buttons on these faux pages. Tapping these buttons should trigger informational pop-ups or text explaining what the user needs to do.
 
-### 3. Describe Visual Annotations Detail
-For each screenshot, describe *precisely* where to place visual annotations. These annotations are what make the tutorial understandable. Use these specific markers:
-- 🔴 **Circles/Rectangles**: Use to highlight specific UI targets (e.g., buttons, input fields, badges, specific table rows).
-- ➡️ **Arrows**: Use to guide the user's eye and indicate flow (e.g., pointing from a dropdown to the resulting filtered data).
-- 💬 **Thought Boxes/Callouts**: Use to explain the context, the "why" behind an action, or to warn about a potential pitfall.
+### 3. Outline Required Mockups & Elements
+For each step, specify the exact mockup the user needs to design. Provide distinct, complete guidelines for both environments:
+- **Desktop/Mobile Views**: Describe the expected state of the interface (e.g., headers, sidebars, bottom sheets) for both environments.
+- 🔴 **Glowing Dummy Buttons**: Specify exactly where to place interactive dummy buttons over UI targets.
+- 💬 **Pop-ups/Text**: Explain the informational text that appears when a dummy button is tapped.
 - 📝 **Captions**: Provide brief, instruction-oriented text accompanying the step. This text should be user-facing, written in a helpful and concise tone.
 
 ### 4. Specify Access Level (RBAC Integration)
@@ -51,8 +51,8 @@ Every feature in PowerProject is governed by Role-Based Access Control (RBAC). Y
 ---
 
 ## Handling Edge Cases
-- **If the update is purely backend/invisible:** Still ask the question, but note that the tutorial might only require a text update rather than new screenshots, unless an error state or loading state UI was added.
-- **If the UI completely changed:** Emphasize to the user that *all* previous screenshots for this flow must be discarded and recaptured.
+- **If the update is purely backend/invisible:** Still ask the question, but note that the tutorial might only require a text update rather than new mockups, unless an error state or loading state UI was added.
+- **If the UI completely changed:** Emphasize to the user that *all* previous faux pages and mockups for this flow must be discarded and redesigned.
 
 ---
 
@@ -70,10 +70,10 @@ When the user says "Yes," respond using the following strict markdown template:
 
 #### Step 1: Navigating to the Feature
 * **Scenario / State**: The user is on the main Home Page. The Centralized Task Board is collapsed.
-* **Screenshot Needed**: Capture the full desktop screen showing the dashboard header and the collapsed task board.
-* **Annotations**:
-  * 🔴 **Rectangle**: Highlighting the "Expand Tasks" toggle button.
-  * 💬 **Callout**: "Click here to expand your personal task view."
+* **Interactive Mockup Needed**: Design a fullscreen faux page showing the dashboard header and the collapsed task board.
+* **Interactive Elements**:
+  * 🔴 **Glowing Dummy Button**: Placed over the "Expand Tasks" toggle button.
+  * 💬 **Pop-up Text**: "Click here to expand your personal task view."
 * **Caption**: "To view your assigned duties, navigate to your Home Page and click the 'Expand Tasks' toggle."
 
 #### Step 2: [Next Action]
@@ -85,11 +85,11 @@ When the user says "Yes," respond using the following strict markdown template:
 
 #### Step 1: Accessing the Drawer
 * **Scenario / State**: The user is viewing the mobile Home Layout.
-* **Screenshot Needed**: Capture the viewport of the mobile device showing the top app bar.
-* **Annotations**:
-  * 🔴 **Circle**: Around the hamburger menu icon in the top left corner.
-  * ➡️ **Arrow**: Pointing slightly inward to suggest a swipe or tap action.
-* **Caption**: "On mobile devices, tap the menu icon or swipe right to open the navigation drawer and access your tasks."
+* **Interactive Mockup Needed**: Design a fullscreen faux page showing the top app bar.
+* **Interactive Elements**:
+  * 🔴 **Glowing Dummy Button**: Placed over the hamburger menu icon in the top left corner.
+  * 💬 **Pop-up Text**: "Tap here to open the navigation drawer and access your tasks."
+* **Caption**: "On mobile devices, tap the menu icon to open the navigation drawer."
 
 #### Step 2: [Next Action]
 *(Continue detailing steps...)*
