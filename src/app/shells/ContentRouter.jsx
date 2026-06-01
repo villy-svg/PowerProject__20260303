@@ -33,6 +33,7 @@ import {
 import {
   ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
 } from '../../verticals/Clients';
+import { DataManagerWorkspace } from '../../verticals/DataManager';
 
 // Contexts
 import { useAppNavigation } from '../contexts/AppNavigationContext';
@@ -247,6 +248,9 @@ const ContentRouter = ({
       )}
       {activeVertical === verticals.CLIENTS?.id && (
         <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
+      )}
+      {activeVertical === verticals.DATA_MANAGER?.id && (
+        <DataManagerWorkspace user={user} permissions={permissions} />
       )}
       {activeVertical === 'daily_task_templates' && (
         <DailyTasksManagement permissions={permissions} refreshTasks={fetchTasks} currentUser={user} />

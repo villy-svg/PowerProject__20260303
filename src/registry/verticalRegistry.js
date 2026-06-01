@@ -18,6 +18,10 @@ import {
   ClientSubSidebar, ClientTaskForm, ClientTaskTile,
 } from '../verticals/Clients';
 
+import {
+  DataManagerSubSidebar
+} from '../verticals/DataManager';
+
 /** All activeVertical values belonging to ChargingHubs vertical */
 export const HUB_VIEWS = [
   'hub_tasks',
@@ -40,14 +44,17 @@ export function resolveVerticalComponents(activeVertical, verticals = {}) {
   const hubId    = verticals?.CHARGING_HUBS?.id;
   const empId    = verticals?.EMPLOYEES?.id;
   const clientId = verticals?.CLIENTS?.id;
+  const dataManagerId = verticals?.DATA_MANAGER?.id;
 
   const isHub    = activeVertical === hubId    || HUB_VIEWS.includes(activeVertical);
   const isEmp    = activeVertical === empId    || EMPLOYEE_VIEWS.includes(activeVertical);
   const isClient = activeVertical === clientId || CLIENT_VIEWS.includes(activeVertical);
+  const isDataManager = activeVertical === dataManagerId;
 
   if (isHub)    return { SidebarComponent: HubSubSidebar,      TaskFormComponent: HubTaskForm,      TaskTileComponent: HubTaskTile };
   if (isEmp)    return { SidebarComponent: EmployeeSubSidebar, TaskFormComponent: EmployeeTaskForm, TaskTileComponent: EmployeeTaskTile };
   if (isClient) return { SidebarComponent: ClientSubSidebar,   TaskFormComponent: ClientTaskForm,   TaskTileComponent: ClientTaskTile };
+  if (isDataManager) return { SidebarComponent: DataManagerSubSidebar, TaskFormComponent: null, TaskTileComponent: null };
   return { SidebarComponent: null, TaskFormComponent: null, TaskTileComponent: null };
 }
 
@@ -87,6 +94,8 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
   if (hubId)    map[hubId]    = { label: 'Hubs List', boardLabel: 'Hubs Task Board' };
   if (empId)    map[empId]    = { label: 'Employees', boardLabel: 'Employee Task Board' };
   if (clientId) map[clientId] = { label: 'Clients',   boardLabel: 'Client Task Board' };
+  const dataManagerId = verticals?.DATA_MANAGER?.id;
+  if (dataManagerId) map[dataManagerId] = { label: 'Data Manager', boardLabel: 'Data Sheet Board' };
 
   return map[activeVertical] || { label: verticals[activeVertical]?.label || '', boardLabel: 'Board' };
 }

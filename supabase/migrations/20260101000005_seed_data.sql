@@ -22,7 +22,7 @@ INSERT INTO public.verticals (id, label, "order", locked) VALUES
 ('EMPLOYEES', 'Employee Manager', 3, false),
 ('PARTNERS', 'Partner Manager', 4, true),
 ('VENDORS', 'Vendor Manager', 5, true),
-('DATA_MANAGER', 'Data Manager', 6, true)
+('DATA_MANAGER', 'Data Manager', 6, false)
 ON CONFLICT (id) DO UPDATE SET label = EXCLUDED.label;
 
 -- Backfill: Link user profiles to employees by email
