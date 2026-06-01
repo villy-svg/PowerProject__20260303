@@ -71,7 +71,7 @@ const CentralisedTaskBoard = ({
               )}
             </div>
           </div>
-          <p className="section-description">{description}</p>
+          {!isMobile && <p className="section-description">{description}</p>}
           {canCreateEscalation && (
             <div className="centralised-actions-row">
               <button
@@ -124,7 +124,7 @@ const CentralisedTaskBoard = ({
             )}
           </div>
         </div>
-        <p className="section-description">{description}</p>
+        {!isMobile && <p className="section-description">{description}</p>}
         {canCreateEscalation && (
           <div className="centralised-actions-row">
             <button

@@ -309,7 +309,6 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
 }
 
 .tutorial-screenshot-img {
@@ -318,6 +317,7 @@
   display: block;
   object-fit: contain;
   background: #121214;
+  border-radius: 12px;
 }
 
 /* Annotations Layer Overlay */
@@ -417,6 +417,20 @@
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-top: 8px solid rgba(18, 18, 20, 0.85);
+}
+
+/* Adjust pointer and pulse styles for bottom-aligned thought bubbles */
+.annotation-thought-bubble.align-bottom-right .thought-bubble-pointer,
+.annotation-thought-bubble.align-bottom-left .thought-bubble-pointer {
+  bottom: auto;
+  top: -8px;
+  border-top: none;
+  border-bottom: 8px solid rgba(18, 18, 20, 0.85);
+}
+
+.annotation-thought-bubble.align-bottom-right .thought-bubble-pulse,
+.annotation-thought-bubble.align-bottom-left .thought-bubble-pulse {
+  top: -12px;
 }
 
 /* Annotation SVG Overlay (Arrows) */
@@ -802,4 +816,6 @@
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
   }
 }
+
+
 

@@ -21,7 +21,7 @@ import ExecutiveSummary from '../../components/ExecutiveSummary';
 import Configuration from '../../components/Configuration';
 import UserRoleManagement from '../../components/UserRoleManagement';
 import UserManagement from '../../components/UserManagement';
-import TutorialHub from '../../components/TutorialHub';
+import TutorialHub from '../../features/tutorials/TutorialHub';
 
 // Vertical Management Pages
 import {

@@ -76,6 +76,9 @@
     margin: 2px;
     position: relative;
     box-shadow: none; /* Override any global button borders/shadows */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .summary-nav-item:active {

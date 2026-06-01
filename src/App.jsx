@@ -12,6 +12,7 @@ import { masterErrorHandler } from './services/core/masterErrorHandler';
 import { useAuth } from './app/contexts/AuthContext';
 import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavigationContext';
 import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext';
+import { MobileLongPressProvider } from './app/contexts/MobileLongPressContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
 import { usePushNotifications } from './hooks/usePushNotifications';
@@ -28,8 +29,8 @@ import { APP_VERSION } from './constants/appVersion';
 import Login from './components/Login';
 import PendingActivation from './components/PendingActivation';
 import OnlineSyncBanner from './components/OnlineSyncBanner';
-import TutorialSlideshowViewer from './components/TutorialSlideshowViewer';
-import { TUTORIAL_FLOWS } from './components/TutorialHub';
+import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
+import { TUTORIAL_FLOWS } from './features/tutorials/TutorialHub';
 
 
 // Assets
@@ -288,8 +289,10 @@ function App() {
   return (
     <AppNavigationProvider verticals={verticals}>
       <TaskBoardProvider user={user} verticals={verticals}>
-        <OnlineSyncBanner />
-        <AppShell verticals={verticals} verticalList={verticalList} />
+        <MobileLongPressProvider>
+          <OnlineSyncBanner />
+          <AppShell verticals={verticals} verticalList={verticalList} />
+        </MobileLongPressProvider>
       </TaskBoardProvider>
     </AppNavigationProvider>
   );

@@ -11,7 +11,7 @@ const HomeEscalationsBoard = (props) => {
     <div className="home-escalations-board-wrapper">
       <CentralisedTaskBoard
         title="Team Support"
-        description="High priority issues and blocks that require your immediate attention."
+        description={"Team Support has all the requests and support tickets raised by all the members of PowerPod\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ."}
         {...props}
       />
     </div>

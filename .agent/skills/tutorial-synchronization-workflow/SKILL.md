@@ -35,6 +35,7 @@ Outline the exact logical steps a user must take to navigate to, interact with, 
 - **Faux Interface over Standard UI**: Do NOT use standard pagination circles or generic tooltip dots unless absolutely necessary.
 - **Interactive Mockups**: Instead, design fullscreen slides that act as "faux pages" (mockups of the actual app interface).
 - **Glowing Dummy Buttons**: Place glowing, interactive dummy buttons on these faux pages. Tapping these buttons should trigger informational pop-ups or text explaining what the user needs to do.
+- **No Text Clipping**: Ensure that thought bubble text boxes are never clipped at the screen boundaries or screenshot wrapper edges. If a hotspot is close to the left or right edges of the viewport, leverage alignment configurations (e.g. `align: 'right'` or `align: 'left'`) to shift the card body away from boundaries while keeping the pulsing indicator anchored correctly. The parent wrapper container must not have `overflow: hidden` properties that truncate overflowing overlays.
 
 ### 3. Outline Required Mockups & Elements
 For each step, specify the exact mockup the user needs to design. Provide distinct, complete guidelines for both environments:
@@ -47,6 +48,15 @@ For each step, specify the exact mockup the user needs to design. Provide distin
 Every feature in PowerProject is governed by Role-Based Access Control (RBAC). You must determine the minimum access level required to see and use this feature, so the tutorial is only shown to the correct audience.
 - Specify the minimum role (e.g., "Executive", "Manager", "Staff", "External").
 - Mention if the tutorial belongs in a specific Hub or Vertical menu.
+
+---
+
+## Code Architecture & File Rules
+To maintain strict modularity, when actually implementing or coding a new tutorial flow in the codebase:
+- **Separate Config Files**: NEVER write the tutorial slides data directly inside `TutorialHub.jsx`.
+- **New Files**: Always create a new, dedicated configuration file for the tutorial inside the flows directory: `src/features/tutorials/flows/<tutorialName>.js`.
+- **Registration**: Register the new tutorial file in `src/features/tutorials/flows/index.js` by importing it and adding it to the `TUTORIAL_FLOWS` array.
+- **Path Verification**: Ensure the tutorial uses relative paths for asset screenshots and follows the standard annotation schema (`circle` highlights, pointing `thought` bubbles, etc.).
 
 ---
 

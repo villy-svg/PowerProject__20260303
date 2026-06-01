@@ -3,6 +3,7 @@ import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { IconEye, IconBoards, IconZap } from './Icons';
 import { taskUtils } from '../utils/taskUtils';
+import { useMobileLongPress } from '../app/contexts/MobileLongPressContext';
 import './ExecutiveSummary.css';
 
 // Core Sub-Components
@@ -27,6 +28,7 @@ import { useRBAC } from '../hooks/useRBAC';
  */
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false, updateTaskStage }) => {
   const { isMobile } = useIsMobile();
+  const { bindLongPress } = useMobileLongPress();
   const { setActiveVertical } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
 
@@ -346,6 +348,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 className={`summary-nav-item ${activeView === 'escalations' ? 'active' : ''}`}
                 onClick={() => setActiveView('escalations')}
                 style={{ '--stage-accent': 'var(--brand-red, #ef4444)' }}
+                {...bindLongPress("Team Support has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ.")}
               >
                 <div className="summary-icon-wrapper">
                   <IconZap size={18} />
@@ -358,6 +361,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               className={`summary-nav-item ${activeView === 'centralised_task_view' ? 'active' : ''}`}
               onClick={() => setActiveView('centralised_task_view')}
               style={{ '--stage-accent': 'var(--brand-green)' }}
+              {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
             >
               <div className="summary-icon-wrapper">
                 <IconBoards size={18} />
@@ -371,6 +375,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               className={`summary-nav-item ${activeView === 'executive_summary' ? 'active' : ''}`}
               onClick={() => setActiveView('executive_summary')}
               style={{ '--stage-accent': '#94a3b8' }}
+              {...bindLongPress("Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ.")}
             >
               <div className="summary-icon-wrapper">
                 <IconEye size={18} />
@@ -424,7 +429,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {(!isMobile || activeView === 'centralised_task_view') && (
         <CentralisedTaskBoard
           title="Centralised Task View"
-          description="A unified, interactive workspace showing all active tasks assigned to you across all verticals."
+          description={"Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ."}
           tasks={tasks.filter(t => 
             t.verticalId !== 'escalation_tasks' && 
             !((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 

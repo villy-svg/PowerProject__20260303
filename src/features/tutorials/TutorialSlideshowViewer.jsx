@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { IconX, IconChevronLeft, IconChevronRight } from './Icons';
-import './TutorialHub.css';
+import { IconX, IconChevronLeft, IconChevronRight } from '../../components/Icons';
+import './TutorialSlideshowViewer.css';
 
 const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
   const [slideIndex, setSlideIndex] = useState(0);
@@ -134,20 +134,35 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
                 }
 
                 if (ann.type === 'thought') {
+                  const alignStyle = ann.align === 'right' 
+                    ? { transform: 'translate(-85%, -120%)' } 
+                    : ann.align === 'left'
+                    ? { transform: 'translate(-15%, -120%)' }
+                    : ann.align === 'bottom-right'
+                    ? { transform: 'translate(-85%, 20px)' }
+                    : ann.align === 'bottom-left'
+                    ? { transform: 'translate(-15%, 20px)' }
+                    : {};
+                  const anchorLeft = ann.align === 'right' || ann.align === 'bottom-right'
+                    ? '85%' 
+                    : ann.align === 'left' || ann.align === 'bottom-left'
+                    ? '15%'
+                    : '50%';
                   return (
                     <div 
                       key={idx}
-                      className="annotation-thought-bubble animate-fade-in"
+                      className={`annotation-thought-bubble animate-fade-in ${ann.align ? `align-${ann.align}` : ''}`}
                       style={{
                         top: `${ann.top}%`,
-                        left: `${ann.left}%`
+                        left: `${ann.left}%`,
+                        ...alignStyle
                       }}
                     >
-                      <div className="thought-bubble-pulse"></div>
+                      <div className="thought-bubble-pulse" style={{ left: anchorLeft }}></div>
                       <div className="thought-bubble-text">
                         {ann.text}
                       </div>
-                      <div className="thought-bubble-pointer"></div>
+                      <div className="thought-bubble-pointer" style={{ left: anchorLeft }}></div>
                     </div>
                   );
                 }

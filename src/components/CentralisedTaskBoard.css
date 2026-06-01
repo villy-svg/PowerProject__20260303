@@ -32,6 +32,7 @@
   margin-bottom: 24px;
   max-width: 600px;
   line-height: 1.5;
+  white-space: pre-line;
 }
 
 /* Board Layout */
@@ -196,6 +197,9 @@
   .centralised-task-view {
     margin-top: 32px !important; /* Expanded margin to give breathing room below the switcher tray */
     padding-bottom: 20px;
+  }
+  .summary-header {
+    margin-bottom: 24px !important;
   }
   .section-description {
     margin-bottom: 24px !important; /* Expanded margin to space it beautifully above column contents */
