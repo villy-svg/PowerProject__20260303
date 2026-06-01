@@ -109,6 +109,10 @@
   vertical-align: middle;
 }
 
+.desktop-layout .header-left {
+  justify-content: center;
+}
+
 .theme-toggle-btn {
   padding: 8px;
   cursor: pointer;
