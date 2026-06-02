@@ -16,16 +16,45 @@ import DataGrid from './DataGrid';
 const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
   <div>
     <h3 className="dm-tab-bar__title">Available Sheet Tabs</h3>
-    <div className="dm-tab-list">
+    <div className="dm-tab-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
       {tabs.map(tab => (
-        <button
-          key={tab}
-          onClick={() => onTabChange(tab)}
-          className={`halo-button dm-tab-btn ${tab === activeTab ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
-          disabled={tabLoading}
-        >
-          {tab}
-        </button>
+        <div key={tab} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <button
+            onClick={() => onTabChange(tab)}
+            className={`halo-button dm-tab-btn ${tab === activeTab ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
+            disabled={tabLoading}
+            style={{ margin: 0 }}
+          >
+            {tab}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(tab);
+            }}
+            title={`Copy tab name "${tab}"`}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              color: 'var(--brand-mint)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '6px',
+              padding: '6px 8px',
+              cursor: 'pointer',
+              fontSize: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              height: '34px',
+              outline: 'none'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+          >
+            📋
+          </button>
+        </div>
       ))}
     </div>
   </div>

@@ -125,7 +125,7 @@ export const validateRow = (row, headers, context = {}) => {
 /**
  * Validates the entire sheet of rows.
  */
-export const validateSheet = (rows, headers, context = {}) => {
+export const validateSheet = (rows, headers, context = {}, skip = 0) => {
   const errors = {};
   
   // Step 1: Detect majority month and year for Date Abruptness
@@ -176,7 +176,7 @@ export const validateSheet = (rows, headers, context = {}) => {
 
   // Step 2: Validate each row using the established context
   rows.forEach((row, idx) => {
-    const actualRowIndex = idx + 1; // 1-indexed to match data rows (skipping header)
+    const actualRowIndex = idx + skip + 1; // absolute 0-based index in previewData (skipped rows offset applied)
     const rowErrors = validateRow(row, headers, fullContext) || {};
     
     // Smart Formula Autofill Detection:
@@ -224,8 +224,9 @@ export const validateSheet = (rows, headers, context = {}) => {
           
           if (isColumnPrimarilyFormulas) {
             // Google Sheets row numbers: header is row 1, data starts at index 0 (row 2)
-            const neighborRowNumber = neighborIdx + 2;
-            const currentRowNumber = idx + 2;
+            // Offset neighborRowNumber and currentRowNumber by the skip parameter!
+            const neighborRowNumber = neighborIdx + skip + 2;
+            const currentRowNumber = idx + skip + 2;
             
             // Regex to shift row references (e.g. A4 -> A5)
             const refRegex = new RegExp(`([A-Z]+)${neighborRowNumber}\\b`, 'g');

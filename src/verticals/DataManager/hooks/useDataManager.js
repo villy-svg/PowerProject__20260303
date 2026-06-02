@@ -19,6 +19,7 @@ const DEFAULT_TAB_SETTINGS = {
   currentHeaderTab: 'Current Header',
   vehicleDetailsTab: 'Vehicle Details',
   masterDataTab:   'Master Data',
+  headerRowsToSkip: 0,
 };
 
 export const useDataManager = () => {
@@ -65,14 +66,15 @@ export const useDataManager = () => {
    */
   const renderRows = useMemo(() => {
     if (!previewData) return [];
-    const allDataRows = previewData.slice(1).map((row, idx) => ({
-      originalIndex: idx + 1,
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    const allDataRows = previewData.slice(skip + 1).map((row, idx) => ({
+      originalIndex: skip + idx + 1,
       cells: row,
     }));
     return showErrorsOnly
       ? allDataRows.filter(r => validationErrors[r.originalIndex])
       : allDataRows;
-  }, [previewData, showErrorsOnly, validationErrors]);
+  }, [previewData, showErrorsOnly, validationErrors, tabSettings.headerRowsToSkip]);
 
   // ── Side Effects ─────────────────────────────────────────────────────────
 
@@ -155,7 +157,8 @@ export const useDataManager = () => {
 
   // ── Async: Run Validation Checker ─────────────────────────────────────────
   const handleRunChecker = useCallback(async () => {
-    if (!previewData || previewData.length <= 1) return;
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    if (!previewData || previewData.length <= skip + 1) return;
 
     // Preserve current plates ref so we can use it even if the fetch fails
     let platesSet = fleetPlates;
@@ -199,16 +202,18 @@ export const useDataManager = () => {
     }
 
     // Run validation — even if fleet load failed, run without cross-reference
-    const headers = previewData[0];
-    const errors = validateSheet(previewData.slice(1), headers, { vehiclePlates: platesSet });
+    const headers = previewData[skip];
+    const dataRows = previewData.slice(skip + 1);
+    const errors = validateSheet(dataRows, headers, { vehiclePlates: platesSet }, skip);
     setValidationErrors(errors);
     setCheckerRun(true);
     setSyncSuccess(null);
-  }, [fleetPlates, previewData, sheetId, tabSettings.vehicleDetailsTab]);
+  }, [fleetPlates, previewData, sheetId, tabSettings.vehicleDetailsTab, tabSettings.headerRowsToSkip]);
 
   // ── Inline Cell Edit ──────────────────────────────────────────────────────
   const handleCellEdit = useCallback((rowIndex, colIdx, newValue) => {
-    const headers = previewData[0];
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    const headers = previewData[skip];
     const headerName = (headers[colIdx] || '').toLowerCase().trim();
 
     // Auto-clean Indian EV plate numbers as the user types
@@ -238,7 +243,7 @@ export const useDataManager = () => {
       }
       return updated;
     });
-  }, [editedCells, fleetPlates, previewData]);
+  }, [editedCells, fleetPlates, previewData, tabSettings.headerRowsToSkip]);
 
   // ── Async: Batch Sync to Google Sheets ───────────────────────────────────
   const handleSyncCorrections = useCallback(async () => {
@@ -249,7 +254,8 @@ export const useDataManager = () => {
     setError(null);
 
     try {
-      const headers = previewData[0];
+      const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+      const headers = previewData[skip];
       const rowsToUpdate = Object.keys(editedCells);
 
       // Build batch payload — one entry per edited row

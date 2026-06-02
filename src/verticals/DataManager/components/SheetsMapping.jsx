@@ -62,6 +62,20 @@ const SheetsMapping = ({ tabSettings, onSettingChange }) => {
             />
           </div>
         </div>
+
+        <div className="form-group">
+          <label>Metadata / Header Rows to Skip</label>
+          <div className="form-input-container">
+            <input 
+              type="number" 
+              name="headerRowsToSkip"
+              min="0"
+              value={tabSettings.headerRowsToSkip}
+              onChange={onSettingChange}
+              required
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
