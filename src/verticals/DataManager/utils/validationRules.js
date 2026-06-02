@@ -8,9 +8,16 @@
 /**
  * Safely evaluates simple row-level spreadsheet formulas (e.g. =D12-E12).
  */
-export const evaluateFormula = (formulaStr, rowCells, headers) => {
+export const evaluateFormula = (formulaStr, rowCells, headers, colIdx = null, visited = new Set()) => {
   if (typeof formulaStr !== 'string' || !formulaStr.startsWith('=')) {
     return formulaStr;
+  }
+
+  if (colIdx !== null) {
+    if (visited.has(colIdx)) {
+      return '#REF!';
+    }
+    visited.add(colIdx);
   }
 
   try {
@@ -18,11 +25,11 @@ export const evaluateFormula = (formulaStr, rowCells, headers) => {
     const cellRefRegex = /([A-Z]+)([0-9]+)/g;
     
     expr = expr.replace(cellRefRegex, (match, colLetter) => {
-      const colIdx = colLetter.charCodeAt(0) - 65; // A=0, B=1, ...
-      if (colIdx >= 0 && colIdx < rowCells.length) {
-        const val = rowCells[colIdx];
+      const targetColIdx = colLetter.charCodeAt(0) - 65; // A=0, B=1, ...
+      if (targetColIdx >= 0 && targetColIdx < rowCells.length) {
+        const val = rowCells[targetColIdx];
         const resolvedVal = (typeof val === 'string' && val.startsWith('=')) 
-          ? evaluateFormula(val, rowCells, headers)
+          ? evaluateFormula(val, rowCells, headers, targetColIdx, new Set(visited))
           : val;
           
         const num = parseFloat(resolvedVal);
@@ -110,7 +117,7 @@ export const validateRow = (row, headers, context = {}) => {
 
     // Evaluate formula if present before validating
     if (typeof value === 'string' && value.startsWith('=')) {
-      value = evaluateFormula(value, row, headers);
+      value = evaluateFormula(value, row, headers, colIdx);
     }
 
     // Flag empty cells in a partially filled row
