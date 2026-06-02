@@ -27,7 +27,17 @@ export const googleSheetsService = {
 
     if (error) {
       console.error('[googleSheetsService] call failed:', error);
-      throw new Error(error.message || 'Google Sheets service request failed');
+      let detailedMessage = error.message;
+      if (error.context && typeof error.context.text === 'function') {
+        try {
+          const bodyText = await error.context.text();
+          const parsed = JSON.parse(bodyText);
+          if (parsed && parsed.error) {
+            detailedMessage = parsed.error;
+          }
+        } catch (_) {}
+      }
+      throw new Error(detailedMessage || 'Google Sheets service request failed');
     }
 
     if (data && data.success === false) {

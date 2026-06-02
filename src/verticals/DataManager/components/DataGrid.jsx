@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { evaluateFormula } from '../utils/validationRules';
 
 const DataGrid = ({
   headers,
@@ -8,6 +9,9 @@ const DataGrid = ({
   isEditableTab,
   onCellEdit
 }) => {
+  // Track currently focused input cell coordinates: { rowIndex, colIdx }
+  const [focusedCell, setFocusedCell] = useState(null);
+
   return (
     <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', maxHeight: '500px' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
@@ -25,6 +29,11 @@ const DataGrid = ({
           {renderRows.map(({ originalIndex, cells }) => {
             const rowErrors = validationErrors[originalIndex] || {};
             const rowEdits = editedCells[originalIndex] || {};
+
+            // Reconstruct the full current row values (original + unsaved edits) for formula evaluation
+            const currentRowValues = cells.map((cellVal, cIdx) => 
+              rowEdits[cIdx] !== undefined ? rowEdits[cIdx] : (cellVal !== undefined ? cellVal : '')
+            );
 
             return (
               <tr 
@@ -44,7 +53,14 @@ const DataGrid = ({
                 {headers.map((_, colIdx) => {
                   const cellError = rowErrors[colIdx];
                   const isEdited = rowEdits[colIdx] !== undefined;
-                  const cellValue = isEdited ? rowEdits[colIdx] : (cells[colIdx] !== undefined ? cells[colIdx] : '');
+                  const rawValue = isEdited ? rowEdits[colIdx] : (cells[colIdx] !== undefined ? cells[colIdx] : '');
+
+                  const isFocused = focusedCell && focusedCell.rowIndex === originalIndex && focusedCell.colIdx === colIdx;
+
+                  // Determine display value: if not focused and starts with '=', evaluate the formula client-side
+                  const displayValue = (!isFocused && typeof rawValue === 'string' && rawValue.startsWith('='))
+                    ? evaluateFormula(rawValue, currentRowValues, headers)
+                    : rawValue;
 
                   return (
                     <td 
@@ -60,8 +76,10 @@ const DataGrid = ({
                         <div style={{ position: 'relative' }}>
                           <input
                             type="text"
-                            value={cellValue}
+                            value={displayValue}
                             onChange={(e) => onCellEdit(originalIndex, colIdx, e.target.value)}
+                            onFocus={() => setFocusedCell({ rowIndex: originalIndex, colIdx })}
+                            onBlur={() => setFocusedCell(null)}
                             style={{
                               width: '100%',
                               background: cellError ? 'rgba(239, 68, 68, 0.05)' : isEdited ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
@@ -69,12 +87,42 @@ const DataGrid = ({
                               border: `1px solid ${cellError ? '#f87171' : isEdited ? 'var(--brand-mint)' : 'transparent'}`,
                               borderRadius: '4px',
                               padding: '6px 10px',
+                              paddingRight: cellError?.isDateSwap ? '65px' : '10px',
                               fontSize: '13px',
                               outline: 'none',
                               transition: 'all 0.2s'
                             }}
-                            title={cellError || undefined}
+                            title={cellError?.message || undefined}
                           />
+                          
+                          {/* Intelligent Month-Day Swap Autocorrect button */}
+                          {cellError?.isDateSwap && (
+                            <button
+                              type="button"
+                              onClick={() => onCellEdit(originalIndex, colIdx, cellError.suggestedValue)}
+                              title={`Click to autocorrect swap to ${cellError.suggestedValue}`}
+                              style={{
+                                position: 'absolute',
+                                right: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'var(--brand-mint)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                boxShadow: '0 0 5px var(--brand-mint)',
+                                transition: 'all 0.2s',
+                                zIndex: 11
+                              }}
+                            >
+                              💡 Swap
+                            </button>
+                          )}
+
                           {cellError && (
                             <div style={{
                               position: 'absolute',
@@ -85,13 +133,13 @@ const DataGrid = ({
                               whiteSpace: 'nowrap',
                               zIndex: 10
                             }}>
-                              {cellError}
+                              {cellError.message}
                             </div>
                           )}
                         </div>
                       ) : (
                         <span style={{ padding: '6px 10px', display: 'inline-block', opacity: 0.85 }}>
-                          {cellValue}
+                          {displayValue}
                         </span>
                       )}
                     </td>
