@@ -36,8 +36,7 @@ export const detectDateSwap = (dateStr, majorityMonth, majorityYear) => {
   if (m - 1 === majorityMonth && y === majorityYear) return null;
 
   if (d <= 12 && d - 1 === majorityMonth && m <= 31 && y === majorityYear) {
-    const pad = (num) => String(num).padStart(2, '0');
-    return `${pad(d)}/${pad(m)}/${y}`;
+    return `${d}/${m}/${y}`;
   }
 
   return null;

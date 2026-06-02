@@ -52,16 +52,15 @@ export const validateRow = (row, headers, context = {}) => {
     if (headerLower.includes('date')) {
       const date = new Date(strVal);
       if (isNaN(date.getTime())) {
-        errors[colIdx] = { message: 'Invalid Date format (use MM/DD/YYYY).' };
+        errors[colIdx] = { message: 'Invalid Date format (use M/D/YYYY).' };
       } else {
-        const strictDateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+        const strictDateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
         const isStrict = strictDateRegex.test(strVal);
 
         if (!isStrict) {
-          const pad = (num) => String(num).padStart(2, '0');
-          const standardized = `${pad(date.getMonth() + 1)}/${pad(date.getDate())}/${date.getFullYear()}`;
+          const standardized = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
           errors[colIdx] = {
-            message: `Non-standard date format. Click to format to MM/DD/YYYY.`,
+            message: `Non-standard date format. Click to format to M/D/YYYY.`,
             isDateFormatAnomaly: true,
             suggestedValue: standardized
           };
