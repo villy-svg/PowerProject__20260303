@@ -139,7 +139,27 @@ serve(async (req: Request) => {
 
     const token = await getAccessToken(serviceAccount);
 
-    if (action === "readSheet") {
+    if (action === "getSpreadsheet") {
+      const apiResponse = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!apiResponse.ok) {
+        const errorMsg = await apiResponse.text();
+        return new Response(
+          JSON.stringify({ success: false, error: `Google API Error: ${errorMsg}` }),
+          { status: apiResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const data = await apiResponse.json();
+      return new Response(
+        JSON.stringify({ success: true, data }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+
+    } else if (action === "readSheet") {
       const targetRange = range || "Sheet1!A:Z";
       const apiResponse = await fetch(
         `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(targetRange)}`,

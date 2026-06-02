@@ -54,6 +54,20 @@ export const googleSheetsService = {
   },
 
   /**
+   * Fetches metadata for a spreadsheet, including available sheets/tabs.
+   * @param {string} spreadsheetId - The target Google Spreadsheet ID
+   * @returns {Promise<object>} Spreadsheet metadata containing list of sheets
+   */
+  async getSpreadsheet(spreadsheetId) {
+    if (!spreadsheetId) throw new Error('spreadsheetId is required');
+    const result = await this._invoke({
+      action: 'getSpreadsheet',
+      spreadsheetId,
+    });
+    return result.data || {};
+  },
+
+  /**
    * Appends rows of data to a specific Google Sheet.
    * @param {string} spreadsheetId - The target Google Spreadsheet ID
    * @param {Array[]} values - Array of row arrays (e.g. [['John', 'Doe', 'j@eg.com']])
