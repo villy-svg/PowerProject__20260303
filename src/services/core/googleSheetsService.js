@@ -41,14 +41,16 @@ export const googleSheetsService = {
    * Reads cell values from a specific Google Sheet range.
    * @param {string} spreadsheetId - The target Google Spreadsheet ID
    * @param {string} [range] - Range (e.g. 'Sheet1!A1:D10', defaults to 'Sheet1!A:Z')
+   * @param {string} [valueRenderOption] - 'FORMATTED_VALUE', 'UNFORMATTED_VALUE', or 'FORMULA'
    * @returns {Promise<Array[]>} Matrix of spreadsheet rows
    */
-  async readSheet(spreadsheetId, range = 'Sheet1!A:Z') {
+  async readSheet(spreadsheetId, range = 'Sheet1!A:Z', valueRenderOption = 'FORMATTED_VALUE') {
     if (!spreadsheetId) throw new Error('spreadsheetId is required');
     const result = await this._invoke({
       action: 'readSheet',
       spreadsheetId,
       range,
+      valueRenderOption,
     });
     return result.data || [];
   },
@@ -63,6 +65,7 @@ export const googleSheetsService = {
     const result = await this._invoke({
       action: 'getSpreadsheet',
       spreadsheetId,
+      range: 'Sheet1!A1', // minimal request to fetch metadata
     });
     return result.data || {};
   },
@@ -105,6 +108,25 @@ export const googleSheetsService = {
       spreadsheetId,
       range,
       values,
+      valueInputOption,
+    });
+    return result.updatedCells;
+  },
+
+  /**
+   * Performs a batch update on multiple ranges in a Google Sheet in a single request.
+   * @param {string} spreadsheetId - The target Google Spreadsheet ID
+   * @param {Array<{ range: string, values: Array[] }>} data - Array of ranges and values
+   * @param {string} [valueInputOption] - 'USER_ENTERED' or 'RAW'
+   */
+  async batchUpdateSheet(spreadsheetId, data, valueInputOption = 'USER_ENTERED') {
+    if (!spreadsheetId) throw new Error('spreadsheetId is required');
+    if (!data || !Array.isArray(data)) throw new Error('data must be an array of ranges and values');
+
+    const result = await this._invoke({
+      action: 'batchUpdateSheet',
+      spreadsheetId,
+      data,
       valueInputOption,
     });
     return result.updatedCells;

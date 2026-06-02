@@ -77,8 +77,8 @@ const DataManagerWorkspace = () => {
       const defaultTab = tabNames[0];
       setActiveTab(defaultTab);
       
-      // 2. Fetch data for default tab
-      const data = await googleSheetsService.readSheet(sheetId, defaultTab);
+      // 2. Fetch data for default tab using FORMULA rendering option to read formulae
+      const data = await googleSheetsService.readSheet(sheetId, defaultTab, 'FORMULA');
       setPreviewData(data);
     } catch (err) {
       console.error('[DataManager] Load error:', err);
@@ -97,7 +97,8 @@ const DataManagerWorkspace = () => {
 
     try {
       const sheetId = extractSpreadsheetId(googleSheetsUrl);
-      const data = await googleSheetsService.readSheet(sheetId, tabName);
+      // Fetch tab values using FORMULA rendering option to see formulae
+      const data = await googleSheetsService.readSheet(sheetId, tabName, 'FORMULA');
       setPreviewData(data);
     } catch (err) {
       console.error('[DataManager] Tab read error:', err);
@@ -153,7 +154,7 @@ const DataManagerWorkspace = () => {
     });
   };
 
-  // --- SYNC BACK TO GOOGLE SHEETS ---
+  // --- BATCH SYNC BACK TO GOOGLE SHEETS ---
   const handleSyncCorrections = async () => {
     const sheetId = extractSpreadsheetId(googleSheetsUrl);
     if (!sheetId || Object.keys(editedCells).length === 0) return;
@@ -166,8 +167,8 @@ const DataManagerWorkspace = () => {
       const headers = previewData[0];
       const rowsToUpdate = Object.keys(editedCells);
 
-      // Perform batch updates sequentially per edited row
-      for (const strRowIndex of rowsToUpdate) {
+      // Assemble all updates in one batch payload
+      const batchData = rowsToUpdate.map(strRowIndex => {
         const rowIndex = parseInt(strRowIndex, 10);
         const originalRow = previewData[rowIndex];
         
@@ -184,10 +185,16 @@ const DataManagerWorkspace = () => {
         const endColChar = String.fromCharCode(65 + headers.length - 1);
         const range = `${activeTab}!A${sheetsRowNumber}:${endColChar}${sheetsRowNumber}`;
 
-        await googleSheetsService.updateSheet(sheetId, range, [updatedRow]);
-      }
+        return {
+          range,
+          values: [updatedRow]
+        };
+      });
 
-      setSyncSuccess(`Successfully updated ${rowsToUpdate.length} row(s) in Google Sheets.`);
+      // Execute single batch write request
+      const updatedCellsCount = await googleSheetsService.batchUpdateSheet(sheetId, batchData);
+
+      setSyncSuccess(`Successfully updated ${rowsToUpdate.length} row(s) (${updatedCellsCount} cells) in Google Sheets.`);
       
       // Merge edits into previewData
       setPreviewData(prev => {
@@ -207,8 +214,8 @@ const DataManagerWorkspace = () => {
       // Clear edits state
       setEditedCells({});
     } catch (err) {
-      console.error('[DataManager] Sync error:', err);
-      setError(`Failed to sync updates to Google Sheets: ${err.message}`);
+      console.error('[DataManager] Batch Sync error:', err);
+      setError(`Failed to sync batch updates to Google Sheets: ${err.message}`);
     } finally {
       setSyncing(false);
     }

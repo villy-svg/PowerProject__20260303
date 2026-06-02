@@ -161,8 +161,9 @@ serve(async (req: Request) => {
 
     } else if (action === "readSheet") {
       const targetRange = range || "Sheet1!A:Z";
+      const valueRenderOption = body.valueRenderOption || "FORMATTED_VALUE";
       const apiResponse = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(targetRange)}`,
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(targetRange)}?valueRenderOption=${valueRenderOption}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -252,6 +253,43 @@ serve(async (req: Request) => {
       const data = await apiResponse.json();
       return new Response(
         JSON.stringify({ success: true, updatedCells: data.updatedCells }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+
+    } else if (action === "batchUpdateSheet") {
+      if (!body.data || !Array.isArray(body.data)) {
+        return new Response(
+          JSON.stringify({ success: false, error: "data array is required for batchUpdateSheet" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const apiResponse = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            valueInputOption,
+            data: body.data // Array of { range, values }
+          }),
+        }
+      );
+
+      if (!apiResponse.ok) {
+        const errorMsg = await apiResponse.text();
+        return new Response(
+          JSON.stringify({ success: false, error: `Google API Error: ${errorMsg}` }),
+          { status: apiResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const data = await apiResponse.json();
+      return new Response(
+        JSON.stringify({ success: true, updatedCells: data.totalUpdatedCells }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
 
