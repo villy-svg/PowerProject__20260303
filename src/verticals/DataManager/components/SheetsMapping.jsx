@@ -25,19 +25,6 @@ const SheetsMapping = ({ tabSettings, onSettingChange }) => {
         </div>
 
         <div className="form-group">
-          <label>Current Header Tab Name</label>
-          <div className="form-input-container">
-            <input 
-              type="text" 
-              name="currentHeaderTab"
-              value={tabSettings.currentHeaderTab}
-              onChange={onSettingChange}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
           <label>Vehicle Details Tab Name</label>
           <div className="form-input-container">
             <input 

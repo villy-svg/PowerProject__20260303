@@ -29,6 +29,17 @@ export const validateRow = (row, headers, context = {}) => {
 
     if (!headerLower) return;
 
+    // Ignore extra/unnecessary columns that are not part of our core dataset
+    const isCore = 
+      headerLower.includes('date') ||
+      headerLower.includes('plate') ||
+      headerLower.includes('vehicle') ||
+      headerLower.includes('soc') ||
+      headerLower.includes('units') ||
+      headerLower.includes('battery');
+      
+    if (!isCore) return;
+
     // Evaluate formula if present before validating
     if (typeof value === 'string' && value.startsWith('=')) {
       value = evaluateFormula(value, row, headers, colIdx);
@@ -193,7 +204,18 @@ export const validateSheet = (rows, headers, context = {}, skip = 0) => {
     
     // Smart Formula Autofill Detection:
     // If a cell is empty or a hardcoded value, but neighboring rows in the same column have formulas, suggest an adjusted formula.
-    headers.forEach((_, colIdx) => {
+    headers.forEach((header, colIdx) => {
+      const headerLower = (header || '').toLowerCase().trim();
+      const isCore = 
+        headerLower.includes('date') ||
+        headerLower.includes('plate') ||
+        headerLower.includes('vehicle') ||
+        headerLower.includes('soc') ||
+        headerLower.includes('units') ||
+        headerLower.includes('battery');
+        
+      if (!isCore) return;
+
       const cellVal = row[colIdx];
       const strVal = String(cellVal || '').trim();
       const isFormula = strVal.startsWith('=');

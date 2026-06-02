@@ -16,7 +16,6 @@ import { extractSpreadsheetId, colIndexToLetter, estimateHeaderRowsToSkip } from
 // ─── Default Tab Name Configuration ──────────────────────────────────────────
 const DEFAULT_TAB_SETTINGS = {
   currentDataTab:  'Current Data',
-  currentHeaderTab: 'Current Header',
   vehicleDetailsTab: 'Vehicle Details',
   masterDataTab:   'Master Data',
   headerRowsToSkip: 0,
@@ -165,8 +164,33 @@ export const useDataManager = () => {
 
   // ── Async: Run Validation Checker ─────────────────────────────────────────
   const handleRunChecker = useCallback(async () => {
-    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
-    if (!previewData || previewData.length <= skip + 1) return;
+    let skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    if (!previewData || previewData.length === 0) return;
+
+    // Check if the current skip row has any valid core headers.
+    // If not, automatically estimate a better row-skip index to help the user.
+    const currentHeaderRow = previewData[skip] || [];
+    const hasCoreHeaders = currentHeaderRow.some(cell => {
+      const val = String(cell || '').toLowerCase().trim();
+      return (
+        val.includes('date') ||
+        val.includes('plate') ||
+        val.includes('vehicle') ||
+        val.includes('soc') ||
+        val.includes('units') ||
+        val.includes('battery')
+      );
+    });
+
+    if (!hasCoreHeaders) {
+      const betterSkip = estimateHeaderRowsToSkip(previewData);
+      if (betterSkip !== skip) {
+        skip = betterSkip;
+        setTabSettings(prev => ({ ...prev, headerRowsToSkip: betterSkip }));
+      }
+    }
+
+    if (previewData.length <= skip + 1) return;
 
     // Preserve current plates ref so we can use it even if the fetch fails
     let platesSet = fleetPlates;
