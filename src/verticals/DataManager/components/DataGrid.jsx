@@ -84,10 +84,10 @@ const DataGrid = ({
                               width: '100%',
                               background: cellError ? 'rgba(239, 68, 68, 0.05)' : isEdited ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
                               color: 'var(--text-color)',
-                              border: `1px solid ${cellError ? '#f87171' : isEdited ? 'var(--brand-mint)' : 'transparent'}`,
-                              borderRadius: '4px',
-                              padding: '6px 10px',
-                              paddingRight: cellError?.isDateSwap ? '65px' : '10px',
+                              paddingRight: cellError?.isDateSwap ? '65px' : 
+                                           (cellError?.isDateFormatAnomaly ? '75px' : 
+                                           (cellError?.isPlateFormatAnomaly ? '70px' : 
+                                           (cellError?.isFormulaSuggestion ? '80px' : '10px'))),
                               fontSize: '13px',
                               outline: 'none',
                               transition: 'all 0.2s'
@@ -120,6 +120,90 @@ const DataGrid = ({
                               }}
                             >
                               💡 Swap
+                            </button>
+                          )}
+
+                          {/* Date Format Standardizer button */}
+                          {cellError?.isDateFormatAnomaly && (
+                            <button
+                              type="button"
+                              onClick={() => onCellEdit(originalIndex, colIdx, cellError.suggestedValue)}
+                              title={`Click to standardize date format to ${cellError.suggestedValue}`}
+                              style={{
+                                position: 'absolute',
+                                right: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'var(--brand-mint)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                boxShadow: '0 0 5px var(--brand-mint)',
+                                transition: 'all 0.2s',
+                                zIndex: 11
+                              }}
+                            >
+                              💡 Format
+                            </button>
+                          )}
+
+                          {/* EV Plate Cleaner button */}
+                          {cellError?.isPlateFormatAnomaly && (
+                            <button
+                              type="button"
+                              onClick={() => onCellEdit(originalIndex, colIdx, cellError.suggestedValue)}
+                              title={`Click to clean plate format to ${cellError.suggestedValue}`}
+                              style={{
+                                position: 'absolute',
+                                right: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'var(--brand-mint)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                boxShadow: '0 0 5px var(--brand-mint)',
+                                transition: 'all 0.2s',
+                                zIndex: 11
+                              }}
+                            >
+                              💡 Clean
+                            </button>
+                          )}
+
+                          {/* Smart Formula Autofill button */}
+                          {cellError?.isFormulaSuggestion && (
+                            <button
+                              type="button"
+                              onClick={() => onCellEdit(originalIndex, colIdx, cellError.suggestedValue)}
+                              title={`Click to autofill formula: ${cellError.suggestedValue}`}
+                              style={{
+                                position: 'absolute',
+                                right: '8px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'var(--brand-mint)',
+                                color: '#000',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '3px 8px',
+                                fontSize: '10px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                boxShadow: '0 0 5px var(--brand-mint)',
+                                transition: 'all 0.2s',
+                                zIndex: 11
+                              }}
+                            >
+                              ⚡ Autofill
                             </button>
                           )}
 

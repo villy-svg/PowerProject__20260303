@@ -1,103 +1,17 @@
 /**
  * validationRules.js
  * Decoupled, pure validation engine for vehicle transaction spreadsheet rows.
- * Now supports formula evaluation, plate normalization, majority month detection,
- * fleet master cross-referencing, and intelligent Month-Day date swap detection.
+ * Focuses purely on business rules and orchestrating validations.
  */
 
-/**
- * Safely evaluates simple row-level spreadsheet formulas (e.g. =D12-E12).
- */
-export const evaluateFormula = (formulaStr, rowCells, headers, colIdx = null, visited = new Set()) => {
-  if (typeof formulaStr !== 'string' || !formulaStr.startsWith('=')) {
-    return formulaStr;
-  }
+import { evaluateFormula } from './formulaEvaluator';
+import { cleanEVPlateNumber } from './plateUtils';
+import { detectDateSwap } from './dateUtils';
 
-  if (colIdx !== null) {
-    if (visited.has(colIdx)) {
-      return '#REF!';
-    }
-    visited.add(colIdx);
-  }
-
-  try {
-    let expr = formulaStr.substring(1).toUpperCase();
-    const cellRefRegex = /([A-Z]+)([0-9]+)/g;
-    
-    expr = expr.replace(cellRefRegex, (match, colLetter) => {
-      const targetColIdx = colLetter.charCodeAt(0) - 65; // A=0, B=1, ...
-      if (targetColIdx >= 0 && targetColIdx < rowCells.length) {
-        const val = rowCells[targetColIdx];
-        const resolvedVal = (typeof val === 'string' && val.startsWith('=')) 
-          ? evaluateFormula(val, rowCells, headers, targetColIdx, new Set(visited))
-          : val;
-          
-        const num = parseFloat(resolvedVal);
-        return isNaN(num) ? '0' : String(num);
-      }
-      return '0';
-    });
-
-    const safeExpr = expr.replace(/[^0-9+\-*/().\s]/g, '');
-    if (!safeExpr.trim()) return '0';
-    
-    const result = Function(`"use strict"; return (${safeExpr})`)();
-    return typeof result === 'number' && !isNaN(result) ? Number(result.toFixed(2)) : '0';
-  } catch (err) {
-    console.error('Formula evaluation error:', err);
-    return '#VALUE!';
-  }
-};
-
-/**
- * Normalizes Indian license plates to AB12CD1234 format.
- */
-export const cleanEVPlateNumber = (plateStr) => {
-  if (typeof plateStr !== 'string') return '';
-  return plateStr.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-};
-
-/**
- * Identifies if a date belongs to a different month but swapping Month and Day
- * places it perfectly in the majority month/year.
- * Returns the corrected string (YYYY-MM-DD) or null.
- */
-export const detectDateSwap = (dateStr, majorityMonth, majorityYear) => {
-  if (typeof dateStr !== 'string' || majorityMonth === null || majorityYear === null) return null;
-
-  // Split by standard date separators
-  const parts = dateStr.split(/[-/]/);
-  if (parts.length !== 3) return null;
-
-  let y, m, d;
-  if (parts[0].length === 4) {
-    // YYYY-MM-DD
-    y = parseInt(parts[0], 10);
-    m = parseInt(parts[1], 10);
-    d = parseInt(parts[2], 10);
-  } else if (parts[2].length === 4) {
-    // DD-MM-YYYY or MM-DD-YYYY
-    y = parseInt(parts[2], 10);
-    m = parseInt(parts[0], 10);
-    d = parseInt(parts[1], 10);
-  } else {
-    return null;
-  }
-
-  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
-
-  // If the parsed month is already in the majority month, no swap needed
-  if (m - 1 === majorityMonth && y === majorityYear) return null;
-
-  // Swap check: if day 'd' is a valid month (<= 12) and matches majority month,
-  // and month 'm' is a valid day (<= 31), we have a month-day swap match!
-  if (d <= 12 && d - 1 === majorityMonth && m <= 31 && y === majorityYear) {
-    const pad = (num) => String(num).padStart(2, '0');
-    return `${y}-${pad(d)}-${pad(m)}`;
-  }
-
-  return null;
-};
+// Re-export utility helpers to maintain a clean public API and prevent dependency breaks
+export { evaluateFormula } from './formulaEvaluator';
+export { cleanEVPlateNumber } from './plateUtils';
+export { detectDateSwap } from './dateUtils';
 
 /**
  * Validates a single row against our business rules.
@@ -128,25 +42,44 @@ export const validateRow = (row, headers, context = {}) => {
 
     const strVal = String(value).trim();
 
+    // If the value is a formula that we couldn't resolve locally (starts with '='),
+    // skip validation rules since we cannot verify the final evaluated cell content here.
+    if (strVal.startsWith('=')) {
+      return;
+    }
+
     // Rule: Date validation
     if (headerLower.includes('date')) {
       const date = new Date(strVal);
       if (isNaN(date.getTime())) {
-        errors[colIdx] = { message: 'Invalid Date format (use YYYY-MM-DD).' };
-      } else if (context.majorityMonth !== undefined && context.majorityMonth !== null && context.majorityYear) {
-        // Run Month-Day Swap Detector
-        const swappedSuggestion = detectDateSwap(strVal, context.majorityMonth, context.majorityYear);
-        
-        if (swappedSuggestion) {
+        errors[colIdx] = { message: 'Invalid Date format (use MM/DD/YYYY).' };
+      } else {
+        const strictDateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+        const isStrict = strictDateRegex.test(strVal);
+
+        if (!isStrict) {
+          const pad = (num) => String(num).padStart(2, '0');
+          const standardized = `${pad(date.getMonth() + 1)}/${pad(date.getDate())}/${date.getFullYear()}`;
           errors[colIdx] = {
-            message: `Month/Day swap detected. Swapping yields ${swappedSuggestion}.`,
-            isDateSwap: true,
-            suggestedValue: swappedSuggestion
+            message: `Non-standard date format. Click to format to MM/DD/YYYY.`,
+            isDateFormatAnomaly: true,
+            suggestedValue: standardized
           };
-        } else if (date.getMonth() !== context.majorityMonth || date.getFullYear() !== context.majorityYear) {
-          // General date abruptness
-          const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-          errors[colIdx] = { message: `Abrupt Date: Expected ${monthNames[context.majorityMonth]} ${context.majorityYear}.` };
+        } else if (context.majorityMonth !== undefined && context.majorityMonth !== null && context.majorityYear) {
+          // Run Month-Day Swap Detector
+          const swappedSuggestion = detectDateSwap(strVal, context.majorityMonth, context.majorityYear);
+          
+          if (swappedSuggestion) {
+            errors[colIdx] = {
+              message: `Month/Day swap detected. Swapping yields ${swappedSuggestion}.`,
+              isDateSwap: true,
+              suggestedValue: swappedSuggestion
+            };
+          } else if (date.getMonth() !== context.majorityMonth || date.getFullYear() !== context.majorityYear) {
+            // General date abruptness
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            errors[colIdx] = { message: `Abrupt Date: Expected ${monthNames[context.majorityMonth]} ${context.majorityYear}.` };
+          }
         }
       }
     }
@@ -158,6 +91,13 @@ export const validateRow = (row, headers, context = {}) => {
       
       if (!indianPlateRegex.test(cleanedPlate)) {
         errors[colIdx] = { message: 'Invalid Indian Plate format (Expected e.g. MH12AB1234).' };
+      } else if (strVal !== cleanedPlate) {
+        // Valid plate, but has spaces, lowercase or hyphens
+        errors[colIdx] = {
+          message: `Non-standard plate format. Click to clean to ${cleanedPlate}.`,
+          isPlateFormatAnomaly: true,
+          suggestedValue: cleanedPlate
+        };
       } else if (context.vehiclePlates && !context.vehiclePlates.has(cleanedPlate)) {
         errors[colIdx] = { message: `Plate not found in Vehicle Details fleet master.` };
       }
@@ -238,8 +178,73 @@ export const validateSheet = (rows, headers, context = {}) => {
   // Step 2: Validate each row using the established context
   rows.forEach((row, idx) => {
     const actualRowIndex = idx + 1; // 1-indexed to match data rows (skipping header)
-    const rowErrors = validateRow(row, headers, fullContext);
-    if (rowErrors) {
+    const rowErrors = validateRow(row, headers, fullContext) || {};
+    
+    // Smart Formula Autofill Detection:
+    // If a cell is empty or a hardcoded value, but neighboring rows in the same column have formulas, suggest an adjusted formula.
+    headers.forEach((_, colIdx) => {
+      const cellVal = row[colIdx];
+      const strVal = String(cellVal || '').trim();
+      const isFormula = strVal.startsWith('=');
+      
+      if (!isFormula) {
+        let templateFormula = null;
+        let neighborIdx = -1;
+        
+        // 1. Check row immediately above
+        if (idx > 0) {
+          const aboveVal = rows[idx - 1][colIdx];
+          if (typeof aboveVal === 'string' && aboveVal.startsWith('=')) {
+            templateFormula = aboveVal;
+            neighborIdx = idx - 1;
+          }
+        }
+        
+        // 2. Check row immediately below
+        if (!templateFormula && idx < rows.length - 1) {
+          const belowVal = rows[idx + 1][colIdx];
+          if (typeof belowVal === 'string' && belowVal.startsWith('=')) {
+            templateFormula = belowVal;
+            neighborIdx = idx + 1;
+          }
+        }
+        
+        if (templateFormula) {
+          // Count formulas in this column to see if it is primarily formula-driven
+          let formulaCount = 0;
+          let validRows = 0;
+          rows.forEach(r => {
+            const v = String(r[colIdx] || '').trim();
+            if (v) {
+              validRows++;
+              if (v.startsWith('=')) formulaCount++;
+            }
+          });
+          
+          const isColumnPrimarilyFormulas = (formulaCount / (validRows || 1)) >= 0.5;
+          
+          if (isColumnPrimarilyFormulas) {
+            // Google Sheets row numbers: header is row 1, data starts at index 0 (row 2)
+            const neighborRowNumber = neighborIdx + 2;
+            const currentRowNumber = idx + 2;
+            
+            // Regex to shift row references (e.g. A4 -> A5)
+            const refRegex = new RegExp(`([A-Z]+)${neighborRowNumber}\\b`, 'g');
+            const suggestedFormula = templateFormula.replace(refRegex, `$1${currentRowNumber}`);
+            
+            if (strVal !== suggestedFormula) {
+              rowErrors[colIdx] = {
+                message: cellVal ? `Hardcoded override in formula column. Click Autofill to restore formula.` : `Missing formula. Click Autofill to generate.`,
+                isFormulaSuggestion: true,
+                suggestedValue: suggestedFormula
+              };
+            }
+          }
+        }
+      }
+    });
+
+    if (Object.keys(rowErrors).length > 0) {
       errors[actualRowIndex] = rowErrors;
     }
   });
