@@ -88,6 +88,7 @@ const DataManagerWorkspace = () => {
             onSyncCorrections={dm.handleSyncCorrections}
             renderRows={dm.renderRows}
             validationErrors={dm.validationErrors}
+            headers={dm.headers}
             onCellEdit={dm.handleCellEdit}
           />
         )}

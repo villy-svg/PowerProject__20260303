@@ -11,7 +11,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { googleSheetsService } from '../../../services/core/googleSheetsService';
 import { validateRow, validateSheet, cleanEVPlateNumber } from '../utils/validationRules';
-import { extractSpreadsheetId, colIndexToLetter } from '../utils/sheetsUtils';
+import { extractSpreadsheetId, colIndexToLetter, estimateHeaderRowsToSkip } from '../utils/sheetsUtils';
 
 // ─── Default Tab Name Configuration ──────────────────────────────────────────
 const DEFAULT_TAB_SETTINGS = {
@@ -127,6 +127,10 @@ export const useDataManager = () => {
       setActiveTab(defaultTab);
       const data = await googleSheetsService.readSheet(sheetId, defaultTab, 'FORMULA');
       setPreviewData(data);
+
+      // Heuristically auto-estimate skipped rows
+      const estimatedSkip = estimateHeaderRowsToSkip(data);
+      setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
     } catch (err) {
       console.error('[DataManager] Load error:', err);
       setError(err.message || 'Failed to connect to Google Sheet. Check permissions and Service Account access.');
@@ -146,6 +150,10 @@ export const useDataManager = () => {
       // FORMULA rendering keeps raw formulae visible for inspection
       const data = await googleSheetsService.readSheet(sheetId, tabName, 'FORMULA');
       setPreviewData(data);
+
+      // Heuristically auto-estimate skipped rows
+      const estimatedSkip = estimateHeaderRowsToSkip(data);
+      setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
     } catch (err) {
       console.error('[DataManager] Tab read error:', err);
       setError(`Failed to read tab "${tabName}": ${err.message}`);
@@ -308,6 +316,12 @@ export const useDataManager = () => {
     setShowErrorsOnly(prev => !prev);
   }, []);
 
+  const headers = useMemo(() => {
+    if (!previewData) return [];
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    return previewData[skip] || [];
+  }, [previewData, tabSettings.headerRowsToSkip]);
+
   // ── Public API ────────────────────────────────────────────────────────────
   return {
     // State
@@ -331,6 +345,7 @@ export const useDataManager = () => {
     isEditableTab,
     totalErrors,
     renderRows,
+    headers,
     // Handlers
     handleSettingChange,
     handleLoadSpreadsheet,

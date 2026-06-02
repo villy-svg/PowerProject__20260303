@@ -50,17 +50,29 @@ export const validateRow = (row, headers, context = {}) => {
 
     // Rule: Date validation
     if (headerLower.includes('date')) {
-      const date = new Date(strVal);
+      let date = new Date(strVal);
+      let isExcelDate = false;
+      
+      const numVal = parseInt(strVal, 10);
+      if (/^\d+$/.test(strVal) && numVal > 30000 && numVal < 70000) {
+        // Excel base date is Dec 30, 1899 due to 1900 leap year bug
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+        date = new Date(excelEpoch.getTime() + numVal * 24 * 60 * 60 * 1000);
+        isExcelDate = true;
+      }
+
       if (isNaN(date.getTime())) {
         errors[colIdx] = { message: 'Invalid Date format (use M/D/YYYY).' };
       } else {
         const strictDateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
-        const isStrict = strictDateRegex.test(strVal);
+        const isStrict = strictDateRegex.test(strVal) && !isExcelDate;
 
         if (!isStrict) {
           const standardized = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
           errors[colIdx] = {
-            message: `Non-standard date format. Click to format to M/D/YYYY.`,
+            message: isExcelDate 
+              ? `Excel serialized date number detected (${strVal}). Click to format to M/D/YYYY.`
+              : `Non-standard date format. Click to format to M/D/YYYY.`,
             isDateFormatAnomaly: true,
             suggestedValue: standardized
           };

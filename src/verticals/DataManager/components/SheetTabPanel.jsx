@@ -107,6 +107,7 @@ const DataBody = ({
   validationErrors,
   editedCells,
   isEditableTab,
+  headers,
   onCellEdit,
 }) => {
   if (tabLoading) {
@@ -134,7 +135,7 @@ const DataBody = ({
           : `Showing ${renderRows.length} records in ${activeTab}.`}
       </p>
       <DataGrid
-        headers={previewData[0]}
+        headers={headers}
         renderRows={renderRows}
         validationErrors={validationErrors}
         editedCells={editedCells}
@@ -163,6 +164,7 @@ const SheetTabPanel = ({
   onSyncCorrections,
   renderRows,
   validationErrors,
+  headers,
   onCellEdit,
 }) => (
   <div className="dm-card dm-card--tab-panel">
@@ -198,6 +200,7 @@ const SheetTabPanel = ({
       validationErrors={validationErrors}
       editedCells={editedCells}
       isEditableTab={isEditableTab}
+      headers={headers}
       onCellEdit={onCellEdit}
     />
   </div>
