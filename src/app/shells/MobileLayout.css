@@ -444,3 +444,48 @@
   width: 100%;
   flex-shrink: 0;
 }
+
+/* ── 9. Soft Keyboard Adaptation ─────────────────────────────────────── */
+/*
+ * When the soft keyboard is open (detected by useVisualViewport hook),
+ * body receives data-keyboard="open". These rules adapt the layout
+ * so modals, forms, and fixed elements don't get buried under the keyboard.
+ *
+ * --keyboard-height: distance the keyboard occupies (set via JS hook)
+ * --visual-viewport-height: the actual visible viewport height (set via JS hook)
+ */
+
+/* Shrink modal/sheet content to the visual viewport so it scrolls instead of
+   overflowing behind the keyboard */
+body[data-keyboard="open"] .modal-overlay {
+  align-items: flex-start;
+}
+
+body[data-keyboard="open"] .modal-content,
+body[data-keyboard="open"] .modal-content-area,
+body[data-keyboard="open"] .task-form-sheet,
+body[data-keyboard="open"] .form-sheet {
+  max-height: calc(var(--visual-viewport-height, 100vh) - 16px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Bring fixed submit/action buttons above the keyboard */
+body[data-keyboard="open"] .form-sticky-footer,
+body[data-keyboard="open"] .modal-footer-actions,
+body[data-keyboard="open"] .form-submit-row {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-color);
+  padding: 8px 0 4px;
+  z-index: 10;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Workspace bottom padding increases so the last focusable field
+   doesn't hide behind the keyboard when the user tabs through a form */
+body[data-keyboard="open"] .mobile-layout .workspace-content {
+  padding-bottom: calc(var(--keyboard-height, 0px) + 16px);
+  transition: padding-bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -726,3 +726,34 @@
     font-size: 0.85rem;
   }
 }
+
+/* ==========================================================================
+   6. KEYBOARD-AWARE GLOBAL ADAPTATIONS
+   Applied when body[data-keyboard="open"] is set by useVisualViewport hook.
+   Ensures forms and modals shrink to visible viewport so submit buttons stay
+   reachable on mobile without scrolling blind.
+   ========================================================================== */
+
+/* Ensure the root app container never exceeds the visual viewport height
+   when the keyboard is open — prevents content from rendering behind keyboard */
+body[data-keyboard="open"] #root,
+body[data-keyboard="open"] .app-root {
+  height: var(--visual-viewport-height, 100vh);
+  overflow: hidden;
+}
+
+/* All form action rows become sticky to the bottom of their container,
+   so the Submit/Create button is always visible while fields are focused */
+body[data-keyboard="open"] .form-actions,
+body[data-keyboard="open"] .form-footer,
+body[data-keyboard="open"] .modal-actions,
+body[data-keyboard="open"] .wizard-footer,
+body[data-keyboard="open"] .task-form-actions {
+  position: sticky !important;
+  bottom: 0 !important;
+  background: var(--bg-color) !important;
+  z-index: 20 !important;
+  padding-bottom: 8px !important;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+}

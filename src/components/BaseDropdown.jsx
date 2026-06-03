@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useLayoutShell } from '../app/shells/useLayoutShell';
 import '../styles/DropdownSystem.css';
 
 /**
@@ -71,11 +72,18 @@ const BaseDropdown = ({
   emptyState = null,
   footerSlot = null,
 
+  // ── CLOSE ON SELECT (Mobile UX) ──────────────────────────────────────
+  // When true + we are on a mobile viewport, the multi-select dropdown closes
+  // after each pick — matching users' expectation that one tap = one action.
+  // Defaults to false to preserve desktop multi-select behaviour.
+  closeOnSelectMobile = false,
+
   // ── STATE
   disabled = false,
   required = false,
   loading = false,
 }) => {
+  const { isMobile } = useLayoutShell();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalOpen;
 
@@ -201,6 +209,12 @@ const BaseDropdown = ({
       newSelection = [...selectedValues, val];
     }
     onChange(newSelection);
+
+    // Auto-close on mobile if the caller has opted into this UX pattern.
+    // Skips when deselecting (to allow correction without re-opening).
+    if (closeOnSelectMobile && isMobile && !selectedValues.includes(val)) {
+      setIsOpen(false);
+    }
   };
 
   const handleClear = (e) => {

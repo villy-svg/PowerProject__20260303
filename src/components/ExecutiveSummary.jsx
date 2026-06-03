@@ -310,12 +310,25 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   const topLevelVisibleCount = visibleTasks.filter(t => !t.parentTask).length;
 
-  const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
+  const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user) && t.stageId !== 'COMPLETED');
   const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
-  const escalationTasks = myTasks.filter(t => 
-    t.verticalId === 'escalation_tasks' || 
-    ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') && 
-     (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+
+  // isCreator: the current user raised this task (created_by or createdBy field)
+  const isCreator = (t) =>
+    (t.created_by && t.created_by === user?.id) ||
+    (t.createdBy && t.createdBy === user?.id);
+
+  // escalationTasks: tasks shown in Team Support panel.
+  // Includes tasks the user is ASSIGNED to OR tasks the user CREATED,
+  // so creators can always track tickets they raised regardless of assignment.
+  const escalationTasks = tasks.filter(t =>
+    t.stageId !== 'COMPLETED' && (
+      t.verticalId === 'escalation_tasks' ||
+      ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') &&
+       (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+    ) && (
+      taskUtils.isAssignee(t, user) || isCreator(t)
+    )
   );
   const regularMyTasks = myTasks.filter(t => !escalationTasks.some(et => et.id === t.id));
   const hasEscalations = escalationTasks.length > 0;
@@ -390,13 +403,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       )}
 
       {/* 0. Escalations Section */}
+      {/* tasks prop: union of tasks the user is assigned to OR created,
+          so creators can always see the tickets they raised here. */}
       {hasEscalations && (!isMobile || activeView === 'escalations') && (
         <HomeEscalationsBoard
-          tasks={tasks.filter(t => 
-            t.verticalId === 'escalation_tasks' || 
-            ((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 
-             (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
-          )}
+          tasks={escalationTasks}
           user={user}
           permissions={permissions}
           verticals={verticals}
@@ -431,6 +442,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           title="Centralised Task View"
           description={"Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ."}
           tasks={tasks.filter(t => 
+            t.stageId !== 'COMPLETED' &&
             t.verticalId !== 'escalation_tasks' && 
             !((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 
               (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
@@ -472,6 +484,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           isMobile={isMobile}
         />
       )}
+
+
 
       {/* Shared Consolidation Workspace Modals */}
       <WorkspaceModals
