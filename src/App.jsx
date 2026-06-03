@@ -105,7 +105,7 @@ function AppShell({ verticals, verticalList }) {
     const isGlobalScope = currentUserPermissions.scope === 'global';
     
     // Special admin-only views
-    const isSpecialAdminView = ['user_management', 'role_management'].includes(activeVertical);
+    const isSpecialAdminView = ['user_management', 'role_management', 'DATA_MANAGER'].includes(activeVertical);
     if (isSpecialAdminView && !isMasterAdmin) {
       // 'rbac_guard' source: security rejection — not a real user navigation
       setActiveVertical(null, 'rbac_guard');

@@ -42,6 +42,9 @@ const DesktopSidebar = ({
   const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
 
   const filteredVerticals = verticalList.filter(vertical => {
+    if (vertical.id === 'DATA_MANAGER') {
+      return user?.roleId === 'master_admin';
+    }
     const isExplicitlyAssigned = user?.assignedVerticals?.includes(vertical.id);
     if (isHydrating) return isExplicitlyAssigned;
     if (permissions.scope === 'global') return true;
