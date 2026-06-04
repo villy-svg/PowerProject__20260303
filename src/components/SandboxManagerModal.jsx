@@ -60,6 +60,11 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
     localStorage.removeItem('power_project_cache_verticals');
     localStorage.removeItem('power_project_permissions_verticalCaps');
 
+    // Purge offline rules caching keys
+    localStorage.removeItem('powerpod_rule_categories_offline');
+    localStorage.removeItem('powerpod_rule_sub_categories_offline');
+    localStorage.removeItem('powerpod_employee_rules_offline');
+
     setStatus({ 
       type: 'success', 
       message: 'Simulated caches cleared successfully! Reconnecting live...' 
@@ -116,7 +121,6 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
             </div>
           )}
         </main>
-
         <footer className="sandbox-modal-footer">
           <button className="halo-button clear-cache-btn" onClick={handleClearCache}>
             🔌 RECONNECT LIVE

@@ -67,9 +67,10 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
     }
   }, [editingItem, isOpen, categories]);
 
-  // Save draft to localStorage on change if not editing
+  // Save draft to localStorage on change if not editing.
+  // Require category_id so a restored draft never fails validation immediately.
   useEffect(() => {
-    if (!editingItem && isOpen && (form.title || form.impact || form.content || form.drive_url)) {
+    if (!editingItem && isOpen && form.category_id && (form.title || form.impact || form.content || form.drive_url)) {
       localStorage.setItem('rule_form_draft', JSON.stringify(form));
     }
   }, [form, editingItem, isOpen]);

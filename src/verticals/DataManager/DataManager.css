@@ -5,6 +5,9 @@
  * All colors use design system tokens from globalTheme.css — no hardcoded hex values.
  */
 
+@import '../../styles/ManagementForms.css';
+
+
 /* ==========================================================================
    DM LOCAL TOKENS
    Localised overrides — avoids hardcoded hex anywhere in this file.

@@ -23,6 +23,7 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
   const [subCategories, setSubCategories] = useState([]);
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   // Modal states
   const [catModal, setCatModal] = useState({ open: false, item: null });
@@ -44,8 +45,10 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
       setCategories(cats);
       setSubCategories(subs);
       setRules(rls);
+      setLoadError(null);
     } catch (err) {
       console.error('[RuleManagement] Load error:', err);
+      setLoadError('Failed to load rules data. Please refresh and try again.');
     } finally {
       setLoading(false);
     }
@@ -113,17 +116,6 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
              '+ New Sub-Category'}
           </button>
         }
-        canAdd={true}
-        addLabel={
-          activeTab === 'rules' ? 'New Rule' :
-          activeTab === 'categories' ? 'New Category' :
-          'New Sub-Category'
-        }
-        onAddClick={() => {
-          if (activeTab === 'rules') setRuleModal({ open: true, item: null });
-          else if (activeTab === 'categories') setCatModal({ open: true, item: null });
-          else setSubModal({ open: true, item: null });
-        }}
       />
 
       <div className="rule-mgmt-content">
@@ -141,6 +133,12 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
         </div>
 
         {loading && <div className="loading-spinner">Loading...</div>}
+
+        {!loading && loadError && (
+          <div className="rule-empty-panel" style={{ color: 'var(--error-color, #ef4444)', opacity: 1 }}>
+            <p>⚠️ {loadError}</p>
+          </div>
+        )}
 
         {/* ──────────────────── RULES TAB ──────────────────────── */}
         {!loading && activeTab === 'rules' && (

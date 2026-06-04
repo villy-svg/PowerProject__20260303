@@ -73,6 +73,7 @@ const EmployeeRulesBoard = ({
   const [subCategories, setSubCategories] = useState([]);
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [activeCategoryId, setActiveCategoryId] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -91,8 +92,10 @@ const EmployeeRulesBoard = ({
         setCategories(cats);
         setSubCategories(subs);
         setRules(rls);
+        setLoadError(null);
       } catch (err) {
         console.error('[EmployeeRulesBoard] Load error:', err);
+        setLoadError('Could not load rules. Please check your connection and refresh.');
       } finally {
         setLoading(false);
       }
@@ -226,6 +229,15 @@ const EmployeeRulesBoard = ({
         {/* ── Loading ── */}
         {loading && (
           <div className="rules-loading">Loading Rules & Regulations...</div>
+        )}
+
+        {/* ── Load Error ── */}
+        {!loading && loadError && (
+          <div className="rules-empty-state">
+            <div className="rules-empty-icon">⚠️</div>
+            <h3>Failed to Load</h3>
+            <p>{loadError}</p>
+          </div>
         )}
 
         {/* ── Empty State (no rules at all) ── */}

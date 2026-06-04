@@ -12,7 +12,8 @@ const OnlineSyncBanner = () => {
     const handleOnlineStatusChange = () => {
       // Check if we have cached offline bypass files in localStorage
       const hasOfflineCache = localStorage.getItem('power_project_user') || 
-                              localStorage.getItem('powerpod_tasks_v5');
+                              localStorage.getItem('powerpod_tasks_v5') ||
+                              localStorage.getItem('powerpod_employee_rules_offline');
       
       if (navigator.onLine && hasOfflineCache) {
         setIsVisible(true);
@@ -38,6 +39,11 @@ const OnlineSyncBanner = () => {
     localStorage.removeItem('power_project_permissions');
     localStorage.removeItem('power_project_cache_verticals');
     localStorage.removeItem('power_project_permissions_verticalCaps');
+    
+    // Purge offline rules caching keys
+    localStorage.removeItem('powerpod_rule_categories_offline');
+    localStorage.removeItem('powerpod_rule_sub_categories_offline');
+    localStorage.removeItem('powerpod_employee_rules_offline');
 
     setIsVisible(false);
     
