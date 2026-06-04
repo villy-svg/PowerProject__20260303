@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-const SpreadsheetForm = ({ googleSheetsUrl, onUrlChange, onSubmit, loading }) => (
+const SpreadsheetForm = ({ googleSheetsUrl, onUrlChange, onSubmit, loading, canLoad = true }) => (
   <div className="dm-card">
     <div className="dm-card__header">
       <h2 className="dm-card__title">Data Sheet Board</h2>
@@ -35,10 +35,17 @@ const SpreadsheetForm = ({ googleSheetsUrl, onUrlChange, onSubmit, loading }) =>
         <button
           type="submit"
           className="halo-button primary dm-form-submit"
-          disabled={loading || !googleSheetsUrl}
+          disabled={loading || !googleSheetsUrl || !canLoad}
+          title={!canLoad ? 'Contributor access or higher is required to load sheets' : ''}
         >
           {loading ? 'Connecting & Loading Spreadsheet...' : 'Load & Preview Spreadsheet'}
         </button>
+        {/* RBAC notice: shown to Viewer-only users who cannot trigger a load */}
+        {!canLoad && (
+          <p className="dm-access-notice">
+            🔒 Contributor access or higher is required to load &amp; preview sheets.
+          </p>
+        )}
       </div>
     </form>
   </div>

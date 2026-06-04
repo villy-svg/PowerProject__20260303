@@ -266,3 +266,20 @@
   color: var(--text-color);
   opacity: 0.6;
 }
+
+/* ==========================================================================
+   DM ACCESS NOTICE
+   Inline text shown when a user's role is insufficient for an action
+   (e.g., Viewer cannot load sheets; Contributor cannot run checker).
+   ========================================================================== */
+.dm-access-notice {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--badge-yellow-text, #d97706);
+  background: var(--badge-yellow-bg, rgba(217, 119, 6, 0.08));
+  border: 1px solid var(--badge-yellow-text, #d97706);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin-top: 8px;
+  opacity: 0.9;
+}

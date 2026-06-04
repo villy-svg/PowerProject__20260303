@@ -60,7 +60,7 @@ const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
   </div>
 );
 
-// ─── Checker Toolbar ──────────────────────────────────────────────────────────
+// ─── Checker Toolbar ────────────────────────────────────────────────
 const CheckerToolbar = ({
   onRunChecker,
   checkerRun,
@@ -70,11 +70,20 @@ const CheckerToolbar = ({
   editedCells,
   syncing,
   onSyncCorrections,
+  // canRunChecker: Editor+ is required to run the validation checker
+  canRunChecker,
 }) => (
   <div className="dm-action-row">
-    <button onClick={onRunChecker} className="halo-button dm-action-btn">
-      🔍 Run Checker
-    </button>
+    {/* RBAC: Run Checker requires Editor+ (canUpdate). Show disabled notice to lower roles. */}
+    {canRunChecker ? (
+      <button onClick={onRunChecker} className="halo-button dm-action-btn">
+        🔍 Run Checker
+      </button>
+    ) : (
+      <span className="dm-access-notice" title="Editor access or higher is required">
+        🔒 Editor access required to run the checker
+      </span>
+    )}
 
     {checkerRun && (
       <button
@@ -169,6 +178,8 @@ const SheetTabPanel = ({
   headers,
   onCellEdit,
   onAutofixColumn,
+  // canRunChecker: Editor+ is required to see/use the Run Checker button
+  canRunChecker = false,
 }) => (
   <div className="dm-card dm-card--tab-panel">
     <div className="dm-tab-bar">
@@ -190,6 +201,7 @@ const SheetTabPanel = ({
           editedCells={editedCells}
           syncing={syncing}
           onSyncCorrections={onSyncCorrections}
+          canRunChecker={canRunChecker}
         />
       )}
     </div>

@@ -272,22 +272,31 @@ export const validateSheet = (rows, headers, context = {}, skip = 0) => {
       if (!isFormula) {
         let templateFormula = null;
         let neighborIdx = -1;
-        
-        // 1. Check row immediately above
-        if (idx > 0) {
-          const aboveVal = rows[idx - 1][colIdx];
-          if (typeof aboveVal === 'string' && aboveVal.startsWith('=')) {
-            templateFormula = aboveVal;
-            neighborIdx = idx - 1;
+
+        // Search up to NEIGHBOR_SCAN_RADIUS rows in both directions to find the nearest formula.
+        // This ensures consecutive blocks of hardcoded/missing values all receive a suggestedValue,
+        // not just the single row immediately adjacent to a formula row.
+        const NEIGHBOR_SCAN_RADIUS = 10;
+
+        // 1. Scan upward first (prefer the row above as the reference anchor)
+        for (let offset = 1; offset <= NEIGHBOR_SCAN_RADIUS && idx - offset >= 0; offset++) {
+          const candidateVal = rows[idx - offset][colIdx];
+          if (typeof candidateVal === 'string' && candidateVal.startsWith('=')) {
+            templateFormula = candidateVal;
+            neighborIdx = idx - offset;
+            break;
           }
         }
-        
-        // 2. Check row immediately below
-        if (!templateFormula && idx < rows.length - 1) {
-          const belowVal = rows[idx + 1][colIdx];
-          if (typeof belowVal === 'string' && belowVal.startsWith('=')) {
-            templateFormula = belowVal;
-            neighborIdx = idx + 1;
+
+        // 2. If no formula found above, scan downward
+        if (!templateFormula) {
+          for (let offset = 1; offset <= NEIGHBOR_SCAN_RADIUS && idx + offset < rows.length; offset++) {
+            const candidateVal = rows[idx + offset][colIdx];
+            if (typeof candidateVal === 'string' && candidateVal.startsWith('=')) {
+              templateFormula = candidateVal;
+              neighborIdx = idx + offset;
+              break;
+            }
           }
         }
         
@@ -306,18 +315,22 @@ export const validateSheet = (rows, headers, context = {}, skip = 0) => {
           const isColumnPrimarilyFormulas = (formulaCount / (validRows || 1)) >= 0.5;
           
           if (isColumnPrimarilyFormulas) {
-            // Google Sheets row numbers: header is row 1, data starts at index 0 (row 2)
-            // Offset neighborRowNumber and currentRowNumber by the skip parameter!
+            // Google Sheets row numbers: header is row 1, data starts at index 0 (row 2).
+            // Offset neighborRowNumber and currentRowNumber by the skip parameter.
+            // The delta between neighborRowNumber and currentRowNumber correctly adjusts
+            // all row references in the template formula regardless of scan distance.
             const neighborRowNumber = neighborIdx + skip + 2;
             const currentRowNumber = idx + skip + 2;
             
-            // Regex to shift row references (e.g. A4 -> A5)
+            // Regex to shift ALL row references in the formula (e.g. A4 → A7)
             const refRegex = new RegExp(`([A-Z]+)${neighborRowNumber}\\b`, 'g');
             const suggestedFormula = templateFormula.replace(refRegex, `$1${currentRowNumber}`);
             
             if (strVal !== suggestedFormula) {
               rowErrors[colIdx] = {
-                message: cellVal ? `Hardcoded override in formula column. Click Autofill to restore formula.` : `Missing formula. Click Autofill to generate.`,
+                message: cellVal
+                  ? `Hardcoded override in formula column. Click Autofill to restore formula.`
+                  : `Missing formula. Click Autofill to generate.`,
                 isFormulaSuggestion: true,
                 suggestedValue: suggestedFormula
               };

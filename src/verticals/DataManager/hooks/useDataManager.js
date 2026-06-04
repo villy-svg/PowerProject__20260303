@@ -314,12 +314,30 @@ export const useDataManager = () => {
     try {
       const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
       const headers = previewData[skip];
+
+      if (!headers || headers.length === 0) {
+        throw new Error('Cannot sync — header row not found. Re-load the spreadsheet and try again.');
+      }
+
       const rowsToUpdate = Object.keys(editedCells);
 
-      // Build batch payload — one entry per edited row
-      const batchData = rowsToUpdate.map(strRowIndex => {
+      // Build batch payload — one entry per edited row.
+      // Guard against stale editedCells entries that point to rows that no longer exist
+      // in previewData (e.g. after a tab switch or partial reload).
+      const batchData = [];
+      const staleRows = [];
+
+      rowsToUpdate.forEach(strRowIndex => {
         const rowIndex = parseInt(strRowIndex, 10);
         const originalRow = previewData[rowIndex];
+
+        if (!originalRow) {
+          // This editedCells entry is stale — the row no longer exists in the current previewData.
+          // Log it and skip rather than crashing.
+          staleRows.push(rowIndex);
+          console.warn(`[DataManager] Sync skipping stale row index ${rowIndex} — no matching previewData row.`);
+          return;
+        }
 
         // Merge edits over originals, padding short rows to header length
         const updatedRow = headers.map((_, cIdx) => {
@@ -330,21 +348,33 @@ export const useDataManager = () => {
 
         // Sheets API uses 1-based row numbers (header = row 1, data starts at row 2)
         const sheetsRowNumber = rowIndex + 1;
-        // Use colIndexToLetter from sheetsUtils instead of raw String.fromCharCode (fix)
         const endColLetter = colIndexToLetter(headers.length - 1);
         const range = `${activeTab}!A${sheetsRowNumber}:${endColLetter}${sheetsRowNumber}`;
 
-        return { range, values: [updatedRow] };
+        batchData.push({ range, values: [updatedRow] });
       });
 
-      const updatedCellsCount = await googleSheetsService.batchUpdateSheet(sheetId, batchData);
-      setSyncSuccess(`Successfully updated ${rowsToUpdate.length} row(s) (${updatedCellsCount} cells) in Google Sheets.`);
+      if (batchData.length === 0) {
+        throw new Error(
+          `Nothing to sync — all ${staleRows.length} pending edit(s) pointed to rows that are no longer present. ` +
+          `Re-load the spreadsheet to refresh the data, then re-apply your corrections.`
+        );
+      }
 
-      // Commit edits into the local preview data so the grid reflects the saved state
+      const updatedCellsCount = await googleSheetsService.batchUpdateSheet(sheetId, batchData);
+      const syncedRows = rowsToUpdate.length - staleRows.length;
+      setSyncSuccess(
+        `Successfully updated ${syncedRows} row(s) (${updatedCellsCount} cells) in Google Sheets.` +
+        (staleRows.length > 0 ? ` (${staleRows.length} stale row(s) were skipped — re-load to refresh.)` : '')
+      );
+
+      // Commit edits into the local preview data so the grid reflects the saved state.
+      // Guard against undefined rows in case previewData changed since editedCells was built.
       setPreviewData(prev => {
         const next = [...prev];
         rowsToUpdate.forEach(strRowIndex => {
           const rowIndex = parseInt(strRowIndex, 10);
+          if (!next[rowIndex]) return; // skip stale rows
           next[rowIndex] = next[rowIndex].map((cellVal, cIdx) =>
             editedCells[rowIndex]?.[cIdx] !== undefined ? editedCells[rowIndex][cIdx] : cellVal
           );
@@ -359,7 +389,7 @@ export const useDataManager = () => {
     } finally {
       setSyncing(false);
     }
-  }, [activeTab, editedCells, previewData, sheetId]);
+  }, [activeTab, editedCells, previewData, sheetId, tabSettings.headerRowsToSkip]);
 
   // ── Action: Autofix entire column for suggestion errors ───────────────────
   const handleAutofixColumn = useCallback((colIdx) => {

@@ -21,19 +21,34 @@ import SheetsMapping from './components/SheetsMapping';
 import SheetTabPanel from './components/SheetTabPanel';
 import './DataManager.css';
 
-const DataManagerWorkspace = () => {
+const DataManagerWorkspace = ({ permissions = {} }) => {
   const dm = useDataManager();
+
+  // RBAC guard: Viewer+ required to see the Data Manager at all.
+  // canRead is true for viewer, contributor, editor, and admin.
+  if (!permissions.canRead) {
+    return (
+      <div className="dm-workspace">
+        <div className="dm-alert dm-alert--error">
+          <strong>Access Denied:</strong>
+          <p>You do not have permission to view the Data Manager.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dm-scroll-area">
       <div className="dm-workspace">
 
         {/* 1 ── URL Input Form ─────────────────────────────────────────── */}
+        {/* canCreate (Contributor+) is required to load and preview sheets  */}
         <SpreadsheetForm
           googleSheetsUrl={dm.googleSheetsUrl}
           onUrlChange={(e) => dm.setGoogleSheetsUrl(e.target.value)}
           onSubmit={dm.handleLoadSpreadsheet}
           loading={dm.loading}
+          canLoad={!!permissions.canCreate}
         />
 
         {/* 2 ── Tab Name Mapping (visible after spreadsheet loads) ──────── */}
@@ -91,6 +106,7 @@ const DataManagerWorkspace = () => {
             headers={dm.headers}
             onCellEdit={dm.handleCellEdit}
             onAutofixColumn={dm.handleAutofixColumn}
+            canRunChecker={!!permissions.canUpdate}
           />
         )}
 
