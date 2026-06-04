@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconX, IconChevronLeft, IconChevronRight } from '../../components/Icons';
+import { IconX, IconChevronLeft, IconChevronRight, IconPlus, IconEdit, IconTrash } from '../../components/Icons';
 import { updateRule } from '../../services/employees/rulesService';
 import './TutorialSlideshowViewer.css';
 
@@ -10,9 +10,17 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const [editText, setEditText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Pick slides based on target environment
-  const slides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
-  const currentSlide = slides[slideIndex];
+  const baseSlides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
+  const [editableSlides, setEditableSlides] = useState(baseSlides);
+  const currentSlide = editableSlides[slideIndex];
+
+  // Reset local state if flow or platform changes externally
+  useEffect(() => {
+    setEditableSlides(platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides);
+    if (slideIndex >= (platform === 'desktop' ? flow.desktopSlides.length : flow.mobileSlides.length)) {
+      setSlideIndex(0);
+    }
+  }, [flow, platform]);
 
   // Initialize edit form when slide or edit mode changes
   useEffect(() => {
@@ -27,7 +35,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
 
   const handleNext = () => {
-    if (slideIndex < slides.length - 1) {
+    if (slideIndex < editableSlides.length - 1) {
       setSlideIndex(slideIndex + 1);
     } else {
       onClose();
@@ -40,23 +48,45 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     }
   };
 
-  const handleSave = async () => {
+  const handleAddSlide = () => {
+    const newSlide = {
+      title: 'New Slide',
+      text: '',
+      image: '/powerpod-logo.svg',
+      fallbackImage: '/powerpod-logo.svg',
+      annotations: []
+    };
+    const updated = [...editableSlides, newSlide];
+    setEditableSlides(updated);
+    setSlideIndex(updated.length - 1);
+    setIsEditing(true);
+  };
+
+  const handleDeleteSlide = () => {
+    if (editableSlides.length <= 1) {
+      alert("Cannot delete the last remaining slide.");
+      return;
+    }
+    if (window.confirm("Are you sure you want to delete this slide?")) {
+      const updated = editableSlides.filter((_, idx) => idx !== slideIndex);
+      setEditableSlides(updated);
+      if (slideIndex >= updated.length) {
+        setSlideIndex(updated.length - 1);
+      }
+      // Auto-save deletion
+      saveModifications(updated);
+    }
+  };
+
+  const saveModifications = async (slidesToSave) => {
     setSaving(true);
     try {
       if (flow.id.startsWith('rule_')) {
-        // Reconstruct rule content from updated slides
         const ruleId = flow.id.replace('rule_', '');
-        const updatedSlides = [...slides];
-        updatedSlides[slideIndex] = {
-          ...updatedSlides[slideIndex],
-          title: editTitle,
-          text: editText
-        };
-
-        const newTitle = updatedSlides[0].title;
-        const introText = updatedSlides[0].text;
-        const bulletContent = updatedSlides.slice(1).map((s, idx) => {
-          const isCustomTitle = s.title && s.title !== `Point ${idx + 1} of ${updatedSlides.length - 1}`;
+        const newTitle = slidesToSave[0].title;
+        const introText = slidesToSave[0].text;
+        const bulletContent = slidesToSave.slice(1).map((s, idx) => {
+          const isCustomTitle = s.title && s.title !== `Point ${idx + 1} of ${slidesToSave.length - 1}`;
           if (isCustomTitle) {
             return `${idx + 1}. ### ${s.title}\n${s.text}`;
           }
@@ -69,11 +99,9 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
           content: newContent
         });
       } else {
-        // For static tutorials, save individual slide override in localStorage
-        const overrideKey = `powerpod_tutorial_override_${flow.id}`;
-        const overrides = JSON.parse(localStorage.getItem(overrideKey) || '{}');
-        overrides[slideIndex] = { title: editTitle, text: editText };
-        localStorage.setItem(overrideKey, JSON.stringify(overrides));
+        // For static tutorials, save the entire array to allow length modification
+        const overrideKey = `powerpod_tutorial_override_array_${flow.id}`;
+        localStorage.setItem(overrideKey, JSON.stringify(slidesToSave));
       }
 
       if (onUpdate) {
@@ -87,24 +115,72 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     }
   };
 
+  const handleSave = () => {
+    const updatedSlides = [...editableSlides];
+    updatedSlides[slideIndex] = {
+      ...updatedSlides[slideIndex],
+      title: editTitle,
+      text: editText
+    };
+    setEditableSlides(updatedSlides);
+    saveModifications(updatedSlides);
+  };
+
   const renderEditControls = () => {
     if (!isMasterAdmin) return null;
     if (isEditing) {
       return (
-        <div className="slide-edit-controls-bar" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-          <button className="halo-button secondary" onClick={() => setIsEditing(false)} disabled={saving} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
-            Cancel
+        <div className="slide-edit-controls-bar" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button 
+            className="halo-button danger" 
+            onClick={handleDeleteSlide} 
+            disabled={saving || editableSlides.length <= 1} 
+            title="Delete Slide"
+            aria-label="Delete Slide"
+            style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <IconTrash size={16} />
           </button>
-          <button className="halo-button save-btn" onClick={handleSave} disabled={saving} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', '--stage-accent': 'var(--brand-green)' }}>
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button 
+              className="halo-button secondary" 
+              onClick={() => setIsEditing(false)} 
+              disabled={saving} 
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px' }}
+            >
+              Cancel
+            </button>
+            <button 
+              className="halo-button" 
+              onClick={handleSave} 
+              disabled={saving} 
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px' }}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
         </div>
       );
     }
     return (
-      <div className="slide-edit-trigger" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-        <button className="halo-button secondary" onClick={() => setIsEditing(true)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
-          ✏️ Edit Slide Text
+      <div className="slide-edit-trigger" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+        <button 
+          className="halo-button secondary" 
+          onClick={handleAddSlide} 
+          title="Add Slide"
+          aria-label="Add Slide"
+          style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <IconPlus size={16} />
+        </button>
+        <button 
+          className="halo-button secondary" 
+          onClick={() => setIsEditing(true)} 
+          title="Edit Slide"
+          aria-label="Edit Slide"
+          style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <IconEdit size={16} />
         </button>
       </div>
     );
@@ -174,7 +250,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
           
           <div className="onboarding-footer">
             <div className="slideshow-step-dots onboarding-dots">
-              {slides.map((_, idx) => (
+              {editableSlides.map((_, idx) => (
                 <div 
                   key={idx} 
                   className={`step-dot-indicator ${slideIndex === idx ? 'active' : ''}`}
@@ -189,7 +265,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
               disabled={isEditing}
               style={{ '--stage-accent': 'var(--brand-green)' }}
             >
-              {slideIndex === slides.length - 1 ? 'Get Started' : 'Next'}
+              {slideIndex === editableSlides.length - 1 ? 'Get Started' : 'Next'}
             </button>
           </div>
         </div>
@@ -377,7 +453,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
 
             {/* Step dot indicators */}
             <div className="slideshow-step-dots">
-              {slides.map((_, idx) => (
+              {editableSlides.map((_, idx) => (
                 <div 
                   key={idx} 
                   className={`step-dot-indicator ${slideIndex === idx ? 'active' : ''}`}
@@ -392,7 +468,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
               disabled={isEditing}
               style={{ '--stage-accent': 'var(--brand-green)' }}
             >
-              {slideIndex === slides.length - 1 ? 'Finish' : 'Next'}
+              {slideIndex === editableSlides.length - 1 ? 'Finish' : 'Next'}
               <IconChevronRight size={16} />
             </button>
           </div>

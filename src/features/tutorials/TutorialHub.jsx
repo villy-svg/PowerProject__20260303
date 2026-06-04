@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import TutorialSlideshowViewer from './TutorialSlideshowViewer';
+import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
 import { fetchRules } from '../../services/employees/rulesService';
+import { IconEdit, IconPlus } from '../../components/Icons';
 export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
 
@@ -77,6 +79,10 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   const [platform, setPlatform] = useState('desktop'); // 'desktop' | 'mobile'
   const [activeFlow, setActiveFlow] = useState(null);
   const [ruleFlows, setRuleFlows] = useState([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingFlow, setEditingFlow] = useState(null);
+
+  const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
 
   const loadRules = useCallback(async () => {
     try {
@@ -95,7 +101,9 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           id: `rule_${rule.id}`,
           title: rule.title,
           category: rule.category?.name || 'Rules & Regulations',
-          description: `Interactive guidelines detailing ${rule.title}.`,
+          category_id: rule.category_id,
+          content: rule.content,
+          description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
           accessLevel: 'All Users',
           badgeColor: 'rgba(16, 185, 129, 0.1)',
           badgeText: '#10b981',
@@ -114,38 +122,74 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
     loadRules();
   }, [loadRules]);
 
-  // Compute final flows with static tutorial overrides applied
   const allFlows = useMemo(() => {
-    const overriddenStaticFlows = TUTORIAL_FLOWS.map(flow => {
-      const overrideKey = `powerpod_tutorial_override_${flow.id}`;
-      const overridesStr = localStorage.getItem(overrideKey);
-      if (!overridesStr) return flow;
+    const applyOverrides = (flow) => {
+      // 0. Apply metadata overrides (title, description, category) from local storage
+      const metaOverrideKey = `powerpod_tutorial_meta_override_${flow.id}`;
+      const metaOverrideStr = localStorage.getItem(metaOverrideKey);
+      if (metaOverrideStr) {
+        try {
+          const parsedMeta = JSON.parse(metaOverrideStr);
+          flow = {
+            ...flow,
+            title: parsedMeta.title ?? flow.title,
+            description: parsedMeta.description ?? flow.description,
+            category: parsedMeta.category ?? flow.category
+          };
+        } catch (e) {
+          console.error('[TutorialHub] Meta override parse failed:', e);
+        }
+      }
 
-      try {
-        const overrides = JSON.parse(overridesStr);
-        const mapOverride = (slidesList) => slidesList.map((slide, idx) => {
-          if (overrides[idx]) {
+      // 1. Check for full array override (supports add/delete slides)
+      const arrayOverrideKey = `powerpod_tutorial_override_array_${flow.id}`;
+      const arrayOverrideStr = localStorage.getItem(arrayOverrideKey);
+      if (arrayOverrideStr) {
+        try {
+          const parsedArray = JSON.parse(arrayOverrideStr);
+          if (Array.isArray(parsedArray)) {
             return {
-              ...slide,
-              title: overrides[idx].title ?? slide.title,
-              text: overrides[idx].text ?? slide.text ?? slide.caption,
-              caption: overrides[idx].text ?? slide.caption
+              ...flow,
+              desktopSlides: parsedArray,
+              mobileSlides: parsedArray
             };
           }
-          return slide;
-        });
-
-        return {
-          ...flow,
-          desktopSlides: mapOverride(flow.desktopSlides || []),
-          mobileSlides: mapOverride(flow.mobileSlides || [])
-        };
-      } catch (e) {
-        console.error('[TutorialHub] Override parse failed for flow:', flow.id, e);
-        return flow;
+        } catch (e) {
+          console.error('[TutorialHub] Array override parse failed:', e);
+        }
       }
-    });
 
+      // 2. Check for legacy index-based override (legacy support)
+      const legacyOverrideKey = `powerpod_tutorial_override_${flow.id}`;
+      const legacyOverrideStr = localStorage.getItem(legacyOverrideKey);
+      if (legacyOverrideStr) {
+        try {
+          const overrides = JSON.parse(legacyOverrideStr);
+          const mapOverride = (slidesList) => slidesList.map((slide, idx) => {
+            if (overrides[idx]) {
+              return {
+                ...slide,
+                title: overrides[idx].title ?? slide.title,
+                text: overrides[idx].text ?? slide.text ?? slide.caption,
+                caption: overrides[idx].text ?? slide.caption
+              };
+            }
+            return slide;
+          });
+          return {
+            ...flow,
+            desktopSlides: mapOverride(flow.desktopSlides || []),
+            mobileSlides: mapOverride(flow.mobileSlides || [])
+          };
+        } catch (e) {
+          console.error('[TutorialHub] Legacy override parse failed:', e);
+        }
+      }
+
+      return flow;
+    };
+
+    const overriddenStaticFlows = TUTORIAL_FLOWS.map(applyOverrides);
     return [...overriddenStaticFlows, ...ruleFlows];
   }, [ruleFlows]);
 
@@ -186,12 +230,26 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           </div>
         }
         rightActions={
-          <button 
-            className="halo-button header-back-dashboard-btn"
-            onClick={() => setActiveVertical(null)}
-          >
-            ← Back to Dashboard
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            {isMasterAdmin && (
+              <button 
+                className="halo-button header-back-dashboard-btn"
+                style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
+                onClick={() => {
+                  setEditingFlow(null);
+                  setIsFormOpen(true);
+                }}
+              >
+                <IconPlus size={16} /> Add Tutorial
+              </button>
+            )}
+            <button 
+              className="halo-button header-back-dashboard-btn"
+              onClick={() => setActiveVertical(null)}
+            >
+              ← Back to Dashboard
+            </button>
+          </div>
         }
       />
 
@@ -217,6 +275,20 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
                     >
                       {flow.accessLevel} Scope
                     </span>
+                    {isMasterAdmin && (
+                      <button
+                        className="halo-button secondary edit-tutorial-info-btn"
+                        style={{ minWidth: 'auto', padding: '4px 8px', height: '28px', display: 'inline-flex', alignItems: 'center', gap: '4px', zIndex: 5 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingFlow(flow);
+                          setIsFormOpen(true);
+                        }}
+                        title="Edit Title / Description"
+                      >
+                        <IconEdit size={12} />
+                      </button>
+                    )}
                     <span className="flow-indicator-icon">▶</span>
                   </div>
                   <h4 className="flow-card-title">{flow.title}</h4>
@@ -260,6 +332,16 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           user={user}
           permissions={permissions}
           onUpdate={loadRules}
+        />
+      )}
+
+      {isFormOpen && (
+        <TutorialFormModal
+          isOpen={isFormOpen}
+          onClose={() => setIsFormOpen(false)}
+          editingItem={editingFlow}
+          user={user}
+          onSave={loadRules}
         />
       )}
     </div>

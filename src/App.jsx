@@ -84,12 +84,32 @@ function AppShell({ verticals, verticalList }) {
   const rawOnboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
   const onboardingFlow = React.useMemo(() => {
     if (!rawOnboardingFlow) return null;
-    const overrideKey = `powerpod_tutorial_override_${rawOnboardingFlow.id}`;
-    const overridesStr = localStorage.getItem(overrideKey);
-    if (!overridesStr) return rawOnboardingFlow;
+    
+    // 1. Check for full array override (supports add/delete slides)
+    const arrayOverrideKey = `powerpod_tutorial_override_array_${rawOnboardingFlow.id}`;
+    const arrayOverrideStr = localStorage.getItem(arrayOverrideKey);
+    if (arrayOverrideStr) {
+      try {
+        const parsedArray = JSON.parse(arrayOverrideStr);
+        if (Array.isArray(parsedArray)) {
+          return {
+            ...rawOnboardingFlow,
+            desktopSlides: parsedArray,
+            mobileSlides: parsedArray
+          };
+        }
+      } catch (e) {
+        console.error('[AppShell] Array override parse failed for onboarding flow:', e);
+      }
+    }
+
+    // 2. Check for legacy index-based override
+    const legacyOverrideKey = `powerpod_tutorial_override_${rawOnboardingFlow.id}`;
+    const legacyOverrideStr = localStorage.getItem(legacyOverrideKey);
+    if (!legacyOverrideStr) return rawOnboardingFlow;
 
     try {
-      const overrides = JSON.parse(overridesStr);
+      const overrides = JSON.parse(legacyOverrideStr);
       const mapOverride = (slidesList) => slidesList.map((slide, idx) => {
         if (overrides[idx]) {
           return {
@@ -108,7 +128,7 @@ function AppShell({ verticals, verticalList }) {
         mobileSlides: mapOverride(rawOnboardingFlow.mobileSlides || [])
       };
     } catch (e) {
-      console.error('[AppShell] Override parse failed for onboarding flow:', e);
+      console.error('[AppShell] Legacy override parse failed for onboarding flow:', e);
       return rawOnboardingFlow;
     }
   }, [rawOnboardingFlow, showIntroTutorial]);
