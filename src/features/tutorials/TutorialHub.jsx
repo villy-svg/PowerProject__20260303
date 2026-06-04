@@ -9,7 +9,7 @@ export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
 
 /* ─── Parse Rule into Slides/Tutorial Pages ───────────────────── */
-const parseRuleSlides = (title, content = '') => {
+export const parseRuleSlides = (title, content = '') => {
   const trimmedContent = content.replace(/^\s*\n+|\n+\s*$/g, '');
   const lines = trimmedContent.split('\n').map(l => l.trim());
   const introLines = [];

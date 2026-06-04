@@ -30,7 +30,8 @@ import Login from './components/Login';
 import PendingActivation from './components/PendingActivation';
 import OnlineSyncBanner from './components/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
-import { TUTORIAL_FLOWS } from './features/tutorials/TutorialHub';
+import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
+import { fetchRules } from './services/employees/rulesService';
 
 
 // Assets
@@ -79,21 +80,38 @@ function AppShell({ verticals, verticalList }) {
   // Mounted here so it is active for the entire authenticated session.
   usePushNotifications({ user });
 
-  // Onboarding Slideshow Autoplay State
-  const [showIntroTutorial, setShowIntroTutorial] = useState(false);
+  // Onboarding Slideshow Autoplay State (Queue-based sequential player)
+  const [tutorialQueue, setTutorialQueue] = useState([]);
+  const [currentTutorialIndex, setCurrentTutorialIndex] = useState(-1);
+
   const rawOnboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
   const onboardingFlow = React.useMemo(() => {
     if (!rawOnboardingFlow) return null;
     
+    // Apply metadata overrides (title, description, category) from local storage
+    let flow = { ...rawOnboardingFlow };
+    const metaOverrideKey = `powerpod_tutorial_meta_override_${flow.id}`;
+    const metaOverrideStr = localStorage.getItem(metaOverrideKey);
+    if (metaOverrideStr) {
+      try {
+        const parsedMeta = JSON.parse(metaOverrideStr);
+        flow.title = parsedMeta.title ?? flow.title;
+        flow.description = parsedMeta.description ?? flow.description;
+        flow.category = parsedMeta.category ?? flow.category;
+      } catch (e) {
+        console.error('[AppShell] Meta override parse failed for onboarding:', e);
+      }
+    }
+
     // 1. Check for full array override (supports add/delete slides)
-    const arrayOverrideKey = `powerpod_tutorial_override_array_${rawOnboardingFlow.id}`;
+    const arrayOverrideKey = `powerpod_tutorial_override_array_${flow.id}`;
     const arrayOverrideStr = localStorage.getItem(arrayOverrideKey);
     if (arrayOverrideStr) {
       try {
         const parsedArray = JSON.parse(arrayOverrideStr);
         if (Array.isArray(parsedArray)) {
           return {
-            ...rawOnboardingFlow,
+            ...flow,
             desktopSlides: parsedArray,
             mobileSlides: parsedArray
           };
@@ -104,9 +122,9 @@ function AppShell({ verticals, verticalList }) {
     }
 
     // 2. Check for legacy index-based override
-    const legacyOverrideKey = `powerpod_tutorial_override_${rawOnboardingFlow.id}`;
+    const legacyOverrideKey = `powerpod_tutorial_override_${flow.id}`;
     const legacyOverrideStr = localStorage.getItem(legacyOverrideKey);
-    if (!legacyOverrideStr) return rawOnboardingFlow;
+    if (!legacyOverrideStr) return flow;
 
     try {
       const overrides = JSON.parse(legacyOverrideStr);
@@ -123,28 +141,94 @@ function AppShell({ verticals, verticalList }) {
       });
 
       return {
-        ...rawOnboardingFlow,
-        desktopSlides: mapOverride(rawOnboardingFlow.desktopSlides || []),
-        mobileSlides: mapOverride(rawOnboardingFlow.mobileSlides || [])
+        ...flow,
+        desktopSlides: mapOverride(flow.desktopSlides || []),
+        mobileSlides: mapOverride(flow.mobileSlides || [])
       };
     } catch (e) {
       console.error('[AppShell] Legacy override parse failed for onboarding flow:', e);
-      return rawOnboardingFlow;
+      return flow;
     }
-  }, [rawOnboardingFlow, showIntroTutorial]);
+  }, [rawOnboardingFlow]);
 
   useEffect(() => {
-    if (user && user.isActive !== false) {
-      const seen = localStorage.getItem(`intro_tutorial_seen_${APP_VERSION}`);
-      if (!seen) {
-        setShowIntroTutorial(true);
-      }
-    }
-  }, [user]);
+    const checkOnboarding = async () => {
+      if (user && user.isActive !== false) {
+        const seen = localStorage.getItem(`intro_tutorial_seen_${APP_VERSION}`);
+        if (!seen) {
+          try {
+            // Load rules to check for special condition tutorials
+            const rulesData = await fetchRules({ activeOnly: true });
+            const specialRules = rulesData.filter(rule => {
+              const catName = rule.category?.name?.toLowerCase() || '';
+              const title = rule.title?.toLowerCase() || '';
+              return catName.includes('special') || title.includes('customer vehicle') || title.includes('material');
+            });
 
-  const handleCloseIntro = () => {
-    localStorage.setItem(`intro_tutorial_seen_${APP_VERSION}`, 'true');
-    setShowIntroTutorial(false);
+            const queue = [];
+            if (onboardingFlow) {
+              queue.push(onboardingFlow);
+            }
+
+            specialRules.forEach(rule => {
+              const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
+              const flowSlides = parsedSlides.map((slide) => ({
+                image: '/powerpod-logo.svg',
+                fallbackImage: '/powerpod-logo.svg',
+                title: slide.isIntro ? rule.title : slide.title,
+                text: slide.text,
+                annotations: []
+              }));
+
+              queue.push({
+                id: `rule_${rule.id}`,
+                title: rule.title,
+                category: rule.category?.name || 'Rules & Regulations',
+                description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
+                accessLevel: 'All Users',
+                badgeColor: 'rgba(16, 185, 129, 0.1)',
+                badgeText: '#10b981',
+                layout: 'onboarding',
+                desktopSlides: flowSlides,
+                mobileSlides: flowSlides
+              });
+            });
+
+            if (queue.length > 0) {
+              setTutorialQueue(queue);
+              setCurrentTutorialIndex(0);
+            }
+          } catch (err) {
+            console.error('Error loading onboarding rules:', err);
+            if (onboardingFlow) {
+              setTutorialQueue([onboardingFlow]);
+              setCurrentTutorialIndex(0);
+            }
+          }
+        }
+      }
+    };
+    checkOnboarding();
+  }, [user, onboardingFlow]);
+
+  const handleCloseTutorial = (completed = false) => {
+    const activeTutorial = tutorialQueue[currentTutorialIndex];
+    const isSpecial = activeTutorial && activeTutorial.id !== 'customer_support';
+    const isMasterAdmin = user?.roleId === 'master_admin';
+
+    // Enforcement: do not allow skip unless completed or master admin
+    if (!completed && !isMasterAdmin && isSpecial) {
+      alert("You must complete this special conditions tutorial. Skipping is not allowed.");
+      return;
+    }
+
+    if (currentTutorialIndex < tutorialQueue.length - 1) {
+      setCurrentTutorialIndex(currentTutorialIndex + 1);
+    } else {
+      localStorage.setItem(`intro_tutorial_seen_${APP_VERSION}`, 'true');
+      setTutorialQueue([]);
+      setCurrentTutorialIndex(-1);
+    }
   };
 
   // SECURITY VALIDATION: Enforces vertical access based on RBAC rules.
@@ -245,13 +329,15 @@ function AppShell({ verticals, verticalList }) {
         />
       </LayoutShell>
 
-      {showIntroTutorial && onboardingFlow && (
+      {currentTutorialIndex >= 0 && tutorialQueue[currentTutorialIndex] && (
         <TutorialSlideshowViewer
-          flow={onboardingFlow}
+          flow={tutorialQueue[currentTutorialIndex]}
           platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
-          onClose={handleCloseIntro}
+          onClose={handleCloseTutorial}
           user={user}
           permissions={currentUserPermissions}
+          preventSkip={tutorialQueue[currentTutorialIndex].id !== 'customer_support' && user?.roleId !== 'master_admin'}
+          onlyFirstSlide={true}
         />
       )}
     </>

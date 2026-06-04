@@ -3,7 +3,7 @@ import { IconX, IconChevronLeft, IconChevronRight, IconPlus, IconEdit, IconTrash
 import { updateRule } from '../../services/employees/rulesService';
 import './TutorialSlideshowViewer.css';
 
-const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, onUpdate }) => {
+const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, onUpdate, preventSkip = false, onlyFirstSlide = false }) => {
   const [slideIndex, setSlideIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -11,16 +11,19 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const [saving, setSaving] = useState(false);
 
   const baseSlides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
-  const [editableSlides, setEditableSlides] = useState(baseSlides);
+  const [editableSlides, setEditableSlides] = useState(
+    onlyFirstSlide && baseSlides.length > 0 ? [baseSlides[0]] : baseSlides
+  );
   const currentSlide = editableSlides[slideIndex];
 
   // Reset local state if flow or platform changes externally
   useEffect(() => {
-    setEditableSlides(platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides);
-    if (slideIndex >= (platform === 'desktop' ? flow.desktopSlides.length : flow.mobileSlides.length)) {
+    const rawSlides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
+    setEditableSlides(onlyFirstSlide && rawSlides.length > 0 ? [rawSlides[0]] : rawSlides);
+    if (slideIndex >= (onlyFirstSlide && rawSlides.length > 0 ? 1 : rawSlides.length)) {
       setSlideIndex(0);
     }
-  }, [flow, platform]);
+  }, [flow, platform, onlyFirstSlide]);
 
   // Initialize edit form when slide or edit mode changes
   useEffect(() => {
@@ -198,7 +201,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             ) : (
               <div className="onboarding-back-placeholder" />
             )}
-            <button className="onboarding-skip-btn" onClick={() => onClose(false)}>Skip</button>
+            {!preventSkip && <button className="onboarding-skip-btn" onClick={() => onClose(false)}>Skip</button>}
           </div>
           
           <div className="onboarding-content-body">
@@ -289,9 +292,11 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             <span className="flow-category-label">{flow.category}</span>
             <h3 className="slideshow-flow-title">{flow.title}</h3>
           </div>
-          <button className="slideshow-close-btn" onClick={() => onClose(false)}>
-            <IconX size={20} />
-          </button>
+          {!preventSkip && (
+            <button className="slideshow-close-btn" onClick={() => onClose(false)}>
+              <IconX size={20} />
+            </button>
+          )}
         </div>
 
         {/* Core screenshot & annotations area */}
