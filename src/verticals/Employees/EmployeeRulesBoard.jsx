@@ -180,6 +180,7 @@ const EmployeeRulesBoard = ({
         permissions={permissions}
         verticals={verticals}
         activeVertical={activeVertical}
+        hideSearchBar={true}
       />
 
       <div className="rules-board-container">

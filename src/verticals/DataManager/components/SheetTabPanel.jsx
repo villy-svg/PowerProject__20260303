@@ -11,6 +11,7 @@
 
 import React from 'react';
 import DataGrid from './DataGrid';
+import { IconCopy } from '../../../components/Icons';
 
 // ─── Tab Switcher ─────────────────────────────────────────────────────────────
 const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
@@ -36,7 +37,7 @@ const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
             title={`Copy tab name "${tab}"`}
             className="halo-button dm-copy-btn"
           >
-            📋
+            <IconCopy size={16} />
           </button>
         </div>
       ))}

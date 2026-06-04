@@ -1,0 +1,157 @@
+.rule-mgmt-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+.rule-mgmt-tab {
+  padding: 0.5rem 1.25rem 0.65rem;
+  border: none;
+  background: none;
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  opacity: 0.45;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  font-family: 'Inter', system-ui, sans-serif;
+  position: relative;
+  top: 1px;
+}
+
+.rule-mgmt-tab:hover { opacity: 0.75; }
+
+.rule-mgmt-tab.active {
+  opacity: 1;
+  color: var(--brand-green);
+  border-bottom-color: var(--brand-green);
+}
+
+.rule-mgmt-content {
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+/* ── Rule Item Row (for rules table) */
+.rule-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+  background: rgba(255,255,255,0.02);
+  transition: all 0.2s ease;
+}
+
+.rule-item-row:hover {
+  border-color: color-mix(in srgb, var(--brand-green), transparent 70%);
+}
+
+.rule-item-row.inactive-rule {
+  opacity: 0.45;
+}
+
+.rule-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-item-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rule-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.rule-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* ── Toggle (.rule-toggle) and form feedback (.status-message) styles
+   are defined in ManagementForms.css and shared across all modals. */
+
+/* ── Section header */
+.rule-mgmt-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.rule-mgmt-section-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+  margin: 0;
+}
+
+/* ── Category filter for rules tab */
+.rule-cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.rule-cat-filter-btn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--halo-bg);
+  color: var(--text-color);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: all 0.2s ease;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.rule-cat-filter-btn:hover { opacity: 0.85; }
+
+.rule-cat-filter-btn.active {
+  opacity: 1;
+  color: var(--brand-green);
+  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+}
+
+@media screen and (max-width: 768px) {
+  .rule-mgmt-tabs { gap: 0; }
+  .rule-mgmt-tab { padding: 0.5rem 0.75rem; font-size: 0.72rem; }
+}
+
+/* ── .status-message styles moved to ManagementForms.css (shared) */
+
+/* ── Empty state for tab panels */
+.rule-empty-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  opacity: 0.5;
+  font-size: 0.88rem;
+}

@@ -308,3 +308,60 @@ select:-webkit-autofill:focus {
     font-size: 0.8rem;
   }
 }
+
+/* ─── Shared Status Message (used in all management form modals) ─── */
+.status-message {
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Inter', system-ui, sans-serif;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.status-message.success {
+  color: var(--brand-green);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 65%);
+  background: color-mix(in srgb, var(--brand-green), transparent 92%);
+}
+
+.status-message.error {
+  color: #ef4444;
+  border-color: color-mix(in srgb, #ef4444, transparent 65%);
+  background: color-mix(in srgb, #ef4444, transparent 92%);
+}
+
+/* ─── Shared Toggle Switch (used in RuleFormModal Active toggle) ─── */
+.rule-toggle {
+  width: 32px;
+  height: 18px;
+  background: var(--border-color);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.rule-toggle.on {
+  background: var(--brand-green);
+}
+
+.rule-toggle::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.2s ease;
+}
+
+.rule-toggle.on::after {
+  transform: translateX(14px);
+}

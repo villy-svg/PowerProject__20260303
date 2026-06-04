@@ -255,6 +255,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #ffffff;
+}
+
+.dm-copy-btn .standard-icon {
+  opacity: 0.9 !important;
+}
+
+.dm-copy-btn:hover .standard-icon {
+  opacity: 1 !important;
+  transform: scale(1.05);
 }
 
 /* ==========================================================================

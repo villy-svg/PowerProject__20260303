@@ -61,6 +61,28 @@ const sanitizeSpreadsheetData = (data, skip) => {
   });
 };
 
+const detectAutoCorrections = (raw, sanitized, skip) => {
+  const edits = {};
+  if (!raw || !sanitized || raw.length === 0) return edits;
+  
+  sanitized.forEach((row, rIdx) => {
+    if (rIdx <= skip || !Array.isArray(row)) return;
+    const rawRow = raw[rIdx];
+    if (!rawRow) return;
+    
+    row.forEach((cellVal, cIdx) => {
+      const rawVal = rawRow[cIdx];
+      if (cellVal !== rawVal && rawVal !== undefined && rawVal !== null) {
+        if (!edits[rIdx]) {
+          edits[rIdx] = {};
+        }
+        edits[rIdx][cIdx] = cellVal;
+      }
+    });
+  });
+  return edits;
+};
+
 export const useDataManager = () => {
   // ── Spreadsheet Source ───────────────────────────────────────────────────
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
@@ -120,7 +142,7 @@ export const useDataManager = () => {
   /** Reset checker/edit state whenever the active tab changes */
   useEffect(() => {
     setValidationErrors({});
-    setEditedCells({});
+    // Resetting of user edits is now managed inside tab loading handlers to support auto-corrections on load
     setShowErrorsOnly(false);
     setSyncSuccess(null);
     setCheckerRun(false);
@@ -145,6 +167,7 @@ export const useDataManager = () => {
     setPreviewData(null);
     setTabs([]);
     setActiveTab('');
+    setEditedCells({});
 
     try {
       if (!sheetId) {
@@ -172,6 +195,9 @@ export const useDataManager = () => {
 
       const sanitized = sanitizeSpreadsheetData(data, estimatedSkip);
       setPreviewData(sanitized);
+
+      const autoEdits = detectAutoCorrections(data, sanitized, estimatedSkip);
+      setEditedCells(autoEdits);
     } catch (err) {
       console.error('[DataManager] Load error:', err);
       setError(err.message || 'Failed to connect to Google Sheet. Check permissions and Service Account access.');
@@ -186,6 +212,7 @@ export const useDataManager = () => {
     setTabLoading(true);
     setError(null);
     setActiveTab(tabName);
+    setEditedCells({});
 
     try {
       // FORMULA rendering keeps raw formulae visible for inspection
@@ -197,6 +224,9 @@ export const useDataManager = () => {
 
       const sanitized = sanitizeSpreadsheetData(data, estimatedSkip);
       setPreviewData(sanitized);
+
+      const autoEdits = detectAutoCorrections(data, sanitized, estimatedSkip);
+      setEditedCells(autoEdits);
     } catch (err) {
       console.error('[DataManager] Tab read error:', err);
       setError(`Failed to read tab "${tabName}": ${err.message}`);

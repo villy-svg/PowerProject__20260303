@@ -43,6 +43,7 @@ const DesktopHeader = ({
   searchRecords,
   recordType,
   onSearchSelect,
+  hideSearchBar,
 }) => {
   const hasExpandedContent = !!(expandedLeft || expandedRight);
 
@@ -61,12 +62,14 @@ const DesktopHeader = ({
       )}
 
       {/* Row 2.5: Search Bar — task-scoped or records-mode */}
-      <SearchBar
-        context="board"
-        records={searchRecords}
-        recordType={recordType}
-        onSelect={onSearchSelect}
-      />
+      {!hideSearchBar && (
+        <SearchBar
+          context="board"
+          records={searchRecords}
+          recordType={recordType}
+          onSelect={onSearchSelect}
+        />
+      )}
 
       {/* Row 3: Actions */}
       <div className="header-actions-area">

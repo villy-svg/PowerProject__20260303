@@ -52,6 +52,7 @@ const MasterPageHeader = ({
   searchRecords,
   recordType,
   onSearchSelect,
+  hideSearchBar,
 }) => {
   const { shellType } = useLayoutShell();
   
@@ -84,6 +85,7 @@ const MasterPageHeader = ({
         searchRecords={searchRecords}
         recordType={recordType}
         onSearchSelect={onSearchSelect}
+        hideSearchBar={hideSearchBar}
       />
     );
   }
