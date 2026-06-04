@@ -125,11 +125,12 @@ export const validateRow = (row, headers, context = {}) => {
       }
     }
 
-    // Rule: SoC Range [0, 100]
+    // Rule: SoC Range [0%, 100%]
     if (headerLower.includes('soc')) {
-      const num = parseFloat(strVal);
+      const cleanVal = strVal.endsWith('%') ? strVal.slice(0, -1) : strVal;
+      const num = parseFloat(cleanVal);
       if (isNaN(num) || num < 0 || num > 100) {
-        errors[colIdx] = { message: 'SoC must be between 0 and 100.' };
+        errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
       }
     }
 
