@@ -35,9 +35,6 @@ const MobileSidebar = ({
   const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
 
   const filteredVerticals = verticalList.filter(vertical => {
-    if (vertical.id === 'DATA_MANAGER') {
-      return user?.roleId === 'master_admin';
-    }
     const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
     const isLocked = vertical.locked || !isAssigned;
     if (isHydrating) return vertical.locked;

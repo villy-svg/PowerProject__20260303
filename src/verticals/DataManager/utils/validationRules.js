@@ -126,32 +126,67 @@ export const validateRow = (row, headers, context = {}) => {
     }
 
     // Rule: SoC Range [0%, 100%]
+    // Handles three cases:
+    //   1. Decimal fraction without %, e.g. "0.52"  → likely 52%  → suggest "52%"
+    //   2. Decimal fraction WITH %, e.g. "0.52%"    → likely 52%  → suggest "52%"
+    //   3. Plain percentage number without %, e.g. "52" → suggest "52%"
     if (headerLower.includes('soc')) {
       if (!strVal.endsWith('%')) {
         const num = parseFloat(strVal);
-        if (!isNaN(num) && num >= 0 && num <= 100) {
+        if (isNaN(num)) {
+          // Non-numeric value in SoC column
+          errors[colIdx] = { message: 'SoC must be a number between 0% and 100%.' };
+        } else if (num > 0 && num <= 1) {
+          // Almost certainly a decimal fraction (0.52 → 52%)
+          const converted = Math.round(num * 100);
+          errors[colIdx] = {
+            message: `SoC appears to be a decimal fraction (${strVal}). Click to convert to ${converted}%.`,
+            isSoCFormatAnomaly: true,
+            suggestedValue: `${converted}%`
+          };
+        } else if (num >= 0 && num <= 100) {
+          // Valid numeric value, just missing the % symbol
           errors[colIdx] = {
             message: `SoC must end with % symbol. Click to format to ${strVal}%.`,
             isSoCFormatAnomaly: true,
             suggestedValue: `${strVal}%`
           };
         } else {
-          errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
+          // Out-of-range value
+          errors[colIdx] = { message: `SoC value (${strVal}) is out of range. Must be between 0% and 100%.` };
         }
       } else {
+        // Has % suffix — strip it and validate the numeric part
         const cleanVal = strVal.slice(0, -1);
         const num = parseFloat(cleanVal);
-        if (isNaN(num) || num < 0 || num > 100) {
-          errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
+        if (isNaN(num)) {
+          errors[colIdx] = { message: 'SoC must be a valid number ending with %.' };
+        } else if (num > 0 && num <= 1) {
+          // Stored as "0.52%" — almost certainly means 52%
+          const converted = Math.round(num * 100);
+          errors[colIdx] = {
+            message: `SoC appears to be a decimal fraction (${strVal}). Click to convert to ${converted}%.`,
+            isSoCFormatAnomaly: true,
+            suggestedValue: `${converted}%`
+          };
+        } else if (num < 0 || num > 100) {
+          errors[colIdx] = { message: `SoC value (${strVal}) is out of range. Must be between 0% and 100%.` };
         }
+        // num === 0 is valid (fully depleted), and 1 < num <= 100 is a valid percentage — no error
       }
     }
 
     // Rule: Positive Numbers for consumed units & battery size
+    // Zero is technically valid for battery size, but suspicious for energy consumed — flag it.
     if (headerLower.includes('units consumed') || headerLower.includes('battery size')) {
       const num = parseFloat(strVal);
-      if (isNaN(num) || num < 0) {
-        errors[colIdx] = { message: 'Must be positive.' };
+      if (isNaN(num)) {
+        errors[colIdx] = { message: `${header} must be a valid number.` };
+      } else if (num < 0) {
+        errors[colIdx] = { message: `${header} cannot be negative (got ${strVal}).` };
+      } else if (num === 0 && headerLower.includes('units consumed')) {
+        // Zero energy consumed is suspicious — likely a missing or erroneous entry
+        errors[colIdx] = { message: 'Units consumed is 0 — verify this is intentional.' };
       }
     }
   });
