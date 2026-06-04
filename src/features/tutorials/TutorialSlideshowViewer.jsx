@@ -270,7 +270,9 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
               disabled={isEditing}
               style={{ '--stage-accent': 'var(--brand-green)' }}
             >
-              {slideIndex === editableSlides.length - 1 ? 'Get Started' : 'Next'}
+              {slideIndex === editableSlides.length - 1 
+                ? (flow.id?.startsWith('rule_') ? 'Finish' : 'Get Started') 
+                : 'Next'}
             </button>
           </div>
         </div>
