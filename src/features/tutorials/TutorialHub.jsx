@@ -310,7 +310,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
                     {isMasterAdmin && (
                       <button
                         className="halo-button secondary edit-tutorial-info-btn"
-                        style={{ minWidth: 'auto', padding: '4px 8px', height: '28px', display: 'inline-flex', alignItems: 'center', gap: '4px', zIndex: 5 }}
+                        style={{ minWidth: 'auto', width: '32px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingFlow(flow);

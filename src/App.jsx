@@ -152,6 +152,21 @@ function AppShell({ verticals, verticalList }) {
   }, [rawOnboardingFlow]);
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isCtrlShiftR = e.ctrlKey && e.shiftKey && (e.key === 'R' || e.key === 'r' || e.keyCode === 82);
+      const isCtrlF5 = e.ctrlKey && (e.key === 'F5' || e.keyCode === 116);
+      if (isCtrlShiftR || isCtrlF5) {
+        console.log('[App] Hard reload detected via keypress. Clearing intro tutorial seen flag...');
+        localStorage.removeItem(`intro_tutorial_seen_${APP_VERSION}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, { capture: true });
+    };
+  }, []);
+
+  useEffect(() => {
     const checkOnboarding = async () => {
       if (user && user.isActive !== false) {
         const seen = localStorage.getItem(`intro_tutorial_seen_${APP_VERSION}`);
