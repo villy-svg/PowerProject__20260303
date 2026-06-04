@@ -202,16 +202,21 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
           </div>
           
           <div className="onboarding-content-body">
-            <div className="onboarding-image-container">
-               <img 
-                 src={currentSlide.image} 
-                 alt={currentSlide.title} 
-                 className="onboarding-image"
-                 onError={(e) => {
-                   e.target.src = currentSlide.fallbackImage || currentSlide.image;
-                 }}
-               />
-            </div>
+            {(() => {
+              const isLogo = currentSlide.image?.endsWith('powerpod-logo.svg') || currentSlide.image?.endsWith('logo.svg');
+              return (
+                <div className={`onboarding-image-container ${isLogo ? 'logo-container' : ''}`}>
+                   <img 
+                     src={currentSlide.image} 
+                     alt={currentSlide.title} 
+                     className={`onboarding-image ${isLogo ? 'logo-image' : ''}`}
+                     onError={(e) => {
+                       e.target.src = currentSlide.fallbackImage || currentSlide.image;
+                     }}
+                   />
+                </div>
+              );
+            })()}
             
             {isEditing ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>

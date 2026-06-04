@@ -156,6 +156,7 @@
   opacity: 0.55;
   margin: 0 0 20px 0;
   flex: 1;
+  white-space: pre-wrap;
 }
 
 .flow-card-footer {
@@ -711,6 +712,17 @@
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+}
+
+.onboarding-image-container.logo-container {
+  max-width: 80px;
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+.onboarding-image.logo-image {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .onboarding-title {
