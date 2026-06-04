@@ -34,23 +34,7 @@ const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
               navigator.clipboard.writeText(tab);
             }}
             title={`Copy tab name "${tab}"`}
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              color: 'var(--brand-mint)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '6px',
-              padding: '6px 8px',
-              cursor: 'pointer',
-              fontSize: '11px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              height: '34px',
-              outline: 'none'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+            className="halo-button dm-copy-btn"
           >
             📋
           </button>

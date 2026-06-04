@@ -2,15 +2,15 @@ import React from 'react';
 
 const SheetsMapping = ({ tabSettings, onSettingChange }) => {
   return (
-    <div style={{ background: 'var(--panel-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px' }}>
+    <div className="dm-card">
       <div style={{ marginBottom: '20px' }}>
-        <h3 style={{ color: 'var(--brand-mint)', margin: 0 }}>Configure Sheets Mapping</h3>
-        <p style={{ color: 'var(--text-color)', opacity: 0.6, fontSize: '13px', margin: '4px 0 0' }}>
+        <h3 className="dm-card__title">Configure Sheets Mapping</h3>
+        <p className="dm-card__description">
           Define the specific tab mappings for validation and historical storage.
         </p>
       </div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="form-row-grid">
         <div className="form-group">
           <label>Current Data Tab Name</label>
           <div className="form-input-container">
