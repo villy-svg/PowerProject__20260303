@@ -216,16 +216,6 @@ const ContentRouter = ({
     );
   }
 
-  if (activeVertical === 'employee_rules_board') {
-    return (
-      <EmployeeRulesBoard
-        user={user}
-        permissions={permissions}
-        setActiveVertical={setActiveVertical}
-        onShowBottomNav={onShowBottomNav}
-      />
-    );
-  }
 
   if (activeVertical === 'tutorial') {
     return (
@@ -268,6 +258,14 @@ const ContentRouter = ({
     >
       {activeVertical === verticals.EMPLOYEES?.id && (
         <EmployeeManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} />
+      )}
+      {activeVertical === 'employee_rules_board' && (
+        <EmployeeRulesBoard
+          user={user}
+          permissions={permissions}
+          setActiveVertical={setActiveVertical}
+          onShowBottomNav={onShowBottomNav}
+        />
       )}
       {activeVertical === verticals.CLIENTS?.id && (
         <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />

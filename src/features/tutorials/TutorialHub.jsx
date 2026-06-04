@@ -1,16 +1,111 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import { TUTORIAL_FLOWS } from './flows';
+import { fetchRules } from '../../services/employees/rulesService';
 export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
+
+/* ─── Parse Rule into Slides/Tutorial Pages ───────────────────── */
+const parseRuleSlides = (title, content = '') => {
+  const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+  const introLines = [];
+  const bullets = [];
+
+  lines.forEach(line => {
+    const isBullet = /^[•\*\-\u2022]/.test(line) || /^\d+[\.\)]/.test(line);
+    if (isBullet) {
+      const cleaned = line.replace(/^[•\*\-\u2022\s\d+\.\)]+/, '').trim();
+      if (cleaned) {
+        bullets.push(cleaned);
+      }
+    } else {
+      if (bullets.length === 0) {
+        introLines.push(line);
+      } else {
+        bullets[bullets.length - 1] += '\n' + line;
+      }
+    }
+  });
+
+  const slides = [];
+  
+  slides.push({
+    title: title,
+    text: introLines.join('\n') || 'This tutorial covers the details of the policy.',
+    isIntro: true
+  });
+
+  bullets.forEach((bullet, index) => {
+    slides.push({
+      title: `Point ${index + 1} of ${bullets.length}`,
+      text: bullet,
+      isIntro: false
+    });
+  });
+
+  if (slides.length === 1 && content && introLines.join('\n') !== content) {
+    const paragraphs = content.split('\n\n').map(p => p.trim()).filter(Boolean);
+    if (paragraphs.length > 1) {
+      paragraphs.forEach((p, idx) => {
+        if (idx === 0) {
+          slides[0].text = p;
+        } else {
+          slides.push({
+            title: `Detail ${idx + 1}`,
+            text: p,
+            isIntro: false
+          });
+        }
+      });
+    }
+  }
+
+  return slides;
+};
 
 const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
   const [platform, setPlatform] = useState('desktop'); // 'desktop' | 'mobile'
   const [activeFlow, setActiveFlow] = useState(null);
+  const [ruleFlows, setRuleFlows] = useState([]);
 
-  // Group flows by category
-  const categories = Array.from(new Set(TUTORIAL_FLOWS.map(f => f.category)));
+  useEffect(() => {
+    const loadRules = async () => {
+      try {
+        const rulesData = await fetchRules({ activeOnly: true });
+        const generated = rulesData.map(rule => {
+          const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
+          const flowSlides = parsedSlides.map((slide) => ({
+            image: '/powerpod-logo.svg',
+            fallbackImage: '/powerpod-logo.svg',
+            title: slide.isIntro ? rule.title : slide.title,
+            text: slide.text,
+            annotations: []
+          }));
+
+          return {
+            id: `rule_${rule.id}`,
+            title: rule.title,
+            category: rule.category?.name || 'Rules & Regulations',
+            description: `Interactive guidelines detailing ${rule.title}.`,
+            accessLevel: 'All Users',
+            badgeColor: 'rgba(16, 185, 129, 0.1)',
+            badgeText: '#10b981',
+            layout: 'onboarding',
+            desktopSlides: flowSlides,
+            mobileSlides: flowSlides
+          };
+        });
+        setRuleFlows(generated);
+      } catch (err) {
+        console.error('[TutorialHub] Error loading rules tutorials:', err);
+      }
+    };
+    loadRules();
+  }, []);
+
+  const allFlows = useMemo(() => [...TUTORIAL_FLOWS, ...ruleFlows], [ruleFlows]);
+  const categories = useMemo(() => Array.from(new Set(allFlows.map(f => f.category))), [allFlows]);
 
   return (
     <div className="management-view-container tutorial-hub-page">
@@ -53,7 +148,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           <div key={category} className="tutorial-category-section">
             <h3 className="category-section-title">{category}</h3>
             <div className="category-flows-grid">
-              {TUTORIAL_FLOWS.filter(f => f.category === category).map(flow => (
+              {allFlows.filter(f => f.category === category).map(flow => (
                 <div 
                   key={flow.id} 
                   className="tutorial-flow-card"

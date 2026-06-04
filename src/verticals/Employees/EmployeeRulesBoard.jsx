@@ -1,16 +1,52 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { fetchCategories, fetchSubCategories, fetchRules } from '../../services/employees/rulesService';
-import CustomerVehicleRule from '../../features/tutorials/CustomerVehicleRule';
 import './EmployeeRulesBoard.css';
 
-/**
- * EmployeeRulesBoard
- *
- * Public-facing, read-only display of all employee rules & regulations.
- * Renders rules grouped by category → sub-category.
- * Features: keyword search, category filter pills, expandable rule cards.
- */
+/* ─── Static Rule Tile Component ────────────────────────────── */
+const RuleCard = ({ rule }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const content = rule.content || '';
+  const isLongContent = content.length > 200;
+
+  return (
+    <div className="rule-card">
+      <div className="rule-card-header">
+        <h4 className="rule-card-title">{rule.title}</h4>
+      </div>
+
+      <div className="rule-card-badges">
+        {rule.sub_category?.name && (
+          <span className="rule-badge">{rule.sub_category.name}</span>
+        )}
+      </div>
+
+      <div className={`rule-card-content ${!isExpanded && isLongContent ? 'collapsed' : ''}`}>
+        {content}
+      </div>
+
+      {isLongContent && (
+        <button 
+          className="rule-expand-btn" 
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? 'Show Less' : 'Read More'}
+        </button>
+      )}
+
+      {rule.drive_url && (
+        <a
+          href={rule.drive_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rule-drive-link"
+        >
+          📄 View Full Document ↗
+        </a>
+      )}
+    </div>
+  );
+};
 
 /* ─── Main Board ─────────────────────────────────────────────── */
 const EmployeeRulesBoard = ({
@@ -232,7 +268,7 @@ const EmployeeRulesBoard = ({
                   </p>
                   <div className="rules-grid">
                     {subRules.map(rule => (
-                      <CustomerVehicleRule key={rule.id} rule={rule} />
+                      <RuleCard key={rule.id} rule={rule} />
                     ))}
                   </div>
                 </div>
@@ -242,7 +278,7 @@ const EmployeeRulesBoard = ({
               {ungrouped.length > 0 && (
                 <div className="rules-grid">
                   {ungrouped.map(rule => (
-                    <CustomerVehicleRule key={rule.id} rule={rule} />
+                    <RuleCard key={rule.id} rule={rule} />
                   ))}
                 </div>
               )}
