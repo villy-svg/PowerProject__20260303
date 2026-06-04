@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import { TUTORIAL_FLOWS } from './flows';
