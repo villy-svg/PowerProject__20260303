@@ -190,7 +190,7 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
                         <span className="rule-badge">{catName}</span>
                         {subName && <span className="rule-badge">{subName}</span>}
                         {rule.impact && (
-                          <span className="rule-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                          <span className="rule-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', whiteSpace: 'pre-wrap' }}>
                             Impact: {rule.impact}
                           </span>
                         )}

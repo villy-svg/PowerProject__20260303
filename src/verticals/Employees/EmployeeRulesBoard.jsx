@@ -11,18 +11,18 @@ const RuleCard = ({ rule }) => {
 
   return (
     <div className="rule-card">
-      <div className="rule-card-header">
+      <div className="rule-card-header" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
         <h4 className="rule-card-title">{rule.title}</h4>
+        {rule.impact && (
+          <div className="rule-card-subtitle" style={{ whiteSpace: 'pre-wrap', marginTop: '6px', fontSize: '0.8rem', color: '#ef4444', fontWeight: '600', opacity: 0.9 }}>
+            {rule.impact}
+          </div>
+        )}
       </div>
 
       <div className="rule-card-badges">
         {rule.sub_category?.name && (
           <span className="rule-badge">{rule.sub_category.name}</span>
-        )}
-        {rule.impact && (
-          <span className="rule-badge rule-impact-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-            ⚠️ Impact: {rule.impact}
-          </span>
         )}
       </div>
 
