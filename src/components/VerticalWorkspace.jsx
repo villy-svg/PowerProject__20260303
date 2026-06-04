@@ -118,7 +118,7 @@ const VerticalWorkspace = ({
   
   const rootVerticalId = resolveVerticalRootId(activeVertical, verticals);
 
-  const isFeatureView = (activeVertical || '').includes('_') && activeVertical !== verticals.CHARGING_HUBS?.id;
+  const isFeatureView = (activeVertical || '').includes('_') && !verticals[activeVertical] && activeVertical !== 'DATA_MANAGER' && activeVertical !== verticals.CHARGING_HUBS?.id;
   const featureBaseName = (activeVertical || '').split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
   const featureAccessFlag = `canAccess${featureBaseName}`;
 

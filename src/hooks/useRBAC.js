@@ -80,7 +80,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     
     // 2. Determine the active feature name (if any) to set the board's effective base level
     // This allows a "Contributor" on a specific board to be treated as a Contributor globally within that view.
-    const isFeatureView = current.includes('_') && current !== verticals.CHARGING_HUBS?.id;
+    const isFeatureView = current.includes('_') && !verticals[current] && current !== 'DATA_MANAGER' && current !== verticals.CHARGING_HUBS?.id;
     let activeFeatureLevel = verticalLevel; // Default to vertical level
     
     if (isFeatureView || current === verticals.CHARGING_HUBS?.id) {

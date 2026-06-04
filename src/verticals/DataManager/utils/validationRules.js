@@ -32,6 +32,7 @@ export const validateRow = (row, headers, context = {}) => {
     // Ignore extra/unnecessary columns that are not part of our core dataset
     const isCore = 
       headerLower.includes('date') ||
+      headerLower.includes('month') ||
       headerLower.includes('plate') ||
       headerLower.includes('vehicle') ||
       headerLower.includes('soc') ||
@@ -41,12 +42,16 @@ export const validateRow = (row, headers, context = {}) => {
     if (!isCore) return;
 
     // Evaluate formula if present before validating
-    if (typeof value === 'string' && value.startsWith('=')) {
+    const isOriginalFormula = typeof value === 'string' && value.startsWith('=');
+    if (isOriginalFormula) {
       value = evaluateFormula(value, row, headers, colIdx);
     }
 
     // Flag empty cells in a partially filled row
     if (value === undefined || value === null || String(value).trim() === '') {
+      if (headerLower.includes('units consumed') && isOriginalFormula) {
+        return; // Allow empty/null if it came from a formula evaluation
+      }
       errors[colIdx] = { message: `${header} cannot be empty.` };
       return;
     }
@@ -60,7 +65,7 @@ export const validateRow = (row, headers, context = {}) => {
     }
 
     // Rule: Date validation
-    if (headerLower.includes('date')) {
+    if (headerLower.includes('date') || headerLower.includes('month')) {
       let date = new Date(strVal);
       let isExcelDate = false;
       
@@ -185,8 +190,9 @@ export const validateRow = (row, headers, context = {}) => {
       } else if (num < 0) {
         errors[colIdx] = { message: `${header} cannot be negative (got ${strVal}).` };
       } else if (num === 0 && headerLower.includes('units consumed')) {
-        // Zero energy consumed is suspicious — likely a missing or erroneous entry
-        errors[colIdx] = { message: 'Units consumed is 0 — verify this is intentional.' };
+        if (!isOriginalFormula) {
+          errors[colIdx] = { message: 'Units consumed is 0 — verify this is intentional.' };
+        }
       }
     }
   });
@@ -205,11 +211,20 @@ export const validateSheet = (rows, headers, context = {}, skip = 0) => {
   let yearCounts = {};
   
   headers.forEach((header, colIdx) => {
-    if ((header || '').toLowerCase().trim().includes('date')) {
+    const headerLower = (header || '').toLowerCase().trim();
+    if (headerLower.includes('date') || headerLower.includes('month')) {
       rows.forEach(row => {
         const val = row[colIdx];
         if (val && !String(val).startsWith('=')) {
-          const date = new Date(val);
+          const strVal = String(val).trim();
+          let date = new Date(strVal);
+          
+          const numVal = parseInt(strVal, 10);
+          if (/^\d+$/.test(strVal) && numVal > 30000 && numVal < 70000) {
+            const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+            date = new Date(excelEpoch.getTime() + numVal * 24 * 60 * 60 * 1000);
+          }
+
           if (!isNaN(date.getTime())) {
             const m = date.getMonth();
             const y = date.getFullYear();
@@ -257,6 +272,7 @@ export const validateSheet = (rows, headers, context = {}, skip = 0) => {
       const headerLower = (header || '').toLowerCase().trim();
       const isCore = 
         headerLower.includes('date') ||
+        headerLower.includes('month') ||
         headerLower.includes('plate') ||
         headerLower.includes('vehicle') ||
         headerLower.includes('soc') ||
