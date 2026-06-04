@@ -135,7 +135,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
               style={{ opacity: activeVertical === 'employee_rules_board' ? 1 : 0.7 }}
               onClick={() => setActiveVertical('employee_rules_board')}
             >
-              📋 Rules & Regulations
+              Rules & Regulations
             </button>
           </div>
 

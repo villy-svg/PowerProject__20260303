@@ -179,6 +179,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           )
         }
         canAdd={permissions.canCreateEmployees}
+        addLabel="Add Employee"
         onAddClick={ui.openAddModal}
         expandedLeft={
           <>

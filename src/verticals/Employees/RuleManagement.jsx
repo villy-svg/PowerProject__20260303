@@ -785,6 +785,17 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
              '+ New Sub-Category'}
           </button>
         }
+        canAdd={true}
+        addLabel={
+          activeTab === 'rules' ? 'New Rule' :
+          activeTab === 'categories' ? 'New Category' :
+          'New Sub-Category'
+        }
+        onAddClick={() => {
+          if (activeTab === 'rules') setRuleModal({ open: true, item: null });
+          else if (activeTab === 'categories') setCatModal({ open: true, item: null });
+          else setSubModal({ open: true, item: null });
+        }}
       />
 
       <div className="rule-mgmt-content">

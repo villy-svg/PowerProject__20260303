@@ -113,6 +113,9 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
             </button>
           )
         }
+        canAdd={permissions.canCreate}
+        addLabel="New Department"
+        onAddClick={() => handleOpenModal()}
         expandedLeft={
           <div className="view-mode-toggle">
             <button 

@@ -42,6 +42,7 @@ const MobileHeader = ({
   onSidebarToggle,
   canAdd,
   onAddClick,
+  addLabel,
   isTaskModalOpen,
   onShowBottomNav,
   hideMenuClose,
@@ -239,7 +240,7 @@ const MobileHeader = ({
             >
               <span className="option-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
                 <IconPlus size={16} style={{ color: 'var(--brand-green)' }} />
-                Create New Task
+                {addLabel || 'Create New Task'}
               </span>
             </button>
 

@@ -29,6 +29,7 @@ const MasterPageHeader = ({
   onSidebarToggle,
   canAdd,
   onAddClick,
+  addLabel,
   isTaskModalOpen,
   onShowBottomNav,
   onTrayVisibilityChange,
@@ -101,6 +102,7 @@ const MasterPageHeader = ({
       onSidebarToggle={onSidebarToggle}
       canAdd={canAdd}
       onAddClick={onAddClick}
+      addLabel={addLabel}
       isTaskModalOpen={isTaskModalOpen}
       onShowBottomNav={onShowBottomNav}
       hideMenuClose={hideMenuClose}

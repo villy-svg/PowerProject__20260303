@@ -115,6 +115,9 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
             </button>
           )
         }
+        canAdd={permissions.canCreate}
+        addLabel="New Role"
+        onAddClick={() => handleOpenModal()}
         expandedLeft={
           <div className="view-mode-toggle">
             <button 
