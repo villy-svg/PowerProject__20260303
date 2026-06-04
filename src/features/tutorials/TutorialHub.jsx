@@ -11,20 +11,28 @@ const parseRuleSlides = (title, content = '') => {
   const trimmedContent = content.replace(/^\s*\n+|\n+\s*$/g, '');
   const lines = trimmedContent.split('\n').map(l => l.trim());
   const introLines = [];
-  const bullets = [];
+  const bullets = []; // Array of { title: string | null, text: string }
 
   lines.forEach(line => {
     const isBullet = /^[•\*\-\u2022]/.test(line) || /^\d+[\.\)]/.test(line);
     if (isBullet) {
-      const cleaned = line.replace(/^[•\*\-\u2022\s\d+\.\)]+/, '').trim();
-      if (cleaned) {
-        bullets.push(cleaned);
+      let cleaned = line.replace(/^[•\*\-\u2022\s\d+\.\)]+/, '').trim();
+      let bulletTitle = null;
+      if (cleaned.startsWith('### ')) {
+        bulletTitle = cleaned.substring(4).trim();
+        cleaned = '';
       }
+      bullets.push({ title: bulletTitle, text: cleaned });
     } else {
       if (bullets.length === 0) {
         introLines.push(line);
       } else {
-        bullets[bullets.length - 1] += '\n' + line;
+        let lastBullet = bullets[bullets.length - 1];
+        if (lastBullet.text === '') {
+          lastBullet.text = line;
+        } else {
+          lastBullet.text += '\n' + line;
+        }
       }
     }
   });
@@ -39,8 +47,8 @@ const parseRuleSlides = (title, content = '') => {
 
   bullets.forEach((bullet, index) => {
     slides.push({
-      title: `Point ${index + 1} of ${bullets.length}`,
-      text: bullet,
+      title: bullet.title || `Point ${index + 1} of ${bullets.length}`,
+      text: bullet.text,
       isIntro: false
     });
   });

@@ -55,8 +55,13 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
 
         const newTitle = updatedSlides[0].title;
         const introText = updatedSlides[0].text;
-        const bulletTexts = updatedSlides.slice(1).map(s => s.text);
-        const bulletContent = bulletTexts.map((text, idx) => `${idx + 1}. ${text}`).join('\n');
+        const bulletContent = updatedSlides.slice(1).map((s, idx) => {
+          const isCustomTitle = s.title && s.title !== `Point ${idx + 1} of ${updatedSlides.length - 1}`;
+          if (isCustomTitle) {
+            return `${idx + 1}. ### ${s.title}\n${s.text}`;
+          }
+          return `${idx + 1}. ${s.text}`;
+        }).join('\n');
         const newContent = [introText, bulletContent].filter(Boolean).join('\n');
 
         await updateRule(ruleId, {
@@ -139,7 +144,6 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   value={editTitle} 
                   onChange={e => setEditTitle(e.target.value)} 
                   placeholder="Slide Title"
-                  disabled={flow.id.startsWith('rule_') && slideIndex > 0}
                   style={{ 
                     width: '100%', 
                     padding: '0.5rem', 
@@ -148,8 +152,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                     borderRadius: '4px', 
                     color: '#fff', 
                     fontSize: '1.1rem', 
-                    fontWeight: 'bold',
-                    opacity: (flow.id.startsWith('rule_') && slideIndex > 0) ? 0.5 : 1
+                    fontWeight: 'bold'
                   }}
                 />
                 <textarea 
@@ -334,7 +337,6 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   value={editTitle} 
                   onChange={e => setEditTitle(e.target.value)} 
                   placeholder="Slide Title"
-                  disabled={flow.id.startsWith('rule_') && slideIndex > 0}
                   style={{ 
                     width: '100%', 
                     padding: '0.4rem', 
@@ -343,8 +345,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                     borderRadius: '4px', 
                     color: '#fff', 
                     fontSize: '0.95rem', 
-                    fontWeight: 'bold',
-                    opacity: (flow.id.startsWith('rule_') && slideIndex > 0) ? 0.5 : 1
+                    fontWeight: 'bold'
                   }}
                 />
                 <textarea 
