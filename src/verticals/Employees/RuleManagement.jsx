@@ -191,6 +191,11 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
                       <div className="rule-item-meta">
                         <span className="rule-badge">{catName}</span>
                         {subName && <span className="rule-badge">{subName}</span>}
+                        {rule.impact && (
+                          <span className="rule-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                            Impact: {rule.impact}
+                          </span>
+                        )}
                         {rule.effective_date && (
                           <span className="rule-badge date-badge">
                             Eff: {new Date(rule.effective_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}

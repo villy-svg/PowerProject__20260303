@@ -8,6 +8,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
     category_id: '',
     sub_category_id: '',
     title: '',
+    impact: '',
     content: '',
     drive_url: '',
     effective_date: '',
@@ -29,6 +30,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
           category_id: editingItem.category_id || '',
           sub_category_id: editingItem.sub_category_id || '',
           title: editingItem.title || '',
+          impact: editingItem.impact || '',
           content: editingItem.content || '',
           drive_url: editingItem.drive_url || '',
           effective_date: editingItem.effective_date || '',
@@ -51,6 +53,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
             category_id: categories[0]?.id || '',
             sub_category_id: '',
             title: '',
+            impact: '',
             content: '',
             drive_url: '',
             effective_date: '',
@@ -66,7 +69,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
 
   // Save draft to localStorage on change if not editing
   useEffect(() => {
-    if (!editingItem && isOpen && (form.title || form.content || form.drive_url)) {
+    if (!editingItem && isOpen && (form.title || form.impact || form.content || form.drive_url)) {
       localStorage.setItem('rule_form_draft', JSON.stringify(form));
     }
   }, [form, editingItem, isOpen]);
@@ -77,6 +80,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
       category_id: categories[0]?.id || '',
       sub_category_id: '',
       title: '',
+      impact: '',
       content: '',
       drive_url: '',
       effective_date: '',
@@ -97,6 +101,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
       const payload = {
         ...form,
         sub_category_id: form.sub_category_id || null,
+        impact: form.impact || null,
         drive_url: form.drive_url || null,
         effective_date: form.effective_date || null,
         created_by: userId,
@@ -185,6 +190,17 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
                   onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                   placeholder="e.g. Mandatory Safety Gear Policy"
                   required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Impact (optional)</label>
+              <div className="form-input-container">
+                <input
+                  type="text"
+                  value={form.impact}
+                  onChange={e => setForm(p => ({ ...p, impact: e.target.value }))}
+                  placeholder="e.g. High, Medium, Low, or key consequences"
                 />
               </div>
             </div>

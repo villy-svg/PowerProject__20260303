@@ -19,6 +19,11 @@ const RuleCard = ({ rule }) => {
         {rule.sub_category?.name && (
           <span className="rule-badge">{rule.sub_category.name}</span>
         )}
+        {rule.impact && (
+          <span className="rule-badge rule-impact-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+            ⚠️ Impact: {rule.impact}
+          </span>
+        )}
       </div>
 
       <div className={`rule-card-content ${!isExpanded && isLongContent ? 'collapsed' : ''}`}>
