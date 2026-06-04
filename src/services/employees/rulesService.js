@@ -292,6 +292,20 @@ export async function fetchRules({ categoryId = null, activeOnly = true } = {}) 
           is_active: true,
           sort_order: 2,
           impact: 'High'
+        },
+        {
+          id: 'rule-customer-vehicle',
+          category_id: 'cat-conduct',
+          sub_category_id: null,
+          title: 'No Using Customer Vehicle/Material',
+          content: `1. Do not use customer vehicles/materials.
+2. ಗ್ರಾಹಕರ ವಾಹನಗಳು/ವಸ್ತುಗಳನ್ನು ಬಳಸಬೇಡಿ
+3. Impact: Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost
+4. ಪ್ರಭಾವ: ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ದಂಡ: ರೂ. 5,000/- | ವಾಹನದ ಸಂಪೂರ್ಣ ದುರಸ್ಥಿ ವೆಚ್ಚವನ್ನು ಪಾವತಿಸಿ`,
+          effective_date: new Date().toISOString().split('T')[0],
+          is_active: true,
+          sort_order: 3,
+          impact: 'Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost'
         }
       ];
       saveLocalData(BYPASS_KEY_RULES, localRules);

@@ -200,6 +200,8 @@ function AppShell({ verticals, verticalList }) {
           flow={onboardingFlow}
           platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
           onClose={handleCloseIntro}
+          user={user}
+          permissions={currentUserPermissions}
         />
       )}
     </>

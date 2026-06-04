@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IconX, IconChevronLeft, IconChevronRight } from '../../components/Icons';
+import { updateRule } from '../../services/employees/rulesService';
 import './TutorialSlideshowViewer.css';
 
-const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
+const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, onUpdate }) => {
   const [slideIndex, setSlideIndex] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editText, setEditText] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // Pick slides based on target environment
   const slides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
   const currentSlide = slides[slideIndex];
 
+  // Initialize edit form when slide or edit mode changes
+  useEffect(() => {
+    if (currentSlide) {
+      setEditTitle(currentSlide.title || '');
+      setEditText(currentSlide.text || currentSlide.caption || '');
+    }
+  }, [slideIndex, currentSlide, isEditing]);
+
   if (!currentSlide) return null;
+
+  const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
 
   const handleNext = () => {
     if (slideIndex < slides.length - 1) {
@@ -25,7 +40,70 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
     }
   };
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (flow.id.startsWith('rule_')) {
+        // Reconstruct rule content from updated slides
+        const ruleId = flow.id.replace('rule_', '');
+        const updatedSlides = [...slides];
+        updatedSlides[slideIndex] = {
+          ...updatedSlides[slideIndex],
+          title: editTitle,
+          text: editText
+        };
 
+        const newTitle = updatedSlides[0].title;
+        const introText = updatedSlides[0].text;
+        const bulletTexts = updatedSlides.slice(1).map(s => s.text);
+        const bulletContent = bulletTexts.map((text, idx) => `${idx + 1}. ${text}`).join('\n');
+        const newContent = [introText, bulletContent].filter(Boolean).join('\n');
+
+        await updateRule(ruleId, {
+          title: newTitle,
+          content: newContent
+        });
+      } else {
+        // For static tutorials, save individual slide override in localStorage
+        const overrideKey = `powerpod_tutorial_override_${flow.id}`;
+        const overrides = JSON.parse(localStorage.getItem(overrideKey) || '{}');
+        overrides[slideIndex] = { title: editTitle, text: editText };
+        localStorage.setItem(overrideKey, JSON.stringify(overrides));
+      }
+
+      if (onUpdate) {
+        await onUpdate();
+      }
+      setIsEditing(false);
+    } catch (err) {
+      alert('Failed to save slide content: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const renderEditControls = () => {
+    if (!isMasterAdmin) return null;
+    if (isEditing) {
+      return (
+        <div className="slide-edit-controls-bar" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+          <button className="halo-button secondary" onClick={() => setIsEditing(false)} disabled={saving} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+            Cancel
+          </button>
+          <button className="halo-button save-btn" onClick={handleSave} disabled={saving} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', '--stage-accent': 'var(--brand-green)' }}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div className="slide-edit-trigger" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="halo-button secondary" onClick={() => setIsEditing(true)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>
+          ✏️ Edit Slide Text
+        </button>
+      </div>
+    );
+  };
 
   if (flow.layout === 'onboarding') {
     return (
@@ -54,8 +132,30 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
                />
             </div>
             
-            <h2 className="onboarding-title">{currentSlide.title}</h2>
-            <p className="onboarding-text">{currentSlide.text}</p>
+            {isEditing ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
+                <input 
+                  type="text" 
+                  value={editTitle} 
+                  onChange={e => setEditTitle(e.target.value)} 
+                  placeholder="Slide Title"
+                  style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '1.1rem', fontWeight: 'bold' }}
+                />
+                <textarea 
+                  value={editText} 
+                  onChange={e => setEditText(e.target.value)} 
+                  placeholder="Slide Content Text"
+                  rows={4}
+                  style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.9rem', resize: 'vertical' }}
+                />
+              </div>
+            ) : (
+              <>
+                <h2 className="onboarding-title">{currentSlide.title}</h2>
+                <p className="onboarding-text" style={{ whiteSpace: 'pre-wrap' }}>{currentSlide.text}</p>
+              </>
+            )}
+            {renderEditControls()}
           </div>
           
           <div className="onboarding-footer">
@@ -72,6 +172,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
             <button 
               className="halo-button onboarding-next-btn"
               onClick={handleNext}
+              disabled={isEditing}
               style={{ '--stage-accent': 'var(--brand-green)' }}
             >
               {slideIndex === slides.length - 1 ? 'Get Started' : 'Next'}
@@ -104,7 +205,6 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
               alt={`Slide ${slideIndex + 1}`} 
               className="tutorial-screenshot-img"
               onError={(e) => {
-                // If public compiled asset is not immediately resolved, load fallback screenshot path
                 e.target.src = currentSlide.fallbackImage || currentSlide.image;
               }}
             />
@@ -215,8 +315,31 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
 
         {/* Footer controls & Description bar */}
         <div className="slideshow-modal-footer">
-          <div className="slideshow-caption-box">
-            <p className="slideshow-caption-text">{currentSlide.caption}</p>
+          <div className="slideshow-caption-box" style={{ width: '100%' }}>
+            {isEditing ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                <input 
+                  type="text" 
+                  value={editTitle} 
+                  onChange={e => setEditTitle(e.target.value)} 
+                  placeholder="Slide Title"
+                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.95rem', fontWeight: 'bold' }}
+                />
+                <textarea 
+                  value={editText} 
+                  onChange={e => setEditText(e.target.value)} 
+                  placeholder="Slide Caption Text"
+                  rows={2}
+                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.85rem', resize: 'vertical' }}
+                />
+              </div>
+            ) : (
+              <>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', color: '#fff' }}>{currentSlide.title}</h4>
+                <p className="slideshow-caption-text" style={{ whiteSpace: 'pre-wrap' }}>{currentSlide.text || currentSlide.caption}</p>
+              </>
+            )}
+            {renderEditControls()}
           </div>
 
           <div className="slideshow-nav-controls-row">
@@ -243,6 +366,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose }) => {
             <button 
               className="halo-button slideshow-control-btn next-action-btn"
               onClick={handleNext}
+              disabled={isEditing}
               style={{ '--stage-accent': 'var(--brand-green)' }}
             >
               {slideIndex === slides.length - 1 ? 'Finish' : 'Next'}

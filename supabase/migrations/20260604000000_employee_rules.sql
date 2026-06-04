@@ -181,6 +181,33 @@ CREATE OR REPLACE TRIGGER employee_rules_updated_at
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ────────────────────────────────────────────────────────────
--- 5. SCHEMA RELOAD (Mandatory per migration policy)
+-- 5. SEED DATA FOR EMOLOYEE RULES (Idempotent)
+-- ────────────────────────────────────────────────────────────
+INSERT INTO rule_categories (id, name, icon, description, sort_order) VALUES
+('a0e8f000-0000-0000-0000-000000000001', 'Safety & Security', '🛡️', 'Rules concerning safety protocol, emergency layouts, and gear usage.', 1),
+('a0e8f000-0000-0000-0000-000000000002', 'Code of Conduct', '🤝', 'Professional guidelines, client communication rules, and ethical standards.', 2),
+('a0e8f000-0000-0000-0000-000000000003', 'Operational Standards', '⚙️', 'Daily shift workflows, checklists, and facility maintenance rules.', 3)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO rule_sub_categories (id, category_id, name, sort_order) VALUES
+('a0e8f000-0000-0000-0000-000000000101', 'a0e8f000-0000-0000-0000-000000000001', 'PPE Requirements', 1),
+('a0e8f000-0000-0000-0000-000000000102', 'a0e8f000-0000-0000-0000-000000000001', 'Fire Safety Protocols', 2),
+('a0e8f000-0000-0000-0000-000000000103', 'a0e8f000-0000-0000-0000-000000000002', 'Attendance & Punctuality', 1),
+('a0e8f000-0000-0000-0000-000000000104', 'a0e8f000-0000-0000-0000-000000000002', 'Anti-Harassment', 2)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO employee_rules (id, category_id, sub_category_id, title, content, effective_date, is_active, sort_order, impact) VALUES
+('a0e8f000-0000-0000-0000-000000000201', 'a0e8f000-0000-0000-0000-000000000001', 'a0e8f000-0000-0000-0000-000000000101', 'Mandatory Helmet Usage', 'All operators must wear safety helmets inside active maintenance bays at all times.', CURRENT_DATE, true, 1, 'High'),
+('a0e8f000-0000-0000-0000-000000000202', 'a0e8f000-0000-0000-0000-000000000001', 'a0e8f000-0000-0000-0000-000000000102', 'Fire Extinguisher Checks', 'Monthly check of fire extinguisher inspection labels is required for all fire wardens.', CURRENT_DATE, true, 2, 'High'),
+('a0e8f000-0000-0000-0000-000000000203', 'a0e8f000-0000-0000-0000-000000000002', NULL, 'No Using Customer Vehicle/Material', '1. Do not use customer vehicles/materials.
+2. ಗ್ರಾಹಕರ ವಾಹನಗಳು/ವಸ್ತುಗಳನ್ನು ಬಳಸಬೇಡಿ
+3. Impact: Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost
+4. ಪ್ರಭಾವ: ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ದಂಡ: ರೂ. 5,000/- | ವಾಹನದ ಸಂಪೂರ್ಣ ದುರಸ್ಥಿ ವೆಚ್ಚವನ್ನು ಪಾವತಿಸಿ', CURRENT_DATE, true, 3, 'Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost')
+ON CONFLICT (id) DO UPDATE SET 
+  content = EXCLUDED.content,
+  impact = EXCLUDED.impact;
+
+-- ────────────────────────────────────────────────────────────
+-- 6. SCHEMA RELOAD (Mandatory per migration policy)
 -- ────────────────────────────────────────────────────────────
 NOTIFY pgrst, 'reload schema';
