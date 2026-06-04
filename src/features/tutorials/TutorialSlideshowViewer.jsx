@@ -38,7 +38,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     if (slideIndex < editableSlides.length - 1) {
       setSlideIndex(slideIndex + 1);
     } else {
-      onClose();
+      onClose(true); // Completed
     }
   };
 
@@ -198,7 +198,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             ) : (
               <div className="onboarding-back-placeholder" />
             )}
-            <button className="onboarding-skip-btn" onClick={onClose}>Skip</button>
+            <button className="onboarding-skip-btn" onClick={() => onClose(false)}>Skip</button>
           </div>
           
           <div className="onboarding-content-body">
@@ -289,7 +289,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             <span className="flow-category-label">{flow.category}</span>
             <h3 className="slideshow-flow-title">{flow.title}</h3>
           </div>
-          <button className="slideshow-close-btn" onClick={onClose}>
+          <button className="slideshow-close-btn" onClick={() => onClose(false)}>
             <IconX size={20} />
           </button>
         </div>

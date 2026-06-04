@@ -81,8 +81,31 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   const [ruleFlows, setRuleFlows] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFlow, setEditingFlow] = useState(null);
+  const [playAllQueue, setPlayAllQueue] = useState([]);
+  const [currentPlayIndex, setCurrentPlayIndex] = useState(-1);
 
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
+
+  const handlePlayAll = (categoryName) => {
+    const categoryFlows = allFlows.filter(f => f.category === categoryName);
+    if (categoryFlows.length > 0) {
+      setPlayAllQueue(categoryFlows);
+      setCurrentPlayIndex(0);
+      setActiveFlow(categoryFlows[0]);
+    }
+  };
+
+  const handleViewerClose = (completed = false) => {
+    if (completed && currentPlayIndex >= 0 && currentPlayIndex < playAllQueue.length - 1) {
+      const nextIndex = currentPlayIndex + 1;
+      setCurrentPlayIndex(nextIndex);
+      setActiveFlow(playAllQueue[nextIndex]);
+    } else {
+      setPlayAllQueue([]);
+      setCurrentPlayIndex(-1);
+      setActiveFlow(null);
+    }
+  };
 
   const loadRules = useCallback(async () => {
     try {
@@ -256,7 +279,16 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
       <div className="tutorial-categories-grid">
         {categories.map(category => (
           <div key={category} className="tutorial-category-section">
-            <h3 className="category-section-title">{category}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+              <h3 className="category-section-title" style={{ margin: 0 }}>{category}</h3>
+              <button 
+                className="halo-button secondary play-all-btn" 
+                style={{ minWidth: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.8rem', height: '32px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => handlePlayAll(category)}
+              >
+                ▶ Play All
+              </button>
+            </div>
             <div className="category-flows-grid">
               {allFlows.filter(f => f.category === category).map(flow => (
                 <div 
@@ -328,7 +360,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
         <TutorialSlideshowViewer
           flow={activeFlow}
           platform={platform}
-          onClose={() => setActiveFlow(null)}
+          onClose={handleViewerClose}
           user={user}
           permissions={permissions}
           onUpdate={loadRules}
