@@ -330,11 +330,18 @@ const CategoryFormModal = ({ isOpen, onClose, editingItem, onSave }) => {
           </div>
           <div className="form-group">
             <label>Description</label>
-            <input
-              type="text"
+            <textarea
+              className="rule-form-textarea"
+              style={{ minHeight: '80px' }}
+              rows={3}
               value={form.description}
               onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               placeholder="Brief description of this category"
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.stopPropagation();
+                }
+              }}
             />
           </div>
           <div className="form-group">
@@ -818,7 +825,7 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
               <div key={cat.id} className="hub-card">
                 <div className="hub-code-tag">{cat.icon || '📋'}</div>
                 <h3>{cat.name}</h3>
-                <p className="hub-city">{cat.description || 'No description'}</p>
+                <p className="hub-city" style={{ whiteSpace: 'pre-wrap' }}>{cat.description || 'No description'}</p>
                 <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.25rem' }}>
                   Order: {cat.sort_order}
                 </p>

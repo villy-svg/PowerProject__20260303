@@ -183,7 +183,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
         id: 'manage_rules',
         title: 'Rule Management',
         desc: 'Create and manage employee rules, regulations, categories, and sub-categories.',
-        icon: '📋',
+        icon: '',
         action: () => setActiveVertical('rule_management'),
         adminOnly: true,
         buttonLabel: 'Manage Rules'

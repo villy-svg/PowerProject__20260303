@@ -21,13 +21,15 @@ const DEFAULT_TAB_SETTINGS = {
   headerRowsToSkip: 0,
 };
 
-const sanitizeExcelDates = (data, skip) => {
+const sanitizeSpreadsheetData = (data, skip) => {
   if (!data || data.length === 0) return data;
   const headers = data[skip] || [];
   return data.map((row, rIdx) => {
     if (rIdx <= skip || !Array.isArray(row)) return row;
     return row.map((cellVal, cIdx) => {
       const colHeader = (headers[cIdx] || '').toLowerCase().trim();
+      
+      // 1. Sanitize Excel serialized date numbers
       if (colHeader.includes('date') && cellVal != null && /^\d+$/.test(String(cellVal).trim())) {
         const numVal = parseInt(String(cellVal).trim(), 10);
         if (numVal > 30000 && numVal < 70000) {
@@ -38,6 +40,22 @@ const sanitizeExcelDates = (data, skip) => {
           }
         }
       }
+
+      // 2. Sanitize SoC percentage decimal format (e.g. 0.35 -> 35%, or 35 -> 35%)
+      if (colHeader.includes('soc') && cellVal != null) {
+        const strVal = String(cellVal).trim();
+        if (strVal && !strVal.endsWith('%') && !strVal.startsWith('=')) {
+          const num = parseFloat(strVal);
+          if (!isNaN(num)) {
+            if (num > 0 && num <= 1) {
+              return `${Math.round(num * 10000) / 100}%`;
+            } else if (num >= 0 && num <= 100) {
+              return `${num}%`;
+            }
+          }
+        }
+      }
+
       return cellVal;
     });
   });
@@ -152,7 +170,7 @@ export const useDataManager = () => {
       const estimatedSkip = estimateHeaderRowsToSkip(data);
       setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
 
-      const sanitized = sanitizeExcelDates(data, estimatedSkip);
+      const sanitized = sanitizeSpreadsheetData(data, estimatedSkip);
       setPreviewData(sanitized);
     } catch (err) {
       console.error('[DataManager] Load error:', err);
@@ -177,7 +195,7 @@ export const useDataManager = () => {
       const estimatedSkip = estimateHeaderRowsToSkip(data);
       setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
 
-      const sanitized = sanitizeExcelDates(data, estimatedSkip);
+      const sanitized = sanitizeSpreadsheetData(data, estimatedSkip);
       setPreviewData(sanitized);
     } catch (err) {
       console.error('[DataManager] Tab read error:', err);
