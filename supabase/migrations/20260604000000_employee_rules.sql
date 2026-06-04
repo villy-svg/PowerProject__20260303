@@ -14,19 +14,24 @@ CREATE TABLE IF NOT EXISTS rule_categories (
   icon        text,                  -- emoji or icon identifier
   description text,
   sort_order  integer NOT NULL DEFAULT 0,
+  metadata    jsonb DEFAULT '{}'::jsonb,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE rule_categories ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE rule_categories ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+
 -- Read: all authenticated users
+DROP POLICY IF EXISTS "rule_categories_read_all" ON rule_categories;
 CREATE POLICY "rule_categories_read_all"
   ON rule_categories FOR SELECT
   TO authenticated
   USING (true);
 
 -- Write: master_admin only
+DROP POLICY IF EXISTS "rule_categories_write_master_admin" ON rule_categories;
 CREATE POLICY "rule_categories_write_master_admin"
   ON rule_categories FOR ALL
   TO authenticated
@@ -53,6 +58,7 @@ CREATE TABLE IF NOT EXISTS rule_sub_categories (
   category_id uuid NOT NULL REFERENCES rule_categories(id) ON DELETE CASCADE,
   name        text NOT NULL,
   sort_order  integer NOT NULL DEFAULT 0,
+  metadata    jsonb DEFAULT '{}'::jsonb,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
@@ -62,11 +68,15 @@ CREATE INDEX IF NOT EXISTS rule_sub_categories_category_id_idx
 
 ALTER TABLE rule_sub_categories ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE rule_sub_categories ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+
+DROP POLICY IF EXISTS "rule_sub_categories_read_all" ON rule_sub_categories;
 CREATE POLICY "rule_sub_categories_read_all"
   ON rule_sub_categories FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "rule_sub_categories_write_master_admin" ON rule_sub_categories;
 CREATE POLICY "rule_sub_categories_write_master_admin"
   ON rule_sub_categories FOR ALL
   TO authenticated
@@ -96,8 +106,10 @@ CREATE TABLE IF NOT EXISTS employee_rules (
   content          text,              -- Markdown/plain-text body
   drive_url        text,              -- Optional: Google Drive link for full document
   effective_date   date,
+  impact           text,              -- Optional: impact of the rule
   is_active        boolean NOT NULL DEFAULT true,
   sort_order       integer NOT NULL DEFAULT 0,
+  metadata         jsonb DEFAULT '{}'::jsonb,
   created_by       uuid REFERENCES user_profiles(id) ON DELETE SET NULL,
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now()
@@ -114,11 +126,16 @@ CREATE INDEX IF NOT EXISTS employee_rules_is_active_idx
 
 ALTER TABLE employee_rules ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE employee_rules ADD COLUMN IF NOT EXISTS metadata jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE employee_rules ADD COLUMN IF NOT EXISTS impact text;
+
+DROP POLICY IF EXISTS "employee_rules_read_all" ON employee_rules;
 CREATE POLICY "employee_rules_read_all"
   ON employee_rules FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "employee_rules_write_master_admin" ON employee_rules;
 CREATE POLICY "employee_rules_write_master_admin"
   ON employee_rules FOR ALL
   TO authenticated
