@@ -58,9 +58,22 @@ const DataGrid = ({
                   const isFocused = focusedCell && focusedCell.rowIndex === originalIndex && focusedCell.colIdx === colIdx;
 
                   // Determine display value: if not focused and starts with '=', evaluate the formula client-side
-                  const displayValue = (!isFocused && typeof rawValue === 'string' && rawValue.startsWith('='))
+                  let displayValue = (!isFocused && typeof rawValue === 'string' && rawValue.startsWith('='))
                     ? evaluateFormula(rawValue, currentRowValues, headers)
                     : rawValue;
+
+                  // Auto-format Excel serialized date numbers (e.g. 46174) in date columns
+                  const colHeader = (headers[colIdx] || '').toLowerCase().trim();
+                  if (colHeader.includes('date') && displayValue != null && /^\d+$/.test(String(displayValue).trim())) {
+                    const numVal = parseInt(String(displayValue).trim(), 10);
+                    if (numVal > 30000 && numVal < 70000) {
+                      const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+                      const dateObj = new Date(excelEpoch.getTime() + numVal * 24 * 60 * 60 * 1000);
+                      if (!isNaN(dateObj.getTime())) {
+                        displayValue = `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
+                      }
+                    }
+                  }
 
                   return (
                     <td 
@@ -85,7 +98,7 @@ const DataGrid = ({
                               background: cellError ? 'rgba(239, 68, 68, 0.05)' : isEdited ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
                               color: 'var(--text-color)',
                               paddingRight: cellError?.isDateSwap ? '65px' : 
-                                           (cellError?.isDateFormatAnomaly ? '75px' : 
+                                           ((cellError?.isDateFormatAnomaly || cellError?.isSoCFormatAnomaly) ? '75px' : 
                                            (cellError?.isPlateFormatAnomaly ? '70px' : 
                                            (cellError?.isFormulaSuggestion ? '80px' : '10px'))),
                               fontSize: '13px',
@@ -123,12 +136,14 @@ const DataGrid = ({
                             </button>
                           )}
 
-                          {/* Date Format Standardizer button */}
-                          {cellError?.isDateFormatAnomaly && (
+                          {/* Date & SoC Format Standardizer button */}
+                          {(cellError?.isDateFormatAnomaly || cellError?.isSoCFormatAnomaly) && (
                             <button
                               type="button"
                               onClick={() => onCellEdit(originalIndex, colIdx, cellError.suggestedValue)}
-                              title={`Click to standardize date format to ${cellError.suggestedValue}`}
+                              title={cellError.isSoCFormatAnomaly 
+                                ? `Click to format SoC to ${cellError.suggestedValue}` 
+                                : `Click to standardize date format to ${cellError.suggestedValue}`}
                               style={{
                                 position: 'absolute',
                                 right: '8px',

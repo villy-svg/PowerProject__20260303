@@ -127,10 +127,23 @@ export const validateRow = (row, headers, context = {}) => {
 
     // Rule: SoC Range [0%, 100%]
     if (headerLower.includes('soc')) {
-      const cleanVal = strVal.endsWith('%') ? strVal.slice(0, -1) : strVal;
-      const num = parseFloat(cleanVal);
-      if (isNaN(num) || num < 0 || num > 100) {
-        errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
+      if (!strVal.endsWith('%')) {
+        const num = parseFloat(strVal);
+        if (!isNaN(num) && num >= 0 && num <= 100) {
+          errors[colIdx] = {
+            message: `SoC must end with % symbol. Click to format to ${strVal}%.`,
+            isSoCFormatAnomaly: true,
+            suggestedValue: `${strVal}%`
+          };
+        } else {
+          errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
+        }
+      } else {
+        const cleanVal = strVal.slice(0, -1);
+        const num = parseFloat(cleanVal);
+        if (isNaN(num) || num < 0 || num > 100) {
+          errors[colIdx] = { message: 'SoC must be between 0% to 100%.' };
+        }
       }
     }
 
