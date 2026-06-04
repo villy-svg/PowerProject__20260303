@@ -31,7 +31,7 @@ export const HUB_VIEWS = [
 ];
 
 /** All activeVertical values belonging to Employees vertical */
-export const EMPLOYEE_VIEWS = ['employee_tasks'];
+export const EMPLOYEE_VIEWS = ['employee_tasks', 'employee_rules_board'];
 
 /** All activeVertical values belonging to Clients vertical */
 export const CLIENT_VIEWS = ['client_tasks', 'leads_funnel'];
@@ -87,9 +87,10 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
     daily_hub_tasks:      { label: 'Hubs List', boardLabel: 'Daily Task Board' },
     daily_task_templates: { label: 'Hubs List', boardLabel: 'Daily Task Templates' },
     escalation_tasks:     { label: 'Hubs List', boardLabel: 'Escalation Task Board' },
-    employee_tasks:       { label: 'Employees', boardLabel: 'Employee Task Board' },
-    client_tasks:         { label: 'Clients',   boardLabel: 'Client Task Board' },
-    leads_funnel:         { label: 'Clients',   boardLabel: 'Client Task Board' },
+    employee_tasks:         { label: 'Employees', boardLabel: 'Employee Task Board' },
+    employee_rules_board:   { label: 'Employees', boardLabel: 'Rules & Regulations' },
+    client_tasks:           { label: 'Clients',   boardLabel: 'Client Task Board' },
+    leads_funnel:           { label: 'Clients',   boardLabel: 'Client Task Board' },
   };
   if (hubId)    map[hubId]    = { label: 'Hubs List', boardLabel: 'Hubs Task Board' };
   if (empId)    map[empId]    = { label: 'Employees', boardLabel: 'Employee Task Board' };

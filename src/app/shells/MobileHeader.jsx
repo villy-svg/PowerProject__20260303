@@ -85,7 +85,7 @@ const MobileHeader = ({
     const clientId = verticals?.CLIENTS?.id || 'CLIENTS';
 
     const isHub = activeVertical === hubId || ['hub_tasks', 'daily_hub_tasks', 'daily_task_templates', 'escalation_tasks'].includes(activeVertical);
-    const isEmp = activeVertical === empId || ['employee_tasks'].includes(activeVertical);
+    const isEmp = activeVertical === empId || ['employee_tasks', 'employee_rules_board'].includes(activeVertical);
     const isClient = activeVertical === clientId || ['client_tasks', 'leads_funnel'].includes(activeVertical);
 
     const list = [];
@@ -106,6 +106,7 @@ const MobileHeader = ({
       if (permissions?.canAccessEmployeeTasks !== false) {
         list.push({ id: 'employee_tasks', label: 'Employee Tasks' });
       }
+      list.push({ id: 'employee_rules_board', label: 'Rules & Regulations' });
       if (permissions?.canAccessEmployees !== false) {
         list.push({ id: empId, label: 'Employees List' });
       }

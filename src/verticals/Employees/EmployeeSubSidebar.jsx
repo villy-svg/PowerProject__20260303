@@ -128,6 +128,17 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
             </div>
           )}
 
+          {/* Rules & Regulations Board button */}
+          <div className="employee-tasks-btn-wrapper">
+            <button
+              className="halo-button employee-tasks-nav-btn"
+              style={{ opacity: activeVertical === 'employee_rules_board' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('employee_rules_board')}
+            >
+              📋 Rules & Regulations
+            </button>
+          </div>
+
           {/* Nav Toggle Header */}
           <div className="sidebar-title-row">
             {permissions?.canAccessEmployees ? (

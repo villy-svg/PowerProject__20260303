@@ -178,6 +178,15 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
         action: () => setActiveVertical('employee_role_management'),
         adminOnly: true,
         buttonLabel: 'Manage Roles'
+      },
+      {
+        id: 'manage_rules',
+        title: 'Rule Management',
+        desc: 'Create and manage employee rules, regulations, categories, and sub-categories.',
+        icon: '📋',
+        action: () => setActiveVertical('rule_management'),
+        adminOnly: true,
+        buttonLabel: 'Manage Rules'
       }
     ],
     [verticals.PARTNERS?.id]: [],

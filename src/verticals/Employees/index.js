@@ -7,6 +7,8 @@ export { default as EmployeeSubSidebar } from './EmployeeSubSidebar';
 export { default as EmployeeManagement } from './EmployeeManagement';
 export { default as DepartmentManagement } from './DepartmentManagement';
 export { default as EmployeeRoleManagement } from './EmployeeRoleManagement';
+export { default as EmployeeRulesBoard } from './EmployeeRulesBoard';
+export { default as RuleManagement } from './RuleManagement';
 
 // Task form + tile
 export { default as EmployeeTaskForm } from './EmployeeTaskForm';

@@ -29,6 +29,7 @@ import {
 } from '../../verticals/ChargingHubs';
 import {
   EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
+  EmployeeRulesBoard, RuleManagement,
 } from '../../verticals/Employees';
 import {
   ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
@@ -171,6 +172,17 @@ const ContentRouter = ({
     );
   }
 
+  if (activeVertical === 'rule_management') {
+    return (
+      <RuleManagement
+        user={user}
+        permissions={permissions}
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+      />
+    );
+  }
+
   if (activeVertical === 'client_category_management') {
     return (
       <ClientCategoryManagement
@@ -245,6 +257,9 @@ const ContentRouter = ({
     >
       {activeVertical === verticals.EMPLOYEES?.id && (
         <EmployeeManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} />
+      )}
+      {activeVertical === 'employee_rules_board' && (
+        <EmployeeRulesBoard user={user} permissions={permissions} />
       )}
       {activeVertical === verticals.CLIENTS?.id && (
         <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />

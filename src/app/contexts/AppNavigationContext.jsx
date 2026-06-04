@@ -45,6 +45,7 @@ const MANAGEMENT_SUB_VIEWS = [
   'hub_function_management',
   'department_management',
   'employee_role_management',
+  'rule_management',
   'client_category_management',
   'client_service_management',
   'client_billing_model_management',
