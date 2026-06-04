@@ -7,7 +7,8 @@ const DataGrid = ({
   validationErrors,
   editedCells,
   isEditableTab,
-  onCellEdit
+  onCellEdit,
+  onAutofixColumn
 }) => {
   // Track currently focused input cell coordinates: { rowIndex, colIdx }
   const [focusedCell, setFocusedCell] = useState(null);
@@ -18,11 +19,37 @@ const DataGrid = ({
         <thead>
           <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid var(--border-color)' }}>
             <th style={{ padding: '12px 16px', color: 'var(--brand-mint)', fontWeight: 'bold', width: '50px' }}>Row</th>
-            {headers.map((cell, idx) => (
-              <th key={idx} style={{ padding: '12px 16px', color: 'var(--brand-mint)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                {cell || `Col ${idx + 1}`}
-              </th>
-            ))}
+            {headers.map((cell, idx) => {
+              const hasFixableError = Object.values(validationErrors).some(rowErrs => rowErrs[idx]?.suggestedValue !== undefined);
+              return (
+                <th key={idx} style={{ padding: '12px 16px', color: 'var(--brand-mint)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>{cell || `Col ${idx + 1}`}</span>
+                    {hasFixableError && isEditableTab && (
+                      <button
+                        type="button"
+                        onClick={() => onAutofixColumn(idx)}
+                        title="Autofix all formatting anomalies in this column"
+                        style={{
+                          background: 'var(--brand-mint)',
+                          color: '#000',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '2px 6px',
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          fontWeight: 'bold',
+                          boxShadow: '0 0 5px var(--brand-mint)',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        ⚡ Fix Column
+                      </button>
+                    )}
+                  </div>
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>

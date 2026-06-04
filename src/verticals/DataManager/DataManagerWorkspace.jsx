@@ -90,6 +90,7 @@ const DataManagerWorkspace = () => {
             validationErrors={dm.validationErrors}
             headers={dm.headers}
             onCellEdit={dm.handleCellEdit}
+            onAutofixColumn={dm.handleAutofixColumn}
           />
         )}
 

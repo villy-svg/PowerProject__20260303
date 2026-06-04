@@ -21,6 +21,28 @@ const DEFAULT_TAB_SETTINGS = {
   headerRowsToSkip: 0,
 };
 
+const sanitizeExcelDates = (data, skip) => {
+  if (!data || data.length === 0) return data;
+  const headers = data[skip] || [];
+  return data.map((row, rIdx) => {
+    if (rIdx <= skip || !Array.isArray(row)) return row;
+    return row.map((cellVal, cIdx) => {
+      const colHeader = (headers[cIdx] || '').toLowerCase().trim();
+      if (colHeader.includes('date') && cellVal != null && /^\d+$/.test(String(cellVal).trim())) {
+        const numVal = parseInt(String(cellVal).trim(), 10);
+        if (numVal > 30000 && numVal < 70000) {
+          const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+          const dateObj = new Date(excelEpoch.getTime() + numVal * 24 * 60 * 60 * 1000);
+          if (!isNaN(dateObj.getTime())) {
+            return `${dateObj.getMonth() + 1}/${dateObj.getDate()}/${dateObj.getFullYear()}`;
+          }
+        }
+      }
+      return cellVal;
+    });
+  });
+};
+
 export const useDataManager = () => {
   // ── Spreadsheet Source ───────────────────────────────────────────────────
   const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
@@ -125,11 +147,13 @@ export const useDataManager = () => {
       const defaultTab = tabNames[0];
       setActiveTab(defaultTab);
       const data = await googleSheetsService.readSheet(sheetId, defaultTab, 'FORMULA');
-      setPreviewData(data);
 
       // Heuristically auto-estimate skipped rows
       const estimatedSkip = estimateHeaderRowsToSkip(data);
       setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
+
+      const sanitized = sanitizeExcelDates(data, estimatedSkip);
+      setPreviewData(sanitized);
     } catch (err) {
       console.error('[DataManager] Load error:', err);
       setError(err.message || 'Failed to connect to Google Sheet. Check permissions and Service Account access.');
@@ -148,11 +172,13 @@ export const useDataManager = () => {
     try {
       // FORMULA rendering keeps raw formulae visible for inspection
       const data = await googleSheetsService.readSheet(sheetId, tabName, 'FORMULA');
-      setPreviewData(data);
 
       // Heuristically auto-estimate skipped rows
       const estimatedSkip = estimateHeaderRowsToSkip(data);
       setTabSettings(prev => ({ ...prev, headerRowsToSkip: estimatedSkip }));
+
+      const sanitized = sanitizeExcelDates(data, estimatedSkip);
+      setPreviewData(sanitized);
     } catch (err) {
       console.error('[DataManager] Tab read error:', err);
       setError(`Failed to read tab "${tabName}": ${err.message}`);
@@ -335,6 +361,46 @@ export const useDataManager = () => {
     }
   }, [activeTab, editedCells, previewData, sheetId]);
 
+  // ── Action: Autofix entire column for suggestion errors ───────────────────
+  const handleAutofixColumn = useCallback((colIdx) => {
+    if (!previewData) return;
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    const newEdits = { ...editedCells };
+    let fixCount = 0;
+
+    Object.keys(validationErrors).forEach(strRowIndex => {
+      const rowIndex = parseInt(strRowIndex, 10);
+      const rowErrs = validationErrors[rowIndex];
+      const cellError = rowErrs?.[colIdx];
+      if (cellError && cellError.suggestedValue !== undefined) {
+        newEdits[rowIndex] = {
+          ...newEdits[rowIndex],
+          [colIdx]: cellError.suggestedValue
+        };
+        fixCount++;
+      }
+    });
+
+    if (fixCount > 0) {
+      setEditedCells(newEdits);
+
+      // Re-validate the entire sheet with the updated editedCells applied
+      const updatedPreviewData = previewData.map((row, rIdx) => {
+        if (newEdits[rIdx]) {
+          const originalRow = previewData[rIdx];
+          return originalRow.map((val, cIdx) => newEdits[rIdx][cIdx] !== undefined ? newEdits[rIdx][cIdx] : val);
+        }
+        return row;
+      });
+
+      const headers = previewData[skip];
+      const dataRows = updatedPreviewData.slice(skip + 1);
+      const errors = validateSheet(dataRows, headers, { vehiclePlates: fleetPlates }, skip);
+      setValidationErrors(errors);
+      setSyncSuccess(null);
+    }
+  }, [editedCells, validationErrors, previewData, tabSettings.headerRowsToSkip, fleetPlates]);
+
   // ── Toggle: Error-only filter ─────────────────────────────────────────────
   const handleToggleErrorsOnly = useCallback(() => {
     setShowErrorsOnly(prev => !prev);
@@ -378,5 +444,6 @@ export const useDataManager = () => {
     handleCellEdit,
     handleSyncCorrections,
     handleToggleErrorsOnly,
+    handleAutofixColumn,
   };
 };

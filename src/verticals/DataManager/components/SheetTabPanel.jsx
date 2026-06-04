@@ -109,6 +109,7 @@ const DataBody = ({
   isEditableTab,
   headers,
   onCellEdit,
+  onAutofixColumn,
 }) => {
   if (tabLoading) {
     return (
@@ -141,6 +142,7 @@ const DataBody = ({
         editedCells={editedCells}
         isEditableTab={isEditableTab}
         onCellEdit={onCellEdit}
+        onAutofixColumn={onAutofixColumn}
       />
     </div>
   );
@@ -166,6 +168,7 @@ const SheetTabPanel = ({
   validationErrors,
   headers,
   onCellEdit,
+  onAutofixColumn,
 }) => (
   <div className="dm-card dm-card--tab-panel">
     <div className="dm-tab-bar">
@@ -202,6 +205,7 @@ const SheetTabPanel = ({
       isEditableTab={isEditableTab}
       headers={headers}
       onCellEdit={onCellEdit}
+      onAutofixColumn={onAutofixColumn}
     />
   </div>
 );
