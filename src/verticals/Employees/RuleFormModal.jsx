@@ -197,11 +197,11 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
             <div className="form-group">
               <label>Impact (optional)</label>
               <div className="form-input-container">
-                <input
-                  type="text"
+                <textarea
                   value={form.impact}
                   onChange={e => setForm(p => ({ ...p, impact: e.target.value }))}
                   placeholder="e.g. High, Medium, Low, or key consequences"
+                  rows={2}
                 />
               </div>
             </div>
