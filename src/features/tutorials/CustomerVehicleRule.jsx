@@ -3,7 +3,8 @@ import './CustomerVehicleRule.css';
 
 /* ─── Parse Rule into Slides/Tutorial Pages ───────────────────── */
 const parseRuleSlides = (title, content = '') => {
-  const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+  const trimmedContent = content.replace(/^\s*\n+|\n+\s*$/g, '');
+  const lines = trimmedContent.split('\n').map(l => l.trim());
   const introLines = [];
   const bullets = [];
 
@@ -29,7 +30,7 @@ const parseRuleSlides = (title, content = '') => {
   // Slide 0: Title and Introduction
   slides.push({
     title: title,
-    text: introLines.join('\n') || 'This tutorial covers the details of the policy.',
+    text: introLines.join('\n'),
     isIntro: true
   });
 

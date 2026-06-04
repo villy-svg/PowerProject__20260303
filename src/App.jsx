@@ -81,7 +81,37 @@ function AppShell({ verticals, verticalList }) {
 
   // Onboarding Slideshow Autoplay State
   const [showIntroTutorial, setShowIntroTutorial] = useState(false);
-  const onboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
+  const rawOnboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
+  const onboardingFlow = React.useMemo(() => {
+    if (!rawOnboardingFlow) return null;
+    const overrideKey = `powerpod_tutorial_override_${rawOnboardingFlow.id}`;
+    const overridesStr = localStorage.getItem(overrideKey);
+    if (!overridesStr) return rawOnboardingFlow;
+
+    try {
+      const overrides = JSON.parse(overridesStr);
+      const mapOverride = (slidesList) => slidesList.map((slide, idx) => {
+        if (overrides[idx]) {
+          return {
+            ...slide,
+            title: overrides[idx].title ?? slide.title,
+            text: overrides[idx].text ?? slide.text ?? slide.caption,
+            caption: overrides[idx].text ?? slide.caption
+          };
+        }
+        return slide;
+      });
+
+      return {
+        ...rawOnboardingFlow,
+        desktopSlides: mapOverride(rawOnboardingFlow.desktopSlides || []),
+        mobileSlides: mapOverride(rawOnboardingFlow.mobileSlides || [])
+      };
+    } catch (e) {
+      console.error('[AppShell] Override parse failed for onboarding flow:', e);
+      return rawOnboardingFlow;
+    }
+  }, [rawOnboardingFlow, showIntroTutorial]);
 
   useEffect(() => {
     if (user && user.isActive !== false) {
