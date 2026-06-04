@@ -34,9 +34,9 @@
 
 .platform-toggle-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 9px;
-  padding: 6px 14px;
+  padding: 5px 13px;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-color);
@@ -47,8 +47,9 @@
 }
 
 .platform-toggle-btn.active {
-  background: var(--brand-green);
-  color: #000 !important;
+  background: color-mix(in srgb, var(--brand-green) 15%, transparent);
+  border: 1px solid var(--brand-green);
+  color: var(--brand-green) !important;
   opacity: 1;
 }
 
