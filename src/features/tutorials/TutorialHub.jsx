@@ -114,7 +114,8 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
         const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
         const flowSlides = parsedSlides.map((slide, idx) => {
           const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
-          const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : '/logos/powerpod-logo.svg';
+          const isDrinkingLogo = idx === 0 && (rule.title.toLowerCase().includes('drinking') || rule.title.toLowerCase().includes('alcohol') || rule.title.toLowerCase().includes('sober'));
+          const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : '/logos/powerpod-logo.svg');
           return {
             image: imgPath,
             fallbackImage: imgPath,

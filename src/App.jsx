@@ -180,7 +180,7 @@ function AppShell({ verticals, verticalList }) {
             const specialRules = rulesData.filter(rule => {
               const catName = rule.category?.name?.toLowerCase() || '';
               const title = rule.title?.toLowerCase() || '';
-              return catName.includes('special') || title.includes('customer vehicle') || title.includes('material');
+              return catName.includes('special') || title.includes('customer vehicle') || title.includes('material') || title.includes('drinking') || title.includes('alcohol');
             });
 
             const queue = [];
@@ -192,7 +192,8 @@ function AppShell({ verticals, verticalList }) {
               const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
               const flowSlides = parsedSlides.map((slide, idx) => {
                 const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
-                const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : '/logos/powerpod-logo.svg';
+                const isDrinkingLogo = idx === 0 && (rule.title.toLowerCase().includes('drinking') || rule.title.toLowerCase().includes('alcohol') || rule.title.toLowerCase().includes('sober'));
+                const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : '/logos/powerpod-logo.svg');
                 return {
                   image: imgPath,
                   fallbackImage: imgPath,
