@@ -1,6 +1,49 @@
 @import '../../styles/ManagementForms.css';
 
 /* Component-specific overrides or additions for HubTaskForm */
+.vertical-task-form .form-group label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.8;
+}
+
+.vertical-task-form .anon-toggle-label {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  opacity: 0.8 !important;
+}
+
+@media screen and (max-width: 480px) {
+  .vertical-task-form .form-group label {
+    font-size: 0.98rem;
+  }
+  .vertical-task-form .anon-toggle-label {
+    font-size: 0.98rem !important;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .vertical-task-form .form-group label {
+    font-size: 0.92rem;
+  }
+  .vertical-task-form .anon-toggle-label {
+    font-size: 0.92rem !important;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .vertical-task-form .form-group label {
+    font-size: 0.85rem;
+  }
+  .vertical-task-form .anon-toggle-label {
+    font-size: 0.85rem !important;
+  }
+}
+
 .vertical-task-form select option {
   background: var(--bg-color);
   color: var(--text-color);

@@ -40,8 +40,7 @@
   background: color-mix(in srgb, var(--bg-color), transparent 10%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 50;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 8px;

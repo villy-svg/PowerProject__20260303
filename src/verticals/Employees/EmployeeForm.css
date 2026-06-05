@@ -241,3 +241,21 @@
     padding: 0.75rem 1rem;
   }
 }
+
+@media screen and (max-width: 480px) {
+  .employee-form .form-group label {
+    font-size: 0.78rem;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .employee-form .form-group label {
+    font-size: 0.7rem;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .employee-form .form-group label {
+    font-size: 0.62rem;
+  }
+}

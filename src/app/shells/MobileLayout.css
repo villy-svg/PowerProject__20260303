@@ -75,13 +75,13 @@
   display: none !important;
 }
 
-/* Mobile scroll-aware hide */
+/* Mobile scroll-aware hide disabled so it scrolls naturally with page content */
 .mobile-header-shell.header-hidden {
-  transform: translateY(-110%);
-  opacity: 0;
-  pointer-events: none;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
   z-index: 2000;
-  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
+  transition: none !important;
 }
 
 /* Mobile sticky state */
@@ -259,21 +259,30 @@
   display: none !important;
 }
 
+.mobile-top-header-bar {
+  position: relative;
+  height: 28px; /* Compressed height to be extremely close to the brand title text */
+  background: transparent;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+}
+
 /* Ensure the centered title is perfectly sized and never squished or truncated on mobile */
 .mobile-layout .brand-title-centered {
-  position: fixed !important;
+  position: absolute !important;
   left: 50% !important;
-  top: clamp(30px, 4.2vh, 45px) !important; /* Perfectly centered vertically in the header */
+  top: 50% !important; /* Center vertically inside header bar */
   transform: translate(-50%, -50%) !important;
-  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
+  font-size: 1.05rem !important; /* Slightly smaller for compact header */
   font-weight: 800 !important;
   max-width: none !important;
   overflow: visible !important;
   text-overflow: clip !important;
   white-space: nowrap !important;
-  z-index: calc(var(--z-header) + 20) !important;
+  z-index: 2002 !important;
   pointer-events: none !important;
   display: block !important;
+  margin: 0 !important;
 }
 
 .mobile-layout .brand-title-centered.mobile-hidden {
@@ -281,17 +290,17 @@
 }
 
 .mobile-header-tutorial-btn {
-  position: fixed !important;
-  right: 16px !important;
+  position: absolute !important;
+  right: 8px !important;
   left: auto !important; /* Prevent from stretching or centering */
-  top: clamp(30px, 4.2vh, 45px) !important; /* Vertically center in header area */
+  top: 50% !important; /* Center vertically inside header bar */
   transform: translateY(-50%) !important;
   width: auto !important; /* Prevent from stretching */
-  padding: 6px 12px;
-  font-size: 0.72rem;
-  min-height: 32px;
-  height: auto;
-  border-radius: var(--radius-button, 12px);
+  padding: 2px 6px !important; /* Compact padding */
+  font-size: 0.58rem !important; /* Smaller font */
+  min-height: auto !important; /* Reset min-height */
+  height: 22px !important; /* Compressed height to fit 28px header bar */
+  border-radius: var(--radius-button, 8px);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -301,7 +310,7 @@
   pointer-events: auto !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 3px var(--halo-glow);
-  z-index: calc(var(--z-header) + 30) !important;
+  z-index: 2003 !important;
 }
 
 .mobile-header-tutorial-btn.mobile-hidden {
@@ -488,4 +497,17 @@ body[data-keyboard="open"] .form-submit-row {
 body[data-keyboard="open"] .mobile-layout .workspace-content {
   padding-bottom: calc(var(--keyboard-height, 0px) + 16px);
   transition: padding-bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
+}
+
+/* ── 10. Search Adaptation in Mobile Shell ───────────────────────────── */
+.mobile-layout[data-has-search="true"] {
+  --tray-height: 118px;
+}
+
+.mobile-layout[data-has-search="true"] .workspace-content {
+  padding-bottom: calc(154px + var(--safe-bottom, 0px)) !important;
+}
+
+.mobile-layout[data-has-search="true"] .app-content {
+  padding-bottom: calc(54px + var(--safe-bottom, 0px));
+}

@@ -3,11 +3,11 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260605 -- Data Manager 1.0.1"
+git commit -m "260605 -- Data Manager 1.0.2"
 git push origin staging 
 
 #npm run apk:staging-debug
- 
+    
 # 3. Merge Staging to Main  
 git checkout main
 git merge staging 

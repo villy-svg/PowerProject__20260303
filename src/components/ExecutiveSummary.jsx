@@ -12,6 +12,8 @@ import CentralisedTaskBoard from './CentralisedTaskBoard';
 import HomeEscalationsBoard from './HomeEscalationsBoard';
 import WorkspaceModals from './WorkspaceModals';
 import { useAppNavigation } from '../app/contexts/AppNavigationContext';
+import powerLogo from '../assets/logo.svg';
+import SandboxManagerModal from './SandboxManagerModal';
 
 import { updateSubmissionStatus, submitProofOfWork } from '../services/tasks/submissionService';
 import { cloneUtils } from '../utils/cloneUtils';
@@ -29,8 +31,10 @@ import { useRBAC } from '../hooks/useRBAC';
 const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, verticalList = [], loading = false, updateTaskStage }) => {
   const { isMobile } = useIsMobile();
   const { bindLongPress } = useMobileLongPress();
-  const { setActiveVertical } = useAppNavigation();
+  const { activeVertical, setActiveVertical, setIsSidebarOpen } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
   const openAddEscalationModal = () => {
@@ -355,8 +359,119 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     }
   }, [hasEscalations, activeView]);
 
+  // Reset scroll position to hide stage-navigation-tray behind sticky header switcher by default
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      const scrollContainer = document.querySelector('.home-summary-view');
+      if (scrollContainer) {
+        if (activeView === 'escalations') {
+          scrollContainer.scrollTop = 76; // Height of stage switcher tray (68px + 8px margin)
+        } else if (activeView === 'centralised_task_view') {
+          scrollContainer.scrollTop = 54; // Height of centralized switcher tray (46px + 8px margin)
+        } else {
+          scrollContainer.scrollTop = 0;
+        }
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [activeView]);
+
   return (
     <div className="home-summary-view">
+      {/* Mobile Sticky Header, Spacer, and Switcher Container */}
+      {isMobile && (
+        <div className="mobile-header-switcher-sticky-container">
+          <header className="mobile-top-header-bar">
+            {/* Logo */}
+            <button
+              className="logo-button"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <img src={powerLogo} alt="Logo" className="logo-svg" />
+            </button>
+
+            {/* Brand Title */}
+            <h1 className="brand-title-centered">PowerProject</h1>
+
+            {isBypassActive && (
+              <button 
+                className="halo-button mobile-header-sandbox-btn"
+                onClick={() => setIsSandboxOpen(true)}
+              >
+                ⚠️ Sandbox
+              </button>
+            )}
+
+            {/* Tutorials Button */}
+            <button 
+              className={`halo-button mobile-header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
+              onClick={() => setActiveVertical('tutorial')}
+            >
+              💡 Tutorials
+            </button>
+          </header>
+
+          {/* Spacing Container */}
+          <div className="mobile-header-switcher-spacer"></div>
+
+          {/* Mobile-Only Summary View Navigation Switcher Tray */}
+          <nav className="summary-navigation-tray">
+            <div className="summary-nav-container">
+              {hasEscalations && (
+                <button
+                  className={`summary-nav-item stage-red ${activeView === 'escalations' ? 'active' : ''}`}
+                  onClick={() => setActiveView('escalations')}
+                  {...bindLongPress("Team Support has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ.")}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconZap size={14} />
+                    <span className="summary-badge-count">{escalationTasks.length}</span>
+                  </div>
+                  <span className="summary-nav-label">Team Support</span>
+                </button>
+              )}
+               <button
+                className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
+                onClick={() => setActiveView('centralised_task_view')}
+                {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
+              >
+                <div className="summary-icon-wrapper">
+                  <IconBoards size={14} />
+                  {regularMyTasks.length > 0 && (
+                    <span className="summary-badge-count">{regularMyTasks.length}</span>
+                  )}
+                </div>
+                <span className="summary-nav-label">Centralised Tasks</span>
+              </button>
+              <button
+                className={`summary-nav-item stage-slate ${activeView === 'executive_summary' ? 'active' : ''}`}
+                onClick={() => setActiveView('executive_summary')}
+                {...bindLongPress("Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ.")}
+              >
+                <div className="summary-icon-wrapper">
+                  <IconEye size={14} />
+                  {topLevelVisibleCount > 0 && (
+                    <span className="summary-badge-count">{topLevelVisibleCount}</span>
+                  )}
+                </div>
+                <span className="summary-nav-label">Executive Summary</span>
+              </button>
+              {!!user && (
+                <button
+                  className="summary-nav-item stage-mint"
+                  onClick={openAddEscalationModal}
+                >
+                  <div className="summary-icon-wrapper">
+                    <span className="request-support-plus">+</span>
+                  </div>
+                  <span className="summary-nav-label">Request Support</span>
+                </button>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+
       {/* Welcome Header & Tutorial Quick Start (Desktop Only) */}
       {!isMobile && (
         <div className="home-dashboard-header">
@@ -365,56 +480,6 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
             <p className="welcome-subtitle">Manage your escalations and centralized tasks in a unified workspace.</p>
           </div>
         </div>
-      )}
-
-      {/* Mobile-Only Summary View Navigation Switcher Tray */}
-      {isMobile && (
-        <nav className="summary-navigation-tray">
-          <div className="summary-nav-container">
-            {hasEscalations && (
-              <button
-                className={`summary-nav-item ${activeView === 'escalations' ? 'active' : ''}`}
-                onClick={() => setActiveView('escalations')}
-                style={{ '--stage-accent': 'var(--brand-red, #ef4444)' }}
-                {...bindLongPress("Team Support has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ.")}
-              >
-                <div className="summary-icon-wrapper">
-                  <IconZap size={18} />
-                  <span className="summary-badge-count">{escalationTasks.length}</span>
-                </div>
-                <span className="summary-nav-label">Team Support</span>
-              </button>
-            )}
-             <button
-              className={`summary-nav-item ${activeView === 'centralised_task_view' ? 'active' : ''}`}
-              onClick={() => setActiveView('centralised_task_view')}
-              style={{ '--stage-accent': 'var(--brand-green)' }}
-              {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
-            >
-              <div className="summary-icon-wrapper">
-                <IconBoards size={18} />
-                {regularMyTasks.length > 0 && (
-                  <span className="summary-badge-count">{regularMyTasks.length}</span>
-                )}
-              </div>
-              <span className="summary-nav-label">Centralised Tasks</span>
-            </button>
-            <button
-              className={`summary-nav-item ${activeView === 'executive_summary' ? 'active' : ''}`}
-              onClick={() => setActiveView('executive_summary')}
-              style={{ '--stage-accent': '#94a3b8' }}
-              {...bindLongPress("Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ.")}
-            >
-              <div className="summary-icon-wrapper">
-                <IconEye size={18} />
-                {topLevelVisibleCount > 0 && (
-                  <span className="summary-badge-count">{topLevelVisibleCount}</span>
-                )}
-              </div>
-              <span className="summary-nav-label">Executive Summary</span>
-            </button>
-          </div>
-        </nav>
       )}
 
       {/* 0. Escalations Section */}
@@ -528,6 +593,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
       />
+      {isMobile && (
+        <SandboxManagerModal isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} />
+      )}
     </div>
   );
 };

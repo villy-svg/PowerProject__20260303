@@ -138,14 +138,6 @@ const MobileHeader = ({
           <h1>{title}</h1>
         </div>
 
-        {/* Global Search Bar (Board Context) — task-scoped or records-mode */}
-        <SearchBar
-          context="board"
-          records={searchRecords}
-          recordType={recordType}
-          onSelect={onSearchSelect}
-        />
-
         {/* Row 2: Description — HIDDEN on mobile (adaptive-ui-strategy §6) */}
       </header>
 

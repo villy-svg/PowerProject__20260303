@@ -25,6 +25,33 @@
   opacity: 0.7;
 }
 
+@media screen and (max-width: 480px) {
+  .anon-toggle-label {
+    font-size: 0.75rem;
+  }
+  .anon-toggle-description {
+    font-size: 0.65rem;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .anon-toggle-label {
+    font-size: 0.65rem;
+  }
+  .anon-toggle-description {
+    font-size: 0.58rem;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .anon-toggle-label {
+    font-size: 0.58rem;
+  }
+  .anon-toggle-description {
+    font-size: 0.52rem;
+  }
+}
+
 /* Custom Toggle Switch Styling */
 .switch {
   position: relative;

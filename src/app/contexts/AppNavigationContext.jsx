@@ -81,6 +81,10 @@ export function AppNavigationProvider({ verticals = {}, children }) {
   // ── Exit App Modal ────────────────────────────────────────────────────────
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // ── Search State (lifted for bottom nav access on mobile) ──────────────────
+  const [searchProps, setSearchProps] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   // ── Smart setActiveVertical ───────────────────────────────────────────────
   /**
    * setActiveVertical wraps the raw setter with localStorage persistence.
@@ -97,6 +101,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     setIsMobileBoardSubTrayOpen(false);
     setIsMobileAddTrayOpen(false);
     setShowBottomNavOverlay(false);
+    setIsSearchOpen(false);
 
     setActiveVerticalRaw(id);
 
@@ -217,6 +222,10 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     // Exit App modal
     showExitModal,
     setShowExitModal,
+    searchProps,
+    setSearchProps,
+    isSearchOpen,
+    setIsSearchOpen,
   };
 
   return (

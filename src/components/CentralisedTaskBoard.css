@@ -11,6 +11,18 @@
   border-left-color: var(--brand-blue) !important;
 }
 
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-center-gap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .centralised-task-view .summary-header h2 {
   font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
   font-weight: 800 !important; /* Bold, premium weight */
@@ -195,7 +207,7 @@
 
 @media screen and (max-width: 768px) {
   .centralised-task-view {
-    margin-top: 32px !important; /* Expanded margin to give breathing room below the switcher tray */
+    margin-top: 12px !important; /* Reduced from 32px — trays are now tighter */
     padding-bottom: 20px;
   }
   .summary-header {
@@ -227,6 +239,7 @@
   }
   .column-cards-container {
     min-height: auto;
+    overflow-y: visible !important;
   }
 
   /* ==========================================================================
@@ -248,11 +261,11 @@
 
   .centralised-stage-nav-container {
     display: flex;
-    height: 54px; /* Tightened from 68px */
+    height: 46px; /* Reduced from 54px to match summary tray */
     width: 100%;
     justify-content: space-around;
     align-items: center;
-    padding: 0 4px;
+    padding: 0 2px;
   }
 
   .centralised-stage-nav-item {
@@ -266,12 +279,14 @@
     border: none;
     color: var(--text-color);
     opacity: 0.5;
-    gap: 1px; /* Tightened gap */
+    gap: 1px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 38px; /* Tightened from 44px */
-    border-radius: 12px;
-    margin: 2px;
+    min-height: 32px !important; /* Override global 44px touch-target enforcement */
+    min-width: 0 !important; /* Override global 44px min-width */
+    border-radius: 10px;
+    margin: 1px;
+    padding: 0 2px;
     position: relative;
     box-shadow: none !important;
   }
@@ -280,7 +295,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px; /* Tightened from 8px */
+    padding: 4px; /* Tightened from 6px */
     border-radius: 50%;
     transition: all 0.3s ease;
     position: relative;
@@ -288,15 +303,15 @@
 
   .centralised-stage-badge-count {
     position: absolute;
-    top: 4px;
-    right: 2px;
+    top: -2px;
+    right: -4px;
     background: var(--stage-accent);
     color: #000;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     font-weight: 800;
-    min-width: 15px;
-    height: 15px;
+    min-width: 12px;
+    height: 12px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -306,15 +321,15 @@
   }
 
   .centralised-stage-nav-label {
-    font-size: 0.62rem;
+    font-size: 0.48rem; /* Reduced to match summary-nav-label */
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     transition: all 0.2s ease;
-    white-space: normal; /* Wrap words into 2 rows */
+    white-space: normal;
     text-align: center;
-    line-height: 1.1;
-    max-width: 90px;
+    line-height: 1.0;
+    max-width: 72px; /* Tighter cap */
   }
 
   /* Active State */

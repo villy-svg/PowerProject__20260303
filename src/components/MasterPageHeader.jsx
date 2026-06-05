@@ -3,6 +3,7 @@ import { useLayoutShell } from '../app/shells/useLayoutShell';
 import DesktopHeader from '../app/shells/DesktopHeader';
 import MobileHeader from '../app/shells/MobileHeader';
 import { useHeaderState } from '../app/shells/useHeaderState';
+import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 import './MasterPageHeader.css';
 
 /**
@@ -55,6 +56,20 @@ const MasterPageHeader = ({
   hideSearchBar,
 }) => {
   const { shellType } = useLayoutShell();
+  const { setSearchProps } = useAppNavigation();
+
+  // Sync search parameters to mobile bottom nav via context
+  React.useEffect(() => {
+    if (shellType === 'mobile') {
+      setSearchProps({
+        records: searchRecords,
+        recordType,
+        onSelect: onSearchSelect,
+        hideSearchBar,
+      });
+      return () => setSearchProps(null);
+    }
+  }, [searchRecords, recordType, onSearchSelect, hideSearchBar, shellType, setSearchProps]);
   
   const headerState = useHeaderState({
     isSubSidebarOpen,

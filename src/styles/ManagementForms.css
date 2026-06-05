@@ -14,7 +14,7 @@
   /* Generous vertical breathing room */
   overflow-y: auto;
   /* Allow overlay to scroll if modal is too tall */
-  z-index: 2000;
+  z-index: 9999;
   animation: modalFadeIn 0.3s ease-out;
 }
 
@@ -250,8 +250,8 @@ select:-webkit-autofill:focus {
   }
 
   .form-group label {
-    font-size: 0.65rem;
-    letter-spacing: 0.3px;
+    font-size: 0.52rem;
+    letter-spacing: 0.1px;
     margin-bottom: 0;
     opacity: 0.8;
   }
@@ -276,6 +276,20 @@ select:-webkit-autofill:focus {
   .modal-footer .halo-button {
     padding: 10px;
     font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .form-group label {
+    font-size: 0.46rem;
+    letter-spacing: 0px;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .form-group label {
+    font-size: 0.4rem;
+    letter-spacing: 0px;
   }
 }
 

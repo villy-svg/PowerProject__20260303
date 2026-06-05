@@ -24,6 +24,15 @@
   height: calc(64px + var(--safe-bottom, 0px));
 }
 
+.bottom-nav.has-search {
+  height: calc(118px + var(--safe-bottom, 0px));
+}
+
+.bottom-nav-search-wrapper {
+  padding: 8px 16px 0px 16px;
+  width: 100%;
+}
+
 .bottom-nav-hidden {
   transform: translateY(115%);
   pointer-events: none;

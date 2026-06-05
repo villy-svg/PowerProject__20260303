@@ -43,6 +43,7 @@ const MobileLayout = ({
     activeVertical, setActiveVertical,
     isSidebarOpen, setIsSidebarOpen,
     showBottomNavOverlay, setShowBottomNavOverlay,
+    searchProps, isSearchOpen
   } = useAppNavigation();
 
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
@@ -80,47 +81,9 @@ const MobileLayout = ({
       data-shell="mobile"
       data-theme={darkMode ? 'dark' : 'light'}
       data-view-state={activeVertical ? 'vertical' : 'home'}
+      data-has-search={(!searchProps?.hideSearchBar && isSearchOpen) ? 'true' : 'false'}
     >
-      {/* Logo — hidden when in a vertical */}
-      <button
-        className={`logo-button ${activeVertical ? 'mobile-hidden' : ''}`}
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <img src={powerLogo} alt="Logo" className="logo-svg" />
-      </button>
-
-      {/* Brand Title — hidden when in a vertical */}
-      <h1 className={`brand-title-centered ${activeVertical ? 'mobile-hidden' : ''}`}>PowerProject</h1>
-
-      {/* Tutorials Button — top right corner, hidden when in a vertical */}
-      <button 
-        className={`halo-button mobile-header-tutorial-btn ${activeVertical ? 'mobile-hidden' : ''} ${activeVertical === 'tutorial' ? 'active' : ''}`}
-        onClick={() => setActiveVertical('tutorial')}
-      >
-        💡 Tutorials
-      </button>
-
-      {isBypassActive && (
-        <button 
-          className="halo-button mobile-header-sandbox-btn"
-          onClick={() => setIsSandboxOpen(true)}
-          style={{
-            position: 'fixed',
-            top: '16px',
-            right: activeVertical ? '16px' : '124px',
-            zIndex: 101,
-            color: '#f59e0b',
-            borderColor: 'rgba(245, 158, 11, 0.3)',
-            background: 'rgba(245, 158, 11, 0.05)',
-            fontWeight: 800,
-            fontSize: '0.75rem',
-            padding: '0 8px',
-            height: '32px'
-          }}
-        >
-          ⚠️ Sandbox
-        </button>
-      )}
+      {/* Mobile Top Header Bar — removed to be rendered inside the scrollable ExecutiveSummary */}
 
       {/* Sidebar Drawer */}
       <MobileSidebar
@@ -144,14 +107,7 @@ const MobileLayout = ({
              it has no content and would create blank space below the fixed brand title.
              The brand title (position:fixed) already serves as the dashboard header. */}
 
-        {/* Global Search Bar — dashboard only.
-             Placed inside app-main-area (normal flow) so the fixed brand-title-centered
-             cannot overlap it. Small top margin gives breathing room below the title. */}
-        {!activeVertical && (
-          <div className="mobile-dashboard-search">
-            <SearchBar context="dashboard" />
-          </div>
-        )}
+
 
         {/* Content */}
         <main className="app-content">
@@ -167,6 +123,8 @@ const MobileLayout = ({
         verticals={verticals}
         showOverlay={showBottomNavOverlay}
         onCloseOverlay={() => setShowBottomNavOverlay(false)}
+        user={user}
+        permissions={permissions}
       />
 
       {/* Exit App Confirmation Modal — shown on dashboard back press */}

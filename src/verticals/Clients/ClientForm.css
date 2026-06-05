@@ -126,3 +126,21 @@
   content: '✓';
   font-weight: 900;
 }
+
+@media screen and (max-width: 480px) {
+  .client-form .form-group label {
+    font-size: 0.72rem;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .client-form .form-group label {
+    font-size: 0.65rem;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .client-form .form-group label {
+    font-size: 0.58rem;
+  }
+}

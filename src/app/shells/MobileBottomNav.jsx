@@ -22,8 +22,12 @@ import {
   IconHubs,
   IconPeople,
   IconDatabase,
+  IconSearch,
 } from '../../components/Icons';
 import '../../components/BottomNav.css';
+
+import SearchBar from '../../components/SearchBar';
+import { useAppNavigation } from '../contexts/AppNavigationContext';
 
 const MobileBottomNav = ({
   activeVertical,
@@ -32,23 +36,49 @@ const MobileBottomNav = ({
   verticals = {},
   showOverlay = false,
   onCloseOverlay = null,
+  user,
+  permissions,
 }) => {
   const isScrollVisible = useScrollDirection(10, 100);
+  const { searchProps, isSearchOpen, setIsSearchOpen } = useAppNavigation();
 
   const forceShow = showOverlay;
   const isEffectivelyVisible = forceShow || isScrollVisible;
+  const hasSearch = !searchProps?.hideSearchBar;
+  const isBottomNavExpanded = hasSearch && isSearchOpen;
+
+  const isAssigned = (vId) => {
+    if (!vId) return true; // Dashboard is always assigned
+    return user?.assignedVerticals?.includes(vId) || permissions?.scope === 'global';
+  };
 
   const navItems = [
     { id: null, label: 'Dashboard', Icon: IconHome },
     { id: verticals.CHARGING_HUBS?.id || 'CHARGING_HUBS', label: 'Hubs', Icon: IconHubs },
     { id: verticals.EMPLOYEES?.id || 'EMPLOYEES', label: 'Team', Icon: IconPeople },
     { id: verticals.CLIENTS?.id || 'CLIENTS', label: 'Clients', Icon: IconDatabase },
-  ];
+  ].filter(item => isAssigned(item.id));
 
   return (
     <>
       {showOverlay && <div className="bottom-nav-backdrop" onClick={onCloseOverlay} />}
-      <nav className={`bottom-nav ${(!isEffectivelyVisible && !showOverlay) ? 'bottom-nav-hidden' : ''} ${showOverlay ? 'overlay-mode' : ''}`}>
+      {isSearchOpen && <div className="bottom-nav-backdrop" onClick={() => setIsSearchOpen(false)} />}
+      <nav className={`bottom-nav ${(!isEffectivelyVisible && !showOverlay) ? 'bottom-nav-hidden' : ''} ${showOverlay ? 'overlay-mode' : ''} ${isBottomNavExpanded ? 'has-search' : ''}`}>
+        {!showOverlay && hasSearch && isSearchOpen && (
+          <div className="bottom-nav-search-wrapper">
+            <SearchBar
+              context={activeVertical ? 'board' : 'dashboard'}
+              records={searchProps?.records}
+              recordType={searchProps?.recordType || 'Record'}
+              onSelect={(record) => {
+                if (searchProps?.onSelect) {
+                  searchProps.onSelect(record);
+                }
+                setIsSearchOpen(false);
+              }}
+            />
+          </div>
+        )}
         <div className="bottom-nav-container">
           {navItems.map((item) => {
             const isActive = activeVertical === item.id;
@@ -68,6 +98,21 @@ const MobileBottomNav = ({
               </button>
             );
           })}
+
+          {hasSearch && (
+            <button
+              className={`nav-item search-trigger ${isSearchOpen ? 'active' : ''}`}
+              onClick={() => {
+                setIsSearchOpen(prev => !prev);
+                if (onCloseOverlay) onCloseOverlay();
+              }}
+            >
+              <div className="icon-wrapper">
+                <IconSearch size={16} />
+              </div>
+              <span className="nav-label">Search</span>
+            </button>
+          )}
 
           <button
             className="nav-item menu-trigger"

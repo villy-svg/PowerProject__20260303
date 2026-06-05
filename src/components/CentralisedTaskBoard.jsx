@@ -46,7 +46,19 @@ const CentralisedTaskBoard = ({
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   
-  const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
+  const assignedTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
+  const myTasks = assignedTasks.filter(t => {
+    let current = t;
+    while (current.parentTask) {
+      const parent = tasks.find(pt => pt.id === current.parentTask);
+      if (!parent) break;
+      if (taskUtils.isAssignee(parent, user)) {
+        return false;
+      }
+      current = parent;
+    }
+    return true;
+  });
   const boardStages = STAGE_LIST.filter(s => s.id !== 'DEPRIORITIZED');
 
   if (myTasks.length === 0) {
@@ -54,8 +66,8 @@ const CentralisedTaskBoard = ({
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
           {!isMobile && (
-            <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="summary-header secondary-header flex-between">
+              <div className="flex-center-gap">
                 <h2>{title}</h2>
                 <button 
                   className="board-collapse-toggle-btn"
@@ -72,7 +84,7 @@ const CentralisedTaskBoard = ({
             </div>
           )}
           {!isMobile && <p className="section-description">{description}</p>}
-          {canCreateEscalation && (
+          {canCreateEscalation && !isMobile && (
             <div className="centralised-actions-row">
               <button
                 className="halo-button add-escalation-btn"
@@ -107,8 +119,8 @@ const CentralisedTaskBoard = ({
     <div className="centralised-task-view-wrapper animate-fade-in">
       <div className="centralised-task-view">
         {!isMobile && (
-          <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="summary-header secondary-header flex-between">
+            <div className="flex-center-gap">
               <h2>{title}</h2>
               <button 
                 className="board-collapse-toggle-btn"
@@ -125,7 +137,7 @@ const CentralisedTaskBoard = ({
           </div>
         )}
         {!isMobile && <p className="section-description">{description}</p>}
-        {canCreateEscalation && (
+        {canCreateEscalation && !isMobile && (
           <div className="centralised-actions-row">
             <button
               className="halo-button add-escalation-btn"
@@ -152,10 +164,10 @@ const CentralisedTaskBoard = ({
                     style={{ '--stage-accent': stage.color }}
                   >
                     <div className="centralised-stage-icon-wrapper">
-                      {stage.id === 'BACKLOG' && <IconClock size={20} />}
-                      {stage.id === 'IN_PROGRESS' && <IconZap size={18} />}
-                      {stage.id === 'REVIEW' && <IconEye size={20} />}
-                      {stage.id === 'COMPLETED' && <IconCheck size={20} />}
+                      {stage.id === 'BACKLOG' && <IconClock size={14} />}
+                      {stage.id === 'IN_PROGRESS' && <IconZap size={14} />}
+                      {stage.id === 'REVIEW' && <IconEye size={14} />}
+                      {stage.id === 'COMPLETED' && <IconCheck size={14} />}
                       {count > 0 && <span className="centralised-stage-badge-count">{count}</span>}
                     </div>
                     <span className="centralised-stage-nav-label">{stage.label}</span>

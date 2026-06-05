@@ -8,7 +8,7 @@
   align-items: center;
   /* Back to center, but with a safety margin */
   padding: 20px;
-  z-index: 2000;
+  z-index: 9999;
   animation: modalFadeIn 0.3s ease-out;
   overflow: hidden;
   /* Overlay itself doesn't scroll, content does */
