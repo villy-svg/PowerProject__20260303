@@ -12,22 +12,22 @@ export const introTutorial = {
   layout: 'onboarding',
   desktopSlides: [
     {
-      image: '/powerpod-logo.svg',
-      fallbackImage: '/powerpod-logo.svg',
+      image: '/logos/powerpod-logo.svg',
+      fallbackImage: '/logos/powerpod-logo.svg',
       title: 'Introduction to PowerProject',
       text: 'The PowerPod app for all in-house operations and team support',
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/customer_support_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/customer_support_illustration.png',
+      image: '/logos/customer_support_illustration.png',
+      fallbackImage: '/logos/customer_support_illustration.png',
       title: 'Request Support',
       text: 'You can request support for ALL things like hubs, clients, drivers, managers and also for escalating to company leadership',
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/task_manager_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/task_manager_illustration.png',
+      image: '/logos/task_manager_illustration.png',
+      fallbackImage: '/logos/task_manager_illustration.png',
       title: 'Task Manager',
       text: `Track all your tasks in one place.
 Your manager will be able to assign you tasks here.
@@ -35,8 +35,8 @@ You will be able to submit photos, videos for completed tasks for review.`,
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/lightbulb_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/lightbulb_illustration.png',
+      image: '/logos/lightbulb_illustration.png',
+      fallbackImage: '/logos/lightbulb_illustration.png',
       title: 'All set for PowerProject!',
       text: 'For more tutorials access the "Tutorials" button on the HomePage.',
       annotations: []
@@ -44,22 +44,22 @@ You will be able to submit photos, videos for completed tasks for review.`,
   ],
   mobileSlides: [
     {
-      image: '/powerpod-logo.svg',
-      fallbackImage: '/powerpod-logo.svg',
+      image: '/logos/powerpod-logo.svg',
+      fallbackImage: '/logos/powerpod-logo.svg',
       title: 'Introduction to PowerProject',
       text: 'The PowerPod app for all in-house operations and team support',
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/customer_support_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/customer_support_illustration.png',
+      image: '/logos/customer_support_illustration.png',
+      fallbackImage: '/logos/customer_support_illustration.png',
       title: 'Request Support',
       text: 'You can request support for ALL things like hubs, clients, drivers, managers and also for escalating to company leadership',
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/task_manager_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/task_manager_illustration.png',
+      image: '/logos/task_manager_illustration.png',
+      fallbackImage: '/logos/task_manager_illustration.png',
       title: 'Task Manager',
       text: `Track all your tasks in one place.
 Your manager will be able to assign you tasks here.
@@ -67,8 +67,8 @@ You will be able to submit photos, videos for completed tasks for review.`,
       annotations: []
     },
     {
-      image: '/Tutorial Screenshots/lightbulb_illustration.png',
-      fallbackImage: '/Tutorial Screenshots/lightbulb_illustration.png',
+      image: '/logos/lightbulb_illustration.png',
+      fallbackImage: '/logos/lightbulb_illustration.png',
       title: 'All set for PowerProject!',
       text: 'For more tutorials access the "Tutorials" button on the HomePage.',
       annotations: []

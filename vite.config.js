@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'auto',
-        includeAssets: ['screenshot-mobile.png', 'screenshot-desktop.png', 'powerpod-logo-512.png'],
+        includeAssets: ['screenshots/screenshot-mobile.png', 'screenshots/screenshot-desktop.png', 'logos/powerpod-logo-512.png'],
         manifest: {
           id: base,
           name: "PowerProject",
@@ -25,13 +25,13 @@ export default defineConfig(({ mode }) => {
           theme_color: "#050505",
           icons: [
             {
-              src: "powerpod-logo-512.png",
+              src: "logos/powerpod-logo-512.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "any"
             },
             {
-              src: "powerpod-logo-512.png",
+              src: "logos/powerpod-logo-512.png",
               sizes: "512x512",
               type: "image/png",
               purpose: "maskable"
@@ -39,14 +39,14 @@ export default defineConfig(({ mode }) => {
           ],
           screenshots: [
             {
-              src: "screenshot-mobile.png",
+              src: "screenshots/screenshot-mobile.png",
               sizes: "1024x1024",
               type: "image/png",
               form_factor: "narrow",
               label: "PowerProject Mobile Dashboard"
             },
             {
-              src: "screenshot-desktop.png",
+              src: "screenshots/screenshot-desktop.png",
               sizes: "1024x1024",
               type: "image/png",
               form_factor: "wide",
