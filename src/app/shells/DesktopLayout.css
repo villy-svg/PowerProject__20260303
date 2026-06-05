@@ -81,7 +81,7 @@
 /* Sidebar is an inline flex panel on desktop — never fixed/overlay */
 .desktop-layout .sidebar {
   position: relative;
-  height: 100vh;
+  height: 100dvh;
   z-index: 10;
   /* No fixed positioning, no translateX */
 }

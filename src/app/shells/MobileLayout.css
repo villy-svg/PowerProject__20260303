@@ -183,7 +183,7 @@
   bottom: 0;
   left: 0;
   height: auto;
-  max-height: 85vh;
+  max-height: 85dvh;
   width: 100vw;
   max-width: 100%;
   transform: translateY(100%);
@@ -199,7 +199,7 @@
 .mobile-layout .sidebar .sidebar-content-wrapper {
   width: 100%;
   height: auto;
-  min-height: 40vh;
+  min-height: 40dvh;
 }
 
 .mobile-layout .sidebar.open {
@@ -465,7 +465,7 @@ body[data-keyboard="open"] .modal-content,
 body[data-keyboard="open"] .modal-content-area,
 body[data-keyboard="open"] .task-form-sheet,
 body[data-keyboard="open"] .form-sheet {
-  max-height: calc(var(--visual-viewport-height, 100vh) - 16px) !important;
+  max-height: calc(var(--visual-viewport-height, 100dvh) - 16px) !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
   transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);

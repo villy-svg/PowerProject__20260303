@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -16,6 +16,7 @@ import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
+import { useIsMobile } from '../hooks/useIsMobile';
 import AssigneeBadge from './AssigneeBadge';
 import './TaskCard.css';
 
@@ -58,6 +59,8 @@ const TaskCard = ({
   isExpanded = false,
   onToggleExpand
 }) => {
+  const { isMobile } = useIsMobile();
+  const [showDetails, setShowDetails] = useState(false);
   const tva = useTaskViewActions({
     onUpdateStage: updateTaskStage,
     onDeleteTask: deleteTask,
@@ -179,17 +182,69 @@ const TaskCard = ({
       </div>
 
       {/* Row 2: Title */}
-      <div className="card-row-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {isRejected && task.stageId === 'IN_PROGRESS' && (
-          <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
+      <div className="card-row-2" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+          {isRejected && task.stageId === 'IN_PROGRESS' && (
+            <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
+          )}
+          {permissions.canUpdate && !!task.hasReviewDescendant && (
+            <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
+          )}
+          {task.text?.startsWith('[DRAFT]') && (
+            <span className="draft-gray-dot" title="Draft Task" />
+          )}
+          <span className="card-task-name" title={task.text}>{task.text}</span>
+        </div>
+
+        {/* Read More button & Description for Mobile */}
+        {isMobile && task.description && (
+          <div className="mobile-description-container" style={{ width: '100%', marginTop: '4px' }}>
+            <button
+              type="button"
+              className="read-more-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(!showDetails);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--brand-mint)',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+                padding: '2px 0',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              {showDetails ? 'Read Less ▲' : 'Read More ▼'}
+            </button>
+            
+            {showDetails && (
+              <div 
+                className="task-detailed-description" 
+                style={{ 
+                  marginTop: '6px', 
+                  fontSize: '0.82rem', 
+                  color: 'var(--text-secondary)', 
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border-color)',
+                  width: '100%',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div style={{ fontWeight: '700', marginBottom: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>Detailed Description</div>
+                <p style={{ margin: 0, lineHeight: '1.4' }}>{task.description}</p>
+              </div>
+            )}
+          </div>
         )}
-        {permissions.canUpdate && !!task.hasReviewDescendant && (
-          <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
-        )}
-        {task.text?.startsWith('[DRAFT]') && (
-          <span className="draft-gray-dot" title="Draft Task" />
-        )}
-        <span className="card-task-name" title={task.text}>{task.text}</span>
       </div>
 
       {/* Row 3: Unified Controls (Navigation + Management) */}

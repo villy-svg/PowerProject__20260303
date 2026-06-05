@@ -2,7 +2,7 @@
 /* MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below */
 .sidebar {
   position: relative;
-  height: 100vh;
+  height: 100dvh;
   background-color: var(--surface-card);
   border-right: 1px solid transparent;
   z-index: 10;
@@ -211,7 +211,7 @@
     bottom: 0;
     left: 0;
     height: auto;
-    max-height: 85vh;
+    max-height: 85dvh;
     width: 100vw;
     max-width: 100%;
     transform: translateY(100%);
@@ -226,7 +226,7 @@
   .sidebar .sidebar-content-wrapper {
     width: 100%;
     height: auto;
-    min-height: 40vh;
+    min-height: 40dvh;
   }
   .sidebar.open {
     transform: translateY(0);
@@ -444,13 +444,13 @@
 
 /* Floating Navigation Tray Overrides */
 .mobile-board-sub-tray.mobile-sidebar-shell {
-  max-height: 72vh !important;
+  max-height: 72dvh !important;
   display: flex;
   flex-direction: column;
 }
 
 .mobile-sidebar-shell .mobile-board-sub-tray-content {
-  max-height: calc(72vh - 70px) !important;
+  max-height: calc(72dvh - 70px) !important;
   display: flex;
   flex-direction: column;
   gap: 16px;

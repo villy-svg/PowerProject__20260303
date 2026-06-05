@@ -156,8 +156,9 @@ function AppShell({ verticals, verticalList }) {
       const isCtrlShiftR = e.ctrlKey && e.shiftKey && (e.key === 'R' || e.key === 'r' || e.keyCode === 82);
       const isCtrlF5 = e.ctrlKey && (e.key === 'F5' || e.keyCode === 116);
       if (isCtrlShiftR || isCtrlF5) {
-        console.log('[App] Hard reload detected via keypress. Clearing intro tutorial seen flag...');
+        console.log('[App] Hard reload detected via keypress. Clearing intro tutorial seen flags...');
         localStorage.removeItem(`intro_tutorial_seen_${APP_VERSION}`);
+        localStorage.removeItem(`intro_tutorial_seen_standalone_${APP_VERSION}`);
       }
     };
     window.addEventListener('keydown', handleKeyDown, { capture: true });
@@ -169,7 +170,9 @@ function AppShell({ verticals, verticalList }) {
   useEffect(() => {
     const checkOnboarding = async () => {
       if (user && user.isActive !== false) {
-        const seen = localStorage.getItem(`intro_tutorial_seen_${APP_VERSION}`);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        const storageKey = isStandalone ? `intro_tutorial_seen_standalone_${APP_VERSION}` : `intro_tutorial_seen_${APP_VERSION}`;
+        const seen = localStorage.getItem(storageKey);
         if (!seen) {
           try {
             // Load rules to check for special condition tutorials
@@ -240,7 +243,9 @@ function AppShell({ verticals, verticalList }) {
     if (currentTutorialIndex < tutorialQueue.length - 1) {
       setCurrentTutorialIndex(currentTutorialIndex + 1);
     } else {
-      localStorage.setItem(`intro_tutorial_seen_${APP_VERSION}`, 'true');
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      const storageKey = isStandalone ? `intro_tutorial_seen_standalone_${APP_VERSION}` : `intro_tutorial_seen_${APP_VERSION}`;
+      localStorage.setItem(storageKey, 'true');
       setTutorialQueue([]);
       setCurrentTutorialIndex(-1);
     }

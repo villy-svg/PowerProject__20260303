@@ -738,7 +738,7 @@
    when the keyboard is open — prevents content from rendering behind keyboard */
 body[data-keyboard="open"] #root,
 body[data-keyboard="open"] .app-root {
-  height: var(--visual-viewport-height, 100vh);
+  height: var(--visual-viewport-height, 100dvh);
   overflow: hidden;
 }
 

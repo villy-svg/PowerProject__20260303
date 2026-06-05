@@ -446,6 +446,19 @@
 
 /* Mobile Adaptation */
 @media (max-width: 768px) {
+  .task-card-master .subtask-tag,
+  .task-card-master .hub-tile-meta {
+    display: flex !important;
+  }
+
+  .task-card-master .assignee-badge-base {
+    display: inline-flex !important;
+  }
+
+  .task-card-master .duplicate-badge {
+    display: inline-block !important;
+  }
+
   .card-row-3 {
     flex-wrap: wrap !important; 
     overflow-x: visible !important; 
