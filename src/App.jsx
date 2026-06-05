@@ -190,13 +190,17 @@ function AppShell({ verticals, verticalList }) {
 
             specialRules.forEach(rule => {
               const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
-              const flowSlides = parsedSlides.map((slide) => ({
-                image: '/powerpod-logo.svg',
-                fallbackImage: '/powerpod-logo.svg',
-                title: slide.isIntro ? rule.title : slide.title,
-                text: slide.text,
-                annotations: []
-              }));
+              const flowSlides = parsedSlides.map((slide, idx) => {
+                const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
+                const imgPath = isCustomerVehicleLogo ? '/no_customer_vehicle_logo.png' : '/powerpod-logo.svg';
+                return {
+                  image: imgPath,
+                  fallbackImage: imgPath,
+                  title: slide.isIntro ? rule.title : slide.title,
+                  text: slide.text,
+                  annotations: []
+                };
+              });
 
               queue.push({
                 id: `rule_${rule.id}`,

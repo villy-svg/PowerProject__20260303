@@ -249,3 +249,26 @@ export const IconBell = (props) => (
   </IconBase>
 );
 
+export const IconLock = (props) => (
+  <IconBase {...props}>
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </IconBase>
+);
+
+export const IconBulb = (props) => (
+  <IconBase {...props}>
+    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .5 2.2 1.5 3.1.7.8 1.3 1.5 1.5 2.5" />
+    <line x1="9" y1="18" x2="15" y2="18" />
+    <line x1="10" y1="22" x2="14" y2="22" />
+  </IconBase>
+);
+
+export const IconWarning = (props) => (
+  <IconBase {...props}>
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </IconBase>
+);
+

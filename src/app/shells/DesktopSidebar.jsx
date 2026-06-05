@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from 'react';
-import { IconChevronDown, IconChevronRight } from '../../components/Icons';
+import { IconChevronDown, IconChevronRight, IconLock } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
 import '../../components/Sidebar.css';
 
@@ -92,7 +92,7 @@ const DesktopSidebar = ({
                       >
                         <span className="v-label-text">{vertical.label}</span>
                         <div className="v-actions-wrapper">
-                          {isLocked && <span className="lock-icon">🔒</span>}
+                          {isLocked && <IconLock className="lock-icon" size={14} />}
                           {!isLocked && canManage && verticalList.length > 0 && 
                             (vertical.id === 'CHARGING_HUBS' || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
                             <button

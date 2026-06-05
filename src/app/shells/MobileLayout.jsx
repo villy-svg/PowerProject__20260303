@@ -65,6 +65,10 @@ const MobileLayout = ({
     const isInteractive = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'A', 'LABEL'].includes(tag);
     if (isInteractive) return;
 
+    // Do NOT trigger if the double tap is on a task card/tile/row
+    const isTaskTile = e.target?.closest('.task-card-master, .list-task-row, .tree-row');
+    if (isTaskTile) return;
+
     const now = Date.now();
     const timeSinceLast = now - lastTapRef.current;
     if (timeSinceLast < 300 && timeSinceLast > 30) {

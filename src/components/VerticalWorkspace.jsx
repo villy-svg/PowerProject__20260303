@@ -5,6 +5,7 @@ import { resolveVerticalRootId } from '../registry/verticalRegistry';
 import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 import { useLayoutShell } from '../app/shells/useLayoutShell';
 import WorkspaceSubSidebar from '../app/shells/WorkspaceSubSidebar';
+import { IconLock } from './Icons';
 
 import './VerticalWorkspace.css';
 
@@ -134,8 +135,8 @@ const VerticalWorkspace = ({
   if (!isAuthorized) {
     return (
       <div className="workspace-container access-denied-layout">
-        <div className="access-denied-content">
-          <span className="lock-icon">🔒</span>
+        <div className="access-denied-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <IconLock className="lock-icon" size={48} style={{ opacity: 0.5, color: 'var(--brand-red)' }} />
           <h2>Access Denied</h2>
           <p>You do not have permission to access the <strong>{label}</strong> {isFeatureView ? 'feature' : 'workspace'}.</p>
           <p>Please contact your administrator if you believe this is an error.</p>

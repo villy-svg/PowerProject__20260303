@@ -25,6 +25,7 @@ import powerLogo from '../../assets/logo.svg';
 import SearchBar from '../../components/SearchBar';
 import NotificationBell from '../../components/NotificationBell';
 import SandboxManagerModal from '../../components/SandboxManagerModal';
+import { IconBulb, IconWarning } from '../../components/Icons';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -81,15 +82,17 @@ const DesktopLayout = ({
             <button 
               className={`halo-button header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
               onClick={() => setActiveVertical('tutorial')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
-              💡 Tutorials
+              <IconBulb size={14} /> Tutorials
             </button>
             {isBypassActive && (
               <button 
                 className="halo-button header-sandbox-btn"
                 onClick={() => setIsSandboxOpen(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                ⚠️ Sandbox Active
+                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} /> Sandbox Active
               </button>
             )}
             <NotificationBell user={user} />

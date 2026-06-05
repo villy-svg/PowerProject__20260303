@@ -18,7 +18,7 @@
 
 import React from 'react';
 import { 
-  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile
+  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile, IconLock
 } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
 import '../../components/Sidebar.css';
@@ -96,7 +96,7 @@ const MobileSidebar = ({
                   >
                     <div className="tray-icon">
                       <Icon size={20} />
-                      {isLocked && <span className="tray-lock">🔒</span>}
+                      {isLocked && <IconLock className="tray-lock" size={16} />}
                     </div>
                     <span>{vertical.label}</span>
                   </button>

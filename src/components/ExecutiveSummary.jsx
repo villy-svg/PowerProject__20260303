@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { IconEye, IconBoards, IconZap } from './Icons';
+import { IconEye, IconBoards, IconZap, IconBulb, IconWarning } from './Icons';
 import { taskUtils } from '../utils/taskUtils';
 import { useMobileLongPress } from '../app/contexts/MobileLongPressContext';
 import './ExecutiveSummary.css';
@@ -397,8 +397,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               <button 
                 className="halo-button mobile-header-sandbox-btn"
                 onClick={() => setIsSandboxOpen(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
               >
-                ⚠️ Sandbox
+                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} /> Sandbox
               </button>
             )}
 
@@ -406,8 +407,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
             <button 
               className={`halo-button mobile-header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
               onClick={() => setActiveVertical('tutorial')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
-              💡 Tutorials
+              <IconBulb size={14} /> Tutorials
             </button>
           </header>
 

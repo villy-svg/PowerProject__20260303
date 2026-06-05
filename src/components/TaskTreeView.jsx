@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -145,6 +145,7 @@ const TaskTreeView = ({
   });
 
   const TreeRow = ({ task, stage, isRowExpanded, onToggleExpandRow }) => {
+    const lastTapRef = useRef(0);
     const tva = useTaskViewActions({
       onUpdateStage: updateTaskStage,
       onDeleteTask: deleteTask,
@@ -166,6 +167,20 @@ const TaskTreeView = ({
     const effectiveCanUpdate = taskPerms.canUpdate;
     const canEditDescription = taskUtils.canUserEditField(task, 'description', permissions, currentUser);
 
+    const handleTouchEnd = (e) => {
+      if (e.target.closest('button') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
+
+      const now = Date.now();
+      const DOUBLE_TAP_DELAY = 300;
+      if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+        e.preventDefault();
+        if (!task.isContextOnly && (effectiveCanUpdate || canEditDescription)) {
+          tva.handleEdit(task);
+        }
+      }
+      lastTapRef.current = now;
+    };
+
     return (
       <div
         className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${isDragOver ? 'drop-target' : ''}`}
@@ -181,6 +196,7 @@ const TaskTreeView = ({
           if (e.target.closest('button') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
           if (onToggleExpandRow) onToggleExpandRow();
         }}
+        onTouchEnd={handleTouchEnd}
         onDoubleClick={() => !task.isContextOnly && (effectiveCanUpdate || canEditDescription) && tva.handleEdit(task)}
       >
         <div className="list-row-main">

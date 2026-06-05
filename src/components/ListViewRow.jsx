@@ -10,7 +10,7 @@
  * Extracted from TaskListView.jsx for single-responsibility.
  * Canonical location: src/components/ListViewRow.jsx
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   IconEdit,
   IconDelete,
@@ -64,6 +64,7 @@ const ListViewRow = ({
   isRowExpanded,
   onToggleRowExpand
 }) => {
+  const lastTapRef = useRef(0);
   const tva = useTaskViewActions({
     onUpdateStage: updateTaskStage,
     onDeleteTask: deleteTask,
@@ -102,6 +103,22 @@ const ListViewRow = ({
   const isRejected = task.latestSubmission?.status === 'rejected';
   const blockArrows = isRejected && permissions.level !== 'admin';
 
+  const handleTouchEnd = (e) => {
+    if (e.target.closest('button') || e.target.closest('.list-row-selection') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
+
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      e.preventDefault();
+      if (task.isDuplicate) {
+        onDuplicateMerge(task);
+      } else if (effectiveCanUpdate) {
+        openEditModal(task);
+      }
+    }
+    lastTapRef.current = now;
+  };
+
   return (
     <div
       className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
@@ -112,6 +129,7 @@ const ListViewRow = ({
         if (e.target.closest('button') || e.target.closest('.list-row-selection') || e.target.closest('.tree-expander')) return;
         if (onToggleRowExpand) onToggleRowExpand();
       }}
+      onTouchEnd={handleTouchEnd}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);

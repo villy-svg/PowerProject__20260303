@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import TaskModal from './TaskModal';
 import { submitProofOfWork } from '../services/tasks/submissionService';
+import { IconWarning } from './Icons';
 import './SubmissionModal.css';
 
 /**
@@ -183,7 +184,10 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         {/* Rejection Feedback */}
         {task?.latestSubmission?.status === 'rejected' && (
           <div className="rejection-feedback-banner" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '12px', borderRadius: '8px', marginBottom: '16px', color: '#ef4444' }}>
-            <strong style={{ display: 'block', marginBottom: '4px' }}>⚠️ Rework Required:</strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <IconWarning size={14} style={{ color: '#ef4444' }} />
+              <strong>Rework Required:</strong>
+            </div>
             {task.latestSubmission.rejection_reason}
           </div>
         )}

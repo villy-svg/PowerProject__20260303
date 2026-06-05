@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { devSanitizeDump } from '../utils/devSanitizer';
+import { IconWarning } from './Icons';
 import './SandboxManagerModal.css';
 
 const SandboxManagerModal = ({ isOpen, onClose }) => {
@@ -78,8 +79,9 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
   return (
     <div className="sandbox-modal-overlay">
       <div className="sandbox-modal-card">
-        <header className="sandbox-modal-header">
-          <h2>⚠️ DEVELOPMENT SANDBOX MANAGER</h2>
+        <header className="sandbox-modal-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <IconWarning size={20} style={{ color: 'var(--brand-yellow)' }} />
+          <h2 style={{ margin: 0 }}>DEVELOPMENT SANDBOX MANAGER</h2>
           <button className="sandbox-close-btn" onClick={onClose}>&times;</button>
         </header>
 

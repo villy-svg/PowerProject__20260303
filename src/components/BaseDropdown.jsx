@@ -210,9 +210,9 @@ const BaseDropdown = ({
     }
     onChange(newSelection);
 
-    // Auto-close on mobile if the caller has opted into this UX pattern.
+    // Auto-close on mobile if the caller has opted into this UX pattern or if on mobile/APK viewport.
     // Skips when deselecting (to allow correction without re-opening).
-    if (closeOnSelectMobile && isMobile && !selectedValues.includes(val)) {
+    if ((closeOnSelectMobile || isMobile) && !selectedValues.includes(val)) {
       setIsOpen(false);
     }
   };

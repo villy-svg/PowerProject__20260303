@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -61,6 +61,7 @@ const TaskCard = ({
 }) => {
   const { isMobile } = useIsMobile();
   const [showDetails, setShowDetails] = useState(false);
+  const lastTapRef = useRef(0);
   const tva = useTaskViewActions({
     onUpdateStage: updateTaskStage,
     onDeleteTask: deleteTask,
@@ -94,6 +95,23 @@ const TaskCard = ({
     disabled: task.isContextOnly || !canManageHierarchy
   });
 
+  const handleTouchEnd = (e) => {
+    // Only handle if it's not a button or similar interactive child
+    if (e.target.closest('button') || e.target.closest('.task-selection-area') || e.target.closest('.subtask-progress-badge') || e.target.closest('.read-more-btn')) return;
+
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      e.preventDefault();
+      if (task.isDuplicate) {
+        onDuplicateMerge(task);
+      } else if (effectiveCanUpdate) {
+        openEditModal(task);
+      }
+    }
+    lastTapRef.current = now;
+  };
+
   return (
     <div
       className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
@@ -104,6 +122,7 @@ const TaskCard = ({
         if (e.target.closest('button') || e.target.closest('.task-selection-area') || e.target.closest('.subtask-progress-badge')) return;
         if (onToggleExpand) onToggleExpand();
       }}
+      onTouchEnd={handleTouchEnd}
       onDoubleClick={() => {
         if (task.isDuplicate) {
           onDuplicateMerge(task);
