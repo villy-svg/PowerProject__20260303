@@ -120,6 +120,7 @@ export const taskService = {
             {
               id: 'mock-escalation-1',
               text: 'Urgent: Charger Offline at Hub-02',
+              description: 'Charger unit #02 is reporting a hard offline state due to a major connector short. Needs immediate on-site inspection.',
               verticalId: 'escalation_tasks',
               stageId: 'BACKLOG',
               priority: 'High',
@@ -134,6 +135,7 @@ export const taskService = {
             {
               id: 'mock-task-1',
               text: 'Perform Preventive Maintenance',
+              description: 'Routine quarterly preventive maintenance checks for charging hub. Review cables, connectors, cooling fans, and update firmware.',
               verticalId: 'CHARGING_HUBS',
               stageId: 'BACKLOG',
               priority: 'Medium',
@@ -454,6 +456,10 @@ export const taskService = {
    * @param {string} newStageId
    */
   async updateTaskStage(taskId, newStageId, userId) {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (updateTaskStage).');
+      return;
+    }
     const row = auditService.stamp({ stage_id: newStageId }, userId);
 
     const { error } = await supabase

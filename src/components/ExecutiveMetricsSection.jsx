@@ -20,9 +20,11 @@ const ExecutiveMetricsSection = ({
 
   return (
     <div className="executive-summary-section animate-fade-in">
-      <div className="summary-header">
-        <h2>Executive Summary</h2>
-      </div>
+      {!isMobile && (
+        <div className="summary-header">
+          <h2>Executive Summary</h2>
+        </div>
+      )}
       
       <div className="summary-grid">
         {STAGE_LIST.map((stage) => {

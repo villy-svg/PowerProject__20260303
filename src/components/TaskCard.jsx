@@ -198,7 +198,7 @@ const TaskCard = ({
 
         {/* Read More button & Description for Mobile */}
         {isMobile && task.description && (
-          <div className="mobile-description-container" style={{ width: '100%', marginTop: '4px' }}>
+          <div className="mobile-description-container">
             <button
               type="button"
               className="read-more-btn"
@@ -206,40 +206,14 @@ const TaskCard = ({
                 e.stopPropagation();
                 setShowDetails(!showDetails);
               }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--brand-mint)',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                padding: '2px 0',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
             >
-              {showDetails ? 'Read Less ▲' : 'Read More ▼'}
+              <span>{showDetails ? 'Read Less' : 'Read More'}</span>
+              <IconChevronDown size={14} className={`read-more-chevron ${showDetails ? 'is-expanded' : ''}`} />
             </button>
             
             {showDetails && (
-              <div 
-                className="task-detailed-description" 
-                style={{ 
-                  marginTop: '6px', 
-                  fontSize: '0.82rem', 
-                  color: 'var(--text-secondary)', 
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  padding: '8px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-color)',
-                  width: '100%',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <div style={{ fontWeight: '700', marginBottom: '4px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-primary)' }}>Detailed Description</div>
+              <div className="task-detailed-description">
+                <div className="task-detailed-description-title">Detailed Description</div>
                 <p style={{ margin: 0, lineHeight: '1.4' }}>{task.description}</p>
               </div>
             )}

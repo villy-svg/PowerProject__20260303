@@ -13,7 +13,7 @@ import HomeEscalationsBoard from './HomeEscalationsBoard';
 import WorkspaceModals from './WorkspaceModals';
 import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 
-import { updateSubmissionStatus } from '../services/tasks/submissionService';
+import { updateSubmissionStatus, submitProofOfWork } from '../services/tasks/submissionService';
 import { cloneUtils } from '../utils/cloneUtils';
 import { supabase } from '../services/core/supabaseClient';
 import { useTaskBoard } from '../app/contexts/TaskBoardContext';
@@ -154,18 +154,33 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       } else {
         const parentTask = editingTask?.parentTask ? tasks.find(t => t.id === editingTask.parentTask) : null;
         const targetVerticalId = parentTask ? parentTask.verticalId : (editingTask?.verticalId || 'CHARGING_HUBS');
+        
+        const { files, ...taskPayload } = formData;
         const newTask = {
-          text: formData.text,
+          text: taskPayload.text,
           verticalId: targetVerticalId,
           stageId: 'BACKLOG',
           parentTask: editingTask?.parentTask || null,
           isSubTask: !!editingTask?.parentTask,
-          priority: formData.priority || 'Medium',
-          assigned_to: formData.assigned_to || [],
+          priority: taskPayload.priority || 'Medium',
+          assigned_to: taskPayload.assigned_to || [],
           createdBy: user?.id,
-          ...formData
+          ...taskPayload
         };
-        await addTask(newTask);
+        const createdTask = await addTask(newTask);
+
+        const primaryTask = Array.isArray(createdTask) ? createdTask[0] : createdTask;
+        const targetTaskId = primaryTask?.id;
+
+        if (files && files.length > 0 && targetTaskId) {
+          await submitProofOfWork({
+            taskId: targetTaskId,
+            userId: user?.id,
+            comment: taskPayload.description || `Attached photos during task creation.`,
+            files,
+            moveToReview: false
+          });
+        }
       }
       setIsModalOpen(false);
       setEditingTask(null);

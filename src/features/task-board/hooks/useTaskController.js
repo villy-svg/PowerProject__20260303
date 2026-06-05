@@ -230,9 +230,12 @@ export const useTaskController = (props) => {
         }
 
         // Chaining Phase 2: If files are provided and the task exists, run the sequential upload
-        if (files && files.length > 0 && createdTask && createdTask.id) {
+        const primaryTask = Array.isArray(createdTask) ? createdTask[0] : createdTask;
+        const targetTaskId = primaryTask?.id;
+
+        if (files && files.length > 0 && targetTaskId) {
           await submitProofOfWork({
-            taskId: createdTask.id,
+            taskId: targetTaskId,
             userId: user?.id,
             comment: taskPayload.description || `Attached photos during task creation.`,
             files,

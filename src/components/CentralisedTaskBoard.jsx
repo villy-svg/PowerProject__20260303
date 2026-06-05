@@ -53,10 +53,10 @@ const CentralisedTaskBoard = ({
     return (
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
-          <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h2>{title}</h2>
-              {!isMobile && (
+          {!isMobile && (
+            <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <h2>{title}</h2>
                 <button 
                   className="board-collapse-toggle-btn"
                   onClick={() => setIsCollapsed(!isCollapsed)}
@@ -68,9 +68,9 @@ const CentralisedTaskBoard = ({
                     size={20}
                   />
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
           {!isMobile && <p className="section-description">{description}</p>}
           {canCreateEscalation && (
             <div className="centralised-actions-row">
@@ -106,10 +106,10 @@ const CentralisedTaskBoard = ({
   return (
     <div className="centralised-task-view-wrapper animate-fade-in">
       <div className="centralised-task-view">
-        <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h2>{title}</h2>
-            {!isMobile && (
+        {!isMobile && (
+          <div className="summary-header secondary-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h2>{title}</h2>
               <button 
                 className="board-collapse-toggle-btn"
                 onClick={() => setIsCollapsed(!isCollapsed)}
@@ -121,9 +121,9 @@ const CentralisedTaskBoard = ({
                   size={20}
                 />
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
         {!isMobile && <p className="section-description">{description}</p>}
         {canCreateEscalation && (
           <div className="centralised-actions-row">
