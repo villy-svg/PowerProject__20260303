@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createRule, updateRule } from '../../services/employees/rulesService';
 import StatusMsg from '../../components/StatusMsg';
+import CustomSelect from '../../components/CustomSelect';
 import '../../styles/ManagementForms.css';
 
 const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories, userId, onSave }) => {
@@ -127,6 +128,17 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
   };
 
   if (!isOpen) return null;
+
+  const categoryOptions = categories.map(cat => ({
+    value: cat.id,
+    label: cat.icon ? `${cat.icon} ${cat.name}` : cat.name
+  }));
+
+  const subCategoryOptions = filteredSubs.map(sub => ({
+    value: sub.id,
+    label: sub.name
+  }));
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content hub-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px' }}>
@@ -152,33 +164,25 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
               <div className="form-group">
                 <label>Category</label>
                 <div className="form-input-container">
-                  <select
-                    className="master-dropdown"
+                  <CustomSelect
                     value={form.category_id}
-                    onChange={e => setForm(p => ({ ...p, category_id: e.target.value, sub_category_id: '' }))}
+                    onChange={val => setForm(p => ({ ...p, category_id: val, sub_category_id: '' }))}
+                    options={categoryOptions}
+                    placeholder="Select Category"
                     required
-                  >
-                    <option value="">— Select Category —</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.icon ? `${cat.icon} ` : ''}{cat.name}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
               <div className="form-group">
                 <label>Sub-Category (optional)</label>
                 <div className="form-input-container">
-                  <select
-                    className="master-dropdown"
+                  <CustomSelect
                     value={form.sub_category_id}
-                    onChange={e => setForm(p => ({ ...p, sub_category_id: e.target.value }))}
+                    onChange={val => setForm(p => ({ ...p, sub_category_id: val }))}
+                    options={subCategoryOptions}
+                    placeholder={filteredSubs.length === 0 ? "No Sub-Categories" : "None"}
                     disabled={filteredSubs.length === 0}
-                  >
-                    <option value="">— None —</option>
-                    {filteredSubs.map(sub => (
-                      <option key={sub.id} value={sub.id}>{sub.name}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
               </div>
             </div>

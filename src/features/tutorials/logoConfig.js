@@ -37,9 +37,6 @@ export const LOGO_KEYWORD_MAPPINGS = [
  * @returns {string} The path to the logo image
  */
 export function getRuleLogo(title = '', slideIndex = 0) {
-  if (slideIndex !== 0) {
-    return '/logos/powerpod-logo.svg';
-  }
   const lowerTitle = title.toLowerCase();
   const match = LOGO_KEYWORD_MAPPINGS.find(mapping =>
     mapping.keywords.some(keyword => lowerTitle.includes(keyword))

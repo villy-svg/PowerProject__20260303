@@ -149,14 +149,38 @@ const EmployeeRulesBoard = ({
     // Preserve sort_order from categories
     return categories
       .filter(cat => catMap[cat.id])
-      .map(cat => ({
-        ...catMap[cat.id],
-        category: cat,
-        subGroups: Object.values(catMap[cat.id]?.subMap || {}).sort((a, b) =>
-          (a.subCategory?.name || '').localeCompare(b.subCategory?.name || '')
-        ),
-      }));
-  }, [filteredRules, categories]);
+      .map(cat => {
+        const entry = catMap[cat.id];
+        
+        // Sort rules inside each subcategory
+        const subGroups = Object.values(entry.subMap || {}).map(group => {
+          const sortedRules = [...group.rules].sort((a, b) => 
+            Number(a.sort_order || 0) - Number(b.sort_order || 0)
+          );
+          return {
+            ...group,
+            rules: sortedRules
+          };
+        }).sort((a, b) => {
+          const subA = subCategories.find(s => s.id === a.subCategory?.id);
+          const subB = subCategories.find(s => s.id === b.subCategory?.id);
+          const orderA = subA ? Number(subA.sort_order || 0) : 0;
+          const orderB = subB ? Number(subB.sort_order || 0) : 0;
+          return (orderA - orderB) || (a.subCategory?.name || '').localeCompare(b.subCategory?.name || '');
+        });
+
+        // Sort ungrouped rules
+        const sortedUngrouped = [...entry.ungrouped].sort((a, b) => 
+          Number(a.sort_order || 0) - Number(b.sort_order || 0)
+        );
+
+        return {
+          category: cat,
+          subGroups,
+          ungrouped: sortedUngrouped
+        };
+      });
+  }, [filteredRules, categories, subCategories]);
 
   // ── Scroll to category section ───────────────────────────────
   const handlePillClick = useCallback((catId) => {
