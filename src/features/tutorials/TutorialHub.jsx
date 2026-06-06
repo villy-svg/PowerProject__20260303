@@ -115,7 +115,8 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
         const flowSlides = parsedSlides.map((slide, idx) => {
           const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
           const isDrinkingLogo = idx === 0 && (rule.title.toLowerCase().includes('drinking') || rule.title.toLowerCase().includes('alcohol') || rule.title.toLowerCase().includes('sober'));
-          const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : '/logos/powerpod-logo.svg');
+          const isInfluenceLogo = idx === 0 && (rule.title.toLowerCase().includes('influence') || rule.title.toLowerCase().includes('drugs'));
+          const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : (isInfluenceLogo ? '/logos/no_under_influence_logo.png' : '/logos/powerpod-logo.svg'));
           return {
             image: imgPath,
             fallbackImage: imgPath,
