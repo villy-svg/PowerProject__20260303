@@ -32,6 +32,27 @@ import OnlineSyncBanner from './components/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
 import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
 import { fetchRules } from './services/employees/rulesService';
+import { getRuleLogo, LOGO_KEYWORD_MAPPINGS } from './features/tutorials/logoConfig';
+
+// TanStack Query Imports
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // Keep cached data for 24 hours
+      staleTime: 1000 * 60 * 5,    // Consider data stale after 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const localStoragePersister = createSyncStoragePersister({
+  storage: window.localStorage,
+  key: 'power_project_react_query_cache',
+});
 
 
 // Assets
@@ -180,7 +201,10 @@ function AppShell({ verticals, verticalList }) {
             const specialRules = rulesData.filter(rule => {
               const catName = rule.category?.name?.toLowerCase() || '';
               const title = rule.title?.toLowerCase() || '';
-              return catName.includes('special') || title.includes('customer vehicle') || title.includes('material') || title.includes('drinking') || title.includes('alcohol') || title.includes('influence') || title.includes('drugs');
+              const matchesKeyword = LOGO_KEYWORD_MAPPINGS.some(mapping =>
+                mapping.keywords.some(kw => title.includes(kw))
+              );
+              return catName.includes('special') || matchesKeyword;
             });
 
             const queue = [];
@@ -191,10 +215,7 @@ function AppShell({ verticals, verticalList }) {
             specialRules.forEach(rule => {
               const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
               const flowSlides = parsedSlides.map((slide, idx) => {
-                const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
-                const isDrinkingLogo = idx === 0 && (rule.title.toLowerCase().includes('drinking') || rule.title.toLowerCase().includes('alcohol') || rule.title.toLowerCase().includes('sober'));
-                const isInfluenceLogo = idx === 0 && (rule.title.toLowerCase().includes('influence') || rule.title.toLowerCase().includes('drugs'));
-                const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : (isInfluenceLogo ? '/logos/no_under_influence_logo.png' : '/logos/powerpod-logo.svg'));
+                const imgPath = getRuleLogo(rule.title, idx);
                 return {
                   image: imgPath,
                   fallbackImage: imgPath,
@@ -451,14 +472,19 @@ function App() {
   }
 
   return (
-    <AppNavigationProvider verticals={verticals}>
-      <TaskBoardProvider user={user} verticals={verticals}>
-        <MobileLongPressProvider>
-          <OnlineSyncBanner />
-          <AppShell verticals={verticals} verticalList={verticalList} />
-        </MobileLongPressProvider>
-      </TaskBoardProvider>
-    </AppNavigationProvider>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister: localStoragePersister }}
+    >
+      <AppNavigationProvider verticals={verticals}>
+        <TaskBoardProvider user={user} verticals={verticals}>
+          <MobileLongPressProvider>
+            <OnlineSyncBanner />
+            <AppShell verticals={verticals} verticalList={verticalList} />
+          </MobileLongPressProvider>
+        </TaskBoardProvider>
+      </AppNavigationProvider>
+    </PersistQueryClientProvider>
   );
 }
 

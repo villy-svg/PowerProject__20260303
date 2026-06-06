@@ -306,6 +306,48 @@ export async function fetchRules({ categoryId = null, activeOnly = true } = {}) 
           is_active: true,
           sort_order: 3,
           impact: 'Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost'
+        },
+        {
+          id: 'rule-no-fighting',
+          category_id: 'cat-conduct',
+          sub_category_id: null,
+          title: 'No Fighting or Physical Violence',
+          content: `1. Do not engage in physical fights or violence at the workplace.
+2. ಕೆಲಸದ ಸ್ಥಳದಲ್ಲಿ ದೈಹಿಕ ಜಗಳಗಳು ಅಥವಾ ಹಿಂಸಾಚಾರದಲ್ಲಿ ತೊಡಗಬೇಡಿ.
+3. Impact: Immediate Termination & Legal Action.
+4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಜಾ ಮತ್ತು ಕಾನೂನು ಕ್ರಮ.`,
+          effective_date: new Date().toISOString().split('T')[0],
+          is_active: true,
+          sort_order: 4,
+          impact: 'Immediate Termination & Legal Action'
+        },
+        {
+          id: 'rule-no-drinking',
+          category_id: 'cat-conduct',
+          sub_category_id: null,
+          title: 'No Drinking / Alcohol',
+          content: `1. No drinking or consumption of alcohol while on duty or on client premises.
+2. ಕರ್ತವ್ಯದ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಕ್ಲೈಂಟ್ ಆವರಣದಲ್ಲಿ ಮದ್ಯಪಾನ ಮಾಡುವುದನ್ನು ನಿಷೇಧಿಸಲಾಗಿದೆ.
+3. Impact: Immediate Termination | Fine: Rs. 10,000/-
+4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ದಂಡ: ರೂ. 10,000/-`,
+          effective_date: new Date().toISOString().split('T')[0],
+          is_active: true,
+          sort_order: 4,
+          impact: 'Immediate Termination | Fine: Rs. 10,000/-'
+        },
+        {
+          id: 'rule-no-drugs',
+          category_id: 'cat-conduct',
+          sub_category_id: null,
+          title: 'No Customer Vehicle Access Under Influence of Drugs',
+          content: `1. Do not access or operate any customer vehicles under the influence of drugs or intoxicating substances.
+2. ಮಾದಕ ದ್ರವ್ಯಗಳು ಅಥವಾ ಅಮಲು ಪದಾರ್ಥಗಳ ಪ್ರಭಾವದ ಅಡಿಯಲ್ಲಿ ಯಾವುದೇ ಗ್ರಾಹಕರ ವಾಹನಗಳನ್ನು ಪ್ರವೇಶಿಸಬೇಡಿ ಅಥವಾ ಚಲಾಯಿಸಬೇಡಿ.
+3. Impact: Immediate Termination | Criminal Prosecution | Fine: Rs. 20,000/-
+4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ಕ್ರಿಮಿನಲ್ ಮೊಕದ್ದಮೆ | ದಂಡ: ರೂ. 20,000/-`,
+          effective_date: new Date().toISOString().split('T')[0],
+          is_active: true,
+          sort_order: 5,
+          impact: 'Immediate Termination | Criminal Prosecution | Fine: Rs. 20,000/-'
         }
       ];
       saveLocalData(BYPASS_KEY_RULES, localRules);

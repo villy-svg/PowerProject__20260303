@@ -4,6 +4,8 @@ import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
 import { fetchRules } from '../../services/employees/rulesService';
+import { getRuleLogo } from './logoConfig';
+import { useQuery } from '@tanstack/react-query';
 import { IconEdit, IconPlus } from '../../components/Icons';
 export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
@@ -78,11 +80,50 @@ export const parseRuleSlides = (title, content = '') => {
 const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
   const [platform, setPlatform] = useState('desktop'); // 'desktop' | 'mobile'
   const [activeFlow, setActiveFlow] = useState(null);
-  const [ruleFlows, setRuleFlows] = useState([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFlow, setEditingFlow] = useState(null);
   const [playAllQueue, setPlayAllQueue] = useState([]);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(-1);
+
+  const { data: rulesData = [], refetch: refetchRulesData } = useQuery({
+    queryKey: ['employee_rules', { activeOnly: true }],
+    queryFn: () => fetchRules({ activeOnly: true }),
+  });
+
+  const ruleFlows = useMemo(() => {
+    return rulesData.map(rule => {
+      const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
+      const flowSlides = parsedSlides.map((slide, idx) => {
+        const imgPath = getRuleLogo(rule.title, idx);
+        return {
+          image: imgPath,
+          fallbackImage: imgPath,
+          title: slide.isIntro ? rule.title : slide.title,
+          text: slide.text,
+          annotations: []
+        };
+      });
+
+      return {
+        id: `rule_${rule.id}`,
+        title: rule.title,
+        category: rule.category?.name || 'Rules & Regulations',
+        category_id: rule.category_id,
+        content: rule.content,
+        description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
+        accessLevel: 'All Users',
+        badgeColor: 'rgba(16, 185, 129, 0.1)',
+        badgeText: '#10b981',
+        layout: 'onboarding',
+        desktopSlides: flowSlides,
+        mobileSlides: flowSlides
+      };
+    });
+  }, [rulesData]);
+
+  const loadRules = useCallback(() => {
+    refetchRulesData();
+  }, [refetchRulesData]);
 
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
 
@@ -106,50 +147,6 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
       setActiveFlow(null);
     }
   };
-
-  const loadRules = useCallback(async () => {
-    try {
-      const rulesData = await fetchRules({ activeOnly: true });
-      const generated = rulesData.map(rule => {
-        const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
-        const flowSlides = parsedSlides.map((slide, idx) => {
-          const isCustomerVehicleLogo = idx === 0 && (rule.title.toLowerCase().includes('customer vehicle') || rule.title.toLowerCase().includes('personal use'));
-          const isDrinkingLogo = idx === 0 && (rule.title.toLowerCase().includes('drinking') || rule.title.toLowerCase().includes('alcohol') || rule.title.toLowerCase().includes('sober'));
-          const isInfluenceLogo = idx === 0 && (rule.title.toLowerCase().includes('influence') || rule.title.toLowerCase().includes('drugs'));
-          const imgPath = isCustomerVehicleLogo ? '/logos/no_customer_vehicle_logo.png' : (isDrinkingLogo ? '/logos/no_drinking_logo.png' : (isInfluenceLogo ? '/logos/no_under_influence_logo.png' : '/logos/powerpod-logo.svg'));
-          return {
-            image: imgPath,
-            fallbackImage: imgPath,
-            title: slide.isIntro ? rule.title : slide.title,
-            text: slide.text,
-            annotations: []
-          };
-        });
-
-        return {
-          id: `rule_${rule.id}`,
-          title: rule.title,
-          category: rule.category?.name || 'Rules & Regulations',
-          category_id: rule.category_id,
-          content: rule.content,
-          description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
-          accessLevel: 'All Users',
-          badgeColor: 'rgba(16, 185, 129, 0.1)',
-          badgeText: '#10b981',
-          layout: 'onboarding',
-          desktopSlides: flowSlides,
-          mobileSlides: flowSlides
-        };
-      });
-      setRuleFlows(generated);
-    } catch (err) {
-      console.error('[TutorialHub] Error loading rules tutorials:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadRules();
-  }, [loadRules]);
 
   const allFlows = useMemo(() => {
     const applyOverrides = (flow) => {
