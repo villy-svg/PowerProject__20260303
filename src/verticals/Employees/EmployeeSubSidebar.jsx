@@ -123,7 +123,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
                 style={{ opacity: activeVertical === 'employee_tasks' ? 1 : 0.7 }}
                 onClick={() => setActiveVertical('employee_tasks')}
               >
-                Employee Tasks
+                Remarks Manager
               </button>
             </div>
           )}

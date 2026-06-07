@@ -13,7 +13,7 @@ export const VERTICAL_FEATURES = {
   ],
   EMPLOYEES: [
     { id: 'canAccessEmployees', label: 'Employees List' },
-    { id: 'canAccessEmployeeTasks', label: 'Employee Tasks Board' }
+    { id: 'canAccessEmployeeTasks', label: 'Remarks Manager' }
   ],
   CHARGING_HUBS: [
     { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },

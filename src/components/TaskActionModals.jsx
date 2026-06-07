@@ -3,6 +3,7 @@ import TaskModal from './TaskModal';
 import ConflictModal from './ConflictModal';
 import { STAGE_LIST } from '../constants/stages';
 import { hierarchyUtils } from '../utils/hierarchyUtils';
+import { resolvePriorityLabel, resolvePriorityTitle, resolveModalTitle } from '../registry/verticalRegistry';
 import { IconUpload } from './Icons';
 
 /**
@@ -40,13 +41,7 @@ const TaskActionModals = ({
       <TaskModal
         isOpen={isModalOpen}
         onClose={handleClose}
-        title={
-          (editingTask && editingTask.id) 
-            ? `Edit Task` 
-            : activeVertical === 'escalation_tasks' 
-              ? 'Request Support' 
-              : `Add New ${activeVertical?.replace('_', ' ')} Task`
-        }
+        title={resolveModalTitle(editingTask?.verticalId || activeVertical, !!(editingTask && editingTask.id))}
       >
         {TaskFormComponent ? (
           <TaskFormComponent
@@ -135,7 +130,7 @@ const TaskActionModals = ({
               </span>
               <p className="merge-summary" style={{ margin: '8px 0', fontSize: '0.9rem' }}>{task.text}</p>
               <div className="merge-meta" style={{ fontSize: '0.8rem', opacity: 0.6 }}>
-                <span>Priority: {task.priority}</span>
+                <span>{resolvePriorityTitle(task.verticalId)}: {resolvePriorityLabel(task.priority, task.verticalId)}</span>
                 {task.city && <span style={{ marginLeft: '8px' }}>City: {task.city}</span>}
               </div>
             </div>

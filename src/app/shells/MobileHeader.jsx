@@ -105,7 +105,7 @@ const MobileHeader = ({
       }
     } else if (isEmp) {
       if (permissions?.canAccessEmployeeTasks !== false) {
-        list.push({ id: 'employee_tasks', label: 'Employee Tasks' });
+        list.push({ id: 'employee_tasks', label: 'Remarks Manager' });
       }
       list.push({ id: 'employee_rules_board', label: 'Rules & Regulations' });
       if (permissions?.canAccessEmployees !== false) {

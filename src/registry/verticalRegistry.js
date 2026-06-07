@@ -22,6 +22,8 @@ import {
   DataManagerSubSidebar
 } from '../verticals/DataManager';
 
+import { REMARK_GRADE_MAP } from '../verticals/Employees/remarksMapping';
+
 /** All activeVertical values belonging to ChargingHubs vertical */
 export const HUB_VIEWS = [
   'hub_tasks',
@@ -87,13 +89,13 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
     daily_hub_tasks:      { label: 'Hubs List', boardLabel: 'Daily Task Board' },
     daily_task_templates: { label: 'Hubs List', boardLabel: 'Daily Task Templates' },
     escalation_tasks:     { label: 'Hubs List', boardLabel: 'Escalation Task Board' },
-    employee_tasks:         { label: 'Employees', boardLabel: 'Employee Task Board' },
+    employee_tasks:         { label: 'Employees', boardLabel: 'Remarks Manager' },
     employee_rules_board:   { label: 'Employees', boardLabel: 'Rules & Regulations' },
     client_tasks:           { label: 'Clients',   boardLabel: 'Client Task Board' },
     leads_funnel:           { label: 'Clients',   boardLabel: 'Client Task Board' },
   };
   if (hubId)    map[hubId]    = { label: 'Hubs List', boardLabel: 'Hubs Task Board' };
-  if (empId)    map[empId]    = { label: 'Employees', boardLabel: 'Employee Task Board' };
+  if (empId)    map[empId]    = { label: 'Employees', boardLabel: 'Remarks Manager' };
   if (clientId) map[clientId] = { label: 'Clients',   boardLabel: 'Client Task Board' };
   const dataManagerId = verticals?.DATA_MANAGER?.id;
   if (dataManagerId) map[dataManagerId] = { label: 'Data Manager', boardLabel: 'Data Sheet Board' };
@@ -121,4 +123,45 @@ export function resolveHeaderClickTarget(activeVertical, verticals = {}, permiss
   );
   if (isHubConfigView && permissions?.canAccessConfig) return 'hub_management';
   return null;
+}
+
+/**
+ * Returns the title of the priority field (e.g., 'Remark Grade' or 'Priority')
+ */
+export function resolvePriorityTitle(verticalId) {
+  if (verticalId === 'EMPLOYEES' || verticalId === 'employee_tasks') {
+    return 'Remark Grade';
+  }
+  return 'Priority';
+}
+
+/**
+ * Returns the mapped priority display value (e.g., 'Level 0' instead of 'Low')
+ */
+export function resolvePriorityLabel(priority, verticalId) {
+  if (!priority) return '';
+  if (verticalId === 'EMPLOYEES' || verticalId === 'employee_tasks') {
+    return REMARK_GRADE_MAP[priority] || priority;
+  }
+  return priority;
+}
+
+/**
+ * Returns the modal title based on the active vertical and operation type
+ */
+export function resolveModalTitle(activeVertical, isEditing) {
+  if (isEditing) {
+    if (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') {
+      return 'Edit Remark';
+    }
+    return 'Edit Task';
+  }
+
+  if (activeVertical === 'EMPLOYEES' || activeVertical === 'employee_tasks') {
+    return 'Add Remark';
+  }
+  if (activeVertical === 'escalation_tasks') {
+    return 'Request Support';
+  }
+  return `Add New ${activeVertical?.replace('_', ' ')} Task`;
 }

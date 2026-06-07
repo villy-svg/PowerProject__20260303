@@ -29,3 +29,6 @@ export { default as DepartmentCSVDownload } from './DepartmentCSVDownload';
 export { default as DepartmentCSVImport } from './DepartmentCSVImport';
 export { default as EmployeeRoleCSVDownload } from './EmployeeRoleCSVDownload';
 export { default as EmployeeRoleCSVImport } from './EmployeeRoleCSVImport';
+
+// Centralized Remarks mappings
+export * from './remarksMapping';

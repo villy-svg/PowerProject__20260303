@@ -474,7 +474,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                 </div>
 
                 {!initialData?.id && (
-                  <div className="form-group upload-section" style={{ marginTop: '1rem' }}>
+                  <div className="form-group upload-section">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                       <label className="section-label">Attach Photo(s)</label>
                       {files.length > 0 && (

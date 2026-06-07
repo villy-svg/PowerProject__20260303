@@ -17,6 +17,7 @@ import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActi
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { resolvePriorityLabel } from '../registry/verticalRegistry';
 import AssigneeBadge from './AssigneeBadge';
 import './TaskCard.css';
 
@@ -188,7 +189,7 @@ const TaskCard = ({
         )}
         {task.priority && (
           <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
-            {task.priority}
+            {resolvePriorityLabel(task.priority, task.verticalId)}
           </span>
         )}
         {task.isDuplicate && (

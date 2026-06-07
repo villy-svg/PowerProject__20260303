@@ -5,6 +5,7 @@ import { useAppNavigation } from '../app/contexts/AppNavigationContext';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { getBoardLabelForVertical } from '../constants/taskBoards';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
+import { resolvePriorityLabel } from '../registry/verticalRegistry';
 import { IconSearch, IconX } from './Icons';
 import './SearchBar.css';
 
@@ -224,7 +225,7 @@ function TaskResult({ task, query, onClick }) {
         )}
         {task.priority && (
           <span className={`result-badge ${priorityClass(task.priority)}`}>
-            {task.priority}
+            {resolvePriorityLabel(task.priority, task.verticalId)}
           </span>
         )}
       </div>

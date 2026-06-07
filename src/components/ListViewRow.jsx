@@ -28,6 +28,7 @@ import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActions';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { taskUtils } from '../utils/taskUtils';
+import { resolvePriorityLabel } from '../registry/verticalRegistry';
 import AssigneeBadge from './AssigneeBadge';
 
 const ListViewRow = ({
@@ -171,7 +172,7 @@ const ListViewRow = ({
         <div className="list-row-badges">
           {task.priority && (
             <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
-              {task.priority}
+              {resolvePriorityLabel(task.priority, task.verticalId)}
             </span>
           )}
 
