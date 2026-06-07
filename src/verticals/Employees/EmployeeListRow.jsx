@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../components/Icons';
+import { IconEdit, IconTrash, IconChevronDown, IconChevronRight, IconComment } from '../../components/Icons';
+import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 
 /**
  * EmployeeListRow
@@ -19,10 +20,12 @@ const EmployeeListRow = ({
   isExpanded,
   onToggleExpand,
   isRowExpanded,
-  onToggleRowExpand
+  onToggleRowExpand,
+  remarks = []
 }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
+  const [showRemarks, setShowRemarks] = useState(false);
 
   const handleHubDoubleClick = (e) => {
     e.stopPropagation();
@@ -109,7 +112,7 @@ const EmployeeListRow = ({
       {/* 4. Controls (Actions) - Following ListViewRow North Star */}
       <div className="list-row-controls">
         {permissions.canUpdate && (
-          <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit">
+          <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit Employee Profile">
             <IconEdit size={14} />
           </button>
         )}
@@ -117,21 +120,29 @@ const EmployeeListRow = ({
           <button
             className="card-deprio-button"
             onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
-            title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
+            title={emp.status === 'Active' ? 'Deactivate Employee' : 'Activate Employee'}
             style={{ color: emp.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
           >
             <IconChevronDown size={14} style={{ transform: emp.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
           </button>
         )}
         {permissions.canDelete && (
-          <button className="card-delete-button" onClick={(e) => { e.stopPropagation(); onDelete(emp.id); }} title="Delete">
+          <button className="card-delete-button" onClick={(e) => { e.stopPropagation(); onDelete(emp.id); }} title="Delete Employee Permanently">
             <IconTrash size={14} />
           </button>
         )}
+        <button
+          className={`card-nav-button ${showRemarks ? 'active' : ''}`}
+          onClick={(e) => { e.stopPropagation(); setShowRemarks(!showRemarks); }}
+          title={showRemarks ? "Hide Remarks Summary" : `Show Remarks Summary (${remarks.length})`}
+          style={{ color: showRemarks ? 'var(--brand-green)' : 'inherit' }}
+        >
+          <IconComment size={14} />
+        </button>
         <button 
           className="card-nav-button" 
           onClick={(e) => { e.stopPropagation(); if (onToggleRowExpand) onToggleRowExpand(); }}
-          title={isRowExpanded ? "Collapse" : "Expand Details"}
+          title={isRowExpanded ? "Collapse Details" : "Expand Details"}
         >
           {isRowExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
         </button>
@@ -166,6 +177,32 @@ const EmployeeListRow = ({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Remarks Drawer */}
+      {showRemarks && (
+        <div className="list-row-details fade-in" style={{ padding: '12px 12px 12px 36px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.15)', fontSize: '0.85rem' }}>
+          <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '0.5px' }}>Remarks Summary ({remarks.length})</h6>
+          {remarks.length === 0 ? (
+            <div className="remark-empty-state" style={{ padding: '4px 0', opacity: 0.5 }}>No remarks assigned</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '600px' }}>
+              {remarks.map((r) => (
+                <div key={r.id} className="remark-summary-item" title={r.description || r.text}>
+                  <span className="remark-summary-text">{r.text}</span>
+                  <div className="remark-summary-meta">
+                    <span className={`result-badge pri-${(r.priority || 'Medium').toLowerCase()}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                      {resolvePriorityLabel(r.priority, r.verticalId)}
+                    </span>
+                    <span className={`result-badge stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                      {r.stageId || 'Backlog'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

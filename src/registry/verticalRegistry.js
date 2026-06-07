@@ -11,7 +11,7 @@ import {
 } from '../verticals/ChargingHubs';
 
 import {
-  EmployeeSubSidebar, EmployeeTaskForm, EmployeeTaskTile,
+  EmployeeSubSidebar, EmployeeRemarkForm, EmployeeTaskTile,
 } from '../verticals/Employees';
 
 import {
@@ -54,7 +54,7 @@ export function resolveVerticalComponents(activeVertical, verticals = {}) {
   const isDataManager = activeVertical === dataManagerId;
 
   if (isHub)    return { SidebarComponent: HubSubSidebar,      TaskFormComponent: HubTaskForm,      TaskTileComponent: HubTaskTile };
-  if (isEmp)    return { SidebarComponent: EmployeeSubSidebar, TaskFormComponent: EmployeeTaskForm, TaskTileComponent: EmployeeTaskTile };
+  if (isEmp)    return { SidebarComponent: EmployeeSubSidebar, TaskFormComponent: EmployeeRemarkForm, TaskTileComponent: EmployeeTaskTile };
   if (isClient) return { SidebarComponent: ClientSubSidebar,   TaskFormComponent: ClientTaskForm,   TaskTileComponent: ClientTaskTile };
   if (isDataManager) return { SidebarComponent: DataManagerSubSidebar, TaskFormComponent: null, TaskTileComponent: null };
   return { SidebarComponent: null, TaskFormComponent: null, TaskTileComponent: null };
@@ -164,4 +164,14 @@ export function resolveModalTitle(activeVertical, isEditing) {
     return 'Request Support';
   }
   return `Add New ${activeVertical?.replace('_', ' ')} Task`;
+}
+
+/**
+ * Returns the label for the add button based on the vertical
+ */
+export function resolveAddButtonLabel(verticalId) {
+  if (verticalId === 'EMPLOYEES' || verticalId === 'employee_tasks') {
+    return 'Add Remark';
+  }
+  return 'Add Task';
 }

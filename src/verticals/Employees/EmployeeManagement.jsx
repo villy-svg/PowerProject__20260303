@@ -297,9 +297,14 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                                 canDelete: permissions.canDeleteEmployees
                               }}
                               availableHubs={hubs}
-                              onUpdateHub={updateEmployeeHub}
                               isSelected={ui.selectedIds.includes(emp.id)}
                               onSelect={ui.handleSelectIndividual}
+                              remarks={(tasks || []).filter(t => {
+                                const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
+                                if (!isRemark) return false;
+                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                                return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
+                              })}
                             />
                           ) : (
                             <EmployeeListRow
@@ -320,6 +325,12 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onSelect={ui.handleSelectIndividual}
                               isExpanded={ui.expandedId === emp.id}
                               onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
+                              remarks={(tasks || []).filter(t => {
+                                const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
+                                if (!isRemark) return false;
+                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                                return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
+                              })}
                             />
                           )
                         ))}
@@ -354,6 +365,12 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
+                        remarks={(tasks || []).filter(t => {
+                          const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
+                          if (!isRemark) return false;
+                          const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                          return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
+                        })}
                       />
                     ) : (
                       <EmployeeListRow
@@ -366,11 +383,17 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         permissions={permissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
-                        isSelected={ui.selectedIds.includes(emp.id)}
-                        onSelect={ui.handleSelectIndividual}
-                        isExpanded={ui.expandedId === emp.id}
-                        onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
-                      />
+                         isSelected={ui.selectedIds.includes(emp.id)}
+                         onSelect={ui.handleSelectIndividual}
+                         isExpanded={ui.expandedId === emp.id}
+                         onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
+                         remarks={(tasks || []).filter(t => {
+                           const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
+                           if (!isRemark) return false;
+                           const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                           return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
+                         })}
+                       />
                     )
                   ))}
                 </div>

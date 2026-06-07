@@ -11,7 +11,7 @@ import { updateSubmissionStatus } from '../services/tasks/submissionService';
 import BulkActionBar from './BulkActionBar';
 import './TaskController.css';
 import FixTasksButton from './FixTasksButton';
-import { HUB_VIEWS } from '../registry/verticalRegistry';
+import { HUB_VIEWS, resolveAddButtonLabel } from '../registry/verticalRegistry';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { IconChevronDown, IconChevronRightSingle } from './Icons';
 
@@ -169,7 +169,7 @@ const TaskController = (props) => {
                 className="halo-button master-action-btn"
                 onClick={openAddModal}
               >
-                + Add Task
+                + {resolveAddButtonLabel(activeVertical)}
               </button>
             )}
           </>
@@ -177,6 +177,7 @@ const TaskController = (props) => {
         isSubSidebarOpen={isSubSidebarOpen}
         onSidebarToggle={(val) => setIsSubSidebarOpen(typeof val === 'boolean' ? val : !isSubSidebarOpen)}
         canAdd={canUserCreate && !activeVertical.includes('daily')}
+        addLabel={resolveAddButtonLabel(activeVertical)}
         onAddClick={openAddModal}
         isTaskModalOpen={isModalOpen}
         onShowBottomNav={onShowBottomNav}

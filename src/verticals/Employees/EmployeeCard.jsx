@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconEdit, IconTrash, IconChevronDown } from '../../components/Icons';
+import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 
 /**
  * EmployeeCard
@@ -16,10 +17,12 @@ const EmployeeCard = ({
   onUpdateHub,
   isSelected = false,
   onSelect,
-  className = ''
+  className = '',
+  remarks = []
 }) => {
   const [isEditingHub, setIsEditingHub] = useState(false);
   const [selectedHubId, setSelectedHubId] = useState(emp.hub_id || 'ALL');
+  const [showRemarksDropdown, setShowRemarksDropdown] = useState(false);
 
   const handleHubDoubleClick = (e) => {
     e.stopPropagation();
@@ -119,7 +122,13 @@ const EmployeeCard = ({
       {/* Row 3: Controls (Actions) */}
       <div className="card-row-3">
         <div className="card-navigation">
-          {/* Symmetrical placeholder for TaskCard alignment */}
+          <button
+            className={`role-select-btn halo-button ${showRemarksDropdown ? 'active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); setShowRemarksDropdown(!showRemarksDropdown); }}
+            title="Toggle Remarks summary"
+          >
+            {showRemarksDropdown ? 'Hide Remarks' : `Remarks (${remarks.length})`}
+          </button>
         </div>
         
         <div className="task-management-actions">
@@ -153,6 +162,28 @@ const EmployeeCard = ({
           )}
         </div>
       </div>
+
+      {showRemarksDropdown && (
+        <div className="card-remarks-dropdown" onClick={(e) => e.stopPropagation()}>
+          {remarks.length === 0 ? (
+            <div className="remark-empty-state">No remarks assigned</div>
+          ) : (
+            remarks.map((r) => (
+              <div key={r.id} className="remark-summary-item" title={r.description || r.text}>
+                <span className="remark-summary-text">{r.text}</span>
+                <div className="remark-summary-meta">
+                  <span className={`result-badge pri-${(r.priority || 'Medium').toLowerCase()}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                    {resolvePriorityLabel(r.priority, r.verticalId)}
+                  </span>
+                  <span className={`result-badge stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                    {r.stageId || 'Backlog'}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 };
