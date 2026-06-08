@@ -21,7 +21,8 @@ import { supabase } from '../services/core/supabaseClient';
 import { useTaskBoard } from '../app/contexts/TaskBoardContext';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 import { useRBAC } from '../hooks/useRBAC';
-
+import { useAuth } from '../app/contexts/AuthContext';
+import UserProfile from './UserProfile';
 
 /**
  * ExecutiveSummary Component
@@ -34,6 +35,13 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const { activeVertical, setActiveVertical, setIsSidebarOpen } = useAppNavigation();
   const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
+  const {
+    realUser,
+    impersonatedUser,
+    impersonationUsers,
+    handleImpersonate,
+    handleLogout
+  } = useAuth();
   const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
@@ -382,35 +390,41 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {isMobile && (
         <div className="mobile-header-switcher-sticky-container">
           <header className="mobile-top-header-bar">
-            {/* Logo */}
-            <button
-              className="logo-button"
-              onClick={() => setIsSidebarOpen(true)}
+            {/* Tutorials Button (Icon Only, Top Left) */}
+            <button 
+              className={`halo-button mobile-header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
+              onClick={() => setActiveVertical('tutorial')}
+              title="Tutorials"
             >
-              <img src={powerLogo} alt="Logo" className="logo-svg" />
+              <IconBulb size={14} />
             </button>
 
-            {/* Brand Title */}
-            <h1 className="brand-title-centered">PowerProject</h1>
-
+            {/* Sandbox Button (Offline Bypass — Icon Only) */}
             {isBypassActive && (
               <button 
                 className="halo-button mobile-header-sandbox-btn"
                 onClick={() => setIsSandboxOpen(true)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                title="Sandbox Active"
               >
-                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} /> Sandbox
+                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} />
               </button>
             )}
 
-            {/* Tutorials Button */}
-            <button 
-              className={`halo-button mobile-header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
-              onClick={() => setActiveVertical('tutorial')}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
-              <IconBulb size={14} /> Tutorials
-            </button>
+            {/* Brand Title */}
+            <h1 className="brand-title-centered">PowerProject</h1>
+
+            {/* Profile Button (Top Right) */}
+            <div className="mobile-header-profile-container">
+              <UserProfile 
+                user={user} 
+                onConfigClick={() => setActiveVertical('configuration')} 
+                onLogout={handleLogout} 
+                realUser={realUser}
+                impersonatedUser={impersonatedUser}
+                impersonationUsers={impersonationUsers}
+                onImpersonate={handleImpersonate}
+              />
+            </div>
           </header>
 
           {/* Spacing Container */}

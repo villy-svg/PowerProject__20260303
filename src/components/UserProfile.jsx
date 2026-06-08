@@ -62,7 +62,22 @@ const UserProfile = ({
           <span className="user-name">{displayName}</span>
           <span className="user-role">{user?.role}</span>
         </div>
-        <div className="user-avatar">{initials}</div>
+        <div className="user-avatar">
+          <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            style={{ opacity: 0.9 }}
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
       </button>
 
       {isOpen && (

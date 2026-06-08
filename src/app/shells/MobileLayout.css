@@ -291,21 +291,19 @@
 
 .mobile-header-tutorial-btn {
   position: absolute !important;
-  right: 8px !important;
-  left: auto !important; /* Prevent from stretching or centering */
+  left: 8px !important;
+  right: auto !important; /* Prevent from stretching or centering */
   top: 50% !important; /* Center vertically inside header bar */
   transform: translateY(-50%) !important;
-  width: auto !important; /* Prevent from stretching */
-  padding: 2px 6px !important; /* Compact padding */
-  font-size: 0.58rem !important; /* Smaller font */
-  min-height: auto !important; /* Reset min-height */
-  height: 22px !important; /* Compressed height to fit 28px header bar */
+  width: 26px !important; /* Fixed width */
+  height: 26px !important; /* Compressed height to fit 28px header bar */
+  min-width: 26px !important;
+  min-height: 26px !important;
+  padding: 0 !important; /* Remove padding */
   border-radius: var(--radius-button, 8px);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  text-transform: uppercase;
-  font-weight: 800;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
   pointer-events: auto !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
