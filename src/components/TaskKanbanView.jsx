@@ -8,7 +8,149 @@ import {
   IconArchive,
   IconChevronRightSingle
 } from './Icons';
+import { useKanbanDnd } from '../hooks/useKanbanDnd';
 import './TaskKanbanView.css';
+
+/**
+ * KanbanColumn
+ * Renders an individual stage column, enabling drag & drop targeting.
+ */
+const KanbanColumn = ({
+  stage,
+  isActive,
+  stageTasks,
+  selectedTaskIds,
+  toggleStageSelection,
+  updateTaskStage,
+  tasks,
+  permissions,
+  user,
+  canEditTask,
+  canUserUpdate,
+  canUserDelete,
+  canManageHierarchy,
+  canAddSubtask,
+  canCloneTask,
+  deleteTask,
+  openEditModal,
+  onCloneTask,
+  openAddSubtaskModal,
+  openSubmissionModal,
+  handleApproveSubmission,
+  handleRejectClick,
+  onMoveToParent,
+  onDuplicateMerge,
+  stageList,
+  toggleTaskSelection,
+  onPromote,
+  setDrillDownId,
+  expandedParents,
+  expandedTaskId,
+  toggleExpanded,
+  setExpandedTaskId,
+  TaskTileComponent
+}) => {
+  const { isDragOver, dropProps } = useKanbanDnd({
+    stageId: stage.id,
+    tasks,
+    permissions,
+    user,
+    updateTaskStage
+  });
+
+  const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
+
+  return (
+    <div
+      className={`kanban-stage-halo ${isActive ? 'active' : ''} ${isDragOver ? 'drag-over' : ''}`}
+      style={{
+        borderTop: `4px solid ${stage.color}`,
+        borderColor: `${stage.color}44`,
+        backgroundColor: `${stage.color}08`
+      }}
+      {...dropProps}
+    >
+      <div className="stage-header">
+        <div className="header-left-group">
+          <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
+          {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
+            <button
+              onClick={() => toggleStageSelection(stage.id, stageTasks)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--brand-green)',
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '0 8px',
+                marginLeft: '4px',
+                height: '100%',
+                opacity: 0.8
+              }}
+            >
+              {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
+            </button>
+          )}
+        </div>
+        <span
+          className="task-count-badge"
+          style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
+        >
+          {stageTasks.length}
+        </span>
+      </div>
+
+      <div className="task-drop-zone">
+        {stageTasks.map((task) => (
+          <div
+            key={task.id}
+            className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
+          >
+            <TaskCard
+              task={task}
+              stage={stage}
+              canUpdate={canEditTask ? canEditTask(task) : canUserUpdate}
+              canDelete={canUserDelete}
+              canManageHierarchy={canManageHierarchy(task)}
+              canAddSubtask={canAddSubtask ? canAddSubtask(task) : false}
+              canCloneTask={canCloneTask ? canCloneTask(task) : false}
+              updateTaskStage={updateTaskStage}
+
+              deleteTask={deleteTask}
+              openEditModal={openEditModal}
+              onCloneTask={onCloneTask}
+              openAddSubtaskModal={openAddSubtaskModal}
+              openSubmissionModal={openSubmissionModal}
+              handleApproveSubmission={handleApproveSubmission}
+              handleRejectClick={handleRejectClick}
+              onMoveToParent={onMoveToParent}
+              onDuplicateMerge={onDuplicateMerge}
+              STAGE_LIST={stageList}
+              isSelected={selectedTaskIds.includes(task.id)}
+              onSelect={() => toggleTaskSelection(task.id)}
+              currentUser={user}
+              tasks={tasks}
+              onPromote={onPromote}
+              onDrillDown={setDrillDownId}
+              showHierarchy={permissions.canViewKanbanHierarchy}
+              permissions={permissions}
+              isExpanded={expandedParents[task.id] || expandedTaskId === task.id}
+              onToggleExpand={() => task.childCount > 0 ? toggleExpanded(task.id) : setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
+            >
+              {TaskTileComponent && (
+                <TaskTileComponent
+                  task={task}
+                  stage={stage}
+                />
+              )}
+            </TaskCard>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /**
  * StageNavigationTray
@@ -203,97 +345,43 @@ const TaskKanbanView = ({
             return 0;
           });
 
-          const allSelected = stageTasks.length > 0 && stageTasks.every(t => selectedTaskIds.includes(t.id));
-
           return (
-            <div
+            <KanbanColumn
               key={stage.id}
-              className={`kanban-stage-halo ${isActive ? 'active' : ''}`}
-              style={{
-                borderTop: `4px solid ${stage.color}`,
-                borderColor: `${stage.color}44`,
-                backgroundColor: `${stage.color}08`
-              }}
-            >
-              <div className="stage-header">
-                <div className="header-left-group">
-                  <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
-                  {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
-                    <button
-                      onClick={() => toggleStageSelection(stage.id, stageTasks)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--brand-green)',
-                        fontSize: '0.65rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        padding: '0 8px',
-                        marginLeft: '4px',
-                        height: '100%',
-                        opacity: 0.8
-                      }}
-                    >
-                      {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
-                    </button>
-                  )}
-                </div>
-                <span
-                  className="task-count-badge"
-                  style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
-                >
-                  {stageTasks.length}
-                </span>
-              </div>
-
-              <div className="task-drop-zone">
-                {stageTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className={`task-card-container ${task.isSubTask ? 'is-subtask-render' : ''}`}
-                  >
-                    <TaskCard
-                      task={task}
-                      stage={stage}
-                      canUpdate={canEditTask ? canEditTask(task) : canUserUpdate}
-                      canDelete={canUserDelete}
-                      canManageHierarchy={canManageHierarchy(task)}
-                      canAddSubtask={canAddSubtask ? canAddSubtask(task) : false}
-                      canCloneTask={canCloneTask ? canCloneTask(task) : false}
-                      updateTaskStage={updateTaskStage}
-
-                      deleteTask={deleteTask}
-                      openEditModal={openEditModal}
-                      onCloneTask={onCloneTask}
-                      openAddSubtaskModal={openAddSubtaskModal}
-                      openSubmissionModal={openSubmissionModal}
-                      handleApproveSubmission={handleApproveSubmission}
-                      handleRejectClick={handleRejectClick}
-                      onMoveToParent={onMoveToParent}
-                      onDuplicateMerge={onDuplicateMerge}
-                      STAGE_LIST={stageList}
-                      isSelected={selectedTaskIds.includes(task.id)}
-                      onSelect={() => toggleTaskSelection(task.id)}
-                      currentUser={user}
-                      tasks={tasks} // Full list for hierarchy lookups if needed
-                      onPromote={onPromote}
-                      onDrillDown={setDrillDownId}
-                      showHierarchy={permissions.canViewKanbanHierarchy}
-                      permissions={permissions}
-                      isExpanded={expandedParents[task.id] || expandedTaskId === task.id}
-                      onToggleExpand={() => task.childCount > 0 ? toggleExpanded(task.id) : setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
-                    >
-                      {TaskTileComponent && (
-                        <TaskTileComponent
-                          task={task}
-                          stage={stage}
-                        />
-                      )}
-                    </TaskCard>
-                  </div>
-                ))}
-              </div>
-            </div>
+              stage={stage}
+              isActive={isActive}
+              stageTasks={stageTasks}
+              selectedTaskIds={selectedTaskIds}
+              toggleStageSelection={toggleStageSelection}
+              updateTaskStage={updateTaskStage}
+              tasks={tasks}
+              permissions={permissions}
+              user={user}
+              canEditTask={canEditTask}
+              canUserUpdate={canUserUpdate}
+              canUserDelete={canUserDelete}
+              canManageHierarchy={canManageHierarchy}
+              canAddSubtask={canAddSubtask}
+              canCloneTask={canCloneTask}
+              deleteTask={deleteTask}
+              openEditModal={openEditModal}
+              onCloneTask={onCloneTask}
+              openAddSubtaskModal={openAddSubtaskModal}
+              openSubmissionModal={openSubmissionModal}
+              handleApproveSubmission={handleApproveSubmission}
+              handleRejectClick={handleRejectClick}
+              onMoveToParent={onMoveToParent}
+              onDuplicateMerge={onDuplicateMerge}
+              stageList={stageList}
+              toggleTaskSelection={toggleTaskSelection}
+              onPromote={onPromote}
+              setDrillDownId={setDrillDownId}
+              expandedParents={expandedParents}
+              expandedTaskId={expandedTaskId}
+              toggleExpanded={toggleExpanded}
+              setExpandedTaskId={setExpandedTaskId}
+              TaskTileComponent={TaskTileComponent}
+            />
           );
         })}
       </div>

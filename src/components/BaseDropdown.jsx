@@ -98,6 +98,13 @@ const BaseDropdown = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [showAll, setShowAll] = useState(!limitToIds);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [openCount, setOpenCount] = useState(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      setOpenCount(prev => prev + 1);
+    }
+  }, [isOpen]);
 
   const containerRef = useRef(null);
   const inputRef = useRef(null);
@@ -210,10 +217,17 @@ const BaseDropdown = ({
     }
     onChange(newSelection);
 
-    // Auto-close on mobile if the caller has opted into this UX pattern or if on mobile/APK viewport.
-    // Skips when deselecting (to allow correction without re-opening).
-    if ((closeOnSelectMobile || isMobile) && !selectedValues.includes(val)) {
-      setIsOpen(false);
+    // Auto-close logic:
+    // On mobile: closes if closeOnSelectMobile is true, or by default.
+    // On desktop: closes on first selection (openCount <= 1), but stays open on subsequent reopenings.
+    if (!isMobile) {
+      if (openCount <= 1 && !selectedValues.includes(val)) {
+        setIsOpen(false);
+      }
+    } else {
+      if ((closeOnSelectMobile || isMobile) && !selectedValues.includes(val)) {
+        setIsOpen(false);
+      }
     }
   };
 
@@ -481,6 +495,21 @@ const BaseDropdown = ({
                 }}
               >
                 {loadMoreLabel} ({hiddenOptions.length})
+              </button>
+            )}
+
+            {/* CLOSE BUTTON — only on desktop (reopened multi-select) */}
+            {!isMobile && mode === 'multi' && openCount > 1 && (
+              <button
+                type="button"
+                className="bd-close-dropdown-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsOpen(false);
+                }}
+              >
+                Close
               </button>
             )}
 

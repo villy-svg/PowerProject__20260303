@@ -9,13 +9,13 @@ import { useState } from 'react';
  * @param {Function} options.onDrop - Callback for when a valid drop occurs: (draggedId, targetId) => void
  * @param {boolean} options.disabled - Optional flag to disable DND (e.g. for context-only tasks)
  */
-export const useHierarchyDnd = ({ itemId, onDrop, disabled = false }) => {
+export const useHierarchyDnd = ({ itemId, onDrop, disabled = false, dragDisabled = disabled, dropDisabled = disabled }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const dragProps = {
-    draggable: !disabled,
+    draggable: !dragDisabled,
     onDragStart: (e) => {
-      if (disabled) return;
+      if (dragDisabled) return;
       e.dataTransfer.setData('text/plain', itemId);
       e.dataTransfer.effectAllowed = 'move';
     }
@@ -24,7 +24,7 @@ export const useHierarchyDnd = ({ itemId, onDrop, disabled = false }) => {
   const dropProps = {
     onDragOver: (e) => {
       e.preventDefault();
-      if (disabled) return;
+      if (dropDisabled) return;
       e.dataTransfer.dropEffect = 'move';
       setIsDragOver(true);
     },
@@ -33,8 +33,9 @@ export const useHierarchyDnd = ({ itemId, onDrop, disabled = false }) => {
     },
     onDrop: (e) => {
       e.preventDefault();
+      e.stopPropagation(); // Prevent drag-drop events on nested subtasks from bubbling up to stage columns
       setIsDragOver(false);
-      if (disabled) return;
+      if (dropDisabled) return;
       
       const draggedId = e.dataTransfer.getData('text/plain');
       if (draggedId && draggedId !== itemId) {

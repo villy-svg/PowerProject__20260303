@@ -93,7 +93,8 @@ const TaskCard = ({
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
     itemId: task.id,
     onDrop: onMoveToParent,
-    disabled: task.isContextOnly || !canManageHierarchy
+    dragDisabled: task.isContextOnly || (!canManageHierarchy && !effectiveCanUpdate),
+    dropDisabled: task.isContextOnly || !canManageHierarchy
   });
 
   const handleTouchEnd = (e) => {
@@ -216,8 +217,8 @@ const TaskCard = ({
           <span className="card-task-name" title={task.text}>{task.text}</span>
         </div>
 
-        {/* Read More button & Description for Mobile */}
-        {isMobile && task.description && (
+        {/* Read More button & Description */}
+        {task.description && (
           <div className="mobile-description-container">
             <button
               type="button"

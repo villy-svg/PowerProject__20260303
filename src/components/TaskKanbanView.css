@@ -226,3 +226,12 @@
     padding: 12px;
   }
 }
+
+/* KANBAN DRAG & DROP FEEDBACK STYLES */
+.kanban-stage-halo.drag-over {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

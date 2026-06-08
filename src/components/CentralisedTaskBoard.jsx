@@ -5,7 +5,7 @@ import { taskUtils } from '../utils/taskUtils';
 import { resolveVerticalComponents } from '../registry/verticalRegistry';
 import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
-import { IconClock, IconZap, IconEye, IconCheck, IconChevronDown } from './Icons';
+import { IconClock, IconZap, IconEye, IconCheck, IconChevronDown, IconInfo } from './Icons';
 import './CentralisedTaskBoard.css';
 
 /**
@@ -68,7 +68,11 @@ const CentralisedTaskBoard = ({
           {!isMobile && (
             <div className="summary-header secondary-header flex-between">
               <div className="flex-center-gap">
-                <h2>{title}</h2>
+                <div className="desktop-header-title-container">
+                  <h2>{title}</h2>
+                  <IconInfo size={16} className="title-info-icon" />
+                  <span className="desktop-title-tooltip-text">{description}</span>
+                </div>
                 <button 
                   className="board-collapse-toggle-btn"
                   onClick={() => setIsCollapsed(!isCollapsed)}
@@ -83,7 +87,7 @@ const CentralisedTaskBoard = ({
               </div>
             </div>
           )}
-          {!isMobile && <p className="section-description">{description}</p>}
+
           {canCreateEscalation && !isMobile && (
             <div className="centralised-actions-row">
               <button
@@ -121,7 +125,11 @@ const CentralisedTaskBoard = ({
         {!isMobile && (
           <div className="summary-header secondary-header flex-between">
             <div className="flex-center-gap">
-              <h2>{title}</h2>
+              <div className="desktop-header-title-container">
+                <h2>{title}</h2>
+                <IconInfo size={16} className="title-info-icon" />
+                <span className="desktop-title-tooltip-text">{description}</span>
+              </div>
               <button 
                 className="board-collapse-toggle-btn"
                 onClick={() => setIsCollapsed(!isCollapsed)}
@@ -136,7 +144,7 @@ const CentralisedTaskBoard = ({
             </div>
           </div>
         )}
-        {!isMobile && <p className="section-description">{description}</p>}
+
         {canCreateEscalation && !isMobile && (
           <div className="centralised-actions-row">
             <button

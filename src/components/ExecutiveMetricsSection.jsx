@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { STAGE_LIST } from '../constants/stages';
 import { VERTICAL_LIST } from '../constants/verticals';
+import { IconInfo } from './Icons';
 import './ExecutiveMetricsSection.css';
 
 /**
@@ -22,7 +23,13 @@ const ExecutiveMetricsSection = ({
     <div className="executive-summary-section animate-fade-in">
       {!isMobile && (
         <div className="summary-header">
-          <h2>Executive Summary</h2>
+          <div className="desktop-header-title-container">
+            <h2>Executive Summary</h2>
+            <IconInfo size={16} className="title-info-icon" />
+            <span className="desktop-title-tooltip-text">
+              {"Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ."}
+            </span>
+          </div>
         </div>
       )}
       

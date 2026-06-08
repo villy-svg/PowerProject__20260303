@@ -23,6 +23,7 @@ import {
   IconChevronDown,
   IconChevronRight,
   IconCopy,
+  IconCheck,
 } from './Icons';
 import { useHierarchyDnd } from '../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../features/task-board/hooks/useTaskViewActions';
@@ -332,6 +333,16 @@ const ListViewRow = ({
               title="Edit Task"
             >
               <IconEdit size={14} />
+            </button>
+          )}
+
+          {permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
+            <button
+              className="card-mark-completed-button"
+              onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'COMPLETED'); }}
+              title="Mark as Completed (Admin Only)"
+            >
+              <IconCheck size={14} />
             </button>
           )}
 

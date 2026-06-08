@@ -403,3 +403,27 @@
   0%, 100% { opacity: 1; filter: brightness(1); }
   50% { opacity: 0.6; filter: brightness(0.8); }
 }
+
+/* ── BaseDropdown: Close Dropdown Button ── */
+.bd-close-dropdown-btn {
+  width: calc(100% - 16px);
+  margin: 8px;
+  padding: 8px 12px;
+  text-align: center;
+  background: var(--brand-green);
+  border: 1px solid var(--brand-green);
+  border-radius: 8px;
+  color: #000 !important; /* Force high contrast black text on green button */
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bd-close-dropdown-btn:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 15%);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 15%);
+  box-shadow: 0 0 12px rgba(var(--brand-green-rgb, 0, 180, 160), 0.15);
+}
