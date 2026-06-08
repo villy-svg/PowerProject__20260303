@@ -290,7 +290,8 @@
     justify-content: center !important;
     border-radius: 6px !important;
     background: rgba(245, 158, 11, 0.05) !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
+    border: none !important;
+    color: #f59e0b !important;
     z-index: 2003 !important;
     box-sizing: border-box !important;
   }

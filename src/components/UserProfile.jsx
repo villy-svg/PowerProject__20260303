@@ -82,11 +82,49 @@ const UserProfile = ({
 
       {isOpen && (
         <div className="user-dropdown-menu">
-          <div className="dropdown-header">Profile Details</div>
-          <div className="dropdown-item static">
-            <span className="role-label">{user?.roleId?.replace('_', ' ').toUpperCase()}</span>
+          {/* 1. Name */}
+          <div className="dropdown-header">Name</div>
+          <div className="dropdown-item static name-display" style={{ fontWeight: '700' }}>
+            {displayName}
           </div>
           
+          <div className="dropdown-divider" />
+
+          {/* 2. Bank Details of User */}
+          <div className="dropdown-header">Bank Details</div>
+          <div className="dropdown-item static bank-details-display" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', minHeight: 'auto', padding: '10px 12px' }}>
+            {user?.bankDetails ? (
+              <>
+                <span style={{ fontSize: '0.75rem', opacity: 0.85 }}><strong>Name:</strong> {user.bankDetails.accountName || 'N/A'}</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.85 }}><strong>A/C No:</strong> {user.bankDetails.accountNumber || 'N/A'}</span>
+                <span style={{ fontSize: '0.75rem', opacity: 0.85 }}><strong>IFSC:</strong> {user.bankDetails.ifscCode || 'N/A'}</span>
+              </>
+            ) : (
+              <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>No linked bank account.</span>
+            )}
+          </div>
+
+          <div className="dropdown-divider" />
+
+          {/* 3. Employee Role */}
+          <div className="dropdown-header">Employee Role</div>
+          <div className="dropdown-item static">
+            <span className="role-label" style={{ fontSize: '0.78rem' }}>
+              {user?.employeeRole ? user.employeeRole.replace('_', ' ').toUpperCase() : 'NO EMPLOYEE ROLE'}
+            </span>
+          </div>
+
+          <div className="dropdown-divider" />
+
+          {/* 4. User Role */}
+          <div className="dropdown-header">User Role</div>
+          <div className="dropdown-item static">
+            <span className="role-label" style={{ fontSize: '0.78rem' }}>
+              {user?.roleId ? user.roleId.replace('_', ' ').toUpperCase() : 'GUEST'}
+            </span>
+          </div>
+
+          {/* 5. Simulate User */}
           {realUser?.roleId === 'master_admin' && (
             <>
               <div className="dropdown-divider" />

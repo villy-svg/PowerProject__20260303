@@ -24,7 +24,7 @@
   opacity: 0.65;
   font-size: 0.95rem;
   line-height: 1.5;
-  max-width: 900px;
+  max-width: 100%;
 }
 
 .master-header-actions-row,

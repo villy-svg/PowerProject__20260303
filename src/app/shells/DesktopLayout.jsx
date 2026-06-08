@@ -82,17 +82,17 @@ const DesktopLayout = ({
             <button 
               className={`halo-button header-tutorial-btn ${activeVertical === 'tutorial' ? 'active' : ''}`}
               onClick={() => setActiveVertical('tutorial')}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              title="Tutorials"
             >
-              <IconBulb size={14} /> Tutorials
+              <IconBulb size={16} />
             </button>
             {isBypassActive && (
               <button 
                 className="halo-button header-sandbox-btn"
                 onClick={() => setIsSandboxOpen(true)}
-                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                title="Sandbox Active"
               >
-                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} /> Sandbox Active
+                <IconWarning size={16} style={{ color: 'var(--brand-yellow)' }} />
               </button>
             )}
             <NotificationBell user={user} />
