@@ -8,13 +8,26 @@ import { orchestrationService } from '../../services/tasks/orchestrationService'
 import CustomSelect from '../../components/CustomSelect'; // FIX Bug10: Was missing — causes runtime crash when Employee task form opens
 import { REMARK_GRADE_OPTIONS } from './remarksMapping';
 import '../../styles/ManagementForms.css';
+import SubmissionHistory from '../../components/SubmissionHistory';
+import { IconUpload } from '../../components/Icons';
+import '../ChargingHubs/HubTaskForm.css';
 
 /**
  * EmployeeRemarkForm
  * Vertical-specific form for Employee Manager remarks.
  * Refactored: Uses useTaskForm for unified state management.
  */
-const EmployeeRemarkForm = ({ onSubmit, onCancel, loading, initialData = {}, currentUser = {}, permissions = {}, availableTasks = [] }) => {
+const EmployeeRemarkForm = ({
+  onSubmit,
+  onCancel,
+  loading,
+  initialData = {},
+  currentUser = {},
+  permissions = {},
+  availableTasks = [],
+  onSubmissionStatusUpdate,
+  onUploadProof
+}) => {
   const {
     formData,
     updateField,
@@ -27,6 +40,13 @@ const EmployeeRemarkForm = ({ onSubmit, onCancel, loading, initialData = {}, cur
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
+
+  const [activeTab, setActiveTab] = useState('details');
+  const [submissionCount, setSubmissionCount] = useState(0);
+
+  const isEditMode = !!initialData?.id;
+  const isMasterAdmin = currentUser?.roleId === 'master_admin' || permissions?.roleId === 'master_admin';
+  const assigneeDisabled = !taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser) || (isEditMode && !isMasterAdmin);
 
   const handleFiles = (newFiles) => {
     const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -83,111 +103,136 @@ const EmployeeRemarkForm = ({ onSubmit, onCancel, loading, initialData = {}, cur
   return (
     <form className="vertical-task-form" onSubmit={handleSubmit}>
       <div className="modal-content-area">
-        <div className="form-group">
-          <label>Remark Summary</label>
-          <div className="form-input-container">
-            <input
-              type="text"
-              value={formData.text}
-              onChange={(e) => updateField('text', e.target.value)}
-              placeholder="e.g. Onboard new hire, Conduct performance review"
-              required
-              disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
-            />
+        {initialData?.id && (
+          <div className="task-form-tabs">
+            <button type="button" className={`task-form-tab ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>📝 Details</button>
+            <button type="button" className={`task-form-tab ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>📋 History {submissionCount > 0 && <span className="tab-count">{submissionCount}</span>}</button>
+            {onUploadProof && (
+              <button type="button" className="halo-button proof-btn-inline" onClick={onUploadProof} title="Upload Proof of Work">
+                <IconUpload size={12} /> <span>Proof</span>
+              </button>
+            )}
           </div>
-        </div>
+        )}
 
-        <div className="form-row-grid">
-          <div className="form-group">
-            <label>Remark Grade</label>
-            <div className="form-input-container">
-              <CustomSelect
-                value={formData.priority}
-                onChange={(val) => updateField('priority', val)}
-                options={REMARK_GRADE_OPTIONS}
-                disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
-              />
+        {activeTab === 'details' ? (
+          <div className="tab-pane fade-in">
+            <div className="form-group">
+              <label>Remark Summary</label>
+              <div className="form-input-container">
+                <input
+                  type="text"
+                  value={formData.text}
+                  onChange={(e) => updateField('text', e.target.value)}
+                  placeholder="e.g. Onboard new hire, Conduct performance review"
+                  required
+                  disabled={!taskUtils.canUserEditField(initialData, 'text', permissions, currentUser)}
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label>Assigned To</label>
-            <div className="form-input-container">
-              <AssigneeSelector
-                value={formData.assigned_to}
-                onChange={(val) => updateField('assigned_to', val)}
-                currentUser={currentUser}
-                disabled={!taskUtils.canUserEditField(initialData, 'assigned_to', permissions, currentUser)}
-              />
+            <div className="form-row-grid">
+              <div className="form-group">
+                <label>Remark Grade</label>
+                <div className="form-input-container">
+                  <CustomSelect
+                    value={formData.priority}
+                    onChange={(val) => updateField('priority', val)}
+                    options={REMARK_GRADE_OPTIONS}
+                    disabled={!taskUtils.canUserEditField(initialData, 'priority', permissions, currentUser)}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Assigned To</label>
+                <div className="form-input-container">
+                  <AssigneeSelector
+                    value={formData.assigned_to}
+                    onChange={(val) => updateField('assigned_to', val)}
+                    currentUser={currentUser}
+                    disabled={assigneeDisabled}
+                    isSingle={true}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="form-group">
-          <label>Detailed Description</label>
-          <div className="form-input-container">
-            <textarea
-              value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
-              placeholder="Enter task details..."
-              rows={4}
-              disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
-            />
-          </div>
-        </div>
+            <div className="form-group">
+              <label>Detailed Description</label>
+              <div className="form-input-container">
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => updateField('description', e.target.value)}
+                  placeholder="Enter task details..."
+                  rows={4}
+                  disabled={!taskUtils.canUserEditField(initialData, 'description', permissions, currentUser)}
+                />
+              </div>
+            </div>
 
-        {!initialData?.id && (
-          <div className="form-group upload-section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-              <label className="section-label">Attach Photo(s)</label>
+            <div className="form-group upload-section">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                <label className="section-label">Attach Photo(s)</label>
+                {files.length > 0 && (
+                  <span className="batch-counter" style={{ fontSize: '0.85rem', opacity: 0.6 }}>
+                    {files.length} / 10 images
+                  </span>
+                )}
+              </div>
+              <div 
+                className={`form-upload-zone ${dragActive ? 'drag-active' : ''}`}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
+                onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDragActive(false);
+                  if (e.dataTransfer.files?.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                  }
+                }}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input 
+                  ref={fileInputRef}
+                  type="file" 
+                  multiple 
+                  accept="image/jpeg,image/png,image/webp" 
+                  onChange={(e) => {
+                    if (e.target.files?.length > 0) {
+                      handleFiles(e.target.files);
+                    }
+                  }} 
+                  style={{ display: 'none' }}
+                />
+                <div className="upload-icon">📸</div>
+                <div className="upload-text">
+                  <strong>Click to browse</strong> or drag & drop photos here
+                </div>
+              </div>
               {files.length > 0 && (
-                <span className="batch-counter" style={{ fontSize: '0.85rem', opacity: 0.6 }}>
-                  {files.length} / 10 images
-                </span>
+                <div className="form-file-preview-strip">
+                  {files.map((file, idx) => (
+                    <div key={idx} className="file-chip">
+                      <img src={URL.createObjectURL(file)} alt="Preview" />
+                      <span className="file-chip-name">{file.name}</span>
+                      <button type="button" className="file-chip-remove" onClick={(e) => { e.stopPropagation(); removeFile(idx); }}>×</button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            <div 
-              className={`form-upload-zone ${dragActive ? 'drag-active' : ''}`}
-              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); }}
-              onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDragActive(false);
-                if (e.dataTransfer.files?.length > 0) {
-                  handleFiles(e.dataTransfer.files);
-                }
-              }}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                multiple 
-                accept="image/jpeg,image/png,image/webp" 
-                onChange={(e) => {
-                  if (e.target.files?.length > 0) {
-                    handleFiles(e.target.files);
-                  }
-                }} 
-                style={{ display: 'none' }}
-              />
-              <div className="upload-icon">📸</div>
-              <div className="upload-text">
-                <strong>Click to browse</strong> or drag & drop photos here
-              </div>
-            </div>
-            {files.length > 0 && (
-              <div className="form-file-preview-strip">
-                {files.map((file, idx) => (
-                  <div key={idx} className="file-chip">
-                    <img src={URL.createObjectURL(file)} alt="Preview" />
-                    <span className="file-chip-name">{file.name}</span>
-                    <button type="button" className="file-chip-remove" onClick={(e) => { e.stopPropagation(); removeFile(idx); }}>×</button>
-                  </div>
-                ))}
-              </div>
-            )}
+          </div>
+        ) : (
+          <div className="history-tab-content fade-in">
+            <SubmissionHistory 
+              taskId={initialData?.id} 
+              permissions={permissions} 
+              currentUser={currentUser} 
+              onStatusUpdate={onSubmissionStatusUpdate} 
+              onCountLoad={setSubmissionCount} 
+            />
           </div>
         )}
       </div>

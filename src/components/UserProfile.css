@@ -185,27 +185,40 @@
   background-color: var(--border-color);
   margin: 8px 0;
 }
-/* UserProfile.css snippet - Re-apply to fix image overlap */
-.user-info-text {
-  display: flex;
-  flex-direction: column; /* Force vertical stacking */
-  align-items: flex-start;
-  justify-content: center;
-  text-align: left;
-  line-height: 1.1;
-  overflow: hidden; /* Prevent bleeding */
-}
-.user-name {
-  color: var(--text-color);
+/* === STATIC STYLE REPLACEMENTS (moved from inline JSX) === */
+
+/* Name display item: heavier weight for the static label */
+.dropdown-item.name-display {
   font-weight: 700;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  margin-bottom: 2px;
 }
-.user-role {
-  color: var(--text-color);
+
+/* Bank details display block: vertical column layout */
+.bank-details-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: auto;
+  padding: 10px 12px;
+}
+
+/* Each bank field row: small monospaced text */
+.bank-details-display span {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* Empty state row for bank details */
+.bank-details-display .bank-empty {
   opacity: 0.6;
-  font-size: 0.7rem;
-  font-weight: 400;
-  white-space: nowrap; /* Keep Role on its own line */
+}
+
+/* Role label text inside dropdown items */
+.role-label {
+  font-size: 0.78rem;
+}
+
+/* Profile avatar icon: slightly dimmed */
+.user-avatar svg {
+  opacity: 0.9;
 }

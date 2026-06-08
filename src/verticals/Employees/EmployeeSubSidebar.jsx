@@ -157,6 +157,13 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
         <p>FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
         <div className="filters-reset-wrapper">
           <button
+            onClick={(e) => { e.stopPropagation(); onFilterChange('highRemarksOnly', !filters.highRemarksOnly); }}
+            className={`filters-action-btn ${filters.highRemarksOnly ? 'active' : ''}`}
+            title="High Remarks Only"
+          >
+            HIGH
+          </button>
+          <button
             onClick={(e) => { e.stopPropagation(); onReset(); }}
             className="filters-action-btn"
           >

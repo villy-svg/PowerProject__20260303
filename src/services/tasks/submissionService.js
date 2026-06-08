@@ -32,12 +32,14 @@ export const compressFile = async (file) => {
 
 /**
  * Uploads a file to Supabase Storage under the field-submissions bucket.
- * Path: {taskId}/{submissionNumber}_{fileName}
+ * Path: {parentType}/{parentId}/{submissionId}/{fileName}
  * @returns {{ url: string, fileName: string, mimeType: string }} | throws
  */
-export const uploadSubmissionFile = async (taskId, submissionId, file) => {
+export const uploadSubmissionFile = async (parentId, submissionId, file, parentType = 'tasks') => {
   const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const storagePath = `${taskId}/${submissionId}/${sanitizedName}`;
+  const storagePath = parentType === 'employees'
+    ? `employees/${parentId}/${submissionId}/${sanitizedName}`
+    : `${parentId}/${submissionId}/${sanitizedName}`;
 
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
@@ -80,17 +82,19 @@ export const updateSubmissionLinks = async (submissionId, links) => {
 /**
  * Creates a submission record.
  * @param {Object} submission
- * @param {string} submission.taskId
+ * @param {string} [submission.taskId]
+ * @param {string} [submission.employeeId]
  * @param {string} submission.submittedBy
  * @param {string} submission.comment
  * @param {Array} submission.links - Array of link objects matching the JSONB schema
  */
-export const createSubmission = async ({ taskId, submittedBy, comment, links = [] }) => {
+export const createSubmission = async ({ taskId, employeeId, submittedBy, comment, links = [] }) => {
   try {
     const result = await createEntity({
       entityType: 'proof_of_work',
       domainData: {
-        task_id: taskId,
+        task_id: taskId || null,
+        employee_id: employeeId || null,
         submitted_by: submittedBy,
         comment,
         links,
@@ -119,20 +123,36 @@ export const getSubmissionsForTask = async (taskId) => {
 };
 
 /**
+ * Fetches all submissions (documents) for a given employee.
+ */
+export const getEmployeeSubmissions = async (employeeId) => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*, submitted_by_profile:user_profiles!submissions_submitted_by_fkey(name, email)')
+    .eq('employee_id', employeeId)
+    .order('submission_number', { ascending: false });
+
+  if (error) throw new Error(`Failed to fetch employee submissions: ${error.message}`);
+  return data || [];
+};
+
+/**
  * Full submission flow: compress files → upload → insert record.
  * @param {Object} params
- * @param {string} params.taskId
+ * @param {string} [params.taskId]
+ * @param {string} [params.employeeId]
  * @param {string} params.userId
  * @param {string} params.comment
  * @param {File[]} params.files
  * @param {boolean} params.moveToReview - If true, auto-transitions task to REVIEW stage
  * @returns {Object} The created submission record
  */
-export const submitProofOfWork = async ({ taskId, userId, comment, files = [], moveToReview = false, onProgress }) => {
+export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, files = [], moveToReview = false, onProgress }) => {
   // 1. Create submission record first (Trigger handles submission_number)
   // We insert with empty links to get the UUID for storage folder naming
   const submission = await createSubmission({
     taskId,
+    employeeId,
     submittedBy: userId,
     comment,
     links: [], // Start empty
@@ -152,7 +172,9 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [], m
     for (const file of compressedFiles) {
       if (onProgress) onProgress({ current: uploadedCount, total: compressedFiles.length, label: `Uploading ${uploadedCount + 1} of ${compressedFiles.length}...` });
       
-      const linkObj = await uploadSubmissionFile(taskId, submissionId, file);
+      const parentId = taskId || employeeId;
+      const parentType = employeeId ? 'employees' : 'tasks';
+      const linkObj = await uploadSubmissionFile(parentId, submissionId, file, parentType);
       links.push(linkObj);
       uploadedCount++;
     }
@@ -163,7 +185,7 @@ export const submitProofOfWork = async ({ taskId, userId, comment, files = [], m
     const updatedSubmission = await updateSubmissionLinks(submissionId, links);
 
     // 4. Optionally move task to REVIEW stage
-    if (moveToReview) {
+    if (moveToReview && taskId) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         await taskService.updateTaskStage(taskId, 'REVIEW', user?.id);

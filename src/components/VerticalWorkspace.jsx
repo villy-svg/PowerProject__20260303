@@ -50,7 +50,8 @@ const VerticalWorkspace = ({
     role: [],
     function: [],
     assignee: [],
-    duplicatesOnly: false 
+    duplicatesOnly: false,
+    highRemarksOnly: false
   });
   const [isInitialized, setIsInitialized] = React.useState(false);
   const [isTrayVisible, setIsTrayVisible] = React.useState(true);

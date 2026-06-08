@@ -15,6 +15,7 @@ import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import ConflictModal from '../../components/ConflictModal';
 import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Icons';
+import { hasHighRemarks } from './remarkRules';
 
 /**
  * EmployeeManagement
@@ -125,6 +126,16 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     const matchesDept = !filters?.department?.length || filters.department.some(d =>
       d?.trim().toUpperCase() === emp.dept_code?.trim().toUpperCase()
     );
+
+    if (filters?.highRemarksOnly) {
+      const empRemarks = (tasks || []).filter(t => {
+        const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
+        if (!isRemark) return false;
+        const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+        return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
+      });
+      if (!hasHighRemarks(emp, empRemarks)) return false;
+    }
 
     return matchesStatus && matchesRole && matchesHub && matchesDept;
   });

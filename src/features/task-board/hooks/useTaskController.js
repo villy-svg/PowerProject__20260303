@@ -206,8 +206,20 @@ export const useTaskController = (props) => {
 
     setSaving(true);
     try {
-      if (isEditing) await updateTask({ ...editingTask, ...formData });
-      else {
+      if (isEditing) {
+        const { files, ...taskPayload } = formData;
+        await updateTask({ ...editingTask, ...taskPayload });
+        
+        if (files && files.length > 0) {
+          await submitProofOfWork({
+            taskId: editingTask.id,
+            userId: user?.id,
+            comment: taskPayload.description || `Attached photos during task edit.`,
+            files,
+            moveToReview: false
+          });
+        }
+      } else {
         // Pass the activeVertical context (e.g., 'escalation_tasks') rather than the normalized rootVerticalId.
         // This ensures taskService.addTask can correctly infer the task_board label.
         const contextVid = (activeVertical && typeof activeVertical === 'string' && (activeVertical.includes('_') || activeVertical.includes('tasks'))) 

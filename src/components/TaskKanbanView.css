@@ -235,3 +235,80 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* STAGE HEADER */
+.stage-header h4 {
+  font-weight: 700;
+}
+
+/* Stage task count badge: inherit font weight from design system */
+.task-count-badge {
+  font-weight: 700;
+}
+
+/* SELECT ALL / DESELECT ALL bulk action button in column header */
+.select-all-btn {
+  background: none;
+  border: none;
+  color: var(--brand-green);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 8px;
+  margin-left: 4px;
+  height: 100%;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.select-all-btn:hover {
+  opacity: 1;
+}
+
+/* DRILL BREADCRUMB NAVIGATION */
+.drill-breadcrumb {
+  padding: 0 24px 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Root board label button (e.g. "Board") */
+.breadcrumb-root-btn {
+  background: none;
+  border: none;
+  color: var(--brand-green);
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+  font-size: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.breadcrumb-root-btn:hover {
+  opacity: 0.8;
+}
+
+/* Individual node buttons in the breadcrumb trail */
+.breadcrumb-node-btn {
+  background: none;
+  border: none;
+  color: var(--brand-green);
+  cursor: pointer;
+  padding: 0;
+  font-weight: 500;
+  font-size: inherit;
+  transition: opacity 0.2s ease;
+}
+
+/* Last (active) node in the breadcrumb — uses text color, not green */
+.breadcrumb-node-btn--active {
+  color: var(--text-color);
+  font-weight: 700;
+  cursor: default;
+}
+
+.breadcrumb-node-btn:hover:not(.breadcrumb-node-btn--active) {
+  opacity: 0.8;
+}

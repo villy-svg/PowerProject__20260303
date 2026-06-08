@@ -72,22 +72,11 @@ const KanbanColumn = ({
     >
       <div className="stage-header">
         <div className="header-left-group">
-          <h4 style={{ fontWeight: 700 }}>{stage.label}</h4>
+          <h4>{stage.label}</h4>
           {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
             <button
               onClick={() => toggleStageSelection(stage.id, stageTasks)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--brand-green)',
-                fontSize: '0.65rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: '0 8px',
-                marginLeft: '4px',
-                height: '100%',
-                opacity: 0.8
-              }}
+              className="select-all-btn"
             >
               {allSelected ? 'DESELECT ALL' : 'SELECT ALL'}
             </button>
@@ -95,7 +84,7 @@ const KanbanColumn = ({
         </div>
         <span
           className="task-count-badge"
-          style={{ backgroundColor: `${stage.color}22`, color: stage.color, fontWeight: 700 }}
+          style={{ backgroundColor: `${stage.color}22`, color: stage.color }}
         >
           {stageTasks.length}
         </span>
@@ -248,10 +237,10 @@ const TaskKanbanView = ({
   return (
     <div className="kanban-view-container">
       {permissions.canViewKanbanHierarchy && (drillDownId || drillPath.length > 0) && (
-        <div className="drill-breadcrumb" style={{ padding: '0 24px 12px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <div className="drill-breadcrumb">
           <button 
             onClick={() => setDrillDownId(null)}
-            style={{ background: 'none', border: 'none', color: 'var(--brand-green)', cursor: 'pointer', padding: 0, fontWeight: 600 }}
+            className="breadcrumb-root-btn"
           >
             {boardLabel || label || 'Board'}
           </button>
@@ -260,14 +249,7 @@ const TaskKanbanView = ({
               <span>/</span>
               <button 
                 onClick={() => setDrillDownId(node.id)}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: idx === drillPath.length - 1 ? 'var(--text-color)' : 'var(--brand-green)', 
-                  cursor: 'pointer', 
-                  padding: 0,
-                  fontWeight: idx === drillPath.length - 1 ? 700 : 500
-                }}
+                className={`breadcrumb-node-btn${idx === drillPath.length - 1 ? ' breadcrumb-node-btn--active' : ''}`}
               >
                 {node.text}
               </button>

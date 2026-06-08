@@ -92,14 +92,23 @@
   display: block;
 }
 
+/* Row 2: vertical stack — badges + title (with optional description below) */
 .card-row-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding-top: 0;
+  margin-top: 6px;
+}
+
+/* Inner row: dot indicators + task name text */
+.card-row-2-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 0;
-  margin-top: 6px;
-  /* Spacing between badges and title */
+  width: 100%;
 }
 
 .rejected-red-dot {
@@ -539,4 +548,45 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-primary);
+}
+
+/* Remove margin from description paragraph — layout handled by container */
+.task-detailed-description p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* VIEWER badge: context-only variant of card-priority */
+.card-priority.context-viewer-badge {
+  background-color: var(--bg-elevated, rgba(255,255,255,0.05));
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  padding: 1px 4px;
+}
+
+/* Promote button group container */
+.promote-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* Promote-up button: granparent direction (blue accent) */
+.action-icon-btn.btn-promote-up {
+  color: var(--brand-blue, #60a5fa);
+}
+
+/* Promote-top button: promote to top level (green accent) */
+.action-icon-btn.btn-promote-top {
+  color: var(--brand-green);
+}
+
+/* Add-subtask button: green accent */
+.action-icon-btn.btn-add-subtask {
+  color: var(--brand-green);
+}
+
+/* Restore-to-backlog button: green + bold */
+.action-icon-btn.btn-restore {
+  color: var(--brand-green);
+  font-weight: 800;
 }

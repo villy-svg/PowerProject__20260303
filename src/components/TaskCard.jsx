@@ -179,7 +179,7 @@ const TaskCard = ({
       {/* Row 1: Metadata (Priority + Tags + Assignee) */}
       <div className="card-row-1">
         {task.isContextOnly && (
-          <span className="card-priority" title="Context Only (View Only)" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+          <span className="card-priority context-viewer-badge" title="Context Only (View Only)">
             VIEWER
           </span>
         )}
@@ -203,8 +203,8 @@ const TaskCard = ({
       </div>
 
       {/* Row 2: Title */}
-      <div className="card-row-2" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+      <div className="card-row-2">
+        <div className="card-row-2-title">
           {isRejected && task.stageId === 'IN_PROGRESS' && (
             <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
           )}
@@ -235,7 +235,7 @@ const TaskCard = ({
             {showDetails && (
               <div className="task-detailed-description">
                 <div className="task-detailed-description-title">Detailed Description</div>
-                <p style={{ margin: 0, lineHeight: '1.4' }}>{task.description}</p>
+                <p>{task.description}</p>
               </div>
             )}
           </div>
@@ -267,11 +267,10 @@ const TaskCard = ({
 
         {/* Hierarchy Navigation (Promote buttons) — restricted to managers/creators */}
         {!task.isContextOnly && canManageHierarchy && showHierarchy && task.parentTask && (
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div className="promote-group">
             {tasks.find(t => t.id === task.parentTask)?.parentTask && (
               <button
-                className="action-icon-btn"
-                style={{ color: 'var(--brand-blue)' }}
+                className="action-icon-btn btn-promote-up"
                 onClick={() => {
                   const parent = tasks.find(t => t.id === task.parentTask);
                   if (parent) onMoveToParent(task.id, parent.parentTask);
@@ -283,8 +282,7 @@ const TaskCard = ({
               </button>
             )}
             <button
-              className="action-icon-btn"
-              style={{ color: 'var(--brand-green)' }}
+              className="action-icon-btn btn-promote-top"
               onClick={(e) => { e.stopPropagation(); onPromote(task.id, null); }}
               title="Promote to Top Level"
             >
@@ -296,8 +294,7 @@ const TaskCard = ({
         {/* Subtask Creation Trigger — available to managers, creators, AND assignees */}
         {!task.isContextOnly && canAddSubtask && showHierarchy && (
           <button
-            className="action-icon-btn"
-            style={{ color: 'var(--brand-green)' }}
+            className="action-icon-btn btn-add-subtask"
             onClick={() => tva.handleAddSubtask(task.id)}
             title="Add Subtask Under This"
           >
@@ -351,10 +348,9 @@ const TaskCard = ({
 
         {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
           <button
-            className="action-icon-btn"
+            className="action-icon-btn btn-restore"
             onClick={() => updateTaskStage(task.id, 'BACKLOG')}
             title="Move back to Pending"
-            style={{ color: 'var(--brand-green)', fontWeight: 800 }}
           >
             <IconPromote size={14} />
           </button>
