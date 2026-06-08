@@ -150,10 +150,7 @@ export const taskUtils = {
       const code = options.assetCode;
       // Do NOT add "ALL" as the prefix to tasks — keep other prefixes except "ALL"
       if (code && code.toUpperCase() !== 'ALL') {
-        const cityPrefix = (options.cityCode && options.cityCode !== code && !code.startsWith(`${options.cityCode}-`)) 
-          ? `${options.cityCode} : ` 
-          : '';
-        const prefix = `${cityPrefix}${code} : `;
+        const prefix = `${code} : `;
 
         if (!finalTaskText.includes(" : ")) {
           finalTaskText = `${prefix}${finalTaskText}`;

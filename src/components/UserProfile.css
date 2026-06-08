@@ -77,6 +77,20 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   padding: 8px;
   z-index: 1000;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Scrollbar Styling for Profile Menu */
+.user-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.user-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.user-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* On-demand Impersonation Menu Section */
