@@ -12,6 +12,7 @@
 import React from 'react';
 import DataGrid from './DataGrid';
 import { IconCopy } from '../../../components/Icons';
+import ScraperPanel from './ScraperPanel';
 
 // ─── Tab Switcher ─────────────────────────────────────────────────────────────
 const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
@@ -165,6 +166,9 @@ const SheetTabPanel = ({
   onAutofixColumn,
   // canRunChecker: Editor+ is required to see/use the Run Checker button
   canRunChecker = false,
+  activeVertical,
+  scrapingProgress,
+  onRunScraper,
 }) => (
   <div className="dm-card dm-card--tab-panel">
     <div className="dm-tab-bar">
@@ -190,6 +194,14 @@ const SheetTabPanel = ({
         />
       )}
     </div>
+
+    {activeVertical === 'model_verification_board' && previewData && (
+      <ScraperPanel
+        onRunScraper={onRunScraper}
+        progress={scrapingProgress}
+        disabled={syncing}
+      />
+    )}
 
     <DataBody
       tabLoading={tabLoading}

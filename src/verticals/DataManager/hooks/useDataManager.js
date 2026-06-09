@@ -12,6 +12,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { googleSheetsService } from '../../../services/core/googleSheetsService';
 import { validateRow, validateSheet, cleanEVPlateNumber } from '../utils/validationRules';
 import { extractSpreadsheetId, colIndexToLetter, estimateHeaderRowsToSkip } from '../utils/sheetsUtils';
+import { buildFinalUrl, parseHtmlField, fetchHtmlViaProxy } from '../utils/scraperUtils';
 
 // ─── Default Tab Name Configuration ──────────────────────────────────────────
 const DEFAULT_TAB_SETTINGS = {
@@ -106,6 +107,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
   const [checkerRun, setCheckerRun] = useState(false);
   /** Cached Set of valid plate numbers from the Vehicle Details tab */
   const [fleetPlates, setFleetPlates] = useState(null);
+  const [scrapingProgress, setScrapingProgress] = useState(null);
 
   // ── Tab Name Mapping ─────────────────────────────────────────────────────
   const [tabSettings, setTabSettingsState] = useState(() => {
@@ -506,6 +508,128 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     setShowErrorsOnly(prev => !prev);
   }, []);
 
+  const handleRunWebScraper = useCallback(async (targetField, outputColumnName) => {
+    if (!previewData || previewData.length === 0 || !targetField || !outputColumnName) return;
+    
+    const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
+    let currentHeaders = [...(previewData[skip] || [])];
+    
+    // Find column indexes
+    let vehicleColIdx = currentHeaders.findIndex(h => {
+      const s = String(h || '').toLowerCase().trim();
+      return s.includes('vehicle number') || s.includes('plate number') || s.includes('vehicle') || s.includes('plate');
+    });
+    
+    let baseColIdx = currentHeaders.findIndex(h => {
+      const s = String(h || '').toLowerCase().trim();
+      return s.includes('base url') || s.includes('base_url') || (s.includes('url') && !s.includes('final'));
+    });
+
+    if (vehicleColIdx === -1 || baseColIdx === -1) {
+      setError('Could not find both "Vehicle Number" and "Base URL" columns in the sheet. Please verify headers.');
+      return;
+    }
+
+    let finalColIdx = currentHeaders.findIndex(h => {
+      const s = String(h || '').toLowerCase().trim();
+      return s.includes('final url') || s.includes('final_url');
+    });
+
+    let targetColIdx = currentHeaders.findIndex(h => {
+      const s = String(h || '').toLowerCase().trim();
+      return s === outputColumnName.toLowerCase().trim();
+    });
+
+    const addedFinalCol = finalColIdx === -1;
+    const addedTargetCol = targetColIdx === -1;
+
+    // Build new headers if we need to add columns
+    let newHeaders = [...currentHeaders];
+    if (addedFinalCol) {
+      newHeaders.push('Final URL');
+      finalColIdx = newHeaders.length - 1;
+    }
+    if (addedTargetCol) {
+      newHeaders.push(outputColumnName);
+      targetColIdx = newHeaders.length - 1;
+    }
+
+    // If columns were added, update previewData to pad rows and update header row
+    if (addedFinalCol || addedTargetCol) {
+      setPreviewData(prev => {
+        const next = [...prev];
+        next[skip] = newHeaders;
+        for (let i = 0; i < next.length; i++) {
+          if (i === skip) continue;
+          if (Array.isArray(next[i])) {
+            const row = [...next[i]];
+            while (row.length < newHeaders.length) {
+              row.push('');
+            }
+            next[i] = row;
+          }
+        }
+        return next;
+      });
+    }
+
+    // Now, run the scraping loop
+    const skipRowsCount = skip + 1;
+    const totalRows = previewData.length - skipRowsCount;
+    setScrapingProgress({ current: 0, total: totalRows, status: 'Initializing...' });
+
+    // We will accumulate edits inside editedCells state
+    const newEdits = { ...editedCells };
+
+    for (let idx = 0; idx < totalRows; idx++) {
+      const rowIndex = skipRowsCount + idx;
+      const row = previewData[rowIndex];
+      if (!row) continue;
+
+      // Extract values using existing edits or raw previewData
+      const vehicleNum = newEdits[rowIndex]?.[vehicleColIdx] ?? row[vehicleColIdx] ?? '';
+      const baseUrl = newEdits[rowIndex]?.[baseColIdx] ?? row[baseColIdx] ?? '';
+
+      if (!baseUrl) {
+        setScrapingProgress(prev => ({
+          ...prev,
+          current: idx + 1,
+          status: `Row ${rowIndex + 1}/${previewData.length}: Missing Base URL. Skipping.`
+        }));
+        continue;
+      }
+
+      // 1. Calculate & populate Final URL
+      const finalUrl = buildFinalUrl(baseUrl, vehicleNum);
+      if (!newEdits[rowIndex]) newEdits[rowIndex] = {};
+      newEdits[rowIndex][finalColIdx] = finalUrl;
+
+      setScrapingProgress(prev => ({
+        ...prev,
+        current: idx + 1,
+        status: `Row ${rowIndex + 1}/${previewData.length}: Fetching ${finalUrl}...`
+      }));
+
+      // 2. Perform Fetch and scrape
+      try {
+        const html = await fetchHtmlViaProxy(finalUrl);
+        const scrapedVal = parseHtmlField(html, targetField);
+        newEdits[rowIndex][targetColIdx] = scrapedVal;
+      } catch (err) {
+        console.error(`[Scraper] Error scraping row index ${rowIndex}:`, err);
+        newEdits[rowIndex][targetColIdx] = `Error: ${err.message || 'Fetch failed'}`;
+      }
+
+      // Update progress and intermediate editedCells so the UI updates progressively!
+      setEditedCells({ ...newEdits });
+    }
+
+    setScrapingProgress(prev => ({
+      ...prev,
+      status: `Completed. Scraped ${totalRows} row(s). Review grid edits and click "Sync Corrections" to save to Google Sheets.`
+    }));
+  }, [previewData, editedCells, tabSettings.headerRowsToSkip]);
+
   const headers = useMemo(() => {
     if (!previewData) return [];
     const skip = Math.max(0, parseInt(tabSettings.headerRowsToSkip || 0, 10));
@@ -530,6 +654,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     syncSuccess,
     checkerRun,
     tabSettings,
+    scrapingProgress,
     // Derived
     sheetId,
     isEditableTab,
@@ -545,5 +670,6 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     handleSyncCorrections,
     handleToggleErrorsOnly,
     handleAutofixColumn,
+    handleRunWebScraper,
   };
 };

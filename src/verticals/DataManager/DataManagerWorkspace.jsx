@@ -108,6 +108,9 @@ const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
             onCellEdit={dm.handleCellEdit}
             onAutofixColumn={dm.handleAutofixColumn}
             canRunChecker={!!permissions.canUpdate}
+            activeVertical={activeVertical}
+            scrapingProgress={dm.scrapingProgress}
+            onRunScraper={dm.handleRunWebScraper}
           />
         )}
 
