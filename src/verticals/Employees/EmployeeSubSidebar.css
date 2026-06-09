@@ -91,7 +91,7 @@
 }
 
 .filter-batch-btn.clear {
-  color: #ef4444;
+  color: var(--brand-red);
 }
 
 .employee-tasks-btn-wrapper {

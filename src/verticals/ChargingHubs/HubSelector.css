@@ -50,8 +50,10 @@
   transform: rotate(180deg);
 }
 
+/* .hub-dropdown-menu inherits from .custom-dropdown-menu via class applied in JSX */
+/* Add scoped overrides below if needed */
 .hub-dropdown-menu {
-  @extend .custom-dropdown-menu;
+  /* Placeholder for hub-specific dropdown overrides */
 }
 
 .hub-info {

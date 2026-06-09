@@ -41,7 +41,7 @@
   font-size: 1.1rem;
   font-weight: 800;
   letter-spacing: 1px;
-  color: #f59e0b; /* Amber */
+  color: var(--brand-amber); /* Amber — uses --brand-amber token */
   margin: 0;
 }
 
@@ -72,8 +72,8 @@
 
 /* Safety Notice Box (Risk 2 Mitigation) */
 .sandbox-safety-notice {
-  background: rgba(245, 158, 11, 0.04);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: color-mix(in srgb, var(--brand-amber), transparent 96%);
+  border: 1px solid color-mix(in srgb, var(--brand-amber), transparent 80%);
   border-radius: 12px;
   padding: 16px;
 }
@@ -82,7 +82,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
   font-weight: 800;
-  color: #f59e0b;
+  color: var(--brand-amber);
   margin: 0 0 8px 0;
   letter-spacing: 0.5px;
 }
@@ -96,12 +96,12 @@
 }
 
 .notice-alert {
-  background: rgba(239, 68, 68, 0.08);
-  border-left: 3px solid #ef4444;
+  background: var(--badge-red-bg);
+  border-left: 3px solid var(--brand-red);
   padding: 10px 12px;
   font-size: 0.8rem;
   line-height: 1.4;
-  color: #f87171;
+  color: color-mix(in srgb, var(--brand-red), white 20%);
   border-radius: 0 6px 6px 0;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .dump-textarea:focus {
-  border-color: #f59e0b;
+  border-color: var(--brand-amber);
   background: rgba(0, 0, 0, 0.6);
 }
 
@@ -160,15 +160,15 @@
 }
 
 .sandbox-status-message.success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34d399;
+  background: color-mix(in srgb, var(--brand-emerald), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--brand-emerald), transparent 70%);
+  color: var(--badge-green-text);
 }
 
 .sandbox-status-message.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: var(--badge-red-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-red), transparent 70%);
+  color: color-mix(in srgb, var(--brand-red), white 20%);
 }
 
 /* Modal Footer */
@@ -186,39 +186,40 @@
   gap: 12px;
 }
 
-/* Buttons overriding default colors for sandbox themes */
-.clear-cache-btn {
-  color: #f87171 !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  background: rgba(239, 68, 68, 0.05) !important;
+/* Buttons — scoped to sandbox-modal-footer to avoid global collision */
+.sandbox-modal-footer .clear-cache-btn {
+  color: color-mix(in srgb, var(--brand-red), white 20%) !important;
+  border-color: color-mix(in srgb, var(--brand-red), transparent 70%) !important;
+  background: color-mix(in srgb, var(--brand-red), transparent 95%) !important;
 }
 
-.clear-cache-btn:hover {
-  border-color: #ef4444 !important;
-  background: rgba(239, 68, 68, 0.1) !important;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2) !important;
+.sandbox-modal-footer .clear-cache-btn:hover {
+  border-color: var(--brand-red) !important;
+  background: var(--badge-red-bg) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-red), transparent 80%) !important;
 }
 
-.cancel-btn {
+/* Scoped to sandbox footer to avoid .cancel-btn global collision */
+.sandbox-modal-footer .cancel-btn {
   opacity: 0.6;
   border-color: transparent !important;
   background: none !important;
 }
 
-.cancel-btn:hover {
+.sandbox-modal-footer .cancel-btn:hover {
   opacity: 1;
 }
 
-.import-btn {
-  color: #f59e0b !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
-  background: rgba(245, 158, 11, 0.05) !important;
+.sandbox-modal-footer .import-btn {
+  color: var(--brand-amber) !important;
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%) !important;
+  background: color-mix(in srgb, var(--brand-amber), transparent 95%) !important;
 }
 
-.import-btn:hover {
-  border-color: #f59e0b !important;
-  background: rgba(245, 158, 11, 0.1) !important;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2) !important;
+.sandbox-modal-footer .import-btn:hover {
+  border-color: var(--brand-amber) !important;
+  background: color-mix(in srgb, var(--brand-amber), transparent 90%) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
 }
 
 /* Keyframes */

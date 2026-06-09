@@ -58,6 +58,13 @@
   --badge-amber-text: #f59e0b;
   --badge-red-bg: rgba(239, 68, 68, 0.1);
   --badge-red-text: #ef4444;
+  /* Semantic Status Colors (aliases for explicit intent) */
+  --brand-red: #ef4444;
+  --brand-amber: #f59e0b;
+  --brand-emerald: #10b981;
+  --color-white: #ffffff;
+  --text-secondary: #71717a;
+  --surface-deep: #f4f4f5;
 }
 [data-theme='dark'] {
   --bg-color: #050505;        /* Midnight Black */
@@ -77,6 +84,7 @@
   --halo-glow: rgba(13, 148, 136, 0.12); /* Subtler glow */
   --halo-glow-blue: rgba(59, 130, 246, 0.08); 
   --halo-bg: rgba(13, 148, 136, 0.02); /* Very subtle background blend */
+  --surface-deep: #09090b;
 }
 /* ==========================================================================
    2. UNIVERSAL SELECTION SYSTEM (Halo Pattern)
@@ -763,4 +771,34 @@ body[data-keyboard="open"] .task-form-actions {
   padding-bottom: 8px !important;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
+}
+
+/* ==========================================================================
+   7. CANONICAL ANIMATIONS (single source of truth)
+   All @keyframes live here. Component files reference these names without
+   re-declaring the @keyframes block.
+   ========================================================================== */
+
+/* Slide-down: used by dropdowns, menus, and expanding sections */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stage/Kanban column fade-in with slide */
+@keyframes stageFadeSlideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Page-level fade-in for form/management pages */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in (global standard — translateY 10px upward) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

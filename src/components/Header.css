@@ -146,10 +146,10 @@
   opacity: 1;
 }
 .app-header .header-sandbox-btn {
-  color: #f59e0b;
-  border-color: rgba(245, 158, 11, 0.3);
-  background: rgba(245, 158, 11, 0.05);
-  box-shadow: 0 0 5px rgba(245, 158, 11, 0.1);
+  color: var(--brand-amber);
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
+  background: color-mix(in srgb, var(--brand-amber), transparent 95%);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--brand-amber), transparent 90%);
   font-weight: 800;
   margin-right: 24px;
   font-size: 0.8rem;

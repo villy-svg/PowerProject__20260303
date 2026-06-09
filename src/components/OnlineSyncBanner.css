@@ -39,10 +39,10 @@
 .online-indicator-dot {
   width: 10px;
   height: 10px;
-  background-color: #10b981; /* Emerald Green */
+  background-color: var(--brand-emerald);
   border-radius: 50%;
   display: inline-block;
-  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-emerald), transparent 30%);
   animation: pulseGreen 2s infinite;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .sync-banner-text strong {
-  color: #10b981;
+  color: var(--brand-emerald);
 }
 
 .sync-banner-right {
@@ -63,33 +63,33 @@
   gap: 12px;
 }
 
-.dismiss-banner-btn {
-  font-size: 0.75rem !important;
-  color: var(--text-color, #f4f4f5) !important;
+.online-sync-banner .dismiss-banner-btn {
+  font-size: 0.75rem;
+  color: var(--text-color, #f4f4f5);
   opacity: 0.6;
-  border-color: transparent !important;
-  background: none !important;
-  padding: 0 12px !important;
-  height: 32px !important;
+  border-color: transparent;
+  background: none;
+  padding: 0 12px;
+  height: 32px;
 }
 
-.dismiss-banner-btn:hover {
+.online-sync-banner .dismiss-banner-btn:hover {
   opacity: 1;
 }
 
-.reconnect-sync-btn {
-  font-size: 0.75rem !important;
-  color: #10b981 !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
-  background: rgba(16, 185, 129, 0.05) !important;
-  padding: 0 16px !important;
-  height: 32px !important;
+.online-sync-banner .reconnect-sync-btn {
+  font-size: 0.75rem;
+  color: var(--brand-emerald);
+  border-color: color-mix(in srgb, var(--brand-emerald), transparent 70%);
+  background: color-mix(in srgb, var(--brand-emerald), transparent 95%);
+  padding: 0 16px;
+  height: 32px;
 }
 
-.reconnect-sync-btn:hover {
-  border-color: #10b981 !important;
-  background: rgba(16, 185, 129, 0.1) !important;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2) !important;
+.online-sync-banner .reconnect-sync-btn:hover {
+  border-color: var(--brand-emerald);
+  background: color-mix(in srgb, var(--brand-emerald), transparent 90%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-emerald), transparent 80%);
 }
 
 /* Animations */
@@ -107,7 +107,7 @@
 @keyframes pulseGreen {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-emerald), transparent 30%);
   }
   
   70% {
@@ -117,7 +117,7 @@
   
   100% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 0 transparent;
   }
 }
 

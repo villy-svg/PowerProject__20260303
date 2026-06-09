@@ -19,7 +19,7 @@
 .employee-card.task-card-master.inactive {
   filter: grayscale(1);
   opacity: 0.5;
-  border-left-color: #666;
+  border-left-color: var(--border-color);
 }
 
 .employee-card-name {
@@ -86,7 +86,7 @@
 }
 /* Local Badge Overrides */
 .app-user-badge-mini { 
-  border-color: rgba(52, 211, 153, 0.4); 
+  border-color: color-mix(in srgb, var(--brand-emerald), transparent 60%); 
   color: var(--badge-green-text); 
   background: var(--badge-green-bg);
 }
@@ -155,7 +155,7 @@
   color: var(--brand-green);
   font-size: 0.75rem;
 }
-.status-toggle-btn {
+.employee-management .status-toggle-btn {
   padding: 2px 10px;
   font-size: 0.8rem;
   min-width: auto;
@@ -197,13 +197,13 @@
   white-space: nowrap;
 }
 .bank-missing-badge-mini {
-  background-color: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid rgba(255, 68, 68, 0.4);
+  background-color: color-mix(in srgb, var(--brand-red), transparent 90%);
+  color: var(--brand-red);
+  border: 1px solid color-mix(in srgb, var(--brand-red), transparent 60%);
 }
 .duplicate-badge-mini {
-  background: #f59e0b;
-  color: white;
+  background: var(--brand-amber);
+  color: var(--color-white);
 }
 /* Hierarchy (Tree) Styles */
 .employee-tree-container {
@@ -295,22 +295,22 @@
 }
 .employee-tree-card.is-current-user {
   border: 2px solid var(--brand-green);
-  background: rgba(0, 255, 135, 0.05);
-  box-shadow: 0 0 15px rgba(0, 255, 135, 0.1);
+  background: var(--halo-bg);
+  box-shadow: 0 0 15px var(--halo-glow);
 }
 .tree-card-name {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--color-white);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .employee-tree-card.is-accessible-reportee {
-  border-color: rgba(0, 255, 135, 0.4);
-  box-shadow: 0 0 15px rgba(0, 255, 135, 0.2);
-  background: rgba(0, 255, 135, 0.04);
+  border-color: color-mix(in srgb, var(--brand-emerald), transparent 60%);
+  box-shadow: 0 0 15px var(--halo-glow);
+  background: var(--halo-bg);
 }
 .reportee-count-badge {
   display: inline-flex;
@@ -334,7 +334,7 @@
   align-items: center;
   justify-content: center;
   background: var(--brand-green);
-  color: #000;
+  color: var(--text-color);
   font-size: 0.65rem;
   font-weight: 900;
   padding: 2px 8px;
@@ -377,7 +377,7 @@
 }
 .others-count {
   background: var(--brand-green);
-  color: #000;
+  color: var(--text-color);
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 0.65rem;

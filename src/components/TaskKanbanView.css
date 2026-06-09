@@ -123,16 +123,7 @@
   box-shadow: 0 0 15px -8px var(--stage-accent);
 }
 
-@keyframes stageFadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+
 
 /* Responsive Refinements */
 @media screen and (max-width: 1280px) {

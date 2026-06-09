@@ -16,7 +16,7 @@
 .client-card.inactive {
   filter: grayscale(1);
   opacity: 0.5;
-  border-left-color: #666 !important;
+  border-left-color: rgba(255,255,255,0.2);
 }
 
 .client-card-name {
@@ -70,7 +70,7 @@
 .list-name {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
 }
 .matrix-summary-mini, .category-code-mini {
   font-size: 0.75rem;
