@@ -1,8 +1,10 @@
 /**
  * scraperUtils.js
  * Client-side scraping utilities for Model Verification Board.
- * Uses a public CORS proxy to retrieve page HTML, then parses it for targeted values.
+ * Uses the backend Edge Function proxy to retrieve page HTML, then parses it for targeted values.
  */
+
+import { scraperService } from '../../../services/core/scraperService';
 
 /**
  * Builds the final URL by directly concatenating Base URL and Vehicle Number (Excel-style '&' concatenation).
@@ -112,10 +114,20 @@ export const parseHtmlField = (html = '', fieldName = '') => {
 };
 
 /**
- * Fetches HTML from a URL using multiple fallback public CORS proxies.
+ * Fetches HTML from a URL.
+ * Uses the server-side Supabase Edge Function to fetch directly (bypassing CORS entirely),
+ * and falls back to client-side CORS proxies only if the server is unavailable.
  */
 export const fetchHtmlViaProxy = async (url) => {
-  // Proxy 1: corsproxy.io (returns raw HTML directly, fast)
+  // Try server-side Edge Function proxy first (recommended)
+  try {
+    const html = await scraperService.fetchHtmlViaServer(url);
+    if (html && html.trim().length > 0) return html;
+  } catch (err) {
+    console.warn('[Scraper] Server-side fetch proxy failed, trying local proxies...', err);
+  }
+
+  // Fallback 1: corsproxy.io (direct response, fast)
   try {
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
     if (res.ok) {
@@ -123,10 +135,21 @@ export const fetchHtmlViaProxy = async (url) => {
       if (html && html.trim().length > 0) return html;
     }
   } catch (err) {
-    console.warn('[Scraper] corsproxy.io failed, trying fallback...', err);
+    console.warn('[Scraper] corsproxy.io failed, trying next fallback...', err);
   }
 
-  // Proxy 2: api.allorigins.win (returns wrapped JSON)
+  // Fallback 2: codetabs.com (direct response, fast)
+  try {
+    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
+    if (res.ok) {
+      const html = await res.text();
+      if (html && html.trim().length > 0) return html;
+    }
+  } catch (err) {
+    console.warn('[Scraper] codetabs failed, trying next fallback...', err);
+  }
+
+  // Fallback 3: api.allorigins.win (wrapped JSON response)
   try {
     const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
     if (res.ok) {
@@ -134,8 +157,10 @@ export const fetchHtmlViaProxy = async (url) => {
       if (data && data.contents) return data.contents;
     }
   } catch (err) {
-    console.error('[Scraper] allorigins fallback failed.', err);
+    console.warn('[Scraper] allorigins failed.', err);
   }
 
-  throw new Error('All CORS proxies failed to retrieve page source. Check your internet connection.');
+  throw new Error(
+    'CORS proxies failed to load page. The target website may be protected by DDoS/bot-mitigation (e.g. Cloudflare) or blocking automated requests.'
+  );
 };

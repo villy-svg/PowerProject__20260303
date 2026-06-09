@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260609 -- Modal Verification 1.0.2"
+git commit -m "260609 -- Modal Verification 1.0.3"
 git push origin staging 
 
 #npm run apk:staging-debug
@@ -27,10 +27,10 @@ git branch --show-current
 
 #Check Current Supabase Link : staging : eeoibqxhfkrgbylnluvk | prod : dhhbdgzutlltiojbsboi
 npx supabase link --project-ref dhhbdgzutlltiojbsboi
-npx supabase migration repair --status reverted 20260608181500
+npx supabase functions deploy scraper-service
 npx supabase db push --include-all
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk
-npx supabase migration repair --status reverted 20260608181500
+npx supabase functions deploy scraper-service
 npx supabase db push --include-all
 #npx supabase migration repair --status reverted 20260604000000
 
@@ -40,6 +40,7 @@ npx supabase db push --include-all
 #npx supabase db push --include-all
 #npx supabase functions deploy send-push
 #npx supabase deploy functions entity-create
+#npx supabase deploy functions scraper-service
 #npx supabase functions deploy entity-create --no-verify-jwt
 #npx supabase functions deploy entity-read --project-ref dhhbdgzutlltiojbsboi
 #npx supabase functions deploy entity-archive --project-ref eeoibqxhfkrgbylnluvk
