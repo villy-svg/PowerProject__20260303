@@ -19,6 +19,7 @@ import { useDataManager } from './hooks/useDataManager';
 import SpreadsheetForm from './components/SpreadsheetForm';
 import SheetsMapping from './components/SheetsMapping';
 import SheetTabPanel from './components/SheetTabPanel';
+import ModelVerificationForm from './components/ModelVerificationForm';
 import './DataManager.css';
 
 const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
@@ -32,6 +33,16 @@ const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
         <div className="dm-alert dm-alert--error">
           <strong>Access Denied:</strong>
           <p>You do not have permission to view the Data Manager.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeVertical === 'model_verification_board') {
+    return (
+      <div className="dm-scroll-area">
+        <div className="dm-workspace">
+          <ModelVerificationForm />
         </div>
       </div>
     );
