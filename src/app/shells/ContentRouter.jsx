@@ -270,8 +270,8 @@ const ContentRouter = ({
       {activeVertical === verticals.CLIENTS?.id && (
         <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
       )}
-      {activeVertical === verticals.DATA_MANAGER?.id && (
-        <DataManagerWorkspace user={user} permissions={permissions} />
+      {(activeVertical === verticals.DATA_MANAGER?.id || activeVertical === 'model_verification_board') && (
+        <DataManagerWorkspace key={activeVertical} user={user} permissions={permissions} activeVertical={activeVertical} />
       )}
       {activeVertical === 'daily_task_templates' && (
         <DailyTasksManagement permissions={permissions} refreshTasks={fetchTasks} currentUser={user} />

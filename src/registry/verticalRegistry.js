@@ -51,7 +51,7 @@ export function resolveVerticalComponents(activeVertical, verticals = {}) {
   const isHub    = activeVertical === hubId    || HUB_VIEWS.includes(activeVertical);
   const isEmp    = activeVertical === empId    || EMPLOYEE_VIEWS.includes(activeVertical);
   const isClient = activeVertical === clientId || CLIENT_VIEWS.includes(activeVertical);
-  const isDataManager = activeVertical === dataManagerId;
+  const isDataManager = activeVertical === dataManagerId || activeVertical === 'model_verification_board';
 
   if (isHub)    return { SidebarComponent: HubSubSidebar,      TaskFormComponent: HubTaskForm,      TaskTileComponent: HubTaskTile };
   if (isEmp)    return { SidebarComponent: EmployeeSubSidebar, TaskFormComponent: EmployeeRemarkForm, TaskTileComponent: EmployeeTaskTile };
@@ -68,10 +68,12 @@ export function resolveVerticalRootId(activeVertical, verticals = {}) {
   const hubId    = verticals?.CHARGING_HUBS?.id;
   const empId    = verticals?.EMPLOYEES?.id;
   const clientId = verticals?.CLIENTS?.id;
+  const dataManagerId = verticals?.DATA_MANAGER?.id;
 
   if (activeVertical === hubId    || HUB_VIEWS.includes(activeVertical))    return hubId;
   if (activeVertical === empId    || EMPLOYEE_VIEWS.includes(activeVertical)) return empId;
   if (activeVertical === clientId || CLIENT_VIEWS.includes(activeVertical))  return clientId;
+  if (activeVertical === dataManagerId || activeVertical === 'model_verification_board') return dataManagerId || 'DATA_MANAGER';
   return (activeVertical || '').toUpperCase();
 }
 
@@ -98,7 +100,10 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
   if (empId)    map[empId]    = { label: 'Employees', boardLabel: 'Remarks Manager' };
   if (clientId) map[clientId] = { label: 'Clients',   boardLabel: 'Client Task Board' };
   const dataManagerId = verticals?.DATA_MANAGER?.id;
-  if (dataManagerId) map[dataManagerId] = { label: 'Data Manager', boardLabel: 'Data Sheet Board' };
+  if (dataManagerId) {
+    map[dataManagerId] = { label: 'Data Manager', boardLabel: 'Data Sheet Board' };
+    map['model_verification_board'] = { label: 'Data Manager', boardLabel: 'Model Verification Board' };
+  }
 
   return map[activeVertical] || { label: verticals[activeVertical]?.label || '', boardLabel: 'Board' };
 }

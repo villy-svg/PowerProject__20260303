@@ -69,6 +69,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks' || current === 'daily_task_templates' || current === 'escalation_tasks') ? verticals.CHARGING_HUBS?.id :
       (current === verticals.CLIENTS?.id || current === 'client_tasks' || current === 'leads_funnel') ? verticals.CLIENTS?.id :
       (current === verticals.EMPLOYEES?.id || current === 'employee_tasks') ? verticals.EMPLOYEES?.id :
+      (current === verticals.DATA_MANAGER?.id || current === 'model_verification_board') ? verticals.DATA_MANAGER?.id :
       current.toUpperCase();
 
     const permData = user.verticalPermissions?.[rootVerticalId];
@@ -80,7 +81,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     
     // 2. Determine the active feature name (if any) to set the board's effective base level
     // This allows a "Contributor" on a specific board to be treated as a Contributor globally within that view.
-    const isFeatureView = current.includes('_') && !verticals[current] && current !== 'DATA_MANAGER' && current !== verticals.CHARGING_HUBS?.id;
+    const isFeatureView = current.includes('_') && !verticals[current] && current !== 'DATA_MANAGER' && current !== 'model_verification_board' && current !== verticals.CHARGING_HUBS?.id;
     let activeFeatureLevel = verticalLevel; // Default to vertical level
     
     if (isFeatureView || current === verticals.CHARGING_HUBS?.id) {

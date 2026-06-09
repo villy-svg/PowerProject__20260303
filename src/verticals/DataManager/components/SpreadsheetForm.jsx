@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-const SpreadsheetForm = ({ googleSheetsUrl, onUrlChange, onSubmit, loading, canLoad = true }) => (
+const SpreadsheetForm = ({ title = 'Data Sheet Board', googleSheetsUrl, onUrlChange, onSubmit, loading, canLoad = true }) => (
   <div className="dm-card">
     <div className="dm-card__header">
-      <h2 className="dm-card__title">Data Sheet Board</h2>
+      <h2 className="dm-card__title">{title}</h2>
       <p className="dm-card__description">
         Securely load, validate, correct, and sync vehicle transaction sheets.
       </p>

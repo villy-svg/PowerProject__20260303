@@ -21,8 +21,8 @@ import SheetsMapping from './components/SheetsMapping';
 import SheetTabPanel from './components/SheetTabPanel';
 import './DataManager.css';
 
-const DataManagerWorkspace = ({ permissions = {} }) => {
-  const dm = useDataManager();
+const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
+  const dm = useDataManager(activeVertical);
 
   // RBAC guard: Viewer+ required to see the Data Manager at all.
   // canRead is true for viewer, contributor, editor, and admin.
@@ -44,6 +44,7 @@ const DataManagerWorkspace = ({ permissions = {} }) => {
         {/* 1 ── URL Input Form ─────────────────────────────────────────── */}
         {/* canCreate (Contributor+) is required to load and preview sheets  */}
         <SpreadsheetForm
+          title={activeVertical === 'model_verification_board' ? 'Model Verification Board' : 'Data Sheet Board'}
           googleSheetsUrl={dm.googleSheetsUrl}
           onUrlChange={(e) => dm.setGoogleSheetsUrl(e.target.value)}
           onSubmit={dm.handleLoadSpreadsheet}

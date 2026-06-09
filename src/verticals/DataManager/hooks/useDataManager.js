@@ -83,9 +83,11 @@ const detectAutoCorrections = (raw, sanitized, skip) => {
   return edits;
 };
 
-export const useDataManager = () => {
+export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
   // ── Spreadsheet Source ───────────────────────────────────────────────────
-  const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
+  const [googleSheetsUrl, setGoogleSheetsUrlState] = useState(() => {
+    return localStorage.getItem(`google_sheets_url_${activeVertical}`) || '';
+  });
   const [loading, setLoading]     = useState(false);
   const [tabLoading, setTabLoading] = useState(false);
   const [error, setError]         = useState(null);
@@ -106,7 +108,27 @@ export const useDataManager = () => {
   const [fleetPlates, setFleetPlates] = useState(null);
 
   // ── Tab Name Mapping ─────────────────────────────────────────────────────
-  const [tabSettings, setTabSettings] = useState(DEFAULT_TAB_SETTINGS);
+  const [tabSettings, setTabSettingsState] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`tab_settings_${activeVertical}`);
+      return saved ? JSON.parse(saved) : DEFAULT_TAB_SETTINGS;
+    } catch (_) {
+      return DEFAULT_TAB_SETTINGS;
+    }
+  });
+
+  const setGoogleSheetsUrl = useCallback((url) => {
+    setGoogleSheetsUrlState(url);
+    localStorage.setItem(`google_sheets_url_${activeVertical}`, url);
+  }, [activeVertical]);
+
+  const setTabSettings = useCallback((valOrFn) => {
+    setTabSettingsState(prev => {
+      const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+      localStorage.setItem(`tab_settings_${activeVertical}`, JSON.stringify(next));
+      return next;
+    });
+  }, [activeVertical]);
 
   // ── Derived Values ───────────────────────────────────────────────────────
   /** Parsed spreadsheet ID — recomputed only when URL changes */
@@ -157,7 +179,7 @@ export const useDataManager = () => {
   const handleSettingChange = useCallback((e) => {
     const { name, value } = e.target;
     setTabSettings(prev => ({ ...prev, [name]: value }));
-  }, []);
+  }, [setTabSettings]);
 
   // ── Async: Load Spreadsheet ───────────────────────────────────────────────
   const handleLoadSpreadsheet = useCallback(async (e) => {
