@@ -19,6 +19,10 @@ export const VERTICAL_FEATURES = {
     { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },
     { id: 'canAccessDailyHubTasks', label: 'Daily Task Board' },
     { id: 'canAccessDailyTaskTemplates', label: 'Daily Task Template' }
+  ],
+  DATA_MANAGER: [
+    { id: 'canAccessDataSheetBoard', label: 'Data Sheet Board' },
+    { id: 'canAccessModelVerificationBoard', label: 'Model Verification Board' }
   ]
 };
 

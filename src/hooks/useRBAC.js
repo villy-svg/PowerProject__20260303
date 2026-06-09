@@ -46,7 +46,8 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       // Ensure feature-specific CRUD flags match global CRUD flags for master roles
       const features = [
         'Clients', 'ClientTasks', 'LeadsFunnel', 
-        'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks', 'DailyTaskTemplates'
+        'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks', 'DailyTaskTemplates',
+        'DataSheetBoard', 'ModelVerificationBoard'
       ];
 
       features.forEach(feat => {
@@ -81,13 +82,14 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     
     // 2. Determine the active feature name (if any) to set the board's effective base level
     // This allows a "Contributor" on a specific board to be treated as a Contributor globally within that view.
-    const isFeatureView = current.includes('_') && !verticals[current] && current !== 'DATA_MANAGER' && current !== 'model_verification_board' && current !== verticals.CHARGING_HUBS?.id;
+    const isFeatureView = (current.includes('_') && !verticals[current] && current !== verticals.CHARGING_HUBS?.id) || current === 'DATA_MANAGER';
     let activeFeatureLevel = verticalLevel; // Default to vertical level
     
     if (isFeatureView || current === verticals.CHARGING_HUBS?.id) {
         // Find matching feature key, e.g. "hub_tasks" -> "canAccessHubTasks"
         let featureKey;
         if (current === verticals.CHARGING_HUBS?.id) featureKey = 'canAccessHubTasks'; // Default board for Hubs
+        else if (current === 'DATA_MANAGER') featureKey = 'canAccessDataSheetBoard'; // Default board for Data Manager
         else {
             const featureName = current.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
             featureKey = `canAccess${featureName}`;

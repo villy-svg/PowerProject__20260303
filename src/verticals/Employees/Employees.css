@@ -383,6 +383,44 @@
   font-size: 0.65rem;
   font-weight: 900;
 }
+.others-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-top: 1rem;
+  border-bottom: 1px dashed var(--border-color);
+  width: 100%;
+  max-width: 320px;
+}
+.others-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.hide-others-link {
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  color: var(--brand-green);
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  box-shadow: 0 0 3px var(--halo-glow);
+  backdrop-filter: blur(4px);
+}
+.hide-others-link:hover {
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-color: var(--brand-green);
+  box-shadow: 0 0 10px var(--halo-glow);
+  transform: translateY(-1px);
+}
 @keyframes fadeInTree {
   from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }

@@ -159,7 +159,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
   };
 
   return (
-    <>
+    <div className="management-view-container">
       <MasterPageHeader
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
@@ -497,7 +497,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           loading={isBulkUpdating}
         />
       </TaskModal>
-    </>
+    </div>
   );
 };
 
