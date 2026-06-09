@@ -116,7 +116,7 @@ export const parseHtmlField = (html = '', fieldName = '') => {
 /**
  * Fetches HTML from a URL.
  * Uses the server-side Supabase Edge Function to fetch directly (bypassing CORS entirely),
- * and falls back to client-side CORS proxies only if the server is unavailable.
+ * and falls back to client-side CORS proxies.
  */
 export const fetchHtmlViaProxy = async (url) => {
   // Try server-side Edge Function proxy first (recommended)
