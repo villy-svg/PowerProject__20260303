@@ -157,6 +157,6 @@
     padding-bottom: 88px; /* Prevent content hiding behind fixed bottom nav */
   }
   .configuration-view .view-toggle {
-    display: none !important;
+    display: none;
   }
 }

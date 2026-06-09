@@ -7,9 +7,9 @@ const DataManagerSubSidebar = ({ activeVertical, setActiveVertical, permissions 
   return (
     <div className="sub-sidebar-body">
       {showDataSheet && (
-        <div className="employee-tasks-btn-wrapper">
+        <div className="dm-sub-nav-wrapper">
           <button
-            className="halo-button employee-tasks-nav-btn"
+            className="halo-button dm-sub-nav-btn"
             style={{ opacity: (activeVertical === 'DATA_MANAGER' || !activeVertical) ? 1 : 0.7 }}
             onClick={() => setActiveVertical('DATA_MANAGER')}
           >
@@ -19,9 +19,9 @@ const DataManagerSubSidebar = ({ activeVertical, setActiveVertical, permissions 
       )}
 
       {showModelVerification && (
-        <div className="employee-tasks-btn-wrapper">
+        <div className="dm-sub-nav-wrapper">
           <button
-            className="halo-button employee-tasks-nav-btn"
+            className="halo-button dm-sub-nav-btn"
             style={{ opacity: activeVertical === 'model_verification_board' ? 1 : 0.7 }}
             onClick={() => setActiveVertical('model_verification_board')}
           >

@@ -14,19 +14,19 @@
   z-index: 998; /* Just below the dropdown menu */
 }
 
-.hub-selector-trigger {
+.hub-selector-container .hub-selector-trigger {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
+  background: transparent;
+  border: none;
+  padding: 0;
   color: var(--brand-green);
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  min-height: unset !important;
+  min-height: unset;
 }
 
 .hub-selector-trigger.disabled {

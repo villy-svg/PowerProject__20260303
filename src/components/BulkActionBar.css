@@ -53,7 +53,7 @@
   }
 
   .bulk-action-bar.bulk-hidden {
-    transform: translate(-50%, 150%) !important;
+    transform: translate(-50%, 150%);
     opacity: 0;
     pointer-events: none;
     transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
@@ -96,8 +96,8 @@
   }
 
   .bulk-action-bar .bulk-btn {
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
+    border-radius: 8px;
+    padding: 8px 12px;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -113,15 +113,15 @@
   gap: 1rem;
   margin-left: auto;
 }
-.save-btn.secondary-action {
-  background: transparent !important;
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%) !important;
-  color: var(--brand-green) !important;
+.employee-form .save-btn.secondary-action {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  color: var(--brand-green);
   opacity: 0.8;
 }
-.save-btn.secondary-action:hover {
-  background: var(--halo-bg) !important;
-  border-color: var(--brand-green) !important;
+.employee-form .save-btn.secondary-action:hover {
+  background: var(--halo-bg);
+  border-color: var(--brand-green);
   opacity: 1;
 }
 .employee-form .save-btn,
@@ -133,17 +133,17 @@
 .employee-form .next-btn {
   margin-left: auto;
 }
-.employee-form .back-btn {
+.employee-form .halo-button.back-btn {
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   opacity: 0.8;
-  background: transparent !important;
-  border-color: transparent !important;
+  background: transparent;
+  border-color: transparent;
   box-shadow: none;
 }
-.employee-form .back-btn:hover {
+.employee-form .halo-button.back-btn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.05);
 }
 /* Wizard Header */
 .form-wizard-header {
@@ -190,12 +190,12 @@
   font-weight: 900;
 }
 /* View-Only Mode */
-.view-only-mode input,
-.view-only-mode select {
+.employee-form.view-only-mode .form-group input,
+.employee-form.view-only-mode .form-group select {
   cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
-  color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
 }
 .view-only-mode .optional {
   display: none;
@@ -261,12 +261,12 @@
 }
 
 /* Employee Documents Section */
-.disabled-tab {
-  opacity: 0.25 !important;
-  cursor: not-allowed !important;
+.task-form-tab.disabled-tab {
+  opacity: 0.25;
+  cursor: not-allowed;
 }
-.disabled-tab:hover {
-  color: inherit !important;
+.task-form-tab.disabled-tab:hover {
+  color: inherit;
 }
 
 .documents-section-container {

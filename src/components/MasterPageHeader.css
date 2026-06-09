@@ -104,12 +104,12 @@
 }
 
 .menu-trigger-btn.active {
-  color: var(--text-color) !important;
+  color: var(--text-color);
   opacity: 1;
 }
 
 .menu-trigger-btn.active:hover {
-  color: var(--text-color) !important;
+  color: var(--text-color);
 }
 
 /* Ensure halo buttons have consistent vertical alignment */
@@ -162,7 +162,7 @@
   }
 
   .master-header-actions-row {
-    display: none !important;
+    display: none;
   }
 
   .expanded-menu-row {
@@ -240,13 +240,13 @@
   .expanded-menu-row .clear-board-btn,
   .expanded-menu-row .halo-button,
   .expanded-menu-row .master-action-btn {
-    color: #ffffff !important;
+    color: #ffffff;
   }
 
   /* Force green text color for whichever is active/selected */
   .expanded-menu-row .view-toggle-btn.active,
   .expanded-menu-row .toggle-depri-btn.active {
-    color: var(--brand-mint) !important;
+    color: var(--brand-mint);
   }
 
   /* Ultra-compact screen refinements (320px / iPhone SE) */
@@ -271,7 +271,7 @@
   }
 
   .master-page-header.is-sticky {
-    position: sticky !important;
+    position: sticky;
     top: 0;
     z-index: 2000;
     background: var(--bg-color);
@@ -324,16 +324,16 @@
   }
 
   .mobile-action-tray .nav-item.active {
-    border: none !important;
-    background: transparent !important;
-    opacity: 1 !important;
-    color: var(--brand-mint) !important;
+    border: none;
+    background: transparent;
+    opacity: 1;
+    color: var(--brand-mint);
   }
 
   .mobile-action-tray .nav-item.active .icon-wrapper {
-    background: var(--halo-bg) !important;
-    box-shadow: 0 0 10px var(--halo-glow) !important;
-    border-radius: 50% !important;
+    background: var(--halo-bg);
+    box-shadow: 0 0 10px var(--halo-glow);
+    border-radius: 50%;
   }
 
   /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
@@ -357,7 +357,7 @@
 
 /* Scroll Lock Utility */
 body.no-scroll {
-  overflow: hidden !important;
+  overflow: hidden;
   touch-action: none;
 }
 
@@ -538,35 +538,35 @@ body.no-scroll {
 .expanded-actions-list .csv-import-btn,
 .expanded-actions-list .csv-download-btn,
 .expanded-actions-list button {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
-  padding: 12px 16px !important;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
-  border-radius: 12px !important;
-  color: rgba(255, 255, 255, 0.7) !important;
-  font-size: 0.9rem !important;
-  font-weight: 500 !important;
-  text-align: left !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  min-height: 44px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: normal;
+  box-shadow: none;
+  backdrop-filter: none;
+  min-height: 44px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expanded-actions-list .halo-button:hover,
 .expanded-actions-list .csv-import-btn:hover,
 .expanded-actions-list .csv-download-btn:hover,
 .expanded-actions-list button:hover {
-  background: rgba(45, 212, 191, 0.08) !important;
-  border-color: rgba(45, 212, 191, 0.2) !important;
-  color: var(--brand-green) !important;
-  box-shadow: 0 0 10px rgba(45, 212, 191, 0.1) !important;
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.2);
+  color: var(--brand-green);
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.1);
 }
 
 .expanded-actions-list .halo-button::after,

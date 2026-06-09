@@ -57,8 +57,8 @@ const ModelVerificationForm = () => {
   };
 
   return (
-    <div className="dm-card" style={{ maxWidth: '720px', margin: '0 auto 2rem auto', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-      <div className="dm-card__header" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '1rem' }}>
+    <div className="dm-card dm-card-centered">
+      <div className="dm-card__header">
         <h2 className="dm-card__title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <span>🔍</span> Model Verification Board
         </h2>
@@ -67,10 +67,10 @@ const ModelVerificationForm = () => {
         </p>
       </div>
 
-      <form onSubmit={handleRunScrape} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1.5rem' }}>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, opacity: 0.85, marginBottom: '0.4rem' }}>
+      <form onSubmit={handleRunScrape} className="dm-form-layout">
+        <div className="dm-form-row">
+          <div className="dm-form-col">
+            <label className="dm-label">
               Vehicle Number
             </label>
             <input
@@ -78,14 +78,14 @@ const ModelVerificationForm = () => {
               value={vehicleNumber}
               onChange={(e) => setVehicleNumber(e.target.value)}
               placeholder="e.g. KA03AM7356"
-              style={{ width: '100%', padding: '0.7rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.9rem' }}
+              className="dm-input"
               disabled={loading}
               required
             />
           </div>
 
-          <div style={{ flex: '2 1 350px' }}>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, opacity: 0.85, marginBottom: '0.4rem' }}>
+          <div className="dm-form-col dm-form-col--wide">
+            <label className="dm-label">
               Base URL
             </label>
             <input
@@ -93,7 +93,7 @@ const ModelVerificationForm = () => {
               value={baseUrl}
               onChange={(e) => setBaseUrl(e.target.value)}
               placeholder="e.g. https://www.carinfo.app/rc-details/"
-              style={{ width: '100%', padding: '0.7rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.9rem' }}
+              className="dm-input"
               disabled={loading}
               required
             />
@@ -101,19 +101,19 @@ const ModelVerificationForm = () => {
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, opacity: 0.85, marginBottom: '0.4rem' }}>
+          <label className="dm-label">
             Final URL (Automatically Concatenated)
           </label>
           <input
             type="text"
             value={finalUrl}
             readOnly
-            style={{ width: '100%', padding: '0.7rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', color: '#888', fontSize: '0.9rem', cursor: 'not-allowed' }}
+            className="dm-input"
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, opacity: 0.85, marginBottom: '0.4rem' }}>
+          <label className="dm-label">
             Scraping Field Name (Class Name / Attribute / Key)
           </label>
           <input
@@ -121,14 +121,14 @@ const ModelVerificationForm = () => {
             value={scrapingField}
             onChange={(e) => setScrapingField(e.target.value)}
             placeholder="e.g. input_vehical_layout_vehicalmodel__1abtf"
-            style={{ width: '100%', padding: '0.7rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.9rem' }}
+            className="dm-input"
             disabled={loading}
             required
           />
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, opacity: 0.85, marginBottom: '0.4rem' }}>
+          <label className="dm-label">
             Output Response
           </label>
           <textarea
@@ -136,30 +136,19 @@ const ModelVerificationForm = () => {
             readOnly
             rows={5}
             placeholder="Scrape output will be displayed here..."
-            style={{ 
-              width: '100%', 
-              padding: '0.7rem', 
-              background: 'rgba(0,0,0,0.2)', 
-              border: '1px solid rgba(255,255,255,0.08)', 
-              borderRadius: '4px', 
-              color: output.startsWith('Error') ? '#ff5252' : (loading ? '#00ffcc' : '#e0e0e0'), 
-              fontSize: '0.9rem', 
-              fontFamily: 'monospace',
-              resize: 'vertical'
-            }}
+            className={`dm-textarea ${output.startsWith('Error') ? 'dm-textarea--error' : (loading ? 'dm-textarea--loading' : '')}`}
           />
         </div>
 
-        <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="dm-form-actions">
           <button
             type="submit"
-            className="halo-button primary"
+            className="halo-button primary dm-action-btn--large"
             disabled={loading || !finalUrl || !scrapingField}
-            style={{ padding: '0.6rem 2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}
           >
             {loading ? (
               <>
-                <span className="dm-spinner dm-spinner--sm" style={{ width: '14px', height: '14px', margin: 0 }} />
+                <span className="dm-spinner dm-spinner--sm" style={{ width: '14px', height: '14px', margin: 0, borderWidth: '2px' }} />
                 Scraping...
               </>
             ) : (

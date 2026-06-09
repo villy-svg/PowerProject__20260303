@@ -9,20 +9,20 @@
   opacity: 0.8;
 }
 
-.vertical-task-form .anon-toggle-label {
-  font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  opacity: 0.8 !important;
+.vertical-task-form .form-group label.anon-toggle-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.8;
 }
 
 @media screen and (max-width: 480px) {
   .vertical-task-form .form-group label {
     font-size: 0.98rem;
   }
-  .vertical-task-form .anon-toggle-label {
-    font-size: 0.98rem !important;
+  .vertical-task-form .form-group label.anon-toggle-label {
+    font-size: 0.98rem;
   }
 }
 
@@ -30,8 +30,8 @@
   .vertical-task-form .form-group label {
     font-size: 0.92rem;
   }
-  .vertical-task-form .anon-toggle-label {
-    font-size: 0.92rem !important;
+  .vertical-task-form .form-group label.anon-toggle-label {
+    font-size: 0.92rem;
   }
 }
 
@@ -39,8 +39,8 @@
   .vertical-task-form .form-group label {
     font-size: 0.85rem;
   }
-  .vertical-task-form .anon-toggle-label {
-    font-size: 0.85rem !important;
+  .vertical-task-form .form-group label.anon-toggle-label {
+    font-size: 0.85rem;
   }
 }
 
@@ -83,12 +83,12 @@
   z-index: 5;
 }
 
-.proof-btn-inline {
+.vertical-task-form .proof-btn-inline {
   margin-left: auto;
   margin-right: 12px;
-  height: 28px !important;
-  padding: 0 10px !important;
-  font-size: 0.7rem !important;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 0.7rem;
   gap: 4px;
   opacity: 0.8;
 }
@@ -103,10 +103,10 @@
     /* Hide text on very small screens to save space */
   }
 
-  .proof-btn-inline {
+  .vertical-task-form .proof-btn-inline {
     margin-right: 8px;
     width: 32px;
-    padding: 0 !important;
+    padding: 0;
     justify-content: center;
   }
 }
@@ -234,7 +234,7 @@
   font-size: 0.75rem;
   opacity: 0.6;
   font-style: italic;
-  margin-top: 8px !important;
+  margin-top: 8px;
 }
 
 /* Animations */
@@ -285,12 +285,12 @@
     gap: 4px;
   }
 
-  .proof-btn-inline {
-    background: transparent !important;
-    background-color: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
+  .vertical-task-form .proof-btn-inline {
+    background: transparent;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .task-form-tab .tab-count {
@@ -327,15 +327,15 @@
   }
 
   .prediction-disclaimer {
-    font-size: 0.7rem !important;
+    font-size: 0.7rem;
   }
 
   /* Orchestration Mobile Fixes */
-  .orchestration-list .form-group {
-    flex-direction: column !important;
-    align-items: stretch !important;
+  .orchestration-page .orchestration-list .form-group {
+    flex-direction: column;
+    align-items: stretch;
     padding: 12px 0;
-    gap: 8px !important;
+    gap: 8px;
   }
 
   .form-footer.sticky {
@@ -345,9 +345,9 @@
   }
 
   .form-footer.sticky .halo-button {
-    font-size: 0.75rem !important;
-    padding: 0 12px !important;
-    height: 36px !important;
+    font-size: 0.75rem;
+    padding: 0 12px;
+    height: 36px;
     min-width: 80px;
   }
 
@@ -408,7 +408,7 @@
   color: var(--text-color);
   opacity: 0.7;
   white-space: nowrap;
-  margin: 0 !important;
+  margin: 0;
 }
 
 .orch-assignee-select {

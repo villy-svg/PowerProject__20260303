@@ -80,7 +80,7 @@ button {
 }
 
 .desktop-header-title-container h2 {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
 .desktop-header-title-container .title-info-icon {
@@ -90,7 +90,7 @@ button {
 
 .desktop-header-title-container:hover .title-info-icon {
   opacity: 1;
-  color: var(--brand-green) !important;
+  color: var(--brand-green);
   transform: scale(1.1);
 }
 

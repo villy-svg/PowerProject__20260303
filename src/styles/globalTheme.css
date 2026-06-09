@@ -129,33 +129,33 @@
   flex-shrink: 0;
 }
 /* Management Action Themes (Halo Glass) - Standardized for Tasks */
-.btn-approve, .btn-reject {
-  padding: 4px 10px !important;
-  font-size: 0.72rem !important;
-  min-width: unset !important;
-  font-weight: 800 !important;
+.halo-button.btn-approve, .halo-button.btn-reject {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  min-width: unset;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-radius: 8px !important;
+  border-radius: 8px;
 }
-.btn-approve {
-  color: var(--brand-mint) !important;
-  background: var(--halo-bg) !important;
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
+.halo-button.btn-approve {
+  color: var(--brand-mint);
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%);
 }
-.btn-approve:hover {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
-  border-color: var(--brand-mint) !important;
+.halo-button.btn-approve:hover {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  border-color: var(--brand-mint);
   box-shadow: 0 0 15px var(--halo-glow);
 }
-.btn-reject {
-  color: var(--priority-urgent) !important;
-  background: color-mix(in srgb, var(--priority-urgent), transparent 95%) !important;
-  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 70%) !important;
+.halo-button.btn-reject {
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 70%);
 }
-.btn-reject:hover {
-  background: color-mix(in srgb, var(--priority-urgent), transparent 90%) !important;
-  border-color: var(--priority-urgent) !important;
+.halo-button.btn-reject:hover {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border-color: var(--priority-urgent);
   box-shadow: 0 0 15px color-mix(in srgb, var(--priority-urgent), transparent 80%);
 }
 /* ==========================================================================
@@ -257,9 +257,9 @@
   background: rgba(255, 255, 255, 0.05);
 }
 .view-toggle-btn.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
-  color: var(--brand-mint) !important;
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%) !important;
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%);
   opacity: 1;
 }
 /* .status-pill — canonical in systemBadges.css (imported above) */
@@ -456,38 +456,38 @@
 }
 
 .bulk-btn {
-  background: var(--halo-bg) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--brand-mint) !important;
-  border-radius: 50px !important;
-  padding: 6px 16px !important;
-  font-size: 0.8rem !important;
-  min-width: 90px !important;
-  height: 34px !important;
-  transition: all 0.2s ease !important;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  color: var(--brand-mint);
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  min-width: 90px;
+  height: 34px;
+  transition: all 0.2s ease;
 }
 
 .bulk-btn:hover {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%) !important;
-  border-color: var(--brand-mint) !important;
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  border-color: var(--brand-mint);
   box-shadow: 0 0 15px var(--halo-glow);
   transform: translateY(-1px);
 }
 
 .bulk-btn.delete:hover {
-  color: #ef4444 !important;
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .bulk-btn.cancel {
-  color: var(--text-color) !important;
+  color: var(--text-color);
   opacity: 0.7;
 }
 
 .bulk-btn.cancel:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 
@@ -574,15 +574,15 @@
 }
 
 .status-toggle-btn {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: auto !important;
-  color: rgba(255, 255, 255, 0.85) !important; /* Increased contrast */
-  font-size: 1.1rem !important;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  min-width: auto;
+  color: rgba(255, 255, 255, 0.85); /* Increased contrast */
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
@@ -592,8 +592,8 @@
 }
 
 .status-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: var(--brand-green) !important;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--brand-green);
   transform: translateY(-1px);
 }
 

@@ -29,8 +29,8 @@
 
 /* Master Card Overrides for Nesting */
 /* Note: These classes are applied to the parent TaskCard container via TaskKanbanView logic */
-.is-subtask-render {
-  margin-left: 24px !important;
+.task-card-master.is-subtask-render {
+  margin-left: 24px;
   opacity: 0.9;
   position: relative;
 }

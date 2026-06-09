@@ -18,7 +18,7 @@
 }
 /* Ensure the desktop header has zero left padding so header-left aligns exactly with the sidebar edge */
 .desktop-layout .app-header {
-  padding-left: 0 !important;
+  padding-left: 0;
 }
 .header-left {
   flex: 1;
@@ -100,11 +100,11 @@
 }
 
 /* Force static relative positioning for desktop brand title to let flexbox center it between sidebar and buttons */
-.desktop-layout .brand-title-centered {
-  position: static !important;
-  transform: none !important;
-  left: auto !important;
-  top: auto !important;
+.desktop-layout .app-header .brand-title-centered {
+  position: static;
+  transform: none;
+  left: auto;
+  top: auto;
   display: inline-block;
   vertical-align: middle;
 }
@@ -139,17 +139,17 @@
   letter-spacing: 0.5px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.header-tutorial-btn.active {
-  border-color: var(--brand-green) !important;
-  background: var(--halo-bg) !important;
-  box-shadow: 0 0 15px var(--halo-glow) !important;
-  opacity: 1 !important;
+.app-header .header-tutorial-btn.active {
+  border-color: var(--brand-green);
+  background: var(--halo-bg);
+  box-shadow: 0 0 15px var(--halo-glow);
+  opacity: 1;
 }
-.header-sandbox-btn {
-  color: #f59e0b !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
-  background: rgba(245, 158, 11, 0.05) !important;
-  box-shadow: 0 0 5px rgba(245, 158, 11, 0.1) !important;
+.app-header .header-sandbox-btn {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.05);
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.1);
   font-weight: 800;
   margin-right: 24px;
   font-size: 0.8rem;
@@ -177,24 +177,24 @@
   }
   
   /* Centering adjustment in tablet layout */
-  .desktop-layout .brand-title-centered {
-    font-size: 1.3rem !important;
+  .desktop-layout .app-header .brand-title-centered {
+    font-size: 1.3rem;
   }
   
   /* Completely remove borders and backgrounds of collapsed buttons, centering icons perfectly */
-  .header-tutorial-btn,
-  .header-tutorial-btn.active {
-    font-size: 0 !important; /* Hide original text & emoji */
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    max-width: 32px !important;
-    min-height: auto !important;
-    padding: 0 !important;
-    display: inline-flex !important;
+  .app-header .header-tutorial-btn,
+  .app-header .header-tutorial-btn.active {
+    font-size: 0; /* Hide original text & emoji */
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    min-height: auto;
+    padding: 0;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
@@ -210,18 +210,18 @@
     line-height: 1;
   }
   
-  .header-sandbox-btn {
-    font-size: 0 !important; /* Hide original text & emoji */
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    max-width: 32px !important;
-    min-height: auto !important;
-    padding: 0 !important;
-    display: inline-flex !important;
+  .app-header .header-sandbox-btn {
+    font-size: 0; /* Hide original text & emoji */
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    min-height: auto;
+    padding: 0;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
@@ -267,7 +267,7 @@
   }
   /* Hide user profile text to save space for centered title on all mobile/tablet */
   .header-right .user-profile-toggle .user-info-text {
-    display: none !important;
+    display: none;
   }
   /* When inside a vertical (mobile-hidden class applies), reclaim vertical space */
   .app-header.mobile-hidden, .brand-title-centered.mobile-hidden, .logo-button.mobile-hidden {

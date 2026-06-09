@@ -22,7 +22,7 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
     : 0;
 
   return (
-    <div className="dm-card" style={{ marginBottom: '1.5rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+    <div className="dm-card" style={{ marginBottom: '24px' }}>
       <div className="dm-card__header">
         <h3 className="dm-card__title" style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>🌐</span> HTML Web Scraper
@@ -32,9 +32,9 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-end', marginTop: '1rem' }}>
-        <div style={{ flex: '1 1 200px' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.4rem', fontWeight: 600 }}>
+      <form onSubmit={handleSubmit} className="dm-form-row">
+        <div className="dm-form-col">
+          <label className="dm-label">
             Target HTML/JSON Field to Scrape
           </label>
           <input
@@ -42,14 +42,14 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
             value={targetField}
             onChange={(e) => setTargetField(e.target.value)}
             placeholder="e.g. title, price, model, status"
-            style={{ width: '100%', padding: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff' }}
+            className="dm-input"
             disabled={disabled}
             required
           />
         </div>
 
-        <div style={{ flex: '1 1 200px' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.8, marginBottom: '0.4rem', fontWeight: 600 }}>
+        <div className="dm-form-col">
+          <label className="dm-label">
             Output Column Name in Grid
           </label>
           <input
@@ -57,7 +57,7 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
             value={outputColumn}
             onChange={(e) => setOutputColumn(e.target.value)}
             placeholder="e.g. Scraped Value"
-            style={{ width: '100%', padding: '0.6rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff' }}
+            className="dm-input"
             disabled={disabled}
             required
           />
@@ -65,28 +65,24 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
 
         <button
           type="submit"
-          className="halo-button primary"
+          className="halo-button primary dm-action-btn"
           disabled={disabled || !targetField.trim() || !outputColumn.trim()}
-          style={{ height: '38px', whiteSpace: 'nowrap' }}
+          style={{ height: '42px', whiteSpace: 'nowrap' }}
         >
           {progress && progress.current < progress.total ? 'Scraping...' : 'Run Scraper on Sheet'}
         </button>
       </form>
 
       {progress && (
-        <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <span style={{ fontWeight: 600, color: '#00ffcc' }}>Progress: {progress.current} / {progress.total} ({percentage}%)</span>
-            <span style={{ opacity: 0.7, fontSize: '0.8rem' }}>Status: {progress.status}</span>
+        <div className="dm-progress-box">
+          <div className="dm-progress-header">
+            <span className="dm-progress-stats">Progress: {progress.current} / {progress.total} ({percentage}%)</span>
+            <span className="dm-progress-status">Status: {progress.status}</span>
           </div>
-          <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+          <div className="dm-progress-track">
             <div
-              style={{
-                width: `${percentage}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #00ffcc, #0099ff)',
-                transition: 'width 0.3s ease',
-              }}
+              className="dm-progress-bar"
+              style={{ width: `${percentage}%` }}
             />
           </div>
         </div>

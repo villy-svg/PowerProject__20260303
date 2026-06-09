@@ -73,24 +73,7 @@
 .responsive-table-wrapper table {
   min-width: 800px;
 }
-/* ── Mobile Layout Adaptations ── */
-@media screen and (max-width: 768px) {
-  .app-container {
-    padding-top: var(--safe-top, 0px);
-    padding-left: var(--safe-left, 0px);
-    padding-right: var(--safe-right, 0px);
-  }
-  /* On mobile the sidebar is a fixed overlay — main area always takes full width */
-  .app-main-area {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-bottom: 0; /* Content handles its own bottom padding */
-  }
-  /* Content area padding for mobile */
-  .app-content {
-    padding: 8px;
-  }
-}
+
 
 .loading-screen-layout .halo-button {
   margin-top: 1rem;
@@ -150,13 +133,4 @@
   padding: 4px 8px;
   font-size: 0.75rem;
   color: var(--brand-green);
-}
-/* ── Phone-Specific Layout ── */
-@media screen and (max-width: 480px) {
-  .sidebar {
-    width: 100%;
-  }
-  .app-content {
-    padding: 8px;
-  }
-}
+}

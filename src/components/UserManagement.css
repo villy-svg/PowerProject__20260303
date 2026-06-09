@@ -161,11 +161,11 @@
   font-size: 13px;
   transition: all 0.2s;
 }
-.v-select-btn.active {
-  background: rgba(0, 255, 133, 0.15) !important;
-  border-color: var(--brand-mint) !important;
-  color: var(--brand-mint) !important;
-  border-width: 2px !important;
+.vertical-selection-grid .v-select-btn.active {
+  background: rgba(0, 255, 133, 0.15);
+  border-color: var(--brand-mint);
+  color: var(--brand-mint);
+  border-width: 2px;
 }
 .modal-actions {
   display: flex;
@@ -184,14 +184,14 @@
   border: 1px solid var(--border-color);
   color: var(--text-color);
 }
-.save-btn {
-  background: rgba(0, 255, 133, 0.1) !important;
-  border: 1px solid var(--brand-mint) !important;
-  color: var(--brand-mint) !important;
+.modal-actions .save-btn {
+  background: rgba(0, 255, 133, 0.1);
+  border: 1px solid var(--brand-mint);
+  color: var(--brand-mint);
   transition: all 0.2s ease;
 }
-.save-btn:hover {
-  background: rgba(0, 255, 133, 0.2) !important;
+.modal-actions .save-btn:hover {
+  background: rgba(0, 255, 133, 0.2);
   box-shadow: 0 0 20px var(--halo-glow);
 }
 .status-banner {
@@ -601,13 +601,13 @@
 }
 
 /* Faded card for inactive users in grid view */
-.user-card--inactive {
+.user-grid .user-card.user-card--inactive {
   opacity: 0.55;
-  border-color: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.2);
 }
-.user-card--inactive:hover {
+.user-grid .user-card.user-card--inactive:hover {
   opacity: 0.85;
-  border-color: rgba(239, 68, 68, 0.35) !important;
+  border-color: rgba(239, 68, 68, 0.35);
 }
 
 /* Card header right slot — status badge + role badge stacked */
@@ -626,41 +626,45 @@
 }
 
 /* Deactivate button — warning tone (muted by default to reduce cognitive load) */
-.deactivate-btn {
+.user-row-actions .deactivate-btn,
+.user-card-actions .deactivate-btn {
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
-  background: transparent !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-color) !important;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
   opacity: 0.6;
   border-radius: 6px;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
-.deactivate-btn:hover {
-  background: rgba(239, 68, 68, 0.08) !important;
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  color: #f87171 !important;
+.user-row-actions .deactivate-btn:hover,
+.user-card-actions .deactivate-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
   opacity: 1;
   transform: translateY(-1px);
 }
 
 /* Reactivate button — muted green tone */
-.reactivate-btn {
+.user-row-actions .reactivate-btn,
+.user-card-actions .reactivate-btn {
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(52, 211, 153, 0.08) !important;
-  border: 1px solid rgba(52, 211, 153, 0.3) !important;
-  color: #34d399 !important;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #34d399;
   border-radius: 6px;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
-.reactivate-btn:hover {
-  background: rgba(52, 211, 153, 0.18) !important;
-  border-color: rgba(52, 211, 153, 0.5) !important;
+.user-row-actions .reactivate-btn:hover,
+.user-card-actions .reactivate-btn:hover {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.5);
   transform: translateY(-1px);
 }
 

@@ -58,7 +58,7 @@
 
 .desktop-header-shell .master-header-actions-row {
   /* Always visible on desktop — no hiding */
-  display: flex !important;
+  display: flex;
 }
 
 /* Desktop expanded menu is inline, not a fixed overlay */
@@ -90,12 +90,12 @@
 /* Sub-sidebar is inline on desktop — no backdrop needed */
 .desktop-layout .sidebar-backdrop,
 .desktop-layout .menu-backdrop {
-  display: none !important;
+  display: none;
 }
 
 /* No blur on desktop — sub-sidebar and menu are inline */
 .desktop-layout .workspace-main-view.is-blurred {
-  filter: none !important;
+  filter: none;
 }
 
 /* Desktop workspace content gets generous padding */
@@ -115,11 +115,11 @@
 /* ── 5. Desktop-Only Utilities ───────────────────────────────────────── */
 /* Hide mobile-only elements on desktop */
 .desktop-layout .mobile-action-tray {
-  display: none !important;
+  display: none;
 }
 
 .desktop-layout .bottom-nav {
-  display: none !important;
+  display: none;
 }
 
 /* Logo is always visible on desktop */
@@ -129,7 +129,7 @@
 
 /* Hide duplicate sidebar header logo on desktop to prevent overlap with floating logo-button */
 .desktop-layout .desktop-logo-wrapper {
-  display: none !important;
+  display: none;
 }
 
 /* Desktop mobile-menu-header is hidden */
@@ -140,45 +140,45 @@
 /* ── 6. Desktop-Only Header Elements (Icon-Only) ─────────────────────── */
 .desktop-layout .header-tutorial-btn,
 .desktop-layout .header-sandbox-btn {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  padding: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 0 !important;
-  border-radius: 12px !important;
-  margin-right: 12px !important;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-radius: 12px;
+  margin-right: 12px;
 }
 
 .desktop-layout .header-sandbox-btn {
-  border: none !important;
+  border: none;
 }
 
 .desktop-layout .user-profile-toggle {
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  min-width: unset !important;
-  gap: 0 !important;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  min-width: unset;
+  gap: 0;
 }
 
 .desktop-layout .user-profile-toggle:hover {
-  background: transparent !important;
-  box-shadow: none !important;
+  background: transparent;
+  box-shadow: none;
 }
 
 .desktop-layout .user-profile-toggle .user-info-text {
-  display: none !important;
+  display: none;
 }
 
 .desktop-layout .user-avatar {
-  width: 36px !important;
-  height: 36px !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

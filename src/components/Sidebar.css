@@ -146,31 +146,31 @@
   opacity: 1;
   color: var(--brand-green);
 }
-.sub-nav-list {
-  list-style: none !important;
-  padding: 0 0 8px 30px !important;
+.sidebar-nav ul.sub-nav-list {
+  list-style: none;
+  padding: 0 0 8px 30px;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.sub-nav-list li {
-  padding: 8px 12px !important;
-  margin-bottom: 2px !important;
-  font-size: var(--font-xs) !important;
+.sidebar-nav ul.sub-nav-list li {
+  padding: 8px 12px;
+  margin-bottom: 2px;
+  font-size: var(--font-xs);
   opacity: 0.7;
-  border-radius: 6px !important;
+  border-radius: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.sub-nav-list li:hover {
+.sidebar-nav ul.sub-nav-list li:hover {
   opacity: 1;
-  background-color: var(--border-color) !important;
+  background-color: var(--border-color);
 }
-.sub-nav-list li.sub-active {
-  background-color: color-mix(in srgb, var(--brand-green), transparent 95%) !important;
-  color: var(--brand-green) !important;
+.sidebar-nav ul.sub-nav-list li.sub-active {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 95%);
+  color: var(--brand-green);
   opacity: 1;
   font-weight: 600;
 }
@@ -283,11 +283,11 @@
 }
 
 /* ── Tray Grid Layout (App Drawer Style) ── */
-.tray-layout {
-  padding: 0 !important;
+.mobile-layout .tray-layout {
+  padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start !important;
+  justify-content: flex-start;
 }
 
 .tray-drag-handle {
@@ -444,13 +444,13 @@
 
 /* Floating Navigation Tray Overrides */
 .mobile-board-sub-tray.mobile-sidebar-shell {
-  max-height: 72dvh !important;
+  max-height: 72dvh;
   display: flex;
   flex-direction: column;
 }
 
 .mobile-sidebar-shell .mobile-board-sub-tray-content {
-  max-height: calc(72dvh - 70px) !important;
+  max-height: calc(72dvh - 70px);
   display: flex;
   flex-direction: column;
   gap: 16px;
