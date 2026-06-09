@@ -5,7 +5,7 @@
  */
 
 /**
- * Builds the final URL by concatenating Base URL and Vehicle Number with an '&' character.
+ * Builds the final URL by directly concatenating Base URL and Vehicle Number (Excel-style '&' concatenation).
  * Ensures the scheme (http/https) is present.
  */
 export const buildFinalUrl = (baseUrl = '', vehicleNumber = '') => {
@@ -18,25 +18,12 @@ export const buildFinalUrl = (baseUrl = '', vehicleNumber = '') => {
   }
 
   const cleanVehicle = vehicleNumber.trim();
-  if (!cleanVehicle) return cleanBase;
-
-  // Perform string "&" join as requested
-  if (cleanBase.endsWith('&')) {
-    return cleanBase + cleanVehicle;
-  }
-  
-  // If base URL has query params but does not end with '&', append '&'
-  if (cleanBase.includes('?')) {
-    return `${cleanBase}&${cleanVehicle}`;
-  }
-
-  // Fallback to joining with '&'
-  return `${cleanBase}&${cleanVehicle}`;
+  return cleanBase + cleanVehicle;
 };
 
 /**
  * Parses raw HTML string to find the value of a target field.
- * Uses fallback parsing techniques (meta tags, json-ld/scripts, table rows, regex).
+ * Uses fallback parsing techniques (class names, meta tags, json-ld/scripts, table rows, regex).
  */
 export const parseHtmlField = (html = '', fieldName = '') => {
   if (!html || !fieldName) return '';
@@ -51,6 +38,15 @@ export const parseHtmlField = (html = '', fieldName = '') => {
       .replace(/\s+/g, ' ')
       .trim();
   };
+
+  // 0. Try finding by class name, id, name or custom attribute (case-insensitive attribute search)
+  // Matches e.g. <span class="input_vehical_layout_vehicalmodel__1abtf">Tata Tigor</span>
+  const attrRegex = new RegExp(`<[^>]*(?:class|id|name|data-[a-z-]+)=["'][^"']*${fieldName.trim()}[^"']*["'][^>]*>([\\s\\S]*?)</`, 'i');
+  const attrMatch = html.match(attrRegex);
+  if (attrMatch && attrMatch[1]) {
+    const val = cleanVal(attrMatch[1]);
+    if (val) return val;
+  }
 
   // 1. Try finding in Meta tags
   // Matches <meta name="field" content="value">, <meta property="og:field" content="value">
@@ -75,7 +71,7 @@ export const parseHtmlField = (html = '', fieldName = '') => {
   }
 
   // Matches numeric/boolean JSON values
-  const jsonNumRegex = new RegExp(`["']${term}["']\\s*:\\s*([^"'{}\\[\\],\\s]+)`, 'i');
+  const jsonNumRegex = new RegExp(`["']${term}["']\\s*:\\s*([^"'{}\\(\\)\\[\\],\\s]+)`, 'i');
   const jsonNumMatch = html.match(jsonNumRegex);
   if (jsonNumMatch && jsonNumMatch[1]) {
     return cleanVal(jsonNumMatch[1]);
@@ -116,14 +112,30 @@ export const parseHtmlField = (html = '', fieldName = '') => {
 };
 
 /**
- * Fetches HTML from a URL using a public CORS proxy.
+ * Fetches HTML from a URL using multiple fallback public CORS proxies.
  */
 export const fetchHtmlViaProxy = async (url) => {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch URL. HTTP status: ${response.status}`);
+  // Proxy 1: corsproxy.io (returns raw HTML directly, fast)
+  try {
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+    if (res.ok) {
+      const html = await res.text();
+      if (html && html.trim().length > 0) return html;
+    }
+  } catch (err) {
+    console.warn('[Scraper] corsproxy.io failed, trying fallback...', err);
   }
-  const data = await response.json();
-  return data.contents || '';
+
+  // Proxy 2: api.allorigins.win (returns wrapped JSON)
+  try {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.contents) return data.contents;
+    }
+  } catch (err) {
+    console.error('[Scraper] allorigins fallback failed.', err);
+  }
+
+  throw new Error('All CORS proxies failed to retrieve page source. Check your internet connection.');
 };
