@@ -5,10 +5,11 @@
  * Replaces the spreadsheet loader and grid on this board.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { buildFinalUrl, parseHtmlField, fetchHtmlViaProxy } from '../utils/scraperUtils';
 
 const ModelVerificationForm = () => {
+  const bookmarkletRef = useRef(null);
   const [mode, setMode] = useState('automated'); // 'automated' or 'manual'
   const [pastedHtml, setPastedHtml] = useState('');
   const [vehicleNumber, setVehicleNumber] = useState(() => {
@@ -37,6 +38,15 @@ const ModelVerificationForm = () => {
   useEffect(() => {
     localStorage.setItem('mv_scraping_field', scrapingField);
   }, [scrapingField]);
+
+  // Dynamically set bookmarklet href to bypass React security checks against javascript: URLs in JSX
+  useEffect(() => {
+    if (bookmarkletRef.current) {
+      const targetClass = 'input_vehical_layout_vehicalModel__1ABTF';
+      const jsCode = `javascript:(function(){const f='${targetClass}';let v='';let e=document.querySelector(f.startsWith('.')||f.startsWith('%23')?f:'.'+f)||document.querySelector('[class*="'+f+'"]')||document.querySelector('[id*="'+f+'"]');if(e){v=e.innerText.trim();}else{const h=document.body.innerHTML;const r=new RegExp('<[^>]*(?:class|id|name|data-[a-z-]+)=["\\\\u0027\\\\u0022][^"\\\\u0027\\\\u0022]*'+f+'[^"\\\\u0027\\\\u0022]*["\\\\u0027\\\\u0022][^>]*>([\\\\\\\\s\\\\\\\\S]*?)</','i');const m=h.match(r);if(m&&m[1]){const t=document.createElement('div');t.innerHTML=m[1];v=t.innerText.trim();}}if(v){navigator.clipboard.writeText(v).then(()=>{alert('Success! Copied to Clipboard:\\\\n"'+v+'"');}).catch(()=>{alert('Clipboard error. Extracted value:\\\\n'+v);});}else{alert('Could not find field matching "'+f+'" on this page.');}})();`;
+      bookmarkletRef.current.setAttribute('href', jsCode);
+    }
+  });
 
   const handleRunScrape = async (e) => {
     e.preventDefault();
@@ -261,7 +271,7 @@ const ModelVerificationForm = () => {
             <div>
               <span className="dm-label" style={{ marginBottom: '4px', opacity: 0.5 }}>1. DRAG TO BOOKMARKS BAR</span>
               <a
-                href={`javascript:(function(){const f='input_vehical_layout_vehicalModel__1ABTF';let v='';let e=document.querySelector(f.startsWith('.')||f.startsWith('%23')?f:'.'+f)||document.querySelector('[class*="'+f+'"]')||document.querySelector('[id*="'+f+'"]');if(e){v=e.innerText.trim();}else{const h=document.body.innerHTML;const r=new RegExp('<[^>]*(?:class|id|name|data-[a-z-]+)=["\\'][^"\\']*'+f+'[^"\\']*["\\'][^>]*>([\\\\s\\\\S]*?)</','i');const m=h.match(r);if(m&&m[1]){const t=document.createElement('div');t.innerHTML=m[1];v=t.innerText.trim();}}if(v){navigator.clipboard.writeText(v).then(()=>{alert('Success! Copied to Clipboard:\\n"'+v+'"');}).catch(()=>{alert('Clipboard error. Extracted value:\\n'+v);});}else{alert('Could not find field matching "'+f+'" on this page.');}})();`}
+                ref={bookmarkletRef}
                 className="halo-button"
                 style={{
                   display: 'inline-flex',
