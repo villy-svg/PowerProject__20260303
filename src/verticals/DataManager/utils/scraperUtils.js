@@ -161,6 +161,6 @@ export const fetchHtmlViaProxy = async (url) => {
   }
 
   throw new Error(
-    'CORS proxies failed to load page. The target website may be protected by DDoS/bot-mitigation (e.g. Cloudflare) or blocking automated requests.'
+    'CORS proxies failed to load page. The target website may be protected by DDoS/bot-mitigation (e.g. Cloudflare) or blocking automated requests. Try switching to "Paste HTML Manually" mode to test parsing rules directly.'
   );
 };
