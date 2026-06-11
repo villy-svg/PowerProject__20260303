@@ -130,7 +130,7 @@ const ModelVerificationForm = () => {
         <div className="dm-alert dm-alert--error" style={{ marginBottom: '20px' }}>
           <strong>⚠️ Scraping Blocked by Cloudflare/DDoS Protection</strong>
           <p>
-            The target website is blocking automated requests. You can bypass this by opening the page in your browser, copying the page source (Ctrl+U / Right Click -> View Page Source), and pasting it here.
+            The target website is blocking automated requests. You can bypass this by opening the page in your browser, copying the page source (Ctrl+U / Right Click -&gt; View Page Source), and pasting it here.
           </p>
           <button
             type="button"
