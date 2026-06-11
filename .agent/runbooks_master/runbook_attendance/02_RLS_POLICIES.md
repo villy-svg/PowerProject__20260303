@@ -51,13 +51,26 @@ supabase/migrations/20260611000001_attendance_rls.sql
 -- Skill compliance:
 --   rbac-security-system §3 (Standard RLS Pattern)
 --   rbac-security-system §8 (Staging vs Production parity)
+--   database-migration-policy §2 (Repair-Safe Idempotency)
 --   database-migration-policy §5 (PostgreSQL Kick)
+--
+-- Idempotency strategy:
+--   PostgreSQL does not support CREATE POLICY IF NOT EXISTS.
+--   Each policy is preceded by DROP POLICY IF EXISTS so this file
+--   is safe to re-run via `supabase migration repair` without
+--   throwing duplicate_object errors.
 -- =========================================================================
 
 -- -------------------------------------------------------------------------
 -- TABLE A: daily_attendances
 -- -------------------------------------------------------------------------
 ALTER TABLE public.daily_attendances ENABLE ROW LEVEL SECURITY;
+
+-- Drop-before-create guards (idempotency / repair-safe)
+DROP POLICY IF EXISTS "Attendance: SELECT for contributor+" ON public.daily_attendances;
+DROP POLICY IF EXISTS "Attendance: INSERT for editor+"      ON public.daily_attendances;
+DROP POLICY IF EXISTS "Attendance: UPDATE for editor+"      ON public.daily_attendances;
+DROP POLICY IF EXISTS "Attendance: DELETE for admin"        ON public.daily_attendances;
 
 -- SELECT: contributor and above can view all attendance records
 -- (Manager Board read access)
@@ -102,6 +115,12 @@ CREATE POLICY "Attendance: DELETE for admin"
 -- TABLE B: attendance_edit_requests
 -- -------------------------------------------------------------------------
 ALTER TABLE public.attendance_edit_requests ENABLE ROW LEVEL SECURITY;
+
+-- Drop-before-create guards (idempotency / repair-safe)
+DROP POLICY IF EXISTS "EditRequests: SELECT own or all for editor+" ON public.attendance_edit_requests;
+DROP POLICY IF EXISTS "EditRequests: INSERT for contributor+"        ON public.attendance_edit_requests;
+DROP POLICY IF EXISTS "EditRequests: UPDATE for editor+"             ON public.attendance_edit_requests;
+DROP POLICY IF EXISTS "EditRequests: DELETE for admin"               ON public.attendance_edit_requests;
 
 -- SELECT:
 --   - Editors and admins can see ALL pending requests (Approval Queue)
@@ -169,6 +188,7 @@ supabase db push --linked
 - [ ] RLS is enabled on `attendance_edit_requests`
 - [ ] 4 policies exist on `daily_attendances` (SELECT, INSERT, UPDATE, DELETE)
 - [ ] 4 policies exist on `attendance_edit_requests`
+- [ ] Re-running the file a second time produces **zero errors** (idempotency confirmed)
 - [ ] As a contributor user: can SELECT from `daily_attendances` ✅
 - [ ] As a contributor user: cannot INSERT into `daily_attendances` directly ✅
 - [ ] As a contributor user: can INSERT into `attendance_edit_requests` ✅
