@@ -12,8 +12,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Capacitor } from '@capacitor/core';
-import { Geolocation } from '@capacitor/geolocation';
+// Capacitor imports will be loaded dynamically if run on native platform.
 import {
   fetchMyTodayAttendance,
   employeeCheckIn,
@@ -25,14 +24,15 @@ import {
 // Uses Capacitor Device plugin if available, falls back to localStorage UUID.
 // ---------------------------------------------------------------------------
 async function getDeviceId() {
-  if (Capacitor.isNativePlatform()) {
-    try {
+  try {
+    const { Capacitor } = await import('@capacitor/core');
+    if (Capacitor?.isNativePlatform()) {
       const { Device } = await import('@capacitor/device');
       const info = await Device.getId();
       return info.identifier;
-    } catch {
-      // Fall through to web fallback
     }
+  } catch (e) {
+    // Fall through to web fallback
   }
   // Web fallback: generate and persist a UUID in localStorage
   let webDeviceId = localStorage.getItem('pp_device_id');
@@ -50,8 +50,18 @@ async function getDeviceId() {
 // ---------------------------------------------------------------------------
 async function captureGeolocation() {
   try {
-    if (Capacitor.isNativePlatform()) {
+    let isNative = false;
+    let Cap = null;
+    try {
+      Cap = await import('@capacitor/core');
+      isNative = Cap.Capacitor?.isNativePlatform() || false;
+    } catch (e) {
+      // Not on native/Capacitor environment
+    }
+
+    if (isNative && Cap) {
       // Platform guard per hybrid-mobile-deployment §4
+      const { Geolocation } = await import('@capacitor/geolocation');
       await Geolocation.requestPermissions();
       const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
       return {

@@ -100,6 +100,11 @@ export default defineConfig(({ mode }) => {
     server: { open: true },
     build: {
       rollupOptions: {
+        external: [
+          '@capacitor/core',
+          '@capacitor/device',
+          '@capacitor/geolocation'
+        ],
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
