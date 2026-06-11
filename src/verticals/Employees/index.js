@@ -32,3 +32,7 @@ export { default as EmployeeRoleCSVImport } from './EmployeeRoleCSVImport';
 
 // Centralized Remarks mappings
 export * from './remarksMapping';
+
+// Attendance Board sub-components (Phase 4+)
+export { default as EmployeeAttendanceBoard } from './EmployeeAttendanceBoard';
+export { default as AttendanceSelfService } from './attendance/AttendanceSelfService';

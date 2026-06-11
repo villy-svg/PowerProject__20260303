@@ -150,6 +150,17 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
             </button>
           </div>
 
+          {/* Employee Self-Service button — for employees to log their own shifts */}
+          <div className="employee-tasks-btn-wrapper">
+            <button
+              className="halo-button employee-tasks-nav-btn"
+              style={{ opacity: activeVertical === 'attendance_self_service' ? 1 : 0.7 }}
+              onClick={() => setActiveVertical('attendance_self_service')}
+            >
+              My Attendance
+            </button>
+          </div>
+
           {/* Nav Toggle Header */}
           <div className="sidebar-title-row">
             {permissions?.canAccessEmployees ? (

@@ -33,6 +33,8 @@ const MANAGEMENT_VIEWS = [
   'client_service_management',
   'client_billing_model_management',
   'tutorial',
+  'employee_attendance_board',  // Manager board is a management view, not a task board
+  'attendance_self_service',    // Employee self-service check-in/out screen
 ];
 
 export function useLayoutShell() {

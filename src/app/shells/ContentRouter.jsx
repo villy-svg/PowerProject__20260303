@@ -29,7 +29,7 @@ import {
 } from '../../verticals/ChargingHubs';
 import {
   EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
-  EmployeeRulesBoard, EmployeeAttendanceBoard, RuleManagement,
+  EmployeeRulesBoard, EmployeeAttendanceBoard, RuleManagement, AttendanceSelfService,
 } from '../../verticals/Employees';
 import {
   ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
@@ -228,6 +228,28 @@ const ContentRouter = ({
     );
   }
 
+  if (activeVertical === 'employee_attendance_board') {
+    return (
+      <EmployeeAttendanceBoard
+        user={user}
+        permissions={permissions}
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        setIsSubSidebarOpen={setIsSubSidebarOpen}
+        SidebarComponent={SidebarComponent}
+      />
+    );
+  }
+
+  if (activeVertical === 'attendance_self_service') {
+    return (
+      <AttendanceSelfService
+        user={user}
+      />
+    );
+  }
+
   // Default: VerticalWorkspace (task board view)
   return (
     <VerticalWorkspace
@@ -267,17 +289,7 @@ const ContentRouter = ({
           onShowBottomNav={onShowBottomNav}
         />
       )}
-      {activeVertical === 'employee_attendance_board' && (
-        <EmployeeAttendanceBoard
-          user={user}
-          permissions={permissions}
-          setActiveVertical={setActiveVertical}
-          onShowBottomNav={onShowBottomNav}
-          isSubSidebarOpen={isSubSidebarOpen}
-          setIsSubSidebarOpen={setIsSubSidebarOpen}
-          SidebarComponent={SidebarComponent}
-        />
-      )}
+
       {activeVertical === verticals.CLIENTS?.id && (
         <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
       )}
