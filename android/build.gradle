@@ -36,6 +36,18 @@ subprojects {
                     targetCompatibility JavaVersion.VERSION_17
                 }
             }
+            
+            // Force Kotlin JVM toolchain to 17 to match the system Java version and prevent toolchain/compatibility errors
+            plugins.withId('org.jetbrains.kotlin.android') {
+                kotlin {
+                    jvmToolchain(17)
+                }
+            }
+            plugins.withId('kotlin-android') {
+                kotlin {
+                    jvmToolchain(17)
+                }
+            }
         }
     }
 }
