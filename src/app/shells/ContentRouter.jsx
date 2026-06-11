@@ -29,7 +29,7 @@ import {
 } from '../../verticals/ChargingHubs';
 import {
   EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
-  EmployeeRulesBoard, RuleManagement,
+  EmployeeRulesBoard, EmployeeAttendanceBoard, RuleManagement,
 } from '../../verticals/Employees';
 import {
   ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
@@ -265,6 +265,17 @@ const ContentRouter = ({
           permissions={permissions}
           setActiveVertical={setActiveVertical}
           onShowBottomNav={onShowBottomNav}
+        />
+      )}
+      {activeVertical === 'employee_attendance_board' && (
+        <EmployeeAttendanceBoard
+          user={user}
+          permissions={permissions}
+          setActiveVertical={setActiveVertical}
+          onShowBottomNav={onShowBottomNav}
+          isSubSidebarOpen={isSubSidebarOpen}
+          setIsSubSidebarOpen={setIsSubSidebarOpen}
+          SidebarComponent={SidebarComponent}
         />
       )}
       {activeVertical === verticals.CLIENTS?.id && (

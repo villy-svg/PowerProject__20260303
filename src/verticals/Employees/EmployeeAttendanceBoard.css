@@ -1,0 +1,9 @@
+/* ============================================================
+   EmployeeAttendanceBoard.css
+   Reserved for future custom board-specific styling.
+   ============================================================ */
+
+.attendance-board-container {
+  padding: 1.5rem 0 0 0;
+  width: 100%;
+}
