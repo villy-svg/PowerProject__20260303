@@ -369,7 +369,7 @@ select:-webkit-autofill:focus {
 
 .form-upload-zone:hover,
 .form-upload-zone.drag-active {
-  border-color: var(--brand-green, #00ff88);
+  border-color: var(--brand-green);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -420,7 +420,7 @@ select:-webkit-autofill:focus {
 .file-chip-remove {
   background: none;
   border: none;
-  color: #ff5252;
+  color: var(--priority-urgent); /* §8: use semantic token, not raw hex */
   cursor: pointer;
   font-size: 1.1rem;
   padding: 0 2px;
@@ -430,7 +430,7 @@ select:-webkit-autofill:focus {
 }
 
 .file-chip-remove:hover {
-  color: #ff7b7b;
+  color: color-mix(in srgb, var(--priority-urgent), white 20%);
 }
 
 .upload-section {

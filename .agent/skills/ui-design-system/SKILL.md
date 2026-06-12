@@ -307,3 +307,39 @@ Test all mobile changes at these viewport widths:
 - **Verification**: After any mobile CSS change, open the app at `1440px` width and confirm ZERO visual differences from the previous state.
 - **Violation**: Any mobile CSS that escapes its `@media` query and affects desktop is a blocking bug.
 
+---
+
+## 15. Depth-Layering Color Scale & Visual Minimalism
+
+### A. Preferred Background Palette (Soft Guideline)
+These four values define a strict tonal step-ladder from darkest to lightest. Apply them where they make contextual sense — they are **intentional guidelines, not rigid rules**.
+
+| Layer         | Value     | Typical Usage                          |
+|---------------|-----------|----------------------------------------|
+| Page / Canvas | `#050505` | The outermost backdrop / `<body>`      |
+| Sidebar       | `#090909` | Left nav, sub-sidebars, drawer panels  |
+| Card          | `#0d0d0d` | Content cards, panels, list items      |
+| Hover / Lift  | `#121212` | Hovered row, active card, focused item |
+
+**Intent**: Each layer is only ~4–8 luminance points brighter than the one below it. This creates a subtle sense of depth without needing borders or shadows to separate surfaces. When implementing, prefer this tonal separation over hard outlines.
+
+### B. Glow + Border Conflict Rule ⚠️
+- **Preferred**: Use **either** a glow (`box-shadow`) **or** a border — not both on the same element at the same time.
+- When a glow is present, the border should be dropped (set to `transparent` or `none`).
+- When a border is present (e.g., a focused form block), suppress the ambient glow.
+- **Exception**: `.halo-button` in its baseline resting state may retain a very faint border + faint glow together only because they are both near-invisible at rest. On hover, the stronger effect (glow) should dominate and the border can remain but must not be visually doubled.
+
+### C. Border Minimalism Principle
+- **Default posture**: Prefer NO border. Let tonal layering (the step-ladder above) do the separation work.
+- Introduce a border only when:
+  1. Two adjacent surfaces share the same background value (tonal separation is insufficient).
+  2. A focusable interactive element needs a clear affordance boundary (form inputs, selects).
+  3. A semantic divider is genuinely required (e.g., modal header/body split).
+- When a border IS used, default to `1px solid rgba(255, 255, 255, 0.06)` (near-invisible satin edge) — not `var(--border-color)` at full opacity unless the context demands visibility.
+
+### D. Cognitive Clutter Prevention
+- **One visual cue per surface**: Choose the strongest signal — color, glow, border, or shadow — and let that single cue carry the meaning. Stacking multiple signals on one element is noise.
+- **Inactive elements should be invisible**: Nav items, metadata badges, and labels at rest should feel like they belong to the background. Only highlight them on hover/active.
+- **Motion discipline**: Do not animate elements that are not being interacted with. Background pulsing, floating elements, or continuous animations add cognitive load.
+- **Whitespace over decoration**: When uncertain whether to add a visual element, choose whitespace instead.
+

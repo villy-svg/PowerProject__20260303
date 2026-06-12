@@ -4,7 +4,7 @@
   align-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #050505;
+  background-color: var(--bg-color); /* §8: use token, not hardcoded #050505 */
   color: var(--text-color);
   padding: 24px;
   position: relative;
@@ -94,7 +94,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #f97316;
+  background-color: var(--priority-high); /* §8: semantic token */
   position: relative;
 }
 
@@ -118,7 +118,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #f97316;
+  color: var(--priority-high); /* §8: semantic token */
 }
 
 .pending-activation-content {
@@ -131,7 +131,7 @@
   font-size: clamp(20px, 4vw, 24px);
   font-weight: 700;
   margin: 0;
-  color: #ffffff;
+  color: var(--color-white); /* §8: use token, not raw #ffffff */
 }
 
 .pending-activation-content p {

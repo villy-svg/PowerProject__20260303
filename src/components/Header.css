@@ -73,7 +73,7 @@
   transition: all 0.2s ease;
 }
 .impersonation-header-wrapper:hover {
-  border-color: var(--brand-green);
+  /* §15.B: glow-only on hover — no simultaneous border-color change */
   box-shadow: 0 0 15px var(--halo-glow);
 }
 .brand-title-centered {

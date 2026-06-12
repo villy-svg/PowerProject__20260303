@@ -14,7 +14,7 @@
 .user-list-wrapper {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-squircle); /* §12.A: squircle for content cards */
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -202,8 +202,8 @@
   justify-content: space-between;
   align-items: center;
 }
-.status-banner.success { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-.status-banner.error { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+.status-banner.success { background: rgba(16, 185, 129, 0.15); color: var(--brand-emerald); }
+.status-banner.error { background: rgba(239, 68, 68, 0.15); color: var(--priority-urgent); }
 /* 2D Role Selection UI */
 .user-role-modal {
   max-width: 600px; /* Slightly wider to accommodate grid */
@@ -531,13 +531,13 @@
 .v-tag.linked-active {
   background: rgba(52, 211, 153, 0.12);
   border: 1px solid rgba(52, 211, 153, 0.28);
-  color: #34d399;
+  color: var(--badge-green-text); /* §8: use badge token */
 }
 /* Inactive employee link — faded red; eye-friendly, clearly distinct from normal */
 .v-tag.linked-inactive {
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.22);
-  color: #f87171;
+  color: var(--badge-red-text); /* §8: use badge token */
   opacity: 0.85; /* Slight fade-back — communicates "impaired" state without alarming */
 }
 
@@ -561,28 +561,28 @@
 .user-status-badge--active {
   background: rgba(52, 211, 153, 0.12);
   border: 1px solid rgba(52, 211, 153, 0.3);
-  color: #34d399;
+  color: var(--badge-green-text); /* §8: badge token */
 }
 .user-status-badge--active::before {
   content: '';
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 6px #34d399;
+  background: var(--badge-green-text);
+  box-shadow: 0 0 6px var(--badge-green-text);
   animation: pulse-dot 2s infinite;
 }
 .user-status-badge--inactive {
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #f87171;
+  color: var(--badge-red-text); /* §8: badge token */
 }
 .user-status-badge--inactive::before {
   content: '';
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f87171;
+  background: var(--badge-red-text);
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
@@ -640,7 +640,7 @@
 .user-card-actions .deactivate-btn:hover {
   background: rgba(239, 68, 68, 0.08);
   border-color: rgba(239, 68, 68, 0.4);
-  color: #f87171;
+  color: var(--badge-red-text); /* §8: badge token */
   opacity: 1;
   transform: translateY(-1px);
 }
@@ -653,7 +653,7 @@
   font-weight: 700;
   background: rgba(52, 211, 153, 0.08);
   border: 1px solid rgba(52, 211, 153, 0.3);
-  color: #34d399;
+  color: var(--badge-green-text); /* §8: badge token */
   border-radius: 6px;
   white-space: nowrap;
   transition: all 0.2s ease;

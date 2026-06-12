@@ -12,8 +12,8 @@
   padding: 40px;
   background-color: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-squircle); /* §12.A: Squircle standard */
+  box-shadow: var(--shadow-premium);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -61,10 +61,11 @@
   opacity: 0.6;
 }
 .login-toggle button.active {
-  background-color: var(--brand-green);
-  color: #fff;
+  /* §4: Selected states use halo border + subtle tint, NOT solid fills */
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-mint);
+  border: 2px solid var(--brand-green);
   opacity: 1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .form-group-stack {
   display: flex;
@@ -135,12 +136,13 @@
   text-align: center;
 }
 .login-message.error {
-  background-color: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid rgba(255, 68, 68, 0.2);
+  /* Use semantic priority tokens per §7 */
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--priority-urgent);
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 .login-message.success {
-  background-color: rgba(0, 200, 83, 0.1);
-  color: #00c853;
-  border: 1px solid rgba(0, 200, 83, 0.2);
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+  color: var(--brand-mint);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
 }

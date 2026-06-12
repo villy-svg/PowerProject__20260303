@@ -4,13 +4,13 @@
 }
 .conflict-warning {
   background: rgba(234, 179, 8, 0.1);
-  border-left: 4px solid #eab308;
+  border-left: 4px solid var(--priority-medium); /* §8: semantic token */
   padding: 16px;
   margin-bottom: 24px;
   border-radius: 8px;
 }
 .conflict-warning h3 {
-  color: #eab308;
+  color: var(--priority-medium); /* §8: semantic token */
   margin: 0 0 8px 0;
   display: flex;
   align-items: center;
@@ -25,7 +25,7 @@
   padding: 20px;
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-squircle); /* §12.A: squircle for content panels */
   transition: all 0.3s ease;
 }
 .option-box h4 {

@@ -1,7 +1,7 @@
 .task-card-master {
   background: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: var(--radius-button); /* §12.A: button token for compact cards */
   padding: 6px 12px;
   /* Tighter vertical padding */
   display: flex;

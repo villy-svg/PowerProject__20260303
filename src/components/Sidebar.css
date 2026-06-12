@@ -341,7 +341,7 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-muted, #888);
+  color: var(--text-secondary); /* §8: use token, not raw hex */
   margin: 0;
   padding-left: 4px;
 }
