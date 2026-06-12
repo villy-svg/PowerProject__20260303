@@ -138,30 +138,35 @@ jobs:
           echo "📦 OTA Bundle: $(du -h ota-bundle.zip | cut -f1)"
 
       # ── 15. Create GitHub Release ──
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ota-${{ steps.env.outputs.environment }}-v${{ steps.version.outputs.app_version }}
-          name: "${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }} v${{ steps.version.outputs.app_version }}"
-          body: |
-            ## ${{ steps.env.outputs.environment == 'production' && '🚀 Production' || '🧪 Staging' }} Release v${{ steps.version.outputs.app_version }}
-            
-            **Branch**: `${{ github.ref_name }}`
-            **Commit**: `${{ github.sha }}`
-            **Built**: ${{ github.event.head_commit.timestamp }}
-            
-            ### Assets
-            - 📱 **APK**: Install directly on Android device
-            - 📦 **OTA Bundle**: Auto-downloaded by existing installs
-            
-            ### Changes
-            ${{ github.event.head_commit.message }}
-          files: |
-            ${{ steps.apk.outputs.apk_path }}
-            ota-bundle.zip
-          draft: false
-          prerelease: ${{ steps.env.outputs.environment == 'staging' }}
-          make_latest: ${{ steps.env.outputs.environment == 'production' }}
+      - name: Create or Update GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="ota-${{ steps.env.outputs.environment }}-v${{ steps.version.outputs.app_version }}"
+          TITLE="${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }} v${{ steps.version.outputs.app_version }}"
+          
+          cat << 'EOF' > release_notes.md
+          ## ${{ steps.env.outputs.environment == 'production' && '🚀 Production' || '🧪 Staging' }} Release v${{ steps.version.outputs.app_version }}
+          
+          **Branch**: `${{ github.ref_name }}`
+          **Commit**: `${{ github.sha }}`
+          
+          ### Assets
+          - 📱 **APK**: Install directly on Android device
+          - 📦 **OTA Bundle**: Auto-downloaded by existing installs
+          
+          ### Changes
+          ${{ github.event.head_commit.message }}
+          EOF
+
+          gh release create "$TAG" \
+            "${{ steps.apk.outputs.apk_path }}" \
+            ota-bundle.zip \
+            --title "$TITLE" \
+            --notes-file release_notes.md \
+            --clobber \
+            ${{ steps.env.outputs.environment == 'staging' && '--prerelease' || '' }} \
+            ${{ steps.env.outputs.environment == 'production' && '--latest' || '' }}
 
       # ── 16. Cleanup ──
       - name: Cleanup Keystore
