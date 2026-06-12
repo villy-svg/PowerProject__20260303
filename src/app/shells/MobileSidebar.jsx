@@ -38,7 +38,10 @@ const MobileSidebar = ({
     const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
     const isLocked = vertical.locked || !isAssigned;
     if (isHydrating) return vertical.locked;
-    return isLocked;
+    
+    // Show locked verticals (coming soon) or verticals that are not in the persistent bottom navigation bar (e.g. DATA_MANAGER)
+    const isBottomNavVertical = ['CHARGING_HUBS', 'CLIENTS', 'EMPLOYEES'].includes(vertical.id);
+    return isLocked || !isBottomNavVertical;
   });
 
   const canSeeConfig = permissions?.canAccessConfig;
@@ -53,6 +56,7 @@ const MobileSidebar = ({
     if (id === 'CHARGING_HUBS') return IconHubs;
     if (id === 'CLIENTS') return IconDatabase;
     if (id === 'EMPLOYEES') return IconPeople;
+    if (id === 'DATA_MANAGER') return IconDatabase;
     return IconFile;
   };
 

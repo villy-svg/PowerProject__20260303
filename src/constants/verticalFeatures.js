@@ -14,12 +14,15 @@ export const VERTICAL_FEATURES = {
   EMPLOYEES: [
     { id: 'canAccessEmployees', label: 'Employees List' },
     { id: 'canAccessEmployeeTasks', label: 'Remarks Manager' },
-    { id: 'canAccessEmployeeAttendanceBoard', label: 'Attendance Board' }
+    { id: 'canAccessEmployeeAttendanceBoard', label: 'Attendance Board' },
+    { id: 'canAccessEmployeeRulesBoard', label: 'Rules & Regulations' },
+    { id: 'canAccessAttendanceSelfService', label: 'My Attendance' }
   ],
   CHARGING_HUBS: [
     { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },
     { id: 'canAccessDailyHubTasks', label: 'Daily Task Board' },
-    { id: 'canAccessDailyTaskTemplates', label: 'Daily Task Template' }
+    { id: 'canAccessDailyTaskTemplates', label: 'Daily Task Template' },
+    { id: 'canAccessEscalationTasks', label: 'Escalation Task Board' }
   ],
   DATA_MANAGER: [
     { id: 'canAccessDataSheetBoard', label: 'Data Sheet Board' },

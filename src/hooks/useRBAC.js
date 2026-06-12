@@ -42,13 +42,16 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessEscalationTasks: true,
         canViewKanbanHierarchy,
         canAccessEmployeeAttendanceBoard: true,
+        canAccessEmployeeRulesBoard: true,
+        canAccessAttendanceSelfService: true,
       };
 
       // Ensure feature-specific CRUD flags match global CRUD flags for master roles
       const features = [
         'Clients', 'ClientTasks', 'LeadsFunnel', 
         'Employees', 'EmployeeTasks', 'HubTasks', 'DailyHubTasks', 'DailyTaskTemplates',
-        'DataSheetBoard', 'ModelVerificationBoard', 'EmployeeAttendanceBoard'
+        'DataSheetBoard', 'ModelVerificationBoard', 'EmployeeAttendanceBoard',
+        'EmployeeRulesBoard', 'AttendanceSelfService', 'EscalationTasks'
       ];
 
       features.forEach(feat => {
@@ -70,7 +73,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     const rootVerticalId = 
       (current === verticals.CHARGING_HUBS?.id || current === 'hub_tasks' || current === 'daily_hub_tasks' || current === 'daily_task_templates' || current === 'escalation_tasks') ? verticals.CHARGING_HUBS?.id :
       (current === verticals.CLIENTS?.id || current === 'client_tasks' || current === 'leads_funnel') ? verticals.CLIENTS?.id :
-      (current === verticals.EMPLOYEES?.id || current === 'employee_tasks') ? verticals.EMPLOYEES?.id :
+      (current === verticals.EMPLOYEES?.id || current === 'employee_tasks' || current === 'employee_rules_board' || current === 'employee_attendance_board' || current === 'attendance_self_service') ? verticals.EMPLOYEES?.id :
       (current === verticals.DATA_MANAGER?.id || current === 'model_verification_board') ? verticals.DATA_MANAGER?.id :
       current.toUpperCase();
 

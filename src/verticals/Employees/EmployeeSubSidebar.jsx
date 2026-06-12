@@ -129,37 +129,43 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
           )}
 
           {/* Rules & Regulations Board button */}
-          <div className="employee-tasks-btn-wrapper">
-            <button
-              className="halo-button employee-tasks-nav-btn"
-              style={{ opacity: activeVertical === 'employee_rules_board' ? 1 : 0.7 }}
-              onClick={() => setActiveVertical('employee_rules_board')}
-            >
-              Rules & Regulations
-            </button>
-          </div>
+          {permissions?.canAccessEmployeeRulesBoard !== false && (
+            <div className="employee-tasks-btn-wrapper">
+              <button
+                className="halo-button employee-tasks-nav-btn"
+                style={{ opacity: activeVertical === 'employee_rules_board' ? 1 : 0.7 }}
+                onClick={() => setActiveVertical('employee_rules_board')}
+              >
+                Rules & Regulations
+              </button>
+            </div>
+          )}
 
           {/* Attendance Board button */}
-          <div className="employee-tasks-btn-wrapper">
-            <button
-              className="halo-button employee-tasks-nav-btn"
-              style={{ opacity: activeVertical === 'employee_attendance_board' ? 1 : 0.7 }}
-              onClick={() => setActiveVertical('employee_attendance_board')}
-            >
-              Attendance Board
-            </button>
-          </div>
+          {permissions?.canAccessEmployeeAttendanceBoard !== false && (
+            <div className="employee-tasks-btn-wrapper">
+              <button
+                className="halo-button employee-tasks-nav-btn"
+                style={{ opacity: activeVertical === 'employee_attendance_board' ? 1 : 0.7 }}
+                onClick={() => setActiveVertical('employee_attendance_board')}
+              >
+                Attendance Board
+              </button>
+            </div>
+          )}
 
           {/* Employee Self-Service button — for employees to log their own shifts */}
-          <div className="employee-tasks-btn-wrapper">
-            <button
-              className="halo-button employee-tasks-nav-btn"
-              style={{ opacity: activeVertical === 'attendance_self_service' ? 1 : 0.7 }}
-              onClick={() => setActiveVertical('attendance_self_service')}
-            >
-              My Attendance
-            </button>
-          </div>
+          {permissions?.canAccessAttendanceSelfService !== false && (
+            <div className="employee-tasks-btn-wrapper">
+              <button
+                className="halo-button employee-tasks-nav-btn"
+                style={{ opacity: activeVertical === 'attendance_self_service' ? 1 : 0.7 }}
+                onClick={() => setActiveVertical('attendance_self_service')}
+              >
+                My Attendance
+              </button>
+            </div>
+          )}
 
           {/* Nav Toggle Header */}
           <div className="sidebar-title-row">

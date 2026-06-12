@@ -1,10 +1,10 @@
-# 1. Build (on Staging)
-npm run build:staging
-
-# 2. Commit Staging Local to Staging Server
+# 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260612 -- Attendance Board 1.0.3"
+git commit -m "260612 -- Attendance Board 1.0.4"
 git push origin staging 
+
+# 2. Build (on Staging)
+npm run build:staging
 
 #npm run apk:staging-debug
     
