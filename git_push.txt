@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260612 -- Attendance Board 1.0.5"
+git commit -m "260612 Bump Android to v2.2.0"
 git push origin staging 
 
 # 2. Build (on Staging)
