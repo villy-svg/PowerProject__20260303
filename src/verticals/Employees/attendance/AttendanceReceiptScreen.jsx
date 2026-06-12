@@ -17,7 +17,8 @@
  *   safe-code-modification §2 (No inline styles)
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { supabase } from '../../../services/core/supabaseClient';
 import './AttendanceSelfService.css';
 
 // ---------------------------------------------------------------------------
@@ -55,9 +56,52 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
 const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
   const { action, record, deviceId, geolocation, timestamp } = successData || {};
 
-  // Resolve display names from the nested record data
-  const employeeName = record?.employees?.full_name || user?.name || 'Employee';
-  const hubName      = record?.employees?.hubs?.name || record?.employees?.hubs?.hub_code || '—';
+  const [resolvedHubName, setResolvedHubName] = useState('—');
+  const [resolvedEmpName, setResolvedEmpName] = useState(user?.name || 'Employee');
+
+  useEffect(() => {
+    const fetchNames = async () => {
+      // 1. Resolve employee name
+      if (record?.employees?.full_name) {
+        setResolvedEmpName(record.employees.full_name);
+      } else if (record?.employee_id) {
+        const { data: empData } = await supabase
+          .from('employees')
+          .select('full_name')
+          .eq('id', record.employee_id)
+          .single();
+        if (empData?.full_name) {
+          setResolvedEmpName(empData.full_name);
+        }
+      }
+
+      // 2. Resolve hub name
+      if (record?.employees?.hubs?.name) {
+        setResolvedHubName(record.employees.hubs.name);
+      } else {
+        // Find hub_id from session_logs_data
+        const sessions = record?.session_logs_data || [];
+        const lastSession = sessions[sessions.length - 1];
+        const hubId = lastSession?.hub_id;
+        
+        if (hubId) {
+          const { data: hubData } = await supabase
+            .from('hubs')
+            .select('name, hub_code')
+            .eq('id', hubId)
+            .single();
+          if (hubData) {
+            setResolvedHubName(hubData.name || hubData.hub_code || '—');
+          }
+        }
+      }
+    };
+
+    fetchNames();
+  }, [record, user]);
+
+  const employeeName = resolvedEmpName;
+  const hubName      = resolvedHubName;
   const shiftLabel   = record?.shift_type === 'day' ? '☀ Day Shift' : '🌙 Night Shift';
   const actionLabel  = action === 'checkin' ? '✅ Shift Started' : '👋 Shift Ended';
   const actionClass  = action === 'checkin' ? 'receipt__card--checkin' : 'receipt__card--checkout';
