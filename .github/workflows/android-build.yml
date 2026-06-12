@@ -71,6 +71,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: 'gradle'
 
       # ── 6. Setup Android SDK ──
       - name: Setup Android SDK
@@ -105,7 +106,13 @@ jobs:
           chmod +x gradlew
           FLAVOR="${{ steps.env.outputs.environment == 'production' && 'Production' || 'Staging' }}"
           echo "🔨 Building: assemble${FLAVOR}Release"
-          ./gradlew assemble${FLAVOR}Release --no-daemon
+          
+          if ! ./gradlew assemble${FLAVOR}Release --no-daemon; then
+            echo "⚠️ Gradle build failed!"
+            echo "🧹 Clearing Gradle cache and retrying..."
+            rm -rf ~/.gradle/caches
+            ./gradlew assemble${FLAVOR}Release --no-daemon
+          fi
         env:
           ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/app/powerproject-release.jks
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
