@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { hierarchyService } from '../services/rules/hierarchyService';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { IconEye, IconBoards, IconZap, IconBulb, IconWarning } from './Icons';
+import { IconEye, IconBoards, IconZap, IconBulb, IconWarning, IconClock } from './Icons';
 import { taskUtils } from '../utils/taskUtils';
 import { useMobileLongPress } from '../app/contexts/MobileLongPressContext';
 import './ExecutiveSummary.css';
@@ -45,6 +45,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
+  const isSMRole = 
+    user?.employeeRole === 'SM' || 
+    user?.employeeRole === 'site_manager' || 
+    user?.roleId === 'master_admin' || 
+    (user?.seniority && user?.seniority > MANAGER_SENIORITY_THRESHOLD);
+
   const openAddEscalationModal = () => {
     setEditingTask({ verticalId: 'escalation_tasks', priority: 'High' });
     setIsModalOpen(true);
@@ -433,6 +439,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           {/* Mobile-Only Summary View Navigation Switcher Tray */}
           <nav className="summary-navigation-tray">
             <div className="summary-nav-container">
+              {/* 1. Team Support */}
               {hasEscalations && (
                 <button
                   className={`summary-nav-item stage-red ${activeView === 'escalations' ? 'active' : ''}`}
@@ -446,32 +453,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                   <span className="summary-nav-label">Team Support</span>
                 </button>
               )}
-               <button
-                className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
-                onClick={() => setActiveView('centralised_task_view')}
-                {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
-              >
-                <div className="summary-icon-wrapper">
-                  <IconBoards size={14} />
-                  {regularMyTasks.length > 0 && (
-                    <span className="summary-badge-count">{regularMyTasks.length}</span>
-                  )}
-                </div>
-                <span className="summary-nav-label">Centralised Tasks</span>
-              </button>
-              <button
-                className={`summary-nav-item stage-slate ${activeView === 'executive_summary' ? 'active' : ''}`}
-                onClick={() => setActiveView('executive_summary')}
-                {...bindLongPress("Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ.")}
-              >
-                <div className="summary-icon-wrapper">
-                  <IconEye size={14} />
-                  {topLevelVisibleCount > 0 && (
-                    <span className="summary-badge-count">{topLevelVisibleCount}</span>
-                  )}
-                </div>
-                <span className="summary-nav-label">Executive Summary</span>
-              </button>
+
+              {/* 2. Request Support */}
               {!!user && (
                 <button
                   className="summary-nav-item stage-mint"
@@ -481,6 +464,51 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                     <span className="request-support-plus">+</span>
                   </div>
                   <span className="summary-nav-label">Request Support</span>
+                </button>
+              )}
+
+              {/* 3. My Attendance (hidden for Master Admins) */}
+              {user?.roleId !== 'master_admin' && (
+                <button
+                  className="summary-nav-item stage-orange"
+                  onClick={() => setActiveVertical('attendance_self_service')}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconClock size={14} />
+                  </div>
+                  <span className="summary-nav-label">My Attendance</span>
+                </button>
+              )}
+
+              {/* 4. Centralised Tasks */}
+              <button
+                className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
+                onClick={() => setActiveView('centralised_task_view')}
+                {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ alpine ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
+              >
+                <div className="summary-icon-wrapper">
+                  <IconBoards size={14} />
+                  {regularMyTasks.length > 0 && (
+                    <span className="summary-badge-count">{regularMyTasks.length}</span>
+                  )}
+                </div>
+                <span className="summary-nav-label">Centralised Tasks</span>
+              </button>
+
+              {/* 5. Executive Summary (hidden for non-SM roles) */}
+              {isSMRole && (
+                <button
+                  className={`summary-nav-item stage-slate ${activeView === 'executive_summary' ? 'active' : ''}`}
+                  onClick={() => setActiveView('executive_summary')}
+                  {...bindLongPress("Executive Summary gives you summary of all tasks related to you or your team and the stage in which they are.\n\nಕಾರ್ಯನಿರ್ವಾಹಕ ಸಾರಾಂಶವು ನಿಮಗೆ ಅಥವಾ ನಿಮ್ಮ ತಂಡಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಎಲ್ಲಾ ಕಾರ್ಯಗಳ ಸಾರಾಂಶವನ್ನು ಮತ್ತು ಅವು ಯಾವ ಹಂತದಲ್ಲಿವೆ ಎಂಬುದನ್ನು ನೀಡುತ್ತದೆ.")}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconEye size={14} />
+                    {topLevelVisibleCount > 0 && (
+                      <span className="summary-badge-count">{topLevelVisibleCount}</span>
+                    )}
+                  </div>
+                  <span className="summary-nav-label">Executive Summary</span>
                 </button>
               )}
             </div>
@@ -572,7 +600,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       )}
 
       {/* 2. Executive Summary Grid Metrics Section */}
-      {(!isMobile || activeView === 'executive_summary') && (
+      {isSMRole && (!isMobile || activeView === 'executive_summary') && (
         <ExecutiveMetricsSection
           visibleTasks={visibleTasks}
           verticalList={verticalList}

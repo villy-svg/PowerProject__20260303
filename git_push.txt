@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260612 Editing the Attendance Message"
+git commit -m "260612 Editing Home Screen for My Attendance"
 git push origin staging 
 
 # 2. Build (on Staging)

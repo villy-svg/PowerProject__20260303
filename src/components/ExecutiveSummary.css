@@ -141,6 +141,7 @@
   .stage-green { --stage-accent: var(--brand-green); }
   .stage-slate { --stage-accent: #94a3b8; }
   .stage-mint { --stage-accent: var(--brand-mint, #10b981); }
+  .stage-orange { --stage-accent: var(--brand-yellow, #f59e0b); }
 
   .request-support-plus {
     font-size: 0.9rem;
