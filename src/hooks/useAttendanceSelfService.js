@@ -49,40 +49,53 @@ async function getDeviceId() {
 // Returns { lat, lng, accuracy } or null if denied.
 // ---------------------------------------------------------------------------
 async function captureGeolocation() {
+  let isNative = false;
+  let Cap = null;
   try {
-    let isNative = false;
-    let Cap = null;
-    try {
-      Cap = await import('@capacitor/core');
-      isNative = Cap.Capacitor?.isNativePlatform() || false;
-    } catch (e) {
-      // Not on native/Capacitor environment
-    }
+    Cap = await import('@capacitor/core');
+    isNative = Cap.Capacitor?.isNativePlatform() || false;
+  } catch (e) {
+    // Not native
+  }
 
-    if (isNative && Cap) {
-      // Platform guard per hybrid-mobile-deployment §4
+  if (isNative && Cap) {
+    try {
       const { Geolocation } = await import('@capacitor/geolocation');
-      await Geolocation.requestPermissions();
+      let status = await Geolocation.checkPermissions();
+      
+      // On every update, if not granted, request permission
+      if (status.location !== 'granted') {
+        status = await Geolocation.requestPermissions();
+      }
+
+      if (status.location !== 'granted') {
+        throw new Error('Location permission is required to update attendance. Please enable it in device settings.');
+      }
+
       const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
       return {
         lat:      position.coords.latitude,
         lng:      position.coords.longitude,
         accuracy: position.coords.accuracy,
       };
-    } else {
-      // Web Geolocation API
+    } catch (err) {
+      console.error('[useAttendanceSelfService] Native geolocation error:', err);
+      throw new Error(err?.message || 'Location permission or GPS is required to update attendance.');
+    }
+  } else {
+    // Web Geolocation API (non-fatal)
+    try {
       return await new Promise((resolve) => {
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
-          ()    => resolve(null),  // Denied — non-blocking, continue without geo
+          ()    => resolve(null),  // Denied — non-blocking on web
           { enableHighAccuracy: true, timeout: 8000 }
         );
       });
+    } catch {
+      console.warn('[useAttendanceSelfService] Web Geolocation unavailable.');
+      return null;
     }
-  } catch {
-    // Geolocation failure is non-fatal — attendance is logged without location
-    console.warn('[useAttendanceSelfService] Geolocation unavailable.');
-    return null;
   }
 }
 

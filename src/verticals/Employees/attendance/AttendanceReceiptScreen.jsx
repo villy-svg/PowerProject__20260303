@@ -38,12 +38,9 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
     : '📍 Location unavailable';
 
   return [
-    `*PowerProject Attendance*`,
+    `👤 ${employeeName} ${actionLabel} at 🏢 ${hubName || 'Hub N/A'}`,
     ``,
-    `${actionLabel}`,
-    `👤 ${employeeName}`,
-    `🏢 ${hubName || 'Hub N/A'}`,
-    `🔄 ${shiftLabel}`,
+    `${shiftLabel}`,
     `🕐 ${timeDisplay}`,
     `${geoTag}`,
     `📱 Device: ${deviceId?.slice(-8) || 'Unknown'}`, // Show last 8 chars of device ID
