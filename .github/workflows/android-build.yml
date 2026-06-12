@@ -159,12 +159,15 @@ jobs:
           ${{ github.event.head_commit.message }}
           EOF
 
+          # Delete the existing release first if it exists to avoid conflicts
+          gh release delete "$TAG" --yes --cleanup-tag || true
+
+          # Create the release fresh
           gh release create "$TAG" \
             "${{ steps.apk.outputs.apk_path }}" \
             ota-bundle.zip \
             --title "$TITLE" \
             --notes-file release_notes.md \
-            --clobber \
             ${{ steps.env.outputs.environment == 'staging' && '--prerelease' || '' }} \
             ${{ steps.env.outputs.environment == 'production' && '--latest' || '' }}
 
