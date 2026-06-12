@@ -3,7 +3,7 @@ npm run build:staging
 
 # 2. Commit Staging Local to Staging Server
 git add .
-git commit -m "260612 -- Attendance Board 1.0.0"
+git commit -m "260612 -- Attendance Board 1.0.1"
 git push origin staging 
 
 #npm run apk:staging-debug
@@ -33,6 +33,7 @@ npx supabase link --project-ref eeoibqxhfkrgbylnluvk
 npx supabase functions deploy scraper-service
 npx supabase db push --include-all
 #npx supabase migration repair --status reverted 20260604000000
+#npx supabase migration repair --status reverted 20260611000000
 
 #npx supabase functions deploy scraper-service
 #npx supabase functions deploy sheets-service

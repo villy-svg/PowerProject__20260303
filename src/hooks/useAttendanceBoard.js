@@ -77,6 +77,9 @@ export function useAttendanceBoard() {
   // Fetch all data for the board: employees + attendance records + pending requests
   // ---------------------------------------------------------------------------
   const fetchBoardData = useCallback(async () => {
+    if (!startDate || !endDate) {
+      return; // Guard against empty or cleared date inputs
+    }
     setIsLoading(true);
     setError(null);
 

@@ -228,28 +228,6 @@ const ContentRouter = ({
     );
   }
 
-  if (activeVertical === 'employee_attendance_board') {
-    return (
-      <EmployeeAttendanceBoard
-        user={user}
-        permissions={permissions}
-        setActiveVertical={setActiveVertical}
-        onShowBottomNav={onShowBottomNav}
-        isSubSidebarOpen={isSubSidebarOpen}
-        setIsSubSidebarOpen={setIsSubSidebarOpen}
-        SidebarComponent={SidebarComponent}
-      />
-    );
-  }
-
-  if (activeVertical === 'attendance_self_service') {
-    return (
-      <AttendanceSelfService
-        user={user}
-      />
-    );
-  }
-
   // Default: VerticalWorkspace (task board view)
   return (
     <VerticalWorkspace
@@ -287,6 +265,22 @@ const ContentRouter = ({
           permissions={permissions}
           setActiveVertical={setActiveVertical}
           onShowBottomNav={onShowBottomNav}
+        />
+      )}
+      {activeVertical === 'employee_attendance_board' && (
+        <EmployeeAttendanceBoard
+          user={user}
+          permissions={permissions}
+          setActiveVertical={setActiveVertical}
+          onShowBottomNav={onShowBottomNav}
+          isSubSidebarOpen={isSubSidebarOpen}
+          setIsSubSidebarOpen={setIsSubSidebarOpen}
+          SidebarComponent={SidebarComponent}
+        />
+      )}
+      {activeVertical === 'attendance_self_service' && (
+        <AttendanceSelfService
+          user={user}
         />
       )}
 

@@ -33,7 +33,12 @@ export const HUB_VIEWS = [
 ];
 
 /** All activeVertical values belonging to Employees vertical */
-export const EMPLOYEE_VIEWS = ['employee_tasks', 'employee_rules_board'];
+export const EMPLOYEE_VIEWS = [
+  'employee_tasks',
+  'employee_rules_board',
+  'employee_attendance_board',
+  'attendance_self_service',
+];
 
 /** All activeVertical values belonging to Clients vertical */
 export const CLIENT_VIEWS = ['client_tasks', 'leads_funnel'];
@@ -93,6 +98,8 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
     escalation_tasks:     { label: 'Hubs List', boardLabel: 'Escalation Task Board' },
     employee_tasks:         { label: 'Employees', boardLabel: 'Remarks Manager' },
     employee_rules_board:   { label: 'Employees', boardLabel: 'Rules & Regulations' },
+    employee_attendance_board: { label: 'Employees', boardLabel: 'Attendance Board' },
+    attendance_self_service:    { label: 'Employees', boardLabel: 'My Attendance' },
     client_tasks:           { label: 'Clients',   boardLabel: 'Client Task Board' },
     leads_funnel:           { label: 'Clients',   boardLabel: 'Client Task Board' },
   };
