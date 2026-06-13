@@ -191,7 +191,7 @@ const ClientSubSidebar = ({
                 onClick={() => setActiveVertical('CLIENTS')}
                 style={{
                   margin: 0,
-                  fontWeight: 700,
+                  fontWeight: 500,
                   fontSize: '1rem',
                   color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
                   letterSpacing: '0.5px',
@@ -207,7 +207,7 @@ const ClientSubSidebar = ({
                 Clients
               </button>
             ) : (
-              <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
+              <span style={{ fontWeight: 500, fontSize: '1rem', color: 'var(--text-color)', opacity: 0.5 }}>Clients</span>
             )}
           </div>
         </>

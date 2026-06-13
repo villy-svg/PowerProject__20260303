@@ -37,6 +37,18 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
       </button>
     );
 
+  const mapVerticalLabel = (label) => {
+    if (!label) return '';
+    const clean = label.trim().toLowerCase();
+    if (clean === 'hub manager' || clean === 'hub') return 'Hubs';
+    if (clean === 'client manager' || clean === 'client') return 'Clients';
+    if (clean === 'employee manager' || clean === 'employee') return 'Employees';
+    if (clean === 'partner manager' || clean === 'partner') return 'Partners';
+    if (clean === 'vendor manager' || clean === 'vendor') return 'Vendors';
+    if (clean === 'data manager' || clean === 'data') return 'Data';
+    return label;
+  };
+
   if (viewMode === 'list') {
     return (
       <div className="user-list-wrapper responsive-table-wrapper">
@@ -71,7 +83,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                 <td>
                   <div className="vertical-tags">
                     {u.role_id?.startsWith('master') ? (
-                      <span className="v-tag master">All Verticals</span>
+                       <span className="v-tag master">All Verticals</span>
                     ) : (
                       (() => {
                         const vPerms = u.verticalPermissions || {}; 
@@ -79,7 +91,8 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                           .filter(([_, data]) => data.level !== 'none')
                           .map(([vId]) => {
                             const vInfo = VERTICAL_LIST.find(v => v.id === vId);
-                            return vInfo ? vInfo.label : vId;
+                            const label = vInfo ? vInfo.label : vId;
+                            return mapVerticalLabel(label);
                           });
                         
                         return activeVIds.length > 0 ? (
@@ -158,7 +171,8 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                     .filter(([_, data]) => data.level !== 'none')
                     .map(([vId]) => {
                       const vInfo = VERTICAL_LIST.find(v => v.id === vId);
-                      return vInfo ? vInfo.label : vId;
+                      const label = vInfo ? vInfo.label : vId;
+                      return mapVerticalLabel(label);
                     });
                   return activeVIds.length > 0 ? (
                     activeVIds.map(vLabel => (

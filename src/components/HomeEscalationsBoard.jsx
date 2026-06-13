@@ -10,8 +10,8 @@ const HomeEscalationsBoard = (props) => {
   return (
     <div className="home-escalations-board-wrapper">
       <CentralisedTaskBoard
-        title="Team Support"
-        description={"Team Support has all the requests and support tickets raised by all the members of PowerPod\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ."}
+        title="Track Requests"
+        description={"Track Requests has all the requests and support tickets raised by all the members of PowerPod\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ರಿಕ್ವೆಸ್ಟ್ಸ್ ಹೊಂದಿದೆ."}
         {...props}
       />
     </div>

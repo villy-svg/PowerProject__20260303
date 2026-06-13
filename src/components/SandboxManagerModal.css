@@ -233,6 +233,125 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+
+/* Role Simulator Controls */
+.role-simulator-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color, #3f3f46);
+}
+
+.role-simulator-section h3 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.simulator-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-color, #f4f4f5);
+  opacity: 0.8;
+}
+
+.role-select {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color, #3f3f46);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-color, #f4f4f5);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.role-select:focus {
+  border-color: var(--brand-amber);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.role-select option {
+  background: #18181b;
+  color: #f4f4f5;
+}
+
+.verticals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.vertical-checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color, #3f3f46);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.vertical-checkbox-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.vertical-checkbox-card.checked {
+  background: color-mix(in srgb, var(--brand-amber), transparent 92%);
+  border-color: var(--brand-amber);
+}
+
+.vertical-checkbox-card input[type="checkbox"] {
+  accent-color: var(--brand-amber);
+  cursor: pointer;
+}
+
+.vertical-checkbox-card span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-color, #f4f4f5);
+}
+
+.save-role-btn {
+  align-self: flex-start;
+  color: var(--brand-amber) !important;
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%) !important;
+  background: color-mix(in srgb, var(--brand-amber), transparent 95%) !important;
+  margin-top: 4px;
+}
+
+.save-role-btn:hover {
+  border-color: var(--brand-amber) !important;
+  background: color-mix(in srgb, var(--brand-amber), transparent 90%) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
+}
+
 /* Small Screen Adaptations */
 @media screen and (max-width: 480px) {
   .sandbox-modal-card {

@@ -82,8 +82,37 @@ export function AppNavigationProvider({ verticals = {}, children }) {
   const [showExitModal, setShowExitModal] = useState(false);
 
   // ── Search State (lifted for bottom nav access on mobile) ──────────────────
-  const [searchProps, setSearchProps] = useState(null);
+  const [searchProps, setSearchPropsRaw] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Memoized setter that shallow-compares properties to prevent infinite loops
+  const setSearchProps = useCallback((newProps) => {
+    setSearchPropsRaw((prev) => {
+      const nextVal = typeof newProps === 'function' ? newProps(prev) : newProps;
+      if (!prev && !nextVal) return null;
+      if (!prev || !nextVal) return nextVal;
+
+      const recordsEqual = (a, b) => {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+          if (a[i] !== b[i]) return false;
+        }
+        return true;
+      };
+
+      if (
+        recordsEqual(prev.records, nextVal.records) &&
+        prev.recordType === nextVal.recordType &&
+        prev.onSelect === nextVal.onSelect &&
+        prev.hideSearchBar === nextVal.hideSearchBar
+      ) {
+        return prev; // Return existing reference to prevent re-render
+      }
+      return nextVal;
+    });
+  }, []);
 
   // ── Smart setActiveVertical ───────────────────────────────────────────────
   /**

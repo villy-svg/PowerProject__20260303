@@ -171,7 +171,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
                   width: '100%', 
                   opacity: activeVertical === 'hub_tasks' ? 1 : 0.7,
                   border: activeVertical === 'hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
-                  fontWeight: activeVertical === 'hub_tasks' ? 600 : 400,
+                  fontWeight: activeVertical === 'hub_tasks' ? 500 : 400,
                   transition: 'all 0.2s ease-in-out',
                   padding: '10px 12px'
                 }}
@@ -190,7 +190,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
                   width: '100%', 
                   opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7,
                   border: activeVertical === 'daily_hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
-                  fontWeight: activeVertical === 'daily_hub_tasks' ? 600 : 400,
+                  fontWeight: activeVertical === 'daily_hub_tasks' ? 500 : 400,
                   transition: 'all 0.2s ease-in-out',
                   padding: '10px 12px'
                 }}
@@ -210,7 +210,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
                   width: '100%', 
                   opacity: activeVertical === 'escalation_tasks' ? 1 : 0.7,
                   border: activeVertical === 'escalation_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
-                  fontWeight: activeVertical === 'escalation_tasks' ? 600 : 400,
+                  fontWeight: activeVertical === 'escalation_tasks' ? 500 : 400,
                   transition: 'all 0.2s ease-in-out',
                   padding: '10px 12px'
                 }}
@@ -229,7 +229,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
                   width: '100%', 
                   opacity: activeVertical === 'daily_task_templates' ? 1 : 0.7,
                   border: activeVertical === 'daily_task_templates' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
-                  fontWeight: activeVertical === 'daily_task_templates' ? 600 : 400,
+                  fontWeight: activeVertical === 'daily_task_templates' ? 500 : 400,
                   transition: 'all 0.2s ease-in-out',
                   padding: '10px 12px'
                 }}

@@ -57,9 +57,9 @@ const VerticalWorkspace = ({
   const [isTrayVisible, setIsTrayVisible] = React.useState(true);
 
   // Sync state upward from MasterPageHeader (via TaskController)
-  const handleTrayVisibilityChange = (visible) => {
+  const handleTrayVisibilityChange = React.useCallback((visible) => {
     setIsTrayVisible(visible);
-  };
+  }, []);
 
   // Auto-populate filters on first load (Select All by default)
   React.useEffect(() => {

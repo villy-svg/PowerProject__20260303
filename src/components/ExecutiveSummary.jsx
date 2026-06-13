@@ -33,7 +33,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const { isMobile } = useIsMobile();
   const { bindLongPress } = useMobileLongPress();
   const { activeVertical, setActiveVertical, setIsSidebarOpen } = useAppNavigation();
-  const [activeView, setActiveView] = useState('centralised_task_view'); // Option 1 by default
+
+  const showCentralisedTasks = 
+    (user?.seniority && user.seniority > MANAGER_SENIORITY_THRESHOLD) || 
+    user?.roleId === 'master_admin';
+
+  const [activeView, setActiveView] = useState(showCentralisedTasks ? 'centralised_task_view' : 'escalations');
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const {
     realUser,
@@ -351,7 +356,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     (t.created_by && t.created_by === user?.id) ||
     (t.createdBy && t.createdBy === user?.id);
 
-  // escalationTasks: tasks shown in Team Support panel.
+  // escalationTasks: tasks shown in Track Requests panel.
   // Includes tasks the user is ASSIGNED to OR tasks the user CREATED,
   // so creators can always track tickets they raised regardless of assignment.
   const escalationTasks = tasks.filter(t =>
@@ -368,10 +373,17 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   // Auto-switch away from escalations if they disappear
   React.useEffect(() => {
-    if (!hasEscalations && activeView === 'escalations') {
+    if (!hasEscalations && activeView === 'escalations' && showCentralisedTasks) {
       setActiveView('centralised_task_view');
     }
-  }, [hasEscalations, activeView]);
+  }, [hasEscalations, activeView, showCentralisedTasks]);
+
+  // Adjust active view if centralised tasks are hidden
+  React.useEffect(() => {
+    if (!showCentralisedTasks && activeView === 'centralised_task_view') {
+      setActiveView(hasEscalations ? 'escalations' : 'executive_summary');
+    }
+  }, [showCentralisedTasks, activeView, hasEscalations]);
 
   // Reset scroll position to hide stage-navigation-tray behind sticky header switcher by default
   React.useEffect(() => {
@@ -444,13 +456,13 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 <button
                   className={`summary-nav-item stage-red ${activeView === 'escalations' ? 'active' : ''}`}
                   onClick={() => setActiveView('escalations')}
-                  {...bindLongPress("Team Support has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟೀಮ್ ಸಪೋರ್ಟ್ ಹೊಂದಿದೆ.")}
+                  {...bindLongPress("Track Requests has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ರಿಕ್ವೆಸ್ಟ್ಸ್ ಹೊಂದಿದೆ.")}
                 >
                   <div className="summary-icon-wrapper">
                     <IconZap size={14} />
                     <span className="summary-badge-count">{escalationTasks.length}</span>
                   </div>
-                  <span className="summary-nav-label">Team Support</span>
+                  <span className="summary-nav-label">Track Requests</span>
                 </button>
               )}
 
@@ -481,19 +493,21 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               )}
 
               {/* 4. Centralised Tasks */}
-              <button
-                className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
-                onClick={() => setActiveView('centralised_task_view')}
-                {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ alpine ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
-              >
-                <div className="summary-icon-wrapper">
-                  <IconBoards size={14} />
-                  {regularMyTasks.length > 0 && (
-                    <span className="summary-badge-count">{regularMyTasks.length}</span>
-                  )}
-                </div>
-                <span className="summary-nav-label">Centralised Tasks</span>
-              </button>
+              {showCentralisedTasks && (
+                <button
+                  className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
+                  onClick={() => setActiveView('centralised_task_view')}
+                  {...bindLongPress("Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ alpine ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ.")}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconBoards size={14} />
+                    {regularMyTasks.length > 0 && (
+                      <span className="summary-badge-count">{regularMyTasks.length}</span>
+                    )}
+                  </div>
+                  <span className="summary-nav-label">Centralised Tasks</span>
+                </button>
+              )}
 
               {/* 5. Executive Summary (hidden for non-SM roles) */}
               {isSMRole && (
@@ -561,7 +575,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       )}
 
       {/* 1. Centralised Task View Section */}
-      {(!isMobile || activeView === 'centralised_task_view') && (
+      {showCentralisedTasks && (!isMobile || activeView === 'centralised_task_view') && (
         <CentralisedTaskBoard
           title="Centralised Task View"
           description={"Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ."}

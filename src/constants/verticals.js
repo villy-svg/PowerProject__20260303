@@ -4,12 +4,12 @@
  * Can be updated dynamically via updateStaticVerticals() once backend data is loaded.
  */
 export const VERTICALS = {
-  CHARGING_HUBS: { id: 'CHARGING_HUBS', label: 'Hub Manager' },
-  CLIENTS: { id: 'CLIENTS', label: 'Client Manager' },
-  EMPLOYEES: { id: 'EMPLOYEES', label: 'Employee Manager' },
-  PARTNERS: { id: 'PARTNERS', label: 'Partner Manager', locked: true },
-  VENDORS: { id: 'VENDORS', label: 'Vendor Manager', locked: true },
-  DATA_MANAGER: { id: 'DATA_MANAGER', label: 'Data Manager', locked: false }
+  CHARGING_HUBS: { id: 'CHARGING_HUBS', label: 'Hubs' },
+  CLIENTS: { id: 'CLIENTS', label: 'Clients' },
+  EMPLOYEES: { id: 'EMPLOYEES', label: 'Employees' },
+  PARTNERS: { id: 'PARTNERS', label: 'Partners', locked: true },
+  VENDORS: { id: 'VENDORS', label: 'Vendors', locked: true },
+  DATA_MANAGER: { id: 'DATA_MANAGER', label: 'Data', locked: false }
 };
 
 export const VERTICAL_LIST = Object.values(VERTICALS);

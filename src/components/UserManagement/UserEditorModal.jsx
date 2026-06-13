@@ -27,6 +27,18 @@ const UserEditorModal = (props) => {
     loading
   } = props;
 
+  const mapVerticalLabel = (label) => {
+    if (!label) return '';
+    const clean = label.trim().toLowerCase();
+    if (clean === 'hub manager' || clean === 'hub') return 'Hubs';
+    if (clean === 'client manager' || clean === 'client') return 'Clients';
+    if (clean === 'employee manager' || clean === 'employee') return 'Employees';
+    if (clean === 'partner manager' || clean === 'partner') return 'Partners';
+    if (clean === 'vendor manager' || clean === 'vendor') return 'Vendors';
+    if (clean === 'data manager' || clean === 'data') return 'Data';
+    return label;
+  };
+
   if (!user) return null;
 
   return (
@@ -100,14 +112,14 @@ const UserEditorModal = (props) => {
                         <div className="left-side-controls">
                           {VERTICAL_FEATURES[v.id] && normalizedVLevel !== 'none' && (
                             <button
-                              type="button"
-                              className={`features-toggle-btn ${expandedVertical === v.id ? 'active' : ''}`}
-                              onClick={() => setExpandedVertical(expandedVertical === v.id ? null : v.id)}
+                               type="button"
+                               className={`features-toggle-btn ${expandedVertical === v.id ? 'active' : ''}`}
+                               onClick={() => setExpandedVertical(expandedVertical === v.id ? null : v.id)}
                             >
                               <span className={`chevron ${expandedVertical === v.id ? 'up' : 'down'}`}></span>
                             </button>
                           )}
-                          <span className="v-name">{v.label}</span>
+                          <span className="v-name">{mapVerticalLabel(v.label)}</span>
                         </div>
                         
                         <div className="v-level-selector">
@@ -134,7 +146,7 @@ const UserEditorModal = (props) => {
 
                       {expandedVertical === v.id && VERTICAL_FEATURES[v.id] && (
                         <div className="features-dropdown">
-                          <p className="features-header">Configure feature-specific levels for {v.label}:</p>
+                          <p className="features-header">Configure feature-specific levels for {mapVerticalLabel(v.label)}:</p>
                           <div className="features-level-list">
                             {VERTICAL_FEATURES[v.id].map(feature => {
                               const fLevel = verticalPermissions[v.id]?.features?.[feature.id] || 'none';

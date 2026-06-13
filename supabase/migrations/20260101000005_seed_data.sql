@@ -17,12 +17,12 @@ ON CONFLICT (role_id) DO UPDATE SET permissions = EXCLUDED.permissions;
 
 -- Verticals
 INSERT INTO public.verticals (id, label, "order", locked) VALUES
-('CHARGING_HUBS', 'Hub Manager', 1, false),
-('CLIENTS', 'Client Manager', 2, false),
-('EMPLOYEES', 'Employee Manager', 3, false),
-('PARTNERS', 'Partner Manager', 4, true),
-('VENDORS', 'Vendor Manager', 5, true),
-('DATA_MANAGER', 'Data Manager', 6, false)
+('CHARGING_HUBS', 'Hubs', 1, false),
+('CLIENTS', 'Clients', 2, false),
+('EMPLOYEES', 'Employees', 3, false),
+('PARTNERS', 'Partners', 4, true),
+('VENDORS', 'Vendors', 5, true),
+('DATA_MANAGER', 'Data', 6, false)
 ON CONFLICT (id) DO UPDATE SET label = EXCLUDED.label;
 
 -- Backfill: Link user profiles to employees by email

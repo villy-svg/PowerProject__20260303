@@ -33,10 +33,10 @@
   margin: 0;
   padding: 8px 16px;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.5px;
   color: var(--brand-green);
-  text-transform: uppercase;
+  text-transform: none;
   background: var(--halo-bg);
   border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
   border-radius: 8px;
@@ -178,7 +178,7 @@
 .sub-nav-text p {
   margin: 0;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-color);
 }
 .sub-nav-text small {
@@ -240,4 +240,11 @@
 .filters-action-btn.active {
   opacity: 1;
   text-decoration: underline;
+}
+
+/* Custom styling to remove ALL CAPS from navigation headers and buttons in the sub-sidebar */
+.sub-sidebar-header h3,
+.sub-sidebar-header h3.navigable-header,
+.sub-sidebar .halo-button {
+  text-transform: none !important;
 }

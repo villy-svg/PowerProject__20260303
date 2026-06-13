@@ -81,9 +81,16 @@ const MasterPageHeader = ({
   });
 
   // Sync tray visibility upstream (for BulkActionBar, etc.)
+  const onTrayVisibilityChangeRef = React.useRef(onTrayVisibilityChange);
   React.useEffect(() => {
-    if (onTrayVisibilityChange) onTrayVisibilityChange(headerState.isTrayVisible);
-  }, [headerState.isTrayVisible, onTrayVisibilityChange]);
+    onTrayVisibilityChangeRef.current = onTrayVisibilityChange;
+  });
+
+  React.useEffect(() => {
+    if (onTrayVisibilityChangeRef.current) {
+      onTrayVisibilityChangeRef.current(headerState.isTrayVisible);
+    }
+  }, [headerState.isTrayVisible]);
 
   if (shellType === 'desktop') {
     return (
