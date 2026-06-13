@@ -4,12 +4,13 @@ import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
 import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
+import RBACManageButton from '../../components/RBACManageButton';
 
 /**
  * ClientBillingModelManagement
  * CRUD sub-view for client billing models.
  */
-const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
+const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,11 +83,15 @@ const ClientBillingModelManagement = ({ permissions = {}, setActiveVertical, onS
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          permissions.canCreate && (
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + New Billing Model
-            </button>
-          )
+          <>
+            {permissions.canCreate && (
+              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                + New Billing Model
+              </button>
+            )}
+            {/* Master Admin: RBAC shortcut for Billing Models */}
+            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Billing Models" />
+          </>
         }
         expandedLeft={
           <div className="view-mode-toggle">

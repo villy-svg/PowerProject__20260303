@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════════════════
+   RBACManageButton.css
+   Styles for the master-admin RBAC shortcut button & dropdown.
+   Uses design system variables only — no hardcoded hex colors.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Core RBAC Button ────────────────────────────────────────────── */
+.rbac-manage-btn {
+  /* Inherit .halo-button base, add a subtle amber security tint */
+  border-color: color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 55%) !important;
+  color: var(--brand-amber, #f59e0b) !important;
+  background: rgba(245, 158, 11, 0.06) !important;
+  box-shadow: 0 0 4px rgba(245, 158, 11, 0.12) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 0.7rem;
+}
+
+.rbac-manage-btn:hover {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: var(--brand-amber, #f59e0b) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* ── Chevron indicator for dropdown group mode ──────────────────── */
+.rbac-chevron {
+  font-size: 0.75rem;
+  display: inline-block;
+  transition: transform 0.2s ease;
+  opacity: 0.75;
+  line-height: 1;
+}
+
+.rbac-chevron--open {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown Group Container ──────────────────────────────────── */
+.rbac-access-group {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Dropdown Menu ─────────────────────────────────────────────── */
+.rbac-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg-color, #09090b);
+  border: 1px solid color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 70%);
+  border-radius: 12px;
+  padding: 8px;
+  z-index: 1200;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.08);
+  backdrop-filter: blur(12px);
+  animation: rbac-dropdown-in 0.15s ease;
+}
+
+@keyframes rbac-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Dropdown Header Label ─────────────────────────────────────── */
+.rbac-dropdown-header {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--brand-amber, #f59e0b);
+  opacity: 0.6;
+  padding: 4px 8px 6px;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 4px;
+}
+
+/* ── Individual Dropdown Item ──────────────────────────────────── */
+.rbac-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: var(--text-color, #f4f4f5);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rbac-dropdown-item:hover {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--brand-amber, #f59e0b);
+}
+
+.rbac-item-icon {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.rbac-item-label {
+  flex: 1;
+}
+
+/* ── Mobile: full-width button ─────────────────────────────────── */
+@media screen and (max-width: 768px) {
+  .rbac-manage-btn {
+    font-size: 0.65rem;
+    padding: 6px 10px;
+  }
+
+  .rbac-dropdown-menu {
+    right: 0;
+    left: auto;
+    min-width: 200px;
+  }
+}

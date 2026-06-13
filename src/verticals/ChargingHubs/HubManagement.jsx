@@ -9,6 +9,7 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { IconEdit, IconTrash, IconX, IconPlus } from '../../components/Icons';
+import RBACManageButton from '../../components/RBACManageButton';
 
 // Error boundary component
 class HubManagementErrorBoundary extends React.Component {
@@ -49,7 +50,7 @@ class HubManagementErrorBoundary extends React.Component {
   }
 }
 
-const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen, setActiveVertical, onShowBottomNav }) => {
+const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen, setActiveVertical, onShowBottomNav }) => {
   const ui = useManagementUI({ storageKey: 'powerpod_hub_view' });
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -188,11 +189,22 @@ const HubManagement = ({ permissions = {}, isSubSidebarOpen, setIsSubSidebarOpen
         onSidebarToggle={setIsSubSidebarOpen}
         hideMenuClose={true}
         rightActions={
-          permissions.canCreate && (
-            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-              + Add New Hub
-            </button>
-          )
+          <>
+            {permissions.canCreate && (
+              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+                + Add New Hub
+              </button>
+            )}
+            {/* Master Admin: RBAC access group for Hubs vertical + sub-boards */}
+            <RBACManageButton
+              user={user}
+              setActiveVertical={setActiveVertical}
+              subItems={[
+                { label: 'Hubs' },
+                { label: 'Hub Functions' },
+              ]}
+            />
+          </>
         }
         canAdd={permissions.canCreate}
         onAddClick={() => handleOpenModal()}

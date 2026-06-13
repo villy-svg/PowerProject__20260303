@@ -16,6 +16,7 @@ import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import ConflictModal from '../../components/ConflictModal';
 import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Icons';
 import { hasHighRemarks } from './remarkRules';
+import RBACManageButton from '../../components/RBACManageButton';
 
 /**
  * EmployeeManagement
@@ -183,11 +184,26 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         recordType="Employee"
         onSearchSelect={(emp) => ui.openViewModal(emp)}
         rightActions={
-          permissions.canCreateEmployees && (
-            <button className="halo-button master-action-btn" onClick={ui.openAddModal}>
-              + Add Employee
-            </button>
-          )
+          <>
+            {permissions.canCreateEmployees && (
+              <button className="halo-button master-action-btn" onClick={ui.openAddModal}>
+                + Add Employee
+              </button>
+            )}
+            {/* Master Admin: RBAC access group for Employees vertical + all sub-boards */}
+            <RBACManageButton
+              user={user}
+              setActiveVertical={setActiveVertical}
+              subItems={[
+                { label: 'Employees' },
+                { label: 'Departments' },
+                { label: 'Roles' },
+                { label: 'Rules & Regulations' },
+                { label: 'Attendance Board' },
+                { label: 'Rules Board' },
+              ]}
+            />
+          </>
         }
         canAdd={permissions.canCreateEmployees}
         addLabel="Add Employee"

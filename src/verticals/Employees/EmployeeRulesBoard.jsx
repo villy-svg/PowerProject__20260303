@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { fetchCategories, fetchSubCategories, fetchRules } from '../../services/employees/rulesService';
 import './EmployeeRulesBoard.css';
+import RBACManageButton from '../../components/RBACManageButton';
 
 /* ─── Static Rule Tile Component ────────────────────────────── */
 const RuleCard = ({ rule }) => {
@@ -213,6 +214,10 @@ const EmployeeRulesBoard = ({
         verticals={verticals}
         activeVertical={activeVertical}
         hideSearchBar={true}
+        rightActions={
+          /* Master Admin: RBAC shortcut for Employee Rules Board */
+          <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Rules Board" />
+        }
       />
 
       <div className="rules-board-container">

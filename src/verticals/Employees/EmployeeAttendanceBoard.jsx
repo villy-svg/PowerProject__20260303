@@ -23,6 +23,7 @@ import AttendanceGrid from './attendance/AttendanceGrid';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
 import './EmployeeAttendanceBoard.css';
+import RBACManageButton from '../../components/RBACManageButton';
 
 // ---------------------------------------------------------------------------
 // Helper: Format a 'YYYY-MM-DD' string for display as an <input type="date">
@@ -150,6 +151,8 @@ const EmployeeAttendanceBoard = ({
       >
         {isLoading ? 'Loading…' : 'Refresh'}
       </button>
+      {/* Master Admin: RBAC shortcut for Attendance Board */}
+      <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Attendance" />
     </>
   );
 

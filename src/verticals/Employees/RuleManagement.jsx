@@ -14,6 +14,7 @@ import './RuleManagement.css'; // Tab & Row styles
 import CategoryFormModal from './CategoryFormModal';
 import SubCategoryFormModal from './SubCategoryFormModal';
 import RuleFormModal from './RuleFormModal';
+import RBACManageButton from '../../components/RBACManageButton';
 
 /* ─── Main Component ────────────────────────────────────────── */
 const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
@@ -103,18 +104,22 @@ const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav 
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          <button
-            className="halo-button master-action-btn"
-            onClick={() => {
-              if (activeTab === 'rules') setRuleModal({ open: true, item: null });
-              else if (activeTab === 'categories') setCatModal({ open: true, item: null });
-              else setSubModal({ open: true, item: null });
-            }}
-          >
-            {activeTab === 'rules' ? '+ New Rule' :
-             activeTab === 'categories' ? '+ New Category' :
-             '+ New Sub-Category'}
-          </button>
+          <>
+            <button
+              className="halo-button master-action-btn"
+              onClick={() => {
+                if (activeTab === 'rules') setRuleModal({ open: true, item: null });
+                else if (activeTab === 'categories') setCatModal({ open: true, item: null });
+                else setSubModal({ open: true, item: null });
+              }}
+            >
+              {activeTab === 'rules' ? '+ New Rule' :
+               activeTab === 'categories' ? '+ New Category' :
+               '+ New Sub-Category'}
+            </button>
+            {/* Master Admin: RBAC shortcut for Rule Management */}
+            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Rules" />
+          </>
         }
       />
 

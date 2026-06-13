@@ -14,6 +14,7 @@ import ClientListRow from './ClientListRow';
 import ConflictModal from '../../components/ConflictModal';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
+import RBACManageButton from '../../components/RBACManageButton';
 
 /**
  * ClientManagement
@@ -159,14 +160,27 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
         verticals={verticals}
         activeVertical={activeVertical}
         rightActions={
-          permissions.canCreateClients && (
-            <button
-              className="halo-button master-action-btn"
-              onClick={ui.openAddModal}
-            >
-              + Add Client
-            </button>
-          )
+          <>
+            {permissions.canCreateClients && (
+              <button
+                className="halo-button master-action-btn"
+                onClick={ui.openAddModal}
+              >
+                + Add Client
+              </button>
+            )}
+            {/* Master Admin: RBAC access group for Clients vertical + all sub-boards */}
+            <RBACManageButton
+              user={user}
+              setActiveVertical={setActiveVertical}
+              subItems={[
+                { label: 'Clients' },
+                { label: 'Categories' },
+                { label: 'Services' },
+                { label: 'Billing Models' },
+              ]}
+            />
+          </>
         }
         canAdd={permissions.canCreateClients}
         onAddClick={ui.openAddModal}
