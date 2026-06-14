@@ -4,7 +4,6 @@ import './HubFunctionManagement.css';
 import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
-import RBACManageButton from '../../components/RBACManageButton';
 
 const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [functions, setFunctions] = useState([]);
@@ -109,15 +108,11 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
         onShowBottomNav={onShowBottomNav}
         hideMenuClose={true}
         rightActions={
-          <>
-            {permissions.canCreate && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Function
-              </button>
-            )}
-            {/* Master Admin: RBAC shortcut for Hub Functions */}
-            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Hub Functions" />
-          </>
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Function
+            </button>
+          )
         }
         expandedLeft={
           <div className="view-mode-toggle">

@@ -151,8 +151,13 @@ const EmployeeAttendanceBoard = ({
       >
         {isLoading ? 'Loading…' : 'Refresh'}
       </button>
-      {/* Master Admin: RBAC shortcut for Attendance Board */}
-      <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Attendance" />
+      {/* Master Admin: Manage RBAC for Attendance Board */}
+      <RBACManageButton 
+        user={user} 
+        verticalId="employees" 
+        featureId="canAccessEmployeeAttendanceBoard" 
+        label="Attendance Board" 
+      />
     </>
   );
 

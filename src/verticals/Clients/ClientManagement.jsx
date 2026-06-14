@@ -169,16 +169,12 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                 + Add Client
               </button>
             )}
-            {/* Master Admin: RBAC access group for Clients vertical + all sub-boards */}
+            {/* Master Admin: Manage RBAC for Clients List */}
             <RBACManageButton
               user={user}
-              setActiveVertical={setActiveVertical}
-              subItems={[
-                { label: 'Clients' },
-                { label: 'Categories' },
-                { label: 'Services' },
-                { label: 'Billing Models' },
-              ]}
+              verticalId="clients"
+              featureId="canAccessClients"
+              label="Clients List"
             />
           </>
         }

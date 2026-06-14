@@ -190,18 +190,12 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                 + Add Employee
               </button>
             )}
-            {/* Master Admin: RBAC access group for Employees vertical + all sub-boards */}
+            {/* Master Admin: Manage RBAC for Employees List */}
             <RBACManageButton
               user={user}
-              setActiveVertical={setActiveVertical}
-              subItems={[
-                { label: 'Employees' },
-                { label: 'Departments' },
-                { label: 'Roles' },
-                { label: 'Rules & Regulations' },
-                { label: 'Attendance Board' },
-                { label: 'Rules Board' },
-              ]}
+              verticalId="employees"
+              featureId="canAccessEmployees"
+              label="Employees List"
             />
           </>
         }

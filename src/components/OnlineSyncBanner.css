@@ -80,14 +80,14 @@
 .online-sync-banner .reconnect-sync-btn {
   font-size: 0.75rem;
   color: var(--brand-emerald);
-  border-color: color-mix(in srgb, var(--brand-emerald), transparent 70%);
+  border-color: transparent;
   background: color-mix(in srgb, var(--brand-emerald), transparent 95%);
   padding: 0 16px;
   height: 32px;
 }
 
 .online-sync-banner .reconnect-sync-btn:hover {
-  border-color: var(--brand-emerald);
+  border-color: transparent;
   background: color-mix(in srgb, var(--brand-emerald), transparent 90%);
   box-shadow: 0 0 12px color-mix(in srgb, var(--brand-emerald), transparent 80%);
 }

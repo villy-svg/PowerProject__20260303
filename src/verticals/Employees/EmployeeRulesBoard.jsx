@@ -215,8 +215,13 @@ const EmployeeRulesBoard = ({
         activeVertical={activeVertical}
         hideSearchBar={true}
         rightActions={
-          /* Master Admin: RBAC shortcut for Employee Rules Board */
-          <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Rules Board" />
+          /* Master Admin: Manage RBAC for Rules Board */
+          <RBACManageButton 
+            user={user} 
+            verticalId="employees" 
+            featureId="canAccessEmployeeRulesBoard" 
+            label="Rules & Regulations" 
+          />
         }
       />
 

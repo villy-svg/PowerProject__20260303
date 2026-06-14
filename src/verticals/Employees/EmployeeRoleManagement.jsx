@@ -5,7 +5,6 @@ import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/MasterPageHeader';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
-import RBACManageButton from '../../components/RBACManageButton';
 
 const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [roles, setRoles] = useState([]);
@@ -110,15 +109,11 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          <>
-            {permissions.canCreate && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Role
-              </button>
-            )}
-            {/* Master Admin: RBAC shortcut for Employee Role Management */}
-            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Roles" />
-          </>
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Role
+            </button>
+          )
         }
         canAdd={permissions.canCreate}
         addLabel="New Role"

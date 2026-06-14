@@ -6,7 +6,6 @@ import MasterPageHeader from '../../components/MasterPageHeader';
 // Imported under neutral local names to make the intent clear and avoid misleading file references.
 import CSVDownload from './ClientCategoryCSVDownload';
 import CSVImport from './ClientCategoryCSVImport';
-import RBACManageButton from '../../components/RBACManageButton';
 
 /**
  * ClientServiceManagement
@@ -85,15 +84,11 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          <>
-            {permissions.canCreate && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Service
-              </button>
-            )}
-            {/* Master Admin: RBAC shortcut for Client Services */}
-            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Services" />
-          </>
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Service
+            </button>
+          )
         }
         expandedLeft={
           <div className="view-mode-toggle">

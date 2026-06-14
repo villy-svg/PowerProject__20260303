@@ -6,7 +6,7 @@ import { ROLE_LEVELS } from '../../constants/roles';
 
 export const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
 
-const sortUsers = (userList) => {
+export const sortUsers = (userList) => {
   const sorted = [...userList].sort((a, b) => {
     // Rule 1: Active above Inactive
     const aActive = a.is_active !== false;

@@ -195,14 +195,11 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                 + Add New Hub
               </button>
             )}
-            {/* Master Admin: RBAC access group for Hubs vertical + sub-boards */}
+            {/* Master Admin: Manage RBAC for Hubs */}
             <RBACManageButton
               user={user}
-              setActiveVertical={setActiveVertical}
-              subItems={[
-                { label: 'Hubs' },
-                { label: 'Hub Functions' },
-              ]}
+              verticalId="charging_hubs"
+              label="Charging Hubs"
             />
           </>
         }

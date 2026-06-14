@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import BoardRBACModal from './BoardRBACModal';
 import './RBACManageButton.css';
 
 /**
@@ -6,84 +7,40 @@ import './RBACManageButton.css';
  *
  * Master-admin-only RBAC shortcut button for management boards.
  * Renders null for any non-master-admin user — fully silent guard.
+ * Opens an in-place modal to manage access for the specific board/feature.
  *
  * Props:
- *   user             {object}    - Current user object (needs roleId).
- *   setActiveVertical {function} - Navigation function.
- *   label            {string}    - Display label (e.g., "Employees", "Departments").
- *   subItems         {Array}     - Optional: [{label, target}] for bigger boards with sub-boards.
- *                                  When provided, renders a compact dropdown menu.
+ *   user       {object} - Current user object (needs roleId).
+ *   verticalId {string} - Target vertical ID.
+ *   featureId  {string} - Optional target feature ID.
+ *   label      {string} - Display label (e.g., "Employees List", "Attendance Board").
  *
  * Security: Guard is `user?.roleId === 'master_admin'` (frontend layer).
- * The navigation target `user_management` is also gated in App.jsx's RBAC
- * security validation effect — defence in depth.
  */
-const RBACManageButton = ({ user, setActiveVertical, label = 'Access', subItems = [] }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+const RBACManageButton = ({ user, verticalId, featureId, label = 'Access' }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Hard guard: invisible to everyone except master_admin
   if (user?.roleId !== 'master_admin') return null;
 
-  const hasSubItems = subItems.length > 0;
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
-
-  // Simple single button (for sub-boards)
-  if (!hasSubItems) {
-    return (
+  return (
+    <>
       <button
         className="halo-button rbac-manage-btn"
-        onClick={() => setActiveVertical('user_management')}
+        onClick={() => setIsModalOpen(true)}
         title={`Configure RBAC access for: ${label}`}
       >
-        🔐 {label} Access
-      </button>
-    );
-  }
-
-  // Dropdown group (for bigger boards with sub-boards)
-  return (
-    <div className="rbac-access-group" ref={dropdownRef}>
-      <button
-        className="halo-button rbac-manage-btn rbac-manage-btn--group"
-        onClick={() => setIsOpen(prev => !prev)}
-        title="Configure RBAC access controls"
-      >
-        🔐 Manage Access
-        <span className={`rbac-chevron ${isOpen ? 'rbac-chevron--open' : ''}`}>▾</span>
+        🔐 Manage RBAC
       </button>
 
-      {isOpen && (
-        <div className="rbac-dropdown-menu">
-          <p className="rbac-dropdown-header">Configure Access For:</p>
-          {subItems.map(item => (
-            <button
-              key={item.label}
-              className="rbac-dropdown-item"
-              onClick={() => {
-                setIsOpen(false);
-                setActiveVertical('user_management');
-              }}
-              title={`Manage RBAC for: ${item.label}`}
-            >
-              <span className="rbac-item-icon">🔐</span>
-              <span className="rbac-item-label">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      <BoardRBACModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        verticalId={verticalId}
+        featureId={featureId}
+        titleLabel={label}
+      />
+    </>
   );
 };
 

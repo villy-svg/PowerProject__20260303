@@ -4,7 +4,6 @@ import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
 import MasterPageHeader from '../../components/MasterPageHeader';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
-import RBACManageButton from '../../components/RBACManageButton';
 
 const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [departments, setDepartments] = useState([]);
@@ -108,15 +107,11 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          <>
-            {permissions.canCreate && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Department
-              </button>
-            )}
-            {/* Master Admin: RBAC shortcut for Department Management */}
-            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Departments" />
-          </>
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Department
+            </button>
+          )
         }
         canAdd={permissions.canCreate}
         addLabel="New Department"

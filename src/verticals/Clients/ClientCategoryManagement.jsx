@@ -4,7 +4,6 @@ import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
 import ClientCategoryCSVImport from './ClientCategoryCSVImport';
-import RBACManageButton from '../../components/RBACManageButton';
 
 /**
  * ClientCategoryManagement
@@ -101,15 +100,11 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         rightActions={
-          <>
-            {permissions.canCreate && (
-              <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
-                + New Category
-              </button>
-            )}
-            {/* Master Admin: RBAC shortcut for Client Categories */}
-            <RBACManageButton user={user} setActiveVertical={setActiveVertical} label="Categories" />
-          </>
+          permissions.canCreate && (
+            <button className="halo-button master-action-btn" onClick={() => handleOpenModal()}>
+              + New Category
+            </button>
+          )
         }
         expandedLeft={
           <div className="view-mode-toggle">
