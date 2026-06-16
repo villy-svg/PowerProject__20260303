@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260616 RBAC in Boards 1.0.1"
+git commit -m "260616 RBAC in Boards 1.0.2"
 git push origin staging 
 
 # 2. Build (on Staging)
