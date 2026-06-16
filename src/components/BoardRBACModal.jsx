@@ -12,7 +12,8 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [accessMap, setAccessMap] = useState({}); // userId -> access_level
-  const [savingUserId, setSavingUserId] = useState(null);
+  const [originalAccessMap, setOriginalAccessMap] = useState({});
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const fetchUsersAndAccess = useCallback(async () => {
     setLoading(true);
@@ -60,6 +61,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
 
       setUsers(sortedUsers);
       setAccessMap(accessMapping);
+      setOriginalAccessMap(accessMapping);
     } catch (err) {
       console.error('Error fetching RBAC data:', err);
     } finally {
@@ -73,46 +75,68 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
     } else {
       setUsers([]);
       setAccessMap({});
+      setOriginalAccessMap({});
     }
   }, [isOpen, fetchUsersAndAccess]);
 
-  const handleAccessChange = async (userId, newLevel) => {
-    setSavingUserId(userId);
-    try {
-      // Update local state optimistically
-      setAccessMap(prev => ({ ...prev, [userId]: newLevel }));
+  const handleAccessChange = (userId, newLevel) => {
+    // Update local state optimistically
+    setAccessMap(prev => ({ ...prev, [userId]: newLevel }));
+  };
 
-      if (newLevel === 'none') {
-        // Delete record
-        if (featureId) {
-          await supabase
-            .from('feature_access')
-            .delete()
-            .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId });
-        } else {
-          await supabase
-            .from('vertical_access')
-            .delete()
-            .match({ user_id: userId, vertical_id: verticalId });
-        }
-      } else {
-        // Upsert record
-        if (featureId) {
-          await supabase
-            .from('feature_access')
-            .upsert({ user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newLevel }, { onConflict: 'user_id,vertical_id,feature_id' });
-        } else {
-          await supabase
-            .from('vertical_access')
-            .upsert({ user_id: userId, vertical_id: verticalId, access_level: newLevel }, { onConflict: 'user_id,vertical_id' });
+  const handleSyncPermissions = async () => {
+    setIsSyncing(true);
+    try {
+      const promises = [];
+      
+      for (const userId of Object.keys(accessMap)) {
+        const newLevel = accessMap[userId];
+        const originalLevel = originalAccessMap[userId] || 'none';
+        
+        if (newLevel !== originalLevel) {
+          if (newLevel === 'none') {
+            // Delete record
+            if (featureId) {
+              promises.push(
+                supabase
+                  .from('feature_access')
+                  .delete()
+                  .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId })
+              );
+            } else {
+              promises.push(
+                supabase
+                  .from('vertical_access')
+                  .delete()
+                  .match({ user_id: userId, vertical_id: verticalId })
+              );
+            }
+          } else {
+            // Upsert record
+            if (featureId) {
+              promises.push(
+                supabase
+                  .from('feature_access')
+                  .upsert({ user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newLevel }, { onConflict: 'user_id,vertical_id,feature_id' })
+              );
+            } else {
+              promises.push(
+                supabase
+                  .from('vertical_access')
+                  .upsert({ user_id: userId, vertical_id: verticalId, access_level: newLevel }, { onConflict: 'user_id,vertical_id' })
+              );
+            }
+          }
         }
       }
+
+      await Promise.all(promises);
+      await fetchUsersAndAccess();
     } catch (err) {
-      console.error('Error updating access:', err);
-      // Revert optimistic update on error
-      fetchUsersAndAccess(); 
+      console.error('Error syncing access:', err);
+      alert('Failed to sync permissions. Please try again.');
     } finally {
-      setSavingUserId(null);
+      setIsSyncing(false);
     }
   };
 
@@ -146,7 +170,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
               <div className="board-rbac-list-body">
                 {users.map(user => {
                   const currentLevel = accessMap[user.id] || 'none';
-                  const isSaving = savingUserId === user.id;
+                  const hasChanged = currentLevel !== (originalAccessMap[user.id] || 'none');
 
                   // Admin is master_admin, they bypass these granular controls usually, 
                   // but we still let them configure other users. If this user IS master_admin, 
@@ -167,16 +191,16 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                           <span className="master-admin-badge">Master Admin (All Access)</span>
                         ) : (
                           <div className="access-selector-group">
-                            {ACCESS_LEVELS.map(lvl => (
-                              <button
-                                key={lvl}
-                                className={`access-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl}`}
-                                onClick={() => handleAccessChange(user.id, lvl)}
-                                disabled={isSaving}
-                              >
-                                {lvl.toUpperCase()}
-                              </button>
-                            ))}
+                              {ACCESS_LEVELS.map(lvl => (
+                                <button
+                                  key={lvl}
+                                  className={`access-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl} ${hasChanged && currentLevel === lvl ? 'has-changed' : ''}`}
+                                  onClick={() => handleAccessChange(user.id, lvl)}
+                                  disabled={isSyncing}
+                                >
+                                  {lvl.toUpperCase()}
+                                </button>
+                              ))}
                           </div>
                         )}
                       </div>
@@ -186,6 +210,17 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
               </div>
             </div>
           )}
+        </div>
+
+        <div className="board-rbac-footer" style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'flex-end', background: '#0F1218' }}>
+          <button
+            className="halo-button"
+            onClick={handleSyncPermissions}
+            disabled={loading || isSyncing}
+            style={{ minWidth: '150px' }}
+          >
+            {isSyncing ? 'Syncing...' : 'Sync Permissions'}
+          </button>
         </div>
       </div>
     </div>

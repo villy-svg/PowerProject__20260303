@@ -230,6 +230,22 @@
   border: 1px dashed color-mix(in srgb, var(--brand-amber), transparent 70%);
 }
 
+.access-lvl-btn.has-changed {
+  position: relative;
+}
+
+.access-lvl-btn.has-changed::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--brand-blue, #3b82f6);
+  border-radius: 50%;
+  border: 2px solid var(--bg-color, #09090b);
+}
+
 @media (max-width: 768px) {
   .board-rbac-list-header {
     display: none;
