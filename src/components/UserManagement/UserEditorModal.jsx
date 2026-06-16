@@ -149,7 +149,8 @@ const UserEditorModal = (props) => {
                           <p className="features-header">Configure feature-specific levels for {mapVerticalLabel(v.label)}:</p>
                           <div className="features-level-list">
                             {VERTICAL_FEATURES[v.id].map(feature => {
-                              const fLevel = verticalPermissions[v.id]?.features?.[feature.id] || 'none';
+                              const fLevelRaw = verticalPermissions[v.id]?.features?.[feature.id];
+                              const fLevel = fLevelRaw || normalizedVLevel;
                               return (
                                 <div key={feature.id} className="feature-level-row">
                                   <span className="feature-label">{feature.label}</span>
