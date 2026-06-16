@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { IconChevronDown } from '../../components/Icons';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
 
@@ -12,6 +13,7 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
   const [editingDept, setEditingDept] = useState(null);
   const [formData, setFormData] = useState({ name: '', dept_code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const fetchDepartments = async () => {
@@ -134,11 +136,28 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
         }
         expandedRight={
           <>
-            <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
             <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

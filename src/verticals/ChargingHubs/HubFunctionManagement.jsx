@@ -4,6 +4,7 @@ import './HubFunctionManagement.css';
 import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { IconChevronDown } from '../../components/Icons';
 
 const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [functions, setFunctions] = useState([]);
@@ -12,6 +13,7 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
   const [editingFunction, setEditingFunction] = useState(null);
   const [formData, setFormData] = useState({ name: '', function_code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const fetchFunctions = async () => {
@@ -132,7 +134,20 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
         }
         expandedRight={
           <>
-            <FunctionCSVDownload 
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <FunctionCSVDownload 
               className="halo-button master-action-btn" 
               data={functions} 
               label="Export Functions" 
@@ -142,6 +157,10 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
             {permissions.canCreate && (
               <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

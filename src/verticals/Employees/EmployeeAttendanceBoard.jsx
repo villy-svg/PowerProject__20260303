@@ -59,7 +59,7 @@ const EmployeeAttendanceBoard = ({
     error,
     refreshBoard,
     getCellData,
-  } = useAttendanceBoard();
+  } = useAttendanceBoard(user);
 
   // Modal/Drawer state
   const [selectedCell, setSelectedCell] = useState(null);    // { employeeId, date, record }

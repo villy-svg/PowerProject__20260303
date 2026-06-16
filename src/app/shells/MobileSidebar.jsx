@@ -18,9 +18,10 @@
 
 import React from 'react';
 import { 
-  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile, IconLock
+  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile, IconLock, IconShield
 } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
+import BoardRBACModal from '../../components/BoardRBACModal';
 import '../../components/Sidebar.css';
 
 const MobileSidebar = ({
@@ -33,6 +34,7 @@ const MobileSidebar = ({
   verticalList = [],
 }) => {
   const isHydrating = !permissions || Object.keys(permissions).length === 0 || !permissions.scope;
+  const [rbacModalVertical, setRbacModalVertical] = React.useState(null);
 
   const filteredVerticals = verticalList.filter(vertical => {
     const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
@@ -135,6 +137,17 @@ const MobileSidebar = ({
                       </div>
                       <span>Functions</span>
                     </button>
+                    {user?.roleId === 'master_admin' && (
+                      <button 
+                        className="tray-card" 
+                        onClick={() => setRbacModalVertical({ id: 'CHARGING_HUBS', label: 'Charging Hubs' })}
+                      >
+                        <div className="tray-icon">
+                          <IconShield size={20} />
+                        </div>
+                        <span>Access</span>
+                      </button>
+                    )}
                   </>
                 )}
 
@@ -168,6 +181,17 @@ const MobileSidebar = ({
                       </div>
                       <span>Billing</span>
                     </button>
+                    {user?.roleId === 'master_admin' && (
+                      <button 
+                        className="tray-card" 
+                        onClick={() => setRbacModalVertical({ id: 'CLIENTS', label: 'Clients' })}
+                      >
+                        <div className="tray-icon">
+                          <IconShield size={20} />
+                        </div>
+                        <span>Access</span>
+                      </button>
+                    )}
                   </>
                 )}
 
@@ -192,6 +216,17 @@ const MobileSidebar = ({
                       </div>
                       <span>Roles</span>
                     </button>
+                    {user?.roleId === 'master_admin' && (
+                      <button 
+                        className="tray-card" 
+                        onClick={() => setRbacModalVertical({ id: 'EMPLOYEES', label: 'Employees' })}
+                      >
+                        <div className="tray-icon">
+                          <IconShield size={20} />
+                        </div>
+                        <span>Access</span>
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -228,6 +263,15 @@ const MobileSidebar = ({
           )}
         </div>
       </aside>
+
+      {rbacModalVertical && (
+        <BoardRBACModal
+          isOpen={true}
+          onClose={() => setRbacModalVertical(null)}
+          verticalId={rbacModalVertical.id?.toLowerCase()}
+          titleLabel={rbacModalVertical.label}
+        />
+      )}
     </>
   );
 };

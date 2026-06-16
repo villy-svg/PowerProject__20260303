@@ -17,6 +17,7 @@ import {
   fetchEmployeesForAttendance,
 } from '../services/employees/attendanceService';
 import { fetchPendingRequests } from '../services/employees/editRequestService';
+import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 
 // ---------------------------------------------------------------------------
 // Utility: Build the array of dates between startDate and endDate (inclusive)
@@ -54,7 +55,7 @@ function getDefaultWeekRange() {
   };
 }
 
-export function useAttendanceBoard() {
+export function useAttendanceBoard(user) {
   const { startDate: defaultStart, endDate: defaultEnd } = getDefaultWeekRange();
 
   // Date range state
@@ -84,9 +85,17 @@ export function useAttendanceBoard() {
     setError(null);
 
     try {
+      const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD;
+      const filters = {};
+      
+      // If the user has restricted seniority, only fetch their own attendance row
+      if (isRestricted && user?.employeeId) {
+        filters.employeeId = user.employeeId;
+      }
+
       // Fetch in parallel — employees and attendance records are independent
       const [employeesResult, attendanceResult, pendingResult] = await Promise.all([
-        fetchEmployeesForAttendance(),
+        fetchEmployeesForAttendance(filters),
         fetchAttendanceForDateRange(startDate, endDate),
         fetchPendingRequests(),
       ]);

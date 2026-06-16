@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { clientCategoryService, clientServiceManager } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { IconChevronDown } from '../../components/Icons';
 import ClientCategoryCSVDownload from './ClientCategoryCSVDownload';
 import ClientCategoryCSVImport from './ClientCategoryCSVImport';
 
@@ -17,6 +18,7 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
   const [editingCat, setEditingCat] = useState(null);
   const [formData, setFormData] = useState({ name: '', code: '', description: '', default_service_code: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const fetchCategories = async () => {
@@ -121,7 +123,20 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
         }
         expandedRight={
           <>
-            <ClientCategoryCSVDownload 
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <ClientCategoryCSVDownload 
               className="master-action-btn" 
               data={categories} 
               label="Export Categories" 
@@ -147,6 +162,10 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
                 requiredFields={['category_name']}
               />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

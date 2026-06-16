@@ -14,6 +14,7 @@ import FixTasksButton from './FixTasksButton';
 import { HUB_VIEWS, resolveAddButtonLabel } from '../registry/verticalRegistry';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { IconChevronDown, IconChevronRightSingle } from './Icons';
+import RBACManageButton from './RBACManageButton';
 
 
 
@@ -142,6 +143,10 @@ const TaskController = (props) => {
     }
   };
 
+  const featureId = activeVertical ? 
+    (activeVertical === verticals?.CHARGING_HUBS?.id ? 'canAccessHubTasks' : 
+    `canAccess${activeVertical.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}`) : null;
+
   return (
     <div className="task-controller">
       <MasterPageHeader
@@ -172,6 +177,12 @@ const TaskController = (props) => {
                 + {resolveAddButtonLabel(activeVertical)}
               </button>
             )}
+            <RBACManageButton
+              user={user}
+              verticalId={(rootVerticalId || '').toLowerCase() || (activeVertical || '').toLowerCase()}
+              featureId={featureId}
+              label={boardLabel || label || 'Board'}
+            />
           </>
         }
         isSubSidebarOpen={isSubSidebarOpen}

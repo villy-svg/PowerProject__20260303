@@ -3,6 +3,7 @@ import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeRoleManagement.css';
 import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { IconChevronDown } from '../../components/Icons';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 
@@ -13,6 +14,7 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
   const [editingRole, setEditingRole] = useState(null);
   const [formData, setFormData] = useState({ name: '', role_code: '', description: '', seniority_level: 1 });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const fetchRoles = async () => {
@@ -136,11 +138,28 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
         }
         expandedRight={
           <>
-            <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
             <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

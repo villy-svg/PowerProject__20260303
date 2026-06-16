@@ -8,7 +8,7 @@ import HubCSVImport from './HubCSVImport';
 import MasterPageHeader from '../../components/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 import { useManagementUI } from '../../hooks/useManagementUI';
-import { IconEdit, IconTrash, IconX, IconPlus } from '../../components/Icons';
+import { IconEdit, IconTrash, IconX, IconPlus, IconChevronDown } from '../../components/Icons';
 import RBACManageButton from '../../components/RBACManageButton';
 
 // Error boundary component
@@ -56,6 +56,7 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
 
   // MASTER-SLAVE: Unified Duplicate Detection
   const hubsWithDuplicateInfo = useDuplicateDetection(hubs, {
@@ -223,7 +224,20 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
         }
         expandedRight={
           <>
-            <HubCSVDownload
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <HubCSVDownload
               className="master-action-btn"
               data={hubs}
               label="Export Hubs"
@@ -233,6 +247,10 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
             {permissions.canCreate && (
               <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

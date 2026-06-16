@@ -18,8 +18,9 @@
  */
 
 import React, { useState } from 'react';
-import { IconChevronDown, IconChevronRight, IconLock } from '../../components/Icons';
+import { IconChevronDown, IconChevronRight, IconLock, IconShield } from '../../components/Icons';
 import powerLogo from '../../assets/logo.svg';
+import BoardRBACModal from '../../components/BoardRBACModal';
 import '../../components/Sidebar.css';
 
 const DesktopSidebar = ({
@@ -31,6 +32,7 @@ const DesktopSidebar = ({
   verticalList = [],
 }) => {
   const [expandedVerticals, setExpandedVerticals] = useState([]);
+  const [rbacModalVertical, setRbacModalVertical] = useState(null);
 
   const toggleVertical = (e, vId) => {
     e.stopPropagation();
@@ -111,6 +113,13 @@ const DesktopSidebar = ({
                             <>
                               <li className={activeVertical === 'hub_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('hub_management')}>Hub Administration</li>
                               <li className={activeVertical === 'hub_function_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('hub_function_management')}>Function Manager</li>
+                              {user?.roleId === 'master_admin' && (
+                                <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <IconShield size={14} /> Manage Access
+                                  </span>
+                                </li>
+                              )}
                             </>
                           )}
                           {vertical.id === 'CLIENTS' && (
@@ -118,12 +127,26 @@ const DesktopSidebar = ({
                               <li className={activeVertical === 'client_category_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_category_management')}>Category Manager</li>
                               <li className={activeVertical === 'client_service_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_service_management')}>Service Manager</li>
                               <li className={activeVertical === 'client_billing_model_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_billing_model_management')}>Billing Model Manager</li>
+                              {user?.roleId === 'master_admin' && (
+                                <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <IconShield size={14} /> Manage Access
+                                  </span>
+                                </li>
+                              )}
                             </>
                           )}
                           {vertical.id === 'EMPLOYEES' && (
                             <>
                               <li className={activeVertical === 'department_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('department_management')}>Department Manager</li>
                               <li className={activeVertical === 'employee_role_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_role_management')}>Role Manager</li>
+                              {user?.roleId === 'master_admin' && (
+                                <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
+                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <IconShield size={14} /> Manage Access
+                                  </span>
+                                </li>
+                              )}
                             </>
                           )}
                         </ul>
@@ -164,6 +187,15 @@ const DesktopSidebar = ({
           </nav>
         </div>
       </div>
+      
+      {rbacModalVertical && (
+        <BoardRBACModal
+          isOpen={true}
+          onClose={() => setRbacModalVertical(null)}
+          verticalId={rbacModalVertical.id?.toLowerCase()}
+          titleLabel={rbacModalVertical.label}
+        />
+      )}
     </aside>
   );
 };

@@ -97,6 +97,11 @@ export async function fetchEmployeesForAttendance(filters = {}) {
     query = query.in('hub_id', filters.hubIds);
   }
 
+  // Apply optional employee filter for restricted visibility
+  if (filters.employeeId) {
+    query = query.eq('id', filters.employeeId);
+  }
+
   const { data, error } = await query;
 
   if (error) {

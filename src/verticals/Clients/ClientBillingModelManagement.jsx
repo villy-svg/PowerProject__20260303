@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { billingModelService } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/MasterPageHeader';
+import { IconChevronDown } from '../../components/Icons';
 import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
 import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
 
@@ -16,6 +17,7 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
   const [editingModel, setEditingModel] = useState(null);
   const [formData, setFormData] = useState({ name: '', code: '', description: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const fetchModels = async () => {
@@ -103,11 +105,28 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
         }
         expandedRight={
           <>
-            <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
+            <div className="data-operations-wrapper">
+              <div className="actions-dropdown-container">
+                <div
+                  className="filters-row-toggle"
+                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+                >
+                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <IconChevronDown size={10} />
+                  </span>
+                </div>
+                {isActionsDropdownOpen && (
+                  <div className="actions-dropdown-menu">
+                    <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
             <ClientBillingModelCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
             )}
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         }
       />

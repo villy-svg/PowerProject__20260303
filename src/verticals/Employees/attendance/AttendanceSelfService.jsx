@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../services/core/supabaseClient';
 import { useAttendanceSelfService } from '../../../hooks/useAttendanceSelfService';
 import AttendanceReceiptScreen from './AttendanceReceiptScreen';
+import RBACManageButton from '../../../components/RBACManageButton';
 import './AttendanceSelfService.css';
 
 // ---------------------------------------------------------------------------
@@ -161,9 +162,17 @@ const AttendanceSelfService = ({ user }) => {
   return (
     <div className="self-service__container">
       {/* Page Header */}
-      <div className="self-service__header">
-        <h1 className="self-service__title">Attendance</h1>
-        <p className="self-service__date">{todayDisplay}</p>
+      <div className="self-service__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 className="self-service__title">Attendance</h1>
+          <p className="self-service__date">{todayDisplay}</p>
+        </div>
+        <RBACManageButton
+          user={user}
+          verticalId="employees"
+          featureId="canAccessAttendanceSelfService"
+          label="My Attendance"
+        />
       </div>
 
       {/* Error display */}
