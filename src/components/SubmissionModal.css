@@ -361,3 +361,44 @@
     font-size: 1.2rem !important; /* Make icons larger */
   }
 }
+
+/* ─── Refactored Classes (Replacing Inline Styles) ─── */
+.submission-task-context {
+  margin-bottom: 1rem;
+}
+.submission-task-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+}
+.submission-task-text {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+.submission-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.rejection-feedback-banner {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border: 1px solid var(--priority-urgent);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: var(--priority-urgent);
+}
+.rejection-feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.hidden-input {
+  display: none;
+}

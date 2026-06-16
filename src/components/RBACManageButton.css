@@ -9,8 +9,8 @@
   /* Inherit .halo-button base, add a subtle amber security tint */
   border-color: color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 55%) !important;
   color: var(--brand-amber, #f59e0b) !important;
-  background: rgba(245, 158, 11, 0.06) !important;
-  box-shadow: 0 0 4px rgba(245, 158, 11, 0.12) !important;
+  background: color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 94%) !important;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 88%) !important;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -18,10 +18,9 @@
   font-size: 0.7rem;
 }
 
-.rbac-manage-btn:hover {
-  background: rgba(245, 158, 11, 0.12) !important;
+  background: color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 88%) !important;
   border-color: var(--brand-amber, #f59e0b) !important;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.2) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 80%) !important;
 }
 
 /* ── Chevron indicator for dropdown group mode ──────────────────── */
@@ -55,7 +54,7 @@
   border-radius: 12px;
   padding: 8px;
   z-index: 1200;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.08);
+  box-shadow: 0 8px 32px color-mix(in srgb, #000, transparent 50%), 0 0 12px color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 92%);
   backdrop-filter: blur(12px);
   animation: rbac-dropdown-in 0.15s ease;
 }
@@ -81,7 +80,7 @@
   opacity: 0.6;
   padding: 4px 8px 6px;
   margin: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   margin-bottom: 4px;
 }
 
@@ -104,7 +103,7 @@
 }
 
 .rbac-dropdown-item:hover {
-  background: rgba(245, 158, 11, 0.08);
+  background: color-mix(in srgb, var(--brand-amber, #f59e0b), transparent 92%);
   color: var(--brand-amber, #f59e0b);
 }
 

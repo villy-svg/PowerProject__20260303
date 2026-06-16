@@ -160,22 +160,11 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         <div className="master-modal-scroll-area">
         {/* Task Context */}
         {task && (
-          <div style={{ marginBottom: '1rem' }}>
-            <span style={{
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              opacity: 0.5,
-            }}>
+          <div className="submission-task-context">
+            <span className="submission-task-label">
               Task
             </span>
-            <p style={{
-              margin: '4px 0 0',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              color: 'var(--text-color)',
-            }}>
+            <p className="submission-task-text">
               {task.text}
             </p>
           </div>
@@ -183,9 +172,9 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
 
         {/* Rejection Feedback */}
         {task?.latestSubmission?.status === 'rejected' && (
-          <div className="rejection-feedback-banner" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', padding: '12px', borderRadius: '8px', marginBottom: '16px', color: '#ef4444' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-              <IconWarning size={14} style={{ color: '#ef4444' }} />
+          <div className="rejection-feedback-banner">
+            <div className="rejection-feedback-header">
+              <IconWarning size={14} className="u-text-brand-red" />
               <strong>Rework Required:</strong>
             </div>
             {task.latestSubmission.rejection_reason}
@@ -214,7 +203,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
         {/* File Upload Zone */}
         {!isLocked && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+            <div className="submission-section-header">
               <label className="submission-section-label">Attachments</label>
               <span className={`batch-counter ${files.length >= BATCH_LIMIT ? 'counter-red' : files.length >= BATCH_LIMIT - 2 ? 'counter-amber' : 'counter-mint'}`}>
                 {files.length} / {BATCH_LIMIT} images
@@ -226,7 +215,6 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => !submitting && fileInputRef.current?.click()}
-              style={{ pointerEvents: submitting ? 'none' : 'auto' }}
             >
               <input
                 ref={fileInputRef}
@@ -234,7 +222,7 @@ const SubmissionModal = ({ isOpen, onClose, task, user, onSubmitSuccess }) => {
                 multiple
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileInputChange}
-                style={{ display: 'none' }}
+                className="hidden-input"
                 disabled={submitting}
               />
               <div className="upload-zone-icon">📸</div>

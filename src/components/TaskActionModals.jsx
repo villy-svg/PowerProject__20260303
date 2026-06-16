@@ -78,7 +78,7 @@ const TaskActionModals = ({
                 required
               />
             </div>
-            <div className="form-group" style={{ marginTop: '1rem' }}>
+            <div className="form-group u-mt-4">
               <label>Parent Task</label>
               <select
                 name="parentTask"
@@ -100,11 +100,11 @@ const TaskActionModals = ({
               </select>
             </div>
             {(((editingTask && editingTask.id) && permissions.canUpdate) || (!(editingTask && editingTask.id) && permissions.canCreate)) ? (
-              <button type="submit" className="halo-button" style={{ marginTop: '1rem', width: '100%', fontWeight: 600 }} disabled={saving}>
+              <button type="submit" className="halo-button u-mt-4 u-w-full u-fw-600" disabled={saving}>
                 {saving ? 'Saving...' : ((editingTask && editingTask.id) ? 'Update Task' : 'Create Task')}
               </button>
             ) : (
-              <button type="button" className="halo-button close-read-only-btn" onClick={handleClose} style={{ marginTop: '1rem', width: '100%', fontWeight: 600, opacity: 0.6 }}>
+              <button type="button" className="halo-button close-read-only-btn u-mt-4 u-w-full u-fw-600 u-opacity-60" onClick={handleClose}>
                 Close (Read Only)
               </button>
             )}
@@ -125,13 +125,13 @@ const TaskActionModals = ({
           const stageInfo = STAGE_LIST.find(s => s.id === task.stageId);
           return (
             <div className="merge-body">
-              <span className="merge-stage-tag" style={{ border: `1px solid ${stageInfo?.color}`, color: stageInfo?.color, padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem' }}>
+              <span className="merge-stage-tag badge-viewer" style={{ border: `1px solid ${stageInfo?.color}`, color: stageInfo?.color }}>
                 {stageInfo?.label || task.stageId}
               </span>
-              <p className="merge-summary" style={{ margin: '8px 0', fontSize: '0.9rem' }}>{task.text}</p>
-              <div className="merge-meta" style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+              <p className="merge-summary">{task.text}</p>
+              <div className="merge-meta">
                 <span>{resolvePriorityTitle(task.verticalId)}: {resolvePriorityLabel(task.priority, task.verticalId)}</span>
-                {task.city && <span style={{ marginLeft: '8px' }}>City: {task.city}</span>}
+                {task.city && <span className="u-ml-8">City: {task.city}</span>}
               </div>
             </div>
           );
@@ -148,18 +148,16 @@ const TaskActionModals = ({
           <div className="confirm-actions">
             <button
               type="button"
-              className="halo-button confirm-btn"
+              className="halo-button confirm-btn u-fw-700"
               onClick={confirmDialog.onConfirm}
               disabled={saving}
-              style={{ fontWeight: 700 }}
             >
               {saving ? 'Working...' : 'Confirm'}
             </button>
             <button
               type="button"
-              className="halo-button cancel-btn"
+              className="halo-button cancel-btn u-fw-600 u-opacity-60"
               onClick={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
-              style={{ opacity: 0.6, fontWeight: 600 }}
             >
               Cancel
             </button>

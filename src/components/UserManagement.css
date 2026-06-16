@@ -47,9 +47,9 @@
   font-size: 13px;
   opacity: 0.5;
 }
-.role-badge.master_admin { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-.role-badge.vertical_admin { background: rgba(52, 152, 219, 0.2); color: #3498db; }
-.role-badge.master_viewer { background: rgba(155, 89, 182, 0.2); color: #9b59b2; }
+.role-badge.master_admin { background: color-mix(in srgb, var(--brand-amber), transparent 80%); color: var(--brand-amber); }
+.role-badge.vertical_admin { background: color-mix(in srgb, var(--brand-blue), transparent 80%); color: var(--brand-blue); }
+.role-badge.master_viewer { background: color-mix(in srgb, #9b59b2, transparent 80%); color: #9b59b2; }
 .vertical-tags {
   display: flex;
   flex-wrap: wrap;
@@ -69,7 +69,7 @@
 .edit-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: color-mix(in srgb, #000, transparent 20%);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -83,7 +83,7 @@
   padding: 32px;
   border-radius: 16px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px color-mix(in srgb, #000, transparent 60%);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -113,7 +113,7 @@
 }
 .close-modal:hover {
   opacity: 1;
-  background: rgba(255,255,255,0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
 }
 .form-section {
   display: flex;
@@ -162,7 +162,7 @@
   transition: all 0.2s;
 }
 .vertical-selection-grid .v-select-btn.active {
-  background: rgba(0, 255, 133, 0.15);
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
   border-color: var(--brand-mint);
   color: var(--brand-mint);
   border-width: 2px;
@@ -185,13 +185,13 @@
   color: var(--text-color);
 }
 .modal-actions .save-btn {
-  background: rgba(0, 255, 133, 0.1);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
   border: 1px solid var(--brand-mint);
   color: var(--brand-mint);
   transition: all 0.2s ease;
 }
 .modal-actions .save-btn:hover {
-  background: rgba(0, 255, 133, 0.2);
+  background: color-mix(in srgb, var(--brand-mint), transparent 80%);
   box-shadow: 0 0 20px var(--halo-glow);
 }
 .status-banner {
@@ -202,8 +202,8 @@
   justify-content: space-between;
   align-items: center;
 }
-.status-banner.success { background: rgba(16, 185, 129, 0.15); color: var(--brand-emerald); }
-.status-banner.error { background: rgba(239, 68, 68, 0.15); color: var(--priority-urgent); }
+.status-banner.success { background: color-mix(in srgb, var(--brand-emerald), transparent 85%); color: var(--brand-emerald); }
+.status-banner.error { background: color-mix(in srgb, var(--priority-urgent), transparent 85%); color: var(--priority-urgent); }
 /* 2D Role Selection UI */
 .user-role-modal {
   max-width: 600px; /* Slightly wider to accommodate grid */
@@ -233,20 +233,20 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .scope-card:hover, .level-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--text-color), transparent 94%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 70%);
 }
 .scope-card.active, .level-card.active {
-  background: rgba(46, 204, 113, 0.1);
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
   border-color: var(--brand-green);
-  box-shadow: 0 0 15px rgba(46, 204, 113, 0.15);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--brand-green), transparent 85%);
 }
 .radio-circle {
   width: 18px;
@@ -305,7 +305,7 @@
   gap: 4px;
 }
 .v-lvl-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   color: var(--text-color);
   padding: 4px 8px;
@@ -318,25 +318,25 @@
 }
 .v-lvl-btn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
 }
 .v-lvl-btn.active {
   opacity: 1;
   border-color: var(--brand-green, #10b981);
-  background: rgba(16, 185, 129, 0.15); /* Subtle green tint */
+  background: color-mix(in srgb, var(--brand-green, #10b981), transparent 85%);
   color: var(--brand-green, #10b981);
   border-width: 2px;
 }
 .v-lvl-btn.active.lvl-none {
-  border-color: #7f8c8d;
-  background: rgba(127, 140, 141, 0.15); /* Subtle gray tint */
-  color: #7f8c8d;
+  border-color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-secondary), transparent 85%);
+  color: var(--text-secondary);
 }
 /* Table Tags */
 .v-tag {
   display: inline-block;
   padding: 4px 8px;
-  background: rgba(16, 185, 129, 0.05); /* Subtle brand green tint */
+  background: color-mix(in srgb, var(--brand-green), transparent 95%);
   border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
   color: var(--brand-green);
   border-radius: 4px;
@@ -348,22 +348,22 @@
   letter-spacing: 0.3px;
 }
 .v-tag.master {
-  background: rgba(16, 185, 129, 0.15);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
   border: 1px solid var(--brand-green);
   color: var(--brand-green);
   box-shadow: 0 0 10px var(--halo-glow);
 }
 .v-tag.locked {
-  background: rgba(127, 140, 141, 0.05);
-  border: 1px solid rgba(127, 140, 141, 0.3);
-  color: #7f8c8d;
+  background: color-mix(in srgb, var(--text-secondary), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--text-secondary), transparent 70%);
+  color: var(--text-secondary);
 }
 /* Granular Feature Toggles */
 .vertical-perm-item-wrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 4px;
@@ -404,7 +404,7 @@
 .features-toggle-btn.active {
   opacity: 1;
   color: var(--brand-green);
-  background: rgba(45, 212, 191, 0.1);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
 }
 .chevron {
   display: inline-block;
@@ -422,7 +422,7 @@
 }
 .features-dropdown {
   padding: 16px;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, #000, transparent 80%);
   border-top: 1px solid var(--border-color);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
@@ -448,7 +448,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
 }
 .feature-level-row:last-child {
   border-bottom: none;
@@ -487,8 +487,8 @@
 }
 .user-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 20px color-mix(in srgb, #000, transparent 80%);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 70%);
 }
 .user-card-header {
   display: flex;
@@ -523,22 +523,22 @@
   width: 100%;
 }
 .v-tag.simple {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   color: var(--text-color);
 }
 /* Active employee link — subtle green tint, same palette as brand-green */
 .v-tag.linked-active {
-  background: rgba(52, 211, 153, 0.12);
-  border: 1px solid rgba(52, 211, 153, 0.28);
-  color: var(--badge-green-text); /* §8: use badge token */
+  background: color-mix(in srgb, var(--badge-green-text), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 72%);
+  color: var(--badge-green-text);
 }
 /* Inactive employee link — faded red; eye-friendly, clearly distinct from normal */
 .v-tag.linked-inactive {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.22);
-  color: var(--badge-red-text); /* §8: use badge token */
-  opacity: 0.85; /* Slight fade-back — communicates "impaired" state without alarming */
+  background: color-mix(in srgb, var(--badge-red-text), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--badge-red-text), transparent 78%);
+  color: var(--badge-red-text);
+  opacity: 0.85;
 }
 
 /* ==========================================================================
@@ -559,9 +559,9 @@
   white-space: nowrap;
 }
 .user-status-badge--active {
-  background: rgba(52, 211, 153, 0.12);
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  color: var(--badge-green-text); /* §8: badge token */
+  background: color-mix(in srgb, var(--badge-green-text), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 70%);
+  color: var(--badge-green-text);
 }
 .user-status-badge--active::before {
   content: '';
@@ -573,9 +573,9 @@
   animation: pulse-dot 2s infinite;
 }
 .user-status-badge--inactive {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: var(--badge-red-text); /* §8: badge token */
+  background: color-mix(in srgb, var(--badge-red-text), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--badge-red-text), transparent 75%);
+  color: var(--badge-red-text);
 }
 .user-status-badge--inactive::before {
   content: '';
@@ -600,11 +600,11 @@
 /* Faded card for inactive users in grid view */
 .user-grid .user-card.user-card--inactive {
   opacity: 0.55;
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 80%);
 }
 .user-grid .user-card.user-card--inactive:hover {
   opacity: 0.85;
-  border-color: rgba(239, 68, 68, 0.35);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 65%);
 }
 
 /* Card header right slot — status badge + role badge stacked */
@@ -638,9 +638,9 @@
 }
 .user-row-actions .deactivate-btn:hover,
 .user-card-actions .deactivate-btn:hover {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: var(--badge-red-text); /* §8: badge token */
+  background: color-mix(in srgb, var(--priority-urgent), transparent 92%);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 60%);
+  color: var(--badge-red-text);
   opacity: 1;
   transform: translateY(-1px);
 }
@@ -651,17 +651,17 @@
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
-  background: rgba(52, 211, 153, 0.08);
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  color: var(--badge-green-text); /* §8: badge token */
+  background: color-mix(in srgb, var(--badge-green-text), transparent 92%);
+  border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 70%);
+  color: var(--badge-green-text);
   border-radius: 6px;
   white-space: nowrap;
   transition: all 0.2s ease;
 }
 .user-row-actions .reactivate-btn:hover,
 .user-card-actions .reactivate-btn:hover {
-  background: rgba(52, 211, 153, 0.18);
-  border-color: rgba(52, 211, 153, 0.5);
+  background: color-mix(in srgb, var(--badge-green-text), transparent 82%);
+  border-color: color-mix(in srgb, var(--badge-green-text), transparent 50%);
   transform: translateY(-1px);
 }
 

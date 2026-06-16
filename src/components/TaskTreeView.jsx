@@ -206,7 +206,7 @@ const TaskTreeView = ({
 
           <div className="list-row-badges">
             {task.isContextOnly && (
-              <span className="card-priority" title="Context Only" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-secondary)', fontSize: '0.6rem', padding: '1px 4px' }}>
+              <span className="card-priority badge-viewer" title="Context Only">
                 VIEWER
               </span>
             )}
@@ -240,7 +240,7 @@ const TaskTreeView = ({
             })()}
           </div>
 
-          <div className="list-row-content" title={task.text} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="list-row-content u-flex-center-gap" title={task.text}>
             {task.latestSubmission?.status === 'rejected' && task.stageId === 'IN_PROGRESS' && (
               <span className="rejected-red-dot" title="Submission Rejected: Rework Required" />
             )}
@@ -298,7 +298,7 @@ const TaskTreeView = ({
               <React.Fragment>
                 {/* Hierarchy Actions — restricted to managers/creators (canManageHierarchy) */}
                 {effectiveCanUpdate && canManageHierarchy(task) && task.parentTask && (
-                  <div className="hierarchy-nav-group" style={{ display: 'flex', gap: '4px' }}>
+                  <div className="hierarchy-nav-group u-flex-gap-4">
                     {tasks.find(t => t.id === task.parentTask)?.parentTask && (
                       <button
                         className="card-nav-button promote-button"
@@ -308,9 +308,8 @@ const TaskTreeView = ({
                           if (parent) onMoveToParent(task.id, parent.parentTask);
                         }}
                         title="Move to Parent's Sibling (Promote to Grandparent)"
-                        style={{ color: 'var(--brand-blue)' }}
                       >
-                        <IconDiagonalUp size={14} />
+                        <IconDiagonalUp size={14} className="u-text-brand-blue" />
                       </button>
                     )}
                     <button
@@ -320,9 +319,8 @@ const TaskTreeView = ({
                         onMoveToParent(task.id, null);
                       }}
                       title="Make Top Level Task"
-                      style={{ color: 'var(--brand-blue)' }}
                     >
-                      <IconPromote size={14} />
+                      <IconPromote size={14} className="u-text-brand-blue" />
                     </button>
                   </div>
                 )}
@@ -332,9 +330,8 @@ const TaskTreeView = ({
                     className="card-add-sub-button"
                     onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
                     title="Add Subtask Under This"
-                    style={{ color: 'var(--brand-green)' }}
                   >
-                    <IconPlus size={14} />
+                    <IconPlus size={14} className="u-text-brand-green" />
                   </button>
                 )}
               </React.Fragment>
@@ -360,16 +357,14 @@ const TaskTreeView = ({
             {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
               <>
                 <button
-                  className="halo-button btn-approve"
-                  style={{ marginLeft: '4px' }}
+                  className="halo-button btn-approve u-ml-4"
                   onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
                   title="Approve Submission"
                 >
                   ✓ Appr
                 </button>
                 <button
-                  className="halo-button btn-reject"
-                  style={{ marginLeft: '4px' }}
+                  className="halo-button btn-reject u-ml-4"
                   onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
                   title="Reject Submission & Request Rework"
                 >
@@ -403,9 +398,8 @@ const TaskTreeView = ({
                 className="card-reprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'BACKLOG'); }}
                 title="Move back to Pending"
-                style={{ color: 'var(--brand-green)' }}
               >
-                <IconPromote size={14} />
+                <IconPromote size={14} className="u-text-brand-green" />
               </button>
             )}
             {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
@@ -495,7 +489,7 @@ const TaskTreeView = ({
         )}
 
         {projectTreeTasks.length === 0 && standaloneTasks.length === 0 && (
-          <p className="empty-msg" style={{ padding: '2rem', textAlign: 'center' }}>No tasks found in this vertical.</p>
+          <p className="empty-msg u-p-2rem-center">No tasks found in this vertical.</p>
         )}
       </div>
     </div>

@@ -83,9 +83,9 @@ const ConflictModal = ({
               <table className="comparison-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '20%' }}>Field</th>
-                    <th style={{ width: '40%' }}>New Data (Incoming)</th>
-                    <th style={{ width: '40%' }}>Current Record (In System)</th>
+                    <th className="u-w-20">Field</th>
+                    <th className="u-w-40">New Data (Incoming)</th>
+                    <th className="u-w-40">Current Record (In System)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,21 +143,19 @@ const ConflictModal = ({
                         <div className="tile-main">
                           {renderConflictTile(c)}
                         </div>
-                        <div className="conflict-tile-actions" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                        <div className="conflict-tile-actions">
                           {compareFields.length > 0 && (
                             <button 
-                              className="review-btn" 
+                              className="review-btn u-flex-1" 
                               onClick={(e) => { e.stopPropagation(); setReviewIdx(idx); }}
-                              style={{ flex: 1 }}
                             >
                               Review
                             </button>
                           )}
                           {c.matchMode === 'soft' && onKeepBoth && (
                             <button 
-                              className="halo-button save-btn" 
+                              className="halo-button save-btn btn-keep-both" 
                               onClick={(e) => { e.stopPropagation(); onKeepBoth(c); }}
-                              style={{ flex: 1, backgroundColor: 'transparent', border: '1px solid var(--brand-green)' }}
                             >
                               Keep Both
                             </button>

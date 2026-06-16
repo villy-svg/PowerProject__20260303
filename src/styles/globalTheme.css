@@ -13,7 +13,7 @@
   --brand-blue: #3b82f6;
   --brand-green: var(--brand-mint); /* Legacy alias */
   --border-color: #e4e4e7;
-  --panel-bg: #ffffff;
+  --panel-bg: var(--color-white);
   --surface-card: #f9f9fb;
   /* Typography */
   --font-main: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -29,13 +29,13 @@
   --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.1);
   --shadow-halo: 0 0 15px var(--halo-glow);
   /* Halo Glow System */
-  --halo-glow: rgba(13, 148, 136, 0.2);
-  --halo-bg: rgba(13, 148, 136, 0.05);
+  --halo-glow: color-mix(in srgb, var(--brand-mint), transparent 80%);
+  --halo-bg: color-mix(in srgb, var(--brand-mint), transparent 95%);
   /* Status Colors */
-  --priority-urgent: #ef4444;
-  --priority-high: #f97316;
-  --priority-medium: #eab308;
-  --priority-low: #22c55e;
+  --priority-urgent: var(--priority-urgent);
+  --priority-high: var(--priority-high);
+  --priority-medium: var(--priority-medium);
+  --priority-low: var(--priority-low);
   /* Z-Index Hierarchy */
   --z-base: 0;
   --z-card-base: 1;
@@ -50,19 +50,19 @@
   /* Badge System Colors (Tokenized) */
   --badge-teal-bg: rgba(45, 212, 191, 0.1);
   --badge-teal-text: #2dd4bf;
-  --badge-blue-bg: rgba(59, 130, 246, 0.1);
+  --badge-blue-bg: color-mix(in srgb, var(--brand-blue), transparent 90%);
   --badge-blue-text: #60a5fa;
   --badge-green-bg: rgba(52, 211, 153, 0.1);
   --badge-green-text: #34d399;
   --badge-amber-bg: rgba(245, 158, 11, 0.1);
   --badge-amber-text: #f59e0b;
-  --badge-red-bg: rgba(239, 68, 68, 0.1);
-  --badge-red-text: #ef4444;
+  --badge-red-bg: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
+  --badge-red-text: var(--priority-urgent);
   /* Semantic Status Colors (aliases for explicit intent) */
-  --brand-red: #ef4444;
+  --brand-red: var(--priority-urgent);
   --brand-amber: #f59e0b;
   --brand-emerald: #10b981;
-  --color-white: #ffffff;
+  --color-white: var(--color-white);
   --text-secondary: #71717a;
   --surface-deep: #f4f4f5;
 }
@@ -81,9 +81,9 @@
   /* Shadows & Depth */
   --shadow-premium: 0 12px 60px rgba(0, 0, 0, 0.6);
   --glass-blur: 25px;
-  --halo-glow: rgba(13, 148, 136, 0.12); /* Subtler glow */
-  --halo-glow-blue: rgba(59, 130, 246, 0.08); 
-  --halo-bg: rgba(13, 148, 136, 0.02); /* Very subtle background blend */
+  --halo-glow: color-mix(in srgb, var(--brand-mint), transparent 88%); /* Subtler glow */
+  --halo-glow-blue: color-mix(in srgb, var(--brand-blue), transparent 92%); 
+  --halo-bg: color-mix(in srgb, var(--brand-mint), transparent 98%); /* Very subtle background blend */
   --surface-deep: #09090b;
 }
 /* ==========================================================================
@@ -331,31 +331,31 @@
 
 /* Badge Semantic Variants */
 .badge-success {
-  color: #22c55e !important;
-  background: rgba(34, 197, 94, 0.1) !important;
-  border-color: rgba(34, 197, 94, 0.2) !important;
-  opacity: 1 !important;
+  color: var(--priority-low);
+  background: color-mix(in srgb, var(--priority-low), transparent 0.1);
+  border-color: color-mix(in srgb, var(--priority-low), transparent 0.2);
+  opacity: 1;
 }
 
 .badge-warning {
-  color: #eab308 !important;
-  background: rgba(234, 179, 8, 0.1) !important;
-  border-color: rgba(234, 179, 8, 0.2) !important;
-  opacity: 1 !important;
+  color: var(--priority-medium);
+  background: color-mix(in srgb, var(--priority-medium), transparent 0.1);
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 0.2);
+  opacity: 1;
 }
 
 .badge-danger {
-  color: #ef4444 !important;
-  background: rgba(239, 68, 68, 0.15) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  opacity: 1 !important;
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 0.15);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3);
+  opacity: 1;
 }
 
 .badge-info {
-  color: var(--brand-blue) !important;
-  background: rgba(59, 130, 246, 0.1) !important;
-  border-color: rgba(59, 130, 246, 0.2) !important;
-  opacity: 1 !important;
+  color: var(--brand-blue);
+  background: color-mix(in srgb, var(--brand-blue), transparent 90%);
+  border-color: color-mix(in srgb, var(--brand-blue), transparent 80%);
+  opacity: 1;
 }
 
 .card-priority {
@@ -364,29 +364,29 @@
 
 /* Priority Color Methods */
 .priority-low { 
-  color: #22c55e !important; 
-  background: rgba(34, 197, 94, 0.1) !important; 
-  border-color: rgba(34, 197, 94, 0.2) !important; 
+  color: var(--priority-low); 
+  background: color-mix(in srgb, var(--priority-low), transparent 0.1); 
+  border-color: color-mix(in srgb, var(--priority-low), transparent 0.2); 
 }
 .priority-medium { 
-  color: #eab308 !important; 
-  background: rgba(234, 179, 8, 0.1) !important; 
-  border-color: rgba(234, 179, 8, 0.2) !important; 
+  color: var(--priority-medium); 
+  background: color-mix(in srgb, var(--priority-medium), transparent 0.1); 
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 0.2); 
 }
 .priority-high { 
-  color: #f97316 !important; 
-  background: rgba(249, 115, 22, 0.15) !important; 
-  border-color: rgba(249, 115, 22, 0.3) !important; 
+  color: var(--priority-high); 
+  background: color-mix(in srgb, var(--priority-high), transparent 0.15); 
+  border-color: color-mix(in srgb, var(--priority-high), transparent 0.3); 
 }
 .priority-urgent { 
-  color: #ef4444 !important; 
-  background: rgba(239, 68, 68, 0.15) !important; 
-  border-color: rgba(239, 68, 68, 0.3) !important; 
+  color: var(--priority-urgent); 
+  background: color-mix(in srgb, var(--priority-urgent), transparent 0.15); 
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3); 
 }
 .priority-completed { 
-  color: var(--brand-mint) !important; 
-  background: rgba(13, 148, 136, 0.1) !important; 
-  border-color: rgba(13, 148, 136, 0.2) !important; 
+  color: var(--brand-mint); 
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%); 
+  border-color: color-mix(in srgb, var(--brand-mint), transparent 80%); 
 }
 
 .hub-badge.null-hub, 
@@ -486,9 +486,9 @@
 }
 
 .bulk-btn.delete:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3);
 }
 
 .bulk-btn.cancel {
@@ -519,7 +519,7 @@
 .card-mark-completed-button {
   background: transparent;
   border: none;
-  color: #ffffff !important; /* Force high contrast white */
+  color: var(--color-white); /* Force high contrast white */
   width: 28px;
   height: 28px;
   display: inline-flex;
@@ -536,19 +536,19 @@
 .card-clone-button:hover,
 .card-nav-button:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--brand-green) !important;
+  color: var(--brand-green);
   transform: translateY(-1px);
 }
 
 .card-mark-completed-button:hover {
-  color: #22c55e !important; /* Semantic success green on hover */
-  background: rgba(34, 197, 94, 0.1) !important;
+  color: var(--priority-low); /* Semantic success green on hover */
+  background: color-mix(in srgb, var(--priority-low), transparent 0.1);
   transform: translateY(-1px);
 }
 
 .card-delete-button:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444 !important;
+  background: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
+  color: var(--priority-urgent);
 }
 
 /* .status-toggle-btn base — defined below with correct rgba(255,255,255,0.85) value */
@@ -581,7 +581,7 @@
   transform: translateY(-1px);
 }
 .action-icon-btn.delete:hover {
-  color: #ef4444;
+  color: var(--priority-urgent);
 }
 
 .status-toggle-btn {
@@ -767,11 +767,11 @@ body[data-keyboard="open"] .form-footer,
 body[data-keyboard="open"] .modal-actions,
 body[data-keyboard="open"] .wizard-footer,
 body[data-keyboard="open"] .task-form-actions {
-  position: sticky !important;
-  bottom: 0 !important;
-  background: var(--bg-color) !important;
-  z-index: 20 !important;
-  padding-bottom: 8px !important;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-color);
+  z-index: 20;
+  padding-bottom: 8px;
   border-top: 1px solid var(--border-color);
   margin-top: auto;
 }
@@ -804,4 +804,82 @@ body[data-keyboard="open"] .task-form-actions {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
+}
+
+/* ==========================================================================
+   8. GLOBAL UTILITY CLASSES (For eliminating inline styles)
+   ========================================================================== */
+.u-flex-center-gap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.u-flex-gap-4 {
+  display: flex;
+  gap: 4px;
+}
+
+.u-text-brand-blue {
+  color: var(--brand-blue);
+}
+
+.u-text-brand-green {
+  color: var(--brand-green);
+}
+
+.u-text-brand-red {
+  color: var(--priority-urgent);
+}
+
+.u-ml-4 {
+  margin-left: 4px;
+}
+
+.u-ml-8 {
+  margin-left: 8px;
+}
+
+.u-mr-4 {
+  margin-right: 4px;
+}
+
+.u-mr-6 {
+  margin-right: 6px;
+}
+
+.u-mr-8 {
+  margin-right: 8px;
+}
+
+.u-mt-4 {
+  margin-top: 1rem;
+}
+
+.u-w-full {
+  width: 100%;
+}
+
+.u-fw-600 {
+  font-weight: 600;
+}
+
+.u-fw-700 {
+  font-weight: 700;
+}
+
+.u-opacity-60 {
+  opacity: 0.6;
+}
+
+.u-p-2rem-center {
+  padding: 2rem;
+  text-align: center;
+}
+
+.badge-viewer {
+  background-color: var(--surface-deep);
+  color: var(--text-secondary);
+  font-size: 0.6rem;
+  padding: 1px 4px;
+}

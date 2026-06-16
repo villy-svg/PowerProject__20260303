@@ -91,7 +91,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
       <div className="submission-history">
         <div className="submission-history-header">
           <span className="submission-history-title">
-            <IconDatabase size={18} style={{ marginRight: '8px' }} />
+            <IconDatabase size={18} className="u-mr-8" />
             Submission History
           </span>
         </div>
@@ -106,7 +106,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
     <div className="submission-history">
       <div className="submission-history-header">
         <span className="submission-history-title">
-          <IconDatabase size={18} style={{ marginRight: '8px' }} />
+          <IconDatabase size={18} className="u-mr-8" />
           Submission History
           {submissions.length > 0 && (
             <span className="submission-count-badge">{submissions.length}</span>
@@ -189,7 +189,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                                 rel="noopener noreferrer"
                                 title={link.file_name}
                               >
-                                <IconFile size={16} style={{ marginRight: '6px' }} />
+                                <IconFile size={16} className="u-mr-6" />
                                 {link.file_name}
                               </a>
                             );
@@ -206,7 +206,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                             onClick={() => handleStatusUpdate(submission.id, 'approved')}
                             disabled={updating === submission.id}
                           >
-                            {updating === submission.id ? '...' : <><IconCheck size={14} style={{ marginRight: '4px' }} /> Approve</>}
+                            {updating === submission.id ? '...' : <><IconCheck size={14} className="u-mr-4" /> Approve</>}
                           </button>
                           <button
                             type="button"
@@ -217,7 +217,7 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                             }}
                             disabled={updating === submission.id}
                           >
-                            {updating === submission.id ? '...' : <><IconX size={14} style={{ marginRight: '4px' }} /> Reject</>}
+                            {updating === submission.id ? '...' : <><IconX size={14} className="u-mr-4" /> Reject</>}
                           </button>
                         </div>
                       )}
