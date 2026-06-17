@@ -102,9 +102,9 @@ const RAW_CONTEXT = {
   },
   'Attendance Board': {
     viewer:      { can: ['View attendance records for all employees', 'See attendance status breakdown and summaries'], summary: 'For HR auditors who monitor attendance without editing.' },
-    contributor: { can: ['View attendance records for all employees', 'Submit new attendance entries'], summary: 'For team leads who log attendance for their team.' },
-    editor:      { can: ['View attendance records', 'Submit new entries and correct existing attendance records'], summary: 'For HR managers who maintain and rectify attendance data.' },
-    admin:       { can: ['Full CRUD — view, submit, edit, and remove any attendance entry'], summary: 'Complete authority over the Attendance Board.' },
+    contributor: { can: ['View attendance records for all employees', 'Suggest edits to existing attendance records (Maker)'], summary: 'For team leads who log attendance corrections requiring approval.' },
+    editor:      { can: ['View attendance records', 'Review and approve pending attendance edits (Checker)', 'Directly correct attendance records'], summary: 'For HR managers who maintain and approve attendance data.' },
+    admin:       { can: ['Full CRUD — view, suggest, approve, and remove any attendance entry'], summary: 'Complete authority over the Attendance Board.' },
   },
   'Rules & Regulations': {
     viewer:      { can: ['Read all published company rules and policy documents'], summary: 'Read-only access to the HR policy library.' },
@@ -113,8 +113,8 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — publish, update, and delete rules & policy documents'], summary: 'Complete authority over Rules & Regulations.' },
   },
   'Current Attendance': {
-    viewer:      { can: ["View today's attendance summary and all employee statuses"], summary: 'For supervisors who monitor live attendance without making changes.' },
-    contributor: { can: ["View today's attendance summary", 'Submit self-service attendance check-ins'], summary: 'For employees who log their own attendance via self-service.' },
+    viewer:      { can: ["Submit self-service attendance check-ins for yourself only"], summary: 'For field employees who only need to log their own daily attendance.' },
+    contributor: { can: ["Submit self-service attendance check-ins", "View today's live attendance summary and all employee statuses"], summary: 'For supervisors who monitor live attendance and also log their own.' },
     editor:      { can: ["View today's attendance summary", 'Submit and correct attendance entries for today'], summary: 'For HR staff who manage and rectify current-day attendance.' },
     admin:       { can: ["Full CRUD — manage all current-day attendance records and overrides"], summary: 'Complete authority over the Current Attendance view.' },
   },

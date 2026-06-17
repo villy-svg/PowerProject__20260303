@@ -5,6 +5,12 @@
 -- attendance records without needing 'editor' RLS access on daily_attendances.
 -- They run as SECURITY DEFINER (elevated) but validate the caller's identity.
 --
+-- REPAIRED 2026-06-17: Added SET search_path = public, pg_catalog to both
+-- functions. Without a pinned search_path, SECURITY DEFINER functions are
+-- vulnerable to search_path hijacking (PostgreSQL §38.6.1). pg_temp is
+-- deliberately excluded as it is a common hijacking vector. This repair is
+-- applied via `supabase migration repair --status reverted` + `db push`.
+--
 -- Skill compliance:
 --   database-migration-policy §5 (PostgreSQL Kick)
 --   rbac-security-system §3 (Access validation inside function)
@@ -30,7 +36,8 @@ CREATE OR REPLACE FUNCTION public.rpc_employee_checkin(
 )
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER  -- Runs as the function owner, bypassing RLS for self-service
+SECURITY DEFINER                          -- Runs as the function owner, bypassing RLS for self-service
+SET search_path = public, pg_catalog      -- Prevent search_path hijacking (pg_temp deliberately excluded)
 AS $$
 DECLARE
   v_user_id       uuid := auth.uid();
@@ -111,7 +118,8 @@ CREATE OR REPLACE FUNCTION public.rpc_employee_checkout(
 )
 RETURNS jsonb
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY DEFINER                          -- Runs as the function owner, bypassing RLS for self-service
+SET search_path = public, pg_catalog      -- Prevent search_path hijacking (pg_temp deliberately excluded)
 AS $$
 DECLARE
   v_user_id       uuid := auth.uid();

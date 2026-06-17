@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260617 Manage RBAC Update 2.0.4"
+git commit -m "260617 Manage RBAC Update 2.0.5"
 git push origin staging 
 
 # 2. Build (on Staging)
@@ -27,8 +27,10 @@ git branch --show-current
 
 #Check Current Supabase Link : staging : eeoibqxhfkrgbylnluvk | prod : dhhbdgzutlltiojbsboi
 npx supabase link --project-ref dhhbdgzutlltiojbsboi
+npx supabase migration repair --status reverted 20260611000002
 npx supabase db push --include-all
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk
+npx supabase migration repair --status reverted 20260611000002
 npx supabase db push --include-all
 #npx supabase migration repair --status reverted 20260101000005
 #npx supabase migration repair --status reverted 20260604000000
