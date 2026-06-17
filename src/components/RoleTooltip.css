@@ -16,10 +16,10 @@
    ========================================================================== */
 .role-tooltip {
   position: fixed;
-  /* JS sets top/left to the anchor's bounding-rect centre.
-     Transform then shifts the panel so its bottom-centre aligns with that point. */
+  /* JS sets top = rect.top (above) or rect.bottom (below).
+     Default: shift UP by own height + 12px gap so bottom-of-tooltip = top-of-button - 12px */
   transform: translateX(-50%) translateY(calc(-100% - 12px));
-  width: 230px;
+  width: 240px;
   z-index: 99999;
 
   background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
@@ -39,6 +39,12 @@
   pointer-events: none;
 }
 
+/* When near the top of the viewport, flip the tooltip BELOW the button */
+.role-tooltip--below {
+  transform: translateX(-50%) translateY(0);
+  animation: roleTooltipInBelow 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes roleTooltipIn {
   from {
     opacity: 0;
@@ -47,6 +53,17 @@
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(calc(-100% - 12px));
+  }
+}
+
+@keyframes roleTooltipInBelow {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
@@ -155,15 +172,25 @@
   font-style: italic;
 }
 
-/* --- Downward caret (points at the button below) --- */
+/* Downward caret — points at button below (default: tooltip above button) */
 .role-tooltip-caret {
   position: absolute;
   bottom: -5px;
-  left: 50%;
+  left: calc(50% + var(--caret-offset, 0px));
   transform: translateX(-50%) rotate(45deg);
   width: 9px;
   height: 9px;
   background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
   border-right: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-bottom: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
+}
+
+/* Upward caret — points at button above (flipped: tooltip below button) */
+.role-tooltip--below .role-tooltip-caret {
+  bottom: auto;
+  top: -5px;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
+  border-top: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
 }
