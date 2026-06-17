@@ -453,12 +453,47 @@
 .feature-level-row:last-child {
   border-bottom: none;
 }
+
+/* Subtle highlight on rows with an explicit DB override */
+.feature-level-row--overridden {
+  background: rgba(245, 158, 11, 0.04);
+  margin: 0 -8px;
+  padding: 8px 8px;
+  border-radius: 6px;
+}
+
+/* Flex wrapper for label + override tag */
+.feature-label-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .feature-label {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color);
   opacity: 0.9;
 }
+
+/* "override" tag — signals this feature has an explicit feature_access row */
+.feature-override-tag {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 1px 5px;
+  min-height: 16px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 3px;
+  color: var(--brand-amber, #f59e0b);
+  flex-shrink: 0;
+}
+
 .v-level-selector.mini {
   gap: 2px;
 }

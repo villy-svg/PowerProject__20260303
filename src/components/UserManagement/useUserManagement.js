@@ -151,11 +151,16 @@ export const useUserManagement = () => {
 
     try {
       const perms = await userService.fetchUserPermissions(user.id);
-      
+
       const vPermsMap = {};
       (perms.verticals || []).forEach(v => {
         vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
       });
+
+      // Re-hydrate ALL explicit feature_access rows from the DB.
+      // This is critical: any feature override written by the Manage RBAC modal
+      // must survive a subsequent User Management save — we preserve it by loading
+      // it into editVerticalPermissions so handleSyncPermissions re-emits it.
       (perms.features || []).forEach(f => {
         if (vPermsMap[f.vertical_id]) {
           vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
@@ -195,18 +200,24 @@ export const useUserManagement = () => {
           Object.keys(editVerticalPermissions).forEach(vId => {
             const vData = editVerticalPermissions[vId];
             const vLvl = vData.level;
-            
+
             if (vLvl !== 'none') {
-                vGrants.push({ vertical_id: vId, access_level: vLvl });
-                
-                if (vData.features) {
-                    Object.keys(vData.features).forEach(fId => {
-                        const fLvl = vData.features[fId];
-                        if (fLvl !== 'none') {
-                            fGrants.push({ vertical_id: vId, feature_id: fId, access_level: fLvl });
-                        }
-                    });
-                }
+              vGrants.push({ vertical_id: vId, access_level: vLvl });
+
+              // Re-emit ALL explicit feature_access rows, including those that match
+              // the vertical level. The RPC does a full wipe+replace, so omitting
+              // any existing row would silently delete it — breaking any override
+              // previously set via the Manage RBAC modal.
+              if (vData.features) {
+                Object.keys(vData.features).forEach(fId => {
+                  const fLvl = vData.features[fId];
+                  // Only skip truly absent/none entries to avoid writing noise rows.
+                  // We DO write rows matching the vertical level (they are explicit overrides).
+                  if (fLvl && fLvl !== 'none') {
+                    fGrants.push({ vertical_id: vId, feature_id: fId, access_level: fLvl });
+                  }
+                });
+              }
             }
           });
         }

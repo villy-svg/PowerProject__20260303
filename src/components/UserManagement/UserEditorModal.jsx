@@ -144,16 +144,25 @@ const UserEditorModal = (props) => {
                         </div>
                       </div>
 
-                      {expandedVertical === v.id && VERTICAL_FEATURES[v.id] && (
+                        {expandedVertical === v.id && VERTICAL_FEATURES[v.id] && (
                         <div className="features-dropdown">
                           <p className="features-header">Configure feature-specific levels for {mapVerticalLabel(v.label)}:</p>
                           <div className="features-level-list">
                             {VERTICAL_FEATURES[v.id].map(feature => {
+                              // fLevelRaw is the explicit DB row value (undefined = no override)
                               const fLevelRaw = verticalPermissions[v.id]?.features?.[feature.id];
+                              // Displayed level: explicit override if set, else fall back to vertical level
                               const fLevel = fLevelRaw || normalizedVLevel;
+                              // hasOverride: there is a real feature_access row for this feature
+                              const hasOverride = fLevelRaw !== undefined && fLevelRaw !== null;
                               return (
-                                <div key={feature.id} className="feature-level-row">
-                                  <span className="feature-label">{feature.label}</span>
+                                <div key={feature.id} className={`feature-level-row${hasOverride ? ' feature-level-row--overridden' : ''}`}>
+                                  <div className="feature-label-group">
+                                    <span className="feature-label">{feature.label}</span>
+                                    {hasOverride && (
+                                      <span className="feature-override-tag" title="Explicitly set — not inherited from vertical">override</span>
+                                    )}
+                                  </div>
                                   <div className="v-level-selector mini">
                                     {['none', 'viewer', 'contributor', 'editor', 'admin'].map(lvl => {
                                       const globalMaxRank = LEVEL_RANKS[roleLevel] || 1;
