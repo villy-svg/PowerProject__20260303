@@ -4,6 +4,7 @@ import { VERTICAL_LIST } from '../../constants/verticals';
 import { VERTICAL_FEATURES } from '../../constants/verticalFeatures';
 import { LEVEL_RANKS } from './useUserManagement';
 import { IconX } from '../Icons';
+import RoleTooltip from '../RoleTooltip';
 
 /**
  * UserEditorModal Component
@@ -128,17 +129,25 @@ const UserEditorModal = (props) => {
                             const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
 
                             return (
-                              <button
-                                key={lvl}
-                                type="button"
-                                className={`v-lvl-btn ${normalizedVLevel === lvl ? 'active' : ''} lvl-${lvl}`}
-                                onClick={() => !isTooHigh && onVerticalLevelChange(v.id, lvl)}
-                                disabled={isTooHigh}
-                                title={isTooHigh ? `Locked by max capability level (${roleLevel.toUpperCase()})` : ''}
-                                style={{ opacity: isTooHigh ? 0.3 : 1, cursor: isTooHigh ? 'not-allowed' : 'pointer' }}
-                              >
-                                {lvl.toUpperCase()}
-                              </button>
+                              <div key={lvl} className="role-tooltip-anchor">
+                                <button
+                                  type="button"
+                                  className={`v-lvl-btn ${normalizedVLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                  onClick={() => !isTooHigh && onVerticalLevelChange(v.id, lvl)}
+                                  disabled={isTooHigh}
+                                  title={isTooHigh ? `Locked by max capability level (${roleLevel.toUpperCase()})` : ''}
+                                  style={{ opacity: isTooHigh ? 0.3 : 1, cursor: isTooHigh ? 'not-allowed' : 'pointer' }}
+                                >
+                                  {lvl.toUpperCase()}
+                                </button>
+                                {!isTooHigh && (
+                                  <RoleTooltip
+                                    level={lvl}
+                                    contextName={mapVerticalLabel(v.label)}
+                                    isFeature={false}
+                                  />
+                                )}
+                              </div>
                             );
                           })}
                         </div>
@@ -170,17 +179,25 @@ const UserEditorModal = (props) => {
                                       const isTooHigh = LEVEL_RANKS[lvl] > Math.min(globalMaxRank, verticalMaxRank);
                                       
                                       return (
-                                        <button
-                                          key={lvl}
-                                          type="button"
-                                          className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
-                                          onClick={() => !isTooHigh && onFeatureLevelChange(v.id, feature.id, lvl)}
-                                          disabled={isTooHigh}
-                                          title={isTooHigh ? `Locked by vertical access level (${normalizedVLevel.toUpperCase()})` : ''}
-                                          style={{ opacity: isTooHigh ? 0.3 : 1 }}
-                                        >
-                                          {lvl.charAt(0).toUpperCase()}
-                                        </button>
+                                        <div key={lvl} className="role-tooltip-anchor">
+                                          <button
+                                            type="button"
+                                            className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                            onClick={() => !isTooHigh && onFeatureLevelChange(v.id, feature.id, lvl)}
+                                            disabled={isTooHigh}
+                                            title={isTooHigh ? `Locked by vertical access level (${normalizedVLevel.toUpperCase()})` : ''}
+                                            style={{ opacity: isTooHigh ? 0.3 : 1 }}
+                                          >
+                                            {lvl.charAt(0).toUpperCase()}
+                                          </button>
+                                          {!isTooHigh && (
+                                            <RoleTooltip
+                                              level={lvl}
+                                              contextName={feature.label}
+                                              isFeature={true}
+                                            />
+                                          )}
+                                        </div>
                                       );
                                     })}
                                   </div>

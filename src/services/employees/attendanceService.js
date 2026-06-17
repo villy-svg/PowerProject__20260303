@@ -166,13 +166,40 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
 // ---------------------------------------------------------------------------
 // EMPLOYEE SELF-SERVICE: Fetch current day's record for the logged-in employee
 //
-// Used to determine if the "Start Shift" or "End Shift" button shows.
+// Queries daily_attendances directly — matching the original design intent.
+//
+// Two fixes vs the original implementation:
+//   1. We first resolve the caller's employee_id from user_profiles so we
+//      can pass an explicit .eq('employee_id', ...) filter. Without this,
+//      contributor+ users (whose RLS lets ALL rows through) would get
+//      multiple records → .maybeSingle() throws PGRST116.
+//   2. The new "Attendance: SELECT own record" RLS policy (migration
+//      20260617120000) now also lets viewer-level users read their own row,
+//      so this query works for all role levels.
 //
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchMyTodayAttendance() {
   const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
 
+  // Step 1: Resolve the caller's employee_id from their profile.
+  // This is a lightweight single-row lookup on user_profiles (indexed on id).
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('employee_id')
+    .single();
+
+  if (profileError) {
+    console.error('[attendanceService] fetchMyTodayAttendance profile lookup error:', profileError);
+    return { data: null, error: profileError };
+  }
+
+  // No employee linked to this user account — treat as "no record" cleanly.
+  if (!profile?.employee_id) {
+    return { data: null, error: null };
+  }
+
+  // Step 2: Fetch today's record for this specific employee only.
   const { data, error } = await supabase
     .from('daily_attendances')
     .select(`
@@ -185,10 +212,8 @@ export async function fetchMyTodayAttendance() {
       employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )
     `)
     .eq('shift_date', today)
-    // Filter by the linked employee via user_profiles
-    // Note: This relies on RLS to scope to the user's own employee record.
-    // The service uses the authenticated user's session.
-    .maybeSingle(); // Returns null (not error) if no record exists
+    .eq('employee_id', profile.employee_id)
+    .maybeSingle(); // Safe: employee_id + shift_date is a UNIQUE constraint → at most 1 row
 
   if (error) {
     console.error('[attendanceService] fetchMyTodayAttendance error:', error);

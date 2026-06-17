@@ -5,6 +5,7 @@ import { userService } from '../services/auth/userService';
 import { sortUsers } from './UserManagement/useUserManagement';
 import { ROLE_LEVELS } from '../constants/roles';
 import { IconX } from './Icons';
+import RoleTooltip from './RoleTooltip';
 import './BoardRBACModal.css';
 
 const ACCESS_LEVELS = ['none', 'viewer', 'contributor', 'editor', 'admin'];
@@ -153,81 +154,72 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
   // ---------------------------------------------------------------------------
   const handleSyncPermissions = async () => {
     setIsSyncing(true);
+    const errors = [];
     try {
-      const promises = [];
-
-      // Collect all user IDs that have been touched (in current or original map)
+      // Collect all user IDs touched since the modal opened (current + original maps)
       const allTouchedUserIds = new Set([
         ...Object.keys(accessMap),
         ...Object.keys(originalAccessMap),
       ]);
 
       for (const userId of allTouchedUserIds) {
-        const newExplicit   = accessMap[userId];         // undefined = no override
-        const origExplicit  = originalAccessMap[userId]; // undefined = was not overridden
-        const inheritedLevel = inheritedMap[userId];     // the vertical-level fallback
+        const newExplicit  = accessMap[userId];          // undefined  = user hit ↩ RESET
+        const origExplicit = originalAccessMap[userId];  // undefined  = no row existed in DB
 
-        // No change at the explicit level → skip
+        // No change — skip to next user
         if (newExplicit === origExplicit) continue;
 
         if (featureId) {
-          if (newExplicit === undefined || newExplicit === inheritedLevel) {
-            // Reset to inherit: delete the feature_access row (if it exists)
+          if (newExplicit === undefined) {
+            // ↩ RESET was clicked — delete the feature_access row to restore inheritance
             if (origExplicit !== undefined) {
-              promises.push(
-                supabase
-                  .from('feature_access')
-                  .delete()
-                  .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId })
-              );
+              const { error } = await supabase
+                .from('feature_access')
+                .delete()
+                .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId });
+              if (error) errors.push(`Delete failed for ${userId}: ${error.message}`);
             }
-          } else if (newExplicit === 'none') {
-            // Explicit NONE (no access, overriding inheritance)
-            promises.push(
-              supabase
-                .from('feature_access')
-                .upsert(
-                  { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: 'none' },
-                  { onConflict: 'user_id,vertical_id,feature_id' }
-                )
-            );
           } else {
-            // Explicit override at a specific level
-            promises.push(
-              supabase
-                .from('feature_access')
-                .upsert(
-                  { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newExplicit },
-                  { onConflict: 'user_id,vertical_id,feature_id' }
-                )
-            );
+            // Any explicit level (including levels that match the inherited vertical level) →
+            // always upsert a feature_access row. This is the only way to promote a user
+            // from "inherited" to "explicitly set", even if the value is the same.
+            const { error } = await supabase
+              .from('feature_access')
+              .upsert(
+                { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newExplicit },
+                { onConflict: 'user_id,vertical_id,feature_id' }
+              );
+            if (error) errors.push(`Upsert failed for ${userId}: ${error.message}`);
           }
         } else {
           // Vertical-level modal (no inheritance concept)
           if (newExplicit === undefined || newExplicit === 'none') {
             if (origExplicit !== undefined) {
-              promises.push(
-                supabase
-                  .from('vertical_access')
-                  .delete()
-                  .match({ user_id: userId, vertical_id: verticalId })
-              );
+              const { error } = await supabase
+                .from('vertical_access')
+                .delete()
+                .match({ user_id: userId, vertical_id: verticalId });
+              if (error) errors.push(`Delete failed for ${userId}: ${error.message}`);
             }
           } else {
-            promises.push(
-              supabase
-                .from('vertical_access')
-                .upsert(
-                  { user_id: userId, vertical_id: verticalId, access_level: newExplicit },
-                  { onConflict: 'user_id,vertical_id' }
-                )
-            );
+            const { error } = await supabase
+              .from('vertical_access')
+              .upsert(
+                { user_id: userId, vertical_id: verticalId, access_level: newExplicit },
+                { onConflict: 'user_id,vertical_id' }
+              );
+            if (error) errors.push(`Upsert failed for ${userId}: ${error.message}`);
           }
         }
       }
 
-      await Promise.all(promises);
-      await fetchUsersAndAccess(); // Re-fetch to reflect saved state
+      if (errors.length > 0) {
+        console.error('[BoardRBACModal] Sync errors:', errors);
+        alert(`Some permissions failed to save:\n${errors.join('\n')}`);
+      }
+
+      // Always re-fetch so the UI reflects the true DB state
+      await fetchUsersAndAccess();
     } catch (err) {
       console.error('Error syncing access:', err);
       alert('Failed to sync permissions. Please try again.');
@@ -303,24 +295,30 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                               const isChanged = isActive && hasChanged;
 
                               return (
-                                <button
-                                  key={lvl}
-                                  className={[
-                                    'access-lvl-btn',
-                                    `lvl-${lvl}`,
-                                    isActive    ? 'active'       : '',
-                                    isInherited ? 'is-inherited' : '',
-                                    isChanged   ? 'has-changed'  : '',
-                                  ].filter(Boolean).join(' ')}
-                                  onClick={() => handleAccessChange(user.id, lvl)}
-                                  disabled={isSyncing}
-                                  title={isInherited ? `Inherited from vertical: ${lvl}` : undefined}
-                                >
-                                  {lvl.toUpperCase()}
-                                  {isInherited && (
-                                    <span className="access-lvl-inherited-tag">inherited</span>
-                                  )}
-                                </button>
+                                <div key={lvl} className="role-tooltip-anchor">
+                                  <button
+                                    className={[
+                                      'access-lvl-btn',
+                                      `lvl-${lvl}`,
+                                      isActive    ? 'active'       : '',
+                                      isInherited ? 'is-inherited' : '',
+                                      isChanged   ? 'has-changed'  : '',
+                                    ].filter(Boolean).join(' ')}
+                                    onClick={() => handleAccessChange(user.id, lvl)}
+                                    disabled={isSyncing}
+                                    title={isInherited ? `Inherited from vertical: ${lvl}` : undefined}
+                                  >
+                                    {lvl.toUpperCase()}
+                                    {isInherited && (
+                                      <span className="access-lvl-inherited-tag">inherited</span>
+                                    )}
+                                  </button>
+                                  <RoleTooltip
+                                    level={lvl}
+                                    contextName={titleLabel}
+                                    isFeature={!!featureId}
+                                  />
+                                </div>
                               );
                             })}
                             {/* Reset to inherit button — only shown for feature modals with an explicit override */}
