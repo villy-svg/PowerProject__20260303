@@ -303,14 +303,6 @@
 .v-level-selector {
   display: flex;
   gap: 4px;
-  /* Allow RoleTooltip panels (position: absolute) to escape this container */
-  overflow: visible;
-  position: relative;
-}
-
-/* Tooltip z-index boost inside the UserEditorModal (renders above modal overlay) */
-.user-role-modal .role-tooltip {
-  z-index: 3000;
 }
 .v-lvl-btn {
   background: color-mix(in srgb, var(--text-color), transparent 95%);

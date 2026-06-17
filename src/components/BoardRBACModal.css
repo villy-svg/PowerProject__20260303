@@ -175,9 +175,6 @@
   display: flex;
   gap: 4px;
   justify-content: flex-end;
-  /* Allow absolutely positioned RoleTooltip panels to overflow this container */
-  overflow: visible;
-  position: relative;
 }
 
 .access-lvl-btn {
@@ -386,7 +383,3 @@
   font-style: italic;
 }
 
-/* Tooltip z-index boost inside the board RBAC modal (sits above the modal overlay) */
-.board-rbac-modal .role-tooltip {
-  z-index: 10100;
-}

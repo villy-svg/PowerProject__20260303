@@ -1,76 +1,53 @@
 /* ==========================================================================
-   RoleTooltip — contextual hover tooltip for RBAC role-level buttons
-   Used in: BoardRBACModal, UserEditorModal
+   RoleTooltip — portal-based fixed tooltip for RBAC role-level buttons.
+   Rendered into document.body via createPortal to escape overflow:hidden/auto
+   parents (modal scroll containers, flex panels, etc.)
    ========================================================================== */
 
-/* --- Wrapper that anchors the tooltip --- */
+/* --- Anchor wrapper (inline-flex so it doesn't disrupt button layout) --- */
 .role-tooltip-anchor {
   position: relative;
   display: inline-flex;
 }
 
-/* Show tooltip on hover of anchor */
-.role-tooltip-anchor .role-tooltip {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(6px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.role-tooltip-anchor:hover .role-tooltip,
-.role-tooltip-anchor:focus-within .role-tooltip {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* --- Tooltip panel --- */
+/* ==========================================================================
+   Tooltip panel — position:fixed, coordinates set by JS via inline style.
+   Transform positions it ABOVE & centred on the anchor button.
+   ========================================================================== */
 .role-tooltip {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  transform: translateX(-50%) translateY(6px);
+  position: fixed;
+  /* JS sets top/left to the anchor's bounding-rect centre.
+     Transform then shifts the panel so its bottom-centre aligns with that point. */
+  transform: translateX(-50%) translateY(calc(-100% - 12px));
   width: 230px;
-  background: color-mix(in srgb, var(--bg-color, #09090b), white 4%);
-  border: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 65%);
+  z-index: 99999;
+
+  background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
+  border: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-radius: 12px;
   padding: 12px;
-  z-index: 10000;
+
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 20px 48px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+
+  /* Entrance animation */
+  animation: roleTooltipIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
 }
 
-/* Ensure tooltip from hover also moves correctly (override the non-hover transform) */
-.role-tooltip-anchor:hover .role-tooltip {
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Prevent tooltip from overflowing the left side of the screen */
-.role-tooltip-anchor:first-child .role-tooltip,
-.role-tooltip-anchor:nth-child(1) .role-tooltip,
-.role-tooltip-anchor:nth-child(2) .role-tooltip {
-  left: 0;
-  transform: translateY(6px);
-}
-.role-tooltip-anchor:first-child:hover .role-tooltip,
-.role-tooltip-anchor:nth-child(1):hover .role-tooltip,
-.role-tooltip-anchor:nth-child(2):hover .role-tooltip {
-  transform: translateY(0);
-}
-
-/* Prevent tooltip from overflowing right for last two buttons */
-.role-tooltip-anchor:nth-last-child(1) .role-tooltip,
-.role-tooltip-anchor:nth-last-child(2) .role-tooltip {
-  left: auto;
-  right: 0;
-  transform: translateY(6px);
-}
-.role-tooltip-anchor:nth-last-child(1):hover .role-tooltip,
-.role-tooltip-anchor:nth-last-child(2):hover .role-tooltip {
-  transform: translateY(0);
+@keyframes roleTooltipIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(calc(-100% - 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(calc(-100% - 12px));
+  }
 }
 
 /* --- Header row --- */
@@ -83,7 +60,7 @@
 
 .role-tooltip-badge {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.6px;
   padding: 2px 6px;
@@ -93,6 +70,7 @@
   background: color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 88%);
   flex-shrink: 0;
   line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .role-tooltip-headline {
@@ -105,13 +83,13 @@
 /* --- Context line --- */
 .role-tooltip-context {
   font-size: 0.7rem;
-  color: color-mix(in srgb, var(--text-color), transparent 45%);
+  color: color-mix(in srgb, var(--text-color), transparent 40%);
   margin: 0 0 10px;
   line-height: 1.4;
 }
 
 .role-tooltip-context strong {
-  color: color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 20%);
+  color: color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 15%);
   font-weight: 600;
 }
 
@@ -138,7 +116,7 @@
   gap: 6px;
   font-size: 0.68rem;
   line-height: 1.35;
-  color: color-mix(in srgb, var(--text-color), transparent 25%);
+  color: color-mix(in srgb, var(--text-color), transparent 20%);
 }
 
 .perm-icon {
@@ -158,18 +136,18 @@
   opacity: 0.7;
 }
 
-/* Lines for "cannot" items */
+/* Cannot-do items: struck through */
 .role-tooltip-list--cannot li {
-  opacity: 0.6;
+  opacity: 0.55;
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--status-danger, #f43f5e), transparent 50%);
+  text-decoration-color: color-mix(in srgb, var(--status-danger, #f43f5e), transparent 55%);
   text-decoration-thickness: 1px;
 }
 
 /* --- Summary blurb --- */
 .role-tooltip-summary {
   font-size: 0.65rem;
-  color: color-mix(in srgb, var(--text-color), transparent 55%);
+  color: color-mix(in srgb, var(--text-color), transparent 50%);
   line-height: 1.45;
   margin: 0;
   padding-top: 8px;
@@ -177,31 +155,15 @@
   font-style: italic;
 }
 
-/* --- Downward caret arrow --- */
+/* --- Downward caret (points at the button below) --- */
 .role-tooltip-caret {
   position: absolute;
-  bottom: -6px;
+  bottom: -5px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 10px;
-  height: 10px;
-  background: color-mix(in srgb, var(--bg-color, #09090b), white 4%);
-  border-right: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 65%);
-  border-bottom: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 65%);
   transform: translateX(-50%) rotate(45deg);
-}
-
-/* Left-anchored caret */
-.role-tooltip-anchor:first-child .role-tooltip-caret,
-.role-tooltip-anchor:nth-child(1) .role-tooltip-caret,
-.role-tooltip-anchor:nth-child(2) .role-tooltip-caret {
-  left: 20px;
-}
-
-/* Right-anchored caret */
-.role-tooltip-anchor:nth-last-child(1) .role-tooltip-caret,
-.role-tooltip-anchor:nth-last-child(2) .role-tooltip-caret {
-  left: auto;
-  right: 20px;
-  transform: rotate(45deg);
+  width: 9px;
+  height: 9px;
+  background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
+  border-right: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
+  border-bottom: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
 }

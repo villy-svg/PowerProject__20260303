@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import './RoleTooltip.css';
 
 /**
  * RoleTooltip
  *
- * Renders a rich hover tooltip explaining what a given RBAC access level grants
- * within a specific feature or vertical context.
+ * A portal-based hover tooltip that escapes any overflow:hidden/auto parent.
+ * Wraps its children in a `.role-tooltip-anchor` div and renders the tooltip
+ * panel into document.body via createPortal using position:fixed coordinates.
+ *
+ * Usage:
+ *   <RoleTooltip level="viewer" contextName="Attendance Board" isFeature>
+ *     <button>VIEWER</button>
+ *   </RoleTooltip>
  *
  * Props:
- *   level       {string}  — 'none' | 'viewer' | 'contributor' | 'editor' | 'admin'
- *   contextName {string}  — e.g. "Attendance Board" or "Employees vertical"
- *   isFeature   {boolean} — true if this is a feature-level tooltip (vs vertical-level)
+ *   level       {string}    — 'none' | 'viewer' | 'contributor' | 'editor' | 'admin'
+ *   contextName {string}    — e.g. "Attendance Board" or "Employees"
+ *   isFeature   {boolean}   — true → "feature", false → "vertical"
+ *   children    {ReactNode} — the button or element to wrap
  */
 
 const ROLE_DATA = {
@@ -24,83 +32,114 @@ const ROLE_DATA = {
   viewer: {
     headline: 'Read-Only Access',
     color: 'var(--brand-blue, #3b82f6)',
-    can: ['View & browse all records', 'Export data (if enabled)', 'Search & filter data'],
+    can: ['View & browse all records', 'Search & filter data'],
     cannot: ['Create new records', 'Edit existing data', 'Delete any records'],
-    summary: 'Perfect for stakeholders and observers who need visibility without write access.',
+    summary: 'For stakeholders who need visibility without write access.',
   },
   contributor: {
     headline: 'Read + Create',
     color: 'var(--brand-emerald, #10b981)',
-    can: ['View & browse all records', 'Create new entries', 'Search & filter data'],
+    can: ['View & browse all records', 'Create new entries'],
     cannot: ['Edit or update existing records', 'Delete any records'],
-    summary: 'Ideal for team members who submit data but should not modify past entries.',
+    summary: 'For team members who submit data but should not modify past entries.',
   },
   editor: {
     headline: 'Read + Create + Edit',
     color: 'var(--brand-amber, #f59e0b)',
-    can: ['View & browse all records', 'Create new entries', 'Edit & update existing records', 'Search & filter data'],
+    can: ['View & browse all records', 'Create new entries', 'Edit & update existing records'],
     cannot: ['Permanently delete records'],
-    summary: 'For trusted team members who manage day-to-day data with full write access.',
+    summary: 'For trusted members who manage day-to-day data with full write access.',
   },
   admin: {
     headline: 'Full Access',
     color: 'var(--priority-urgent, #f43f5e)',
-    can: ['View & browse all records', 'Create new entries', 'Edit & update existing records', 'Permanently delete records', 'Manage sub-settings (if available)'],
+    can: ['View, create, edit & delete records', 'Manage sub-settings (if available)'],
     cannot: [],
     summary: 'Full CRUD control. Grant only to trusted administrators for this area.',
   },
 };
 
-const RoleTooltip = ({ level, contextName, isFeature }) => {
+const RoleTooltip = ({ level, contextName, isFeature, children }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const anchorRef = useRef(null);
+
   const data = ROLE_DATA[level] || ROLE_DATA.none;
   const contextType = isFeature ? 'feature' : 'vertical';
 
+  const show = useCallback(() => {
+    if (anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.top + window.scrollY,
+        left: rect.left + rect.width / 2 + window.scrollX,
+      });
+    }
+    setIsVisible(true);
+  }, []);
+
+  const hide = useCallback(() => setIsVisible(false), []);
+
   return (
-    <div className="role-tooltip" role="tooltip" style={{ '--tooltip-accent': data.color }}>
-      {/* Header */}
-      <div className="role-tooltip-header">
-      <span className="role-tooltip-badge">
-          {level?.toUpperCase()}
-        </span>
-        <span className="role-tooltip-headline">{data.headline}</span>
-      </div>
+    <div
+      ref={anchorRef}
+      className="role-tooltip-anchor"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+    >
+      {children}
 
-      {/* Context Line */}
-      <p className="role-tooltip-context">
-        {contextName
-          ? <>For <strong>{contextName}</strong> {contextType}</>
-          : `For this ${contextType}`}
-      </p>
+      {isVisible && createPortal(
+        <div
+          className="role-tooltip"
+          role="tooltip"
+          style={{ '--tooltip-accent': data.color, top: coords.top, left: coords.left }}
+        >
+          {/* Header */}
+          <div className="role-tooltip-header">
+            <span className="role-tooltip-badge">{level?.toUpperCase()}</span>
+            <span className="role-tooltip-headline">{data.headline}</span>
+          </div>
 
-      {/* Permissions grid */}
-      <div className="role-tooltip-perms">
-        {data.can.length > 0 && (
-          <ul className="role-tooltip-list role-tooltip-list--can">
-            {data.can.map((item, i) => (
-              <li key={i}>
-                <span className="perm-icon perm-icon--yes">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-        {data.cannot.length > 0 && (
-          <ul className="role-tooltip-list role-tooltip-list--cannot">
-            {data.cannot.map((item, i) => (
-              <li key={i}>
-                <span className="perm-icon perm-icon--no">✕</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+          {/* Context line */}
+          {contextName && (
+            <p className="role-tooltip-context">
+              For <strong>{contextName}</strong> {contextType}
+            </p>
+          )}
 
-      {/* Summary */}
-      <p className="role-tooltip-summary">{data.summary}</p>
+          {/* Permissions */}
+          <div className="role-tooltip-perms">
+            {data.can.length > 0 && (
+              <ul className="role-tooltip-list role-tooltip-list--can">
+                {data.can.map((item, i) => (
+                  <li key={i}>
+                    <span className="perm-icon perm-icon--yes">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {data.cannot.length > 0 && (
+              <ul className="role-tooltip-list role-tooltip-list--cannot">
+                {data.cannot.map((item, i) => (
+                  <li key={i}>
+                    <span className="perm-icon perm-icon--no">✕</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-      {/* Caret */}
-      <div className="role-tooltip-caret" />
+          {/* Summary */}
+          <p className="role-tooltip-summary">{data.summary}</p>
+
+          {/* Caret */}
+          <div className="role-tooltip-caret" />
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

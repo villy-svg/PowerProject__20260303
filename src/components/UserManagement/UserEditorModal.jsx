@@ -129,7 +129,12 @@ const UserEditorModal = (props) => {
                             const isTooHigh = LEVEL_RANKS[lvl] > maxRank;
 
                             return (
-                              <div key={lvl} className="role-tooltip-anchor">
+                              <RoleTooltip
+                                key={lvl}
+                                level={lvl}
+                                contextName={mapVerticalLabel(v.label)}
+                                isFeature={false}
+                              >
                                 <button
                                   type="button"
                                   className={`v-lvl-btn ${normalizedVLevel === lvl ? 'active' : ''} lvl-${lvl}`}
@@ -140,14 +145,7 @@ const UserEditorModal = (props) => {
                                 >
                                   {lvl.toUpperCase()}
                                 </button>
-                                {!isTooHigh && (
-                                  <RoleTooltip
-                                    level={lvl}
-                                    contextName={mapVerticalLabel(v.label)}
-                                    isFeature={false}
-                                  />
-                                )}
-                              </div>
+                              </RoleTooltip>
                             );
                           })}
                         </div>
@@ -179,7 +177,12 @@ const UserEditorModal = (props) => {
                                       const isTooHigh = LEVEL_RANKS[lvl] > Math.min(globalMaxRank, verticalMaxRank);
                                       
                                       return (
-                                        <div key={lvl} className="role-tooltip-anchor">
+                                        <RoleTooltip
+                                          key={lvl}
+                                          level={lvl}
+                                          contextName={feature.label}
+                                          isFeature={true}
+                                        >
                                           <button
                                             type="button"
                                             className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
@@ -190,14 +193,7 @@ const UserEditorModal = (props) => {
                                           >
                                             {lvl.charAt(0).toUpperCase()}
                                           </button>
-                                          {!isTooHigh && (
-                                            <RoleTooltip
-                                              level={lvl}
-                                              contextName={feature.label}
-                                              isFeature={true}
-                                            />
-                                          )}
-                                        </div>
+                                        </RoleTooltip>
                                       );
                                     })}
                                   </div>

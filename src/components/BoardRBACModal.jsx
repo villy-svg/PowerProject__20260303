@@ -295,7 +295,12 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                               const isChanged = isActive && hasChanged;
 
                               return (
-                                <div key={lvl} className="role-tooltip-anchor">
+                                <RoleTooltip
+                                  key={lvl}
+                                  level={lvl}
+                                  contextName={titleLabel}
+                                  isFeature={!!featureId}
+                                >
                                   <button
                                     className={[
                                       'access-lvl-btn',
@@ -313,12 +318,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                                       <span className="access-lvl-inherited-tag">inherited</span>
                                     )}
                                   </button>
-                                  <RoleTooltip
-                                    level={lvl}
-                                    contextName={titleLabel}
-                                    isFeature={!!featureId}
-                                  />
-                                </div>
+                                </RoleTooltip>
                               );
                             })}
                             {/* Reset to inherit button — only shown for feature modals with an explicit override */}
