@@ -281,3 +281,105 @@
     text-align: center;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Inherited level: dashed border variant of the active state.
+   Signals "this is the effective level but it comes from the vertical, not
+   an explicit feature override."
+   -------------------------------------------------------------------------- */
+.access-lvl-btn.is-inherited {
+  /* Dashed border to distinguish from explicit active */
+  border-style: dashed;
+}
+
+/* Keep the color coding consistent with explicit active, just dashed */
+.access-lvl-btn.is-inherited.lvl-viewer {
+  background: color-mix(in srgb, var(--brand-blue), transparent 90%);
+  border-color: var(--brand-blue);
+  color: var(--brand-blue);
+}
+
+.access-lvl-btn.is-inherited.lvl-contributor {
+  background: color-mix(in srgb, var(--brand-emerald), transparent 90%);
+  border-color: var(--brand-emerald);
+  color: var(--brand-emerald);
+}
+
+.access-lvl-btn.is-inherited.lvl-editor {
+  background: color-mix(in srgb, var(--brand-amber), transparent 90%);
+  border-color: var(--brand-amber);
+  color: var(--brand-amber);
+}
+
+.access-lvl-btn.is-inherited.lvl-admin {
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border-color: var(--priority-urgent);
+  color: var(--priority-urgent);
+}
+
+/* Small "inherited" sub-label inside the button */
+.access-lvl-inherited-tag {
+  display: block;
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-top: 1px;
+  line-height: 1;
+}
+
+/* Reset-to-inherit button: subtle, neutral, with a left-arrow icon */
+.access-lvl-btn.access-lvl-reset {
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
+  border: 1px dashed color-mix(in srgb, var(--text-color), transparent 70%);
+  color: color-mix(in srgb, var(--text-color), transparent 40%);
+  font-size: 0.6rem;
+  font-style: normal;
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.access-lvl-btn.access-lvl-reset:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--text-color), transparent 50%);
+  color: var(--text-color);
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+}
+
+/* --------------------------------------------------------------------------
+   Footer — proper flex layout + pending indicator
+   -------------------------------------------------------------------------- */
+.board-rbac-footer {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #0F1218;
+  flex-shrink: 0;
+}
+
+.board-rbac-pending-note {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--status-warning, #f59e0b);
+  opacity: 0.8;
+  letter-spacing: 0.3px;
+}
+
+/* Disabled sync button when nothing has changed */
+.board-rbac-footer .halo-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Header inherit note */
+.board-rbac-inherit-note {
+  display: block;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--brand-green), transparent 40%);
+  margin-top: 2px;
+  font-style: italic;
+}
+

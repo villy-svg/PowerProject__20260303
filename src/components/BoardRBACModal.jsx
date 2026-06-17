@@ -9,13 +9,40 @@ import './BoardRBACModal.css';
 
 const ACCESS_LEVELS = ['none', 'viewer', 'contributor', 'editor', 'admin'];
 
+/**
+ * BoardRBACModal
+ *
+ * Bug fix (2026-06-17): Modal now correctly reflects inherited permission levels.
+ *
+ * BEFORE: When a featureId is provided, the modal only fetched `feature_access`.
+ * Users with no explicit feature row appeared as NONE, hiding their inherited
+ * vertical-level access. This was misleading — it looked like everyone had no
+ * access even when they did via the parent vertical.
+ *
+ * AFTER: The modal now:
+ *   1. Always fetches both `vertical_access` AND `feature_access` (when featureId set).
+ *   2. Builds an `inheritedMap` (vertical level) alongside the `accessMap` (feature override).
+ *   3. Renders the active button as the EXPLICIT override if set, or the INHERITED level
+ *      if no override exists — with a clear visual "(inherited)" sub-label.
+ *   4. Sync only writes a feature_access row if the chosen level DIFFERS from the inherited
+ *      level. Choosing the inherited level explicitly deletes any override (resets to inherit).
+ */
 const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [accessMap, setAccessMap] = useState({}); // userId -> access_level
+
+  // Explicit overrides stored in feature_access (or vertical_access for vertical-level modals)
+  const [accessMap, setAccessMap] = useState({}); // userId -> explicit access_level | undefined
+
+  // Vertical-level access (only populated when featureId is set — used for inheritance display)
+  const [inheritedMap, setInheritedMap] = useState({}); // userId -> inherited vertical level | undefined
+
   const [originalAccessMap, setOriginalAccessMap] = useState({});
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // ---------------------------------------------------------------------------
+  // Fetch users + access records
+  // ---------------------------------------------------------------------------
   const fetchUsersAndAccess = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,31 +65,50 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
 
       const sortedUsers = sortUsers(merged);
 
-      // 2. Fetch specific access records
-      let accessData = [];
+      // 2. Fetch access records. When a featureId is set, ALWAYS also fetch vertical_access
+      // so we can show the inherited level for users without an explicit feature override.
+      let explicitAccessData = [];
+      let verticalAccessData = [];
+
       if (featureId) {
-        const { data } = await supabase
-          .from('feature_access')
-          .select('user_id, access_level')
-          .eq('vertical_id', verticalId)
-          .eq('feature_id', featureId);
-        accessData = data || [];
+        // Feature-level modal: fetch both explicit feature overrides AND vertical inheritance
+        const [featureResult, verticalResult] = await Promise.all([
+          supabase
+            .from('feature_access')
+            .select('user_id, access_level')
+            .eq('vertical_id', verticalId)
+            .eq('feature_id', featureId),
+          supabase
+            .from('vertical_access')
+            .select('user_id, access_level')
+            .eq('vertical_id', verticalId),
+        ]);
+        explicitAccessData = featureResult.data || [];
+        verticalAccessData = verticalResult.data || [];
       } else {
+        // Vertical-level modal: no inheritance concept, just fetch vertical_access directly
         const { data } = await supabase
           .from('vertical_access')
           .select('user_id, access_level')
           .eq('vertical_id', verticalId);
-        accessData = data || [];
+        explicitAccessData = data || [];
       }
 
+      // 3. Build maps
       const accessMapping = {};
-      accessData.forEach(row => {
+      explicitAccessData.forEach(row => {
         accessMapping[row.user_id] = row.access_level;
+      });
+
+      const inheritedMapping = {};
+      verticalAccessData.forEach(row => {
+        inheritedMapping[row.user_id] = row.access_level;
       });
 
       setUsers(sortedUsers);
       setAccessMap(accessMapping);
-      setOriginalAccessMap(accessMapping);
+      setOriginalAccessMap({ ...accessMapping });
+      setInheritedMap(inheritedMapping);
     } catch (err) {
       console.error('Error fetching RBAC data:', err);
     } finally {
@@ -77,34 +123,89 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
       setUsers([]);
       setAccessMap({});
       setOriginalAccessMap({});
+      setInheritedMap({});
     }
   }, [isOpen, fetchUsersAndAccess]);
 
+  // ---------------------------------------------------------------------------
+  // Local state change — sets an EXPLICIT override in accessMap.
+  // Setting undefined removes the override (resets to inherit).
+  // ---------------------------------------------------------------------------
   const handleAccessChange = (userId, newLevel) => {
-    // Update local state optimistically
     setAccessMap(prev => ({ ...prev, [userId]: newLevel }));
   };
 
+  // ---------------------------------------------------------------------------
+  // Derive the EFFECTIVE (displayed) level for a user:
+  //   - If an explicit override exists → use it
+  //   - Else if an inherited vertical level exists → use it (shown as "inherited")
+  //   - Else → 'none'
+  // ---------------------------------------------------------------------------
+  const getEffectiveLevel = (userId) => {
+    return accessMap[userId] ?? inheritedMap[userId] ?? 'none';
+  };
+
+  // Whether a user has an explicit feature-level override (vs. just inheriting)
+  const hasExplicitOverride = (userId) => accessMap[userId] !== undefined;
+
+  // ---------------------------------------------------------------------------
+  // Sync changes to the database
+  // ---------------------------------------------------------------------------
   const handleSyncPermissions = async () => {
     setIsSyncing(true);
     try {
       const promises = [];
-      
-      for (const userId of Object.keys(accessMap)) {
-        const newLevel = accessMap[userId];
-        const originalLevel = originalAccessMap[userId] || 'none';
-        
-        if (newLevel !== originalLevel) {
-          if (newLevel === 'none') {
-            // Delete record
-            if (featureId) {
+
+      // Collect all user IDs that have been touched (in current or original map)
+      const allTouchedUserIds = new Set([
+        ...Object.keys(accessMap),
+        ...Object.keys(originalAccessMap),
+      ]);
+
+      for (const userId of allTouchedUserIds) {
+        const newExplicit   = accessMap[userId];         // undefined = no override
+        const origExplicit  = originalAccessMap[userId]; // undefined = was not overridden
+        const inheritedLevel = inheritedMap[userId];     // the vertical-level fallback
+
+        // No change at the explicit level → skip
+        if (newExplicit === origExplicit) continue;
+
+        if (featureId) {
+          if (newExplicit === undefined || newExplicit === inheritedLevel) {
+            // Reset to inherit: delete the feature_access row (if it exists)
+            if (origExplicit !== undefined) {
               promises.push(
                 supabase
                   .from('feature_access')
                   .delete()
                   .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId })
               );
-            } else {
+            }
+          } else if (newExplicit === 'none') {
+            // Explicit NONE (no access, overriding inheritance)
+            promises.push(
+              supabase
+                .from('feature_access')
+                .upsert(
+                  { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: 'none' },
+                  { onConflict: 'user_id,vertical_id,feature_id' }
+                )
+            );
+          } else {
+            // Explicit override at a specific level
+            promises.push(
+              supabase
+                .from('feature_access')
+                .upsert(
+                  { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newExplicit },
+                  { onConflict: 'user_id,vertical_id,feature_id' }
+                )
+            );
+          }
+        } else {
+          // Vertical-level modal (no inheritance concept)
+          if (newExplicit === undefined || newExplicit === 'none') {
+            if (origExplicit !== undefined) {
               promises.push(
                 supabase
                   .from('vertical_access')
@@ -113,26 +214,20 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
               );
             }
           } else {
-            // Upsert record
-            if (featureId) {
-              promises.push(
-                supabase
-                  .from('feature_access')
-                  .upsert({ user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newLevel }, { onConflict: 'user_id,vertical_id,feature_id' })
-              );
-            } else {
-              promises.push(
-                supabase
-                  .from('vertical_access')
-                  .upsert({ user_id: userId, vertical_id: verticalId, access_level: newLevel }, { onConflict: 'user_id,vertical_id' })
-              );
-            }
+            promises.push(
+              supabase
+                .from('vertical_access')
+                .upsert(
+                  { user_id: userId, vertical_id: verticalId, access_level: newExplicit },
+                  { onConflict: 'user_id,vertical_id' }
+                )
+            );
           }
         }
       }
 
       await Promise.all(promises);
-      await fetchUsersAndAccess();
+      await fetchUsersAndAccess(); // Re-fetch to reflect saved state
     } catch (err) {
       console.error('Error syncing access:', err);
       alert('Failed to sync permissions. Please try again.');
@@ -143,6 +238,9 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
 
   if (!isOpen) return null;
 
+  // Whether any explicit override has changed vs. the saved state
+  const hasPendingChanges = users.some(u => accessMap[u.id] !== originalAccessMap[u.id]);
+
   return createPortal(
     <div className="board-rbac-overlay">
       <div className="board-rbac-modal">
@@ -151,6 +249,11 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
             <h3>Manage Access: {titleLabel}</h3>
             <span className="board-rbac-subtitle">
               Configure who can access this {featureId ? 'feature' : 'board'} and at what level.
+              {featureId && (
+                <span className="board-rbac-inherit-note">
+                  {' '}Levels shown without a label are inherited from the vertical.
+                </span>
+              )}
             </span>
           </div>
           <button className="board-rbac-close" onClick={onClose}>
@@ -167,16 +270,15 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                 <div className="col-user">User</div>
                 <div className="col-access">Access Level</div>
               </div>
-              
+
               <div className="board-rbac-list-body">
                 {users.map(user => {
-                  const currentLevel = accessMap[user.id] || 'none';
-                  const hasChanged = currentLevel !== (originalAccessMap[user.id] || 'none');
-
-                  // Admin is master_admin, they bypass these granular controls usually, 
-                  // but we still let them configure other users. If this user IS master_admin, 
-                  // we might disable it, but standard flow allows it. We'll disable for master_admin for safety.
-                  const isMasterAdmin = user.role_id === 'master_admin';
+                  const effectiveLevel  = getEffectiveLevel(user.id);
+                  const isExplicit      = hasExplicitOverride(user.id);
+                  const inherited       = inheritedMap[user.id];
+                  const originalLevel   = originalAccessMap[user.id];
+                  const hasChanged      = accessMap[user.id] !== originalLevel;
+                  const isMasterAdmin   = user.role_id === 'master_admin';
 
                   return (
                     <div key={user.id} className={`board-rbac-row ${!user.is_active ? 'inactive-user' : ''}`}>
@@ -192,16 +294,46 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                           <span className="master-admin-badge">Master Admin (All Access)</span>
                         ) : (
                           <div className="access-selector-group">
-                              {ACCESS_LEVELS.map(lvl => (
+                            {ACCESS_LEVELS.map(lvl => {
+                              // A button is "active" if this level is the current effective level
+                              const isActive = effectiveLevel === lvl;
+                              // "Inherited" label: level matches inherited AND no explicit override was set
+                              const isInherited = featureId && !isExplicit && inherited === lvl && lvl !== 'none';
+                              // "Changed" indicator: this button IS the active one AND state differs from saved
+                              const isChanged = isActive && hasChanged;
+
+                              return (
                                 <button
                                   key={lvl}
-                                  className={`access-lvl-btn ${currentLevel === lvl ? 'active' : ''} lvl-${lvl} ${hasChanged && currentLevel === lvl ? 'has-changed' : ''}`}
+                                  className={[
+                                    'access-lvl-btn',
+                                    `lvl-${lvl}`,
+                                    isActive    ? 'active'       : '',
+                                    isInherited ? 'is-inherited' : '',
+                                    isChanged   ? 'has-changed'  : '',
+                                  ].filter(Boolean).join(' ')}
                                   onClick={() => handleAccessChange(user.id, lvl)}
                                   disabled={isSyncing}
+                                  title={isInherited ? `Inherited from vertical: ${lvl}` : undefined}
                                 >
                                   {lvl.toUpperCase()}
+                                  {isInherited && (
+                                    <span className="access-lvl-inherited-tag">inherited</span>
+                                  )}
                                 </button>
-                              ))}
+                              );
+                            })}
+                            {/* Reset to inherit button — only shown for feature modals with an explicit override */}
+                            {featureId && isExplicit && (
+                              <button
+                                className="access-lvl-btn access-lvl-reset"
+                                onClick={() => handleAccessChange(user.id, undefined)}
+                                disabled={isSyncing}
+                                title={`Reset to inherited vertical level${inherited ? `: ${inherited}` : ''}`}
+                              >
+                                ↩ RESET
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -213,12 +345,14 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
           )}
         </div>
 
-        <div className="board-rbac-footer" style={{ padding: '16px 24px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'flex-end', background: '#0F1218' }}>
+        <div className="board-rbac-footer">
+          {hasPendingChanges && (
+            <span className="board-rbac-pending-note">Unsaved changes</span>
+          )}
           <button
             className="halo-button"
             onClick={handleSyncPermissions}
-            disabled={loading || isSyncing}
-            style={{ minWidth: '150px' }}
+            disabled={loading || isSyncing || !hasPendingChanges}
           >
             {isSyncing ? 'Syncing...' : 'Sync Permissions'}
           </button>
