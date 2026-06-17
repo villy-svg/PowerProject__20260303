@@ -29,24 +29,24 @@ const RAW_CONTEXT = {
   /* ── VERTICALS ── */
   'Hubs': {
     none:        { can: [], summary: 'Completely blocked from the Hubs vertical — no boards will be visible.' },
-    viewer:      { can: ['View hub profiles, locations, and operational status', 'Browse hub task boards, daily logs, and escalations (read-only)'], summary: 'Good for oversight roles who monitor hub operations without making changes.' },
-    contributor: { can: ['View all Hubs data', 'Submit new hub task entries and daily task completions'], summary: 'Suited for field staff who log work but should not modify existing records.' },
-    editor:      { can: ['View all Hubs data', 'Create and update hub tasks, daily tasks, and escalation records'], summary: 'For hub supervisors who actively manage task flow and daily operations.' },
-    admin:       { can: ['Full control over all Hubs features', 'Create, edit, and delete tasks, templates, and escalations'], summary: 'Grants complete authority over the Hubs vertical. Assign to hub managers only.' },
+    viewer:      { can: ['View hub profiles, locations, and operational status', 'Browse hub task boards (Tasks limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'Good for oversight roles. Note: Junior staff (Seniority ≤ 6) only see tasks assigned to or created by them/their reportees.' },
+    contributor: { can: ['View Hubs data (Tasks limited if Seniority ≤ 6)', 'Submit new hub task entries and daily task completions'], summary: 'Suited for field staff who log work but should not modify existing records. Sphere of Influence applies to task visibility.' },
+    editor:      { can: ['View Hubs data (Tasks limited if Seniority ≤ 6)', 'Create and update hub tasks, daily tasks, and escalation records'], summary: 'For hub supervisors who actively manage task flow and daily operations. Sphere of Influence applies to task visibility.' },
+    admin:       { can: ['Full control over all Hubs features', 'Create, edit, and delete tasks, templates, and escalations'], summary: 'Grants complete authority over the Hubs vertical. Master Admins bypass all Sphere limitations.' },
   },
   'Clients': {
     none:        { can: [], summary: 'Completely blocked from the Clients vertical.' },
-    viewer:      { can: ['Browse client profiles, service contracts, and active tasks', 'View the leads funnel and billing models (read-only)'], summary: 'For senior stakeholders who review client relationships without editing them.' },
-    contributor: { can: ['View all Client data', 'Add new clients, raise client tasks, and add leads to the funnel'], summary: 'Suited for business development staff who capture new clients and leads.' },
-    editor:      { can: ['View all Client data', 'Create and update client profiles, tasks, and leads funnel entries'], summary: 'For account managers who maintain and update ongoing client relationships.' },
-    admin:       { can: ['Full control over all Clients features', 'Create, edit, and delete clients, tasks, and leads'], summary: 'Grants complete authority over the Clients vertical.' },
+    viewer:      { can: ['Browse client profiles and service contracts', 'View active tasks and leads funnel (Tasks limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For senior stakeholders. Note: Junior staff only see client tasks tied to them or their reportees.' },
+    contributor: { can: ['View Client data (Tasks limited if Seniority ≤ 6)', 'Add new clients, raise client tasks, and add leads to the funnel'], summary: 'Suited for business development staff who capture new clients and leads. Task visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View Client data (Tasks limited if Seniority ≤ 6)', 'Create and update client profiles, tasks, and leads funnel entries'], summary: 'For account managers who maintain and update ongoing client relationships. Task visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full control over all Clients features', 'Create, edit, and delete clients, tasks, and leads'], summary: 'Grants complete authority over the Clients vertical. Master Admins bypass all Sphere limitations.' },
   },
   'Employees': {
     none:        { can: [], summary: 'Completely blocked from the Employees vertical.' },
-    viewer:      { can: ['View employee profiles, department assignments, and roles', 'Browse attendance records, remarks, and HR rules (read-only)'], summary: 'For auditors or senior stakeholders who need HR visibility.' },
-    contributor: { can: ['View all Employee data', 'Submit new attendance entries and add task remarks'], summary: 'For team leads who log attendance and remarks for their direct reports.' },
-    editor:      { can: ['View all Employee data', 'Create and update employee records, attendance logs, and remarks'], summary: 'For HR managers who actively manage employee data and attendance.' },
-    admin:       { can: ['Full control over all Employees features', 'Manage profiles, attendance, rules & regulations, and all sub-boards'], summary: 'Grants complete authority over the Employees vertical.' },
+    viewer:      { can: ['View employee profiles, department assignments, and roles', 'Browse attendance and remarks (Remarks limited by Sphere if Seniority ≤ 6)'], summary: 'For auditors or senior stakeholders. Note: Junior staff only see remarks tied to them or their reportees.' },
+    contributor: { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Submit new attendance entries and add task remarks'], summary: 'For team leads who log attendance and remarks. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Create and update employee records, attendance logs, and remarks'], summary: 'For HR managers who actively manage employee data. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full control over all Employees features', 'Manage profiles, attendance, rules & regulations, and all sub-boards'], summary: 'Grants complete authority over the Employees vertical. Master Admins bypass all Sphere limitations.' },
   },
   'Partners': {
     viewer:      { can: ['View partner profiles and associated data (read-only)'], summary: 'Read-only visibility into partner relationships.' },
@@ -61,10 +61,10 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD over all Vendors data'], summary: 'Complete authority over Vendors.' },
   },
   'Data': {
-    viewer:      { can: ['View data sheets and model verification records (read-only)'], summary: 'For stakeholders who need data visibility without making changes.' },
-    contributor: { can: ['View all data', 'Submit new data sheet entries and model verification requests'], summary: 'For analysts who input data but should not modify existing verified entries.' },
-    editor:      { can: ['View, submit, and update data sheets and verification records'], summary: 'For data managers who actively maintain and correct data records.' },
-    admin:       { can: ['Full control over all Data Manager features', 'Create, edit, and delete data and verification records'], summary: 'Complete authority over the Data vertical.' },
+    viewer:      { can: ['View data sheets and model verification records (Limited by Sphere if Seniority ≤ 6)'], summary: 'For stakeholders. Note: Junior staff only see records tied to them or their reportees.' },
+    contributor: { can: ['View data records (Limited if Seniority ≤ 6)', 'Submit new data sheet entries and model verification requests'], summary: 'For analysts. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View data records (Limited if Seniority ≤ 6)', 'Submit and update data sheets and verification records'], summary: 'For data managers. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full control over all Data Manager features', 'Create, edit, and delete data and verification records'], summary: 'Complete authority over the Data vertical. Master Admins bypass all Sphere limitations.' },
   },
 
   /* ── CLIENTS FEATURES ── */
@@ -75,16 +75,16 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — add, edit, and permanently remove client profiles'], summary: 'Complete authority over the Clients List.' },
   },
   'Client Tasks Board': {
-    viewer:      { can: ['View all client tasks, priorities, and completion statuses'], summary: 'For oversight roles who monitor task progress without assigning or editing.' },
-    contributor: { can: ['View all client tasks', 'Create new client task assignments'], summary: 'For staff who raise tasks but should not update or close them.' },
-    editor:      { can: ['View all client tasks', 'Create, reassign, and update task records and statuses'], summary: 'For task managers who actively manage client task flow.' },
-    admin:       { can: ['Full CRUD — create, edit, reassign, and delete client tasks'], summary: 'Complete authority over the Client Tasks Board.' },
+    viewer:      { can: ['View client tasks, priorities, and completion statuses (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see tasks assigned to/created by them or their reportees.' },
+    contributor: { can: ['View client tasks (Limited if Seniority ≤ 6)', 'Create new client task assignments'], summary: 'For staff who raise tasks. Visibility restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View client tasks (Limited if Seniority ≤ 6)', 'Create, reassign, and update task records and statuses'], summary: 'For task managers. Visibility restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — create, edit, reassign, and delete client tasks'], summary: 'Complete authority over the Client Tasks Board. Master Admins bypass all Sphere limitations.' },
   },
   'Leads Funnel': {
-    viewer:      { can: ['View all leads and their current funnel stage'], summary: 'For stakeholders who track pipeline progress without modifying it.' },
-    contributor: { can: ['View all leads', 'Add new leads into the funnel'], summary: 'For BDEs who capture new leads but should not move or edit existing ones.' },
-    editor:      { can: ['View all leads', 'Add new leads and move them through funnel stages', 'Update lead details and status'], summary: 'For sales managers who actively manage the lead pipeline.' },
-    admin:       { can: ['Full CRUD — add, update, progress, and delete leads from the funnel'], summary: 'Complete authority over the Leads Funnel.' },
+    viewer:      { can: ['View all leads and their current funnel stage (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For stakeholders. Note: Junior staff only see leads assigned to/created by them or their reportees.' },
+    contributor: { can: ['View leads (Limited if Seniority ≤ 6)', 'Add new leads into the funnel'], summary: 'For BDEs capturing leads. Visibility restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View leads (Limited if Seniority ≤ 6)', 'Add new leads and move them through funnel stages', 'Update lead details and status'], summary: 'For sales managers. Visibility restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — add, update, progress, and delete leads from the funnel'], summary: 'Complete authority over the Leads Funnel. Master Admins bypass all Sphere limitations.' },
   },
 
   /* ── EMPLOYEES FEATURES ── */
@@ -95,10 +95,10 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — add, edit, and permanently remove employee records'], summary: 'Complete authority over the Employees List.' },
   },
   'Remarks Manager': {
-    viewer:      { can: ['View all task remarks and their full history'], summary: 'For oversight roles who review remarks without adding new ones.' },
-    contributor: { can: ['View all remarks', 'Submit new remarks for employees'], summary: 'For team leads who log feedback but should not edit past entries.' },
-    editor:      { can: ['View all remarks', 'Submit new remarks and edit existing remark entries'], summary: 'For managers who actively maintain the remarks log.' },
-    admin:       { can: ['Full CRUD — add, edit, and delete remark entries'], summary: 'Complete authority over the Remarks Manager.' },
+    viewer:      { can: ['View task remarks and their full history (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see remarks assigned to/created by them or their reportees.' },
+    contributor: { can: ['View remarks (Limited if Seniority ≤ 6)', 'Submit new remarks for employees'], summary: 'For team leads. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View remarks (Limited if Seniority ≤ 6)', 'Submit new remarks and edit existing remark entries'], summary: 'For managers. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — add, edit, and delete remark entries'], summary: 'Complete authority over the Remarks Manager. Master Admins bypass all Sphere limitations.' },
   },
   'Attendance Board': {
     viewer:      { can: ['View attendance records for all employees', 'See attendance status breakdown and summaries'], summary: 'For HR auditors who monitor attendance without editing.' },
@@ -121,16 +121,16 @@ const RAW_CONTEXT = {
 
   /* ── CHARGING HUBS FEATURES ── */
   'Hub Tasks Board': {
-    viewer:      { can: ['View all hub task assignments, priorities, and completion statuses'], summary: 'For oversight roles who monitor hub task flow without making changes.' },
-    contributor: { can: ['View all hub tasks', 'Create new hub task assignments'], summary: 'For field staff who raise tasks but should not update or close them.' },
-    editor:      { can: ['View all hub tasks', 'Create, reassign, and update hub task records and statuses'], summary: 'For hub supervisors who actively manage hub task workflow.' },
-    admin:       { can: ['Full CRUD — create, edit, reassign, and delete hub tasks'], summary: 'Complete authority over the Hub Tasks Board.' },
+    viewer:      { can: ['View all hub task assignments, priorities, and completion statuses (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see tasks assigned to/created by them or their reportees.' },
+    contributor: { can: ['View hub tasks (Limited if Seniority ≤ 6)', 'Create new hub task assignments'], summary: 'For field staff raising tasks. Visibility restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View hub tasks (Limited if Seniority ≤ 6)', 'Create, reassign, and update hub task records and statuses'], summary: 'For hub supervisors. Visibility restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — create, edit, reassign, and delete hub tasks'], summary: 'Complete authority over the Hub Tasks Board. Master Admins bypass all Sphere limitations.' },
   },
   'Daily Task Board': {
-    viewer:      { can: ['View all daily task assignments, checklists, and completion logs'], summary: 'For supervisors who review daily task progress without submitting entries.' },
-    contributor: { can: ['View all daily tasks', 'Submit task completion entries'], summary: 'For field agents who check off and log their daily task completions.' },
-    editor:      { can: ['View all daily tasks', 'Submit and update daily task records and completion statuses'], summary: 'For team leads who manage and correct daily task completion logs.' },
-    admin:       { can: ['Full CRUD — manage all daily tasks and completion records'], summary: 'Complete authority over the Daily Task Board.' },
+    viewer:      { can: ['View all daily task assignments, checklists, and completion logs (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see tasks assigned to/created by them or their reportees.' },
+    contributor: { can: ['View daily tasks (Limited if Seniority ≤ 6)', 'Submit task completion entries'], summary: 'For field agents logging completions. Visibility restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View daily tasks (Limited if Seniority ≤ 6)', 'Submit and update daily task records and completion statuses'], summary: 'For team leads correcting logs. Visibility restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — manage all daily tasks and completion records'], summary: 'Complete authority over the Daily Task Board. Master Admins bypass all Sphere limitations.' },
   },
   'Daily Task Template': {
     viewer:      { can: ['Browse all configured daily task templates and their task items'], summary: 'For staff who reference templates without modifying them.' },
@@ -139,24 +139,24 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — add, edit, and delete daily task templates'], summary: 'Complete authority over task templates.' },
   },
   'Escalation Task Board': {
-    viewer:      { can: ['View all escalated tasks, urgency levels, and resolution statuses'], summary: 'For senior oversight roles who monitor escalations without editing them.' },
-    contributor: { can: ['View all escalations', 'Raise and submit new escalation entries'], summary: 'For field staff who flag issues but should not resolve or close escalations.' },
-    editor:      { can: ['View all escalations', 'Raise new entries and update escalation records and statuses'], summary: 'For supervisors who manage and progress escalation resolution.' },
-    admin:       { can: ['Full CRUD — manage, update, resolve, and close escalation tasks'], summary: 'Complete authority over the Escalation Board.' },
+    viewer:      { can: ['View escalated tasks, urgency levels, and resolution statuses (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see escalations tied to them or their reportees.' },
+    contributor: { can: ['View escalations (Limited if Seniority ≤ 6)', 'Raise and submit new escalation entries'], summary: 'For field staff flagging issues. Visibility restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View escalations (Limited if Seniority ≤ 6)', 'Raise new entries and update escalation records and statuses'], summary: 'For supervisors managing resolution. Visibility restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — manage, update, resolve, and close escalation tasks'], summary: 'Complete authority over the Escalation Board. Master Admins bypass all Sphere limitations.' },
   },
 
   /* ── DATA MANAGER FEATURES ── */
   'Data Sheet Board': {
-    viewer:      { can: ['View and browse all data sheets and their entries'], summary: 'For stakeholders who review data records without modifying them.' },
-    contributor: { can: ['View all data sheets', 'Submit new data entries to existing sheets'], summary: 'For analysts who input raw data but should not modify validated records.' },
-    editor:      { can: ['View all data sheets', 'Submit new entries and modify existing data records'], summary: 'For data managers who maintain and correct data sheets.' },
-    admin:       { can: ['Full CRUD — add, edit, and delete data sheet records'], summary: 'Complete authority over the Data Sheet Board.' },
+    viewer:      { can: ['View and browse data sheets and their entries (Limited by Sphere if Seniority ≤ 6)'], summary: 'For stakeholders. Note: Junior staff only see records tied to them or their reportees.' },
+    contributor: { can: ['View data sheets (Limited if Seniority ≤ 6)', 'Submit new data entries to existing sheets'], summary: 'For analysts. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View data sheets (Limited if Seniority ≤ 6)', 'Submit new entries and modify existing data records'], summary: 'For data managers. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — add, edit, and delete data sheet records'], summary: 'Complete authority over the Data Sheet Board. Master Admins bypass all Sphere limitations.' },
   },
   'Model Verification Board': {
-    viewer:      { can: ['View model verification requests and their current verification status'], summary: 'For auditors who review verification records without submitting or editing.' },
-    contributor: { can: ['View all verification records', 'Submit new model verification requests'], summary: 'For analysts who raise verification requests but do not process them.' },
-    editor:      { can: ['View all verification records', 'Submit requests and update verification findings'], summary: 'For QA leads who actively process and update verification outcomes.' },
-    admin:       { can: ['Full CRUD — manage, process, and delete model verification records'], summary: 'Complete authority over the Model Verification Board.' },
+    viewer:      { can: ['View model verification requests and their current verification status (Limited by Sphere if Seniority ≤ 6)'], summary: 'For auditors. Note: Junior staff only see requests tied to them or their reportees.' },
+    contributor: { can: ['View verification records (Limited if Seniority ≤ 6)', 'Submit new model verification requests'], summary: 'For analysts. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View verification records (Limited if Seniority ≤ 6)', 'Submit requests and update verification findings'], summary: 'For QA leads. Record visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full CRUD — manage, process, and delete model verification records'], summary: 'Complete authority over the Model Verification Board. Master Admins bypass all Sphere limitations.' },
   },
 };
 
