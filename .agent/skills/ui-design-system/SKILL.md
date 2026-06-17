@@ -124,18 +124,27 @@ For toggle/selector button groups (e.g., capability level selectors in modals):
 
 ---
 
-## 7. Global Stage/Priority Colors
-Stage colors are referenced via `var(--stage-color)`.
+## 7. Global Unified 4-Color Status Palette
+To prevent cognitive overload and ensure high visibility without eye strain, all priority and attendance indicators MUST use this single unified 4-color semantic palette.
 
-Priority badge convention:
-- **Urgent**: `rgba(239, 68, 68, 0.15)` bg, `#ef4444` text.
-- **High**: `rgba(249, 115, 22, 0.15)` bg, `#f97316` text.
-- **Medium**: `rgba(234, 179, 8, 0.1)` bg, `#eab308` text.
-- **Low**: `rgba(34, 197, 94, 0.1)` bg, `#22c55e` text.
+### The Semantic Status Tokens
+- **Danger (`var(--status-danger)`)**: Rose Red (`#f43f5e`). Soft, legible red.
+- **Warning (`var(--status-warning)`)**: Amber (`#f59e0b`). Muted orange.
+- **Neutral (`var(--status-neutral)`)**: Azure Blue (`#3b82f6`). Calm, highly visible blue.
+- **Success (`var(--status-success)`)**: Emerald Green (`#10b981`). Vibrant but soft green.
 
-**Rule**: These are the ONLY allowed semantic colors. They MUST use the standard badge geometry (4px radius, 20px height).
+### Domain Mappings
+This palette strictly maps to the following domains:
 
+| Semantic Token | Priority Level | Attendance Status |
+|----------------|----------------|-------------------|
+| **Danger**     | Urgent         | Absent            |
+| **Warning**    | High           | Leave             |
+| **Neutral**    | Medium         | Week-Off          |
+| **Success**    | Low            | Present           |
 
+**Rule**: These are the ONLY allowed semantic colors. They MUST be referenced via variables, never hardcoded. 
+**Rule**: Do NOT use `#ef4444` directly; it has been deprecated for being too aggressive visually.
 ---
 
 ## 8. General Rules Summary

@@ -94,7 +94,27 @@
   width: 100%;
 }
 
-/* Shift type toggle buttons */
+/* Shift type indicator — read-only display that inherits form-input-container */
+.self-service__shift-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: default;
+  user-select: none;
+}
+
+.self-service__shift-indicator-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.self-service__shift-indicator-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--brand-green);
+}
+
+/* Shift type toggle buttons (kept for reference, no longer rendered) */
 .self-service__shift-toggle {
   display: flex;
   gap: 0.5rem;
@@ -329,3 +349,480 @@
     border-radius: 20px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   SECTION 7: Page Header — spaced layout for title + RBAC button
+   -------------------------------------------------------------------------- */
+.self-service__header--spaced {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 8: Tab Bar
+   -------------------------------------------------------------------------- */
+.self-service__tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  padding: 0.3rem;
+  width: 100%;
+  max-width: 440px;
+  flex-shrink: 0;
+}
+
+.self-service__tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-color);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /* Touch target: min-height 44px per ui-design-system §14B */
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+/* Selected tab — halo pattern per ui-design-system §4 */
+.self-service__tab-btn--active {
+  border: 2px solid var(--brand-green);
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--brand-green);
+}
+
+/* Pulsing dot — "Live" indicator on the Live Attendance tab */
+.self-service__tab-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-success, #10b981);
+  animation: tab-pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes tab-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 9: 12-Hour Alarm Banner
+   -------------------------------------------------------------------------- */
+.self-service__alarm-banner {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: var(--radius-button, 12px);
+  animation: alarm-slide-in 0.3s ease;
+  flex-shrink: 0;
+}
+
+@keyframes alarm-slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.self-service__alarm-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.self-service__alarm-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.self-service__alarm-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--status-warning, #f59e0b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.self-service__alarm-text {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.self-service__alarm-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+  flex-shrink: 0;
+  min-height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+
+.self-service__alarm-dismiss:hover {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 10: Live Attendance Tab
+   -------------------------------------------------------------------------- */
+.live-attendance__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Summary bar — "N currently active" + Refresh button */
+.live-attendance__summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.live-attendance__summary-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+/* Animated green pulse dot for "live" indicator */
+.live-attendance__pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-success, #10b981);
+  animation: live-pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+}
+
+.live-attendance__refresh-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+}
+
+.live-attendance__last-refresh {
+  font-size: 0.72rem;
+  opacity: 0.4;
+  margin: -0.5rem 0 0;
+}
+
+/* Hub card grid — 1 column on mobile, up to 2 columns on wider screens */
+.live-attendance__hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+/* Hub card */
+.live-attendance__hub-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  overflow: hidden;
+}
+
+.live-attendance__hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.live-attendance__hub-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Hub code badge — neutral metadata style per ui-design-system §3B */
+.live-attendance__hub-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.live-attendance__hub-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.live-attendance__hub-counts {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Active session count badge */
+.live-attendance__hub-active-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 4px;
+  color: var(--status-success, #10b981);
+}
+
+/* Overtime count badge in hub header */
+.live-attendance__hub-overtime-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 4px;
+  color: var(--status-warning, #f59e0b);
+}
+
+/* User list within a hub card */
+.live-attendance__user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual user row */
+.live-attendance__user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+}
+
+.live-attendance__user-row:last-child {
+  border-bottom: none;
+}
+
+.live-attendance__user-row:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+/* Subtle amber tint for overtime rows */
+.live-attendance__user-row--overtime {
+  background: rgba(245, 158, 11, 0.04);
+}
+
+.live-attendance__user-row--overtime:hover {
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.live-attendance__user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.live-attendance__user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Emp code — neutral metadata badge */
+.live-attendance__emp-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  min-height: 18px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.live-attendance__shift-badge {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.live-attendance__user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Hours worked display — normal color */
+.live-attendance__hours {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+/* Overtime hours — status-warning amber color per ui-design-system §7 */
+.live-attendance__hours--overtime {
+  color: var(--status-warning, #f59e0b);
+  opacity: 1;
+}
+
+/* Overtime badge — semantic warning per ui-design-system §3C */
+.live-attendance__overtime-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  min-height: 18px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 4px;
+  color: var(--status-warning, #f59e0b);
+  animation: overtime-flash 3s ease-in-out infinite;
+}
+
+@keyframes overtime-flash {
+  0%, 80%, 100% { opacity: 1; }
+  90%           { opacity: 0.5; }
+}
+
+/* Loading + error states */
+.live-attendance__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+  opacity: 0.5;
+}
+
+.live-attendance__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--status-danger, #f43f5e);
+  font-size: 0.875rem;
+}
+
+/* Empty state */
+.live-attendance__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  opacity: 0.4;
+  text-align: center;
+}
+
+.live-attendance__empty-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.live-attendance__empty-text {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 11: Responsive adjustments for smaller screens
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 480px) {
+  .self-service__header--spaced {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .self-service__tabs {
+    max-width: 100%;
+  }
+
+  .live-attendance__hub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .live-attendance__user-name {
+    max-width: 130px;
+  }
+}
+

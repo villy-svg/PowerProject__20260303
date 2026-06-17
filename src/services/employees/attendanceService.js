@@ -197,3 +197,57 @@ export async function fetchMyTodayAttendance() {
 
   return { data, error: null };
 }
+
+// ---------------------------------------------------------------------------
+// LIVE ATTENDANCE TAB: Fetch all employees with an active (open) session today
+//
+// An active session is one where the session_logs_data array contains an entry
+// with logout_time === null. We fetch today's records with session data and
+// filter out hubs coded 'ALL' or 'MULTI' (aggregate hubs).
+//
+// Returns raw records; the hook (useLiveAttendance) does the grouping.
+//
+// @returns {Promise<{ data: Array, error: object|null }>}
+// ---------------------------------------------------------------------------
+export async function fetchLiveAttendance() {
+  const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+  const { data, error } = await supabase
+    .from('daily_attendances')
+    .select(`
+      id,
+      employee_id,
+      shift_type,
+      first_login_time,
+      session_logs_data,
+      employees (
+        id,
+        full_name,
+        emp_code,
+        hub_id,
+        hubs ( id, name, hub_code )
+      )
+    `)
+    .eq('shift_date', today)
+    // Only grab records that have at least one session started today
+    .not('first_login_time', 'is', null);
+
+  if (error) {
+    console.error('[attendanceService] fetchLiveAttendance error:', error);
+    return { data: null, error };
+  }
+
+  // Filter to records that have an open session (logout_time === null)
+  // and whose hub_code is NOT 'ALL' or 'MULTI'
+  const EXCLUDED_HUB_CODES = ['ALL', 'MULTI'];
+  const liveRecords = (data || []).filter(record => {
+    const sessions = record?.session_logs_data || [];
+    const hasOpenSession = sessions.some(s => s.logout_time === null);
+    const hubCode = record?.employees?.hubs?.hub_code;
+    const isExcludedHub = EXCLUDED_HUB_CODES.includes(hubCode);
+    return hasOpenSession && !isExcludedHub;
+  });
+
+  return { data: liveRecords, error: null };
+}
+

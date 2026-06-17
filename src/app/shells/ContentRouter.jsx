@@ -281,6 +281,7 @@ const ContentRouter = ({
       {activeVertical === 'attendance_self_service' && (
         <AttendanceSelfService
           user={user}
+          permissions={permissions}
         />
       )}
 

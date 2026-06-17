@@ -27,10 +27,10 @@ import { submitEditRequest } from '../../../services/employees/editRequestServic
 // Presentational helpers avoid mixing display logic with data logic.
 // ---------------------------------------------------------------------------
 const STATUS_OPTIONS = [
-  { value: 'present',  label: '✅ Present'  },
-  { value: 'week-off', label: '⬜ Week-Off' },
-  { value: 'leave',    label: '🟡 Leave'    },
-  { value: 'absent',   label: '🔴 Absent'   },
+  { value: 'present',  label: 'Present'  },
+  { value: 'week-off', label: 'Week-Off' },
+  { value: 'leave',    label: 'Leave'    },
+  { value: 'absent',   label: 'Absent'   },
 ];
 
 const SHIFT_TYPE_OPTIONS = [

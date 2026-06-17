@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../services/core/supabaseClient';
 import { userService } from '../services/auth/userService';
 import { sortUsers } from './UserManagement/useUserManagement';
@@ -142,7 +143,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="board-rbac-overlay">
       <div className="board-rbac-modal">
         <header className="board-rbac-header">
@@ -223,7 +224,8 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -452,6 +452,21 @@ function App() {
     masterErrorHandler.testDatabaseConnection();
   }, []);
 
+  useEffect(() => {
+    const requestLocationOnStartup = async () => {
+      try {
+        const { Geolocation } = await import('@capacitor/geolocation');
+        let status = await Geolocation.checkPermissions();
+        if (status.location !== 'granted') {
+          await Geolocation.requestPermissions();
+        }
+      } catch (err) {
+        console.warn('[App] Geolocation request on startup failed or unsupported:', err);
+      }
+    };
+    requestLocationOnStartup();
+  }, []);
+
   if (isAppInitializing) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>

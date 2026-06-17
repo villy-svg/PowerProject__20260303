@@ -15,16 +15,16 @@
    Scoped to this component, referencing global design system variables.
    -------------------------------------------------------------------------- */
 .attendance-board__wrapper {
-  /* Status tokens — derived from global design system semantic palette */
-  --attendance-present:  rgba(34, 197, 94, 0.15);           /* Green tint */
-  --attendance-present-text: #22c55e;
-  --attendance-week-off: rgba(255, 255, 255, 0.05);          /* Neutral */
-  --attendance-week-off-text: var(--text-color);
-  --attendance-leave:    rgba(234, 179, 8, 0.15);            /* Yellow tint */
-  --attendance-leave-text: #eab308;
-  --attendance-absent:   rgba(239, 68, 68, 0.12);            /* Red tint */
-  --attendance-absent-text: #ef4444;
-  --attendance-pending:  rgba(249, 115, 22, 0.9);            /* Orange — badge bg */
+  /* Status tokens — derived from global unified status palette */
+  --attendance-present:  color-mix(in srgb, var(--status-success), transparent 85%);
+  --attendance-present-text: var(--status-success);
+  --attendance-week-off: color-mix(in srgb, var(--status-neutral), transparent 90%);
+  --attendance-week-off-text: var(--status-neutral);
+  --attendance-leave:    color-mix(in srgb, var(--status-warning), transparent 85%);
+  --attendance-leave-text: var(--status-warning);
+  --attendance-absent:   color-mix(in srgb, var(--status-danger), transparent 88%);
+  --attendance-absent-text: var(--status-danger);
+  --attendance-pending:  var(--status-warning);
 }
 
 /* --------------------------------------------------------------------------

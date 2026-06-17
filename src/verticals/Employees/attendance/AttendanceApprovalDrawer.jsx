@@ -27,10 +27,10 @@ import { approveRequest, rejectRequest } from '../../../services/employees/editR
 // STATUS_LABELS: Human-readable labels for the suggested_status enum
 // ---------------------------------------------------------------------------
 const STATUS_LABELS = {
-  'present':  '✅ Present',
-  'week-off': '⬜ Week-Off',
-  'leave':    '🟡 Leave',
-  'absent':   '🔴 Absent',
+  'present':  'Present',
+  'week-off': 'Week-Off',
+  'leave':    'Leave',
+  'absent':   'Absent',
 };
 
 // ---------------------------------------------------------------------------

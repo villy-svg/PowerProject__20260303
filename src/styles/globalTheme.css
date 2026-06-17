@@ -31,11 +31,16 @@
   /* Halo Glow System */
   --halo-glow: color-mix(in srgb, var(--brand-mint), transparent 80%);
   --halo-bg: color-mix(in srgb, var(--brand-mint), transparent 95%);
-  /* Status Colors */
-  --priority-urgent: var(--priority-urgent);
-  --priority-high: var(--priority-high);
-  --priority-medium: var(--priority-medium);
-  --priority-low: var(--priority-low);
+  /* Status & Priority Colors (Unified 4-Color Palette) */
+  --status-danger: #f43f5e;   /* Rose Red */
+  --status-warning: #f59e0b;  /* Amber */
+  --status-neutral: #3b82f6;  /* Azure Blue */
+  --status-success: #10b981;  /* Emerald Green */
+
+  --priority-urgent: var(--status-danger);
+  --priority-high: var(--status-warning);
+  --priority-medium: var(--status-neutral);
+  --priority-low: var(--status-success);
   /* Z-Index Hierarchy */
   --z-base: 0;
   --z-card-base: 1;
@@ -59,9 +64,9 @@
   --badge-red-bg: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
   --badge-red-text: var(--priority-urgent);
   /* Semantic Status Colors (aliases for explicit intent) */
-  --brand-red: var(--priority-urgent);
-  --brand-amber: #f59e0b;
-  --brand-emerald: #10b981;
+  --brand-red: var(--status-danger);
+  --brand-amber: var(--status-warning);
+  --brand-emerald: var(--status-success);
   --color-white: var(--color-white);
   --text-secondary: #71717a;
   --surface-deep: #f4f4f5;

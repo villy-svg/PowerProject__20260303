@@ -1,23 +1,29 @@
 /**
  * AttendanceSelfService.jsx
  *
- * Employee-facing check-in / check-out screen.
- * Displays either the "Start Shift" form or "End Shift" button based on
- * the current attendance state for the logged-in employee.
+ * Employee-facing check-in / check-out screen — now called "Current Attendance".
  *
- * Conditionally routes to AttendanceReceiptScreen on successful action.
+ * Layout variants:
+ *   - Viewer: Single-tab — the check-in/check-out form only.
+ *   - Contributor+: Two tabs — "Current Attendance" (form) + "Live Attendance" (hub view).
+ *
+ * Features:
+ *   - 12-hour shift alarm (via browser Notification API or in-page banner fallback).
+ *   - RBACManageButton visible only to master_admin, labelled "Current Attendance".
  *
  * Skill compliance:
  *   hybrid-mobile-deployment §4 (Platform guards via useAttendanceSelfService hook)
  *   ui-design-system §14B (Touch targets ≥ 44px — enforced in CSS)
  *   development-best-practices §4 (Strict modularity — sub-components extracted)
  *   safe-code-modification §2 (No inline styles)
+ *   rbac-security-system §2 (Viewer can submit attendance; tab guard uses canCreate)
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../services/core/supabaseClient';
 import { useAttendanceSelfService } from '../../../hooks/useAttendanceSelfService';
 import AttendanceReceiptScreen from './AttendanceReceiptScreen';
+import LiveAttendanceTab from './LiveAttendanceTab';
 import RBACManageButton from '../../../components/RBACManageButton';
 import './AttendanceSelfService.css';
 
@@ -66,28 +72,19 @@ const HubSelector = ({ selectedHubId, onSelect }) => {
 };
 
 // ---------------------------------------------------------------------------
-// ShiftTypeSelector — Day / Night toggle buttons
+// ShiftTypeIndicator — read-only display of the auto-detected shift type.
+// No user interaction; the shift is determined by getDefaultShiftType().
 // ---------------------------------------------------------------------------
-const ShiftTypeSelector = ({ value, onChange }) => (
+const ShiftTypeIndicator = ({ value }) => (
   <div className="form-group self-service__shift-group">
     <label className="form-label">SHIFT TYPE</label>
-    <div className="self-service__shift-toggle">
-      <button
-        type="button"
-        className={`self-service__shift-btn ${value === 'day' ? 'active' : ''}`}
-        onClick={() => onChange('day')}
-        id="shift-type-day"
-      >
-        ☀ Day
-      </button>
-      <button
-        type="button"
-        className={`self-service__shift-btn ${value === 'night' ? 'active' : ''}`}
-        onClick={() => onChange('night')}
-        id="shift-type-night"
-      >
-        🌙 Night
-      </button>
+    <div className="form-input-container self-service__shift-indicator">
+      <span className="self-service__shift-indicator-icon">
+        {value === 'day' ? '☀' : '🌙'}
+      </span>
+      <span className="self-service__shift-indicator-label">
+        {value === 'day' ? 'Day Shift' : 'Night Shift'}
+      </span>
     </div>
   </div>
 );
@@ -116,9 +113,31 @@ const ActiveSessionCard = ({ record }) => {
 };
 
 // ---------------------------------------------------------------------------
-// AttendanceSelfService — main export
+// AlarmBanner — in-page fallback when browser Notifications are not granted
 // ---------------------------------------------------------------------------
-const AttendanceSelfService = ({ user }) => {
+const AlarmBanner = ({ onDismiss }) => (
+  <div className="self-service__alarm-banner" role="alert" aria-live="assertive">
+    <span className="self-service__alarm-icon">⏰</span>
+    <div className="self-service__alarm-body">
+      <strong className="self-service__alarm-title">12-Hour Shift Alert</strong>
+      <p className="self-service__alarm-text">
+        You have been on shift for 12 hours. Please remember to end your shift!
+      </p>
+    </div>
+    <button
+      className="self-service__alarm-dismiss"
+      onClick={onDismiss}
+      aria-label="Dismiss overtime reminder"
+    >
+      ✕
+    </button>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
+// CurrentAttendanceTab — the main check-in / check-out form area
+// ---------------------------------------------------------------------------
+const CurrentAttendanceTab = ({ user }) => {
   const {
     todayRecord,
     hasActiveSession,
@@ -126,6 +145,8 @@ const AttendanceSelfService = ({ user }) => {
     isLoading,
     isActing,
     error,
+    alarmFired,
+    dismissAlarm,
     selectedShiftType, setSelectedShiftType,
     selectedHubId, setSelectedHubId,
     handleCheckIn,
@@ -133,9 +154,7 @@ const AttendanceSelfService = ({ user }) => {
     clearSuccessData,
   } = useAttendanceSelfService();
 
-  // ---------------------------------------------------------------------------
   // Receipt screen routing: show receipt after successful check-in/out
-  // ---------------------------------------------------------------------------
   if (successData) {
     return (
       <AttendanceReceiptScreen
@@ -155,25 +174,10 @@ const AttendanceSelfService = ({ user }) => {
     );
   }
 
-  const todayDisplay = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  });
-
   return (
-    <div className="self-service__container">
-      {/* Page Header */}
-      <div className="self-service__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 className="self-service__title">Attendance</h1>
-          <p className="self-service__date">{todayDisplay}</p>
-        </div>
-        <RBACManageButton
-          user={user}
-          verticalId="employees"
-          featureId="canAccessAttendanceSelfService"
-          label="My Attendance"
-        />
-      </div>
+    <>
+      {/* 12-hour alarm fallback banner */}
+      {alarmFired && <AlarmBanner onDismiss={dismissAlarm} />}
 
       {/* Error display */}
       {error && (
@@ -205,9 +209,8 @@ const AttendanceSelfService = ({ user }) => {
             selectedHubId={selectedHubId}
             onSelect={setSelectedHubId}
           />
-          <ShiftTypeSelector
+          <ShiftTypeIndicator
             value={selectedShiftType}
-            onChange={setSelectedShiftType}
           />
           <button
             id="self-service-checkin-btn"
@@ -218,6 +221,79 @@ const AttendanceSelfService = ({ user }) => {
             {isActing ? 'Starting Shift…' : '✅ Start Shift'}
           </button>
         </form>
+      )}
+    </>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// TAB CONSTANTS
+// ---------------------------------------------------------------------------
+const TAB_CURRENT  = 'current';
+const TAB_LIVE     = 'live';
+
+// ---------------------------------------------------------------------------
+// AttendanceSelfService — main export
+// Accepts `permissions` from ContentRouter to determine the tab layout.
+// Viewer: single tab (form only). Contributor+: two tabs.
+// ---------------------------------------------------------------------------
+const AttendanceSelfService = ({ user, permissions }) => {
+  // Contributor+ can create records — use canCreate as the tab gate.
+  // Viewer has canCreate === false but can still submit via the SECURITY DEFINER RPC.
+  const showLiveTab = !!(permissions?.canCreate);
+  const [activeTab, setActiveTab] = useState(TAB_CURRENT);
+
+  const todayDisplay = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  return (
+    <div className="self-service__container">
+      {/* Page Header */}
+      <div className="self-service__header self-service__header--spaced">
+        <div>
+          <h1 className="self-service__title">Current Attendance</h1>
+          <p className="self-service__date">{todayDisplay}</p>
+        </div>
+        {/* master_admin only — the RBACManageButton is self-guarded */}
+        <RBACManageButton
+          user={user}
+          verticalId="employees"
+          featureId="canAccessAttendanceSelfService"
+          label="Current Attendance"
+        />
+      </div>
+
+      {/* Tab bar — only shown for Contributor+ */}
+      {showLiveTab && (
+        <div className="self-service__tabs" role="tablist" aria-label="Attendance views">
+          <button
+            id="tab-btn-current"
+            role="tab"
+            aria-selected={activeTab === TAB_CURRENT}
+            className={`self-service__tab-btn${activeTab === TAB_CURRENT ? ' self-service__tab-btn--active' : ''}`}
+            onClick={() => setActiveTab(TAB_CURRENT)}
+          >
+            Current Attendance
+          </button>
+          <button
+            id="tab-btn-live"
+            role="tab"
+            aria-selected={activeTab === TAB_LIVE}
+            className={`self-service__tab-btn${activeTab === TAB_LIVE ? ' self-service__tab-btn--active' : ''}`}
+            onClick={() => setActiveTab(TAB_LIVE)}
+          >
+            <span className="self-service__tab-pulse" />
+            Live Attendance
+          </button>
+        </div>
+      )}
+
+      {/* Tab content */}
+      {activeTab === TAB_CURRENT || !showLiveTab ? (
+        <CurrentAttendanceTab user={user} />
+      ) : (
+        <LiveAttendanceTab />
       )}
     </div>
   );
