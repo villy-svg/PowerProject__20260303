@@ -132,17 +132,23 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
     if (navigator.share) {
       try {
         await navigator.share({ text: shareText });
-        return;
       } catch (err) {
         // User cancelled share — fall through to deep link fallback
         if (err.name !== 'AbortError') {
           console.warn('[AttendanceReceiptScreen] navigator.share error:', err);
         }
+      } finally {
+        // Automatically finish the flow after the share sheet closes (even if cancelled)
+        onDone();
       }
+      return;
     }
 
     // Fallback: wa.me deep link (works on all platforms)
     window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    
+    // Automatically finish the flow after opening the fallback share link
+    onDone();
   };
 
   return (
@@ -218,14 +224,6 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
         </button>
       </div>
 
-      {/* Done button — returns to self-service screen */}
-      <button
-        id="receipt-done-btn"
-        className="halo-button receipt__done-btn"
-        onClick={onDone}
-      >
-        Done
-      </button>
     </div>
   );
 };
