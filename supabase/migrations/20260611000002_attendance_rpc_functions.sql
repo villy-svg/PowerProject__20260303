@@ -124,7 +124,6 @@ AS $$
 DECLARE
   v_user_id       uuid := auth.uid();
   v_employee_id   uuid;
-  v_shift_date    date := CURRENT_DATE;
   v_rec           public.daily_attendances;
   v_sessions      jsonb;
   v_updated_sessions jsonb;
@@ -141,14 +140,24 @@ BEGIN
     RAISE EXCEPTION 'No employee linked to this user account.';
   END IF;
 
-  -- 2. Fetch the existing record for today
+  -- 2. Fetch the active attendance record
+  -- Prioritize the most recent record that has an open session (logout_time IS NULL)
+  -- Or fallback to today's record
   SELECT * INTO v_rec
   FROM public.daily_attendances
   WHERE employee_id = v_employee_id
-    AND shift_date = v_shift_date;
+    AND (
+      (session_logs_data @> '[{"logout_time": null}]'::jsonb)
+      OR
+      (shift_date = CURRENT_DATE)
+    )
+  ORDER BY 
+    CASE WHEN session_logs_data @> '[{"logout_time": null}]'::jsonb THEN 1 ELSE 2 END ASC,
+    shift_date DESC
+  LIMIT 1;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'No active attendance record found for today.';
+    RAISE EXCEPTION 'No active attendance record found for checkout.';
   END IF;
 
   -- 3. Find the open session (logout_time IS NULL) and close it
@@ -175,8 +184,7 @@ BEGIN
     logout_geolocation   = p_geolocation,
     session_logs_data    = v_updated_sessions,
     updated_at           = now()
-  WHERE employee_id = v_employee_id
-    AND shift_date = v_shift_date
+  WHERE id = v_rec.id
   RETURNING to_jsonb(daily_attendances.*) INTO v_result;
 
   RETURN v_result;

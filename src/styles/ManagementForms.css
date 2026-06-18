@@ -24,7 +24,7 @@
   border-radius: var(--radius-squircle);
   width: 100%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: 90dvh;
   /* Safety cap */
   display: flex;
   flex-direction: column;
@@ -227,6 +227,23 @@ select:-webkit-autofill:focus {
 
 /* Mobile Adaptations (Phone <= 480px) as per Design System */
 @media screen and (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 92dvh;
+    border-radius: var(--radius-squircle) var(--radius-squircle) 0 0;
+    margin: 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+  }
+
   .vertical-task-form {
     gap: 22px;
     padding: 0;

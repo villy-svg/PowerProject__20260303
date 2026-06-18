@@ -199,11 +199,13 @@ export async function fetchMyTodayAttendance() {
     return { data: null, error: null };
   }
 
-  // Step 2: Fetch today's record for this specific employee only.
+  // Step 2: Fetch the active record for this specific employee.
+  // We look for either today's record OR the most recent record that still has an open session.
   const { data, error } = await supabase
     .from('daily_attendances')
     .select(`
       id,
+      shift_date,
       attendance_status,
       shift_type,
       first_login_time,
@@ -211,9 +213,11 @@ export async function fetchMyTodayAttendance() {
       session_logs_data,
       employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )
     `)
-    .eq('shift_date', today)
     .eq('employee_id', profile.employee_id)
-    .maybeSingle(); // Safe: employee_id + shift_date is a UNIQUE constraint → at most 1 row
+    .or(`shift_date.eq.${today},session_logs_data.cs.[{"logout_time": null}]`)
+    .order('shift_date', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
     console.error('[attendanceService] fetchMyTodayAttendance error:', error);
