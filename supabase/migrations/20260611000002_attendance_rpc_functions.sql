@@ -157,7 +157,7 @@ BEGIN
 
   -- 2b. Validate the fetched record actually has an open session.
   -- This catches the edge case where the most recent record is already fully checked out.
-  IF NOT jsonb_path_exists(v_rec.session_logs_data, '$[*] ? (@.logout_time == null)') THEN
+  IF NOT (v_rec.session_logs_data @> '[{"logout_time": null}]'::jsonb) THEN
     RAISE EXCEPTION 'Your most recent shift is already checked out. No open session found.';
   END IF;
 

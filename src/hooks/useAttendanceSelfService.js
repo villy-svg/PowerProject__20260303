@@ -18,6 +18,7 @@ import {
   employeeCheckIn,
   employeeCheckOut,
 } from '../services/employees/attendanceService';
+import { supabase } from '../services/core/supabaseClient';
 
 // ---------------------------------------------------------------------------
 // Utility: Get a stable device identifier
@@ -226,35 +227,44 @@ export function useAttendanceSelfService() {
   // ---------------------------------------------------------------------------
   // Auto-Update 2: Realtime database subscription
   // Refreshes instantly if a manager or cron job checks the user out externally
+  //
+  // NOTE: We use a channelRef so the cleanup returned to React can correctly
+  // call removeChannel. A dynamic import(.then()) makes the cleanup invisible
+  // to React — this static approach fixes that silent memory leak.
   // ---------------------------------------------------------------------------
+  const realtimeChannelRef = useRef(null);
+
   useEffect(() => {
     if (!todayRecord?.employee_id) return;
 
-    // We only need to import supabase here for the realtime channel
-    import('../services/core/supabaseClient').then(({ supabase }) => {
-      const channel = supabase
-        .channel('public:daily_attendances:self_service')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'daily_attendances',
-            filter: `employee_id=eq.${todayRecord.employee_id}`,
-          },
-          (payload) => {
-            console.log('[useAttendanceSelfService] Realtime update received:', payload);
-            loadTodayRecord();
-          }
-        )
-        .subscribe();
+    // Tear down any previously subscribed channel before creating a new one
+    if (realtimeChannelRef.current) {
+      supabase.removeChannel(realtimeChannelRef.current);
+    }
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }).catch(err => {
-      console.warn('[useAttendanceSelfService] Failed to load supabase client for realtime:', err);
-    });
+    realtimeChannelRef.current = supabase
+      .channel(`daily_attendances:self_service:${todayRecord.employee_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'daily_attendances',
+          filter: `employee_id=eq.${todayRecord.employee_id}`,
+        },
+        (payload) => {
+          console.log('[useAttendanceSelfService] Realtime update received:', payload);
+          loadTodayRecord();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      if (realtimeChannelRef.current) {
+        supabase.removeChannel(realtimeChannelRef.current);
+        realtimeChannelRef.current = null;
+      }
+    };
   }, [todayRecord?.employee_id, loadTodayRecord]);
 
   // ---------------------------------------------------------------------------

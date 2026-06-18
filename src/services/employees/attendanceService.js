@@ -201,6 +201,8 @@ export async function fetchMyTodayAttendance() {
 
   // Step 2: Fetch the active record for this specific employee.
   // We look for either today's record OR the most recent record that still has an open session.
+  // We intentionally omit .maybeSingle() to avoid "Cannot coerce" PostgREST errors 
+  // if multiple rows match; we simply take the first one from the sorted array.
   const { data, error } = await supabase
     .from('daily_attendances')
     .select(`
@@ -216,15 +218,17 @@ export async function fetchMyTodayAttendance() {
     .eq('employee_id', profile.employee_id)
     .or(`shift_date.eq.${today},session_logs_data.cs.[{"logout_time": null}]`)
     .order('shift_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     console.error('[attendanceService] fetchMyTodayAttendance error:', error);
     return { data: null, error };
   }
 
-  return { data, error: null };
+  // Safely extract the single record or return null
+  const record = (data && data.length > 0) ? data[0] : null;
+
+  return { data: record, error: null };
 }
 
 // ---------------------------------------------------------------------------
