@@ -140,27 +140,29 @@ BEGIN
     RAISE EXCEPTION 'No employee linked to this user account.';
   END IF;
 
-  -- 2. Fetch the active attendance record
-  -- Prioritize the most recent record that has an open session (logout_time IS NULL)
-  -- Or fallback to today's record
+  -- 2. Fetch the most recent attendance record within a 2-day window.
+  -- The ±2 day guard prevents accidentally closing a zombie/stale record
+  -- that was never checked out weeks ago. No real shift exceeds 36 hours.
+  -- Night shifts are safe: CURRENT_DATE - 2 days covers yesterday + today.
   SELECT * INTO v_rec
   FROM public.daily_attendances
   WHERE employee_id = v_employee_id
-    AND (
-      (session_logs_data @> '[{"logout_time": null}]'::jsonb)
-      OR
-      (shift_date = CURRENT_DATE)
-    )
-  ORDER BY 
-    CASE WHEN session_logs_data @> '[{"logout_time": null}]'::jsonb THEN 1 ELSE 2 END ASC,
-    shift_date DESC
+    AND shift_date >= CURRENT_DATE - INTERVAL '2 days'
+  ORDER BY shift_date DESC, created_at DESC
   LIMIT 1;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'No active attendance record found for checkout.';
+    RAISE EXCEPTION 'No active shift found within the last 2 days. If your shift started more than 48 hours ago, please contact your manager to correct attendance.';
+  END IF;
+
+  -- 2b. Validate the fetched record actually has an open session.
+  -- This catches the edge case where the most recent record is already fully checked out.
+  IF NOT jsonb_path_exists(v_rec.session_logs_data, '$[*] ? (@.logout_time == null)') THEN
+    RAISE EXCEPTION 'Your most recent shift is already checked out. No open session found.';
   END IF;
 
   -- 3. Find the open session (logout_time IS NULL) and close it
+
   v_sessions := v_rec.session_logs_data;
   v_updated_sessions := '[]'::jsonb;
 

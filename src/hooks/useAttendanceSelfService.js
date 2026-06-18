@@ -182,26 +182,80 @@ export function useAttendanceSelfService() {
   const [selectedHubId, setSelectedHubId] = useState(null);
 
   // ---------------------------------------------------------------------------
-  // Fetch today's attendance record on mount
+  // Fetch today's attendance record
+  // ---------------------------------------------------------------------------
+  const loadTodayRecord = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, error: fetchError } = await fetchMyTodayAttendance();
+      if (fetchError) throw fetchError;
+      setTodayRecord(data); // null if no record exists yet
+    } catch (err) {
+      console.error('[useAttendanceSelfService] loadTodayRecord error:', err);
+      setError(err?.message || 'Failed to load your attendance status.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Run on mount
+  useEffect(() => {
+    loadTodayRecord();
+  }, [loadTodayRecord]);
+
+  // ---------------------------------------------------------------------------
+  // Auto-Update 1: Refresh when app comes to foreground (tab focus)
+  // This handles the "stale connections/data" if left open overnight
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    const loadTodayRecord = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await fetchMyTodayAttendance();
-        if (fetchError) throw fetchError;
-        setTodayRecord(data); // null if no record exists yet
-      } catch (err) {
-        console.error('[useAttendanceSelfService] loadTodayRecord error:', err);
-        setError(err?.message || 'Failed to load your attendance status.');
-      } finally {
-        setIsLoading(false);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadTodayRecord();
       }
     };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
 
-    loadTodayRecord();
-  }, []);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
+  }, [loadTodayRecord]);
+
+  // ---------------------------------------------------------------------------
+  // Auto-Update 2: Realtime database subscription
+  // Refreshes instantly if a manager or cron job checks the user out externally
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!todayRecord?.employee_id) return;
+
+    // We only need to import supabase here for the realtime channel
+    import('../services/core/supabaseClient').then(({ supabase }) => {
+      const channel = supabase
+        .channel('public:daily_attendances:self_service')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'daily_attendances',
+            filter: `employee_id=eq.${todayRecord.employee_id}`,
+          },
+          (payload) => {
+            console.log('[useAttendanceSelfService] Realtime update received:', payload);
+            loadTodayRecord();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }).catch(err => {
+      console.warn('[useAttendanceSelfService] Failed to load supabase client for realtime:', err);
+    });
+  }, [todayRecord?.employee_id, loadTodayRecord]);
 
   // ---------------------------------------------------------------------------
   // On mount: if there is already an active session (from a prior check-in),
