@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLiveAttendance } from '../../../hooks/useLiveAttendance';
+import { adminForceCheckout } from '../../../services/employees/attendanceService';
 
 // ---------------------------------------------------------------------------
 // Utility: Format decimal hours into "Xh Ym" string (e.g. 1.5 → "1h 30m")
@@ -61,9 +62,18 @@ const LiveHoursCounter = ({ loginTime, standardShiftHours }) => {
 // ---------------------------------------------------------------------------
 // UserRow — a single employee entry inside a hub card
 // ---------------------------------------------------------------------------
-const UserRow = ({ session, standardShiftHours }) => {
+const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout }) => {
   const hoursWorked = (Date.now() - new Date(session.loginTime).getTime()) / (1000 * 60 * 60);
   const isOvertime  = hoursWorked >= standardShiftHours;
+  const [isEnding, setIsEnding] = useState(false);
+
+  const handleEndShift = async () => {
+    if (window.confirm(`Force end shift for ${session.fullName}?`)) {
+      setIsEnding(true);
+      await onForceCheckout(session.recordId, session.sessions);
+      setIsEnding(false);
+    }
+  };
 
   return (
     <div className={`live-attendance__user-row${isOvertime ? ' live-attendance__user-row--overtime' : ''}`}>
@@ -79,6 +89,16 @@ const UserRow = ({ session, standardShiftHours }) => {
           <span className="live-attendance__overtime-badge">OVERTIME</span>
         )}
         <LiveHoursCounter loginTime={session.loginTime} standardShiftHours={standardShiftHours} />
+        {isMasterAdmin && (
+          <button 
+            className="halo-button live-attendance__force-end-btn"
+            onClick={handleEndShift}
+            disabled={isEnding}
+            title="Force End Shift"
+          >
+            {isEnding ? 'Ending...' : 'End Shift'}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -87,7 +107,7 @@ const UserRow = ({ session, standardShiftHours }) => {
 // ---------------------------------------------------------------------------
 // HubCard — collapses/expands the list of users for a hub
 // ---------------------------------------------------------------------------
-const HubCard = ({ hubGroup, standardShiftHours }) => {
+const HubCard = ({ hubGroup, standardShiftHours, isMasterAdmin, onForceCheckout }) => {
   const { hub, sessions } = hubGroup;
   const overtimeCount = sessions.filter(s => {
     const hours = (Date.now() - new Date(s.loginTime).getTime()) / (1000 * 60 * 60);
@@ -118,6 +138,8 @@ const HubCard = ({ hubGroup, standardShiftHours }) => {
             key={session.employeeId}
             session={session}
             standardShiftHours={standardShiftHours}
+            isMasterAdmin={isMasterAdmin}
+            onForceCheckout={onForceCheckout}
           />
         ))}
       </div>
@@ -128,7 +150,7 @@ const HubCard = ({ hubGroup, standardShiftHours }) => {
 // ---------------------------------------------------------------------------
 // LiveAttendanceTab — main export
 // ---------------------------------------------------------------------------
-const LiveAttendanceTab = () => {
+const LiveAttendanceTab = ({ user }) => {
   const {
     hubGroups,
     totalActive,
@@ -138,6 +160,17 @@ const LiveAttendanceTab = () => {
     refresh,
     STANDARD_SHIFT_HOURS,
   } = useLiveAttendance();
+
+  const isMasterAdmin = user?.roleId === 'master_admin';
+
+  const handleForceCheckout = async (recordId, currentSessions) => {
+    const { error } = await adminForceCheckout(recordId, currentSessions);
+    if (!error) {
+      refresh(); // Reload to remove the checked-out session from live view
+    } else {
+      alert(`Failed to force checkout: ${error.message || 'Unknown error'}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -192,6 +225,8 @@ const LiveAttendanceTab = () => {
               key={group.hub.id}
               hubGroup={group}
               standardShiftHours={STANDARD_SHIFT_HOURS}
+              isMasterAdmin={isMasterAdmin}
+              onForceCheckout={handleForceCheckout}
             />
           ))}
         </div>

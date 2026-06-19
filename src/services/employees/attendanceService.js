@@ -290,3 +290,40 @@ export async function fetchLiveAttendance() {
   return { data: liveRecords, error: null };
 }
 
+// ---------------------------------------------------------------------------
+// LIVE ATTENDANCE TAB: Admin Force Checkout
+//
+// Closes the open session and the main shift record for an employee.
+// Requires admin privileges (enforced by RLS UPDATE policy).
+// ---------------------------------------------------------------------------
+export async function adminForceCheckout(recordId, currentSessions) {
+  const nowIso = new Date().toISOString();
+  
+  // Update the open session(s)
+  const updatedSessions = currentSessions.map(s => {
+    if (s.logout_time === null) {
+      return { 
+        ...s, 
+        logout_time: nowIso, 
+        logout_geolocation: { note: 'Forced by admin' } 
+      };
+    }
+    return s;
+  });
+
+  const { data, error } = await supabase
+    .from('daily_attendances')
+    .update({
+      logout_time: nowIso,
+      logout_geolocation: { note: 'Forced by admin' },
+      session_logs_data: updatedSessions,
+      updated_at: nowIso
+    })
+    .eq('id', recordId);
+
+  if (error) {
+    console.error('[attendanceService] adminForceCheckout error:', error);
+    return { data: null, error };
+  }
+  return { data, error: null };
+}

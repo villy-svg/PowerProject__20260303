@@ -58,6 +58,7 @@ function groupByHub(records) {
     const hoursWorked = computeHoursWorked(loginTime);
 
     const entry = {
+      recordId:    record.id,
       employeeId:  record.employee_id,
       empCode:     record.employees?.emp_code || '—',
       fullName:    record.employees?.full_name || 'Unknown',
@@ -65,6 +66,7 @@ function groupByHub(records) {
       loginTime,
       hoursWorked,
       isOvertime:  hoursWorked >= STANDARD_SHIFT_HOURS,
+      sessions:    sessions,
     };
 
     if (!hubMap.has(hub.id)) {

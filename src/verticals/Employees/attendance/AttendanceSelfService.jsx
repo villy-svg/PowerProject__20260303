@@ -293,7 +293,7 @@ const AttendanceSelfService = ({ user, permissions }) => {
       {activeTab === TAB_CURRENT || !showLiveTab ? (
         <CurrentAttendanceTab user={user} />
       ) : (
-        <LiveAttendanceTab />
+        <LiveAttendanceTab user={user} />
       )}
     </div>
   );
