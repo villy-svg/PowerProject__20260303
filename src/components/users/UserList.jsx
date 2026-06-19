@@ -40,12 +40,12 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
   const mapVerticalLabel = (label) => {
     if (!label) return '';
     const clean = label.trim().toLowerCase();
-    if (clean === 'hub manager' || clean === 'hub') return 'Hubs';
-    if (clean === 'client manager' || clean === 'client') return 'Clients';
-    if (clean === 'employee manager' || clean === 'employee') return 'Employees';
-    if (clean === 'partner manager' || clean === 'partner') return 'Partners';
-    if (clean === 'vendor manager' || clean === 'vendor') return 'Vendors';
-    if (clean === 'data manager' || clean === 'data') return 'Data';
+    if (clean === 'hub manager' || clean === 'hub' || clean === 'charging_hubs' || clean === 'hubs') return 'Hubs';
+    if (clean === 'client manager' || clean === 'client' || clean === 'clients') return 'Clients';
+    if (clean === 'employee manager' || clean === 'employee' || clean === 'employees') return 'Employees';
+    if (clean === 'partner manager' || clean === 'partner' || clean === 'partners') return 'Partners';
+    if (clean === 'vendor manager' || clean === 'vendor' || clean === 'vendors') return 'Vendors';
+    if (clean === 'data manager' || clean === 'data' || clean === 'data_manager') return 'Data';
     return label;
   };
 
@@ -87,13 +87,13 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                     ) : (
                       (() => {
                         const vPerms = u.verticalPermissions || {}; 
-                        const activeVIds = Object.entries(vPerms)
+                        const activeVIds = Array.from(new Set(Object.entries(vPerms)
                           .filter(([_, data]) => data.level !== 'none')
                           .map(([vId]) => {
                             const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                             const label = vInfo ? vInfo.label : vId;
                             return mapVerticalLabel(label);
-                          });
+                          })));
                         
                         return activeVIds.length > 0 ? (
                           activeVIds.map(vLabel => (
@@ -167,13 +167,13 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
               ) : (
                 (() => {
                   const vPerms = u.verticalPermissions || {};
-                  const activeVIds = Object.entries(vPerms)
+                  const activeVIds = Array.from(new Set(Object.entries(vPerms)
                     .filter(([_, data]) => data.level !== 'none')
                     .map(([vId]) => {
                       const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                       const label = vInfo ? vInfo.label : vId;
                       return mapVerticalLabel(label);
-                    });
+                    })));
                   return activeVIds.length > 0 ? (
                     activeVIds.map(vLabel => (
                       <span key={vLabel} className="v-tag simple">{vLabel}</span>

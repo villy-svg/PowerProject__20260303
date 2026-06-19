@@ -282,14 +282,7 @@ export async function fetchLiveAttendance() {
       )
     `)
     // Include the last 3 days to safely catch old unclosed sessions
-    .gte('shift_date', threeDaysAgo)
-    // Use PostgREST raw filter for JSONB @> containment.
-    // .contains() with a string arg may not correctly encode JSON null;
-    // .filter(..., 'cs', ...) sends the predicate verbatim to PostgREST,
-    // which correctly maps it to: session_logs_data @> '[{"logout_time":null}]'::jsonb
-    .filter('session_logs_data', 'cs', '[{"logout_time":null}]')
-    // Only grab records that have at least one session started
-    .not('first_login_time', 'is', null);
+    .gte('shift_date', threeDaysAgo);
 
   if (error) {
     console.error('[attendanceService] fetchLiveAttendance error:', error);
