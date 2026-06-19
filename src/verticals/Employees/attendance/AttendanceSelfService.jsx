@@ -101,6 +101,32 @@ const ActiveSessionCard = ({ record }) => {
     ? new Date(activeSession.login_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     : '—';
 
+  const [hubName, setHubName] = useState('Loading...');
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHubName = async () => {
+      if (record?.employees?.hubs?.name) {
+        if (isMounted) setHubName(record.employees.hubs.name);
+      } else if (activeSession?.hub_id) {
+        const { data: hubData } = await supabase
+          .from('hubs')
+          .select('name')
+          .eq('id', activeSession.hub_id)
+          .single();
+        if (isMounted && hubData?.name) {
+          setHubName(hubData.name);
+        } else if (isMounted) {
+          setHubName('Unknown Hub');
+        }
+      } else {
+        if (isMounted) setHubName('Unknown Hub');
+      }
+    };
+    fetchHubName();
+    return () => { isMounted = false; };
+  }, [record, activeSession]);
+
   return (
     <div className="self-service__active-card">
       <div className="self-service__active-icon">✅</div>
@@ -109,6 +135,7 @@ const ActiveSessionCard = ({ record }) => {
         {record?.shift_type === 'day' ? '☀ Day Shift' : '🌙 Night Shift'}
       </p>
       <p className="self-service__active-time">Started at {loginTime}</p>
+      <p className="self-service__active-hub">📍 {hubName}</p>
     </div>
   );
 };

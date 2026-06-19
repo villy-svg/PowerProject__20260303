@@ -23,21 +23,62 @@ const Login = () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
-    // We use signInWithOtp for both.
-    // If isRegistering, we pass the name in the data object for the Supabase Trigger.
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-        data: isRegistering ? { name } : {}
-      }
-    });
+    if (isRegistering) {
+      // Try to sign in WITHOUT creating a user to see if they already exist
+      const { error: existingCheckError } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false }
+      });
 
-    if (error) {
-      setMessage({ type: 'error', text: error.message });
+      if (!existingCheckError) {
+        // Success! User already exists, OTP was sent for login.
+        setIsRegistering(false);
+        setMessage({ type: 'success', text: 'Account found! We sent an OTP to sign you in.' });
+        setStep(2);
+        setLoading(false);
+        return;
+      }
+
+      if (existingCheckError && !existingCheckError.message.includes('Signups not allowed')) {
+        // It's a real error (like rate limit), so show it and abort
+        setMessage({ type: 'error', text: existingCheckError.message });
+        setLoading(false);
+        return;
+      }
+
+      // User does not exist, so register them
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: true,
+          data: { name }
+        }
+      });
+
+      if (error) {
+        setMessage({ type: 'error', text: error.message });
+      } else {
+        setMessage({ type: 'success', text: 'OTP sent! Please check your email to complete registration.' });
+        setStep(2);
+      }
     } else {
-      setMessage({ type: 'success', text: 'OTP sent! Please check your email.' });
-      setStep(2);
+      // Sign-in flow: prevent creating new accounts silently
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false }
+      });
+
+      if (error) {
+        // Friendly error for non-existent users trying to log in
+        if (error.message.includes('Signups not allowed')) {
+          setMessage({ type: 'error', text: 'Account not found. Please switch to Register.' });
+        } else {
+          setMessage({ type: 'error', text: error.message });
+        }
+      } else {
+        setMessage({ type: 'success', text: 'OTP sent! Please check your email.' });
+        setStep(2);
+      }
     }
     setLoading(false);
   };

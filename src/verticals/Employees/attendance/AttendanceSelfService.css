@@ -217,6 +217,14 @@
   margin: 0;
 }
 
+.self-service__active-hub {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0;
+  color: var(--brand-green);
+  opacity: 0.9;
+}
+
 /* --------------------------------------------------------------------------
    SECTION 5: Receipt Screen
    -------------------------------------------------------------------------- */
