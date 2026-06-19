@@ -296,15 +296,10 @@ export async function fetchLiveAttendance() {
     return { data: null, error };
   }
 
-  // Filter to records that have an open session (logout_time === null)
-  // and whose hub_code is NOT 'ALL' or 'MULTI'
-  const EXCLUDED_HUB_CODES = ['ALL', 'MULTI'];
   const liveRecords = (data || []).filter(record => {
     const sessions = record?.session_logs_data || [];
     const hasOpenSession = sessions.some(s => s.logout_time === null);
-    const hubCode = record?.employees?.hubs?.hub_code;
-    const isExcludedHub = EXCLUDED_HUB_CODES.includes(hubCode);
-    return hasOpenSession && !isExcludedHub;
+    return hasOpenSession;
   });
 
   return { data: liveRecords, error: null };
