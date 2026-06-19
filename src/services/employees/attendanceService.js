@@ -267,7 +267,7 @@ export async function fetchLiveAttendance() {
         hubs ( id, name, hub_code )
       )
     `)
-    .or(`shift_date.eq.${today},session_logs_data.cs.[{"logout_time": null}]`)
+    .contains('session_logs_data', '[{"logout_time": null}]')
     // Only grab records that have at least one session started
     .not('first_login_time', 'is', null);
 
