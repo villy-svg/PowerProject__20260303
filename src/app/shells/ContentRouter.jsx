@@ -257,7 +257,13 @@ const ContentRouter = ({
       verticals={verticals}
     >
       {activeVertical === verticals.EMPLOYEES?.id && (
-        <EmployeeManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} />
+        <EmployeeManagement 
+          user={user} 
+          permissions={permissions} 
+          tasks={tasks.filter(t => t.verticalId === verticals.EMPLOYEES?.id)} 
+          verticals={verticals}
+          activeVertical={activeVertical}
+        />
       )}
       {activeVertical === 'employee_rules_board' && (
         <EmployeeRulesBoard
@@ -265,6 +271,8 @@ const ContentRouter = ({
           permissions={permissions}
           setActiveVertical={setActiveVertical}
           onShowBottomNav={onShowBottomNav}
+          verticals={verticals}
+          activeVertical={activeVertical}
         />
       )}
       {activeVertical === 'employee_attendance_board' && (
@@ -276,17 +284,32 @@ const ContentRouter = ({
           isSubSidebarOpen={isSubSidebarOpen}
           setIsSubSidebarOpen={setIsSubSidebarOpen}
           SidebarComponent={SidebarComponent}
+          verticals={verticals}
+          activeVertical={activeVertical}
         />
       )}
       {activeVertical === 'attendance_self_service' && (
         <AttendanceSelfService
           user={user}
           permissions={permissions}
+          setActiveVertical={setActiveVertical}
+          onShowBottomNav={onShowBottomNav}
+          isSubSidebarOpen={isSubSidebarOpen}
+          setIsSubSidebarOpen={setIsSubSidebarOpen}
+          SidebarComponent={SidebarComponent}
+          verticals={verticals}
+          activeVertical={activeVertical}
         />
       )}
 
       {activeVertical === verticals.CLIENTS?.id && (
-        <ClientManagement user={user} permissions={permissions} tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} />
+        <ClientManagement 
+          user={user} 
+          permissions={permissions} 
+          tasks={tasks.filter(t => t.verticalId === verticals.CLIENTS?.id)} 
+          verticals={verticals}
+          activeVertical={activeVertical}
+        />
       )}
       {(activeVertical === verticals.DATA_MANAGER?.id || activeVertical === 'model_verification_board') && (
         <DataManagerWorkspace key={activeVertical} user={user} permissions={permissions} activeVertical={activeVertical} />

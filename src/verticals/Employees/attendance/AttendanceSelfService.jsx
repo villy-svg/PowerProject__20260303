@@ -26,6 +26,7 @@ import AttendanceReceiptScreen from './AttendanceReceiptScreen';
 import LiveAttendanceTab from './LiveAttendanceTab';
 import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './AttendanceSelfService.css';
+import MasterPageHeader from '../../../components/layout/MasterPageHeader';
 
 // ---------------------------------------------------------------------------
 // HubSelector — fetches hubs and renders a select element.
@@ -152,7 +153,7 @@ const CurrentAttendanceTab = ({ user }) => {
     handleCheckIn,
     handleCheckOut,
     clearSuccessData,
-  } = useAttendanceSelfService();
+  } = useAttendanceSelfService(user?.id);
 
   // Receipt screen routing: show receipt after successful check-in/out
   if (successData) {
@@ -237,7 +238,17 @@ const TAB_LIVE     = 'live';
 // Accepts `permissions` from ContentRouter to determine the tab layout.
 // Viewer: single tab (form only). Contributor+: two tabs.
 // ---------------------------------------------------------------------------
-const AttendanceSelfService = ({ user, permissions }) => {
+const AttendanceSelfService = ({ 
+  user, 
+  permissions,
+  setActiveVertical,
+  onShowBottomNav,
+  isSubSidebarOpen,
+  setIsSubSidebarOpen,
+  SidebarComponent,
+  verticals,
+  activeVertical,
+}) => {
   // Contributor+ can create records — use canCreate as the tab gate.
   // Viewer has canCreate === false but can still submit via the SECURITY DEFINER RPC.
   const showLiveTab = !!(permissions?.canCreate);
@@ -250,19 +261,29 @@ const AttendanceSelfService = ({ user, permissions }) => {
   return (
     <div className="self-service__container">
       {/* Page Header */}
-      <div className="self-service__header self-service__header--spaced">
-        <div>
-          <h1 className="self-service__title">Current Attendance</h1>
-          <p className="self-service__date">{todayDisplay}</p>
-        </div>
-        {/* master_admin only — the RBACManageButton is self-guarded */}
-        <RBACManageButton
-          user={user}
-          verticalId="employees"
-          featureId="canAccessAttendanceSelfService"
-          label="Current Attendance"
-        />
-      </div>
+      <MasterPageHeader
+        title="Current Attendance"
+        description={todayDisplay}
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={setIsSubSidebarOpen}
+        hideMenuClose={true}
+        SidebarComponent={SidebarComponent}
+        user={user}
+        permissions={permissions}
+        verticals={verticals}
+        activeVertical={activeVertical}
+        hideSearchBar={true}
+        rightActions={
+          <RBACManageButton
+            user={user}
+            verticalId="employees"
+            featureId="canAccessAttendanceSelfService"
+            label="Current Attendance"
+          />
+        }
+      />
 
       {/* Tab bar — only shown for Contributor+ */}
       {showLiveTab && (

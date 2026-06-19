@@ -179,20 +179,28 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
 //
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
-export async function fetchMyTodayAttendance() {
+export async function fetchMyTodayAttendance(userId) {
   const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
 
   // Step 1: Resolve the caller's employee_id from their profile.
-  // This is a lightweight single-row lookup on user_profiles (indexed on id).
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { data: null, error: new Error('User not authenticated') };
+  // We use the provided userId (from React auth context) to support impersonation.
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: new Error('User not authenticated') };
+    }
+    targetUserId = user.id;
+  }
+
+  if (targetUserId === 'dev-bypass-user-id') {
+    return { data: null, error: null };
   }
 
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('employee_id')
-    .eq('id', user.id)
+    .eq('id', targetUserId)
     .single();
 
   if (profileError) {

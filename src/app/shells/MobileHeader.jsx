@@ -278,62 +278,62 @@ const MobileHeader = ({
           </button>
 
           {/* Board Switcher Toggle (Icon 1) */}
-          {boards.length > 0 && (
-            <button
-              className={`nav-item mobile-tray-btn ${isBoardSubTrayOpen ? 'active' : ''}`}
-              onClick={() => {
-                const nextState = !isBoardSubTrayOpen;
-                setIsBoardSubTrayOpen(nextState);
-                setIsMobileAddTrayOpen(false);
-                if (nextState) setIsMenuOpen(false);
-              }}
-              title="Select Board"
-            >
-              <div className="icon-wrapper">
-                <IconBoards size={16} strokeWidth={isBoardSubTrayOpen ? 2.2 : 1.8} />
-              </div>
-              <span className="nav-label">Boards</span>
-            </button>
-          )}
+          <button
+            className={`nav-item mobile-tray-btn ${isBoardSubTrayOpen ? 'active' : ''} ${boards.length === 0 ? 'disabled' : ''}`}
+            onClick={() => {
+              if (boards.length === 0) return;
+              const nextState = !isBoardSubTrayOpen;
+              setIsBoardSubTrayOpen(nextState);
+              setIsMobileAddTrayOpen(false);
+              if (nextState) setIsMenuOpen(false);
+            }}
+            title="Select Board"
+            style={{ opacity: boards.length > 0 ? 1 : 0.4 }}
+          >
+            <div className="icon-wrapper">
+              <IconBoards size={16} strokeWidth={isBoardSubTrayOpen ? 2.2 : 1.8} />
+            </div>
+            <span className="nav-label">Boards</span>
+          </button>
 
           {/* Filters Overlay Toggle (Icon 2 - Funnel replacing legacy Menu Toggle) */}
-          {hasExpandedContent && (
-            <button
-              className={`nav-item mobile-tray-btn ${isMenuOpen ? 'active' : ''}`}
-              onClick={() => {
-                const nextMenuState = !isMenuOpen;
-                setIsMenuOpen(nextMenuState);
-                setIsBoardSubTrayOpen(false);
-                setIsMobileAddTrayOpen(false);
-                if (nextMenuState && onSidebarToggle) onSidebarToggle(false);
-              }}
-              title="Toggle Filters"
-            >
-              <div className="icon-wrapper">
-                <IconFilter size={16} strokeWidth={isMenuOpen ? 2.2 : 1.8} />
-              </div>
-              <span className="nav-label">Filters</span>
-            </button>
-          )}
+          <button
+            className={`nav-item mobile-tray-btn ${isMenuOpen ? 'active' : ''} ${!hasExpandedContent ? 'disabled' : ''}`}
+            onClick={() => {
+              if (!hasExpandedContent) return;
+              const nextMenuState = !isMenuOpen;
+              setIsMenuOpen(nextMenuState);
+              setIsBoardSubTrayOpen(false);
+              setIsMobileAddTrayOpen(false);
+              if (nextMenuState && onSidebarToggle) onSidebarToggle(false);
+            }}
+            title="Toggle Filters"
+            style={{ opacity: hasExpandedContent ? 1 : 0.4 }}
+          >
+            <div className="icon-wrapper">
+              <IconFilter size={16} strokeWidth={isMenuOpen ? 2.2 : 1.8} />
+            </div>
+            <span className="nav-label">Filters</span>
+          </button>
 
           {/* Add Button */}
-          {canAdd && (
-            <button
-              className={`nav-item mobile-tray-btn mobile-add-btn ${(isTaskModalOpen || isMobileAddTrayOpen) ? 'active' : ''}`}
-              onClick={() => {
-                const nextAddTrayState = !isMobileAddTrayOpen;
-                setIsMobileAddTrayOpen(nextAddTrayState);
-                setIsBoardSubTrayOpen(false);
-                setIsMenuOpen(false);
-              }}
-              title="Add / Actions"
-            >
-              <div className="icon-wrapper">
-                <IconPlus size={16} strokeWidth={(isTaskModalOpen || isMobileAddTrayOpen) ? 2.2 : 1.8} />
-              </div>
-              <span className="nav-label">Add</span>
-            </button>
-          )}
+          <button
+            className={`nav-item mobile-tray-btn mobile-add-btn ${(isTaskModalOpen || isMobileAddTrayOpen) ? 'active' : ''} ${!canAdd ? 'disabled' : ''}`}
+            onClick={() => {
+              if (!canAdd) return;
+              const nextAddTrayState = !isMobileAddTrayOpen;
+              setIsMobileAddTrayOpen(nextAddTrayState);
+              setIsBoardSubTrayOpen(false);
+              setIsMenuOpen(false);
+            }}
+            title="Add / Actions"
+            style={{ opacity: canAdd ? 1 : 0.4 }}
+          >
+            <div className="icon-wrapper">
+              <IconPlus size={16} strokeWidth={(isTaskModalOpen || isMobileAddTrayOpen) ? 2.2 : 1.8} />
+            </div>
+            <span className="nav-label">Add</span>
+          </button>
         </div>
       </div>
     </>

@@ -42,6 +42,8 @@ const EmployeeAttendanceBoard = ({
   isSubSidebarOpen,
   setIsSubSidebarOpen,
   SidebarComponent,
+  verticals,
+  activeVertical,
 }) => {
   // Board data hook
   const {
@@ -195,6 +197,8 @@ const EmployeeAttendanceBoard = ({
         SidebarComponent={SidebarComponent}
         user={user}
         permissions={permissions}
+        verticals={verticals}
+        activeVertical={activeVertical}
         leftActions={headerLeftActions}
         rightActions={headerRightActions}
       />

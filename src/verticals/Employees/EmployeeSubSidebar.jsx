@@ -67,7 +67,16 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
   );
 };
 
-const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilterChange, onReset, onBatchFilter, filters, hideNavigation }) => {
+const EmployeeSubSidebar = ({ 
+  permissions, 
+  activeVertical, 
+  setActiveVertical, 
+  onFilterChange = () => {}, 
+  onReset = () => {}, 
+  onBatchFilter = () => {}, 
+  filters = {}, 
+  hideNavigation 
+}) => {
   /* All filter groups start collapsed in the mobile menu (hideNavigation=true).
      The mobile overlay unmounts/remounts on each open/close, so this initial state
      effectively resets to collapsed every time the menu is opened. */

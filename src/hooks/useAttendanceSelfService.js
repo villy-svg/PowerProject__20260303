@@ -165,7 +165,7 @@ async function fireOvertimeNotification(setAlarmFired) {
   setAlarmFired(true);
 }
 
-export function useAttendanceSelfService() {
+export function useAttendanceSelfService(userId) {
   // Current day's attendance for the logged-in employee
   const [todayRecord, setTodayRecord] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -186,10 +186,11 @@ export function useAttendanceSelfService() {
   // Fetch today's attendance record
   // ---------------------------------------------------------------------------
   const loadTodayRecord = useCallback(async () => {
+    if (!userId) return; // Wait until auth provides userId
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await fetchMyTodayAttendance();
+      const { data, error: fetchError } = await fetchMyTodayAttendance(userId);
       if (fetchError) throw fetchError;
       setTodayRecord(data); // null if no record exists yet
     } catch (err) {
@@ -198,7 +199,7 @@ export function useAttendanceSelfService() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   // Run on mount
   useEffect(() => {
