@@ -16,6 +16,11 @@
   min-height: 160px;
 }
 
+.employee-card.task-card-master .card-row-1 {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
 .employee-card.task-card-master.inactive {
   filter: grayscale(1);
   opacity: 0.5;
