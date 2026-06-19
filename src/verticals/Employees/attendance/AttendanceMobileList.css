@@ -1,3 +1,5 @@
+@import '../../../styles/DropdownSystem.css';
+
 /* Attendance Mobile List specific classes */
 
 .attendance-mobile-list {
@@ -18,16 +20,6 @@
   font-weight: 700;
   text-transform: uppercase;
   opacity: 0.7;
-}
-
-.attendance-mobile-list__selector select {
-  padding: 0.75rem;
-  border-radius: var(--radius-button, 12px);
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  font-size: 1rem;
-  font-weight: 600;
 }
 
 .attendance-summary-cards {

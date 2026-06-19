@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconSun, IconMoon, IconCoffee, IconFile, IconX } from '../../../components/ui/Icons';
+import BaseDropdown from '../../../components/ui/BaseDropdown';
 
 // Status labels and classes (from Grid)
 const STATUS_META = {
@@ -91,17 +92,19 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
       {employees.length > 1 && (
         <div className="attendance-mobile-list__selector">
           <label htmlFor="mobile-employee-select">Select Employee</label>
-          <select
+          <BaseDropdown
             id="mobile-employee-select"
+            options={employees.map(emp => ({
+              value: emp.id,
+              label: `${emp.full_name} ${emp.emp_code ? `(${emp.emp_code})` : ''}`
+            }))}
             value={selectedEmployee?.id || ''}
-            onChange={(e) => setSelectedEmployeeId(e.target.value)}
-          >
-            {employees.map(emp => (
-              <option key={emp.id} value={emp.id}>
-                {emp.full_name} {emp.emp_code ? `(${emp.emp_code})` : ''}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setSelectedEmployeeId(val)}
+            mode="single"
+            searchable={true}
+            searchPlaceholder="Search employee..."
+            placeholder="Select Employee"
+          />
         </div>
       )}
 

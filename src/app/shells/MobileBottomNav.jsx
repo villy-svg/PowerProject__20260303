@@ -28,6 +28,7 @@ import '../../components/layout/BottomNav.css';
 
 import SearchBar from '../../components/ui/SearchBar';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
+import { resolveVerticalRootId } from '../../registry/verticalRegistry';
 
 const MobileBottomNav = ({
   activeVertical,
@@ -81,7 +82,8 @@ const MobileBottomNav = ({
         )}
         <div className="bottom-nav-container">
           {navItems.map((item) => {
-            const isActive = activeVertical === item.id;
+            const rootVerticalId = resolveVerticalRootId(activeVertical, verticals);
+            const isActive = rootVerticalId === item.id || activeVertical === item.id;
             return (
               <button
                 key={item.label}
