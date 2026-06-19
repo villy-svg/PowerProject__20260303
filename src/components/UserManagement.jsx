@@ -2,6 +2,7 @@ import React from 'react';
 import MasterPageHeader from './MasterPageHeader';
 import UserList from './UserManagement/UserList';
 import UserEditorModal from './UserManagement/UserEditorModal';
+import PermissionSyncModal from './UserManagement/PermissionSyncModal';
 import { useUserManagement } from './UserManagement/useUserManagement';
 import './UserManagement.css';
 
@@ -11,6 +12,8 @@ import './UserManagement.css';
  * Now modularized for extreme safety and auditability.
  */
 const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
+  const [isSyncModalOpen, setIsSyncModalOpen] = React.useState(false);
+
   const {
     users,
     loading,
@@ -22,6 +25,7 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
     openEditor,
     closeEditor,
     handleSyncPermissions,
+    handleMassSyncPermissions,
     handleDeactivate,
     handleReactivate,
     editRoleScope,
@@ -52,18 +56,30 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
         expandedLeft={
-          <div className="view-mode-toggle">
+          <div className="view-mode-toggle view-mode-toggle--expanded">
+            <div className="view-toggle-group">
+              <button 
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => setViewMode('grid')}
+              >
+                Grid
+              </button>
+              <button 
+                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+              >
+                List
+              </button>
+            </div>
+            
+            <div className="header-divider"></div>
+
             <button 
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
+              className="halo-button header-action-btn" 
+              onClick={() => setIsSyncModalOpen(true)}
+              title="Clone permissions from one user to multiple others"
             >
-              Grid
-            </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              List
+              Mass Sync
             </button>
           </div>
         }
@@ -98,6 +114,18 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
           setExpandedVertical={setExpandedFeatures}
           onClose={closeEditor}
           onSave={handleSyncPermissions}
+          loading={loading}
+        />
+      )}
+
+      {isSyncModalOpen && (
+        <PermissionSyncModal
+          users={users}
+          onClose={() => setIsSyncModalOpen(false)}
+          onSave={async (sourceId, targetIds) => {
+            await handleMassSyncPermissions(sourceId, targetIds);
+            setIsSyncModalOpen(false);
+          }}
           loading={loading}
         />
       )}

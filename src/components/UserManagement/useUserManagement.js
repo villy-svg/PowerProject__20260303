@@ -62,6 +62,7 @@ export const sortUsers = (userList) => {
  * useUserManagement Hook
  * Logic engine for the User Management dashboard.
  * Handles user list fetching, atomic permission syncing, and user activation toggling.
+ * Includes mass syncing capabilities.
  */
 export const useUserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -240,6 +241,53 @@ export const useUserManagement = () => {
     }
   };
 
+  // 3b. Mass Sync Permissions
+  const handleMassSyncPermissions = async (sourceUserId, targetUserIds) => {
+    if (!sourceUserId || !targetUserIds || targetUserIds.length === 0) return;
+    
+    setLoading(true);
+    setStatus({ type: '', text: '' });
+
+    try {
+      // Find source user role from loaded profile list
+      const sourceUser = users.find(u => u.id === sourceUserId);
+      if (!sourceUser) throw new Error("Source user not found.");
+
+      // Fetch granular permissions from source
+      const perms = await userService.fetchUserPermissions(sourceUserId);
+      
+      const vGrants = (perms.verticals || []).map(v => ({ 
+        vertical_id: v.vertical_id, 
+        access_level: v.access_level 
+      }));
+
+      const fGrants = (perms.features || []).map(f => ({
+        vertical_id: f.vertical_id,
+        feature_id: f.feature_id,
+        access_level: f.access_level
+      }));
+
+      // Map through all target users and fire a sync request for each
+      // The RPC 'sync_user_permissions' manages wiping and replacing existing permissions cleanly
+      await Promise.all(targetUserIds.map(tId => 
+        userService.syncPermissions({
+          userId: tId,
+          roleId: sourceUser.role_id,
+          verticalGrants: vGrants,
+          featureGrants: fGrants
+        })
+      ));
+
+      setStatus({ type: 'success', text: `Permissions successfully cloned to ${targetUserIds.length} user(s).` });
+      await fetchUsers(false);
+    } catch (err) {
+      console.error("Mass Sync Failure:", err.message);
+      setStatus({ type: 'error', text: `Mass Sync Failed: ${err.message}` });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 4. Deactivate User
   // Optimistically updates local state, then calls the RPC, then refreshes.
   const handleDeactivate = async (userId) => {
@@ -356,7 +404,7 @@ export const useUserManagement = () => {
 
   return {
     users, loading, viewMode, setViewMode, status, setStatus,
-    editingUser, openEditor, closeEditor, handleSyncPermissions,
+    editingUser, openEditor, closeEditor, handleSyncPermissions, handleMassSyncPermissions,
     handleDeactivate, handleReactivate,
     editRoleScope, setEditRoleScope,
     editRoleLevel, handleLevelChange,
