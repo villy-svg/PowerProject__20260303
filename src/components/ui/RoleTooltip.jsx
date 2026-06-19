@@ -168,7 +168,7 @@ const CONTEXT_ACCESS = {
   'Hub Task Board': RAW_CONTEXT['Hub Tasks Board'],
   'Hubs Task Board': RAW_CONTEXT['Hub Tasks Board'],
   'Daily Task Templates': RAW_CONTEXT['Daily Task Template'],
-  'My Attendance': RAW_CONTEXT['Current Attendance'],
+  'Current Attendance': RAW_CONTEXT['Current Attendance'],
   'Data Manager': RAW_CONTEXT['Data'],
 };
 

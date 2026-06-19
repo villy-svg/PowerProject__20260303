@@ -479,7 +479,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 </button>
               )}
 
-              {/* 3. My Attendance (hidden for Master Admins) */}
+              {/* 3. Current Attendance (hidden for Master Admins) */}
               {user?.roleId !== 'master_admin' && (
                 <button
                   className="summary-nav-item stage-orange"
@@ -488,7 +488,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                   <div className="summary-icon-wrapper">
                     <IconClock size={14} />
                   </div>
-                  <span className="summary-nav-label">My Attendance</span>
+                  <span className="summary-nav-label">Current Attendance</span>
                 </button>
               )}
 
