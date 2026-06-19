@@ -1,5 +1,5 @@
 /* RejectionModal.css */
-@import '../styles/DropdownSystem.css';
+@import '../../styles/DropdownSystem.css';
 .rejection-form {
   padding: 0;
   display: flex;

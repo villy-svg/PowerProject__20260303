@@ -2,7 +2,7 @@
    SubmissionModal.css — Proof of Work Modal (Halo/Glassmorphism System)
    Follows: UI Design System §5 (Modals), §12 (Apple Premium Standards)
    ========================================================================== */
-@import '../styles/systems/systemModals.css';
+@import '../../styles/systems/systemModals.css';
 /* ─── Modal Body Layout ─────────────────────────────────────────────────── */
 
 /* ─── Section Labels ────────────────────────────────────────────────────── */

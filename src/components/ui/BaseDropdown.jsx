@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
-import '../styles/DropdownSystem.css';
+import '../../styles/DropdownSystem.css';
 
 /**
  * BaseDropdown
