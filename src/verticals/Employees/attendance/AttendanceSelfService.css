@@ -19,6 +19,8 @@
   min-height: 100%;
   padding: clamp(1.5rem, 5vw, 3rem);
   gap: 1.5rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .self-service__header {
@@ -222,9 +224,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  padding: clamp(1.5rem, 5vw, 3rem);
+  width: 100%;
   gap: 1.5rem;
 }
 
@@ -337,12 +337,15 @@
 /* --------------------------------------------------------------------------
    SECTION 6: Mobile Responsive Adaptations
    -------------------------------------------------------------------------- */
-@media screen and (max-width: 480px) {
-  .self-service__container,
-  .receipt__container {
+@media screen and (max-width: 768px) {
+  .self-service__container {
     padding: 1rem;
     justify-content: flex-start;
     padding-top: 2rem;
+  }
+
+  .receipt__container {
+    padding: 0;
   }
 
   .receipt__card {

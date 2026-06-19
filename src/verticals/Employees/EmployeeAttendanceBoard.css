@@ -57,7 +57,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .attendance-board__date-label {
@@ -75,10 +75,11 @@
   border-radius: var(--radius-button, 12px);
   color: var(--brand-green);
   padding: 0.4rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s ease;
+  text-align: center;
 }
 
 .attendance-board__date-input:focus {
@@ -89,6 +90,17 @@
 .attendance-board__date-separator {
   opacity: 0.4;
   font-weight: 600;
+}
+
+.attendance-board__go-btn {
+  padding: 0 !important;
+  width: 32px;
+  height: 32px;
+  min-width: 32px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* Pending approvals badge on the header button */
@@ -107,30 +119,7 @@
   padding: 0 4px;
 }
 
-/* Status legend below the header */
-.attendance-board__legend {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1.5rem;
-  flex-wrap: wrap;
-}
 
-.attendance-board__legend-item {
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-}
-
-.attendance-board__legend--present  { background: var(--attendance-present); color: var(--attendance-present-text); }
-.attendance-board__legend--week-off { background: var(--attendance-week-off); color: var(--attendance-week-off-text); opacity: 0.7; }
-.attendance-board__legend--leave    { background: var(--attendance-leave); color: var(--attendance-leave-text); }
-.attendance-board__legend--absent   { background: var(--attendance-absent); color: var(--attendance-absent-text); }
-.attendance-board__legend--pending  { background: rgba(249, 115, 22, 0.15); color: #f97316; }
 
 /* --------------------------------------------------------------------------
    SECTION 3: Attendance Grid
@@ -527,12 +516,20 @@
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 768px) {
   .attendance-board__date-range {
-    gap: 0.35rem;
+    gap: 0.25rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .attendance-board__date-label {
+    display: none;
   }
 
   .attendance-board__date-input {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.6rem;
+    font-size: clamp(0.65rem, 3.5vw, 0.9rem);
+    padding: 0.35rem 0.25rem;
+    flex: 1;
+    min-width: 0;
   }
 
   .approval-drawer {
@@ -557,15 +554,6 @@
 }
 
 @media screen and (max-width: 480px) {
-  .attendance-board__legend {
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-  }
-
-  .attendance-board__legend-item {
-    font-size: 0.6rem;
-  }
-
   .suggest-edit-modal {
     width: 95vw;
   }

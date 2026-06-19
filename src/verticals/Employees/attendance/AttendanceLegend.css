@@ -1,0 +1,67 @@
+/* AttendanceLegend.css */
+
+.attendance-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.attendance-legend__item {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: var(--radius-button, 6px);
+  border: 1px solid var(--border-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.attendance-legend__item--present { 
+  background: var(--attendance-present); 
+  color: var(--attendance-present-text); 
+}
+.attendance-legend__item--present-night { 
+  background: var(--attendance-present); 
+  color: var(--attendance-present-text); 
+}
+.attendance-legend__item--week-off { 
+  background: var(--attendance-week-off); 
+  color: var(--attendance-week-off-text); 
+  opacity: 0.9; 
+}
+.attendance-legend__item--leave { 
+  background: var(--attendance-leave); 
+  color: var(--attendance-leave-text); 
+}
+.attendance-legend__item--absent { 
+  background: var(--attendance-absent); 
+  color: var(--attendance-absent-text); 
+}
+.attendance-legend__item--pending { 
+  background: rgba(249, 115, 22, 0.15); 
+  color: #f97316; 
+}
+
+.attendance-legend__icon-pending {
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+@media screen and (max-width: 768px) {
+  .attendance-legend {
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .attendance-legend__item {
+    font-size: 0.6rem;
+    padding: 4px 6px;
+  }
+}

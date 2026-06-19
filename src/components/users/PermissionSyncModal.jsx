@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconX } from '../ui/Icons';
+import BaseDropdown from '../ui/BaseDropdown';
 import '../../styles/ManagementForms.css';
 
 /**
@@ -11,25 +12,11 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
   const [sourceUserId, setSourceUserId] = useState('');
   const [targetUserIds, setTargetUserIds] = useState([]);
 
-  // Only active users should be eligible for syncing
-  const activeUsers = users.filter(u => u.is_active !== false);
-
-  const handleTargetToggle = (userId) => {
-    setTargetUserIds(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    const allEligible = activeUsers.filter(u => u.id !== sourceUserId).map(u => u.id);
-    if (targetUserIds.length === allEligible.length) {
-      setTargetUserIds([]);
-    } else {
-      setTargetUserIds(allEligible);
-    }
-  };
+  // Use all users so that even inactive users can be targeted/sourced
+  const userOptions = users.map(u => ({
+    label: `${u.name} (${u.email})`,
+    value: u.id
+  }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,23 +44,21 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
               1. Permission Exporting User (Source)
             </label>
             <div className="form-input-container">
-              <select 
-                value={sourceUserId} 
-                onChange={(e) => {
-                  setSourceUserId(e.target.value);
+              <BaseDropdown
+                id="source-user-select"
+                value={sourceUserId}
+                onChange={(val) => {
+                  setSourceUserId(val);
                   // Remove the new source from targets if it was previously selected
-                  setTargetUserIds(prev => prev.filter(id => id !== e.target.value));
+                  setTargetUserIds(prev => prev.filter(id => id !== val));
                 }}
-                className="master-dropdown"
-                required
-              >
-                <option value="" className="dropdown-fallback-option">Select the source user...</option>
-                {activeUsers.map(u => (
-                  <option key={u.id} value={u.id} className="dropdown-fallback-option">
-                    {u.name} ({u.email})
-                  </option>
-                ))}
-              </select>
+                options={userOptions}
+                placeholder="Select the source user..."
+                mode="single"
+                searchable={true}
+                fuzzySearch={true}
+                displayMode="compact"
+              />
             </div>
             <p className="sync-help-text">
               This user's Access Scope, Capability Level, Vertical Access, and Feature Overrides will be copied exactly.
@@ -86,49 +71,30 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
               <label className="section-label">
                 2. Permission Importing Users (Targets)
               </label>
-              {sourceUserId && (
-                <button type="button" onClick={handleSelectAll} className="select-all-btn">
-                  {targetUserIds.length > 0 && targetUserIds.length === activeUsers.length - 1 ? 'Deselect All' : 'Select All'}
-                </button>
-              )}
             </div>
             
-            <div className="form-input-container multi-select-container">
+            <div className="form-input-container" style={{ minHeight: 'auto', padding: '0', background: 'transparent', border: 'none' }}>
               {!sourceUserId ? (
-                <p className="empty-state-text">
-                  Please select a source user first.
-                </p>
+                <div className="form-input-container" style={{ opacity: 0.5 }}>
+                  <p className="empty-state-text" style={{ margin: 0, padding: '8px', fontSize: '0.9rem' }}>
+                    Please select a source user first.
+                  </p>
+                </div>
               ) : (
-                <div className="checkbox-list">
-                  {activeUsers.filter(u => u.id !== sourceUserId).map(u => {
-                    const isSelected = targetUserIds.includes(u.id);
-                    return (
-                      <div 
-                        key={u.id} 
-                        className={`checkbox-item ${isSelected ? 'selected' : ''}`}
-                        onClick={() => handleTargetToggle(u.id)}
-                        role="checkbox"
-                        aria-checked={isSelected}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            handleTargetToggle(u.id);
-                          }
-                        }}
-                      >
-                        <div className="selection-area">
-                          <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
-                            {isSelected && '✓'}
-                          </div>
-                        </div>
-                        <div className="user-info">
-                          <span className="user-name">{u.name}</span>
-                          <span className="user-email">{u.email}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div style={{ width: '100%' }}>
+                  <BaseDropdown
+                    id="target-users-select"
+                    value={targetUserIds}
+                    onChange={setTargetUserIds}
+                    options={userOptions.filter(opt => opt.value !== sourceUserId)}
+                    placeholder="Select target users..."
+                    mode="multi"
+                    searchable={true}
+                    fuzzySearch={true}
+                    selectAll={true}
+                    displayMode="pills"
+                    closeOnSelectMobile={false}
+                  />
                 </div>
               )}
             </div>

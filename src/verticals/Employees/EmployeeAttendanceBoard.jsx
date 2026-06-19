@@ -20,10 +20,14 @@ import React, { useState, useCallback } from 'react';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useAttendanceBoard } from '../../hooks/useAttendanceBoard';
 import AttendanceGrid from './attendance/AttendanceGrid';
+import AttendanceMobileList from './attendance/AttendanceMobileList';
+import AttendanceLegend from './attendance/AttendanceLegend';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
 import './EmployeeAttendanceBoard.css';
+import './attendance/AttendanceMobileList.css';
 import RBACManageButton from '../../components/ui/RBACManageButton';
+import { useLayoutShell } from '../../app/shells/useLayoutShell';
 
 // ---------------------------------------------------------------------------
 // Helper: Format a 'YYYY-MM-DD' string for display as an <input type="date">
@@ -39,15 +43,6 @@ const EmployeeAttendanceBoard = ({
   setIsSubSidebarOpen,
   SidebarComponent,
 }) => {
-  // Guard: RBAC access check (hard gate per rbac-security-system §3)
-  if (!permissions?.canAccessEmployeeAttendanceBoard) {
-    return (
-      <div className="attendance-board__no-access">
-        <p>You do not have access to the Attendance Board.</p>
-      </div>
-    );
-  }
-
   // Board data hook
   const {
     employees,
@@ -61,9 +56,15 @@ const EmployeeAttendanceBoard = ({
     getCellData,
   } = useAttendanceBoard(user);
 
+  const { shellType } = useLayoutShell();
+
   // Modal/Drawer state
   const [selectedCell, setSelectedCell] = useState(null);    // { employeeId, date, record }
   const [isApprovalDrawerOpen, setIsApprovalDrawerOpen] = useState(false);
+
+  // Local state for date inputs to prevent continuous re-rendering
+  const [inputStart, setInputStart] = useState(startDate);
+  const [inputEnd, setInputEnd] = useState(endDate);
 
   // Determine if this user can approve (editor or admin)
   const canApprove = permissions?.canUpdate || permissions?.canUpdateEmployeeAttendanceBoard;
@@ -71,9 +72,7 @@ const EmployeeAttendanceBoard = ({
   const canSuggestEdit = permissions?.canCreate || permissions?.canCreateEmployeeAttendanceBoard;
 
   // ---------------------------------------------------------------------------
-  // Cell click handler — behavior differs by role:
-  //   Editor/Admin: if cell has pending edit, open approval drawer. Otherwise suggest.
-  //   Contributor:  always open suggest edit modal.
+  // Cell click handler
   // ---------------------------------------------------------------------------
   const handleCellClick = useCallback((employeeId, date) => {
     const record = getCellData(employeeId, date);
@@ -82,7 +81,6 @@ const EmployeeAttendanceBoard = ({
     if (canApprove && record.has_pending_edit) {
       setIsApprovalDrawerOpen(true);
     } else if (canSuggestEdit) {
-      // SuggestEditModal opens via selectedCell !== null AND drawer not open
       setIsApprovalDrawerOpen(false);
     }
   }, [canApprove, canSuggestEdit, getCellData]);
@@ -97,20 +95,33 @@ const EmployeeAttendanceBoard = ({
     refreshBoard();
   }, [handleCloseModal, refreshBoard]);
 
-  // ---------------------------------------------------------------------------
+  // Guard: RBAC access check (hard gate per rbac-security-system §3)
+  if (!permissions?.canAccessEmployeeAttendanceBoard) {
+    return (
+      <div className="attendance-board__no-access">
+        <p>You do not have access to the Attendance Board.</p>
+      </div>
+    );
+  }
+
   // Header Actions (per master-header-system §4 alignment rules)
   // ---------------------------------------------------------------------------
+  const handleApplyDates = () => {
+    setStartDate(inputStart);
+    setEndDate(inputEnd);
+  };
+
   const headerLeftActions = (
-    <div className="attendance-board__date-range">
+    <div className="attendance-board__date-range" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       {/* Date range pickers — leftActions = "how I see the data" */}
       <label className="attendance-board__date-label" htmlFor="att-start-date">From</label>
       <input
         id="att-start-date"
         type="date"
         className="attendance-board__date-input"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-        max={endDate}
+        value={inputStart}
+        onChange={(e) => setInputStart(e.target.value)}
+        max={inputEnd}
       />
       <span className="attendance-board__date-separator">→</span>
       <label className="attendance-board__date-label" htmlFor="att-end-date">To</label>
@@ -118,10 +129,19 @@ const EmployeeAttendanceBoard = ({
         id="att-end-date"
         type="date"
         className="attendance-board__date-input"
-        value={endDate}
-        onChange={(e) => setEndDate(e.target.value)}
-        min={startDate}
+        value={inputEnd}
+        onChange={(e) => setInputEnd(e.target.value)}
+        min={inputStart}
       />
+      <button 
+        className="halo-button halo-button--primary attendance-board__go-btn" 
+        onClick={handleApplyDates}
+        aria-label="Apply Dates"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
     </div>
   );
 
@@ -187,23 +207,28 @@ const EmployeeAttendanceBoard = ({
         </div>
       )}
 
-      {/* Legend */}
-      <div className="attendance-board__legend">
-        <span className="attendance-board__legend-item attendance-board__legend--present">Present</span>
-        <span className="attendance-board__legend-item attendance-board__legend--week-off">Week-Off</span>
-        <span className="attendance-board__legend-item attendance-board__legend--leave">Leave</span>
-        <span className="attendance-board__legend-item attendance-board__legend--absent">Absent</span>
-        <span className="attendance-board__legend-item attendance-board__legend--pending">⚠ Pending Edit</span>
-      </div>
+      {/* Legend (Desktop Only) */}
+      {shellType !== 'mobile' && <AttendanceLegend />}
 
-      {/* Main Grid */}
-      <AttendanceGrid
-        employees={employees}
-        dateRange={dateRange}
-        getCellData={getCellData}
-        isLoading={isLoading}
-        onCellClick={handleCellClick}
-      />
+      {/* Main Content: Adaptive swapping between Grid and List */}
+      {shellType === 'mobile' ? (
+        <AttendanceMobileList
+          employees={employees}
+          dateRange={dateRange}
+          getCellData={getCellData}
+          isLoading={isLoading}
+          onCellClick={handleCellClick}
+          dateFilterControl={headerLeftActions}
+        />
+      ) : (
+        <AttendanceGrid
+          employees={employees}
+          dateRange={dateRange}
+          getCellData={getCellData}
+          isLoading={isLoading}
+          onCellClick={handleCellClick}
+        />
+      )}
 
       {/* Editor: Approval Drawer */}
       {isApprovalDrawerOpen && (

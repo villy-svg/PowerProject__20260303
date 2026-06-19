@@ -104,6 +104,16 @@ const SkeletonRow = ({ colCount }) => (
 // AttendanceGrid — main export
 // ---------------------------------------------------------------------------
 const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick }) => {
+  if (!isLoading && (!dateRange || dateRange.length === 0)) {
+    return (
+      <div className="attendance-grid__empty-state">
+        <div className="empty-state-icon">⚠️</div>
+        <h3 className="empty-state-title">Invalid Date Range</h3>
+        <p className="empty-state-text">Please select a valid From and To date to view attendance.</p>
+      </div>
+    );
+  }
+
   if (!isLoading && (!employees || employees.length === 0)) {
     return (
       <div className="attendance-grid__empty-state">
