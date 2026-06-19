@@ -257,7 +257,13 @@ export async function fetchMyTodayAttendance(userId) {
 // @returns {Promise<{ data: Array, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchLiveAttendance() {
-  const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+  // Look back 3 days. This ensures we catch night-shift workers and extreme
+  // overtime cases (or sessions left open by mistake) which will be flagged
+  // on the frontend. The JS-side filter ensures we only show records with an
+  // open session.
+  const today = new Date();
+  const threeDaysAgoMs = today.getTime() - (3 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(threeDaysAgoMs).toISOString().split('T')[0]; // 'YYYY-MM-DD'
 
   const { data, error } = await supabase
     .from('daily_attendances')
@@ -275,7 +281,13 @@ export async function fetchLiveAttendance() {
         hubs ( id, name, hub_code )
       )
     `)
-    .contains('session_logs_data', '[{"logout_time": null}]')
+    // Include the last 3 days to safely catch old unclosed sessions
+    .gte('shift_date', threeDaysAgo)
+    // Use PostgREST raw filter for JSONB @> containment.
+    // .contains() with a string arg may not correctly encode JSON null;
+    // .filter(..., 'cs', ...) sends the predicate verbatim to PostgREST,
+    // which correctly maps it to: session_logs_data @> '[{"logout_time":null}]'::jsonb
+    .filter('session_logs_data', 'cs', '[{"logout_time":null}]')
     // Only grab records that have at least one session started
     .not('first_login_time', 'is', null);
 
