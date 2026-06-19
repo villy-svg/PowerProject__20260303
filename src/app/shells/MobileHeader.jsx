@@ -28,7 +28,7 @@ import {
 } from '../../components/ui/Icons';
 import MasterHeaderMenu from '../../components/layout/MasterHeaderMenu';
 import SearchBar from '../../components/ui/SearchBar';
-import '../../components/BottomNav.css';
+import '../../components/layout/BottomNav.css';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 
 const MobileHeader = ({

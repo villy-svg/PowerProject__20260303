@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './theme/useTheme';
 import './App.css';
-import './components/Header.css';
+import './components/layout/Header.css';
 
 // Services — Core
 import { verticalService } from './services/core/verticalService';

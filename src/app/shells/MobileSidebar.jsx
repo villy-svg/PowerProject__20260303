@@ -22,7 +22,7 @@ import {
 } from '../../components/ui/Icons';
 import powerLogo from '../../assets/logo.svg';
 import BoardRBACModal from '../../components/modals/BoardRBACModal';
-import '../../components/Sidebar.css';
+import '../../components/layout/Sidebar.css';
 
 const MobileSidebar = ({
   isOpen,

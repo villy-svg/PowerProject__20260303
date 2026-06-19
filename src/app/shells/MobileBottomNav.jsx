@@ -24,7 +24,7 @@ import {
   IconDatabase,
   IconSearch,
 } from '../../components/ui/Icons';
-import '../../components/BottomNav.css';
+import '../../components/layout/BottomNav.css';
 
 import SearchBar from '../../components/ui/SearchBar';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
