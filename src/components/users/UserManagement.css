@@ -848,13 +848,6 @@
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
 }
 
-.custom-checkbox {
-  accent-color: var(--brand-green);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
 .checkbox-item .user-info {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260619 User Permission Sync 1.0.6"
+git commit -m "260619 User Permission Sync 1.0.7"
 git push origin staging 
 
 # 2. Build (on Staging)

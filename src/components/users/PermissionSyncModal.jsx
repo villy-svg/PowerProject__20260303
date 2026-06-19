@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { IconX } from '../ui/Icons';
+import '../../styles/ManagementForms.css';
 
 /**
  * PermissionSyncModal Component
@@ -99,20 +100,35 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
                 </p>
               ) : (
                 <div className="checkbox-list">
-                  {activeUsers.filter(u => u.id !== sourceUserId).map(u => (
-                    <label key={u.id} className={`checkbox-item ${targetUserIds.includes(u.id) ? 'selected' : ''}`}>
-                      <input 
-                        type="checkbox" 
-                        checked={targetUserIds.includes(u.id)}
-                        onChange={() => handleTargetToggle(u.id)}
-                        className="custom-checkbox"
-                      />
-                      <div className="user-info">
-                        <span className="user-name">{u.name}</span>
-                        <span className="user-email">{u.email}</span>
+                  {activeUsers.filter(u => u.id !== sourceUserId).map(u => {
+                    const isSelected = targetUserIds.includes(u.id);
+                    return (
+                      <div 
+                        key={u.id} 
+                        className={`checkbox-item ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleTargetToggle(u.id)}
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleTargetToggle(u.id);
+                          }
+                        }}
+                      >
+                        <div className="selection-area">
+                          <div className={`selection-checkbox ${isSelected ? 'checked' : ''}`}>
+                            {isSelected && '✓'}
+                          </div>
+                        </div>
+                        <div className="user-info">
+                          <span className="user-name">{u.name}</span>
+                          <span className="user-email">{u.email}</span>
+                        </div>
                       </div>
-                    </label>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
