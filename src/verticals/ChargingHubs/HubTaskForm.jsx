@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import AssigneeSelector from '../../components/AssigneeSelector';
-import TaskHierarchySelector from '../../components/TaskHierarchySelector';
-import SubmissionHistory from '../../components/SubmissionHistory';
+import AssigneeSelector from '../../components/ui/AssigneeSelector';
+import TaskHierarchySelector from '../../components/tasks/TaskHierarchySelector';
+import SubmissionHistory from '../../components/tasks/SubmissionHistory';
 import { taskUtils } from '../../utils/taskUtils';
 import HubSelector from './HubSelector';
 import { useAssignees } from '../../hooks/useAssignees';
-import { IconUpload } from '../../components/Icons';
+import { IconUpload } from '../../components/ui/Icons';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { orchestrationService } from '../../services/tasks/orchestrationService';
-import CustomSelect from '../../components/CustomSelect';
-import AnonToggle from '../../components/AnonToggle';
+import CustomSelect from '../../components/ui/CustomSelect';
+import AnonToggle from '../../components/ui/AnonToggle';
 import './HubTaskForm.css';
 
 /** Fixed missing import */

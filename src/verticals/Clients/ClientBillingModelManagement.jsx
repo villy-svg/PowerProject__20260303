@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { billingModelService } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
-import MasterPageHeader from '../../components/MasterPageHeader';
-import { IconChevronDown } from '../../components/Icons';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import { IconChevronDown } from '../../components/ui/Icons';
 import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
 import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
 

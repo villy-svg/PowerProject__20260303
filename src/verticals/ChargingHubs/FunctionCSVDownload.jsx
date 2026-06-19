@@ -1,5 +1,5 @@
 import React from 'react';
-import CSVDownloadButton from '../../components/CSVDownloadButton';
+import CSVDownloadButton from '../../components/ui/CSVDownloadButton';
 
 const FunctionCSVDownload = ({ className, data, label = "Download CSV Template", filename = "hub_functions_template.csv" }) => {
   const headers = ['name', 'function_code', 'description'];

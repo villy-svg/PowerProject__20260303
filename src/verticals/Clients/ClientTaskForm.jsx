@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { clientService } from '../../services/clients/clientService';
-import AssigneeSelector from '../../components/AssigneeSelector';
-import TaskHierarchySelector from '../../components/TaskHierarchySelector';
-import CustomSelect from '../../components/CustomSelect';
+import AssigneeSelector from '../../components/ui/AssigneeSelector';
+import TaskHierarchySelector from '../../components/tasks/TaskHierarchySelector';
+import CustomSelect from '../../components/ui/CustomSelect';
 import { taskUtils } from '../../utils/taskUtils';
 import { useTaskForm } from '../../hooks/useTaskForm';
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
+import { IconChevronDown, IconChevronRightSingle } from '../../components/ui/Icons';
 import './EmployeeSubSidebar.css';
 
 /**
@@ -162,7 +162,7 @@ const EmployeeSubSidebar = ({ permissions, activeVertical, setActiveVertical, on
                 style={{ opacity: activeVertical === 'attendance_self_service' ? 1 : 0.7 }}
                 onClick={() => setActiveVertical('attendance_self_service')}
               >
-                My Attendance
+                Current Attendance
               </button>
             </div>
           )}

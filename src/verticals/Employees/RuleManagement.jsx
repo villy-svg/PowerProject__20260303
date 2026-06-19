@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import {
   fetchCategories,
   fetchSubCategories,

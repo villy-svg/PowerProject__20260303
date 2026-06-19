@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconX, IconChevronLeft, IconChevronRight, IconPlus, IconEdit, IconTrash } from '../../components/Icons';
+import { IconX, IconChevronLeft, IconChevronRight, IconPlus, IconEdit, IconTrash } from '../../components/ui/Icons';
 import { updateRule } from '../../services/employees/rulesService';
 import './TutorialSlideshowViewer.css';
 

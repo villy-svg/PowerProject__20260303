@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createCategory, updateCategory } from '../../services/employees/rulesService';
-import StatusMsg from '../../components/StatusMsg';
+import StatusMsg from '../../components/ui/StatusMsg';
 import '../../styles/ManagementForms.css';
 
 const CategoryFormModal = ({ isOpen, onClose, editingItem, onSave }) => {

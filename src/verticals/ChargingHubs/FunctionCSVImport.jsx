@@ -1,5 +1,5 @@
 import React from 'react';
-import CSVImportButton from '../../components/CSVImportButton';
+import CSVImportButton from '../../components/ui/CSVImportButton';
 import { supabase } from '../../services/core/supabaseClient';
 
 /**

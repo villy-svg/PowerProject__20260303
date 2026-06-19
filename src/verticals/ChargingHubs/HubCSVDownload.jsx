@@ -1,5 +1,5 @@
 import React from 'react';
-import CSVDownloadButton from '../../components/CSVDownloadButton';
+import CSVDownloadButton from '../../components/ui/CSVDownloadButton';
 
 const HubCSVDownload = ({ className, data, label, filename }) => {
   const headers = ['name', 'hub_code', 'city', 'status'];

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { clientServiceManager } from '../../services/clients/clientService';
 import '../ChargingHubs/HubManagement.css';
-import MasterPageHeader from '../../components/MasterPageHeader';
-import { IconChevronDown } from '../../components/Icons';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import { IconChevronDown } from '../../components/ui/Icons';
 // B4 FIX: ClientCategoryCSVDownload/Import are fully generic via tableName/entityName/requiredFields props.
 // Imported under neutral local names to make the intent clear and avoid misleading file references.
 import CSVDownload from './ClientCategoryCSVDownload';

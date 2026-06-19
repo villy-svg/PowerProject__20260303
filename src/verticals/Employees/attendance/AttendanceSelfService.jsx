@@ -24,7 +24,7 @@ import { supabase } from '../../../services/core/supabaseClient';
 import { useAttendanceSelfService } from '../../../hooks/useAttendanceSelfService';
 import AttendanceReceiptScreen from './AttendanceReceiptScreen';
 import LiveAttendanceTab from './LiveAttendanceTab';
-import RBACManageButton from '../../../components/RBACManageButton';
+import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './AttendanceSelfService.css';
 
 // ---------------------------------------------------------------------------

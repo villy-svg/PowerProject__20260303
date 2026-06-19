@@ -3,8 +3,8 @@ import { supabase } from '../../services/core/supabaseClient';
 import './Employees.css';
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
-import MasterPageHeader from '../../components/MasterPageHeader';
-import TaskModal from '../../components/TaskModal';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import TaskModal from '../../components/modals/TaskModal';
 import EmployeeForm from './EmployeeForm';
 import EmployeeCard from './EmployeeCard';
 import EmployeeListRow from './EmployeeListRow';
@@ -13,10 +13,10 @@ import EmployeeBulkUpdateModal from './EmployeeBulkUpdateModal';
 import { useEmployees } from '../../hooks/useEmployees';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
-import ConflictModal from '../../components/ConflictModal';
-import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/Icons';
+import ConflictModal from '../../components/modals/ConflictModal';
+import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/ui/Icons';
 import { hasHighRemarks } from './remarkRules';
-import RBACManageButton from '../../components/RBACManageButton';
+import RBACManageButton from '../../components/ui/RBACManageButton';
 
 /**
  * EmployeeManagement

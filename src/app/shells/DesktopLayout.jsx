@@ -17,15 +17,15 @@
 
 import React, { useState } from 'react';
 import DesktopSidebar from './DesktopSidebar';
-import UserProfile from '../../components/UserProfile';
-import CustomSelect from '../../components/CustomSelect';
+import UserProfile from '../../components/users/UserProfile';
+import CustomSelect from '../../components/ui/CustomSelect';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
-import SearchBar from '../../components/SearchBar';
-import NotificationBell from '../../components/NotificationBell';
-import SandboxManagerModal from '../../components/SandboxManagerModal';
-import { IconBulb, IconWarning } from '../../components/Icons';
+import SearchBar from '../../components/ui/SearchBar';
+import NotificationBell from '../../components/ui/NotificationBell';
+import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
+import { IconBulb, IconWarning } from '../../components/ui/Icons';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({

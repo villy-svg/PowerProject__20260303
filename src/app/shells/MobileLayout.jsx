@@ -20,9 +20,9 @@ import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import { useVisualViewport } from '../../hooks/useVisualViewport';
 import powerLogo from '../../assets/logo.svg';
-import SearchBar from '../../components/SearchBar';
-import ExitAppModal from '../../components/ExitAppModal';
-import SandboxManagerModal from '../../components/SandboxManagerModal';
+import SearchBar from '../../components/ui/SearchBar';
+import ExitAppModal from '../../components/modals/ExitAppModal';
+import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
 import './MobileLayout.css';
 
 const MobileLayout = ({

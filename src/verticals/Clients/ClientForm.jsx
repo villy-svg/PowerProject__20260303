@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { clientService } from '../../services/clients/clientService';
-import CustomSelect from '../../components/CustomSelect';
+import CustomSelect from '../../components/ui/CustomSelect';
 import './ClientForm.css';
 import '../ChargingHubs/HubManagement.css'; // For switch/slider styles
 

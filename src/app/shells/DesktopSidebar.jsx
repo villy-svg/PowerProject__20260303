@@ -18,9 +18,9 @@
  */
 
 import React, { useState } from 'react';
-import { IconChevronDown, IconChevronRight, IconLock, IconShield } from '../../components/Icons';
+import { IconChevronDown, IconChevronRight, IconLock, IconShield } from '../../components/ui/Icons';
 import powerLogo from '../../assets/logo.svg';
-import BoardRBACModal from '../../components/BoardRBACModal';
+import BoardRBACModal from '../../components/modals/BoardRBACModal';
 import '../../components/Sidebar.css';
 
 const DesktopSidebar = ({

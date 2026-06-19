@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
 import { fetchRules } from '../../services/employees/rulesService';
 import { getRuleLogo } from './logoConfig';
 import { useQuery } from '@tanstack/react-query';
-import { IconEdit, IconPlus } from '../../components/Icons';
+import { IconEdit, IconPlus } from '../../components/ui/Icons';
 export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
 

@@ -16,11 +16,11 @@
 import React from 'react';
 
 // Components
-import VerticalWorkspace from '../../components/VerticalWorkspace';
-import ExecutiveSummary from '../../components/ExecutiveSummary';
-import Configuration from '../../components/Configuration';
-import UserRoleManagement from '../../components/UserRoleManagement';
-import UserManagement from '../../components/UserManagement';
+import VerticalWorkspace from '../../components/workspaces/VerticalWorkspace';
+import ExecutiveSummary from '../../components/dashboard/ExecutiveSummary';
+import Configuration from '../../components/workspaces/Configuration';
+import UserRoleManagement from '../../components/users/UserRoleManagement';
+import UserManagement from '../../components/users/UserManagement';
 import TutorialHub from '../../features/tutorials/TutorialHub';
 
 // Vertical Management Pages

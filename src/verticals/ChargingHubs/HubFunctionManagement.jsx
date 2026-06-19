@@ -3,8 +3,8 @@ import { supabase } from '../../services/core/supabaseClient';
 import './HubFunctionManagement.css';
 import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
-import MasterPageHeader from '../../components/MasterPageHeader';
-import { IconChevronDown } from '../../components/Icons';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import { IconChevronDown } from '../../components/ui/Icons';
 
 const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [functions, setFunctions] = useState([]);

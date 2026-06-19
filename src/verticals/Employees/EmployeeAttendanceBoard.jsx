@@ -17,13 +17,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useAttendanceBoard } from '../../hooks/useAttendanceBoard';
 import AttendanceGrid from './attendance/AttendanceGrid';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
 import './EmployeeAttendanceBoard.css';
-import RBACManageButton from '../../components/RBACManageButton';
+import RBACManageButton from '../../components/ui/RBACManageButton';
 
 // ---------------------------------------------------------------------------
 // Helper: Format a 'YYYY-MM-DD' string for display as an <input type="date">

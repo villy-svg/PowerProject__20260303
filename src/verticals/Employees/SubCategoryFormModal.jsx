@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createSubCategory, updateSubCategory } from '../../services/employees/rulesService';
-import StatusMsg from '../../components/StatusMsg';
+import StatusMsg from '../../components/ui/StatusMsg';
 import '../../styles/ManagementForms.css';
 
 const SubCategoryFormModal = ({ isOpen, onClose, editingItem, categories, onSave }) => {

@@ -1,0 +1,21 @@
+import React from 'react';
+import CentralisedTaskBoard from '../tasks/CentralisedTaskBoard';
+import './HomeEscalationsBoard.css';
+
+/**
+ * HomeEscalationsBoard Component
+ * A wrapper around CentralisedTaskBoard specifically for handling and displaying Escalations on the Home page.
+ */
+const HomeEscalationsBoard = (props) => {
+  return (
+    <div className="home-escalations-board-wrapper">
+      <CentralisedTaskBoard
+        title="Track Requests"
+        description={"Track Requests has all the requests and support tickets raised by all the members of PowerPod\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ರಿಕ್ವೆಸ್ಟ್ಸ್ ಹೊಂದಿದೆ."}
+        {...props}
+      />
+    </div>
+  );
+};
+
+export default HomeEscalationsBoard;

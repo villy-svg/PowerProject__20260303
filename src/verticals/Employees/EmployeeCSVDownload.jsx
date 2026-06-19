@@ -1,5 +1,5 @@
 import React from 'react';
-import CSVDownloadButton from '../../components/CSVDownloadButton';
+import CSVDownloadButton from '../../components/ui/CSVDownloadButton';
 import { supabase } from '../../services/core/supabaseClient';
 
 /**

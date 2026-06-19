@@ -1,4 +1,4 @@
-import CustomSelect from '../../components/CustomSelect';
+import CustomSelect from '../../components/ui/CustomSelect';
 
 export const BasicDetailsSection = ({ formData, onChange, isViewOnly = false }) => (
   <div className="form-section">

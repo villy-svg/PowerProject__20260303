@@ -4,17 +4,17 @@ import '../ChargingHubs/HubManagement.css';
 import './ClientManagement.css';
 import ClientCSVDownload from './ClientCSVDownload';
 import ClientCSVImport from './ClientCSVImport';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useScrollDirection } from '../../hooks/useScrollDirection';
-import { IconChevronDown, IconPlus } from '../../components/Icons';
-import TaskModal from '../../components/TaskModal';
+import { IconChevronDown, IconPlus } from '../../components/ui/Icons';
+import TaskModal from '../../components/modals/TaskModal';
 import ClientForm from './ClientForm';
 import ClientCard from './ClientCard';
 import ClientListRow from './ClientListRow';
-import ConflictModal from '../../components/ConflictModal';
+import ConflictModal from '../../components/modals/ConflictModal';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
-import RBACManageButton from '../../components/RBACManageButton';
+import RBACManageButton from '../../components/ui/RBACManageButton';
 
 /**
  * ClientManagement

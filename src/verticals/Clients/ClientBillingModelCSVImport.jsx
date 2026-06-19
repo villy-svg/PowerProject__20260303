@@ -1,5 +1,5 @@
 import React from 'react';
-import CSVImportButton from '../../components/CSVImportButton';
+import CSVImportButton from '../../components/ui/CSVImportButton';
 // B7 FIX: Use service layer instead of direct Supabase calls (repository pattern).
 import { billingModelService } from '../../services/clients/clientService';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';

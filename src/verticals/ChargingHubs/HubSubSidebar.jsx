@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
+import { IconChevronDown, IconChevronRightSingle } from '../../components/ui/Icons';
 
 /**
  * HubSubSidebar

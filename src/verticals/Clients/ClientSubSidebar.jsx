@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { clientService } from '../../services/clients/clientService';
-import { IconChevronDown, IconChevronRightSingle } from '../../components/Icons';
+import { IconChevronDown, IconChevronRightSingle } from '../../components/ui/Icons';
 
 /**
  * ClientSubSidebar

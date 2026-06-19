@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
-import MasterPageHeader from '../../components/MasterPageHeader';
-import { IconChevronDown } from '../../components/Icons';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import { IconChevronDown } from '../../components/ui/Icons';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
 

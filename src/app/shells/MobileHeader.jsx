@@ -25,9 +25,9 @@ import {
   IconPlus,
   IconBoards,
   IconFilter,
-} from '../../components/Icons';
-import MasterHeaderMenu from '../../components/MasterHeaderMenu';
-import SearchBar from '../../components/SearchBar';
+} from '../../components/ui/Icons';
+import MasterHeaderMenu from '../../components/layout/MasterHeaderMenu';
+import SearchBar from '../../components/ui/SearchBar';
 import '../../components/BottomNav.css';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 
@@ -114,7 +114,7 @@ const MobileHeader = ({
         list.push({ id: 'employee_attendance_board', label: 'Attendance Board' });
       }
       if (permissions?.canAccessAttendanceSelfService !== false) {
-        list.push({ id: 'attendance_self_service', label: 'My Attendance' });
+        list.push({ id: 'attendance_self_service', label: 'Current Attendance' });
       }
       if (permissions?.canAccessEmployees !== false) {
         list.push({ id: empId, label: 'Employees List' });

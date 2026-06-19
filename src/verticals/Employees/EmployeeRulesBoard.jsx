@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { fetchCategories, fetchSubCategories, fetchRules } from '../../services/employees/rulesService';
 import './EmployeeRulesBoard.css';
-import RBACManageButton from '../../components/RBACManageButton';
+import RBACManageButton from '../../components/ui/RBACManageButton';
 
 /* ─── Static Rule Tile Component ────────────────────────────── */
 const RuleCard = ({ rule }) => {

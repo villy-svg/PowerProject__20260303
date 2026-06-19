@@ -11,7 +11,7 @@
 
 import React from 'react';
 import DataGrid from './DataGrid';
-import { IconCopy } from '../../../components/Icons';
+import { IconCopy } from '../../../components/ui/Icons';
 import ScraperPanel from './ScraperPanel';
 
 // ─── Tab Switcher ─────────────────────────────────────────────────────────────

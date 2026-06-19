@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { IconChevronLeft, IconChevronRight } from '../../components/Icons';
+import { IconChevronLeft, IconChevronRight } from '../../components/ui/Icons';
 
 const WorkspaceSubSidebar = ({
   label,

@@ -25,9 +25,9 @@ import React from 'react';
 import {
   IconChevronRight,
   IconChevronDown,
-} from '../../components/Icons';
-import MasterHeaderMenu from '../../components/MasterHeaderMenu';
-import SearchBar from '../../components/SearchBar';
+} from '../../components/ui/Icons';
+import MasterHeaderMenu from '../../components/layout/MasterHeaderMenu';
+import SearchBar from '../../components/ui/SearchBar';
 
 const DesktopHeader = ({
   title,

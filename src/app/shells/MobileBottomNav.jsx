@@ -23,10 +23,10 @@ import {
   IconPeople,
   IconDatabase,
   IconSearch,
-} from '../../components/Icons';
+} from '../../components/ui/Icons';
 import '../../components/BottomNav.css';
 
-import SearchBar from '../../components/SearchBar';
+import SearchBar from '../../components/ui/SearchBar';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 
 const MobileBottomNav = ({

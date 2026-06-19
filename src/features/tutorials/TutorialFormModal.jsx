@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createRule, updateRule, createCategory, fetchCategories } from '../../services/employees/rulesService';
-import StatusMsg from '../../components/StatusMsg';
+import StatusMsg from '../../components/ui/StatusMsg';
 import '../../styles/ManagementForms.css';
 
 const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {

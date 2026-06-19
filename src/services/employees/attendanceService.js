@@ -184,9 +184,15 @@ export async function fetchMyTodayAttendance() {
 
   // Step 1: Resolve the caller's employee_id from their profile.
   // This is a lightweight single-row lookup on user_profiles (indexed on id).
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { data: null, error: new Error('User not authenticated') };
+  }
+
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
     .select('employee_id')
+    .eq('id', user.id)
     .single();
 
   if (profileError) {
@@ -261,8 +267,8 @@ export async function fetchLiveAttendance() {
         hubs ( id, name, hub_code )
       )
     `)
-    .eq('shift_date', today)
-    // Only grab records that have at least one session started today
+    .or(`shift_date.eq.${today},session_logs_data.cs.[{"logout_time": null}]`)
+    // Only grab records that have at least one session started
     .not('first_login_time', 'is', null);
 
   if (error) {

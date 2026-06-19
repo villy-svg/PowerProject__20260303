@@ -19,9 +19,9 @@
 import React from 'react';
 import { 
   IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile, IconLock, IconShield
-} from '../../components/Icons';
+} from '../../components/ui/Icons';
 import powerLogo from '../../assets/logo.svg';
-import BoardRBACModal from '../../components/BoardRBACModal';
+import BoardRBACModal from '../../components/modals/BoardRBACModal';
 import '../../components/Sidebar.css';
 
 const MobileSidebar = ({

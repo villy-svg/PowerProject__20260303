@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import AssigneeSelector from '../../components/AssigneeSelector';
-import TaskHierarchySelector from '../../components/TaskHierarchySelector';
+import AssigneeSelector from '../../components/ui/AssigneeSelector';
+import TaskHierarchySelector from '../../components/tasks/TaskHierarchySelector';
 import { taskUtils } from '../../utils/taskUtils';
 import { useAssignees } from '../../hooks/useAssignees';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { orchestrationService } from '../../services/tasks/orchestrationService';
-import CustomSelect from '../../components/CustomSelect'; // FIX Bug10: Was missing — causes runtime crash when Employee task form opens
+import CustomSelect from '../../components/ui/CustomSelect'; // FIX Bug10: Was missing — causes runtime crash when Employee task form opens
 import { REMARK_GRADE_OPTIONS } from './remarksMapping';
 import '../../styles/ManagementForms.css';
-import SubmissionHistory from '../../components/SubmissionHistory';
-import { IconUpload } from '../../components/Icons';
+import SubmissionHistory from '../../components/tasks/SubmissionHistory';
+import { IconUpload } from '../../components/ui/Icons';
 import '../ChargingHubs/HubTaskForm.css';
 
 /**

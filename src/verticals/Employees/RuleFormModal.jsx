@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createRule, updateRule } from '../../services/employees/rulesService';
-import StatusMsg from '../../components/StatusMsg';
-import CustomSelect from '../../components/CustomSelect';
+import StatusMsg from '../../components/ui/StatusMsg';
+import CustomSelect from '../../components/ui/CustomSelect';
 import '../../styles/ManagementForms.css';
 
 const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories, userId, onSave }) => {

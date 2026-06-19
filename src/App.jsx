@@ -26,9 +26,9 @@ import { VERTICALS as STATIC_VERTICALS, VERTICAL_LIST as STATIC_VERTICAL_LIST, u
 import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 import { APP_VERSION } from './constants/appVersion';
 
-import Login from './components/Login';
-import PendingActivation from './components/PendingActivation';
-import OnlineSyncBanner from './components/OnlineSyncBanner';
+import Login from './components/auth/Login';
+import PendingActivation from './components/auth/PendingActivation';
+import OnlineSyncBanner from './components/ui/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
 import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
 import { fetchRules } from './services/employees/rulesService';

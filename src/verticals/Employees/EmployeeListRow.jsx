@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconEdit, IconTrash, IconChevronDown, IconChevronRight, IconComment } from '../../components/Icons';
+import { IconEdit, IconTrash, IconChevronDown, IconChevronRight, IconComment } from '../../components/ui/Icons';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 
 /**

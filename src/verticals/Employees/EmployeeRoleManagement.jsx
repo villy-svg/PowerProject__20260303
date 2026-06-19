@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeRoleManagement.css';
 import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
-import MasterPageHeader from '../../components/MasterPageHeader';
-import { IconChevronDown } from '../../components/Icons';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import { IconChevronDown } from '../../components/ui/Icons';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 

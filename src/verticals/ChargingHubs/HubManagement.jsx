@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { masterErrorHandler } from '../../services/core/masterErrorHandler';
-import CustomSelect from '../../components/CustomSelect';
+import CustomSelect from '../../components/ui/CustomSelect';
 import './HubManagement.css';
 import HubCSVDownload from './HubCSVDownload';
 import HubCSVImport from './HubCSVImport';
-import MasterPageHeader from '../../components/MasterPageHeader';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 import { useManagementUI } from '../../hooks/useManagementUI';
-import { IconEdit, IconTrash, IconX, IconPlus, IconChevronDown } from '../../components/Icons';
-import RBACManageButton from '../../components/RBACManageButton';
+import { IconEdit, IconTrash, IconX, IconPlus, IconChevronDown } from '../../components/ui/Icons';
+import RBACManageButton from '../../components/ui/RBACManageButton';
 
 // Error boundary component
 class HubManagementErrorBoundary extends React.Component {

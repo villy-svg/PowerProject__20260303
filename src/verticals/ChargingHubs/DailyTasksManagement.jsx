@@ -3,12 +3,12 @@ import { supabase } from '../../services/core/supabaseClient';
 import { masterErrorHandler } from '../../services/core/masterErrorHandler';
 import { dailyTaskTemplateService } from '../../services/tasks/dailyTaskTemplateService';
 import { VERTICALS } from '../../constants/verticals';
-import MasterPageHeader from '../../components/MasterPageHeader';
-import AssigneeSelector from '../../components/AssigneeSelector';
+import MasterPageHeader from '../../components/layout/MasterPageHeader';
+import AssigneeSelector from '../../components/ui/AssigneeSelector';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { taskUtils } from '../../utils/taskUtils';
 import './DailyTasksManagement.css';
-import CustomSelect from '../../components/CustomSelect';
+import CustomSelect from '../../components/ui/CustomSelect';
 
 const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) => {
   const ui = useManagementUI({

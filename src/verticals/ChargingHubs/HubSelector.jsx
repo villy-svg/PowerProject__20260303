@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseDropdown from '../../components/BaseDropdown';
+import BaseDropdown from '../../components/ui/BaseDropdown';
 import './HubSelector.css';
 import '../../styles/DropdownSystem.css';
 

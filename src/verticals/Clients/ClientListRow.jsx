@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../components/Icons';
+import { IconEdit, IconTrash, IconChevronDown, IconChevronRight } from '../../components/ui/Icons';
 
 /**
  * ClientListRow

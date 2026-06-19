@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconEdit, IconTrash, IconChevronDown } from '../../components/Icons';
+import { IconEdit, IconTrash, IconChevronDown } from '../../components/ui/Icons';
 
 /**
  * ClientCard
