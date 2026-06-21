@@ -286,7 +286,7 @@ const AttendanceSelfService = ({
   });
 
   return (
-    <div className="self-service__container">
+    <>
       {/* Page Header */}
       <MasterPageHeader
         title="Current Attendance"
@@ -310,6 +310,8 @@ const AttendanceSelfService = ({
           />
         }
       />
+
+      <div className="self-service__container">
 
       {/* Tab bar — only shown for Contributor+ */}
       {showLiveTab && (
@@ -343,6 +345,7 @@ const AttendanceSelfService = ({
         <LiveAttendanceTab user={user} />
       )}
     </div>
+    </>
   );
 };
 
