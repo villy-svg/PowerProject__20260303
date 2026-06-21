@@ -551,6 +551,25 @@ export const taskService = {
     if (error) throw error;
     return (data || []).map(normalizeTask);
   },
+
+  /**
+   * Manually trigger the warm archival process for old tasks.
+   * Calls the archive_old_tasks_to_backup RPC.
+   */
+  async archiveOldTasks() {
+    if (import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true') {
+      console.warn('PowerProject: Offline modification (archiveOldTasks).');
+      return { tasks_moved: 0, links_moved: 0, submissions_moved: 0, status: 'offline' };
+    }
+
+    const { data, error } = await supabase.rpc('archive_old_tasks_to_backup');
+    if (error) {
+      console.error('[TaskService] Error archiving tasks:', error);
+      throw error;
+    }
+    return data;
+  },
+
   /**
    * Fix Tasks tool for Master Admin.
    * Goes through the columns and fixes all the rows with incorrect values in any column

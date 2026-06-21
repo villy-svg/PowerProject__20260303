@@ -11,6 +11,7 @@ import { updateSubmissionStatus } from '../../services/tasks/submissionService';
 import BulkActionBar from '../ui/BulkActionBar';
 import './TaskController.css';
 import FixTasksButton from '../ui/FixTasksButton';
+import ArchiveTasksButton from '../ui/ArchiveTasksButton';
 import { HUB_VIEWS, resolveAddButtonLabel } from '../../registry/verticalRegistry';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { IconChevronDown, IconChevronRightSingle } from '../ui/Icons';
@@ -290,6 +291,15 @@ const TaskController = (props) => {
                           setIsActionsDropdownOpen(false);
                         }} 
                         label="Fix Tasks"
+                      />
+                      <ArchiveTasksButton 
+                        className="master-action-btn" 
+                        permissions={permissions} 
+                        refreshTasks={(b) => {
+                          refreshTasks(b);
+                          setIsActionsDropdownOpen(false);
+                        }} 
+                        label="Archive Old Tasks"
                       />
                     </div>
                   )}
