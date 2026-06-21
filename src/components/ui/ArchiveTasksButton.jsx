@@ -16,7 +16,7 @@ const ArchiveTasksButton = ({ permissions, refreshTasks, className = '', label }
       if (refreshTasks) refreshTasks(false);
     } catch (err) {
       console.error('[ArchiveTasksButton] Failed to archive tasks:', err);
-      alert(`Failed to archive tasks: ${err.message || err}`);
+      alert(`Failed to archive tasks: ${err?.message || err}\nDetails: ${err?.details || ''}`);
     } finally {
       setArchivingTasks(false);
     }

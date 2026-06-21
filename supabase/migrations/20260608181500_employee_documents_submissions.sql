@@ -9,6 +9,9 @@ ALTER TABLE public.submissions ALTER COLUMN task_id DROP NOT NULL;
 -- 2. Add employee_id to public.submissions linking to public.employees
 ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS employee_id uuid;
 
+-- 2.1 Keep archival backup schema in sync to prevent 42601 crash
+ALTER TABLE public.submissions_backup ADD COLUMN IF NOT EXISTS employee_id uuid;
+
 DO $$
 BEGIN
   IF NOT EXISTS (
