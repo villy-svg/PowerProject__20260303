@@ -8,7 +8,19 @@ const supabase = createClient(
 async function checkRow() {
   const { data, error } = await supabase
     .from('daily_attendances')
-    .select('*')
+    .select(`
+      id,
+      employee_id,
+      shift_date,
+      session_logs_data,
+      employees (
+        id,
+        full_name,
+        emp_code,
+        hub_id,
+        hubs ( id, name, hub_code )
+      )
+    `)
     .eq('id', 'e1a93504-2eed-4c6c-8d39-a916ddc6de61');
 
   if (error) {

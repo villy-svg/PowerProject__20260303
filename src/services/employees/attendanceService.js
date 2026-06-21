@@ -290,7 +290,10 @@ export async function fetchLiveAttendance() {
   }
 
   const liveRecords = (data || []).filter(record => {
-    const sessions = record?.session_logs_data || [];
+    let sessions = record?.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch(e) { sessions = []; }
+    }
     const hasOpenSession = sessions.some(s => s.logout_time === null);
     return hasOpenSession;
   });

@@ -46,13 +46,22 @@ function groupByHub(records) {
   const hubMap = new Map(); // hub_id → { hub, sessions }
 
   records.forEach(record => {
-    const hub = record?.employees?.hubs;
-    if (!hub?.id) return; // Skip records with no hub
+    let sessions = record?.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch(e) { sessions = []; }
+    }
 
-    const sessions = record?.session_logs_data || [];
     // Get the open session (logout_time === null)
     const openSession = sessions.find(s => s.logout_time === null);
     if (!openSession) return; // Already checked out — skip
+
+    // Use the employee's permanently assigned hub, OR fallback to a generic Unassigned hub
+    // so they are never silently dropped from the Live Attendance UI.
+    const hub = record?.employees?.hubs || { 
+      id: 'unassigned-hub', 
+      name: 'Other / Floating', 
+      hub_code: 'UNASSIGNED' 
+    };
 
     const loginTime = openSession.login_time || record.first_login_time;
     const hoursWorked = computeHoursWorked(loginTime);
