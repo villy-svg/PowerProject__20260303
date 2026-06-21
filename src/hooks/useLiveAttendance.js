@@ -42,7 +42,7 @@ function computeHoursWorked(loginTimeIso) {
 // Returns: Array of { hub: { id, name, hub_code }, sessions: [...] }
 // Each session: { employeeId, empCode, fullName, loginTime, hoursWorked, isOvertime }
 // ---------------------------------------------------------------------------
-function groupByHub(records) {
+function groupByHub(records, allHubsMap) {
   const hubMap = new Map(); // hub_id → { hub, sessions }
 
   records.forEach(record => {
@@ -55,10 +55,10 @@ function groupByHub(records) {
     const openSession = sessions.find(s => s.logout_time === null);
     if (!openSession) return; // Already checked out — skip
 
-    // Use the employee's permanently assigned hub, OR fallback to a generic Unassigned hub
-    // so they are never silently dropped from the Live Attendance UI.
-    const hub = record?.employees?.hubs || { 
-      id: 'unassigned-hub', 
+    // Use the session's hub_id (selected in UI), OR fallback to generic
+    const sessionHubId = openSession.hub_id;
+    const hub = allHubsMap.get(sessionHubId) || { 
+      id: sessionHubId || 'unassigned-hub', 
       name: 'Other / Floating', 
       hub_code: 'UNASSIGNED' 
     };
@@ -109,10 +109,20 @@ export function useLiveAttendance() {
   const refresh = useCallback(async () => {
     setError(null);
     try {
-      const { data, error: fetchError } = await fetchLiveAttendance();
-      if (fetchError) throw fetchError;
+      // Import supabase to fetch hubs dict
+      const { supabase } = await import('../services/core/supabaseClient');
+      const [attendanceRes, hubsRes] = await Promise.all([
+        fetchLiveAttendance(),
+        supabase.from('hubs').select('id, name, hub_code')
+      ]);
 
-      const grouped = groupByHub(data || []);
+      if (attendanceRes.error) throw attendanceRes.error;
+      if (hubsRes.error) throw hubsRes.error;
+
+      const allHubsMap = new Map();
+      (hubsRes.data || []).forEach(h => allHubsMap.set(h.id, h));
+
+      const grouped = groupByHub(attendanceRes.data || [], allHubsMap);
       setHubGroups(grouped);
       setLastRefresh(new Date());
     } catch (err) {

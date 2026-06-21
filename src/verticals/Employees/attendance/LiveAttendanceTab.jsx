@@ -78,11 +78,15 @@ const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout }
   return (
     <div className={`live-attendance__user-row${isOvertime ? ' live-attendance__user-row--overtime' : ''}`}>
       <div className="live-attendance__user-info">
-        <span className="live-attendance__user-name">{session.fullName}</span>
-        <span className="live-attendance__emp-code">{session.empCode}</span>
-        <span className="live-attendance__shift-badge">
-          {session.shiftType === 'day' ? '☀' : '🌙'}
-        </span>
+        <div className="live-attendance__user-name-row" style={{ display: 'block', marginBottom: '2px' }}>
+          <span className="live-attendance__user-name" style={{ fontWeight: '600' }}>{session.fullName}</span>
+        </div>
+        <div className="live-attendance__user-meta-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="live-attendance__emp-code">{session.empCode}</span>
+          <span className="live-attendance__shift-badge">
+            {session.shiftType === 'day' ? '☀' : '🌙'}
+          </span>
+        </div>
       </div>
       <div className="live-attendance__user-meta">
         {isOvertime && (

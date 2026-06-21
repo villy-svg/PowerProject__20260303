@@ -30,6 +30,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
   const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
+  const [groupBy, setGroupBy] = useState('role');
 
   // Bulk Context
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
@@ -143,12 +144,20 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
 
   const activeEmps = filteredEmployees.filter(emp => emp.status === 'Active');
 
-  const activeEmpsByRole = activeEmps.reduce((acc, emp) => {
-    const roleName = emp.role_code || emp.role || 'Unassigned Role';
-    const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 1;
-    const sortKey = `${String(seniorityNum).padStart(3, '0')}|${roleName}`;
+  const groupedActiveEmps = activeEmps.reduce((acc, emp) => {
+    let groupName;
+    let sortKey;
 
-    if (!acc[sortKey]) acc[sortKey] = { roleName, overrideKey: sortKey, emps: [] };
+    if (groupBy === 'role') {
+      groupName = emp.role_code || emp.role || 'Unassigned Role';
+      const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 1;
+      sortKey = `${String(seniorityNum).padStart(3, '0')}|${groupName}`;
+    } else {
+      groupName = emp.hub_code || emp.hub_id || 'Unassigned Hub';
+      sortKey = groupName;
+    }
+
+    if (!acc[sortKey]) acc[sortKey] = { groupName, overrideKey: sortKey, emps: [] };
     acc[sortKey].emps.push(emp);
     return acc;
   }, {});  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
@@ -241,6 +250,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
               </div>
               {isActionsDropdownOpen && (
                 <div className="actions-dropdown-menu">
+                  <div className="master-action-btn" onClick={() => { setGroupBy(groupBy === 'role' ? 'hub' : 'role'); setIsActionsDropdownOpen(false); }} style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                    Group By: <strong>{groupBy === 'role' ? 'Role' : 'Hub'}</strong>
+                  </div>
                   <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
                   <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
                   {permissions.canCreateEmployees && (
@@ -287,23 +299,23 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
               <p className="empty-sub-state">No active employees found matching filters.</p>
             ) : (
               <div className="grouped-employee-sections">
-                {Object.values(activeEmpsByRole)
-                  .sort((a, b) => b.overrideKey.localeCompare(a.overrideKey))
-                  .map(({ roleName, emps: empsInRole }) => (
-                    <div key={roleName} className="role-group-section">
+                {Object.values(groupedActiveEmps)
+                  .sort((a, b) => groupBy === 'role' ? b.overrideKey.localeCompare(a.overrideKey) : a.overrideKey.localeCompare(b.overrideKey))
+                  .map(({ groupName, emps: empsInGroup }) => (
+                    <div key={groupName} className="role-group-section">
                       <h5 className="role-group-header">
                         <span>
-                          {roleName} <span className="role-count">({empsInRole.length})</span>
+                          {groupName} <span className="role-count">({empsInGroup.length})</span>
                         </span>
                         <button
                           className="halo-button role-select-btn"
-                          onClick={() => ui.handleSelectAll(empsInRole)}
+                          onClick={() => ui.handleSelectAll(empsInGroup)}
                         >
-                          {empsInRole.every(id => ui.selectedIds.includes(id.id)) ? 'Deselect Role' : 'Select Role'}
+                          {empsInGroup.every(id => ui.selectedIds.includes(id.id)) ? `Deselect ${groupBy === 'role' ? 'Role' : 'Hub'}` : `Select ${groupBy === 'role' ? 'Role' : 'Hub'}`}
                         </button>
                       </h5>
                       <div className={ui.viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
-                        {empsInRole.map(emp => (
+                        {empsInGroup.map(emp => (
                           ui.viewMode === 'grid' ? (
                             <EmployeeCard
                               key={emp.id}

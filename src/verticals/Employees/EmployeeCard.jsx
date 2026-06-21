@@ -92,7 +92,11 @@ const EmployeeCard = ({
           )}
         </span>
         <span className="role-badge">{emp.role_code || 'NO ROLE'}</span>
-        {emp.is_app_user && <span className="app-user-badge-mini" title="Has App Access">USER</span>}
+        {emp.is_app_user ? (
+          <span className="app-user-badge-mini" title="Has App Access">USER</span>
+        ) : (
+          <span className="badge-base badge-danger" style={{ fontSize: '0.6rem' }} title="Not onboarded">NOT USER</span>
+        )}
         {emp.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
         {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
           <span className="badge-base badge-danger" style={{ fontSize: '0.6rem' }}>BANK MISSING</span>

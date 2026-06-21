@@ -180,7 +180,9 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchMyTodayAttendance(userId) {
-  const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+  // Use Intl.DateTimeFormat to ensure we get the correct YYYY-MM-DD string for local time (IST)
+  // en-CA natively outputs the YYYY-MM-DD format.
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 
   // Step 1: Resolve the caller's employee_id from their profile.
   // We use the provided userId (from React auth context) to support impersonation.
@@ -263,7 +265,7 @@ export async function fetchLiveAttendance() {
   // open session.
   const today = new Date();
   const threeDaysAgoMs = today.getTime() - (3 * 24 * 60 * 60 * 1000);
-  const threeDaysAgo = new Date(threeDaysAgoMs).toISOString().split('T')[0]; // 'YYYY-MM-DD'
+  const threeDaysAgo = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(threeDaysAgoMs));
 
   const { data, error } = await supabase
     .from('daily_attendances')
@@ -308,15 +310,22 @@ export async function fetchLiveAttendance() {
 // Requires admin privileges (enforced by RLS UPDATE policy).
 // ---------------------------------------------------------------------------
 export async function adminForceCheckout(recordId, currentSessions) {
-  const nowIso = new Date().toISOString();
+  // Find the open session to calculate the 12-hour auto-fallback
+  const openSession = currentSessions.find(s => s.logout_time === null);
+  
+  let forcedLogoutTimeIso = new Date().toISOString();
+  if (openSession && openSession.login_time) {
+    const loginTimeMs = new Date(openSession.login_time).getTime();
+    forcedLogoutTimeIso = new Date(loginTimeMs + 12 * 60 * 60 * 1000).toISOString();
+  }
   
   // Update the open session(s)
   const updatedSessions = currentSessions.map(s => {
     if (s.logout_time === null) {
       return { 
         ...s, 
-        logout_time: nowIso, 
-        logout_geolocation: { note: 'Forced by admin' } 
+        logout_time: forcedLogoutTimeIso, 
+        logout_geolocation: { note: 'Forced by admin (auto 12-hour fallback)' } 
       };
     }
     return s;
@@ -325,10 +334,10 @@ export async function adminForceCheckout(recordId, currentSessions) {
   const { data, error } = await supabase
     .from('daily_attendances')
     .update({
-      logout_time: nowIso,
-      logout_geolocation: { note: 'Forced by admin' },
+      logout_time: forcedLogoutTimeIso,
+      logout_geolocation: { note: 'Forced by admin (auto 12-hour fallback)' },
       session_logs_data: updatedSessions,
-      updated_at: nowIso
+      updated_at: new Date().toISOString()
     })
     .eq('id', recordId);
 
