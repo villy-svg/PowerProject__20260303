@@ -60,6 +60,14 @@ const MobileBottomNav = ({
     { id: verticals.CLIENTS?.id || 'CLIENTS', label: 'Clients', Icon: IconDatabase },
   ].filter(item => isAssigned(item.id));
 
+  // Phase 3 Architecture: MobileBottomNav is the primary navigation on the dashboard.
+  // Inside verticals, it is replaced by the mobile-action-tray (MasterPageHeader).
+  // It should only appear inside a vertical if the user taps "Switch" (showOverlay).
+  const isDashboard = !activeVertical;
+  if (!isDashboard && !showOverlay) {
+    return null;
+  }
+
   return (
     <>
       {showOverlay && <div className="bottom-nav-backdrop" onClick={onCloseOverlay} />}
