@@ -301,7 +301,6 @@ const AttendanceSelfService = ({
         permissions={permissions}
         verticals={verticals}
         activeVertical={activeVertical}
-        hideSearchBar={true}
         rightActions={
           <RBACManageButton
             user={user}
