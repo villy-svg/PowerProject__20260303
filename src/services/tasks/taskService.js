@@ -562,7 +562,7 @@ export const taskService = {
       return { tasks_moved: 0, links_moved: 0, submissions_moved: 0, status: 'offline' };
     }
 
-    const { data, error } = await supabase.rpc('archive_old_tasks_to_backup');
+    const { data, error } = await supabase.rpc('archive_old_tasks_to_backup', { p_ignore_cooldown: true });
     if (error) {
       console.error('[TaskService] Error archiving tasks:', error);
       throw error;
