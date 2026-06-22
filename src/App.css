@@ -43,7 +43,7 @@
 }
 /* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
 .management-view-container {
-  padding: clamp(1rem, 3vw, 2.5rem) 40px 40px 40px;
+  padding: clamp(1rem, 3vw, 2.5rem) 10px 40px 10px;
   width: 100%;
   height: calc(100dvh - 80px);
   overflow-y: auto;
