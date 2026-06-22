@@ -17,6 +17,7 @@ import ConflictModal from '../../components/modals/ConflictModal';
 import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/ui/Icons';
 import { hasHighRemarks } from './remarkRules';
 import RBACManageButton from '../../components/ui/RBACManageButton';
+import { taskService } from '../../services/tasks/taskService';
 
 /**
  * EmployeeManagement
@@ -81,7 +82,59 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     ui.setIsSaving(true);
     try {
       if (ui.editingItem) {
-        await updateEmployee(ui.editingItem.id, formData);
+        let finalFormData = { ...formData };
+        
+        if (user?.roleId !== 'master_admin') {
+          const oldBank = {
+            accountNumber: ui.editingItem.account_number || '',
+            ifscCode: ui.editingItem.ifsc_code || '',
+            accountName: ui.editingItem.account_name || '',
+            panNumber: ui.editingItem.pan_number || ''
+          };
+          
+          const newBank = {
+            accountNumber: formData.accountNumber || '',
+            ifscCode: formData.ifscCode || '',
+            accountName: formData.accountName || '',
+            panNumber: formData.panNumber || ''
+          };
+          
+          const bankChanged = 
+            oldBank.accountNumber !== newBank.accountNumber ||
+            oldBank.ifscCode !== newBank.ifscCode ||
+            oldBank.accountName !== newBank.accountName ||
+            oldBank.panNumber !== newBank.panNumber;
+            
+          if (bankChanged) {
+            finalFormData.accountNumber = ui.editingItem.account_number;
+            finalFormData.ifscCode = ui.editingItem.ifsc_code;
+            finalFormData.accountName = ui.editingItem.account_name;
+            finalFormData.panNumber = ui.editingItem.pan_number;
+            
+            const reviewPayload = {
+              employeeId: ui.editingItem.id,
+              employeeName: ui.editingItem.full_name,
+              oldDetails: oldBank,
+              newDetails: newBank,
+              requestedBy: user?.id,
+              requestedByName: user?.name || user?.email || 'User'
+            };
+            
+            await taskService.addTask({
+              verticalId: 'EMPLOYEES',
+              stageId: 'BANK_REVIEW',
+              priority: 'High',
+              task_board: ['Employees'],
+              text: `Bank Details Update: ${ui.editingItem.full_name}`,
+              description: JSON.stringify(reviewPayload),
+              hub_id: ui.editingItem.hub_id === 'ALL' ? null : ui.editingItem.hub_id
+            }, user?.id);
+            
+            alert("Other changes saved. Bank details update has been sent to Master Admin for approval.");
+          }
+        }
+        
+        await updateEmployee(ui.editingItem.id, finalFormData);
       } else {
         await addEmployee(formData);
       }
@@ -463,6 +516,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           onSubmit={handleSave}
           onCancel={ui.closeModal}
           isViewOnly={ui.isViewOnly}
+          requiresBankApproval={user?.roleId !== 'master_admin' && !!ui.editingItem}
           initialData={ui.editingItem ? {
             id: ui.editingItem.id,
             name: ui.editingItem.full_name,

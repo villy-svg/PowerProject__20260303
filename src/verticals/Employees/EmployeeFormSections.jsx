@@ -146,34 +146,43 @@ export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, r
   </div>
 );
 
-export const BankDetailsSection = ({ formData, onChange, isViewOnly = false }) => (
-  <div className="form-section">
-    <h3 className="form-section-header">Bank Details</h3>
-    <div className="form-grid">
-      <div className="form-group">
-        <label>Account Number <span className="optional">(Optional)</span></label>
-        <div className="form-input-container">
-          <input type="text" name="accountNumber" value={formData.accountNumber} onChange={onChange} placeholder="Enter account number" disabled={isViewOnly} />
-        </div>
+export const BankDetailsSection = ({ formData, onChange, isViewOnly = false, requiresBankApproval = false }) => {
+  return (
+    <div className="form-section">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h3 className="form-section-header" style={{ margin: 0 }}>Bank Details</h3>
+        {requiresBankApproval && !isViewOnly && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', opacity: 0.8 }}>
+            🔒 Changes to Bank Details require Master Admin approval
+          </span>
+        )}
       </div>
-      <div className="form-group">
-        <label>IFSC Code <span className="optional">(Optional)</span></label>
-        <div className="form-input-container">
-          <input type="text" name="ifscCode" value={formData.ifscCode} onChange={onChange} placeholder="e.g. SBIN0001234" disabled={isViewOnly} />
+      <div className="form-grid">
+        <div className="form-group">
+          <label>Account Number <span className="optional">(Optional)</span></label>
+          <div className="form-input-container">
+            <input type="text" name="accountNumber" value={formData.accountNumber} onChange={onChange} placeholder="Enter account number" disabled={isViewOnly} />
+          </div>
         </div>
-      </div>
-      <div className="form-group">
-        <label>Account Name <span className="optional">(Optional)</span></label>
-        <div className="form-input-container">
-          <input type="text" name="accountName" value={formData.accountName} onChange={onChange} placeholder="Name as per bank records" disabled={isViewOnly} />
+        <div className="form-group">
+          <label>IFSC Code <span className="optional">(Optional)</span></label>
+          <div className="form-input-container">
+            <input type="text" name="ifscCode" value={formData.ifscCode} onChange={onChange} placeholder="e.g. SBIN0001234" disabled={isViewOnly} />
+          </div>
         </div>
-      </div>
-      <div className="form-group">
-        <label>PAN Number <span className="optional">(Optional)</span></label>
-        <div className="form-input-container">
-          <input type="text" name="panNumber" value={formData.panNumber} onChange={onChange} placeholder="e.g. ABCDE1234F" disabled={isViewOnly} />
+        <div className="form-group">
+          <label>Account Name <span className="optional">(Optional)</span></label>
+          <div className="form-input-container">
+            <input type="text" name="accountName" value={formData.accountName} onChange={onChange} placeholder="Name as per bank records" disabled={isViewOnly} />
+          </div>
+        </div>
+        <div className="form-group">
+          <label>PAN Number <span className="optional">(Optional)</span></label>
+          <div className="form-input-container">
+            <input type="text" name="panNumber" value={formData.panNumber} onChange={onChange} placeholder="e.g. ABCDE1234F" disabled={isViewOnly} />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};

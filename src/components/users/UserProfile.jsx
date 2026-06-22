@@ -15,6 +15,7 @@ const UserProfile = ({
   onImpersonate
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showBankHint, setShowBankHint] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -26,6 +27,13 @@ const UserProfile = ({
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Show bank hint on mobile
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setShowBankHint(true);
+    }
   }, []);
 
   const roles = ROLE_LIST;
@@ -54,15 +62,22 @@ const UserProfile = ({
 
   const isVerticalRole = user?.roleId === 'vertical_admin' || user?.roleId === 'vertical_viewer';
 
+  const handleToggleClick = () => {
+    setIsOpen(!isOpen);
+    if (showBankHint) {
+      setShowBankHint(false);
+    }
+  };
+
   return (
     <div className="user-profile-container" ref={dropdownRef}>
-      <button className="user-profile-toggle" onClick={() => setIsOpen(!isOpen)}>
+      <button className="user-profile-toggle" onClick={handleToggleClick}>
         {/* WRAPPER FOR TEXT: This div is styled in CSS to stack vertically */}
         <div className="user-info-text">
           <span className="user-name">{displayName}</span>
           <span className="user-role">{user?.role}</span>
         </div>
-        <div className="user-avatar">
+        <div className={`user-avatar ${showBankHint ? 'bank-hint-glow' : ''}`}>
           <svg 
             width="16" 
             height="16" 
@@ -78,6 +93,14 @@ const UserProfile = ({
           </svg>
         </div>
       </button>
+
+      {showBankHint && !isOpen && (
+        <div className="bank-details-hint-dialog" onClick={() => setShowBankHint(false)}>
+          <div className="hint-pointer"></div>
+          <span className="hint-text-en">Your Bank Details Here</span>
+          <span className="hint-text-kn">ಬ್ಯಾಂಕ್ ವಿವರಗಳು ಇಲ್ಲಿ</span>
+        </div>
+      )}
 
       {isOpen && (
         <div className="user-dropdown-menu">
