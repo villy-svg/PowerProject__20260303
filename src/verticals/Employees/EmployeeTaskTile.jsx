@@ -12,16 +12,16 @@ const EmployeeTaskTile = ({ task }) => {
   const { user } = useRBAC();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  if (task.stageId === 'BANK_REVIEW') {
-    let payload = null;
+  let payload = null;
+  if (task.description) {
     try {
       payload = JSON.parse(task.description);
     } catch (e) {
-      console.error("Failed to parse review payload:", e);
-      return <div className="error-text">Invalid review payload</div>;
+      console.error("Failed to parse task payload:", e);
     }
+  }
 
-    if (!payload) return null;
+  if (payload?.type === 'BANK_UPDATE') {
 
     const handleAccept = async (e) => {
       e.stopPropagation();

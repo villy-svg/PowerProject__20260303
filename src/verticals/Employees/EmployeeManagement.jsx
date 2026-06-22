@@ -112,6 +112,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
             finalFormData.panNumber = ui.editingItem.pan_number;
             
             const reviewPayload = {
+              type: 'BANK_UPDATE',
               employeeId: ui.editingItem.id,
               employeeName: ui.editingItem.full_name,
               oldDetails: oldBank,
@@ -120,11 +121,16 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
               requestedByName: user?.name || user?.email || 'User'
             };
             
+            const masterAdmins = employees.filter(emp => emp.role_id === 'master_admin');
+            const assigneeIds = masterAdmins.map(admin => admin.id);
+            
             await taskService.addTask({
               verticalId: 'EMPLOYEES',
-              stageId: 'BANK_REVIEW',
+              stageId: 'REVIEW',
               priority: 'High',
-              task_board: ['Employees'],
+              task_board: ['Escalations'],
+              function: 'EMP',
+              assigned_to: assigneeIds.length > 0 ? assigneeIds : null,
               text: `Bank Details Update: ${ui.editingItem.full_name}`,
               description: JSON.stringify(reviewPayload),
               hub_id: ui.editingItem.hub_id === 'ALL' ? null : ui.editingItem.hub_id
