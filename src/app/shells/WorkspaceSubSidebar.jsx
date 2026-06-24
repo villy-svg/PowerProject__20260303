@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { IconChevronLeft, IconChevronRight } from '../../components/ui/Icons';
+import { useWorkspaceFilter } from '../contexts/WorkspaceFilterContext';
 
 const WorkspaceSubSidebar = ({
   label,
@@ -28,12 +29,10 @@ const WorkspaceSubSidebar = ({
   permissions,
   activeVertical,
   setActiveVertical,
-  handleFilterChange,
-  resetFilters,
-  filters,
   tasks,
-  setFilters,
 }) => {
+  const { filters, setFilters, handleFilterChange, resetFilters } = useWorkspaceFilter();
+
   return (
     <aside className={`sub-sidebar ${!isSubSidebarOpen ? 'collapsed' : ''} ${isTrayVisible ? 'tray-visible' : ''}`}>
       <div className="sub-sidebar-header">

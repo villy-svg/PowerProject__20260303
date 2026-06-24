@@ -4,6 +4,7 @@ import { taskUtils } from '../../utils/taskUtils';
 import { resolveVerticalRootId } from '../../registry/verticalRegistry';
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
+import { useWorkspaceFilter } from '../../app/contexts/WorkspaceFilterContext';
 import WorkspaceSubSidebar from '../../app/shells/WorkspaceSubSidebar';
 import { IconLock } from '../ui/Icons';
 
@@ -43,80 +44,13 @@ const VerticalWorkspace = ({
   const { setActiveVertical } = useAppNavigation();
   const { isDesktop } = useLayoutShell();
 
-  const [filters, setFilters] = React.useState({ 
-    city: [], 
-    hub: [], 
-    priority: [], 
-    role: [],
-    function: [],
-    assignee: [],
-    duplicatesOnly: false,
-    highRemarksOnly: false
-  });
-  const [isInitialized, setIsInitialized] = React.useState(false);
+  const { filters, setFilters, handleFilterChange, handleBatchFilter, resetFilters } = useWorkspaceFilter();
   const [isTrayVisible, setIsTrayVisible] = React.useState(true);
 
   // Sync state upward from MasterPageHeader (via TaskController)
   const handleTrayVisibilityChange = React.useCallback((visible) => {
     setIsTrayVisible(visible);
   }, []);
-
-  // Auto-populate filters on first load (Select All by default)
-  React.useEffect(() => {
-    if (!Array.isArray(tasks) || tasks.length === 0) return;
-
-    const newCities    = [...new Set(tasks.map(t => t.city).filter(Boolean))];
-    const newHubs      = [...new Set(tasks.map(t => t.hub_id).filter(Boolean))];
-    const newPriorities = [...new Set(tasks.map(t => t.priority).filter(Boolean))];
-    const newFunctions = [...new Set(tasks.map(t => t.function).filter(Boolean))];
-    const newAssignees = [...new Set(tasks.map(t =>
-      taskUtils.formatAssigneeForList(t.assigned_to, t.assigneeName, user)
-    ).filter(Boolean))];
-
-    if (!isInitialized) {
-      setFilters(prev => ({
-        ...prev,
-        city:     newCities,
-        hub:      newHubs,
-        priority: newPriorities,
-        function: newFunctions,
-        assignee: newAssignees,
-      }));
-      setIsInitialized(true);
-    } else {
-      setFilters(prev => ({
-        ...prev,
-        city:     [...new Set([...(prev.city     || []), ...newCities])],
-        hub:      [...new Set([...(prev.hub      || []), ...newHubs])],
-        priority: [...new Set([...(prev.priority || []), ...newPriorities])],
-        function: [...new Set([...(prev.function || []), ...newFunctions])],
-        assignee: [...new Set([...(prev.assignee || []), ...newAssignees])],
-      }));
-    }
-  }, [tasks, user, isInitialized]);
-
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => {
-      const current = prev[key];
-      
-      if (typeof current === 'boolean') {
-        return { ...prev, [key]: !current };
-      }
-
-      const updated = (current || []).includes(value)
-        ? current.filter(v => v !== value)
-        : [...(current || []), value];
-      return { ...prev, [key]: updated };
-    });
-  };
-
-  const resetFilters = (newFilters) => {
-    if (newFilters) {
-      setFilters(newFilters);
-    } else {
-      setIsInitialized(false);
-    }
-  };
   
   const rootVerticalId = resolveVerticalRootId(activeVertical, verticals);
 
@@ -145,10 +79,6 @@ const VerticalWorkspace = ({
       </div>
     );
   }
-
-  const handleBatchFilter = (key, values) => {
-    setFilters(prev => ({ ...prev, [key]: values }));
-  };
 
   return (
     <div className={`workspace-container ${(!isDesktop || !isSubSidebarOpen) ? 'sub-sidebar-collapsed' : ''}`}>

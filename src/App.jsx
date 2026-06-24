@@ -12,6 +12,7 @@ import { masterErrorHandler } from './services/core/masterErrorHandler';
 import { useAuth } from './app/contexts/AuthContext';
 import { AppNavigationProvider, useAppNavigation } from './app/contexts/AppNavigationContext';
 import { TaskBoardProvider, useTaskBoard } from './app/contexts/TaskBoardContext';
+import { WorkspaceFilterProvider } from './app/contexts/WorkspaceFilterContext';
 import { MobileLongPressProvider } from './app/contexts/MobileLongPressContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
@@ -493,10 +494,12 @@ function App() {
     >
       <AppNavigationProvider verticals={verticals}>
         <TaskBoardProvider user={user} verticals={verticals}>
-          <MobileLongPressProvider>
-            <OnlineSyncBanner />
-            <AppShell verticals={verticals} verticalList={verticalList} />
-          </MobileLongPressProvider>
+          <WorkspaceFilterProvider>
+            <MobileLongPressProvider>
+              <OnlineSyncBanner />
+              <AppShell verticals={verticals} verticalList={verticalList} />
+            </MobileLongPressProvider>
+          </WorkspaceFilterProvider>
         </TaskBoardProvider>
       </AppNavigationProvider>
     </PersistQueryClientProvider>

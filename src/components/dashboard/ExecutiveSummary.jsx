@@ -39,7 +39,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     (user?.seniority && user.seniority > MANAGER_SENIORITY_THRESHOLD) || 
     user?.roleId === 'master_admin';
 
-  const [activeView, setActiveView] = useState(showCentralisedTasks ? 'centralised_task_view' : 'escalations');
+  const [activeView, setActiveView] = useState(
+    user?.roleId === 'master_admin' ? 'centralised_task_view' : 'attendance_self_service'
+  );
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const {
     realUser,
@@ -382,9 +384,9 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   // Adjust active view if centralised tasks are hidden
   React.useEffect(() => {
     if (!showCentralisedTasks && activeView === 'centralised_task_view') {
-      setActiveView(hasEscalations ? 'escalations' : 'executive_summary');
+      setActiveView(user?.roleId !== 'master_admin' ? 'attendance_self_service' : (hasEscalations ? 'escalations' : 'executive_summary'));
     }
-  }, [showCentralisedTasks, activeView, hasEscalations]);
+  }, [showCentralisedTasks, activeView, hasEscalations, user?.roleId]);
 
   // Reset scroll position to hide stage-navigation-tray behind sticky header switcher by default
   React.useEffect(() => {
@@ -452,7 +454,20 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           {/* Mobile-Only Summary View Navigation Switcher Tray */}
           <nav className="summary-navigation-tray">
             <div className="summary-nav-container">
-              {/* 1. Team Support */}
+              {/* 1. Current Attendance (hidden for Master Admins) */}
+              {user?.roleId !== 'master_admin' && (
+                <button
+                  className={`summary-nav-item stage-orange ${activeView === 'attendance_self_service' ? 'active' : ''}`}
+                  onClick={() => setActiveView('attendance_self_service')}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconClock size={14} />
+                  </div>
+                  <span className="summary-nav-label">Current Attendance</span>
+                </button>
+              )}
+
+              {/* 2. Team Support */}
               {hasEscalations && (
                 <button
                   className={`summary-nav-item stage-red ${activeView === 'escalations' ? 'active' : ''}`}
@@ -467,7 +482,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 </button>
               )}
 
-              {/* 2. Request Support */}
+              {/* 3. Request Support */}
               {!!user && (
                 <button
                   className="summary-nav-item stage-mint"
@@ -477,19 +492,6 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                     <span className="request-support-plus">+</span>
                   </div>
                   <span className="summary-nav-label">Request Support</span>
-                </button>
-              )}
-
-              {/* 3. Current Attendance (hidden for Master Admins) */}
-              {user?.roleId !== 'master_admin' && (
-                <button
-                  className={`summary-nav-item stage-orange ${activeView === 'attendance_self_service' ? 'active' : ''}`}
-                  onClick={() => setActiveView('attendance_self_service')}
-                >
-                  <div className="summary-icon-wrapper">
-                    <IconClock size={14} />
-                  </div>
-                  <span className="summary-nav-label">Current Attendance</span>
                 </button>
               )}
 
