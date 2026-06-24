@@ -23,6 +23,7 @@ import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
 import { useRBAC } from '../../hooks/useRBAC';
 import { useAuth } from '../../app/contexts/AuthContext';
 import UserProfile from '../users/UserProfile';
+import { AttendanceSelfServiceContent } from '../../verticals/Employees/attendance/AttendanceSelfService';
 
 /**
  * ExecutiveSummary Component
@@ -482,8 +483,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               {/* 3. Current Attendance (hidden for Master Admins) */}
               {user?.roleId !== 'master_admin' && (
                 <button
-                  className="summary-nav-item stage-orange"
-                  onClick={() => setActiveVertical('attendance_self_service')}
+                  className={`summary-nav-item stage-orange ${activeView === 'attendance_self_service' ? 'active' : ''}`}
+                  onClick={() => setActiveView('attendance_self_service')}
                 >
                   <div className="summary-icon-wrapper">
                     <IconClock size={14} />
@@ -620,6 +621,14 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           verticalList={verticalList}
           loading={loading}
           isMobile={isMobile}
+        />
+      )}
+
+      {/* 3. Attendance Self Service Section */}
+      {activeView === 'attendance_self_service' && (
+        <AttendanceSelfServiceContent
+          user={user}
+          permissions={permissions}
         />
       )}
 

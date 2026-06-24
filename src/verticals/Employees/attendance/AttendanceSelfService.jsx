@@ -261,58 +261,16 @@ const TAB_CURRENT  = 'current';
 const TAB_LIVE     = 'live';
 
 // ---------------------------------------------------------------------------
-// AttendanceSelfService — main export
-// Accepts `permissions` from ContentRouter to determine the tab layout.
-// Viewer: single tab (form only). Contributor+: two tabs.
+// AttendanceSelfServiceContent — Reusable content for both vertical and homepage
 // ---------------------------------------------------------------------------
-const AttendanceSelfService = ({ 
-  user, 
-  permissions,
-  setActiveVertical,
-  onShowBottomNav,
-  isSubSidebarOpen,
-  setIsSubSidebarOpen,
-  SidebarComponent,
-  verticals,
-  activeVertical,
-}) => {
+export const AttendanceSelfServiceContent = ({ user, permissions }) => {
   // Contributor+ can create records — use canCreate as the tab gate.
   // Viewer has canCreate === false but can still submit via the SECURITY DEFINER RPC.
   const showLiveTab = !!(permissions?.canCreate);
   const [activeTab, setActiveTab] = useState(TAB_CURRENT);
 
-  const todayDisplay = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  });
-
   return (
-    <>
-      {/* Page Header */}
-      <MasterPageHeader
-        title="Current Attendance"
-        description={todayDisplay}
-        setActiveVertical={setActiveVertical}
-        onShowBottomNav={onShowBottomNav}
-        isSubSidebarOpen={isSubSidebarOpen}
-        onSidebarToggle={setIsSubSidebarOpen}
-        hideMenuClose={true}
-        SidebarComponent={SidebarComponent}
-        user={user}
-        permissions={permissions}
-        verticals={verticals}
-        activeVertical={activeVertical}
-        rightActions={
-          <RBACManageButton
-            user={user}
-            verticalId="employees"
-            featureId="canAccessAttendanceSelfService"
-            label="Current Attendance"
-          />
-        }
-      />
-
-      <div className="self-service__container">
-
+    <div className="self-service__container">
       {/* Tab bar — only shown for Contributor+ */}
       {showLiveTab && (
         <div className="self-service__tabs" role="tablist" aria-label="Attendance views">
@@ -345,6 +303,56 @@ const AttendanceSelfService = ({
         <LiveAttendanceTab user={user} />
       )}
     </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// AttendanceSelfService — main export
+// Accepts `permissions` from ContentRouter to determine the tab layout.
+// Viewer: single tab (form only). Contributor+: two tabs.
+// ---------------------------------------------------------------------------
+const AttendanceSelfService = ({ 
+  user, 
+  permissions,
+  setActiveVertical,
+  onShowBottomNav,
+  isSubSidebarOpen,
+  setIsSubSidebarOpen,
+  SidebarComponent,
+  verticals,
+  activeVertical,
+}) => {
+  const todayDisplay = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  return (
+    <>
+      {/* Page Header */}
+      <MasterPageHeader
+        title="Current Attendance"
+        description={todayDisplay}
+        setActiveVertical={setActiveVertical}
+        onShowBottomNav={onShowBottomNav}
+        isSubSidebarOpen={isSubSidebarOpen}
+        onSidebarToggle={setIsSubSidebarOpen}
+        hideMenuClose={true}
+        SidebarComponent={SidebarComponent}
+        user={user}
+        permissions={permissions}
+        verticals={verticals}
+        activeVertical={activeVertical}
+        rightActions={
+          <RBACManageButton
+            user={user}
+            verticalId="employees"
+            featureId="canAccessAttendanceSelfService"
+            label="Current Attendance"
+          />
+        }
+      />
+
+      <AttendanceSelfServiceContent user={user} permissions={permissions} />
     </>
   );
 };
