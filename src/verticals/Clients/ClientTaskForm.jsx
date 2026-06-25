@@ -30,6 +30,7 @@ const ClientTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, current
     }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchClients();
   }, []);

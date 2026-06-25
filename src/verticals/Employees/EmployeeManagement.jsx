@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../../services/core/supabaseClient';
+import React, { useState, useEffect } from 'react';
 import './Employees.css';
 import EmployeeCSVDownload from './EmployeeCSVDownload';
 import EmployeeCSVImport from './EmployeeCSVImport';
@@ -183,7 +182,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     const matchesRole = !filters?.role?.length || filters.role.some(r =>
       r?.trim().toUpperCase() === emp.role_code?.trim().toUpperCase()
     );
-    const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
+    const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id) || emp.hub_id === null;
     const matchesDept = !filters?.department?.length || filters.department.some(d =>
       d?.trim().toUpperCase() === emp.dept_code?.trim().toUpperCase()
     );
@@ -219,13 +218,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     if (!acc[sortKey]) acc[sortKey] = { groupName, overrideKey: sortKey, emps: [] };
     acc[sortKey].emps.push(emp);
     return acc;
-  }, {});  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
+  }, {});
 
-  const handleCloseModal = () => {
-    setIsAddModalOpen(false);
-    setEditingEmployee(null);
-    setIsViewOnly(false);
-  };
+  const inactiveEmps = filteredEmployees.filter(emp => emp.status === 'Inactive');
 
   return (
     <div className="management-view-container">
@@ -415,8 +410,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onUpdateHub={updateEmployeeHub}
                               isSelected={ui.selectedIds.includes(emp.id)}
                               onSelect={ui.handleSelectIndividual}
-                              isExpanded={ui.expandedId === emp.id}
-                              onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
+                              isRowExpanded={ui.expandedId === emp.id}
+                              onToggleRowExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
                               remarks={(tasks || []).filter(t => {
                                 const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                                 if (!isRemark) return false;
@@ -477,8 +472,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         onUpdateHub={updateEmployeeHub}
                          isSelected={ui.selectedIds.includes(emp.id)}
                          onSelect={ui.handleSelectIndividual}
-                         isExpanded={ui.expandedId === emp.id}
-                         onToggleExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
+                         isRowExpanded={ui.expandedId === emp.id}
+                         onToggleRowExpand={() => ui.setExpandedId(ui.expandedId === emp.id ? null : emp.id)}
                          remarks={(tasks || []).filter(t => {
                            const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                            if (!isRemark) return false;

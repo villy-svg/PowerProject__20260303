@@ -114,7 +114,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     try {
       const saved = localStorage.getItem(`tab_settings_${activeVertical}`);
       return saved ? JSON.parse(saved) : DEFAULT_TAB_SETTINGS;
-    } catch (_) {
+    } catch {
       return DEFAULT_TAB_SETTINGS;
     }
   });
@@ -228,7 +228,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     } finally {
       setLoading(false);
     }
-  }, [sheetId]);
+  }, [sheetId, setTabSettings]);
 
   // ── Async: Switch Tab ─────────────────────────────────────────────────────
   const handleTabChange = useCallback(async (tabName) => {
@@ -258,7 +258,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     } finally {
       setTabLoading(false);
     }
-  }, [activeTab, sheetId]);
+  }, [activeTab, sheetId, setTabSettings]);
 
   // ── Async: Run Validation Checker ─────────────────────────────────────────
   const handleRunChecker = useCallback(async () => {
@@ -338,7 +338,7 @@ export const useDataManager = (activeVertical = 'DATA_MANAGER') => {
     setValidationErrors(errors);
     setCheckerRun(true);
     setSyncSuccess(null);
-  }, [fleetPlates, previewData, sheetId, tabSettings.vehicleDetailsTab, tabSettings.headerRowsToSkip]);
+  }, [fleetPlates, previewData, sheetId, tabSettings.vehicleDetailsTab, tabSettings.headerRowsToSkip, setTabSettings]);
 
   // ── Inline Cell Edit ──────────────────────────────────────────────────────
   const handleCellEdit = useCallback((rowIndex, colIdx, newValue) => {

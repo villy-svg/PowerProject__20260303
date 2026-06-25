@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import EmployeeTreeCard from './EmployeeTreeCard';
 import './Employees.css';
@@ -15,18 +15,15 @@ import './Employees.css';
 const EmployeeTree = ({ 
   employees, 
   user, 
-  onEdit, 
-  onView, 
-  onDelete, 
-  onToggleStatus, 
-  permissions, 
-  availableHubs, 
-  onUpdateHub,
+  onEdit,
+  onDelete,
+  permissions,
   selectedIds,
   onSelect
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [showOthersIds, setShowOthersIds] = useState(new Set());
+  const hasInitializedRef = React.useRef(false);
 
   // Build tree from flat data
   const treeData = useMemo(() => {
@@ -42,10 +39,10 @@ const EmployeeTree = ({
     return new Set([...ancestors.map(a => a.id), currentUser.id]);
   }, [user, employees]);
 
-  // Default behavior: Expand the management line to ensure the path is visible
   useEffect(() => {
-    if (pathIds.size > 0) {
+    if (pathIds.size > 0 && !hasInitializedRef.current) {
       setExpandedIds(new Set(pathIds));
+      hasInitializedRef.current = true;
     }
   }, [pathIds]);
 

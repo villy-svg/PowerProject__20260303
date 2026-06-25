@@ -7,7 +7,7 @@ import { IconChevronDown } from '../../components/ui/Icons';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
 
-const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
+const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,8 +17,8 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
-  const fetchRoles = async () => {
-    setLoading(true);
+  const fetchRoles = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from('employee_roles')
       .select('*')
@@ -32,6 +32,7 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchRoles();
   }, []);
@@ -83,7 +84,7 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
       setStatusMsg({ type: 'success', text: `Role ${editingRole ? 'updated' : 'created'} successfully!` });
       setTimeout(() => {
         setIsModalOpen(false);
-        fetchRoles();
+        fetchRoles(true);
       }, 1000);
     }
     setLoading(false);
@@ -98,7 +99,7 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
     if (error) {
       alert(`Delete failed: ${error.message}`);
     } else {
-      fetchRoles();
+      fetchRoles(true);
     }
     setLoading(false);
   };
@@ -154,7 +155,7 @@ const EmployeeRoleManagement = ({ user = {}, permissions = {}, setActiveVertical
                     <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
             <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
-              <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={fetchRoles} />
+              <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={() => fetchRoles(true)} />
             )}
                   </div>
                 )}

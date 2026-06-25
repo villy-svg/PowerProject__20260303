@@ -23,13 +23,29 @@ import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 // Utility: Build the array of dates between startDate and endDate (inclusive)
 // Returns an array of 'YYYY-MM-DD' strings.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Utility: Format a Date object as a YYYY-MM-DD string in IST.
+//
+// WHY NOT toISOString().split('T')[0]?
+//   toISOString() always outputs UTC. At 01:00 IST (19:30 UTC previous day),
+//   new Date().toISOString().split('T')[0] gives "yesterday" in UTC =
+//   the wrong date from India's perspective.
+//
+// Intl.DateTimeFormat with timeZone: 'Asia/Kolkata' and locale 'en-CA'
+// (which natively outputs YYYY-MM-DD) is the correct, IST-aware approach.
+// This pattern is already used in attendanceService.js and is the standard.
+// ---------------------------------------------------------------------------
+function toISTDateString(date) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(date);
+}
+
 function buildDateRange(startDate, endDate) {
   const dates = [];
-  const current = new Date(startDate);
-  const end = new Date(endDate);
+  const current = new Date(startDate + 'T00:00:00'); // 'T00:00:00' = local midnight, avoids UTC-shift on date-only parse
+  const end = new Date(endDate + 'T00:00:00');
 
   while (current <= end) {
-    dates.push(current.toISOString().split('T')[0]);
+    dates.push(toISTDateString(current));
     current.setDate(current.getDate() + 1);
   }
 
@@ -37,7 +53,12 @@ function buildDateRange(startDate, endDate) {
 }
 
 // ---------------------------------------------------------------------------
-// Utility: Get the default start/end date for the current week (Mon–Sun)
+// Utility: Get the default start/end date for the current week (Mon–Sun) in IST.
+//
+// IST FIX: today.getDay() reads the browser's local time (correct for Indian
+// users), but the final date output previously used toISOString().split('T')[0]
+// which serialises in UTC. At 01:00 IST, this produces the wrong (UTC) date.
+// Now uses toISTDateString() for all date serialisation.
 // ---------------------------------------------------------------------------
 function getDefaultWeekRange() {
   const today = new Date();
@@ -50,8 +71,8 @@ function getDefaultWeekRange() {
   sunday.setDate(monday.getDate() + 6);
 
   return {
-    startDate: monday.toISOString().split('T')[0],
-    endDate:   sunday.toISOString().split('T')[0],
+    startDate: toISTDateString(monday),
+    endDate:   toISTDateString(sunday),
   };
 }
 

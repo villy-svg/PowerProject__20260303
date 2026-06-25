@@ -175,7 +175,7 @@ const CurrentAttendanceTab = ({ user }) => {
     error,
     alarmFired,
     dismissAlarm,
-    selectedShiftType, setSelectedShiftType,
+    selectedShiftType,
     selectedHubId, setSelectedHubId,
     handleCheckIn,
     handleCheckOut,

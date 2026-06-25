@@ -36,7 +36,7 @@ const STATUS_LABELS = {
 // ---------------------------------------------------------------------------
 // RequestCard — renders a single pending request with Approve/Reject actions
 // ---------------------------------------------------------------------------
-const RequestCard = ({ request, currentUserId, onApprove, onReject, isActing }) => {
+const RequestCard = ({ request, onApprove, onReject, isActing }) => {
   const [showRejectNote, setShowRejectNote] = useState(false);
   const [rejectNote, setRejectNote] = useState('');
 
@@ -264,7 +264,6 @@ const AttendanceApprovalDrawer = ({
               <RequestCard
                 key={request.id}
                 request={request}
-                currentUserId={currentUser?.id}
                 onApprove={handleApprove}
                 onReject={handleReject}
                 isActing={isActing}

@@ -17,8 +17,6 @@ const EmployeeListRow = ({
   onUpdateHub,
   isSelected = false,
   onSelect,
-  isExpanded,
-  onToggleExpand,
   isRowExpanded,
   onToggleRowExpand,
   remarks = []

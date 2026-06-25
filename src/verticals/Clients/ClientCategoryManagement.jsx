@@ -41,6 +41,7 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
     }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { 
     fetchCategories();
     fetchServices();

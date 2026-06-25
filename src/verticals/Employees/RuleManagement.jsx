@@ -16,7 +16,7 @@ import SubCategoryFormModal from './SubCategoryFormModal';
 import RuleFormModal from './RuleFormModal';
 
 /* ─── Main Component ────────────────────────────────────────── */
-const RuleManagement = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
+const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
   const [activeTab, setActiveTab] = useState('rules');
 
   const [categories, setCategories] = useState([]);

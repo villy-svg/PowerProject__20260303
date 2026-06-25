@@ -6,7 +6,7 @@ import { IconChevronDown } from '../../components/ui/Icons';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
 
-const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
+const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,8 +16,8 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
-  const fetchDepartments = async () => {
-    setLoading(true);
+  const fetchDepartments = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from('departments')
       .select('*')
@@ -31,6 +31,7 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchDepartments();
   }, []);
@@ -81,7 +82,7 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
       setStatusMsg({ type: 'success', text: `Department ${editingDept ? 'updated' : 'created'} successfully!` });
       setTimeout(() => {
         setIsModalOpen(false);
-        fetchDepartments();
+        fetchDepartments(true);
       }, 1000);
     }
     setLoading(false);
@@ -96,7 +97,7 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
     if (error) {
       alert(`Delete failed: ${error.message}`);
     } else {
-      fetchDepartments();
+      fetchDepartments(true);
     }
     setLoading(false);
   };
@@ -152,7 +153,7 @@ const DepartmentManagement = ({ user = {}, permissions = {}, setActiveVertical, 
                     <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
             <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
-              <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={fetchDepartments} />
+              <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={() => fetchDepartments(true)} />
             )}
                   </div>
                 )}

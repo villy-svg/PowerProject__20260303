@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import AssigneeSelector from '../../components/ui/AssigneeSelector';
 import TaskHierarchySelector from '../../components/tasks/TaskHierarchySelector';
 import { taskUtils } from '../../utils/taskUtils';
@@ -24,7 +24,6 @@ const EmployeeRemarkForm = ({
   initialData = {},
   currentUser = {},
   permissions = {},
-  availableTasks = [],
   onSubmissionStatusUpdate,
   onUploadProof
 }) => {

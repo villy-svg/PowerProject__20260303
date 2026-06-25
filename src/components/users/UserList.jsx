@@ -77,7 +77,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                 </td>
                 <td>
                   <span className={`role-badge ${u.role_id}`}>
-                    {u.role_id?.replace('_', ' ')}
+                    {typeof u.role_id === 'string' ? u.role_id.replace('_', ' ') : u.role_id}
                   </span>
                 </td>
                 <td>
@@ -88,7 +88,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                       (() => {
                         const vPerms = u.verticalPermissions || {}; 
                         const activeVIds = Array.from(new Set(Object.entries(vPerms)
-                          .filter(([_, data]) => data.level !== 'none')
+                          .filter(([_, data]) => data?.level && data.level !== 'none')
                           .map(([vId]) => {
                             const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                             const label = vInfo ? vInfo.label : vId;
@@ -154,7 +154,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
             <div className="user-card-header-right">
               <StatusBadge isActive={u.is_active} />
               <span className={`role-badge ${u.role_id}`}>
-                {u.role_id?.replace('_', ' ')}
+                {typeof u.role_id === 'string' ? u.role_id.replace('_', ' ') : u.role_id}
               </span>
             </div>
           </div>
@@ -168,7 +168,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                 (() => {
                   const vPerms = u.verticalPermissions || {};
                   const activeVIds = Array.from(new Set(Object.entries(vPerms)
-                    .filter(([_, data]) => data.level !== 'none')
+                    .filter(([_, data]) => data?.level && data.level !== 'none')
                     .map(([vId]) => {
                       const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                       const label = vInfo ? vInfo.label : vId;

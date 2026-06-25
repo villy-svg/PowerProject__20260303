@@ -159,7 +159,6 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         const department_id = lookup(row.dept_code, ctx.deptMap);
         const manager_id = lookup(row.manager || row.Manager, ctx.managerMap);
         const hire_date = parseDateForDB(row.hire_date) || new Date().toISOString().split('T')[0];
-        const dob = parseDateForDB(row.dob);
 
         // ID & Badge Logic
         let emp_code = existingMatch?.emp_code;
@@ -234,7 +233,8 @@ const EmployeeCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
         const name = normalizeValue(row.full_name || row.name || '');
         const phone = normalizeValue(row.phone || row.contactNumber || '');
         const email = normalizeValue(row.email || '');
-        return `${name}|${phone}|${email}` || 'new-row';
+        const key = `${name}|${phone}|${email}`;
+        return key === '||' ? 'new-row' : key;
       }} 
       findConflict={(row, existingData) => {
         const hard = existingData.find(e => isHardMatch(row, e));

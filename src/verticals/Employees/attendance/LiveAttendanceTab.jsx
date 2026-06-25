@@ -62,8 +62,8 @@ const LiveHoursCounter = ({ loginTime, standardShiftHours }) => {
 // ---------------------------------------------------------------------------
 // UserRow — a single employee entry inside a hub card
 // ---------------------------------------------------------------------------
-const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout }) => {
-  const hoursWorked = (Date.now() - new Date(session.loginTime).getTime()) / (1000 * 60 * 60);
+const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout, now }) => {
+  const hoursWorked = (now - new Date(session.loginTime).getTime()) / (1000 * 60 * 60);
   const isOvertime  = hoursWorked >= standardShiftHours;
   const [isEnding, setIsEnding] = useState(false);
 
@@ -111,10 +111,10 @@ const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout }
 // ---------------------------------------------------------------------------
 // HubCard — collapses/expands the list of users for a hub
 // ---------------------------------------------------------------------------
-const HubCard = ({ hubGroup, standardShiftHours, isMasterAdmin, onForceCheckout }) => {
+const HubCard = ({ hubGroup, standardShiftHours, isMasterAdmin, onForceCheckout, now }) => {
   const { hub, sessions } = hubGroup;
   const overtimeCount = sessions.filter(s => {
-    const hours = (Date.now() - new Date(s.loginTime).getTime()) / (1000 * 60 * 60);
+    const hours = (now - new Date(s.loginTime).getTime()) / (1000 * 60 * 60);
     return hours >= standardShiftHours;
   }).length;
 
@@ -144,6 +144,7 @@ const HubCard = ({ hubGroup, standardShiftHours, isMasterAdmin, onForceCheckout 
             standardShiftHours={standardShiftHours}
             isMasterAdmin={isMasterAdmin}
             onForceCheckout={onForceCheckout}
+            now={now}
           />
         ))}
       </div>
@@ -166,6 +167,14 @@ const LiveAttendanceTab = ({ user }) => {
   } = useLiveAttendance();
 
   const isMasterAdmin = user?.roleId === 'master_admin';
+
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleForceCheckout = async (recordId, currentSessions) => {
     const { error } = await adminForceCheckout(recordId, currentSessions);
@@ -231,6 +240,7 @@ const LiveAttendanceTab = ({ user }) => {
               standardShiftHours={STANDARD_SHIFT_HOURS}
               isMasterAdmin={isMasterAdmin}
               onForceCheckout={handleForceCheckout}
+              now={now}
             />
           ))}
         </div>

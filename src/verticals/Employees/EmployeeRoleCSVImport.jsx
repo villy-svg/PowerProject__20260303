@@ -109,7 +109,8 @@ const EmployeeRoleCSVImport = ({ onImportComplete, className, label = 'Import Ro
       getConflictKey={(row) => {
         const name = normalizeValue(row['Role Name'] || row.name || '');
         const code = normalizeValue(row['Code'] || row.role_code || '');
-        return `${name}|${code}` || 'new-row';
+        const key = `${name}|${code}`;
+        return key === '|' ? 'new-row' : key;
       }}
       findConflict={(row, existingData) => {
         const hard = existingData.find(e => isHardMatch(row, e));

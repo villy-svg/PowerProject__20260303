@@ -33,6 +33,7 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchCategories(); }, []);
 
   const handleOpenModal = (cat = null) => {
