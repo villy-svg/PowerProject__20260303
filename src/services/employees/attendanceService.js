@@ -203,7 +203,7 @@ export async function fetchMyTodayAttendance(userId) {
     .from('user_profiles')
     .select('employee_id')
     .eq('id', targetUserId)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     console.error('[attendanceService] fetchMyTodayAttendance profile lookup error:', profileError);
