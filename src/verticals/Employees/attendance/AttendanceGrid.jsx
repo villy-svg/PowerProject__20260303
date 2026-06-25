@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { IconSun, IconMoon, IconCoffee, IconFile, IconX } from '../../../components/ui/Icons';
 
 // ---------------------------------------------------------------------------
 // STATUS_META: Maps status enum → display label + CSS modifier class.
@@ -47,6 +48,15 @@ const AttendanceCell = ({ record, onClick }) => {
   const hasPendingEdit = !!record?.has_pending_edit;
   const shiftType = record?.shift_type;
 
+  let icon = <IconX size={16} />;
+  if (status === 'present') {
+    icon = shiftType === 'night' ? <IconMoon size={16} /> : <IconSun size={16} />;
+  } else if (status === 'week-off') {
+    icon = <IconCoffee size={16} />;
+  } else if (status === 'leave') {
+    icon = <IconFile size={16} />;
+  }
+
   return (
     <td
       className={`attendance-cell ${meta.className} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''}`}
@@ -56,13 +66,9 @@ const AttendanceCell = ({ record, onClick }) => {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       aria-label={`Status: ${status}${hasPendingEdit ? ', has pending edit' : ''}`}
     >
-      <span className="attendance-cell__status-label">{meta.label}</span>
-      {/* Shift type sub-label — only shown when present */}
-      {shiftType && (
-        <span className="attendance-cell__shift-type">
-          {shiftType === 'day' ? '☀' : '🌙'}
-        </span>
-      )}
+      <span className="attendance-cell__status-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+      </span>
       {/* Pending edit indicator badge */}
       {hasPendingEdit && (
         <span className="attendance-cell__pending-badge" aria-hidden="true">⚠</span>

@@ -184,7 +184,7 @@ const EmployeeAttendanceBoard = ({
   );
 
   return (
-    <>
+    <div className="attendance-board__wrapper">
       {/* Master Page Header (master-header-system compliance) */}
       <MasterPageHeader
         title="Attendance Board"
@@ -255,7 +255,7 @@ const EmployeeAttendanceBoard = ({
           onSubmitComplete={handleActionComplete}
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -243,9 +243,9 @@
 }
 
 .attendance-cell--present .attendance-cell__status-label  { color: var(--attendance-present-text); }
-.attendance-cell--week-off .attendance-cell__status-label { color: var(--attendance-week-off-text); opacity: 0.5; }
+.attendance-cell--week-off .attendance-cell__status-label { color: var(--attendance-week-off-text); }
 .attendance-cell--leave .attendance-cell__status-label    { color: var(--attendance-leave-text); }
-.attendance-cell--absent .attendance-cell__status-label   { color: var(--attendance-absent-text); opacity: 0.4; }
+.attendance-cell--absent .attendance-cell__status-label   { color: var(--attendance-absent-text); }
 
 .attendance-cell__shift-type {
   display: block;
