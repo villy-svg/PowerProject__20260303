@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260625 Attendace Board 1.0.1"
+git commit -m "260625 Attendace Board 1.0.3"
 git push origin staging 
 
 # 2. Build (on Staging)

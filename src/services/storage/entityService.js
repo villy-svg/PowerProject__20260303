@@ -28,23 +28,36 @@ export const createEntity = async ({ entityType, domainData = {}, metadata = {} 
     throw new Error('User is not authenticated. Cannot create entity.');
   }
 
-  const { data, error } = await supabase.functions.invoke('entity-create', {
+  const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const url = `${baseUrl}/functions/v1/entity-create`;
+
+  const response = await fetch(url, {
+    method: 'POST',
     headers: {
-      Authorization: `Bearer ${token}`,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'x-client-info': 'supabase-js/entity-service',
     },
-    body: { 
-      entity_type: entityType, 
-      domain_data: domainData, 
-      metadata 
-    },
+    body: JSON.stringify({
+      entity_type: entityType,
+      domain_data: domainData,
+      metadata
+    }),
   });
 
-  if (error) {
-    console.error('[entityService] createEntity failed:', error);
-    throw new Error(error.message || 'Entity creation failed');
+  if (!response.ok) {
+    let errBody;
+    try {
+      errBody = await response.json();
+    } catch {
+      errBody = { error: `HTTP ${response.status}` };
+    }
+    console.error('[entityService] createEntity failed:', errBody);
+    throw new Error(errBody.error || `entity-create returned ${response.status}`);
   }
 
-  return data;
+  const result = await response.json();
+  return result;
 };
 
 /**

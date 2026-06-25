@@ -37,9 +37,10 @@ export const compressFile = async (file) => {
  */
 export const uploadSubmissionFile = async (parentId, submissionId, file, parentType = 'tasks') => {
   const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const uniqueName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}_${sanitizedName}`;
   const storagePath = parentType === 'employees'
-    ? `employees/${parentId}/${submissionId}/${sanitizedName}`
-    : `${parentId}/${submissionId}/${sanitizedName}`;
+    ? `employees/${parentId}/${submissionId}/${uniqueName}`
+    : `${parentId}/${submissionId}/${uniqueName}`;
 
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
@@ -137,7 +138,16 @@ export const getEmployeeSubmissions = async (employeeId) => {
 };
 
 /**
- * Full submission flow: compress files → upload → insert record.
+ * Full submission flow: compress → upload files → single atomic DB insert.
+ *
+ * ROOT CAUSE FIX: The DB record is created ONLY after all file uploads succeed.
+ * A client-generated UUID (uploadBatchId) is used to name the storage folder,
+ * so no DB record is needed upfront. This eliminates orphan `submissions` rows
+ * (empty links: []) that were previously left behind on any upload failure.
+ *
+ * Old (broken) flow:  CREATE DB record → upload → PATCH links (3 round-trips, orphan risk)
+ * New (fixed) flow:   upload files → CREATE DB record with links (1 round-trip, atomic)
+ *
  * @param {Object} params
  * @param {string} [params.taskId]
  * @param {string} [params.employeeId]
@@ -145,62 +155,65 @@ export const getEmployeeSubmissions = async (employeeId) => {
  * @param {string} params.comment
  * @param {File[]} params.files
  * @param {boolean} params.moveToReview - If true, auto-transitions task to REVIEW stage
+ * @param {Function} [params.onProgress]
  * @returns {Object} The created submission record
  */
 export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, files = [], moveToReview = false, onProgress }) => {
-  // 1. Create submission record first (Trigger handles submission_number)
-  // We insert with empty links to get the UUID for storage folder naming
+  const totalSteps = files.length + 1; // uploads + DB insert
+
+  // Step 1: Generate a client-side UUID as the storage folder name.
+  // This is ONLY for folder organisation in storage — it does NOT need to match the DB record ID.
+  // Using crypto.randomUUID() ensures each submission attempt gets a fresh, collision-free folder,
+  // so retrying after a failure will never hit a "resource already exists" storage error.
+  const uploadBatchId = crypto.randomUUID();
+
+  // Step 2: Compress all files concurrently (web workers, non-blocking)
+  if (onProgress) onProgress({ current: 0, total: totalSteps, label: `Compressing ${files.length} file(s)...` });
+  const compressedFiles = await Promise.all(files.map(file => compressFile(file)));
+
+  // Step 3: Upload files sequentially (ordered, stable on slow connections)
+  // If ANY upload fails here, NO DB record has been created yet — zero orphan risk.
+  const links = [];
+  let uploadedCount = 0;
+  const parentId = taskId || employeeId;
+  const parentType = employeeId ? 'employees' : 'tasks';
+
+  for (const file of compressedFiles) {
+    if (onProgress) onProgress({
+      current: uploadedCount,
+      total: totalSteps,
+      label: `Uploading ${uploadedCount + 1} of ${compressedFiles.length}...`,
+    });
+    const linkObj = await uploadSubmissionFile(parentId, uploadBatchId, file, parentType);
+    links.push(linkObj);
+    uploadedCount++;
+  }
+
+  if (onProgress) onProgress({ current: uploadedCount, total: totalSteps, label: 'Saving record...' });
+
+  // Step 4: All uploads succeeded — now create the single, complete DB record.
+  // links[] is already fully populated, so this is ONE atomic write with no follow-up patch.
   const submission = await createSubmission({
     taskId,
     employeeId,
     submittedBy: userId,
     comment,
-    links: [], // Start empty
+    links,
   });
 
-  const submissionId = submission.id;
+  if (onProgress) onProgress({ current: totalSteps, total: totalSteps, label: 'Done!' });
 
-  try {
-    // 2. CONCURRENT COMPRESSION (Promise.all)
-    // Map over files and compress them in parallel using browser web workers
-    const compressedFiles = await Promise.all(files.map(file => compressFile(file)));
-
-    // 3. UPLOAD (Sequential to maintain order and stable connection)
-    const links = [];
-    let uploadedCount = 0;
-    
-    for (const file of compressedFiles) {
-      if (onProgress) onProgress({ current: uploadedCount, total: compressedFiles.length, label: `Uploading ${uploadedCount + 1} of ${compressedFiles.length}...` });
-      
-      const parentId = taskId || employeeId;
-      const parentType = employeeId ? 'employees' : 'tasks';
-      const linkObj = await uploadSubmissionFile(parentId, submissionId, file, parentType);
-      links.push(linkObj);
-      uploadedCount++;
+  // Step 5: Optionally move task to REVIEW stage (best-effort, non-blocking on failure)
+  if (moveToReview && taskId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await taskService.updateTaskStage(taskId, 'REVIEW', user?.id);
+    } catch (err) {
+      console.error('Failed to move task to REVIEW:', err.message);
     }
-    
-    if (onProgress) onProgress({ current: compressedFiles.length, total: compressedFiles.length, label: 'Finalizing...' });
-
-    // 3. Update the record with the final links
-    const updatedSubmission = await updateSubmissionLinks(submissionId, links);
-
-    // 4. Optionally move task to REVIEW stage
-    if (moveToReview && taskId) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        await taskService.updateTaskStage(taskId, 'REVIEW', user?.id);
-      } catch (err) {
-        console.error('Failed to move task to REVIEW:', err.message);
-      }
-    }
-
-    return updatedSubmission;
-  } catch (err) {
-    // Cleanup: If file upload or link update fails, we should ideally mark the submission
-    // as 'error' or 'abandoned', but for now we just throw so the UI handles the error.
-    console.error('Core submission flow failed:', err.message);
-    throw err;
   }
+
+  return submission;
 };
 
 /**
