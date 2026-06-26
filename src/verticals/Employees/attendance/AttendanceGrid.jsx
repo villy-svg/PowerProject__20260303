@@ -17,7 +17,7 @@
  *   ui-design-system §11 (responsive-table-wrapper for horizontal scroll)
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IconSun, IconMoon, IconCoffee, IconFile, IconX } from '../../../components/ui/Icons';
 import './AttendanceGrid.css';
 
@@ -164,7 +164,22 @@ const SkeletonRow = ({ colCount }) => (
 // ---------------------------------------------------------------------------
 // AttendanceGrid — main export
 // ---------------------------------------------------------------------------
-const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, activeCellEdit, onCellChange, hubs }) => {
+const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, activeCellEdit, onCellChange, hubs, groupByHub }) => {
+  const groupedEmployees = useMemo(() => {
+    if (!groupByHub || !employees) return { 'All Employees': employees || [] };
+    const groups = {};
+    employees.forEach(emp => {
+      const hubName = emp.hubs?.name || emp.hubs?.hub_code || 'Unassigned';
+      if (!groups[hubName]) groups[hubName] = [];
+      groups[hubName].push(emp);
+    });
+    // Sort groups alphabetically
+    const sortedGroups = {};
+    Object.keys(groups).sort().forEach(key => {
+      sortedGroups[key] = groups[key];
+    });
+    return sortedGroups;
+  }, [employees, groupByHub]);
   if (!isLoading && (!dateRange || dateRange.length === 0)) {
     return (
       <div className="attendance-grid__empty-state">
@@ -209,22 +224,33 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
             ? Array.from({ length: 5 }).map((_, i) => (
                 <SkeletonRow key={i} colCount={dateRange.length} />
               ))
-            : employees.map(employee => (
-                <tr key={employee.id} className="attendance-grid__row">
-                  <EmployeeRowHeader employee={employee} />
-                  {dateRange.map(date => (
-                    <AttendanceCell
-                      key={`${employee.id}_${date}`}
-                      record={getCellData(employee.id, date)}
-                      onClick={() => onCellClick(employee.id, date)}
-                      isEditing={activeCellEdit?.empId === employee.id && activeCellEdit?.date === date}
-                      onCellChange={onCellChange}
-                      hubs={hubs}
-                      employeeId={employee.id}
-                      date={date}
-                    />
+            : Object.entries(groupedEmployees).map(([groupName, groupEmployees]) => (
+                <React.Fragment key={groupName}>
+                  {groupByHub && (
+                    <tr className="attendance-grid__group-header" style={{ backgroundColor: 'var(--bg-secondary)', borderTop: '2px solid var(--border-color)' }}>
+                      <td colSpan={dateRange.length + 1} style={{ padding: '8px 12px', fontWeight: 'bold', color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {groupName}
+                      </td>
+                    </tr>
+                  )}
+                  {groupEmployees.map(employee => (
+                    <tr key={employee.id} className="attendance-grid__row">
+                      <EmployeeRowHeader employee={employee} />
+                      {dateRange.map(date => (
+                        <AttendanceCell
+                          key={`${employee.id}_${date}`}
+                          record={getCellData(employee.id, date)}
+                          onClick={() => onCellClick(employee.id, date)}
+                          isEditing={activeCellEdit?.empId === employee.id && activeCellEdit?.date === date}
+                          onCellChange={onCellChange}
+                          hubs={hubs}
+                          employeeId={employee.id}
+                          date={date}
+                        />
+                      ))}
+                    </tr>
                   ))}
-                </tr>
+                </React.Fragment>
               ))
           }
         </tbody>

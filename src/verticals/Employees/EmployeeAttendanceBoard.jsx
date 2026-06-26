@@ -699,6 +699,7 @@ const EmployeeAttendanceBoard = ({
           activeCellEdit={activeCellEdit}
           onCellChange={handleCellChange}
           hubs={hubs}
+          groupByHub={viewMode === 'planner'}
         />
       )}
 
