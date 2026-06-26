@@ -329,6 +329,24 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                   </div>
                 </div>
 
+                {initialData?.id && (
+                  <div className="form-group">
+                    <label htmlFor="task-board-select">MOVE TO BOARD</label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        id="task-board-select"
+                        value={formData.task_board?.[0] || 'Hubs'}
+                        onChange={(val) => updateField('task_board', [val])}
+                        options={[
+                          { label: 'Hubs Task Board', value: 'Hubs' },
+                          { label: 'Escalation Task Board', value: 'Escalations' }
+                        ]}
+                        disabled={!permissions?.canUpdate}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {activeVertical === 'escalation_tasks' && (
                   <div className="form-group anonymity-toggle-group">
                     <AnonToggle

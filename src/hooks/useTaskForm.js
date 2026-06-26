@@ -18,6 +18,7 @@ export const useTaskForm = (initialData = {}) => {
       hub_ids: Array.isArray(data.hub_ids) ? data.hub_ids : (data.hub_id ? [data.hub_id] : []),
       function: data.function || '',
       assigned_client_id: data.assigned_client_id || '',
+      task_board: Array.isArray(data.task_board) ? data.task_board : (data.task_board ? [data.task_board] : []),
       // Allow for arbitrary metadata expansion
       ...(data.metadata || {})
     };
