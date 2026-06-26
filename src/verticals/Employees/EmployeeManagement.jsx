@@ -182,7 +182,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     const matchesRole = !filters?.role?.length || filters.role.some(r =>
       r?.trim().toUpperCase() === emp.role_code?.trim().toUpperCase()
     );
-    const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id) || emp.hub_id === null;
+    const matchesHub = !filters?.hub?.length || filters.hub.includes(emp.hub_id);
     const matchesDept = !filters?.department?.length || filters.department.some(d =>
       d?.trim().toUpperCase() === emp.dept_code?.trim().toUpperCase()
     );
