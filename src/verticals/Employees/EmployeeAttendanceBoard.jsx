@@ -149,9 +149,9 @@ const EmployeeAttendanceBoard = ({
       const selections = employeeSelections[empId] || [];
       const sel = selections.find(d => d.date === date);
       if (sel) {
-        return { status: sel.attendance_status, hub_id: sel.hub_id, is_draft: true, shift_date: date, employee_id: empId };
+        return { attendance_status: sel.attendance_status, hub_id: sel.hub_id, is_draft: true, shift_date: date, employee_id: empId };
       }
-      return { status: null, shift_date: date, employee_id: empId };
+      return { attendance_status: null, shift_date: date, employee_id: empId };
     }
     return getLiveCellData(empId, date);
   }, [viewMode, employeeSelections, getLiveCellData]);
@@ -439,8 +439,7 @@ const EmployeeAttendanceBoard = ({
               <CustomSelect
                 value={paintbrushStatus}
                 onChange={setPaintbrushStatus}
-                className="master-dropdown"
-                style={{ width: '150px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+                style={{ width: '180px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
                 options={[
                   { value: 'null', label: 'NULL (Not Marked)' },
                   { value: 'present', label: 'Present (Day)' },
@@ -456,7 +455,6 @@ const EmployeeAttendanceBoard = ({
                 <CustomSelect
                   value={paintbrushHubId}
                   onChange={setPaintbrushHubId}
-                  className="master-dropdown"
                   style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
                   options={[
                     { value: '', label: 'No Hub' },

@@ -31,6 +31,13 @@
   padding: 12px;
 }
 
+/* Fix for when master-dropdown is applied to CustomSelect (BaseDropdown) */
+.custom-select-container.master-dropdown {
+  background-image: none;
+  padding-right: 12px; /* Reset padding to balance the inner SVG chevron */
+}
+
+
 /* 
    CUSTOM DROPDOWN POPUP SYSTEM
    Used by AssigneeSelector, HubSelector, and other technical multi-selects.
