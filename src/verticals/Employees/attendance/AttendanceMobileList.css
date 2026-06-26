@@ -54,10 +54,13 @@
   opacity: 0.7;
 }
 
-.attendance-summary-card--present { background: var(--attendance-present); color: var(--attendance-present-text); }
-.attendance-summary-card--absent { background: var(--attendance-absent); color: var(--attendance-absent-text); }
-.attendance-summary-card--weekoff { background: var(--attendance-week-off); color: var(--attendance-week-off-text); }
-.attendance-summary-card--leave { background: var(--attendance-leave); color: var(--attendance-leave-text); }
+.attendance-summary-card--present { color: var(--attendance-present-text); }
+.attendance-summary-card--absent,
+.attendance-summary-card--no-show,
+.attendance-summary-card--no-call-no-show { color: var(--attendance-absent-text); }
+.attendance-summary-card--weekoff { color: var(--attendance-week-off-text); }
+.attendance-summary-card--leave { color: var(--attendance-leave-text); }
+.attendance-summary-card--null { color: var(--text-color); opacity: 0.7; }
 
 .attendance-mobile-list__items {
   display: flex;
@@ -79,7 +82,9 @@
 .attendance-list-item--present  { background: var(--attendance-present);  }
 .attendance-list-item--week-off { background: var(--attendance-week-off); }
 .attendance-list-item--leave    { background: var(--attendance-leave);    }
-.attendance-list-item--absent   { background: transparent;                }
+.attendance-list-item--absent,
+.attendance-list-item--no-show,
+.attendance-list-item--no-call-no-show { background: transparent;                }
 
 .attendance-list-item--has-pending {
   box-shadow: inset 0 0 0 2px rgba(249, 115, 22, 0.6);
@@ -106,7 +111,9 @@
 .attendance-list-item--present .attendance-list-item__status-label  { color: var(--attendance-present-text); }
 .attendance-list-item--week-off .attendance-list-item__status-label { color: var(--attendance-week-off-text); opacity: 0.7; }
 .attendance-list-item--leave .attendance-list-item__status-label    { color: var(--attendance-leave-text); }
-.attendance-list-item--absent .attendance-list-item__status-label   { color: var(--attendance-absent-text); opacity: 0.6; }
+.attendance-list-item--absent .attendance-list-item__status-label,
+.attendance-list-item--no-show .attendance-list-item__status-label,
+.attendance-list-item--no-call-no-show .attendance-list-item__status-label { color: var(--attendance-absent-text); opacity: 0.6; }
 
 .attendance-list-item__shift {
   opacity: 0.7;

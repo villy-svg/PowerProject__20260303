@@ -10,7 +10,8 @@ import {
   IconDiagonalUp,
   IconChevronDown,
   IconCopy,
-  IconCheck
+  IconCheck,
+  IconComment
 } from '../ui/Icons';
 import { useHierarchyDnd } from '../../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../../features/task-board/hooks/useTaskViewActions';
@@ -112,6 +113,65 @@ const TaskCard = ({
       }
     }
     lastTapRef.current = now;
+  };
+
+  const handleWhatsAppReminder = () => {
+    const assigneeName = taskUtils.getAssigneeLabel(task, null);
+    const actualName = ['Unassigned', 'None', 'Assigned'].includes(assigneeName) ? 'Team Member' : assigneeName;
+    const taskName = task.text || 'Unknown Task';
+    const stageName = STAGE_LIST?.find(s => s.id === task.stageId)?.title || task.stageId;
+    
+    // Dynamic Emojis for Status
+    const getStageEmoji = (stageId) => {
+      switch (stageId) {
+        case 'BACKLOG': return '📋';
+        case 'IN_PROGRESS': return '🚧';
+        case 'REVIEW': return '👀';
+        case 'COMPLETED': return '✅';
+        case 'DEPRIORITIZED': return '⬇️';
+        default: return '📌';
+      }
+    };
+
+    // Dynamic Emojis for Priority
+    const getPriorityEmoji = (priority) => {
+      switch (priority?.toUpperCase()) {
+        case 'URGENT':
+        case 'CRITICAL': return '🚨';
+        case 'HIGH': return '🔴';
+        case 'MEDIUM':
+        case 'NORMAL': return '🟡';
+        case 'LOW': return '🟢';
+        default: return '⚪';
+      }
+    };
+
+    const stageEmoji = getStageEmoji(task.stageId);
+    const priorityEmoji = getPriorityEmoji(task.priority);
+    const priorityText = task.priority || 'Standard';
+    
+    const shareText = `Task Reminder
+
+Hi ${actualName},
+Just a reminder about the task: ${taskName}.
+
+*Current Status:* ${stageEmoji} ${stageName}
+*Priority:* ${priorityEmoji} ${priorityText}
+
+Please take a look when you have a moment. Thanks!`;
+    
+    const encoded = encodeURIComponent(shareText);
+
+    if (navigator.share) {
+      navigator.share({ text: shareText }).catch(err => {
+        if (err.name !== 'AbortError') {
+          console.warn('[TaskCard] navigator.share error:', err);
+        }
+      });
+      return;
+    }
+
+    window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -343,6 +403,16 @@ const TaskCard = ({
             title="Clone Task"
           >
             <IconCopy size={14} />
+          </button>
+        )}
+
+        {!task.isContextOnly && task.stageId !== 'COMPLETED' && (
+          <button
+            className="action-icon-btn"
+            onClick={(e) => { e.stopPropagation(); handleWhatsAppReminder(); }}
+            title="Share WhatsApp Reminder"
+          >
+            <IconComment size={14} />
           </button>
         )}
 

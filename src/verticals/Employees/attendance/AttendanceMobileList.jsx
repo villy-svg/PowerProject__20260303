@@ -8,6 +8,9 @@ const STATUS_META = {
   'week-off': { label: 'Week-Off',  className: 'attendance-list-item--week-off' },
   'leave':    { label: 'Leave',     className: 'attendance-list-item--leave'    },
   'absent':   { label: 'Absent',    className: 'attendance-list-item--absent'   },
+  'no-show':  { label: 'No Show',   className: 'attendance-list-item--no-show'  },
+  'no-call-no-show': { label: 'No Call No Show', className: 'attendance-list-item--no-call-no-show' },
+  'null':     { label: 'NULL', className: 'attendance-list-item--null' },
 };
 
 function formatDate(dateStr) {
@@ -62,12 +65,15 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
     absent: 0,
     weekOff: 0,
     leave: 0,
+    noShow: 0,
+    noCallNoShow: 0,
+    nullCount: 0,
   };
 
   if (selectedEmployee) {
     dateRange.forEach(date => {
       const record = getCellData(selectedEmployee.id, date);
-      const status = record?.attendance_status || 'absent';
+      const status = record?.attendance_status || 'null';
       if (status === 'present') {
         if (record.shift_type === 'night') counts.presentNight++;
         else counts.presentDay++;
@@ -75,8 +81,14 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
         counts.weekOff++;
       } else if (status === 'leave') {
         counts.leave++;
-      } else {
+      } else if (status === 'absent') {
         counts.absent++;
+      } else if (status === 'no-show') {
+        counts.noShow++;
+      } else if (status === 'no-call-no-show') {
+        counts.noCallNoShow++;
+      } else {
+        counts.nullCount++;
       }
     });
   }
@@ -130,16 +142,28 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
           <span className="attendance-summary-card__label">Leave</span>
         </div>
         <div className="attendance-summary-card attendance-summary-card--absent">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><IconX size={18} /> {counts.absent}</span>
+          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800 }}>ABS</span> {counts.absent}</span>
           <span className="attendance-summary-card__label">Absent</span>
+        </div>
+        <div className="attendance-summary-card attendance-summary-card--no-show">
+          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800 }}>NS</span> {counts.noShow}</span>
+          <span className="attendance-summary-card__label">No Show</span>
+        </div>
+        <div className="attendance-summary-card attendance-summary-card--no-call-no-show">
+          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 900 }}>X</span> {counts.noCallNoShow}</span>
+          <span className="attendance-summary-card__label">No Call No Show</span>
+        </div>
+        <div className="attendance-summary-card attendance-summary-card--null">
+          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> {counts.nullCount}</span>
+          <span className="attendance-summary-card__label">Default</span>
         </div>
       </div>
 
       <div className="attendance-mobile-list__items">
         {dateRange.map(date => {
           const record = getCellData(selectedEmployee.id, date);
-          const status = record?.attendance_status || 'absent';
-          const meta = STATUS_META[status] || STATUS_META['absent'];
+          const status = record?.attendance_status || 'null';
+          const meta = STATUS_META[status] || STATUS_META['null'];
           const hasPendingEdit = !!record?.has_pending_edit;
           const shiftType = record?.shift_type;
 
@@ -159,7 +183,10 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
                   {status === 'present' ? (shiftType === 'night' ? <IconMoon size={16} /> : <IconSun size={16} />) : null}
                   {status === 'week-off' ? <IconCoffee size={16} /> : null}
                   {status === 'leave' ? <IconFile size={16} /> : null}
-                  {status === 'absent' ? <IconX size={16} /> : null}
+                  {status === 'absent' ? <span style={{ fontWeight: 800 }}>ABS</span> : null}
+                  {status === 'no-show' ? <span style={{ fontWeight: 800 }}>NS</span> : null}
+                  {status === 'no-call-no-show' ? <span style={{ fontWeight: 900, fontSize: '1.1em' }}>X</span> : null}
+                  {status === 'null' ? <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> : null}
                 </span>
                 {hasPendingEdit && (
                   <span className="attendance-list-item__pending-badge">⚠ Pending</span>

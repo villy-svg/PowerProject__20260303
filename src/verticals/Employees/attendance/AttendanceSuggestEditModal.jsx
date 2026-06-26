@@ -31,6 +31,8 @@ const STATUS_OPTIONS = [
   { value: 'week-off', label: 'Week-Off' },
   { value: 'leave',    label: 'Leave'    },
   { value: 'absent',   label: 'Absent'   },
+  { value: 'no-show',  label: 'No Show'  },
+  { value: 'no-call-no-show', label: 'No Call No Show' },
 ];
 
 const SHIFT_TYPE_OPTIONS = [

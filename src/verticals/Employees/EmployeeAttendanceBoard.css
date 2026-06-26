@@ -227,7 +227,9 @@
 .attendance-cell--present  { background: var(--attendance-present);  }
 .attendance-cell--week-off { background: var(--attendance-week-off); }
 .attendance-cell--leave    { background: var(--attendance-leave);    }
-.attendance-cell--absent   { background: transparent;                }
+.attendance-cell--absent,
+.attendance-cell--no-show,
+.attendance-cell--no-call-no-show { background: transparent;                }
 
 /* Pending edit highlight — orange ring */
 .attendance-cell--has-pending {
@@ -245,7 +247,9 @@
 .attendance-cell--present .attendance-cell__status-label  { color: var(--attendance-present-text); }
 .attendance-cell--week-off .attendance-cell__status-label { color: var(--attendance-week-off-text); }
 .attendance-cell--leave .attendance-cell__status-label    { color: var(--attendance-leave-text); }
-.attendance-cell--absent .attendance-cell__status-label   { color: var(--attendance-absent-text); }
+.attendance-cell--absent .attendance-cell__status-label,
+.attendance-cell--no-show .attendance-cell__status-label,
+.attendance-cell--no-call-no-show .attendance-cell__status-label   { color: var(--attendance-absent-text); }
 
 .attendance-cell__shift-type {
   display: block;

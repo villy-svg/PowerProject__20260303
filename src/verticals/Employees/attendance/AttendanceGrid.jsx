@@ -29,6 +29,9 @@ const STATUS_META = {
   'week-off': { label: 'WO',  className: 'attendance-cell--week-off' },
   'leave':    { label: 'L',   className: 'attendance-cell--leave'    },
   'absent':   { label: 'A',   className: 'attendance-cell--absent'   },
+  'no-show':  { label: 'NS',  className: 'attendance-cell--no-show'  },
+  'no-call-no-show': { label: 'NCNS', className: 'attendance-cell--no-call-no-show' },
+  'null':     { label: 'NULL', className: 'attendance-cell--null' },
 };
 
 // ---------------------------------------------------------------------------
@@ -43,18 +46,26 @@ function formatDateHeader(dateStr) {
 // AttendanceCell — individual grid cell (sub-component)
 // ---------------------------------------------------------------------------
 const AttendanceCell = ({ record, onClick }) => {
-  const status = record?.attendance_status || 'absent';
-  const meta = STATUS_META[status] || STATUS_META['absent'];
+  const status = record?.attendance_status || 'null';
+  const meta = STATUS_META[status] || STATUS_META['null'];
   const hasPendingEdit = !!record?.has_pending_edit;
   const shiftType = record?.shift_type;
 
-  let icon = <IconX size={16} />;
+  let icon = null;
   if (status === 'present') {
     icon = shiftType === 'night' ? <IconMoon size={16} /> : <IconSun size={16} />;
   } else if (status === 'week-off') {
     icon = <IconCoffee size={16} />;
   } else if (status === 'leave') {
     icon = <IconFile size={16} />;
+  } else if (status === 'absent') {
+    icon = <span style={{ fontWeight: 800 }}>ABS</span>;
+  } else if (status === 'no-show') {
+    icon = <span style={{ fontWeight: 800 }}>NS</span>;
+  } else if (status === 'no-call-no-show') {
+    icon = <span style={{ fontWeight: 900, fontSize: '1.1em' }}>X</span>;
+  } else {
+    icon = <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span>;
   }
 
   return (

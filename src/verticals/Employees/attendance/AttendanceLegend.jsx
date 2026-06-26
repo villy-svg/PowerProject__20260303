@@ -18,7 +18,16 @@ const AttendanceLegend = () => {
         <IconFile size={14} /> Leave
       </span>
       <span className="attendance-legend__item attendance-legend__item--absent">
-        <IconX size={14} /> Absent
+        <span style={{ fontWeight: 800 }}>ABS</span> Absent
+      </span>
+      <span className="attendance-legend__item attendance-legend__item--no-show">
+        <span style={{ fontWeight: 800 }}>NS</span> No Show
+      </span>
+      <span className="attendance-legend__item attendance-legend__item--no-call-no-show">
+        <span style={{ fontWeight: 900, fontSize: '1.1em' }}>X</span> No Call No Show
+      </span>
+      <span className="attendance-legend__item attendance-legend__item--null">
+        <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> Default
       </span>
       <span className="attendance-legend__item attendance-legend__item--pending">
         <span className="attendance-legend__icon-pending">⚠</span> Pending Edit

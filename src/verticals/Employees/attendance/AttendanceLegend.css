@@ -35,7 +35,9 @@
   background: transparent;
   color: var(--status-info, #3b82f6);
 }
-.attendance-legend__item--absent { 
+.attendance-legend__item--absent,
+.attendance-legend__item--no-show,
+.attendance-legend__item--no-call-no-show { 
   background: transparent;
   color: var(--status-danger, #ef4444);
 }

@@ -76,7 +76,7 @@ function getDefaultWeekRange() {
   };
 }
 
-export function useAttendanceBoard(user) {
+export function useAttendanceBoard(user, defaultStatus = null) {
   const { startDate: defaultStart, endDate: defaultEnd } = getDefaultWeekRange();
 
   // Date range state
@@ -163,10 +163,10 @@ export function useAttendanceBoard(user) {
     return cellMap[key] || {
       employee_id:       employeeId,
       shift_date:        date,
-      attendance_status: 'absent',
+      attendance_status: defaultStatus,
       has_pending_edit:  false,
     };
-  }, [attendanceRecords]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [attendanceRecords, defaultStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     // Data
