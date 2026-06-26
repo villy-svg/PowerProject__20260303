@@ -40,12 +40,12 @@
 -- -------------------------------------------------------------------------
 -- STEP 1: Clean up old weekoff tables and new schedule tables for idempotency
 -- -------------------------------------------------------------------------
-DROP TABLE IF EXISTS public.employee_weekoff_plan_entries;
-DROP TABLE IF EXISTS public.employee_weekoff_plans;
-DROP TYPE IF EXISTS public.weekoff_plan_status_enum;
+DROP TABLE IF EXISTS public.employee_weekoff_plan_entries CASCADE;
+DROP TABLE IF EXISTS public.employee_weekoff_plans CASCADE;
+DROP TYPE IF EXISTS public.weekoff_plan_status_enum CASCADE;
 
-DROP TABLE IF EXISTS public.employee_schedule_plan_entries;
-DROP TABLE IF EXISTS public.employee_schedule_plans;
+DROP TABLE IF EXISTS public.employee_schedule_plan_entries CASCADE;
+DROP TABLE IF EXISTS public.employee_schedule_plans CASCADE;
 DROP TYPE IF EXISTS public.schedule_plan_status_enum;
 
 -- -------------------------------------------------------------------------
