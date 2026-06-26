@@ -116,12 +116,13 @@ const EmployeeAttendanceBoard = ({
   const [plannerError, setPlannerError] = useState(null);
   const [plannerSuccess, setPlannerSuccess] = useState(null);
 
-  const [paintbrushStatus, setPaintbrushStatus] = useState('present');
+  const [paintbrushStatus, setPaintbrushStatus] = useState('null');
   const [paintbrushHubId, setPaintbrushHubId] = useState('');
   const [hubs, setHubs] = useState([]);
+  const [activeCellEdit, setActiveCellEdit] = useState(null);
 
   useEffect(() => {
-    supabase.from('hubs').select('id, name').order('name').then(({ data }) => {
+    supabase.from('hubs').select('id, name, hub_code').order('name').then(({ data }) => {
       if (data) setHubs(data);
     });
   }, []);
@@ -158,6 +159,12 @@ const EmployeeAttendanceBoard = ({
   // Grid Cell Click
   const handleCellClick = useCallback((empId, date) => {
     if (viewMode === 'planner') {
+      if (paintbrushStatus === 'null') {
+        setActiveCellEdit(prev => (prev?.empId === empId && prev?.date === date) ? null : { empId, date });
+        return;
+      }
+      
+      setActiveCellEdit(null);
       setPlannerError(null);
       setPlannerSuccess(null);
       setEmployeeSelections(prev => {
@@ -188,7 +195,29 @@ const EmployeeAttendanceBoard = ({
     } else if (canSuggestEdit) {
       setIsApprovalDrawerOpen(false);
     }
-  }, [viewMode, getCellData, canApprove, canSuggestEdit]);
+  }, [viewMode, getCellData, canApprove, canSuggestEdit, paintbrushStatus, paintbrushHubId]);
+
+  const handleCellChange = useCallback((empId, date, newStatus, newHubId) => {
+    setEmployeeSelections(prev => {
+      const current = prev[empId] || [];
+      const existingIdx = current.findIndex(d => d.date === date);
+      
+      if (newStatus === 'null') {
+        if (existingIdx >= 0) {
+          return { ...prev, [empId]: current.filter((_, idx) => idx !== existingIdx) };
+        }
+        return prev;
+      }
+
+      const newArray = [...current];
+      if (existingIdx >= 0) {
+        newArray[existingIdx] = { date, attendance_status: newStatus, hub_id: newHubId };
+      } else {
+        newArray.push({ date, attendance_status: newStatus, hub_id: newHubId });
+      }
+      return { ...prev, [empId]: newArray };
+    });
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setSelectedCell(null);
@@ -386,22 +415,57 @@ const EmployeeAttendanceBoard = ({
           </button>
         </div>
       ) : (
-        // Planner Week Picker
-        <div className="attendance-board__date-range">
-          <label className="attendance-board__date-label">Target Week</label>
-          <DatePicker
-            selected={plannerDateFrom ? new Date(plannerDateFrom + 'T00:00:00') : null}
-            onChange={(date) => {
-              if (date) setWeekString(getWeekStringFromDate(date));
-            }}
-            showWeekPicker
-            showWeekNumbers
-            calendarStartDay={1}
-            dateFormat="I-R"
-            className="attendance-board__week-input"
-            wrapperClassName="attendance-board__date-wrapper"
-            portalId="root"
-          />
+        // Planner Week Picker & Paintbrush
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div className="attendance-board__date-range">
+            <label className="attendance-board__date-label">Target Week</label>
+            <DatePicker
+              selected={plannerDateFrom ? new Date(plannerDateFrom + 'T00:00:00') : null}
+              onChange={(date) => {
+                if (date) setWeekString(getWeekStringFromDate(date));
+              }}
+              showWeekPicker
+              showWeekNumbers
+              calendarStartDay={1}
+              dateFormat="I-R"
+              className="attendance-board__week-input"
+              wrapperClassName="attendance-board__date-wrapper"
+              portalId="root"
+            />
+          </div>
+          {canSuggestEdit && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Paintbrush:</label>
+              <CustomSelect
+                value={paintbrushStatus}
+                onChange={setPaintbrushStatus}
+                className="master-dropdown"
+                style={{ width: '150px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+                options={[
+                  { value: 'null', label: 'NULL (Not Marked)' },
+                  { value: 'present', label: 'Present (Day)' },
+                  { value: 'present-night', label: 'Present (Night)' },
+                  { value: 'week-off', label: 'Week-Off' },
+                  { value: 'leave', label: 'Leave' },
+                  { value: 'absent', label: 'Absent' },
+                  { value: 'no-show', label: 'No Show' },
+                  { value: 'no-call-no-show', label: 'No Call No Show' }
+                ]}
+              />
+              {(paintbrushStatus === 'present' || paintbrushStatus === 'present-night') && (
+                <CustomSelect
+                  value={paintbrushHubId}
+                  onChange={setPaintbrushHubId}
+                  className="master-dropdown"
+                  style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+                  options={[
+                    { value: '', label: 'No Hub' },
+                    ...hubs.map(h => ({ value: h.id, label: h.hub_code || h.name }))
+                  ]}
+                />
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -542,35 +606,7 @@ const EmployeeAttendanceBoard = ({
         )}
       </div>
 
-      {viewMode === 'planner' && canSuggestEdit && (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Paintbrush:</label>
-          <CustomSelect
-            value={paintbrushStatus}
-            onChange={setPaintbrushStatus}
-            className="master-dropdown"
-            style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
-            options={[
-              { value: 'present', label: 'Present' },
-              { value: 'week-off', label: 'Week-Off' },
-              { value: 'leave', label: 'Leave' },
-              { value: 'wfh', label: 'WFH' },
-              { value: 'half-day', label: 'Half Day' },
-              { value: 'absent', label: 'Clear' }
-            ]}
-          />
-          <CustomSelect
-            value={paintbrushHubId}
-            onChange={setPaintbrushHubId}
-            className="master-dropdown"
-            style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
-            options={[
-              { value: '', label: 'No Hub' },
-              ...hubs.map(h => ({ value: h.id, label: h.name }))
-            ]}
-          />
-        </div>
-      )}
+      </div>
 
       <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
         <AttendanceLegend />
@@ -664,6 +700,9 @@ const EmployeeAttendanceBoard = ({
           getCellData={getCellData}
           isLoading={viewMode === 'attendance' ? isBoardLoading : false}
           onCellClick={handleCellClick}
+          activeCellEdit={activeCellEdit}
+          onCellChange={handleCellChange}
+          hubs={hubs}
         />
       )}
 

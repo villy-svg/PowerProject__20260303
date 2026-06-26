@@ -46,7 +46,7 @@ function formatDateHeader(dateStr) {
 // ---------------------------------------------------------------------------
 // AttendanceCell — individual grid cell (sub-component)
 // ---------------------------------------------------------------------------
-const AttendanceCell = ({ record, onClick }) => {
+const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employeeId, date }) => {
   const status = record?.attendance_status || 'null';
   const meta = STATUS_META[status] || STATUS_META['null'];
   const hasPendingEdit = !!record?.has_pending_edit;
@@ -67,6 +67,45 @@ const AttendanceCell = ({ record, onClick }) => {
     icon = <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span>;
   } else {
     icon = <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span>;
+  }
+
+  if (isEditing) {
+    return (
+      <td className={`attendance-cell ${meta.className} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''}`}>
+        <div 
+          style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '4px', minWidth: '90px' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <select 
+            className="master-dropdown" 
+            style={{ width: '100%', fontSize: '10px', padding: '4px', height: 'auto' }}
+            value={status} 
+            onChange={e => onCellChange(employeeId, date, e.target.value, record?.hub_id || '')}
+            autoFocus
+          >
+            <option value="null">NULL (Not Marked)</option>
+            <option value="present">Present (Day)</option>
+            <option value="present-night">Present (Night)</option>
+            <option value="week-off">Week-Off</option>
+            <option value="leave">Leave</option>
+            <option value="absent">Absent</option>
+            <option value="no-show">No Show</option>
+            <option value="no-call-no-show">No Call No Show</option>
+          </select>
+          {(status === 'present' || status === 'present-night') && (
+            <select
+              className="master-dropdown"
+              style={{ width: '100%', fontSize: '10px', padding: '4px', height: 'auto' }}
+              value={record?.hub_id || ''}
+              onChange={e => onCellChange(employeeId, date, status, e.target.value)}
+            >
+              <option value="">No Hub</option>
+              {hubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code || h.name}</option>)}
+            </select>
+          )}
+        </div>
+      </td>
+    );
   }
 
   return (
@@ -125,7 +164,7 @@ const SkeletonRow = ({ colCount }) => (
 // ---------------------------------------------------------------------------
 // AttendanceGrid — main export
 // ---------------------------------------------------------------------------
-const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick }) => {
+const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, activeCellEdit, onCellChange, hubs }) => {
   if (!isLoading && (!dateRange || dateRange.length === 0)) {
     return (
       <div className="attendance-grid__empty-state">
@@ -178,6 +217,11 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
                       key={`${employee.id}_${date}`}
                       record={getCellData(employee.id, date)}
                       onClick={() => onCellClick(employee.id, date)}
+                      isEditing={activeCellEdit?.empId === employee.id && activeCellEdit?.date === date}
+                      onCellChange={onCellChange}
+                      hubs={hubs}
+                      employeeId={employee.id}
+                      date={date}
                     />
                   ))}
                 </tr>
