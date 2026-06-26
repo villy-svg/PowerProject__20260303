@@ -52,6 +52,13 @@
   font-size: 0.875rem;
 }
 
+/* Container for header left actions (toggles + date range) */
+.attendance-board__left-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* 16px */
+}
+
 /* Date range controls in the header leftActions */
 .attendance-board__date-range {
   display: flex;
@@ -117,6 +124,23 @@
   font-weight: 800;
   margin-left: 0.4rem;
   padding: 0 4px;
+}
+
+/* ⓘ Info icon in the board description — tooltip target */
+.attendance-board__info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.4rem;
+  font-size: 0.75rem;
+  opacity: 0.45;
+  cursor: help;
+  vertical-align: middle;
+  transition: opacity 0.2s ease;
+}
+
+.attendance-board__info-icon:hover {
+  opacity: 0.9;
 }
 
 
@@ -512,6 +536,31 @@
   opacity: 0.4;
   font-size: 0.6rem;
   text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   SECTION 5.5: Togglable Legend Wrapper (Desktop)
+   -------------------------------------------------------------------------- */
+.attendance-board__legend-wrapper {
+  margin: 0 1.5rem 1rem;
+  padding: 0.25rem 1rem;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  backdrop-filter: blur(20px);
+  animation: slideDown 0.2s ease-out;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 10px rgba(0, 255, 135, 0.02);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --------------------------------------------------------------------------

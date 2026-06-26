@@ -61,9 +61,9 @@ const AttendanceCell = ({ record, onClick }) => {
   } else if (status === 'absent') {
     icon = <span style={{ fontWeight: 800 }}>ABS</span>;
   } else if (status === 'no-show') {
-    icon = <span style={{ fontWeight: 800 }}>NS</span>;
+    icon = <span style={{ fontWeight: 800 }}>X</span>;
   } else if (status === 'no-call-no-show') {
-    icon = <span style={{ fontWeight: 900, fontSize: '1.1em' }}>X</span>;
+    icon = <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span>;
   } else {
     icon = <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span>;
   }

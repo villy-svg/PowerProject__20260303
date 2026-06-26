@@ -120,43 +120,34 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
         </div>
       )}
 
-      <div className="attendance-summary-cards">
-        <div className="attendance-summary-card">
-          <span className="attendance-summary-card__value">{dateRange.length}</span>
-          <span className="attendance-summary-card__label">Total Days</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--present">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><IconSun size={18} /> {counts.presentDay}</span>
-          <span className="attendance-summary-card__label">Present (Day)</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--present">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><IconMoon size={18} /> {counts.presentNight}</span>
-          <span className="attendance-summary-card__label">Present (Night)</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--weekoff">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><IconCoffee size={18} /> {counts.weekOff}</span>
-          <span className="attendance-summary-card__label">Week-Off</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--leave">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><IconFile size={18} /> {counts.leave}</span>
-          <span className="attendance-summary-card__label">Leave</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--absent">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800 }}>ABS</span> {counts.absent}</span>
-          <span className="attendance-summary-card__label">Absent</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--no-show">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800 }}>NS</span> {counts.noShow}</span>
-          <span className="attendance-summary-card__label">No Show</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--no-call-no-show">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 900 }}>X</span> {counts.noCallNoShow}</span>
-          <span className="attendance-summary-card__label">No Call No Show</span>
-        </div>
-        <div className="attendance-summary-card attendance-summary-card--null">
-          <span className="attendance-summary-card__value" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> {counts.nullCount}</span>
-          <span className="attendance-summary-card__label">Default</span>
-        </div>
+      <div className="attendance-summary-pills">
+        <span className="attendance-summary-pill">
+          <span style={{ opacity: 0.7 }}>Total</span> {dateRange.length}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--present">
+          <IconSun size={14} /> {counts.presentDay}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--present">
+          <IconMoon size={14} /> {counts.presentNight}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--weekoff">
+          <IconCoffee size={14} /> {counts.weekOff}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--leave">
+          <IconFile size={14} /> {counts.leave}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--absent">
+          <span style={{ fontWeight: 800 }}>ABS</span> {counts.absent}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--no-show">
+          <span style={{ fontWeight: 800 }}>X</span> {counts.noShow}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--no-call-no-show">
+          <span style={{ fontWeight: 900 }}>XX</span> {counts.noCallNoShow}
+        </span>
+        <span className="attendance-summary-pill attendance-summary-pill--null">
+          <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> {counts.nullCount}
+        </span>
       </div>
 
       <div className="attendance-mobile-list__items">
@@ -184,8 +175,8 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
                   {status === 'week-off' ? <IconCoffee size={16} /> : null}
                   {status === 'leave' ? <IconFile size={16} /> : null}
                   {status === 'absent' ? <span style={{ fontWeight: 800 }}>ABS</span> : null}
-                  {status === 'no-show' ? <span style={{ fontWeight: 800 }}>NS</span> : null}
-                  {status === 'no-call-no-show' ? <span style={{ fontWeight: 900, fontSize: '1.1em' }}>X</span> : null}
+                  {status === 'no-show' ? <span style={{ fontWeight: 800 }}>X</span> : null}
+                  {status === 'no-call-no-show' ? <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span> : null}
                   {status === 'null' ? <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> : null}
                 </span>
                 {hasPendingEdit && (

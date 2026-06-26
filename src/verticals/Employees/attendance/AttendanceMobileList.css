@@ -22,45 +22,42 @@
   opacity: 0.7;
 }
 
-.attendance-summary-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.attendance-summary-pills {
+  display: flex;
+  overflow-x: auto;
   gap: 0.5rem;
+  padding-bottom: 0.5rem;
   margin-bottom: 0.5rem;
+  /* Hide scrollbar for a sleek look */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.attendance-summary-card {
+.attendance-summary-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.attendance-summary-pill {
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: var(--radius-button, 12px);
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
   background: var(--halo-bg);
   border: 1px solid var(--border-color);
-  text-align: center;
-}
-
-.attendance-summary-card__value {
-  font-size: clamp(1rem, 5vw, 1.25rem);
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.attendance-summary-card__label {
-  font-size: clamp(0.5rem, 2.5vw, 0.65rem);
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  opacity: 0.7;
+  line-height: 1;
 }
 
-.attendance-summary-card--present { color: var(--attendance-present-text); }
-.attendance-summary-card--absent,
-.attendance-summary-card--no-show,
-.attendance-summary-card--no-call-no-show { color: var(--attendance-absent-text); }
-.attendance-summary-card--weekoff { color: var(--attendance-week-off-text); }
-.attendance-summary-card--leave { color: var(--attendance-leave-text); }
-.attendance-summary-card--null { color: var(--text-color); opacity: 0.7; }
+.attendance-summary-pill--present { color: var(--attendance-present-text); border-color: var(--attendance-present-text); }
+.attendance-summary-pill--absent,
+.attendance-summary-pill--no-show,
+.attendance-summary-pill--no-call-no-show { color: var(--attendance-absent-text); border-color: var(--attendance-absent-text); }
+.attendance-summary-pill--weekoff { color: var(--attendance-week-off-text); border-color: var(--attendance-week-off-text); }
+.attendance-summary-pill--leave { color: var(--attendance-leave-text); border-color: var(--attendance-leave-text); }
+.attendance-summary-pill--null { color: var(--text-color); opacity: 0.7; }
 
 .attendance-mobile-list__items {
   display: flex;
