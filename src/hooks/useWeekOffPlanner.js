@@ -76,7 +76,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
   // ---------------------------------------------------------------------------
   // saveDraft — saves (or updates) a plan without submitting it
   // ---------------------------------------------------------------------------
-  const saveDraft = useCallback(async ({ planId, dateFrom, dateTo, employeeIds }) => {
+  const saveDraft = useCallback(async ({ planId, dateFrom, dateTo, employeeSelections }) => {
     if (!user?.id) return { error: new Error('User not authenticated') };
     setIsLoading(true);
     setError(null);
@@ -86,7 +86,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
         planId,
         dateFrom,
         dateTo,
-        employeeIds,
+        employeeSelections,
         submittedBy: user.id,
       });
       if (err) throw err;

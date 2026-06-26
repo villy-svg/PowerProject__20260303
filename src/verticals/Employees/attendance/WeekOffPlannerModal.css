@@ -16,27 +16,15 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Children handle their own scroll */
+  overflow: hidden;
+}
+
+.wop-modal--wide {
+  width: clamp(340px, 95vw, 800px); /* Slightly wider to accommodate dates */
 }
 
 /* --------------------------------------------------------------------------
-   SECTION 2: Info Banner
-   -------------------------------------------------------------------------- */
-.wop-modal__info-banner {
-  padding: 0.75rem 1rem;
-  background: var(--halo-bg);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
-  border-radius: var(--radius-button, 12px);
-  font-size: 0.8rem;
-  opacity: 0.85;
-  margin: 0 1.5rem 0.75rem;
-  line-height: 1.5;
-}
-
-.wop-modal__info-banner p { margin: 0; }
-
-/* --------------------------------------------------------------------------
-   SECTION 3: Tab Toggle
+   SECTION 2: Tab Toggle
    -------------------------------------------------------------------------- */
 .wop-modal__tabs {
   display: flex;
@@ -73,7 +61,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   SECTION 4: Form Panel
+   SECTION 3: Form Panel
    -------------------------------------------------------------------------- */
 .wop-modal__form {
   flex: 1;
@@ -84,7 +72,6 @@
   gap: 1rem;
 }
 
-/* Edit indicator bar */
 .wop-modal__edit-indicator {
   display: flex;
   align-items: center;
@@ -104,95 +91,77 @@
   padding: 0.25rem 0.6rem;
 }
 
-/* Date row */
-.wop-modal__date-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.wop-modal__date-group {
-  flex: 1;
+/* Week Selector */
+.wop-modal__week-group {
   margin: 0;
 }
 
-.wop-modal__date-arrow {
-  font-size: 1.1rem;
-  opacity: 0.4;
-  padding-bottom: 0.6rem;
-  flex-shrink: 0;
+.wop-modal__week-input {
+  max-width: 200px;
 }
 
-.wop-modal__date-warning {
-  font-size: 0.8rem;
-  color: var(--status-danger);
-  margin: -0.5rem 0 0;
+.wop-modal__week-hint {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  margin: 0.4rem 0 0;
 }
 
 /* --------------------------------------------------------------------------
-   SECTION 5: Employee List
+   SECTION 4: Employee Grid List
    -------------------------------------------------------------------------- */
-.wop-modal__emp-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.wop-modal__emp-bulk-btns {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.wop-modal__bulk-btn {
-  font-size: 0.7rem;
-  padding: 0.25rem 0.6rem;
-  opacity: 0.7;
-}
-
-.wop-modal__emp-list {
-  max-height: 220px;
-  overflow-y: auto;
+.wop-modal__emp-grid-container {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-button, 12px);
   display: flex;
   flex-direction: column;
-  gap: 0;
+  overflow: hidden;
 }
 
-.wop-modal__emp-item {
+.wop-modal__emp-grid-header {
+  display: flex;
+  background: var(--halo-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+}
+
+.wop-modal__emp-grid-body {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.wop-modal__emp-grid-row {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 0.75rem;
-  cursor: pointer;
+  padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border-color);
   transition: background 0.15s ease;
-  font-size: 0.875rem;
 }
 
-.wop-modal__emp-item:last-child {
+.wop-modal__emp-grid-row:last-child {
   border-bottom: none;
 }
 
-.wop-modal__emp-item:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 92%);
+.wop-modal__emp-grid-row:hover {
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
 }
 
-.wop-modal__emp-item--selected {
-  background: color-mix(in srgb, var(--brand-green), transparent 90%);
-}
-
-.wop-modal__emp-checkbox {
-  width: 14px;
-  height: 14px;
-  accent-color: var(--brand-green);
-  flex-shrink: 0;
-  cursor: pointer;
+.wop-modal__grid-col-name {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 150px;
 }
 
 .wop-modal__emp-name {
-  flex: 1;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -201,8 +170,38 @@
   opacity: 0.7;
 }
 
+.wop-modal__grid-col-date {
+  width: 180px;
+  padding-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.wop-modal__date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wop-modal__date-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Show the short day name inside the input wrapper on the right */
+.wop-modal__day-label {
+  position: absolute;
+  right: 2.2rem; /* Avoid calendar icon */
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--brand-green);
+  background: var(--bg-color);
+  padding: 0 0.25rem;
+  pointer-events: none; /* Let clicks pass through to input */
+}
+
 /* --------------------------------------------------------------------------
-   SECTION 6: Plan Summary
+   SECTION 5: Plan Summary
    -------------------------------------------------------------------------- */
 .wop-modal__summary {
   display: flex;
@@ -229,7 +228,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   SECTION 7: Feedback — Error & Success
+   SECTION 6: Feedback — Error & Success
    -------------------------------------------------------------------------- */
 .wop-modal__error {
   padding: 0.75rem;
@@ -254,13 +253,13 @@
 .wop-modal__success p { margin: 0; }
 
 /* --------------------------------------------------------------------------
-   SECTION 8: Footer Button Colors
+   SECTION 7: Footer Button Colors
    -------------------------------------------------------------------------- */
 .wop-modal__draft-btn  { color: var(--status-warning); }
 .wop-modal__submit-btn { color: var(--brand-green);    }
 
 /* --------------------------------------------------------------------------
-   SECTION 9: My Plans Panel
+   SECTION 8: My Plans Panel & History Cards
    -------------------------------------------------------------------------- */
 .wop-modal__my-plans {
   flex: 1;
@@ -281,9 +280,6 @@
   font-size: 0.875rem;
 }
 
-/* --------------------------------------------------------------------------
-   SECTION 10: Plan History Card
-   -------------------------------------------------------------------------- */
 .wop-history-card {
   background: color-mix(in srgb, var(--text-color), transparent 97%);
   border: 1px solid var(--border-color);
@@ -341,9 +337,6 @@
   color: var(--brand-green);
 }
 
-/* --------------------------------------------------------------------------
-   SECTION 11: Status Badges
-   -------------------------------------------------------------------------- */
 .wop-badge {
   display: inline-flex;
   align-items: center;
@@ -363,32 +356,26 @@
 .wop-badge--cancelled { background: color-mix(in srgb, var(--text-color), transparent 90%); color: var(--text-color); opacity: 0.4; }
 
 /* --------------------------------------------------------------------------
-   SECTION 12: Mobile Adaptations
+   SECTION 9: Mobile Adaptations
    -------------------------------------------------------------------------- */
-@media screen and (max-width: 600px) {
-  .wop-modal {
-    width: 96vw;
-    max-height: 92vh;
-  }
-
-  .wop-modal__info-banner {
-    margin: 0 1rem 0.75rem;
-  }
-
-  .wop-modal__form {
-    padding: 1rem;
-  }
-
-  .wop-modal__my-plans {
-    padding: 1rem;
-  }
-
-  .wop-modal__date-row {
+@media screen and (max-width: 768px) {
+  .wop-modal__emp-grid-row {
     flex-direction: column;
-    gap: 0;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
   }
 
-  .wop-modal__date-arrow {
-    display: none;
+  .wop-modal__grid-col-name {
+    width: 100%;
+  }
+
+  .wop-modal__grid-col-date {
+    width: 100%;
+    padding-left: 0;
+  }
+  
+  .wop-modal__emp-grid-header {
+    display: none; /* Hide header on mobile, stack inputs instead */
   }
 }

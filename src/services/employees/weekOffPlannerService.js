@@ -33,11 +33,11 @@ import { supabase } from '../core/supabaseClient';
 //   @param {string|null} params.planId      - Existing plan UUID (null for new)
 //   @param {string}      params.dateFrom    - 'YYYY-MM-DD' (start of week-off window)
 //   @param {string}      params.dateTo      - 'YYYY-MM-DD' (end of week-off window, max +14 days)
-//   @param {string[]}    params.employeeIds - Array of employee UUIDs to cover
+//   @param {Array}       params.employeeSelections - Array of { employeeId, dates: [] }
 //   @param {string}      params.submittedBy - user_profiles UUID (auth.uid())
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
-export async function saveDraft({ planId, dateFrom, dateTo, employeeIds, submittedBy }) {
+export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, submittedBy }) {
   // --- Validate the 15-day window client-side before hitting the DB ---
   const from  = new Date(dateFrom);
   const to    = new Date(dateTo);
@@ -50,15 +50,18 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeIds, submitt
   }
 
   // --- Build the list of (employeeId, shiftDate) entry tuples ---
-  // Expand every employee × every date in the range
+  // Iterate over specific dates selected per employee
   const entries = [];
-  const cur = new Date(dateFrom);
-  while (cur <= to) {
-    const dateStr = cur.toISOString().split('T')[0];
-    for (const empId of employeeIds) {
-      entries.push({ employee_id: empId, shift_date: dateStr });
+  for (const selection of employeeSelections) {
+    if (!selection.dates || selection.dates.length === 0) continue;
+    
+    for (const d of selection.dates) {
+      if (!d) continue; // Skip empty dates
+      // Safety check: ensure date is within the plan's overall window
+      if (d >= dateFrom && d <= dateTo) {
+        entries.push({ employee_id: selection.employeeId, shift_date: d });
+      }
     }
-    cur.setDate(cur.getDate() + 1);
   }
 
   // --- CASE 1: New plan — INSERT plan header then INSERT entries ---

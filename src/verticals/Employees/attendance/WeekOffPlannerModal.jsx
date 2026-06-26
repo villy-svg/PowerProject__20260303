@@ -2,15 +2,14 @@
  * WeekOffPlannerModal.jsx
  *
  * The main UI for Contributors and Editors to bulk-schedule week-offs.
+ * Redesigned for per-employee week-based selection.
  *
  * Features:
- *   - Date range picker (max 15 days from today)
- *   - Org-wide employee multi-select (Select All / Deselect All)
- *   - Plan summary card (N employees × M days)
+ *   - Week selector (e.g., 2026-W34)
+ *   - Org-wide employee list with 2 date pickers per employee
+ *   - Date pickers show the day of the week and are restricted to the selected week
  *   - "Save Draft" and "Submit for Approval" footer buttons
- *   - "My Plans" section — lists the user's own plans with status badges.
- *     Rejected plans show an "Edit & Resubmit" button that loads
- *     the plan's data back into the form.
+ *   - "My Plans" section
  *
  * Props:
  *   user          {object}   - Current user object
@@ -23,16 +22,13 @@
  *   ui-design-system §2      (halo-button for all actions)
  *   ui-design-system §1      (CSS variables only — no hardcoded hex)
  *   safe-code-modification §2B (BEM naming, no inline styles)
- *   rbac-security-system §2  (canSuggestEdit guard in parent; this component
- *                              only renders when guard passes)
- *   development-best-practices §3 (try/catch + submitError display)
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import './WeekOffPlannerModal.css';
 
 // ---------------------------------------------------------------------------
-// Helper — format a 'YYYY-MM-DD' string to a readable locale string
+// Helpers
 // ---------------------------------------------------------------------------
 function formatDate(dateStr) {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
@@ -40,20 +36,54 @@ function formatDate(dateStr) {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Helper — get today's date as YYYY-MM-DD in IST
-// ---------------------------------------------------------------------------
-function todayIST() {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+// Format "2026-06-26" -> "Mon, 26 Jun"
+function formatDateWithDay(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
+    weekday: 'short', day: 'numeric', month: 'short'
+  });
 }
 
-// ---------------------------------------------------------------------------
-// Helper — get max allowed end date (today + 14 days) as YYYY-MM-DD
-// ---------------------------------------------------------------------------
-function maxEndDateIST() {
-  const d = new Date();
-  d.setDate(d.getDate() + 14);
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(d);
+// Get the Monday of the current week (ISO 8601 week starts on Monday)
+function getCurrentWeekString() {
+  const now = new Date();
+  const day = now.getDay() || 7; // Sunday is 0 -> 7
+  now.setDate(now.getDate() - day + 1); // Monday
+  const year = now.getFullYear();
+  
+  // Calculate ISO week number
+  const target = new Date(now.valueOf());
+  const dayNr = (now.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+  }
+  const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
+  return `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+}
+
+// Convert "YYYY-Www" to { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' } (Monday to Sunday)
+function getDatesFromWeekString(weekStr) {
+  if (!weekStr) return { from: '', to: '' };
+  const [year, week] = weekStr.split('-W');
+  
+  // Create a date for Jan 1 of the year
+  const date = new Date(year, 0, 1);
+  const days = (week - 1) * 7;
+  
+  // ISO weeks start on Monday, so adjust if Jan 1 is not a Monday
+  const dayOffset = date.getDay() <= 4 && date.getDay() !== 0 ? date.getDay() - 1 : date.getDay() + 6;
+  date.setDate(date.getDate() - dayOffset + days);
+  
+  const fromStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(date);
+  
+  const toDate = new Date(date);
+  toDate.setDate(toDate.getDate() + 6);
+  const toStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(toDate);
+  
+  return { from: fromStr, to: toStr };
 }
 
 // ---------------------------------------------------------------------------
@@ -67,21 +97,15 @@ const STATUS_CONFIG = {
   cancelled: { label: 'Cancelled', className: 'wop-badge--cancelled' },
 };
 
-// ---------------------------------------------------------------------------
-// PlanStatusBadge — inline status indicator
-// ---------------------------------------------------------------------------
 const PlanStatusBadge = ({ status }) => {
   const cfg = STATUS_CONFIG[status] || { label: status, className: '' };
-  return (
-    <span className={`wop-badge ${cfg.className}`}>{cfg.label}</span>
-  );
+  return <span className={`wop-badge ${cfg.className}`}>{cfg.label}</span>;
 };
 
 // ---------------------------------------------------------------------------
-// PlanHistoryCard — renders one of the user's past plans
+// PlanHistoryCard
 // ---------------------------------------------------------------------------
 const PlanHistoryCard = ({ plan, onEditResubmit }) => {
-  // Compute unique employee count for this plan
   const uniqueEmployeeIds = new Set(
     (plan.employee_weekoff_plan_entries || []).map(e => e.employee_id)
   );
@@ -101,7 +125,6 @@ const PlanHistoryCard = ({ plan, onEditResubmit }) => {
         </span>
       </div>
 
-      {/* Rejection note (if applicable) */}
       {plan.review_note && plan.plan_status === 'rejected' && (
         <div className="wop-history-card__rejection-note">
           <span className="wop-history-card__rejection-label">Editor Note:</span>
@@ -109,7 +132,6 @@ const PlanHistoryCard = ({ plan, onEditResubmit }) => {
         </div>
       )}
 
-      {/* Edit & Resubmit (rejected or draft plans) */}
       {(plan.plan_status === 'rejected' || plan.plan_status === 'draft') && (
         <button
           className="halo-button wop-history-card__edit-btn"
@@ -133,75 +155,87 @@ const WeekOffPlannerModal = ({
   onClose,
   onPlanSaved,
 }) => {
-  const today      = todayIST();
-  const maxEndDate = maxEndDateIST();
-
   // --- Form state ---
-  const [activePlanId,      setActivePlanId]      = useState(null);   // null = new plan
-  const [dateFrom,          setDateFrom]           = useState(today);
-  const [dateTo,            setDateTo]             = useState(today);
-  const [selectedEmployees, setSelectedEmployees]  = useState(
-    () => new Set(employees.map(e => e.id))  // Default: all selected
-  );
-  const [isSubmitting,      setIsSubmitting]       = useState(false);
-  const [submitError,       setSubmitError]        = useState(null);
-  const [submitSuccess,     setSubmitSuccess]      = useState(null);
-  const [showMyPlans,       setShowMyPlans]        = useState(false);
+  const [activePlanId,  setActivePlanId]  = useState(null);
+  const [weekString,    setWeekString]    = useState(getCurrentWeekString());
+  
+  // Map of employeeId -> [date1, date2]
+  const [employeeSelections, setEmployeeSelections] = useState({});
+  
+  const [isSubmitting,  setIsSubmitting]  = useState(false);
+  const [submitError,   setSubmitError]   = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(null);
+  const [showMyPlans,   setShowMyPlans]   = useState(false);
 
-  // --- Derived: plan summary ---
-  const dayCount = useMemo(() => {
-    const from = new Date(dateFrom);
-    const to   = new Date(dateTo);
-    if (to < from) return 0;
-    return Math.round((to - from) / (1000 * 60 * 60 * 24)) + 1;
-  }, [dateFrom, dateTo]);
+  const { from: dateFrom, to: dateTo } = useMemo(() => getDatesFromWeekString(weekString), [weekString]);
 
-  const entryCount = selectedEmployees.size * dayCount;
-
-  // --- Toggle a single employee ---
-  const toggleEmployee = useCallback((empId) => {
-    setSelectedEmployees(prev => {
-      const next = new Set(prev);
-      if (next.has(empId)) {
-        next.delete(empId);
-      } else {
-        next.add(empId);
-      }
-      return next;
+  // Total entries calculation
+  const totalEntries = useMemo(() => {
+    let count = 0;
+    Object.values(employeeSelections).forEach(dates => {
+      if (dates[0]) count++;
+      if (dates[1]) count++;
     });
-  }, []);
+    return count;
+  }, [employeeSelections]);
 
-  // --- Select / Deselect all ---
-  const handleSelectAll = useCallback(() => {
-    setSelectedEmployees(new Set(employees.map(e => e.id)));
-  }, [employees]);
+  const activeEmployeesCount = useMemo(() => {
+    return Object.values(employeeSelections).filter(dates => dates[0] || dates[1]).length;
+  }, [employeeSelections]);
 
-  const handleDeselectAll = useCallback(() => {
-    setSelectedEmployees(new Set());
+  // --- Date change handler ---
+  const handleDateChange = useCallback((empId, index, newDate) => {
+    setEmployeeSelections(prev => {
+      const currentDates = prev[empId] || ['', ''];
+      const updatedDates = [...currentDates];
+      updatedDates[index] = newDate;
+      return { ...prev, [empId]: updatedDates };
+    });
   }, []);
 
   // --- Load a rejected/draft plan into the form for re-editing ---
   const handleEditResubmit = useCallback((plan) => {
     setActivePlanId(plan.id);
-    setDateFrom(plan.date_from);
-    setDateTo(plan.date_to);
-    const empIds = new Set(
-      (plan.employee_weekoff_plan_entries || []).map(e => e.employee_id)
-    );
-    setSelectedEmployees(empIds);
-    setShowMyPlans(false); // Switch back to the form
+    
+    // We don't have the original weekString, but we have date_from (a Monday).
+    // Let's manually reconstruct the week string. Or just set a custom week if needed.
+    // To be safe, we calculate it from date_from.
+    const d = new Date(plan.date_from);
+    const year = d.getFullYear();
+    const firstThursday = new Date(d.getFullYear(), 0, 4);
+    const days = Math.round((d.getTime() - firstThursday.getTime()) / 86400000);
+    const weekNumber = 1 + Math.ceil(days / 7);
+    setWeekString(`${year}-W${weekNumber.toString().padStart(2, '0')}`);
+
+    // Rehydrate selections
+    const newSelections = {};
+    const entries = plan.employee_weekoff_plan_entries || [];
+    entries.forEach(entry => {
+      if (!newSelections[entry.employee_id]) {
+        newSelections[entry.employee_id] = [entry.shift_date, ''];
+      } else if (!newSelections[entry.employee_id][1]) {
+        newSelections[entry.employee_id][1] = entry.shift_date;
+      }
+    });
+    setEmployeeSelections(newSelections);
+
+    setShowMyPlans(false);
     setSubmitError(null);
     setSubmitSuccess(null);
   }, []);
 
+  // --- Generate Payload ---
+  const buildPayload = useCallback(() => {
+    return Object.keys(employeeSelections).map(empId => ({
+      employeeId: empId,
+      dates: employeeSelections[empId]
+    })).filter(sel => sel.dates[0] || sel.dates[1]);
+  }, [employeeSelections]);
+
   // --- Save Draft ---
   const handleSaveDraft = useCallback(async () => {
-    if (selectedEmployees.size === 0) {
-      setSubmitError('Please select at least one employee.');
-      return;
-    }
-    if (dayCount === 0 || dayCount > 15) {
-      setSubmitError('Date range must be between 1 and 15 days.');
+    if (totalEntries === 0) {
+      setSubmitError('Please assign at least one date to an employee.');
       return;
     }
     setIsSubmitting(true);
@@ -213,14 +247,11 @@ const WeekOffPlannerModal = ({
         planId:      activePlanId,
         dateFrom,
         dateTo,
-        employeeIds: Array.from(selectedEmployees),
+        employeeSelections: buildPayload(),
       });
       if (error) throw error;
 
-      // If this was a new plan, update activePlanId so subsequent
-      // "Submit" knows which plan to promote
       if (!activePlanId && data?.id) setActivePlanId(data.id);
-
       setSubmitSuccess('Draft saved. You can submit for approval when ready.');
       if (onPlanSaved) onPlanSaved();
     } catch (err) {
@@ -229,16 +260,12 @@ const WeekOffPlannerModal = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [activePlanId, dateFrom, dateTo, selectedEmployees, dayCount, planner, onPlanSaved]);
+  }, [activePlanId, dateFrom, dateTo, totalEntries, buildPayload, planner, onPlanSaved]);
 
   // --- Submit for Approval ---
   const handleSubmitForApproval = useCallback(async () => {
-    if (selectedEmployees.size === 0) {
-      setSubmitError('Please select at least one employee.');
-      return;
-    }
-    if (dayCount === 0 || dayCount > 15) {
-      setSubmitError('Date range must be between 1 and 15 days.');
+    if (totalEntries === 0) {
+      setSubmitError('Please assign at least one date to an employee.');
       return;
     }
     setIsSubmitting(true);
@@ -246,19 +273,17 @@ const WeekOffPlannerModal = ({
     setSubmitSuccess(null);
 
     try {
-      // Step 1: Always save/update the draft first to ensure entries are fresh
       const { data: draftData, error: draftErr } = await planner.saveDraft({
         planId:      activePlanId,
         dateFrom,
         dateTo,
-        employeeIds: Array.from(selectedEmployees),
+        employeeSelections: buildPayload(),
       });
       if (draftErr) throw draftErr;
 
       const resolvedPlanId = activePlanId || draftData?.id;
       if (!resolvedPlanId) throw new Error('Failed to resolve plan ID after save.');
 
-      // Step 2: Submit (transitions draft → pending, cancels overlapping pending)
       const { error: submitErr } = await planner.submitPlan({
         planId:   resolvedPlanId,
         dateFrom,
@@ -267,9 +292,9 @@ const WeekOffPlannerModal = ({
       if (submitErr) throw submitErr;
 
       setSubmitSuccess(
-        `Plan submitted! ${entryCount} week-off entries are pending Editor approval.`
+        `Plan submitted! ${totalEntries} week-off entries are pending Editor approval.`
       );
-      setActivePlanId(null); // Reset form to "new plan" state after submission
+      setActivePlanId(null);
       if (onPlanSaved) onPlanSaved();
     } catch (err) {
       console.error('[WeekOffPlannerModal] handleSubmitForApproval error:', err);
@@ -277,7 +302,7 @@ const WeekOffPlannerModal = ({
     } finally {
       setIsSubmitting(false);
     }
-  }, [activePlanId, dateFrom, dateTo, selectedEmployees, dayCount, entryCount, planner, onPlanSaved]);
+  }, [activePlanId, dateFrom, dateTo, totalEntries, buildPayload, planner, onPlanSaved]);
 
   // ---------------------------------------------------------------------------
   // RENDER
@@ -285,16 +310,15 @@ const WeekOffPlannerModal = ({
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div
-        className="modal-body wop-modal"
+        className="modal-body wop-modal wop-modal--wide"
         onClick={(e) => e.stopPropagation()}
         aria-label="Week Off Planner"
       >
-        {/* ── HEADER ─────────────────────────────────────────────────────── */}
         <div className="modal-header">
           <div>
             <h2 className="modal-title">Week Off Planner</h2>
             <p className="modal-subtitle">
-              Schedule week-offs for all employees up to 15 days ahead.
+              Schedule up to 2 days off per employee for a specific week.
             </p>
           </div>
           <button
@@ -307,28 +331,16 @@ const WeekOffPlannerModal = ({
           </button>
         </div>
 
-        {/* ── INFO BANNER ─────────────────────────────────────────────────── */}
-        <div className="wop-modal__info-banner">
-          <p>
-            <strong>Contributors</strong> can save drafts and submit plans for approval. &nbsp;
-            <strong>Editors</strong> can approve or reject submitted plans in bulk.
-            Once approved, individual dates follow the standard single-cell edit flow.
-          </p>
-        </div>
-
-        {/* ── TAB TOGGLE ─────────────────────────────────────────────────── */}
         <div className="wop-modal__tabs">
           <button
             className={`halo-button wop-modal__tab ${!showMyPlans ? 'wop-modal__tab--active' : ''}`}
             onClick={() => setShowMyPlans(false)}
-            id="wop-tab-new"
           >
             New Plan
           </button>
           <button
             className={`halo-button wop-modal__tab ${showMyPlans ? 'wop-modal__tab--active' : ''}`}
             onClick={() => setShowMyPlans(true)}
-            id="wop-tab-history"
           >
             My Plans
             {planner.myPlans.length > 0 && (
@@ -337,7 +349,6 @@ const WeekOffPlannerModal = ({
           </button>
         </div>
 
-        {/* ── MY PLANS PANEL ─────────────────────────────────────────────── */}
         {showMyPlans ? (
           <div className="wop-modal__my-plans custom-scrollbar">
             {planner.isLoading ? (
@@ -355,10 +366,8 @@ const WeekOffPlannerModal = ({
             )}
           </div>
         ) : (
-          /* ── NEW PLAN FORM ───────────────────────────────────────────── */
           <div className="wop-modal__form custom-scrollbar">
 
-            {/* Active plan indicator (editing a draft/rejected) */}
             {activePlanId && (
               <div className="wop-modal__edit-indicator">
                 <span>Editing an existing plan</span>
@@ -366,104 +375,95 @@ const WeekOffPlannerModal = ({
                   className="halo-button wop-modal__clear-plan-btn"
                   onClick={() => {
                     setActivePlanId(null);
-                    setDateFrom(today);
-                    setDateTo(today);
-                    setSelectedEmployees(new Set(employees.map(e => e.id)));
+                    setWeekString(getCurrentWeekString());
+                    setEmployeeSelections({});
                     setSubmitError(null);
                     setSubmitSuccess(null);
                   }}
-                  id="wop-clear-plan"
                 >
                   × Start New
                 </button>
               </div>
             )}
 
-            {/* Date Range */}
-            <div className="wop-modal__date-row">
-              <div className="form-group wop-modal__date-group">
-                <label className="form-label" htmlFor="wop-date-from">FROM DATE</label>
-                <div className="form-input-container">
-                  <input
-                    id="wop-date-from"
-                    type="date"
-                    className="form-input"
-                    value={dateFrom}
-                    min={today}
-                    max={dateTo || maxEndDate}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                  />
-                </div>
+            {/* Week Selector */}
+            <div className="form-group wop-modal__week-group">
+              <label className="form-label" htmlFor="wop-week-select">TARGET WEEK</label>
+              <div className="form-input-container">
+                <input
+                  id="wop-week-select"
+                  type="week"
+                  className="form-input wop-modal__week-input"
+                  value={weekString}
+                  onChange={(e) => setWeekString(e.target.value)}
+                  required
+                />
               </div>
-              <div className="wop-modal__date-arrow">→</div>
-              <div className="form-group wop-modal__date-group">
-                <label className="form-label" htmlFor="wop-date-to">TO DATE</label>
-                <div className="form-input-container">
-                  <input
-                    id="wop-date-to"
-                    type="date"
-                    className="form-input"
-                    value={dateTo}
-                    min={dateFrom || today}
-                    max={maxEndDate}
-                    onChange={(e) => setDateTo(e.target.value)}
-                  />
-                </div>
-              </div>
+              <p className="wop-modal__week-hint">
+                Covers: {formatDate(dateFrom)} to {formatDate(dateTo)}
+              </p>
             </div>
 
-            {/* 15-day cap warning */}
-            {dayCount > 15 && (
-              <p className="wop-modal__date-warning">
-                ⚠ Range exceeds 15 days. Please shorten the period.
-              </p>
-            )}
-
-            {/* Employee Selector */}
-            <div className="form-group">
-              <div className="wop-modal__emp-header">
-                <label className="form-label">
-                  EMPLOYEES ({selectedEmployees.size} / {employees.length} selected)
-                </label>
-                <div className="wop-modal__emp-bulk-btns">
-                  <button
-                    className="halo-button wop-modal__bulk-btn"
-                    onClick={handleSelectAll}
-                    id="wop-select-all"
-                    type="button"
-                  >
-                    All
-                  </button>
-                  <button
-                    className="halo-button wop-modal__bulk-btn"
-                    onClick={handleDeselectAll}
-                    id="wop-deselect-all"
-                    type="button"
-                  >
-                    None
-                  </button>
-                </div>
+            {/* Employee List with specific Date Pickers */}
+            <div className="wop-modal__emp-grid-container">
+              <div className="wop-modal__emp-grid-header">
+                <div className="wop-modal__grid-col-name">EMPLOYEE</div>
+                <div className="wop-modal__grid-col-date">DATE 1</div>
+                <div className="wop-modal__grid-col-date">DATE 2</div>
               </div>
-              <div className="wop-modal__emp-list custom-scrollbar">
-                {employees.map(emp => (
-                  <label
-                    key={emp.id}
-                    className={`wop-modal__emp-item ${selectedEmployees.has(emp.id) ? 'wop-modal__emp-item--selected' : ''}`}
-                    htmlFor={`wop-emp-${emp.id}`}
-                  >
-                    <input
-                      id={`wop-emp-${emp.id}`}
-                      type="checkbox"
-                      className="wop-modal__emp-checkbox"
-                      checked={selectedEmployees.has(emp.id)}
-                      onChange={() => toggleEmployee(emp.id)}
-                    />
-                    <span className="wop-modal__emp-name">{emp.full_name}</span>
-                    {emp.emp_code && (
-                      <span className="hub-badge wop-modal__emp-code">{emp.emp_code}</span>
-                    )}
-                  </label>
-                ))}
+              
+              <div className="wop-modal__emp-grid-body custom-scrollbar">
+                {employees.map(emp => {
+                  const selections = employeeSelections[emp.id] || ['', ''];
+                  return (
+                    <div key={emp.id} className="wop-modal__emp-grid-row">
+                      <div className="wop-modal__grid-col-name">
+                        <span className="wop-modal__emp-name">{emp.full_name}</span>
+                        {emp.emp_code && (
+                          <span className="hub-badge wop-modal__emp-code">{emp.emp_code}</span>
+                        )}
+                      </div>
+                      
+                      {/* Date 1 Picker */}
+                      <div className="wop-modal__grid-col-date">
+                        <div className="wop-modal__date-input-wrapper">
+                          <input
+                            type="date"
+                            className="form-input wop-modal__date-input"
+                            value={selections[0]}
+                            min={dateFrom}
+                            max={dateTo}
+                            onChange={(e) => handleDateChange(emp.id, 0, e.target.value)}
+                          />
+                          {selections[0] && (
+                            <span className="wop-modal__day-label">
+                              {formatDateWithDay(selections[0]).split(',')[0]}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Date 2 Picker */}
+                      <div className="wop-modal__grid-col-date">
+                        <div className="wop-modal__date-input-wrapper">
+                          <input
+                            type="date"
+                            className="form-input wop-modal__date-input"
+                            value={selections[1]}
+                            min={dateFrom}
+                            max={dateTo}
+                            onChange={(e) => handleDateChange(emp.id, 1, e.target.value)}
+                          />
+                          {selections[1] && (
+                            <span className="wop-modal__day-label">
+                              {formatDateWithDay(selections[1]).split(',')[0]}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -471,14 +471,13 @@ const WeekOffPlannerModal = ({
             <div className="wop-modal__summary">
               <span className="wop-modal__summary-label">PLAN SUMMARY</span>
               <span className="wop-modal__summary-value">
-                {selectedEmployees.size === 0 || dayCount === 0
-                  ? 'No entries — select employees and a date range.'
-                  : `${selectedEmployees.size} employee${selectedEmployees.size !== 1 ? 's' : ''} × ${dayCount} day${dayCount !== 1 ? 's' : ''} = ${entryCount} week-off entries`
+                {totalEntries === 0
+                  ? 'No dates assigned yet.'
+                  : `${totalEntries} entries across ${activeEmployeesCount} employees`
                 }
               </span>
             </div>
 
-            {/* Error / Success feedback */}
             {submitError && (
               <div className="wop-modal__error">
                 <p>⚠ {submitError}</p>
@@ -504,8 +503,7 @@ const WeekOffPlannerModal = ({
                 type="button"
                 className="halo-button wop-modal__draft-btn"
                 onClick={handleSaveDraft}
-                disabled={isSubmitting || selectedEmployees.size === 0 || dayCount === 0 || dayCount > 15}
-                id="wop-save-draft"
+                disabled={isSubmitting || totalEntries === 0}
               >
                 {isSubmitting ? 'Saving…' : '💾 Save Draft'}
               </button>
@@ -513,8 +511,7 @@ const WeekOffPlannerModal = ({
                 type="button"
                 className="halo-button wop-modal__submit-btn"
                 onClick={handleSubmitForApproval}
-                disabled={isSubmitting || selectedEmployees.size === 0 || dayCount === 0 || dayCount > 15}
-                id="wop-submit"
+                disabled={isSubmitting || totalEntries === 0}
               >
                 {isSubmitting ? 'Submitting…' : '→ Submit for Approval'}
               </button>
