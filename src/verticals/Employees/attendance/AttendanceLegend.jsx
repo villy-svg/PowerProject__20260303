@@ -30,7 +30,7 @@ const AttendanceLegend = () => {
           <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span> <span className="attendance-legend__label">No Call No Show</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--null">
-          <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> <span className="attendance-legend__label">Default</span>
+          <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> <span className="attendance-legend__label">Not Marked</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--pending">
           <span className="attendance-legend__icon-pending">⚠</span> <span className="attendance-legend__label">Pending Edit</span>

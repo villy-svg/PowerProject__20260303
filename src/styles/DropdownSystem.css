@@ -16,6 +16,7 @@
   background-size: 16px;
   padding-right: 40px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color-scheme: dark;
 }
 
 .master-dropdown:focus {

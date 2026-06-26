@@ -8,6 +8,8 @@ import BaseDropdown from './BaseDropdown';
  */
 const CustomSelect = ({
   id,
+  className = '',
+  style = {},
   value,
   onChange,
   options = [],
@@ -18,6 +20,8 @@ const CustomSelect = ({
 }) => (
   <BaseDropdown
     id={id}
+    className={className}
+    style={style}
     value={value}
     onChange={onChange}
     options={options}

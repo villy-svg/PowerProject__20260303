@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createSubCategory, updateSubCategory } from '../../services/employees/rulesService';
+import CustomSelect from '../../components/ui/CustomSelect';
 import StatusMsg from '../../components/ui/StatusMsg';
 import '../../styles/ManagementForms.css';
 
@@ -53,17 +54,16 @@ const SubCategoryFormModal = ({ isOpen, onClose, editingItem, categories, onSave
             <div className="form-group">
               <label>Parent Category</label>
               <div className="form-input-container">
-                <select
+                <CustomSelect
                   className="master-dropdown"
                   value={form.category_id}
-                  onChange={e => setForm(p => ({ ...p, category_id: e.target.value }))}
+                  onChange={val => setForm(p => ({ ...p, category_id: val }))}
+                  options={[
+                    { value: '', label: '— Select Category —' },
+                    ...categories.map(cat => ({ value: cat.id, label: `${cat.icon ? `${cat.icon} ` : ''}${cat.name}` }))
+                  ]}
                   required
-                >
-                  <option value="">— Select Category —</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.icon ? `${cat.icon} ` : ''}{cat.name}</option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
             <div className="form-row-grid">

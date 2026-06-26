@@ -21,6 +21,7 @@ import { useSchedulePlanner } from '../../hooks/useSchedulePlanner';
 import AttendanceGrid from './attendance/AttendanceGrid';
 import AttendanceMobileList from './attendance/AttendanceMobileList';
 import AttendanceLegend from './attendance/AttendanceLegend';
+import CustomSelect from '../../components/ui/CustomSelect';
 import { IconChevronDown } from '../../components/ui/Icons';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
@@ -523,47 +524,51 @@ const EmployeeAttendanceBoard = ({
             </div>
           </>
         ) : (
-          <input 
-            type="week" 
-            value={weekString} 
-            onChange={e => {
-              setWeekString(e.target.value);
-              // Also reset grid selections when week changes so they don't get misaligned
-              setEmployeeSelections({});
-              setActivePlanId(null);
-              setPage(1);
-            }}
-            className="form-input"
-            style={{ padding: '0.4rem 0.8rem', minHeight: 'auto', width: 'auto' }}
-          />
+          <div className="attendance-board__date-range">
+            <span className="attendance-board__date-label">Week:</span>
+            <input 
+              type="week" 
+              value={weekString} 
+              onChange={e => {
+                setWeekString(e.target.value);
+                // Also reset grid selections when week changes so they don't get misaligned
+                setEmployeeSelections({});
+                setActivePlanId(null);
+                setPage(1);
+              }}
+              className="attendance-board__week-input"
+            />
+          </div>
         )}
       </div>
 
       {viewMode === 'planner' && canSuggestEdit && (
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Paintbrush:</label>
-          <select 
-            value={paintbrushStatus} 
-            onChange={e => setPaintbrushStatus(e.target.value)}
-            className="form-input"
-            style={{ width: '110px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', minHeight: 'auto' }}
-          >
-            <option value="present">Present</option>
-            <option value="week-off">Week-Off</option>
-            <option value="leave">Leave</option>
-            <option value="wfh">WFH</option>
-            <option value="half-day">Half Day</option>
-            <option value="absent">Clear</option>
-          </select>
-          <select 
-            value={paintbrushHubId} 
-            onChange={e => setPaintbrushHubId(e.target.value)}
-            className="form-input"
-            style={{ width: '110px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', minHeight: 'auto' }}
-          >
-            <option value="">No Hub</option>
-            {hubs.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-          </select>
+          <CustomSelect
+            value={paintbrushStatus}
+            onChange={setPaintbrushStatus}
+            className="master-dropdown"
+            style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+            options={[
+              { value: 'present', label: 'Present' },
+              { value: 'week-off', label: 'Week-Off' },
+              { value: 'leave', label: 'Leave' },
+              { value: 'wfh', label: 'WFH' },
+              { value: 'half-day', label: 'Half Day' },
+              { value: 'absent', label: 'Clear' }
+            ]}
+          />
+          <CustomSelect
+            value={paintbrushHubId}
+            onChange={setPaintbrushHubId}
+            className="master-dropdown"
+            style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+            options={[
+              { value: '', label: 'No Hub' },
+              ...hubs.map(h => ({ value: h.id, label: h.name }))
+            ]}
+          />
         </div>
       )}
 

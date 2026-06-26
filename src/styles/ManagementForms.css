@@ -133,17 +133,29 @@
 }
 
 .form-input-container input,
-.form-input-container select,
 .form-input-container textarea,
-.form-input-container .master-dropdown,
 .form-input-container .assignee-selector-trigger,
 .form-input-container .hub-selector-trigger,
 .form-input-container .task-hierarchy-trigger,
 .form-input-container .assignee-selector-container,
 .form-input-container .hub-selector-container {
   border: none !important;
-  background: transparent !important;
+  background-color: transparent !important;
   padding: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  color: var(--brand-green) !important;
+  width: 100%;
+  outline: none !important;
+  min-height: unset !important;
+}
+
+.form-input-container select,
+.form-input-container .master-dropdown {
+  border: none !important;
+  background-color: transparent !important;
   box-shadow: none !important;
   transform: none !important;
   font-size: 0.95rem !important;

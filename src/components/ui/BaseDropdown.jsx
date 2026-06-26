@@ -19,6 +19,7 @@ const BaseDropdown = ({
   // ── IDENTITY
   id = '',
   className = '',
+  style = {},
 
   // ── DATA
   options = [],
@@ -395,6 +396,7 @@ const BaseDropdown = ({
   return (
     <div 
       className={`bd-container custom-select-container ${isOpen ? 'open' : ''} ${className}`} 
+      style={style}
       ref={containerRef}
       onKeyDown={handleKeyDown}
     >

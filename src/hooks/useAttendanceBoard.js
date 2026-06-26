@@ -208,7 +208,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     return {
       employee_id:       employeeId,
       shift_date:        date,
-      attendance_status: defaultStatus || 'absent',
+      attendance_status: defaultStatus || 'null',
       has_pending_edit:  false,
     };
   }, [liveMap, scheduleMap, defaultStatus]); // eslint-disable-line react-hooks/exhaustive-deps

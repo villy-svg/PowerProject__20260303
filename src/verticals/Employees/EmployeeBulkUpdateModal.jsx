@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import CustomSelect from '../../components/ui/CustomSelect';
 import './EmployeeForm.css';
 
 /**
@@ -85,16 +86,17 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
           </div>
           <div className={`form-group bulk-form-group ${!activeFields.hub_id ? 'disabled' : ''}`}>
             <label>Primary Hub</label>
-            <select 
+            <CustomSelect 
               className="master-dropdown"
               value={values.hub_id} 
-              onChange={(e) => handleValueChange('hub_id', e.target.value)}
+              onChange={(val) => handleValueChange('hub_id', val)}
               disabled={!activeFields.hub_id}
-            >
-              <option value="">No Change</option>
-              <option value="NULL">NONE (ALL)</option>
-              {hubs.map(h => <option key={h.id} value={h.id}>{h.hub_code}</option>)}
-            </select>
+              options={[
+                { value: '', label: 'No Change' },
+                { value: 'NULL', label: 'NONE (ALL)' },
+                ...hubs.map(h => ({ value: h.id, label: h.hub_code }))
+              ]}
+            />
           </div>
         </div>
 
@@ -107,15 +109,16 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
           </div>
           <div className={`form-group bulk-form-group ${!activeFields.role_id ? 'disabled' : ''}`}>
             <label>Role</label>
-            <select 
+            <CustomSelect 
               className="master-dropdown"
               value={values.role_id} 
-              onChange={(e) => handleValueChange('role_id', e.target.value)}
+              onChange={(val) => handleValueChange('role_id', val)}
               disabled={!activeFields.role_id}
-            >
-              <option value="">No Change</option>
-              {roles.map(r => <option key={r.id} value={r.id}>{r.role_code ? `[${r.role_code}] ` : ''}{r.name}</option>)}
-            </select>
+              options={[
+                { value: '', label: 'No Change' },
+                ...roles.map(r => ({ value: r.id, label: `${r.role_code ? `[${r.role_code}] ` : ''}${r.name}` }))
+              ]}
+            />
           </div>
         </div>
 
@@ -128,15 +131,16 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
           </div>
           <div className={`form-group bulk-form-group ${!activeFields.department_id ? 'disabled' : ''}`}>
             <label>Department</label>
-            <select 
+            <CustomSelect 
               className="master-dropdown"
               value={values.department_id} 
-              onChange={(e) => handleValueChange('department_id', e.target.value)}
+              onChange={(val) => handleValueChange('department_id', val)}
               disabled={!activeFields.department_id}
-            >
-              <option value="">No Change</option>
-              {departments.map(d => <option key={d.id} value={d.id}>{d.dept_code ? `[${d.dept_code}] ` : ''}{d.name}</option>)}
-            </select>
+              options={[
+                { value: '', label: 'No Change' },
+                ...departments.map(d => ({ value: d.id, label: `${d.dept_code ? `[${d.dept_code}] ` : ''}${d.name}` }))
+              ]}
+            />
           </div>
         </div>
 
@@ -149,16 +153,17 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
           </div>
           <div className={`form-group bulk-form-group ${!activeFields.manager_id ? 'disabled' : ''}`}>
             <label>Reporting Manager</label>
-            <select 
+            <CustomSelect 
               className="master-dropdown"
               value={values.manager_id} 
-              onChange={(e) => handleValueChange('manager_id', e.target.value)}
+              onChange={(val) => handleValueChange('manager_id', val)}
               disabled={!activeFields.manager_id}
-            >
-              <option value="">No Change</option>
-              <option value="NULL">NONE (Clear Manager)</option>
-              {employees.map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}
-            </select>
+              options={[
+                { value: '', label: 'No Change' },
+                { value: 'NULL', label: 'NONE (Clear Manager)' },
+                ...employees.map(e => ({ value: e.id, label: e.full_name }))
+              ]}
+            />
           </div>
         </div>
       </div>

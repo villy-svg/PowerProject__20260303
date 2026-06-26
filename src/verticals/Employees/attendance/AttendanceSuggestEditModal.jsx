@@ -21,6 +21,7 @@
 
 import React, { useState } from 'react';
 import { submitEditRequest } from '../../../services/employees/editRequestService';
+import CustomSelect from '../../../components/ui/CustomSelect';
 
 // ---------------------------------------------------------------------------
 // STATUS_OPTIONS: The selectable statuses for the suggestion form.
@@ -50,9 +51,11 @@ const AttendanceSuggestEditModal = ({
   const { employeeId, date, record, employeeName } = selectedCell || {};
 
   // Form state — default to the existing record's values if available
-  const [suggestedStatus, setSuggestedStatus] = useState(
-    record?.attendance_status || 'present'
-  );
+  const initialStatus = (record?.attendance_status && record.attendance_status !== 'null') 
+    ? record.attendance_status 
+    : 'present';
+    
+  const [suggestedStatus, setSuggestedStatus] = useState(initialStatus);
   const [suggestedShiftType, setSuggestedShiftType] = useState(
     record?.shift_type || ''
   );
@@ -167,17 +170,14 @@ const AttendanceSuggestEditModal = ({
               SUGGESTED STATUS
             </label>
             <div className="form-input-container">
-              <select
+              <CustomSelect
                 id="suggest-status-select"
                 className="master-dropdown"
                 value={suggestedStatus}
-                onChange={(e) => setSuggestedStatus(e.target.value)}
+                onChange={setSuggestedStatus}
+                options={STATUS_OPTIONS}
                 required
-              >
-                {STATUS_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              />
             </div>
           </div>
 
@@ -188,16 +188,13 @@ const AttendanceSuggestEditModal = ({
                 SHIFT TYPE
               </label>
               <div className="form-input-container">
-                <select
+                <CustomSelect
                   id="suggest-shift-type-select"
                   className="master-dropdown"
                   value={suggestedShiftType}
-                  onChange={(e) => setSuggestedShiftType(e.target.value)}
-                >
-                  {SHIFT_TYPE_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                  onChange={setSuggestedShiftType}
+                  options={SHIFT_TYPE_OPTIONS}
+                />
               </div>
             </div>
           )}

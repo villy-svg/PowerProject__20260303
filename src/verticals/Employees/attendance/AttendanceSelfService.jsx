@@ -24,6 +24,7 @@ import { supabase } from '../../../services/core/supabaseClient';
 import { useAttendanceSelfService } from '../../../hooks/useAttendanceSelfService';
 import AttendanceReceiptScreen from './AttendanceReceiptScreen';
 import LiveAttendanceTab from './LiveAttendanceTab';
+import CustomSelect from '../../../components/ui/CustomSelect';
 import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './AttendanceSelfService.css';
 import MasterPageHeader from '../../../components/layout/MasterPageHeader';
@@ -53,20 +54,17 @@ const HubSelector = ({ selectedHubId, onSelect }) => {
     <div className="form-group self-service__hub-group">
       <label className="form-label" htmlFor="self-service-hub-select">SELECT HUB</label>
       <div className="form-input-container">
-        <select
+        <CustomSelect
           id="self-service-hub-select"
           className="master-dropdown"
           value={selectedHubId || ''}
-          onChange={(e) => onSelect(e.target.value || null)}
+          onChange={(val) => onSelect(val || null)}
+          options={[
+            { value: '', label: '— Choose your hub —' },
+            ...(!loading ? hubs.map(hub => ({ value: hub.id, label: `${hub.hub_code} — ${hub.name}` })) : [])
+          ]}
           required
-        >
-          <option value="">— Choose your hub —</option>
-          {!loading && hubs.map(hub => (
-            <option key={hub.id} value={hub.id}>
-              {hub.hub_code} — {hub.name}
-            </option>
-          ))}
-        </select>
+        />
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
    EmployeeAttendanceBoard.css
    ========================================================================== */
 
+@import '../../styles/DropdownSystem.css';
+
 .attendance-board__wrapper {
   display: flex;
   flex-direction: column;
