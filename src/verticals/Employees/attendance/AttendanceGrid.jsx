@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { IconSun, IconMoon, IconCoffee, IconFile, IconX } from '../../../components/ui/Icons';
+import './AttendanceGrid.css';
 
 // ---------------------------------------------------------------------------
 // STATUS_META: Maps status enum → display label + CSS modifier class.
@@ -93,13 +94,17 @@ const AttendanceCell = ({ record, onClick }) => {
 // ---------------------------------------------------------------------------
 const EmployeeRowHeader = ({ employee }) => (
   <td className="attendance-grid__employee-cell">
-    <p className="attendance-grid__employee-name">{employee.full_name}</p>
-    <div className="attendance-grid__employee-meta">
-      {employee.emp_code && (
-        <span className="attendance-grid__employee-code">{employee.emp_code}</span>
-      )}
-      {employee.hubs?.hub_code && (
-        <span className="hub-badge">{employee.hubs.hub_code}</span>
+    <div className="attendance-grid__employee-info">
+      <h4 className="attendance-grid__employee-name" title={employee.full_name}>{employee.full_name}</h4>
+      {(employee.emp_code || employee.hubs?.hub_code) && (
+        <div className="attendance-grid__employee-badges">
+          {employee.emp_code && (
+            <span className="attendance-grid__badge attendance-grid__badge--id" title="Employee ID">{employee.emp_code}</span>
+          )}
+          {employee.hubs?.hub_code && (
+            <span className="attendance-grid__badge attendance-grid__badge--hub" title="Primary Hub">{employee.hubs.hub_code}</span>
+          )}
+        </div>
       )}
     </div>
   </td>

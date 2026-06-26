@@ -1,0 +1,195 @@
+/* ==========================================================================
+   AttendanceGrid.css
+   Modern & succinct styling for the Attendance Board grid, specifically 
+   the employee name and meta tags (ID & Hub).
+   ========================================================================== */
+
+.attendance-grid__employee-cell {
+  position: sticky;
+  left: -1px;
+  background-color: var(--bg-color);
+  z-index: 2; /* keep above scrolling cells */
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  min-width: 200px;
+  max-width: 250px;
+  text-align: left;
+}
+
+.attendance-grid__employee-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.attendance-grid__employee-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attendance-grid__employee-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.attendance-grid__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.attendance-grid__badge--id {
+  background-color: var(--halo-bg);
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.attendance-grid__badge--hub {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+}
+
+/* ==========================================================================
+   Grid Architecture & Borders
+   ========================================================================== */
+
+.attendance-grid__wrapper {
+  flex: 1;
+  overflow: auto;
+  border-radius: var(--radius-button);
+  background-color: var(--panel-bg);
+}
+
+.attendance-grid__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-grid__table th,
+.attendance-grid__table td {
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.attendance-grid__date-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  position: sticky;
+  top: -1px;
+  z-index: 1;
+}
+
+.attendance-grid__corner-cell {
+  position: sticky;
+  top: -1px;
+  left: -1px;
+  z-index: 4;
+  background-color: var(--bg-color);
+  text-align: left !important;
+  padding-left: 1rem !important;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   Cell States
+   ========================================================================== */
+
+.attendance-cell {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 90px;
+  position: relative;
+  padding: 0 !important; /* Let the flex container fill the height/width */
+}
+
+.attendance-cell:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.attendance-cell__status-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 48px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attendance-cell--null .attendance-cell__status-label {
+  color: var(--text-secondary);
+  opacity: 0.4;
+}
+
+.attendance-cell--present {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+}
+
+.attendance-cell--present:hover {
+  background-color: color-mix(in srgb, var(--brand-green), transparent 80%);
+}
+
+.attendance-cell--absent {
+  background-color: color-mix(in srgb, var(--status-danger), transparent 85%);
+  color: var(--status-danger);
+}
+
+.attendance-cell--leave,
+.attendance-cell--week-off {
+  background-color: color-mix(in srgb, var(--brand-blue), transparent 85%);
+  color: var(--brand-blue);
+}
+
+.attendance-cell--no-show,
+.attendance-cell--no-call-no-show {
+  background-color: color-mix(in srgb, var(--status-warning), transparent 85%);
+  color: var(--status-warning);
+}
+
+/* Pending edit indicator badge */
+.attendance-cell__pending-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: var(--status-warning);
+  color: #000;
+  font-size: 0.5rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}

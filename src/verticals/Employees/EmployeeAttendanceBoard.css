@@ -1,613 +1,339 @@
 /* ==========================================================================
    EmployeeAttendanceBoard.css
-   Styles for the Manager Attendance Board and all its sub-components:
-   - AttendanceGrid, AttendanceApprovalDrawer, AttendanceSuggestEditModal
-
-   Skill compliance:
-     ui-design-system §1 (CSS Variables only — no hardcoded hex)
-     ui-design-system §12 (Squircle, glassmorphism)
-     safe-code-modification §2B (BEM naming, no !important)
-     ui-design-system §14 (Mobile adaptations inside media queries)
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   SECTION 1: Attendance Status Color Tokens
-   Scoped to this component, referencing global design system variables.
-   -------------------------------------------------------------------------- */
 .attendance-board__wrapper {
-  /* Status tokens — derived from global unified status palette */
-  --attendance-present:  color-mix(in srgb, var(--status-success), transparent 85%);
-  --attendance-present-text: var(--status-success);
-  --attendance-week-off: color-mix(in srgb, var(--status-neutral), transparent 90%);
-  --attendance-week-off-text: var(--status-neutral);
-  --attendance-leave:    color-mix(in srgb, var(--status-warning), transparent 85%);
-  --attendance-leave-text: var(--status-warning);
-  --attendance-absent:   color-mix(in srgb, var(--status-danger), transparent 88%);
-  --attendance-absent-text: var(--status-danger);
-  --attendance-pending:  var(--status-warning);
-}
-
-/* --------------------------------------------------------------------------
-   SECTION 2: Board-level Layout
-   -------------------------------------------------------------------------- */
-.attendance-board__no-access {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(2rem, 5vw, 4rem);
-  color: var(--text-color);
-  opacity: 0.5;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  position: relative;
 }
 
-.attendance-board__error {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-button, 12px);
-  color: #ef4444;
-  margin: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-}
-
-/* Container for header left actions (toggles + date range) */
+/* Left Actions (Date Pickers / Week Picker) */
 .attendance-board__left-actions {
   display: flex;
   align-items: center;
-  gap: 1rem; /* 16px */
+  gap: 1rem;
 }
 
-/* Date range controls in the header leftActions */
 .attendance-board__date-range {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
+  gap: 0.4rem;
+  background: color-mix(in srgb, var(--halo-bg), transparent 30%);
+  padding: 0.35rem 0.35rem 0.35rem 1rem;
+  border-radius: 100px;
+  border: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .attendance-board__date-label {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--text-color);
   opacity: 0.5;
-  white-space: nowrap;
 }
 
-.attendance-board__date-input {
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-button, 12px);
-  color: var(--brand-green);
-  padding: 0.4rem 0.75rem;
-  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+.attendance-board__date-input,
+.attendance-board__week-input {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  color-scheme: dark; /* Force native dark theme calendars */
+  font-family: inherit;
+  font-size: 0.85rem;
   font-weight: 600;
+  padding: 0.15rem 0.25rem;
+  outline: none;
   cursor: pointer;
-  transition: border-color 0.2s ease;
-  text-align: center;
 }
 
-.attendance-board__date-input:focus {
-  outline: none;
-  border-color: var(--brand-green);
+.attendance-board__date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.attendance-board__date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 .attendance-board__date-separator {
-  opacity: 0.4;
-  font-weight: 600;
+  opacity: 0.3;
+  font-size: 0.85rem;
+  margin: 0 0.15rem;
 }
 
 .attendance-board__go-btn {
-  padding: 0 !important;
-  width: 32px;
-  height: 32px;
-  min-width: 32px !important;
+  padding: 0.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  background: transparent;
+  color: var(--brand-mint, #00ffcc);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0.2rem;
+  opacity: 0.7;
 }
 
-/* Pending approvals badge on the header button */
+.attendance-board__go-btn:hover {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* Dropdown Menu */
+.attendance-board__menu-container {
+  position: relative;
+}
+
+.attendance-board__menu-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  padding: 0.5rem;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.attendance-board__menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.attendance-board__menu-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  opacity: 0.5;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.attendance-board__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.attendance-board__menu-item:hover {
+  background: var(--halo-bg);
+}
+
+.attendance-board__menu-item input[type="radio"],
+.attendance-board__menu-item input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--brand-green);
+}
+
+.attendance-board__menu-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.25rem 0;
+}
+
+/* Right Actions */
+.attendance-board__approval-btn {
+  color: var(--status-warning);
+  position: relative;
+  border-color: color-mix(in srgb, var(--status-warning), transparent 70%);
+}
+
 .attendance-board__pending-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  background: rgba(249, 115, 22, 0.9);
+  background-color: var(--status-warning);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  margin-left: 0.4rem;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 8px;
   padding: 0 4px;
+  margin-right: 0.4rem;
 }
 
-/* ⓘ Info icon in the board description — tooltip target */
+/* Planner Specific Actions */
+.attendance-board__planner-action--save {
+  color: var(--status-warning);
+}
+
+.attendance-board__planner-action--submit {
+  color: var(--brand-green);
+}
+
+/* Info Icon */
 .attendance-board__info-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.4rem;
-  font-size: 0.75rem;
+  font-size: 0.8em;
+  margin-left: 0.35rem;
   opacity: 0.45;
   cursor: help;
-  vertical-align: middle;
-  transition: opacity 0.2s ease;
+  vertical-align: super;
+  transition: opacity 0.2s;
 }
 
 .attendance-board__info-icon:hover {
   opacity: 0.9;
 }
 
-
-
-/* --------------------------------------------------------------------------
-   SECTION 3: Attendance Grid
-   -------------------------------------------------------------------------- */
-.attendance-grid__wrapper {
-  /* responsive-table-wrapper pattern from ui-design-system §11 */
-  overflow-x: auto;
-  padding: 0 1rem 1rem;
-  -webkit-overflow-scrolling: touch;
-}
-
-.attendance-grid__table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px; /* Prevents collapse on narrow viewports */
-}
-
-/* Corner cell (top-left "Employee" label) */
-.attendance-grid__corner-cell {
-  text-align: left;
+/* Errors & Feedback */
+.attendance-board__error,
+.attendance-board__planner-msg {
   padding: 0.5rem 1rem;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
-  white-space: nowrap;
-  min-width: 180px;
-  position: sticky;
-  left: 0;
-  background: var(--bg-color);
-  z-index: 2;
-  border-bottom: 1px solid var(--border-color);
+  margin: 0 1.5rem 0.5rem;
+  border-radius: var(--radius-button, 12px);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
 }
 
-/* Date header cells (X-axis) */
-.attendance-grid__date-header {
-  text-align: center;
-  padding: 0.5rem 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  white-space: nowrap;
-  min-width: 70px;
-  border-bottom: 1px solid var(--border-color);
+.attendance-board__error {
+  background: color-mix(in srgb, var(--status-danger), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--status-danger), transparent 50%);
+  color: var(--status-danger);
+}
+
+.attendance-board__planner-msg--success {
+  background: color-mix(in srgb, var(--status-success), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 50%);
+  color: var(--status-success);
+}
+
+.attendance-board__planner-msg--error {
+  background: color-mix(in srgb, var(--status-danger), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--status-danger), transparent 50%);
+  color: var(--status-danger);
+}
+
+.attendance-board__no-access {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 0.9rem;
   opacity: 0.7;
 }
 
-/* Employee info cell (Y-axis, sticky left) */
-.attendance-grid__employee-cell {
-  padding: 0.6rem 1rem;
-  position: sticky;
-  left: 0;
-  background: var(--bg-color);
-  z-index: 1;
-  border-bottom: 1px solid var(--border-color);
-  border-right: 1px solid var(--border-color);
-  min-width: 180px;
-  max-width: 220px;
-}
-
-.attendance-grid__employee-name {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.attendance-grid__employee-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-.attendance-grid__employee-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  opacity: 0.5;
-}
-
-/* Attendance status cells */
-.attendance-cell {
-  text-align: center;
-  padding: 0.4rem 0.25rem;
-  border-bottom: 1px solid var(--border-color);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
-  cursor: pointer;
-  transition: filter 0.15s ease, transform 0.1s ease;
-  position: relative;
-  vertical-align: middle;
-  min-width: 70px;
-}
-
-.attendance-cell:hover {
-  filter: brightness(1.2);
-  transform: scale(1.05);
-  z-index: 1;
-}
-
-/* Status-specific backgrounds */
-.attendance-cell--present  { background: var(--attendance-present);  }
-.attendance-cell--week-off { background: var(--attendance-week-off); }
-.attendance-cell--leave    { background: var(--attendance-leave);    }
-.attendance-cell--absent,
-.attendance-cell--no-show,
-.attendance-cell--no-call-no-show { background: transparent;                }
-
-/* Pending edit highlight — orange ring */
-.attendance-cell--has-pending {
-  box-shadow: inset 0 0 0 2px rgba(249, 115, 22, 0.6);
-}
-
-.attendance-cell__status-label {
-  display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.attendance-cell--present .attendance-cell__status-label  { color: var(--attendance-present-text); }
-.attendance-cell--week-off .attendance-cell__status-label { color: var(--attendance-week-off-text); }
-.attendance-cell--leave .attendance-cell__status-label    { color: var(--attendance-leave-text); }
-.attendance-cell--absent .attendance-cell__status-label,
-.attendance-cell--no-show .attendance-cell__status-label,
-.attendance-cell--no-call-no-show .attendance-cell__status-label   { color: var(--attendance-absent-text); }
-
-.attendance-cell__shift-type {
-  display: block;
-  font-size: 0.65rem;
-  margin-top: 1px;
-  opacity: 0.6;
-}
-
-/* Pending badge (⚠) positioned top-right of cell */
-.attendance-cell__pending-badge {
-  position: absolute;
-  top: 2px;
-  right: 3px;
-  font-size: 0.55rem;
-  color: #f97316;
-  line-height: 1;
-}
-
-/* Skeleton loading rows */
-.attendance-grid__skeleton-cell {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.07) 50%,
-    rgba(255, 255, 255, 0.03) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  height: 42px;
-}
-
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.attendance-grid__empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(2rem, 8vw, 5rem);
-  text-align: center;
-}
-
-/* --------------------------------------------------------------------------
-   SECTION 4: Approval Drawer
-   -------------------------------------------------------------------------- */
-.approval-drawer__backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-}
-
-.approval-drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: clamp(300px, 40vw, 480px);
-  background: var(--bg-color);
-  border-left: 1px solid var(--border-color);
-  z-index: 101;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-premium, -12px 0 40px rgba(0, 0, 0, 0.4));
-}
-
-.approval-drawer__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  flex-shrink: 0;
-}
-
-.approval-drawer__title {
-  font-size: 1rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.approval-drawer__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.approval-drawer__error {
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-button, 12px);
-  color: #ef4444;
-  font-size: 0.875rem;
-  margin: 0 1rem;
-}
-
-.approval-drawer__empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  opacity: 0.4;
-  font-size: 0.875rem;
-}
-
-/* Approval Card */
-.approval-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-squircle, 24px);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.approval-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.approval-card__employee {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.approval-card__name {
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin: 0;
-}
-
-.approval-card__date {
-  font-size: 0.7rem;
-  opacity: 0.5;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.approval-card__change {
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-button, 12px);
-  padding: 0.75rem;
-}
-
-.approval-card__change-label {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
-  margin: 0 0 0.25rem;
-}
-
-.approval-card__change-value {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--brand-green);
-}
-
-.approval-card__shift-type,
-.approval-card__time {
-  font-size: 0.75rem;
-  opacity: 0.6;
-  margin: 0.2rem 0 0;
-}
-
-.approval-card__requester {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.7rem;
-  opacity: 0.5;
-  flex-wrap: wrap;
-}
-
-.approval-card__requester-label { font-weight: 800; text-transform: uppercase; }
-.approval-card__requester-name  { font-weight: 600; }
-.approval-card__requester-time  { margin-left: auto; }
-
-.approval-card__actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.approval-card__approve-btn { color: #22c55e; }
-.approval-card__reject-btn  { color: #ef4444; }
-
-.approval-card__reject-textarea {
-  width: 100%;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-color);
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  resize: vertical;
-  min-height: 80px;
-  box-sizing: border-box;
-}
-
-/* --------------------------------------------------------------------------
-   SECTION 5: Suggest Edit Modal
-   -------------------------------------------------------------------------- */
-.suggest-edit-modal {
-  width: clamp(300px, 90vw, 520px);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.suggest-edit-modal__info-banner {
-  padding: 0.75rem 1rem;
-  background: var(--halo-bg);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
-  border-radius: var(--radius-button, 12px);
-  font-size: 0.8rem;
-  opacity: 0.8;
-  margin-bottom: 0.75rem;
-}
-
-.suggest-edit-modal__current-status {
-  font-weight: 700;
-  color: var(--text-color);
-  opacity: 0.5;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-}
-
-.suggest-edit-modal__error {
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: var(--radius-button, 12px);
-  color: #ef4444;
-  font-size: 0.875rem;
-}
-
-.suggest-edit-modal__submit-btn {
-  color: var(--brand-green);
-}
-
-.form-label--optional {
-  opacity: 0.4;
-  font-size: 0.6rem;
-  text-transform: uppercase;
-}
-
-/* --------------------------------------------------------------------------
-   SECTION 5.5: Togglable Legend Wrapper (Desktop)
-   -------------------------------------------------------------------------- */
 .attendance-board__legend-wrapper {
-  margin: 0 1.5rem 1rem;
-  padding: 0.25rem 1rem;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-button, 12px);
-  backdrop-filter: blur(20px);
-  animation: slideDown 0.2s ease-out;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 10px rgba(0, 255, 135, 0.02);
+  padding: 0 1.5rem;
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* --------------------------------------------------------------------------
-   SECTION 6: Mobile Responsive Adaptations
-   All mobile-specific styles MUST be inside @media queries (ui-design-system §14G)
-   -------------------------------------------------------------------------- */
 @media screen and (max-width: 768px) {
-  .attendance-board__date-range {
-    gap: 0.25rem;
+  .attendance-board__left-actions {
     width: 100%;
     justify-content: space-between;
   }
-
-  .attendance-board__date-label {
-    display: none;
-  }
-
-  .attendance-board__date-input {
-    font-size: clamp(0.65rem, 3.5vw, 0.9rem);
-    padding: 0.35rem 0.25rem;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .approval-drawer {
-    width: 100vw;
-    border-left: none;
-    border-top: 1px solid var(--border-color);
-    border-radius: var(--radius-squircle, 24px) var(--radius-squircle, 24px) 0 0;
-    top: auto;
-    max-height: 80vh;
-  }
-
-  .attendance-grid__corner-cell,
-  .attendance-grid__employee-cell {
-    min-width: 140px;
-    max-width: 160px;
-  }
-
-  .attendance-grid__date-header,
-  .attendance-cell {
-    min-width: 55px;
-  }
 }
 
-@media screen and (max-width: 480px) {
-  .suggest-edit-modal {
-    width: 95vw;
-  }
+/* --- React DatePicker Overrides --- */
+.react-datepicker-wrapper {
+  display: inline-block;
+}
+
+.react-datepicker-popper {
+  z-index: 4005 !important;
+}
+
+.react-datepicker {
+  background-color: var(--bg-color, #1e1e1e) !important;
+  border: 1px solid var(--border-color, #333) !important;
+  border-radius: 12px !important;
+  font-family: inherit !important;
+  color: var(--text-color, #fff) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  z-index: 4005 !important;
+}
+
+.react-datepicker__header {
+  background-color: color-mix(in srgb, var(--bg-color, #1e1e1e), transparent 20%) !important;
+  border-bottom: 1px solid var(--border-color, #333) !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker-time__header, 
+.react-datepicker-year-header {
+  color: var(--text-color, #fff) !important;
+}
+
+.react-datepicker__day-name, 
+.react-datepicker__day, 
+.react-datepicker__time-name {
+  color: var(--text-color, #ccc) !important;
+}
+
+.react-datepicker__day:hover, 
+.react-datepicker__month-text:hover, 
+.react-datepicker__quarter-text:hover, 
+.react-datepicker__year-text:hover {
+  background-color: var(--halo-bg, #333) !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__day--in-range, 
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__month-text--in-selecting-range, 
+.react-datepicker__month-text--in-range {
+  background-color: color-mix(in srgb, var(--brand-mint, #00ffcc), transparent 75%) !important;
+  color: var(--text-color, #fff) !important;
+  border-radius: 0 !important;
+}
+
+.react-datepicker__day--range-start,
+.react-datepicker__day--range-end,
+.react-datepicker__day--selecting-range-start,
+.react-datepicker__day--selected,
+.react-datepicker__month-text--selected {
+  background-color: var(--brand-mint, #00ffcc) !important;
+  color: #000 !important;
+  border-radius: 50% !important;
+  font-weight: bold;
+}
+
+.react-datepicker__day--keyboard-selected, 
+.react-datepicker__month-text--keyboard-selected {
+  background-color: color-mix(in srgb, var(--brand-mint, #00ffcc), transparent 70%) !important;
+  color: var(--brand-mint, #00ffcc) !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: var(--text-color, #ccc) !important;
+}
+
+.react-datepicker__navigation:hover *::before {
+  border-color: var(--brand-mint, #00ffcc) !important;
+}
+
+.react-datepicker__day--outside-month {
+  opacity: 0.3;
 }
