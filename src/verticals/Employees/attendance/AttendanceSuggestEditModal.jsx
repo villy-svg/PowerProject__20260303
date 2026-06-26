@@ -47,7 +47,7 @@ const AttendanceSuggestEditModal = ({
   onClose,
   onSubmitComplete,
 }) => {
-  const { employeeId, date, record } = selectedCell || {};
+  const { employeeId, date, record, employeeName } = selectedCell || {};
 
   // Form state — default to the existing record's values if available
   const [suggestedStatus, setSuggestedStatus] = useState(
@@ -56,8 +56,6 @@ const AttendanceSuggestEditModal = ({
   const [suggestedShiftType, setSuggestedShiftType] = useState(
     record?.shift_type || ''
   );
-  const [suggestedLoginTime, setSuggestedLoginTime] = useState('');
-  const [suggestedLogoutTime, setSuggestedLogoutTime] = useState('');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,14 +76,35 @@ const AttendanceSuggestEditModal = ({
     setIsSubmitting(true);
     setSubmitError(null);
 
+    let finalLoginTime = null;
+    let finalLogoutTime = null;
+
+    if (suggestedStatus === 'present') {
+      if (suggestedShiftType === 'day') {
+        finalLoginTime = `${date}T10:00`;
+        finalLogoutTime = `${date}T20:00`;
+      } else if (suggestedShiftType === 'night') {
+        finalLoginTime = `${date}T22:00`;
+        
+        const nextDay = new Date(date + 'T00:00:00');
+        nextDay.setDate(nextDay.getDate() + 1);
+        const yyyy = nextDay.getFullYear();
+        const mm = String(nextDay.getMonth() + 1).padStart(2, '0');
+        const dd = String(nextDay.getDate()).padStart(2, '0');
+        const nextDateStr = `${yyyy}-${mm}-${dd}`;
+        
+        finalLogoutTime = `${nextDateStr}T08:00`;
+      }
+    }
+
     try {
       const { error } = await submitEditRequest({
         employeeId,
         shiftDate:               date,
         suggestedStatus,
         suggestedShiftType:      suggestedShiftType || null,
-        suggestedFirstLoginTime: suggestedLoginTime || null,
-        suggestedLogoutTime:     suggestedLogoutTime || null,
+        suggestedFirstLoginTime: finalLoginTime,
+        suggestedLogoutTime:     finalLogoutTime,
         // Link to existing record if it exists (null for future dates)
         dailyAttendanceId:       record?.id || null,
         requestedBy:             currentUser?.id,
@@ -114,8 +133,8 @@ const AttendanceSuggestEditModal = ({
         {/* Modal Header */}
         <div className="modal-header">
           <div>
-            <h2 className="modal-title">Suggest Edit</h2>
-            <p className="modal-subtitle">{displayDate}</p>
+            <h2 className="modal-title">Edit Attendance</h2>
+            <p className="modal-subtitle">{employeeName} • {displayDate}</p>
           </div>
           <button
             className="halo-button modal-close-btn"
@@ -127,12 +146,7 @@ const AttendanceSuggestEditModal = ({
           </button>
         </div>
 
-        {/* Info banner: Contributor-only visibility */}
-        <div className="suggest-edit-modal__info-banner">
-          <p>
-            Your suggestion will be reviewed by an Editor before it takes effect on the live board.
-          </p>
-        </div>
+
 
         {/* Current Status (read-only context) */}
         {record?.attendance_status && (
@@ -188,37 +202,6 @@ const AttendanceSuggestEditModal = ({
             </div>
           )}
 
-          {/* Login Time (optional — for fixing missed logins) */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="suggest-login-time">
-              SUGGESTED LOGIN TIME <span className="form-label--optional">(optional)</span>
-            </label>
-            <div className="form-input-container">
-              <input
-                id="suggest-login-time"
-                type="datetime-local"
-                className="form-input"
-                value={suggestedLoginTime}
-                onChange={(e) => setSuggestedLoginTime(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Logout Time (optional — for fixing missed logouts) */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="suggest-logout-time">
-              SUGGESTED LOGOUT TIME <span className="form-label--optional">(optional)</span>
-            </label>
-            <div className="form-input-container">
-              <input
-                id="suggest-logout-time"
-                type="datetime-local"
-                className="form-input"
-                value={suggestedLogoutTime}
-                onChange={(e) => setSuggestedLogoutTime(e.target.value)}
-              />
-            </div>
-          </div>
 
           {/* Error display */}
           {submitError && (

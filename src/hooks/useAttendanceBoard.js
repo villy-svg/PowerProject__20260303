@@ -16,6 +16,7 @@ import {
   fetchAttendanceForDateRange,
   fetchEmployeesForAttendance,
 } from '../services/employees/attendanceService';
+import { fetchApprovedSchedulesForDateRange } from '../services/employees/schedulePlannerService';
 import { fetchPendingRequests } from '../services/employees/editRequestService';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
 
@@ -83,9 +84,15 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(50);
+  const [hasMore, setHasMore] = useState(true);
+
   // Data state
   const [employees, setEmployees] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [scheduledRecords, setScheduledRecords] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
 
   // UI state
@@ -114,30 +121,34 @@ export function useAttendanceBoard(user, defaultStatus = null) {
         filters.employeeId = user.employeeId;
       }
 
-      // Fetch in parallel — employees and attendance records are independent
-      const [employeesResult, attendanceResult, pendingResult] = await Promise.all([
-        fetchEmployeesForAttendance(filters),
+      // Fetch in parallel — employees, attendance records, pending requests, and approved schedules
+      const [employeesResult, attendanceResult, pendingResult, schedulesResult] = await Promise.all([
+        fetchEmployeesForAttendance(filters, page, pageSize),
         fetchAttendanceForDateRange(startDate, endDate),
         fetchPendingRequests(),
+        fetchApprovedSchedulesForDateRange(startDate, endDate),
       ]);
 
       if (employeesResult.error) throw employeesResult.error;
       if (attendanceResult.error) throw attendanceResult.error;
+      if (schedulesResult.error) throw schedulesResult.error;
       // pendingRequests failure is non-fatal — editors may lack access, gracefully degrade
       if (pendingResult.error) {
         console.warn('[useAttendanceBoard] Could not fetch pending requests:', pendingResult.error);
       }
 
       setEmployees(employeesResult.data || []);
+      setHasMore((employeesResult.data || []).length === pageSize);
       setAttendanceRecords(attendanceResult.data || []);
+      setScheduledRecords(schedulesResult.data || []);
       setPendingRequests(pendingResult.data || []);
     } catch (err) {
       console.error('[useAttendanceBoard] fetchBoardData error:', err);
-      setError(err?.message || 'Failed to load attendance data.');
+      setError(err?.message || 'Failed to load attendance board data.');
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, user, page, pageSize]); // Re-fetch on date or page change
 
   // Initial fetch and re-fetch when date range changes
   useEffect(() => {
@@ -145,37 +156,77 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   }, [fetchBoardData]);
 
   // ---------------------------------------------------------------------------
-  // Derived: Build the grid cell map for fast O(1) lookup in the UI
-  // Key: `${employeeId}_${shiftDate}` → attendance record (or null if absent)
+  // Derived: Build the grid cell maps for fast O(1) lookup in the UI
   // ---------------------------------------------------------------------------
-  const cellMap = {};
+  const liveMap = {};
   attendanceRecords.forEach(record => {
     const key = `${record.employee_id}_${record.shift_date}`;
-    cellMap[key] = record;
+    liveMap[key] = record;
+  });
+
+  const scheduleMap = {};
+  scheduledRecords.forEach(record => {
+    const key = `${record.employee_id}_${record.shift_date}`;
+    // Because the query orders by updated_at DESC, the first one we encounter
+    // is the most recently approved. We only store it if it doesn't exist yet.
+    if (!scheduleMap[key]) {
+      scheduleMap[key] = record;
+    }
   });
 
   // ---------------------------------------------------------------------------
   // Helper: Get the cell data for a specific employee + date combo
-  // Returns the attendance record if it exists, or a default 'absent' shell.
+  // Returns the attendance record if it exists and is valid, or falls back to
+  // the approved schedule, or finally a default 'absent' shell.
   // ---------------------------------------------------------------------------
   const getCellData = useCallback((employeeId, date) => {
     const key = `${employeeId}_${date}`;
-    return cellMap[key] || {
+    const live = liveMap[key];
+    const scheduled = scheduleMap[key];
+
+    // 1. If we have a live record in daily_attendances
+    if (live) {
+      // If it has actual check-in data, or it's an explicit override (like week-off/leave)
+      if (live.first_login_time || live.attendance_status !== 'absent') {
+        return live;
+      }
+    }
+
+    // 2. If we don't have a valid live record, but we DO have an approved schedule
+    if (scheduled) {
+      return {
+        employee_id: employeeId,
+        shift_date: date,
+        attendance_status: scheduled.attendance_status,
+        hub_id: scheduled.hub_id,
+        is_scheduled_only: true, // Optional flag for UI
+        has_pending_edit: false
+      };
+    }
+
+    // 3. Fallback default
+    return {
       employee_id:       employeeId,
       shift_date:        date,
-      attendance_status: defaultStatus,
+      attendance_status: defaultStatus || 'absent',
       has_pending_edit:  false,
     };
-  }, [attendanceRecords, defaultStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [liveMap, scheduleMap, defaultStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     // Data
     employees,
-    attendanceRecords,
-    pendingRequests,
     dateRange,
-    // State
-    startDate, setStartDate,
+    pendingRequests,
+    
+    // Pagination
+    page,
+    setPage,
+    hasMore,
+
+    // Controls
+    startDate,
+    setStartDate,
     endDate, setEndDate,
     isLoading,
     error,

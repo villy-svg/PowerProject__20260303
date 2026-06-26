@@ -2,16 +2,24 @@
 
 .attendance-legend {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  width: 100%;
+}
+
+.attendance-legend__row {
+  display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1.5rem;
   flex-wrap: wrap;
-  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .attendance-legend__item {
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 6px 12px;
@@ -20,6 +28,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.attendance-legend__label {
+  opacity: 0.65;
+}
+
+.attendance-legend__icon {
+  opacity: 1 !important;
 }
 
 .attendance-legend__item--present,

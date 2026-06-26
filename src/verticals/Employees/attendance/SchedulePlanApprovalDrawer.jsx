@@ -1,15 +1,15 @@
 /**
- * WeekOffPlanApprovalDrawer.jsx
+ * SchedulePlanApprovalDrawer.jsx
  *
  * Slide-in approval panel for Editors to review, approve, or reject
- * pending bulk week-off plans submitted by Contributors or other Editors.
+ * pending bulk Schedule plans submitted by Contributors or other Editors.
  *
  * Mirrors the pattern from AttendanceApprovalDrawer.jsx for consistency.
  * Uses the same .approval-drawer CSS classes (defined in EmployeeAttendanceBoard.css).
  *
  * Props:
  *   isOpen        {boolean}  - Controls visibility
- *   planner       {object}   - useWeekOffPlanner hook result
+ *   planner       {object}   - useSchedulePlanner hook result
  *   currentUser   {object}   - The logged-in user object
  *   onClose       {Function} - Closes the drawer
  *   onActionComplete {Function} - Called after approve/reject to refresh board
@@ -44,13 +44,13 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   // Compute unique employee count from entries
   const uniqueEmployees = [
     ...new Map(
-      (plan.employee_weekoff_plan_entries || []).map(e => [e.employee_id, e.employees])
+      (plan.employee_Schedule_plan_entries || []).map(e => [e.employee_id, e.employees])
     ).values()
   ];
   const uniqueDates = [
-    ...new Set((plan.employee_weekoff_plan_entries || []).map(e => e.shift_date))
+    ...new Set((plan.employee_Schedule_plan_entries || []).map(e => e.shift_date))
   ].sort();
-  const entryCount = plan.employee_weekoff_plan_entries?.length || 0;
+  const entryCount = plan.employee_Schedule_plan_entries?.length || 0;
 
   const handleRejectSubmit = () => {
     onReject(plan, rejectNote);
@@ -85,18 +85,18 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 
       {/* Expandable employee list */}
       <button
-        className="halo-button wop-plan-card__expand-btn"
+        className="halo-button sp-plan-card__expand-btn"
         onClick={() => setIsExpanded(v => !v)}
-        id={`wop-expand-plan-${plan.id}`}
+        id={`sp-expand-plan-${plan.id}`}
         type="button"
       >
         {isExpanded ? '▲ Hide employees' : `▼ Show ${uniqueEmployees.length} employees`}
       </button>
 
       {isExpanded && (
-        <div className="wop-plan-card__emp-list">
+        <div className="sp-plan-card__emp-list">
           {uniqueEmployees.map(emp => (
-            <span key={emp?.id || Math.random()} className="wop-plan-card__emp-chip">
+            <span key={emp?.id || Math.random()} className="sp-plan-card__emp-chip">
               {emp?.full_name || '—'}
               {emp?.emp_code && <span className="hub-badge">{emp.emp_code}</span>}
             </span>
@@ -111,7 +111,7 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
             className="halo-button approval-card__approve-btn"
             onClick={() => onApprove(plan)}
             disabled={isActing}
-            id={`wop-approve-plan-${plan.id}`}
+            id={`sp-approve-plan-${plan.id}`}
           >
             {isActing ? 'Applying…' : '✓ Approve Plan'}
           </button>
@@ -119,18 +119,18 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
             className="halo-button approval-card__reject-btn"
             onClick={() => setShowRejectNote(true)}
             disabled={isActing}
-            id={`wop-reject-plan-${plan.id}`}
+            id={`sp-reject-plan-${plan.id}`}
           >
             ✕ Reject
           </button>
         </div>
       ) : (
         <div className="approval-card__reject-note-form">
-          <label className="form-label" htmlFor={`wop-reject-note-${plan.id}`}>
+          <label className="form-label" htmlFor={`sp-reject-note-${plan.id}`}>
             Rejection Reason (optional)
           </label>
           <textarea
-            id={`wop-reject-note-${plan.id}`}
+            id={`sp-reject-note-${plan.id}`}
             className="approval-card__reject-textarea"
             value={rejectNote}
             onChange={(e) => setRejectNote(e.target.value)}
@@ -159,9 +159,9 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 };
 
 // ---------------------------------------------------------------------------
-// WeekOffPlanApprovalDrawer — main export
+// SchedulePlanApprovalDrawer — main export
 // ---------------------------------------------------------------------------
-const WeekOffPlanApprovalDrawer = ({
+const SchedulePlanApprovalDrawer = ({
   isOpen,
   planner,
   currentUser,
@@ -178,10 +178,12 @@ const WeekOffPlanApprovalDrawer = ({
     setIsActing(true);
     setActionError(null);
 
-    // Flatten entries into { employee_id, shift_date } for the service
-    const entries = (plan.employee_weekoff_plan_entries || []).map(e => ({
-      employee_id: e.employee_id,
-      shift_date:  e.shift_date,
+    // Flatten entries into { employee_id, shift_date, attendance_status, hub_id } for the service
+    const entries = (plan.employee_Schedule_plan_entries || []).map(e => ({
+      employee_id:       e.employee_id,
+      shift_date:        e.shift_date,
+      attendance_status: e.attendance_status,
+      hub_id:            e.hub_id,
     }));
 
     try {
@@ -192,7 +194,7 @@ const WeekOffPlanApprovalDrawer = ({
       if (error) throw error;
       if (onActionComplete) onActionComplete();
     } catch (err) {
-      console.error('[WeekOffPlanApprovalDrawer] handleApprove error:', err);
+      console.error('[SchedulePlanApprovalDrawer] handleApprove error:', err);
       setActionError(err?.message || 'Failed to approve plan. Please try again.');
     } finally {
       setIsActing(false);
@@ -214,7 +216,7 @@ const WeekOffPlanApprovalDrawer = ({
       if (error) throw error;
       if (onActionComplete) onActionComplete();
     } catch (err) {
-      console.error('[WeekOffPlanApprovalDrawer] handleReject error:', err);
+      console.error('[SchedulePlanApprovalDrawer] handleReject error:', err);
       setActionError(err?.message || 'Failed to reject plan. Please try again.');
     } finally {
       setIsActing(false);
@@ -237,11 +239,11 @@ const WeekOffPlanApprovalDrawer = ({
         className="approval-drawer"
         role="dialog"
         aria-modal="true"
-        aria-label="Pending Week-Off Plans"
+        aria-label="Pending Schedule Plans"
       >
         <div className="approval-drawer__header">
           <h2 className="approval-drawer__title">
-            Week-Off Plans
+            Schedule Plans
             {!!planner.pendingPlansCount && (
               <span className="attendance-board__pending-badge">
                 {planner.pendingPlansCount}
@@ -252,7 +254,7 @@ const WeekOffPlanApprovalDrawer = ({
             className="halo-button approval-drawer__close-btn"
             onClick={onClose}
             aria-label="Close plan approval drawer"
-            id="wop-approval-drawer-close"
+            id="sp-approval-drawer-close"
           >
             ✕
           </button>
@@ -271,7 +273,7 @@ const WeekOffPlanApprovalDrawer = ({
             <div className="approval-drawer__empty">Loading plans…</div>
           ) : planner.pendingPlans.length === 0 ? (
             <div className="approval-drawer__empty">
-              <p>No pending week-off plans.</p>
+              <p>No pending Schedule plans.</p>
             </div>
           ) : (
             planner.pendingPlans.map(plan => (
@@ -289,13 +291,13 @@ const WeekOffPlanApprovalDrawer = ({
 
       {/* Scoped styles for plan-specific additions (extends existing approval-card CSS) */}
       <style>{`
-        .wop-plan-card__expand-btn {
+        .sp-plan-card__expand-btn {
           font-size: 0.72rem;
           opacity: 0.6;
           align-self: flex-start;
           padding: 0.2rem 0.5rem;
         }
-        .wop-plan-card__emp-list {
+        .sp-plan-card__emp-list {
           display: flex;
           flex-wrap: wrap;
           gap: 0.4rem;
@@ -304,7 +306,7 @@ const WeekOffPlanApprovalDrawer = ({
           border-radius: var(--radius-button, 12px);
           border: 1px solid var(--border-color);
         }
-        .wop-plan-card__emp-chip {
+        .sp-plan-card__emp-chip {
           display: inline-flex;
           align-items: center;
           gap: 0.3rem;
@@ -319,4 +321,6 @@ const WeekOffPlanApprovalDrawer = ({
   );
 };
 
-export default WeekOffPlanApprovalDrawer;
+export default SchedulePlanApprovalDrawer;
+
+

@@ -75,9 +75,11 @@ export async function fetchAttendanceForDateRange(startDate, endDate) {
 // with NO attendance records still appear as rows with 'absent' status)
 //
 // @param {object} filters - { hubIds: [], departmentIds: [] }
+// @param {number} page - Page number (1-indexed)
+// @param {number} pageSize - Number of records per page
 // @returns {Promise<{ data: Array, error: object|null }>}
 // ---------------------------------------------------------------------------
-export async function fetchEmployeesForAttendance(filters = {}) {
+export async function fetchEmployeesForAttendance(filters = {}, page = 1, pageSize = 50) {
   let query = supabase
     .from('employees')
     .select(`
@@ -90,7 +92,8 @@ export async function fetchEmployeesForAttendance(filters = {}) {
       departments ( id, name, dept_code )
     `)
     .eq('status', 'Active')
-    .order('full_name', { ascending: true });
+    .order('full_name', { ascending: true })
+    .range((page - 1) * pageSize, page * pageSize - 1);
 
   // Apply optional hub filter
   if (filters.hubIds && filters.hubIds.length > 0) {

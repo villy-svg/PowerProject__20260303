@@ -39,9 +39,11 @@ const MasterHeaderMenu = ({
       <div className="master-header-left">
         {expandedLeft}
       </div>
-      <div className="master-header-right">
-        {expandedRight}
-      </div>
+      {expandedRight && (
+        <div className="master-header-right">
+          {expandedRight}
+        </div>
+      )}
       
       {SidebarComponent && (
         <div className="mobile-menu-sidebar-filters">

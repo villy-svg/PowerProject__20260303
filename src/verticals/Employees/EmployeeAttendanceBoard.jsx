@@ -17,21 +17,22 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useAttendanceBoard } from '../../hooks/useAttendanceBoard';
-import { useWeekOffPlanner } from '../../hooks/useWeekOffPlanner';
+import { useSchedulePlanner } from '../../hooks/useSchedulePlanner';
 import AttendanceGrid from './attendance/AttendanceGrid';
 import AttendanceMobileList from './attendance/AttendanceMobileList';
 import AttendanceLegend from './attendance/AttendanceLegend';
 import { IconChevronDown } from '../../components/ui/Icons';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
-import WeekOffPlanApprovalDrawer from './attendance/WeekOffPlanApprovalDrawer';
-import WeekOffMyPlansDrawer from './attendance/WeekOffMyPlansDrawer';
+import SchedulePlanApprovalDrawer from './attendance/SchedulePlanApprovalDrawer';
+import ScheduleMyPlansDrawer from './attendance/ScheduleMyPlansDrawer';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './EmployeeAttendanceBoard.css';
 import './attendance/AttendanceMobileList.css';
 import RBACManageButton from '../../components/ui/RBACManageButton';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
+import { supabase } from '../../services/core/supabaseClient';
 
 // --- Week Off Planner Helpers ---
 function getWeekStringFromDate(dateInput) {
@@ -86,6 +87,7 @@ const EmployeeAttendanceBoard = ({
     employees, dateRange: attendanceDateRange, startDate, setStartDate,
     endDate, setEndDate, pendingRequests, isLoading: isBoardLoading,
     error, refreshBoard, getCellData: getLiveCellData,
+    page, setPage, hasMore
   } = useAttendanceBoard(user);
 
   const { shellType } = useLayoutShell();
@@ -93,7 +95,7 @@ const EmployeeAttendanceBoard = ({
   const canApprove = permissions?.canUpdate || permissions?.canUpdateEmployeeAttendanceBoard;
   const canSuggestEdit = permissions?.canCreate || permissions?.canCreateEmployeeAttendanceBoard;
 
-  const planner = useWeekOffPlanner({ user, canApprove });
+  const planner = useSchedulePlanner({ user, canApprove });
 
   // --- UI View Mode State ---
   const [viewMode, setViewMode] = useState('attendance'); // 'attendance' | 'planner'
@@ -112,6 +114,16 @@ const EmployeeAttendanceBoard = ({
   const [isSubmittingPlanner, setIsSubmittingPlanner] = useState(false);
   const [plannerError, setPlannerError] = useState(null);
   const [plannerSuccess, setPlannerSuccess] = useState(null);
+
+  const [paintbrushStatus, setPaintbrushStatus] = useState('present');
+  const [paintbrushHubId, setPaintbrushHubId] = useState('');
+  const [hubs, setHubs] = useState([]);
+
+  useEffect(() => {
+    supabase.from('hubs').select('id, name').order('name').then(({ data }) => {
+      if (data) setHubs(data);
+    });
+  }, []);
 
   const { from: plannerDateFrom, to: plannerDateTo } = useMemo(() => getDatesFromWeekString(weekString), [weekString]);
   
@@ -133,8 +145,9 @@ const EmployeeAttendanceBoard = ({
   const getCellData = useCallback((empId, date) => {
     if (viewMode === 'planner') {
       const selections = employeeSelections[empId] || [];
-      if (selections.includes(date)) {
-        return { status: 'week-off', is_draft: true, shift_date: date, employee_id: empId };
+      const sel = selections.find(d => d.date === date);
+      if (sel) {
+        return { status: sel.attendance_status, hub_id: sel.hub_id, is_draft: true, shift_date: date, employee_id: empId };
       }
       return { status: null, shift_date: date, employee_id: empId };
     }
@@ -148,16 +161,17 @@ const EmployeeAttendanceBoard = ({
       setPlannerSuccess(null);
       setEmployeeSelections(prev => {
         const current = prev[empId] || [];
-        if (current.includes(date)) {
-          return { ...prev, [empId]: current.filter(d => d !== date) };
-        } else {
-          // Check if adding this date would exceed the 2-day limit
-          // The grid itself only shows 7 days, so we enforce max 2 selections.
-          if (current.length >= 2) {
-             // Replace the oldest selection to avoid frustration
-             return { ...prev, [empId]: [current[1], date] }; 
+        const existingIdx = current.findIndex(d => d.date === date);
+        if (existingIdx >= 0) {
+          const existing = current[existingIdx];
+          if (existing.attendance_status === paintbrushStatus && existing.hub_id === paintbrushHubId) {
+            return { ...prev, [empId]: current.filter((_, idx) => idx !== existingIdx) };
           }
-          return { ...prev, [empId]: [...current, date] };
+          const newArray = [...current];
+          newArray[existingIdx] = { date, attendance_status: paintbrushStatus, hub_id: paintbrushHubId };
+          return { ...prev, [empId]: newArray };
+        } else {
+          return { ...prev, [empId]: [...current, { date, attendance_status: paintbrushStatus, hub_id: paintbrushHubId }] };
         }
       });
       return;
@@ -165,7 +179,9 @@ const EmployeeAttendanceBoard = ({
 
     // Normal Attendance Mode
     const record = getCellData(empId, date);
-    setSelectedCell({ employeeId: empId, date, record });
+    const emp = employees.find(e => e.id === empId);
+    const employeeName = emp?.full_name || emp?.name || 'Unknown Employee';
+    setSelectedCell({ employeeId: empId, date, record, employeeName });
     if (canApprove && record.has_pending_edit) {
       setIsApprovalDrawerOpen(true);
     } else if (canSuggestEdit) {
@@ -213,6 +229,7 @@ const EmployeeAttendanceBoard = ({
   const handleApplyDates = () => {
     setStartDate(inputStart);
     setEndDate(inputEnd);
+    if (setPage) setPage(1); // Reset page on date change
   };
 
   // --- PLANNER ACTIONS ---
@@ -312,14 +329,16 @@ const EmployeeAttendanceBoard = ({
     setWeekString(`${year}-W${weekNumber.toString().padStart(2, '0')}`);
 
     const newSelections = {};
-    const entries = plan.employee_weekoff_plan_entries || [];
+    const entries = plan.employee_schedule_plan_entries || [];
     entries.forEach(entry => {
       if (!newSelections[entry.employee_id]) {
         newSelections[entry.employee_id] = [];
       }
-      if (newSelections[entry.employee_id].length < 2) {
-        newSelections[entry.employee_id].push(entry.shift_date);
-      }
+      newSelections[entry.employee_id].push({
+        date: entry.shift_date,
+        attendance_status: entry.attendance_status,
+        hub_id: entry.hub_id
+      });
     });
     setEmployeeSelections(newSelections);
     setViewMode('planner');
@@ -459,7 +478,7 @@ const EmployeeAttendanceBoard = ({
   );
 
   const headerExpandedLeft = (
-    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
       {canSuggestEdit && (
         <div className="view-mode-toggle">
           <button
@@ -472,13 +491,83 @@ const EmployeeAttendanceBoard = ({
             className={`view-toggle-btn ${viewMode === 'planner' ? 'active' : ''}`}
             onClick={() => { setViewMode('planner'); setIsMenuOpen(false); }}
           >
-            Week Off Planner
+            Schedule Planner
           </button>
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div className="attendance-board__menu-label" style={{ padding: 0, margin: 0, border: 'none', background: 'transparent' }}>Legend:</div>
+      {/* Date Filter & Pagination */}
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        {viewMode === 'attendance' ? (
+          <>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '12px' }}>
+              <button 
+                className="halo-button" 
+                style={{ padding: '4px 12px', fontSize: '0.75rem', minHeight: 'auto' }}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                ◀ Prev
+              </button>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)' }}>
+                PAGE {page}
+              </span>
+              <button 
+                className="halo-button" 
+                style={{ padding: '4px 12px', fontSize: '0.75rem', minHeight: 'auto' }}
+                onClick={() => setPage(p => p + 1)}
+                disabled={!hasMore}
+              >
+                Next ▶
+              </button>
+            </div>
+          </>
+        ) : (
+          <input 
+            type="week" 
+            value={weekString} 
+            onChange={e => {
+              setWeekString(e.target.value);
+              // Also reset grid selections when week changes so they don't get misaligned
+              setEmployeeSelections({});
+              setActivePlanId(null);
+              setPage(1);
+            }}
+            className="form-input"
+            style={{ padding: '0.4rem 0.8rem', minHeight: 'auto', width: 'auto' }}
+          />
+        )}
+      </div>
+
+      {viewMode === 'planner' && canSuggestEdit && (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Paintbrush:</label>
+          <select 
+            value={paintbrushStatus} 
+            onChange={e => setPaintbrushStatus(e.target.value)}
+            className="form-input"
+            style={{ width: '110px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', minHeight: 'auto' }}
+          >
+            <option value="present">Present</option>
+            <option value="week-off">Week-Off</option>
+            <option value="leave">Leave</option>
+            <option value="wfh">WFH</option>
+            <option value="half-day">Half Day</option>
+            <option value="absent">Clear</option>
+          </select>
+          <select 
+            value={paintbrushHubId} 
+            onChange={e => setPaintbrushHubId(e.target.value)}
+            className="form-input"
+            style={{ width: '110px', padding: '0.2rem 0.5rem', fontSize: '0.8rem', minHeight: 'auto' }}
+          >
+            <option value="">No Hub</option>
+            {hubs.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+          </select>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
         <AttendanceLegend />
       </div>
 
@@ -503,14 +592,14 @@ const EmployeeAttendanceBoard = ({
   return (
     <div className="attendance-board__wrapper">
       <MasterPageHeader
-        title={viewMode === 'planner' ? "Week Off Planner" : "Attendance Board"}
+        title={viewMode === 'planner' ? "Schedule Planner" : "Attendance Board"}
         description={
           viewMode === 'planner' ? (
-            <span>Click cells to assign up to 2 days off per employee for this week.</span>
+            <span>Select a status and hub for your paintbrush, then click cells to paint shifts for this week.</span>
           ) : (
             <span>
               Daily log for employee shifts, check-ins, and leave tracking.
-              <span className="attendance-board__info-icon" title="Switch to the Week Off Planner via the Menu to submit bulk requests.">ⓘ</span>
+              <span className="attendance-board__info-icon" title="Switch to the Schedule Planner via the Menu to submit bulk requests.">ⓘ</span>
             </span>
           )
         }
@@ -595,7 +684,7 @@ const EmployeeAttendanceBoard = ({
       )}
 
       {isPlanApprovalDrawerOpen && (
-        <WeekOffPlanApprovalDrawer
+        <SchedulePlanApprovalDrawer
           isOpen={isPlanApprovalDrawerOpen}
           planner={planner}
           currentUser={user}
@@ -609,7 +698,7 @@ const EmployeeAttendanceBoard = ({
       )}
 
       {showMyPlans && (
-        <WeekOffMyPlansDrawer
+        <ScheduleMyPlansDrawer
           isOpen={showMyPlans}
           planner={planner}
           onClose={() => setShowMyPlans(false)}
@@ -621,3 +710,4 @@ const EmployeeAttendanceBoard = ({
 };
 
 export default EmployeeAttendanceBoard;
+

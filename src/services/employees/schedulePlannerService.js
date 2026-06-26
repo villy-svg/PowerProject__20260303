@@ -1,13 +1,13 @@
 /**
- * weekOffPlannerService.js
+ * schedulePlannerService.js
  *
- * Repository layer for the bulk Week Off Planner workflow.
+ * Repository layer for the bulk Schedule Planner workflow.
  *
  * Lifecycle:
  *   Contributor/Editor (Maker) → saveDraft() / submitPlan()
  *   Editor (Checker)           → fetchPendingPlans() / approvePlan() / rejectPlan()
  *
- * Table naming: employee_weekoff_plans + employee_weekoff_plan_entries
+ * Table naming: employee_schedule_plans + employee_schedule_plan_entries
  * (database-table-naming-convention: [vertical]_[feature]_[details])
  *
  * Skill compliance:
@@ -18,6 +18,10 @@
  */
 
 import { supabase } from '../core/supabaseClient';
+
+// Define which statuses should automatically be upserted to daily_attendances upon plan approval.
+// This allows future extensibility (e.g., auto-upserting 'leave' or similar states).
+const AUTO_UPSERT_STATUSES = ['week-off'];
 
 // ---------------------------------------------------------------------------
 // CONTRIBUTOR/EDITOR (MAKER): Save or update a draft plan
@@ -31,8 +35,8 @@ import { supabase } from '../core/supabaseClient';
 //
 // @param {object} params
 //   @param {string|null} params.planId      - Existing plan UUID (null for new)
-//   @param {string}      params.dateFrom    - 'YYYY-MM-DD' (start of week-off window)
-//   @param {string}      params.dateTo      - 'YYYY-MM-DD' (end of week-off window, max +14 days)
+//   @param {string}      params.dateFrom    - 'YYYY-MM-DD' (start of schedule window)
+//   @param {string}      params.dateTo      - 'YYYY-MM-DD' (end of schedule window, max +14 days)
 //   @param {Array}       params.employeeSelections - Array of { employeeId, dates: [] }
 //   @param {string}      params.submittedBy - user_profiles UUID (auth.uid())
 // @returns {Promise<{ data: object|null, error: object|null }>}
@@ -43,7 +47,7 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
   const to    = new Date(dateTo);
   const dayDiff = Math.round((to - from) / (1000 * 60 * 60 * 24));
   if (dayDiff > 14) {
-    return { data: null, error: new Error('Week-off plan cannot exceed 15 days.') };
+    return { data: null, error: new Error('schedule plan cannot exceed 15 days.') };
   }
   if (from > to) {
     return { data: null, error: new Error('Start date must be before end date.') };
@@ -56,10 +60,15 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
     if (!selection.dates || selection.dates.length === 0) continue;
     
     for (const d of selection.dates) {
-      if (!d) continue; // Skip empty dates
+      if (!d || !d.date) continue; // Skip empty dates
       // Safety check: ensure date is within the plan's overall window
-      if (d >= dateFrom && d <= dateTo) {
-        entries.push({ employee_id: selection.employeeId, shift_date: d });
+      if (d.date >= dateFrom && d.date <= dateTo) {
+        entries.push({ 
+          employee_id: selection.employeeId, 
+          shift_date: d.date,
+          attendance_status: d.attendance_status || 'present',
+          hub_id: d.hub_id || null
+        });
       }
     }
   }
@@ -67,7 +76,7 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
   // --- CASE 1: New plan — INSERT plan header then INSERT entries ---
   if (!planId) {
     const { data: newPlan, error: planError } = await supabase
-      .from('employee_weekoff_plans')
+      .from('employee_schedule_plans')
       .insert({
         submitted_by: submittedBy,
         plan_status:  'draft',
@@ -78,18 +87,18 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
       .single();
 
     if (planError) {
-      console.error('[weekOffPlannerService] saveDraft INSERT plan error:', planError);
+      console.error('[schedulePlannerService] saveDraft INSERT plan error:', planError);
       return { data: null, error: planError };
     }
 
     // Insert all entries linked to the new plan
     const entryRows = entries.map(e => ({ ...e, plan_id: newPlan.id }));
     const { error: entriesError } = await supabase
-      .from('employee_weekoff_plan_entries')
+      .from('employee_schedule_plan_entries')
       .insert(entryRows);
 
     if (entriesError) {
-      console.error('[weekOffPlannerService] saveDraft INSERT entries error:', entriesError);
+      console.error('[schedulePlannerService] saveDraft INSERT entries error:', entriesError);
       return { data: null, error: entriesError };
     }
 
@@ -100,18 +109,18 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
 
   // Step A: Delete existing entries for this plan (re-building from scratch)
   const { error: deleteError } = await supabase
-    .from('employee_weekoff_plan_entries')
+    .from('employee_schedule_plan_entries')
     .delete()
     .eq('plan_id', planId);
 
   if (deleteError) {
-    console.error('[weekOffPlannerService] saveDraft DELETE entries error:', deleteError);
+    console.error('[schedulePlannerService] saveDraft DELETE entries error:', deleteError);
     return { data: null, error: deleteError };
   }
 
   // Step B: Update the plan header with new dates + reset to draft
   const { data: updatedPlan, error: updateError } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .update({
       date_from:   dateFrom,
       date_to:     dateTo,
@@ -123,18 +132,18 @@ export async function saveDraft({ planId, dateFrom, dateTo, employeeSelections, 
     .single();
 
   if (updateError) {
-    console.error('[weekOffPlannerService] saveDraft UPDATE plan error:', updateError);
+    console.error('[schedulePlannerService] saveDraft UPDATE plan error:', updateError);
     return { data: null, error: updateError };
   }
 
   // Step C: Insert fresh entries
   const entryRows = entries.map(e => ({ ...e, plan_id: planId }));
   const { error: insertError } = await supabase
-    .from('employee_weekoff_plan_entries')
+    .from('employee_schedule_plan_entries')
     .insert(entryRows);
 
   if (insertError) {
-    console.error('[weekOffPlannerService] saveDraft INSERT entries (update path) error:', insertError);
+    console.error('[schedulePlannerService] saveDraft INSERT entries (update path) error:', insertError);
     return { data: null, error: insertError };
   }
 
@@ -160,7 +169,7 @@ export async function submitPlan({ planId, submittedBy, dateFrom, dateTo }) {
   // --- STEP 1: Cancel any overlapping pending plans from the same submitter ---
   // A plan overlaps if: its date_from <= our date_to AND its date_to >= our date_from
   const { error: cancelError } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .update({
       plan_status: 'cancelled',
       updated_at:  new Date().toISOString(),
@@ -172,13 +181,13 @@ export async function submitPlan({ planId, submittedBy, dateFrom, dateTo }) {
     .gte('date_to',   dateFrom);
 
   if (cancelError) {
-    console.error('[weekOffPlannerService] submitPlan cancel overlapping plans error:', cancelError);
+    console.error('[schedulePlannerService] submitPlan cancel overlapping plans error:', cancelError);
     return { data: null, error: cancelError };
   }
 
   // --- STEP 2: Set this plan to 'pending' ---
   const { data, error } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .update({
       plan_status: 'pending',
       updated_at:  new Date().toISOString(),
@@ -189,7 +198,7 @@ export async function submitPlan({ planId, submittedBy, dateFrom, dateTo }) {
     .single();
 
   if (error) {
-    console.error('[weekOffPlannerService] submitPlan update to pending error:', error);
+    console.error('[schedulePlannerService] submitPlan update to pending error:', error);
     return { data: null, error };
   }
 
@@ -207,7 +216,7 @@ export async function submitPlan({ planId, submittedBy, dateFrom, dateTo }) {
 // ---------------------------------------------------------------------------
 export async function fetchMyPlans(userId) {
   const { data, error } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .select(`
       id,
       plan_status,
@@ -216,14 +225,14 @@ export async function fetchMyPlans(userId) {
       review_note,
       created_at,
       updated_at,
-      employee_weekoff_plan_entries ( id, employee_id, shift_date )
+      employee_schedule_plan_entries ( id, employee_id, shift_date, attendance_status, hub_id )
     `)
     .eq('submitted_by', userId)
     .in('plan_status', ['draft', 'pending', 'approved', 'rejected'])
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('[weekOffPlannerService] fetchMyPlans error:', error);
+    console.error('[schedulePlannerService] fetchMyPlans error:', error);
     return { data: null, error };
   }
 
@@ -239,7 +248,7 @@ export async function fetchMyPlans(userId) {
 // ---------------------------------------------------------------------------
 export async function fetchPendingPlans() {
   const { data, error } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .select(`
       id,
       plan_status,
@@ -247,9 +256,11 @@ export async function fetchPendingPlans() {
       date_to,
       created_at,
       submitter:submitted_by ( id, name, email ),
-      employee_weekoff_plan_entries (
+      employee_schedule_plan_entries (
         id,
         shift_date,
+        attendance_status,
+        hub_id,
         employees ( id, full_name, emp_code )
       )
     `)
@@ -257,7 +268,7 @@ export async function fetchPendingPlans() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('[weekOffPlannerService] fetchPendingPlans error:', error);
+    console.error('[schedulePlannerService] fetchPendingPlans error:', error);
     return { data: null, error };
   }
 
@@ -265,11 +276,11 @@ export async function fetchPendingPlans() {
 }
 
 // ---------------------------------------------------------------------------
-// EDITOR (CHECKER): Approve a bulk week-off plan
+// EDITOR (CHECKER): Approve a bulk schedule plan
 //
 // Three-step operation:
 //   1. Mark the plan as 'approved'.
-//   2. For each entry, upsert into daily_attendances as status='week-off'.
+//   2. For each entry, upsert into daily_attendances as status='schedule'.
 //      Uses ON CONFLICT on (employee_id, shift_date) to safely update
 //      existing records or create new ones.
 //
@@ -286,7 +297,7 @@ export async function fetchPendingPlans() {
 export async function approvePlan({ planId, reviewedBy, entries }) {
   // --- STEP 1: Mark plan as approved ---
   const { error: approveError } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .update({
       plan_status: 'approved',
       reviewed_by: reviewedBy,
@@ -295,36 +306,64 @@ export async function approvePlan({ planId, reviewedBy, entries }) {
     .eq('id', planId);
 
   if (approveError) {
-    console.error('[weekOffPlannerService] approvePlan update plan error:', approveError);
+    console.error('[schedulePlannerService] approvePlan update plan error:', approveError);
     return { data: null, error: approveError };
   }
 
-  // --- STEP 2: Upsert all entries into daily_attendances as 'week-off' ---
-  const upsertRows = entries.map(entry => ({
-    employee_id:       entry.employee_id,
-    shift_date:        entry.shift_date,
-    attendance_status: 'week-off',
-    updated_at:        new Date().toISOString(),
-  }));
+  // --- STEP 2: Upsert ONLY allowed entries into daily_attendances ---
+  // The remaining scheduled entries stay entirely in the schedule plan tables.
+  const entriesToUpsert = entries.filter(entry => 
+    AUTO_UPSERT_STATUSES.includes(entry.attendance_status)
+  );
 
-  const { error: upsertError } = await supabase
-    .from('daily_attendances')
-    .upsert(upsertRows, {
-      onConflict: 'employee_id,shift_date', // Matches the composite unique constraint
+  if (entriesToUpsert.length > 0) {
+    const upsertRows = entriesToUpsert.map(entry => ({
+      employee_id:       entry.employee_id,
+      shift_date:        entry.shift_date,
+      attendance_status: entry.attendance_status,
+      hub_id:            entry.hub_id,
+    }));
+
+    const { error: upsertError } = await supabase.rpc('rpc_upsert_schedule_attendances', {
+      p_entries: upsertRows,
     });
 
-  if (upsertError) {
-    console.error('[weekOffPlannerService] approvePlan upsert daily_attendances error:', upsertError);
-    // NOTE: Plan is already marked approved above. Log prominently.
-    // TODO: Phase 2 — wrap in atomic RPC to prevent partial writes.
-    return { data: null, error: upsertError };
+    if (upsertError) {
+      console.error('[schedulePlannerService] approvePlan upsert daily_attendances error:', upsertError);
+      // NOTE: Plan is already marked approved above. Log prominently.
+      // TODO: Phase 2 — wrap in atomic RPC to prevent partial writes.
+      return { data: null, error: upsertError };
+    }
+  }
+
+  // --- STEP 3: Clear any ghost attendances for non-auto-upserted statuses ---
+  // If the manager is overriding a week-off (auto-upserted) with a present/absent (not auto-upserted),
+  // we must delete the stranded week-off from daily_attendances if they haven't checked in yet.
+  const entriesToClear = entries.filter(entry => 
+    !AUTO_UPSERT_STATUSES.includes(entry.attendance_status)
+  );
+
+  if (entriesToClear.length > 0) {
+    const clearPayload = entriesToClear.map(entry => ({
+      employee_id: entry.employee_id,
+      shift_date:  entry.shift_date,
+    }));
+
+    const { error: clearError } = await supabase.rpc('rpc_clear_ghost_attendances', {
+      p_entries: clearPayload,
+    });
+
+    if (clearError) {
+      console.error('[schedulePlannerService] approvePlan rpc_clear_ghost_attendances error:', clearError);
+      // Non-fatal to the approval itself, but log it.
+    }
   }
 
   return { data: { planId, approved: true, entriesCount: entries.length }, error: null };
 }
 
 // ---------------------------------------------------------------------------
-// EDITOR (CHECKER): Reject a bulk week-off plan
+// EDITOR (CHECKER): Reject a bulk schedule plan
 //
 // Sets status to 'rejected' and records the review note. The plan returns
 // to an editable state for the contributor (status='rejected' is treated as
@@ -338,7 +377,7 @@ export async function approvePlan({ planId, reviewedBy, entries }) {
 // ---------------------------------------------------------------------------
 export async function rejectPlan({ planId, reviewedBy, reviewNote = '' }) {
   const { data, error } = await supabase
-    .from('employee_weekoff_plans')
+    .from('employee_schedule_plans')
     .update({
       plan_status: 'rejected',
       reviewed_by: reviewedBy,
@@ -350,9 +389,36 @@ export async function rejectPlan({ planId, reviewedBy, reviewNote = '' }) {
     .single();
 
   if (error) {
-    console.error('[weekOffPlannerService] rejectPlan error:', error);
+    console.error('[schedulePlannerService] rejectPlan error:', error);
     return { data: null, error };
   }
 
   return { data, error: null };
 }
+
+// ---------------------------------------------------------------------------
+// MANAGER BOARD: Fetch Approved Schedules for a Date Range
+//
+// Queries the highly optimized Postgres View which automatically filters
+// overlapping plans and returns only the single most recently approved 
+// entry per employee per date.
+//
+// @param {string} startDate - 'YYYY-MM-DD'
+// @param {string} endDate   - 'YYYY-MM-DD'
+// @returns {Promise<{ data: Array, error: object|null }>}
+// ---------------------------------------------------------------------------
+export async function fetchApprovedSchedulesForDateRange(startDate, endDate) {
+  const { data, error } = await supabase
+    .from('vw_latest_approved_schedules')
+    .select('*')
+    .gte('shift_date', startDate)
+    .lte('shift_date', endDate);
+
+  if (error) {
+    console.error('[schedulePlannerService] fetchApprovedSchedules error:', error);
+    return { data: null, error };
+  }
+
+  return { data: data || [], error: null };
+}
+

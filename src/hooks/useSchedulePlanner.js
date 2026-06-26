@@ -1,7 +1,7 @@
 /**
- * useWeekOffPlanner.js
+ * useSchedulePlanner.js
  *
- * State management hook for the bulk Week Off Planner feature.
+ * State management hook for the bulk Schedule Planner feature.
  *
  * Provides:
  *   - myPlans: The current user's own plans (draft, pending, rejected)
@@ -24,17 +24,17 @@ import {
   fetchPendingPlans as serviceFetchPendingPlans,
   approvePlan      as serviceApprovePlan,
   rejectPlan       as serviceRejectPlan,
-} from '../services/employees/weekOffPlannerService';
+} from '../services/employees/schedulePlannerService';
 
 // ---------------------------------------------------------------------------
-// useWeekOffPlanner
+// useSchedulePlanner
 //
 // @param {object} params
 //   @param {object}  params.user       - Current user object (needs .id)
 //   @param {boolean} params.canApprove - True if the user is Editor or Admin
 // @returns {object} planner state and action handlers
 // ---------------------------------------------------------------------------
-export function useWeekOffPlanner({ user, canApprove }) {
+export function useSchedulePlanner({ user, canApprove }) {
   const [myPlans,      setMyPlans]      = useState([]);
   const [pendingPlans, setPendingPlans] = useState([]);
   const [isLoading,    setIsLoading]    = useState(false);
@@ -61,8 +61,8 @@ export function useWeekOffPlanner({ user, canApprove }) {
         setPendingPlans(pendingData || []);
       }
     } catch (err) {
-      console.error('[useWeekOffPlanner] refreshPlanner error:', err);
-      setError(err?.message || 'Failed to load week-off plans.');
+      console.error('[useSchedulePlanner] refreshPlanner error:', err);
+      setError(err?.message || 'Failed to load schedule plans.');
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +94,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
       await refreshPlanner();
       return { data, error: null };
     } catch (err) {
-      console.error('[useWeekOffPlanner] saveDraft error:', err);
+      console.error('[useSchedulePlanner] saveDraft error:', err);
       setError(err?.message || 'Failed to save draft.');
       return { data: null, error: err };
     } finally {
@@ -121,7 +121,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
       await refreshPlanner();
       return { data, error: null };
     } catch (err) {
-      console.error('[useWeekOffPlanner] submitPlan error:', err);
+      console.error('[useSchedulePlanner] submitPlan error:', err);
       setError(err?.message || 'Failed to submit plan.');
       return { data: null, error: err };
     } finally {
@@ -147,7 +147,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
       await refreshPlanner();
       return { data, error: null };
     } catch (err) {
-      console.error('[useWeekOffPlanner] approvePlan error:', err);
+      console.error('[useSchedulePlanner] approvePlan error:', err);
       setError(err?.message || 'Failed to approve plan.');
       return { data: null, error: err };
     } finally {
@@ -173,7 +173,7 @@ export function useWeekOffPlanner({ user, canApprove }) {
       await refreshPlanner();
       return { data, error: null };
     } catch (err) {
-      console.error('[useWeekOffPlanner] rejectPlan error:', err);
+      console.error('[useSchedulePlanner] rejectPlan error:', err);
       setError(err?.message || 'Failed to reject plan.');
       return { data: null, error: err };
     } finally {
@@ -194,3 +194,4 @@ export function useWeekOffPlanner({ user, canApprove }) {
     rejectPlan,
   };
 }
+

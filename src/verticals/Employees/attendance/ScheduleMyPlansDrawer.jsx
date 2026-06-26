@@ -1,7 +1,7 @@
 /**
- * WeekOffMyPlansDrawer.jsx
+ * ScheduleMyPlansDrawer.jsx
  *
- * Drawer for Contributors to view their past week-off plans,
+ * Drawer for Contributors to view their past Schedule plans,
  * see rejection notes, and re-load rejected plans into the board for editing.
  */
 
@@ -16,19 +16,19 @@ function formatDate(dateStr) {
 }
 
 const STATUS_CONFIG = {
-  draft:     { label: 'Draft',     className: 'wop-badge--draft'     },
-  pending:   { label: 'Pending',   className: 'wop-badge--pending'   },
-  approved:  { label: 'Approved',  className: 'wop-badge--approved'  },
-  rejected:  { label: 'Rejected',  className: 'wop-badge--rejected'  },
-  cancelled: { label: 'Cancelled', className: 'wop-badge--cancelled' },
+  draft:     { label: 'Draft',     className: 'sp-badge--draft'     },
+  pending:   { label: 'Pending',   className: 'sp-badge--pending'   },
+  approved:  { label: 'Approved',  className: 'sp-badge--approved'  },
+  rejected:  { label: 'Rejected',  className: 'sp-badge--rejected'  },
+  cancelled: { label: 'Cancelled', className: 'sp-badge--cancelled' },
 };
 
 const PlanStatusBadge = ({ status }) => {
   const cfg = STATUS_CONFIG[status] || { label: status, className: '' };
-  return <span className={`wop-badge ${cfg.className}`}>{cfg.label}</span>;
+  return <span className={`sp-badge ${cfg.className}`}>{cfg.label}</span>;
 };
 
-const WeekOffMyPlansDrawer = ({
+const ScheduleMyPlansDrawer = ({
   isOpen,
   planner,
   onClose,
@@ -40,7 +40,7 @@ const WeekOffMyPlansDrawer = ({
     <div className="drawer-overlay" onClick={onClose} role="dialog">
       <div className="drawer drawer--right custom-scrollbar" onClick={(e) => e.stopPropagation()}>
         <div className="drawer__header">
-          <h2 className="drawer__title">My Week Off Plans</h2>
+          <h2 className="drawer__title">My Schedule Plans</h2>
           <button className="drawer__close-btn" onClick={onClose} aria-label="Close My Plans">
             ✕
           </button>
@@ -50,36 +50,36 @@ const WeekOffMyPlansDrawer = ({
           {planner.isLoading ? (
             <p className="drawer__empty-state">Loading your plans…</p>
           ) : planner.myPlans.length === 0 ? (
-            <p className="drawer__empty-state">You haven't submitted any week-off plans yet.</p>
+            <p className="drawer__empty-state">You haven't submitted any Schedule plans yet.</p>
           ) : (
-            <div className="wop-approval-list">
+            <div className="sp-approval-list">
               {planner.myPlans.map((plan) => {
                 const uniqueEmployeeIds = new Set(
-                  (plan.employee_weekoff_plan_entries || []).map(e => e.employee_id)
+                  (plan.employee_Schedule_plan_entries || []).map(e => e.employee_id)
                 );
-                const entryCount = plan.employee_weekoff_plan_entries?.length || 0;
+                const entryCount = plan.employee_Schedule_plan_entries?.length || 0;
 
                 return (
-                  <div key={plan.id} className="wop-approval-card">
-                    <div className="wop-approval-card__header">
-                      <div className="wop-approval-card__title">
+                  <div key={plan.id} className="sp-approval-card">
+                    <div className="sp-approval-card__header">
+                      <div className="sp-approval-card__title">
                         {formatDate(plan.date_from)} → {formatDate(plan.date_to)}
                       </div>
                       <PlanStatusBadge status={plan.plan_status} />
                     </div>
 
-                    <div className="wop-approval-card__meta">
+                    <div className="sp-approval-card__meta">
                       {uniqueEmployeeIds.size} employees · {entryCount} total entries
                     </div>
 
                     {plan.review_note && plan.plan_status === 'rejected' && (
-                      <div className="wop-approval-card__note">
+                      <div className="sp-approval-card__note">
                         <strong>Editor Note:</strong> {plan.review_note}
                       </div>
                     )}
 
                     {(plan.plan_status === 'rejected' || plan.plan_status === 'draft') && (
-                      <div className="wop-approval-card__actions">
+                      <div className="sp-approval-card__actions">
                         <button
                           className="halo-button halo-button--secondary"
                           onClick={() => onLoadPlan(plan)}
@@ -99,4 +99,6 @@ const WeekOffMyPlansDrawer = ({
   );
 };
 
-export default WeekOffMyPlansDrawer;
+export default ScheduleMyPlansDrawer;
+
+
