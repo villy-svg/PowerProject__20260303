@@ -23,6 +23,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import '../../../components/tasks/TaskCard.css';
 
 // ---------------------------------------------------------------------------
 // Helper — format a 'YYYY-MM-DD' string to readable locale
@@ -59,95 +60,103 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   };
 
   return (
-    <div className="approval-card">
-      {/* Plan summary header */}
-      <div className="approval-card__header">
-        <div className="approval-card__employee">
-          <p className="approval-card__name">
+    <div className="task-card-master" style={{ '--stage-color': 'var(--brand-blue)', marginBottom: '12px' }}>
+      {/* Row 1: Meta */}
+      <div className="card-row-1">
+        <span className="card-priority priority-high">
+          Schedule Plan
+        </span>
+        <span className="subtask-tag">
+          {uniqueEmployees.length} Emp • {uniqueDates.length} Days
+        </span>
+      </div>
+
+      {/* Row 2: Title & Details */}
+      <div className="card-row-2">
+        <div className="card-row-2-title" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <span className="card-task-name">
             {formatDate(plan.date_from)} → {formatDate(plan.date_to)}
-          </p>
+          </span>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            {entryCount} total entries
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+            Submitted by: {plan.submitter?.name || plan.submitter?.email || '—'}
+          </div>
         </div>
-        <p className="approval-card__date">
-          {uniqueEmployees.length} employees · {uniqueDates.length} days · {entryCount} entries
-        </p>
       </div>
 
-      {/* Submitter info */}
-      <div className="approval-card__requester">
-        <span className="approval-card__requester-label">Submitted by</span>
-        <span className="approval-card__requester-name">
-          {plan.submitter?.name || plan.submitter?.email || '—'}
-        </span>
-        <span className="approval-card__requester-time">
-          {new Date(plan.created_at).toLocaleString('en-IN')}
-        </span>
+      {/* Employee List Toggle */}
+      <div style={{ padding: '0 8px 8px 8px' }}>
+        <button
+          className="halo-button sp-plan-card__expand-btn"
+          onClick={() => setIsExpanded(v => !v)}
+          id={`sp-expand-plan-${plan.id}`}
+          type="button"
+        >
+          {isExpanded ? '▲ Hide employees' : `▼ Show ${uniqueEmployees.length} employees`}
+        </button>
+        {isExpanded && (
+          <div className="sp-plan-card__emp-list" style={{ marginTop: '8px' }}>
+            {uniqueEmployees.map((emp, idx) => (
+              <span key={emp?.id || idx} className="sp-plan-card__emp-chip">
+                {emp?.full_name || '—'}
+                {emp?.emp_code && <span className="hub-badge" style={{ marginLeft: '4px' }}>{emp.emp_code}</span>}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Expandable employee list */}
-      <button
-        className="halo-button sp-plan-card__expand-btn"
-        onClick={() => setIsExpanded(v => !v)}
-        id={`sp-expand-plan-${plan.id}`}
-        type="button"
-      >
-        {isExpanded ? '▲ Hide employees' : `▼ Show ${uniqueEmployees.length} employees`}
-      </button>
-
-      {isExpanded && (
-        <div className="sp-plan-card__emp-list">
-          {uniqueEmployees.map(emp => (
-            <span key={emp?.id || Math.random()} className="sp-plan-card__emp-chip">
-              {emp?.full_name || '—'}
-              {emp?.emp_code && <span className="hub-badge">{emp.emp_code}</span>}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Action Buttons / Rejection Note */}
+      {/* Action Buttons */}
       {!showRejectNote ? (
-        <div className="approval-card__actions">
+        <div className="card-row-approval" style={{ padding: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '8px' }}>
           <button
-            className="halo-button approval-card__approve-btn"
+            className="halo-button btn-approve"
             onClick={() => onApprove(plan)}
             disabled={isActing}
             id={`sp-approve-plan-${plan.id}`}
+            style={{ flex: 1 }}
           >
-            {isActing ? 'Applying…' : '✓ Approve Plan'}
+            {isActing ? 'Applying…' : '✓ Approve'}
           </button>
           <button
-            className="halo-button approval-card__reject-btn"
+            className="halo-button btn-reject"
             onClick={() => setShowRejectNote(true)}
             disabled={isActing}
             id={`sp-reject-plan-${plan.id}`}
+            style={{ flex: 1 }}
           >
             ✕ Reject
           </button>
         </div>
       ) : (
-        <div className="approval-card__reject-note-form">
-          <label className="form-label" htmlFor={`sp-reject-note-${plan.id}`}>
+        <div className="approval-card__reject-note-form" style={{ padding: '8px', borderTop: '1px solid var(--border-color)' }}>
+          <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`sp-reject-note-${plan.id}`}>
             Rejection Reason (optional)
           </label>
           <textarea
             id={`sp-reject-note-${plan.id}`}
-            className="approval-card__reject-textarea"
+            className="master-input"
+            style={{ width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
             value={rejectNote}
             onChange={(e) => setRejectNote(e.target.value)}
             placeholder="Explain the rejection to the contributor…"
-            rows={3}
+            rows={2}
           />
-          <div className="approval-card__actions">
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
-              className="halo-button approval-card__reject-btn"
+              className="halo-button btn-reject"
               onClick={handleRejectSubmit}
               disabled={isActing}
+              style={{ flex: 1 }}
             >
-              {isActing ? 'Rejecting…' : 'Confirm Reject'}
+              {isActing ? 'Rejecting…' : 'Confirm'}
             </button>
             <button
               className="halo-button"
               onClick={() => setShowRejectNote(false)}
+              style={{ flex: 1 }}
             >
               Cancel
             </button>
@@ -164,7 +173,6 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 const SchedulePlanApprovalDrawer = ({
   isOpen,
   planner,
-  currentUser,
   onClose,
   onActionComplete,
 }) => {

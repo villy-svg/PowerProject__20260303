@@ -14,7 +14,7 @@
  *   development-best-practices §4 (Strict modularity)
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { useAttendanceBoard } from '../../hooks/useAttendanceBoard';
 import { useSchedulePlanner } from '../../hooks/useSchedulePlanner';
@@ -146,6 +146,14 @@ const EmployeeAttendanceBoard = ({
   // Custom cell data provider that overrides the live database when in planner mode
   const getCellData = useCallback((empId, date) => {
     if (viewMode === 'planner') {
+      const liveData = getLiveCellData(empId, date);
+      const isAlreadyMarked = liveData && !liveData.is_scheduled_only && liveData.attendance_status !== 'null';
+      
+      if (isAlreadyMarked) {
+        // Return this so already marked attendance displays in the planner grid
+        return { ...liveData, is_draft: false };
+      }
+
       const selections = employeeSelections[empId] || [];
       const sel = selections.find(d => d.date === date);
       if (sel) {
@@ -159,6 +167,12 @@ const EmployeeAttendanceBoard = ({
   // Grid Cell Click
   const handleCellClick = useCallback((empId, date) => {
     if (viewMode === 'planner') {
+      const liveData = getLiveCellData(empId, date);
+      const isAlreadyMarked = liveData && !liveData.is_scheduled_only && liveData.attendance_status !== 'null';
+      if (isAlreadyMarked) {
+        return; // do not allow editing already marked attendance
+      }
+
       if (paintbrushStatus === 'null') {
         setActiveCellEdit(prev => (prev?.empId === empId && prev?.date === date) ? null : { empId, date });
         return;

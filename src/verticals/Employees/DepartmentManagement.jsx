@@ -31,8 +31,9 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
     setLoading(false);
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // We disable exhaustive-deps because fetchDepartments updates state and causes a loop if included
     fetchDepartments();
   }, []);
 

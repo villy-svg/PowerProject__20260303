@@ -22,6 +22,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { approveRequest, rejectRequest } from '../../../services/employees/editRequestService';
+import '../../../components/tasks/TaskCard.css';
 
 // ---------------------------------------------------------------------------
 // STATUS_LABELS: Human-readable labels for the suggested_status enum
@@ -50,94 +51,88 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
     .toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className="approval-card">
-      {/* Employee Info */}
-      <div className="approval-card__header">
-        <div className="approval-card__employee">
-          <p className="approval-card__name">{request.employees?.full_name}</p>
-          {request.employees?.emp_code && (
-            <span className="hub-badge">{request.employees.emp_code}</span>
-          )}
-        </div>
-        <p className="approval-card__date">{formattedDate}</p>
-      </div>
-
-      {/* Suggested Change */}
-      <div className="approval-card__change">
-        <p className="approval-card__change-label">SUGGESTED STATUS</p>
-        <p className="approval-card__change-value">
-          {STATUS_LABELS[request.suggested_status] || request.suggested_status}
-        </p>
-        {request.suggested_shift_type && (
-          <p className="approval-card__shift-type">
-            Shift: {request.suggested_shift_type === 'day' ? '☀ Day' : '🌙 Night'}
-          </p>
-        )}
-        {request.suggested_first_login_time && (
-          <p className="approval-card__time">
-            Login: {new Date(request.suggested_first_login_time).toLocaleTimeString('en-IN')}
-          </p>
-        )}
-        {request.suggested_logout_time && (
-          <p className="approval-card__time">
-            Logout: {new Date(request.suggested_logout_time).toLocaleTimeString('en-IN')}
-          </p>
-        )}
-      </div>
-
-      {/* Requester Info */}
-      <div className="approval-card__requester">
-        <span className="approval-card__requester-label">Submitted by</span>
-        <span className="approval-card__requester-name">{request.requester?.name || request.requester?.email}</span>
-        <span className="approval-card__requester-time">
-          {new Date(request.created_at).toLocaleString('en-IN')}
+    <div className="task-card-master" style={{ '--stage-color': 'var(--brand-yellow)', marginBottom: '12px' }}>
+      {/* Row 1: Meta */}
+      <div className="card-row-1">
+        <span className="card-priority priority-medium">
+          {formattedDate}
         </span>
+        {request.employees?.emp_code && (
+          <span className="subtask-tag">
+            {request.employees.emp_code}
+          </span>
+        )}
+      </div>
+
+      {/* Row 2: Title & Details */}
+      <div className="card-row-2">
+        <div className="card-row-2-title" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <span className="card-task-name">{request.employees?.full_name}</span>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+            Suggested: <strong>{STATUS_LABELS[request.suggested_status] || request.suggested_status}</strong>
+            {request.suggested_shift_type && ` • ${request.suggested_shift_type === 'day' ? '☀ Day' : '🌙 Night'}`}
+          </div>
+          {(request.suggested_first_login_time || request.suggested_logout_time) && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              {request.suggested_first_login_time && `Login: ${new Date(request.suggested_first_login_time).toLocaleTimeString('en-IN')}`}
+              {request.suggested_logout_time && ` | Logout: ${new Date(request.suggested_logout_time).toLocaleTimeString('en-IN')}`}
+            </div>
+          )}
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+            Submitted by: {request.requester?.name || request.requester?.email}
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
       {!showRejectNote ? (
-        <div className="approval-card__actions">
+        <div className="card-row-approval" style={{ padding: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '8px' }}>
           <button
-            className="halo-button approval-card__approve-btn"
+            className="halo-button btn-approve"
             onClick={() => onApprove(request)}
             disabled={isActing}
             id={`approve-req-${request.id}`}
+            style={{ flex: 1 }}
           >
             {isActing ? 'Applying…' : '✓ Approve'}
           </button>
           <button
-            className="halo-button approval-card__reject-btn"
+            className="halo-button btn-reject"
             onClick={() => setShowRejectNote(true)}
             disabled={isActing}
             id={`reject-req-${request.id}`}
+            style={{ flex: 1 }}
           >
             ✕ Reject
           </button>
         </div>
       ) : (
-        <div className="approval-card__reject-note-form">
-          <label className="form-label" htmlFor={`reject-note-${request.id}`}>
+        <div className="approval-card__reject-note-form" style={{ padding: '8px', borderTop: '1px solid var(--border-color)' }}>
+          <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`reject-note-${request.id}`}>
             Rejection Reason (optional)
           </label>
           <textarea
             id={`reject-note-${request.id}`}
-            className="approval-card__reject-textarea"
+            className="master-input"
+            style={{ width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
             value={rejectNote}
             onChange={(e) => setRejectNote(e.target.value)}
-            placeholder="Explain the rejection to the contributor…"
-            rows={3}
+            placeholder="Explain the rejection..."
+            rows={2}
           />
-          <div className="approval-card__actions">
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
-              className="halo-button approval-card__reject-btn"
+              className="halo-button btn-reject"
               onClick={handleRejectSubmit}
               disabled={isActing}
+              style={{ flex: 1 }}
             >
-              {isActing ? 'Rejecting…' : 'Confirm Reject'}
+              {isActing ? 'Rejecting…' : 'Confirm'}
             </button>
             <button
               className="halo-button"
               onClick={() => setShowRejectNote(false)}
+              style={{ flex: 1 }}
             >
               Cancel
             </button>
