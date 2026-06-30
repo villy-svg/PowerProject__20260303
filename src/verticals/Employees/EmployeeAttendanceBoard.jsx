@@ -102,10 +102,11 @@ const EmployeeAttendanceBoard = ({
   const [viewMode, setViewMode] = useState('attendance'); // 'attendance' | 'planner'
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // --- Drawers & Modals ---
+  // --- Drawers & Modals & Views ---
   const [selectedCell, setSelectedCell] = useState(null);
-  const [isApprovalDrawerOpen, setIsApprovalDrawerOpen] = useState(false);
-  const [isPlanApprovalDrawerOpen, setIsPlanApprovalDrawerOpen] = useState(false);
+  
+  // Replace boolean drawers with setting the viewMode
+  // viewMode can now be 'attendance' | 'planner' | 'pending-requests' | 'pending-plans'
   const [showMyPlans, setShowMyPlans] = useState(false);
 
   // --- PLANNER DRAFT STATE ---
@@ -205,9 +206,9 @@ const EmployeeAttendanceBoard = ({
     const employeeName = emp?.full_name || emp?.name || 'Unknown Employee';
     setSelectedCell({ employeeId: empId, date, record, employeeName });
     if (canApprove && record.has_pending_edit) {
-      setIsApprovalDrawerOpen(true);
+      setViewMode('pending-requests');
     } else if (canSuggestEdit) {
-      setIsApprovalDrawerOpen(false);
+      // Just open suggest edit modal, don't change viewMode
     }
   }, [viewMode, getCellData, canApprove, canSuggestEdit, paintbrushStatus, paintbrushHubId]);
 
@@ -235,7 +236,7 @@ const EmployeeAttendanceBoard = ({
 
   const handleCloseModal = useCallback(() => {
     setSelectedCell(null);
-    setIsApprovalDrawerOpen(false);
+    setViewMode('attendance');
   }, []);
 
   const handleActionComplete = useCallback(() => {
@@ -403,7 +404,15 @@ const EmployeeAttendanceBoard = ({
   // --- HEADER ACTIONS ---
   const headerLeftActions = (
     <div className="attendance-board__left-actions">
-      {viewMode === 'attendance' ? (
+      {viewMode === 'pending-requests' || viewMode === 'pending-plans' ? (
+        <button 
+          className="halo-button" 
+          onClick={() => setViewMode('attendance')}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <span>←</span> Back to Board
+        </button>
+      ) : viewMode === 'attendance' ? (
         // Standard Attendance Date Pickers
         <div className="attendance-board__date-range">
           <label className="attendance-board__date-label">Date Range</label>
@@ -485,7 +494,7 @@ const EmployeeAttendanceBoard = ({
 
   const headerRightActions = (
     <>
-      {viewMode === 'planner' ? (
+      {viewMode === 'pending-requests' || viewMode === 'pending-plans' ? null : viewMode === 'planner' ? (
         <>
           <button
             className="halo-button attendance-board__planner-action--save"
@@ -508,7 +517,7 @@ const EmployeeAttendanceBoard = ({
           {canApprove && !!planner.pendingPlansCount && (
             <button
               className="halo-button attendance-board__approval-btn"
-              onClick={() => setIsPlanApprovalDrawerOpen(true)}
+              onClick={() => setViewMode('pending-plans')}
               title="Editors can approve or reject bulk week-off plans."
             >
               <span className="attendance-board__pending-badge">
@@ -522,7 +531,7 @@ const EmployeeAttendanceBoard = ({
           {canApprove && !!pendingRequests.length && (
             <button
               className="halo-button attendance-board__approval-btn"
-              onClick={() => setIsApprovalDrawerOpen(true)}
+              onClick={() => setViewMode('pending-requests')}
               title="Review individual attendance edit requests."
             >
               <span className="attendance-board__pending-badge">
@@ -554,7 +563,7 @@ const EmployeeAttendanceBoard = ({
     </>
   );
 
-  const headerExpandedLeft = (
+  const headerExpandedLeft = (viewMode === 'pending-requests' || viewMode === 'pending-plans') ? null : (
     <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
       {canSuggestEdit && (
         <div className="view-mode-toggle">
@@ -643,10 +652,17 @@ const EmployeeAttendanceBoard = ({
   return (
     <div className="attendance-board__wrapper">
       <MasterPageHeader
-        title={viewMode === 'planner' ? "Schedule Planner" : "Attendance Board"}
+        title={
+          viewMode === 'planner' ? "Schedule Planner" : 
+          viewMode === 'pending-requests' ? "Pending Edit Requests" : 
+          viewMode === 'pending-plans' ? "Pending Schedule Plans" : 
+          "Attendance Board"
+        }
         description={
           viewMode === 'planner' ? (
             <span>Select a status and hub for your paintbrush, then click cells to paint shifts for this week.</span>
+          ) : viewMode === 'pending-requests' || viewMode === 'pending-plans' ? (
+            <span>Review and approve pending requests from your team.</span>
           ) : (
             <span>
               Daily log for employee shifts, check-ins, and leave tracking.
@@ -694,7 +710,28 @@ const EmployeeAttendanceBoard = ({
       )}
 
       {/* Main Grid Content */}
-      {shellType === 'mobile' ? (
+      {viewMode === 'pending-requests' ? (
+        <AttendanceApprovalDrawer
+          isOpen={true}
+          selectedCell={selectedCell}
+          pendingRequests={pendingRequests}
+          currentUser={user}
+          onClose={handleCloseModal}
+          onActionComplete={handleActionComplete}
+        />
+      ) : viewMode === 'pending-plans' ? (
+        <SchedulePlanApprovalDrawer
+          isOpen={true}
+          planner={planner}
+          currentUser={user}
+          onClose={() => setViewMode('attendance')}
+          onActionComplete={() => {
+            setViewMode('attendance');
+            planner.refreshPlanner();
+            refreshBoard();
+          }}
+        />
+      ) : shellType === 'mobile' ? (
         <AttendanceMobileList
           employees={employees}
           dateRange={activeDateRange}
@@ -718,37 +755,12 @@ const EmployeeAttendanceBoard = ({
       )}
 
       {/* Modals and Drawers */}
-      {isApprovalDrawerOpen && (
-        <AttendanceApprovalDrawer
-          isOpen={isApprovalDrawerOpen}
-          selectedCell={selectedCell}
-          pendingRequests={pendingRequests}
-          currentUser={user}
-          onClose={handleCloseModal}
-          onActionComplete={handleActionComplete}
-        />
-      )}
-
-      {selectedCell && !isApprovalDrawerOpen && canSuggestEdit && viewMode === 'attendance' && (
+      {selectedCell && viewMode === 'attendance' && canSuggestEdit && (
         <AttendanceSuggestEditModal
           selectedCell={selectedCell}
           currentUser={user}
           onClose={handleCloseModal}
           onSubmitComplete={handleActionComplete}
-        />
-      )}
-
-      {isPlanApprovalDrawerOpen && (
-        <SchedulePlanApprovalDrawer
-          isOpen={isPlanApprovalDrawerOpen}
-          planner={planner}
-          currentUser={user}
-          onClose={() => setIsPlanApprovalDrawerOpen(false)}
-          onActionComplete={() => {
-            setIsPlanApprovalDrawerOpen(false);
-            planner.refreshPlanner();
-            refreshBoard();
-          }}
         />
       )}
 

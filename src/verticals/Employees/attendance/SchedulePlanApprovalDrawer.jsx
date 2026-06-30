@@ -173,7 +173,6 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 const SchedulePlanApprovalDrawer = ({
   isOpen,
   planner,
-  onClose,
   onActionComplete,
 }) => {
   const [isActing,     setIsActing]    = useState(false);
@@ -234,54 +233,22 @@ const SchedulePlanApprovalDrawer = ({
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop overlay (ui-design-system §5) */}
-      <div
-        className="approval-drawer__backdrop"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Drawer panel — reuses approval-drawer CSS from EmployeeAttendanceBoard.css */}
-      <aside
-        className="approval-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Pending Schedule Plans"
-      >
-        <div className="approval-drawer__header">
-          <h2 className="approval-drawer__title">
-            Schedule Plans
-            {!!planner.pendingPlansCount && (
-              <span className="attendance-board__pending-badge">
-                {planner.pendingPlansCount}
-              </span>
-            )}
-          </h2>
-          <button
-            className="halo-button approval-drawer__close-btn"
-            onClick={onClose}
-            aria-label="Close plan approval drawer"
-            id="sp-approval-drawer-close"
-          >
-            ✕
-          </button>
-        </div>
-
+    <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Error state */}
         {actionError && (
-          <div className="approval-drawer__error">
+          <div className="attendance-board__error" style={{ marginBottom: '16px' }}>
             <p>⚠ {actionError}</p>
           </div>
         )}
 
         {/* Plan list */}
-        <div className="approval-drawer__body custom-scrollbar">
+        <div className="approval-list-body">
           {planner.isLoading ? (
-            <div className="approval-drawer__empty">Loading plans…</div>
+            <div style={{ padding: '24px', textAlign: 'center' }}>Loading plans…</div>
           ) : planner.pendingPlans.length === 0 ? (
-            <div className="approval-drawer__empty">
-              <p>No pending Schedule plans.</p>
+            <div style={{ padding: '24px', textAlign: 'center', opacity: 0.6 }}>
+              <p>No pending plans for approval.</p>
             </div>
           ) : (
             planner.pendingPlans.map(plan => (
@@ -295,7 +262,7 @@ const SchedulePlanApprovalDrawer = ({
             ))
           )}
         </div>
-      </aside>
+      </div>
 
       {/* Scoped styles for plan-specific additions (extends existing approval-card CSS) */}
       <style>{`
@@ -325,7 +292,7 @@ const SchedulePlanApprovalDrawer = ({
           font-weight: 500;
         }
       `}</style>
-    </>
+    </div>
   );
 };
 

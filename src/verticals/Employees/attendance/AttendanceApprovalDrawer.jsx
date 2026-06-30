@@ -151,7 +151,6 @@ const AttendanceApprovalDrawer = ({
   selectedCell,
   pendingRequests,
   currentUser,
-  onClose,
   onActionComplete,
 }) => {
   const [isActing, setIsActing] = useState(false);
@@ -212,46 +211,19 @@ const AttendanceApprovalDrawer = ({
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop overlay (ui-design-system §5) */}
-      <div
-        className="approval-drawer__backdrop"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Drawer panel */}
-      <aside className="approval-drawer" role="dialog" aria-modal="true" aria-label="Pending Approvals">
-        <div className="approval-drawer__header">
-          <h2 className="approval-drawer__title">
-            Pending Approvals
-            {!!pendingRequests.length && (
-              <span className="attendance-board__pending-badge">
-                {pendingRequests.length}
-              </span>
-            )}
-          </h2>
-          <button
-            className="halo-button approval-drawer__close-btn"
-            onClick={onClose}
-            aria-label="Close approval drawer"
-            id="approval-drawer-close"
-          >
-            ✕
-          </button>
-        </div>
-
+    <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Error state */}
         {actionError && (
-          <div className="approval-drawer__error">
+          <div className="attendance-board__error" style={{ marginBottom: '16px' }}>
             <p>⚠ {actionError}</p>
           </div>
         )}
 
         {/* Request list */}
-        <div className="approval-drawer__body custom-scrollbar">
+        <div className="approval-list-body">
           {filteredRequests.length === 0 ? (
-            <div className="approval-drawer__empty">
+            <div style={{ padding: '24px', textAlign: 'center', opacity: 0.6 }}>
               <p>No pending requests{selectedCell ? ' for this cell' : ''}.</p>
             </div>
           ) : (
@@ -266,8 +238,8 @@ const AttendanceApprovalDrawer = ({
             ))
           )}
         </div>
-      </aside>
-    </>
+      </div>
+    </div>
   );
 };
 
