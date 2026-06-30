@@ -169,38 +169,41 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
 // ---------------------------------------------------------------------------
 // EMPLOYEE SELF-SERVICE: Fetch current day's record for the logged-in employee
 //
-// Queries daily_attendances directly — matching the original design intent.
+// Uses two targeted queries rather than a fragile JSONB containment filter:
 //
-// Two fixes vs the original implementation:
-//   1. We first resolve the caller's employee_id from user_profiles so we
-//      can pass an explicit .eq('employee_id', ...) filter. Without this,
-//      contributor+ users (whose RLS lets ALL rows through) would get
-//      multiple records → .maybeSingle() throws PGRST116.
-//   2. The new "Attendance: SELECT own record" RLS policy (migration
-//      20260617120000) now also lets viewer-level users read their own row,
-//      so this query works for all role levels.
+//   Query A: .is('logout_time', null) — finds any open (unchecked-out) shift.
+//            This uses the top-level indexed timestamptz column, which
+//            rpc_employee_checkout always sets when a shift ends. It is far
+//            more reliable than PostgREST .cs JSONB containment on null values.
 //
+//   Query B: .eq('shift_date', today) — fallback for a shift that was already
+//            closed today. Lets the UI show a "you already clocked out" state.
+//
+// A 3-day window guard on Query A prevents zombie records (left open by error)
+// from being surfaced to the employee self-service screen.
+//
+// @param {string} userId - UUID from auth context
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchMyTodayAttendance(userId) {
-  // Use Intl.DateTimeFormat to ensure we get the correct YYYY-MM-DD string for local time (IST)
-  // en-CA natively outputs the YYYY-MM-DD format.
+  // en-CA locale produces YYYY-MM-DD natively, matching the DB shift_date column.
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
 
+  // 3-day safety window — catches night-shift crossover without surfacing stale zombies.
+  const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(threeDaysAgoMs));
+
+  // -------------------------------------------------------------------------
   // Step 1: Resolve the caller's employee_id from their profile.
-  // We use the provided userId (from React auth context) to support impersonation.
+  // -------------------------------------------------------------------------
   let targetUserId = userId;
   if (!targetUserId) {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return { data: null, error: new Error('User not authenticated') };
-    }
+    if (!user) return { data: null, error: new Error('User not authenticated') };
     targetUserId = user.id;
   }
 
-  if (targetUserId === 'dev-bypass-user-id') {
-    return { data: null, error: null };
-  }
+  if (targetUserId === 'dev-bypass-user-id') return { data: null, error: null };
 
   const { data: profile, error: profileError } = await supabase
     .from('user_profiles')
@@ -214,41 +217,84 @@ export async function fetchMyTodayAttendance(userId) {
   }
 
   // No employee linked to this user account — treat as "no record" cleanly.
-  if (!profile?.employee_id) {
-    return { data: null, error: null };
-  }
+  if (!profile?.employee_id) return { data: null, error: null };
 
-  // Step 2: Fetch the active record for this specific employee.
-  // We look for either today's record OR the most recent record that still has an open session.
-  // We intentionally omit .maybeSingle() to avoid "Cannot coerce" PostgREST errors 
-  // if multiple rows match; we simply take the first one from the sorted array.
-  const { data, error } = await supabase
+  // -------------------------------------------------------------------------
+  // Shared select columns for both queries below.
+  // -------------------------------------------------------------------------
+  const SHARED_SELECT = `
+    id,
+    shift_date,
+    attendance_status,
+    shift_type,
+    first_login_time,
+    logout_time,
+    session_logs_data,
+    employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )
+  `;
+
+  // -------------------------------------------------------------------------
+  // Step 2 — Query A: Find an open (active) shift.
+  //
+  // We use .is('logout_time', null) on the top-level indexed timestamptz column.
+  // rpc_employee_checkout always writes logout_time = now() when a shift ends,
+  // so this is a guaranteed, type-safe signal that the shift is still ongoing.
+  //
+  // This completely replaces the old JSONB containment filter:
+  //   .or(`...session_logs_data.cs.[{"logout_time": null}]`)
+  // which was fragile because PostgREST URL-encodes JSON null differently
+  // from how PostgreSQL's @> operator matches it, causing silent misses.
+  // -------------------------------------------------------------------------
+  const { data: openData, error: openError } = await supabase
     .from('daily_attendances')
-    .select(`
-      id,
-      shift_date,
-      attendance_status,
-      shift_type,
-      first_login_time,
-      logout_time,
-      session_logs_data,
-      employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )
-    `)
+    .select(SHARED_SELECT)
     .eq('employee_id', profile.employee_id)
-    .or(`shift_date.eq.${today},session_logs_data.cs.[{"logout_time": null}]`)
+    .is('logout_time', null)
+    .gte('shift_date', threeDaysAgo)
     .order('shift_date', { ascending: false })
-    .limit(1);
+    .limit(1)
+    .maybeSingle();
 
-  if (error) {
-    console.error('[attendanceService] fetchMyTodayAttendance error:', error);
-    return { data: null, error };
+  if (openError) {
+    console.error('[attendanceService] fetchMyTodayAttendance (open query) error:', openError);
+    return { data: null, error: openError };
   }
 
-  // Safely extract the single record or return null
-  const record = (data && data.length > 0) ? data[0] : null;
+  if (openData) {
+    // Defensive parse: Supabase occasionally returns JSONB as a string over
+    // some network/driver paths (e.g. Capacitor native HTTP on older devices).
+    if (typeof openData.session_logs_data === 'string') {
+      try { openData.session_logs_data = JSON.parse(openData.session_logs_data); }
+      catch (e) { openData.session_logs_data = []; }
+    }
+    return { data: openData, error: null };
+  }
 
-  return { data: record, error: null };
+  // -------------------------------------------------------------------------
+  // Step 2 — Query B: No open shift found.
+  // Fall back to today's record (if any) so the UI can show a "shift complete"
+  // state rather than going blank.
+  // -------------------------------------------------------------------------
+  const { data: todayData, error: todayError } = await supabase
+    .from('daily_attendances')
+    .select(SHARED_SELECT)
+    .eq('employee_id', profile.employee_id)
+    .eq('shift_date', today)
+    .maybeSingle();
+
+  if (todayError) {
+    console.error('[attendanceService] fetchMyTodayAttendance (today query) error:', todayError);
+    return { data: null, error: todayError };
+  }
+
+  if (todayData && typeof todayData.session_logs_data === 'string') {
+    try { todayData.session_logs_data = JSON.parse(todayData.session_logs_data); }
+    catch (e) { todayData.session_logs_data = []; }
+  }
+
+  return { data: todayData ?? null, error: null };
 }
+
 
 // ---------------------------------------------------------------------------
 // LIVE ATTENDANCE TAB: Fetch all employees with an active (open) session today

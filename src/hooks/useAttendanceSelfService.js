@@ -274,7 +274,10 @@ export function useAttendanceSelfService(userId) {
   // ---------------------------------------------------------------------------
   useEffect(() => {
     if (!todayRecord) return;
-    const sessions = todayRecord?.session_logs_data || [];
+    let sessions = todayRecord?.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch (e) { sessions = []; }
+    }
     const openSession = sessions.find(s => s.logout_time === null);
     if (!openSession?.login_time) return;
 
@@ -295,7 +298,11 @@ export function useAttendanceSelfService(userId) {
   // Derived: Is there currently an open (active) session?
   // An open session has a session log entry with logout_time === null.
   // ---------------------------------------------------------------------------
-  const hasActiveSession = !!todayRecord?.session_logs_data?.some(
+  let parsedSessions = todayRecord?.session_logs_data || [];
+  if (typeof parsedSessions === 'string') {
+    try { parsedSessions = JSON.parse(parsedSessions); } catch (e) { parsedSessions = []; }
+  }
+  const hasActiveSession = !!parsedSessions.some(
     (session) => session.logout_time === null
   );
 
