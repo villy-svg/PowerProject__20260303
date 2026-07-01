@@ -38,50 +38,48 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
         </header>
 
         <form onSubmit={handleSubmit} className="vertical-task-form">
-          {/* 1. Exporting User */}
-          <div className="form-group">
-            <label className="section-label">
-              1. Permission Exporting User (Source)
-            </label>
-            <div className="form-input-container">
-              <BaseDropdown
-                id="source-user-select"
-                value={sourceUserId}
-                onChange={(val) => {
-                  setSourceUserId(val);
-                  // Remove the new source from targets if it was previously selected
-                  setTargetUserIds(prev => prev.filter(id => id !== val));
-                }}
-                options={userOptions}
-                placeholder="Select the source user..."
-                mode="single"
-                searchable={true}
-                fuzzySearch={true}
-                displayMode="compact"
-              />
-            </div>
-            <p className="sync-help-text">
-              This user's Access Scope, Capability Level, Vertical Access, and Feature Overrides will be copied exactly.
-            </p>
-          </div>
-
-          {/* 2. Importing Users */}
-          <div className="form-group">
-            <div className="form-group-header">
+          <div className="modal-content-area sync-modal-content">
+            {/* 1. Exporting User */}
+            <div className="form-group">
               <label className="section-label">
-                2. Permission Importing Users (Targets)
+                1. Permission Exporting User (Source)
               </label>
+              <div className="form-input-container">
+                <BaseDropdown
+                  id="source-user-select"
+                  value={sourceUserId}
+                  onChange={(val) => {
+                    setSourceUserId(val);
+                    // Remove the new source from targets if it was previously selected
+                    setTargetUserIds(prev => prev.filter(id => id !== val));
+                  }}
+                  options={userOptions}
+                  placeholder="Select the source user..."
+                  mode="single"
+                  searchable={true}
+                  fuzzySearch={true}
+                  displayMode="compact"
+                />
+              </div>
+              <p className="sync-help-text">
+                This user's Access Scope, Capability Level, Vertical Access, and Feature Overrides will be copied exactly.
+              </p>
             </div>
-            
-            <div className="form-input-container" style={{ minHeight: 'auto', padding: '0', background: 'transparent', border: 'none' }}>
-              {!sourceUserId ? (
-                <div className="form-input-container" style={{ opacity: 0.5 }}>
-                  <p className="empty-state-text" style={{ margin: 0, padding: '8px', fontSize: '0.9rem' }}>
+
+            {/* 2. Importing Users */}
+            <div className="form-group">
+              <div className="form-group-header">
+                <label className="section-label">
+                  2. Permission Importing Users (Targets)
+                </label>
+              </div>
+              
+              <div className="form-input-container sync-target-container">
+                {!sourceUserId ? (
+                  <div className="empty-state-text">
                     Please select a source user first.
-                  </p>
-                </div>
-              ) : (
-                <div style={{ width: '100%' }}>
+                  </div>
+                ) : (
                   <BaseDropdown
                     id="target-users-select"
                     value={targetUserIds}
@@ -95,15 +93,15 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
                     displayMode="pills"
                     closeOnSelectMobile={false}
                   />
-                </div>
-              )}
+                )}
+              </div>
+              <p className="sync-help-text warning-text">
+                Warning: Selected users will have their current permissions completely wiped and replaced.
+              </p>
             </div>
-            <p className="sync-help-text warning-text">
-              Warning: Selected users will have their current permissions completely wiped and replaced.
-            </p>
           </div>
 
-          <div className="modal-actions">
+          <div className="modal-footer sticky">
             <button type="button" className="halo-button cancel-btn" onClick={onClose} disabled={loading}>
               Cancel
             </button>

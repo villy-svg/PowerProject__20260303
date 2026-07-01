@@ -777,6 +777,24 @@
   max-width: 600px;
 }
 
+.sync-modal-content {
+  min-height: 380px;
+}
+
+.sync-target-container {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.sync-target-container .empty-state-text {
+  opacity: 0.5;
+  margin: 0;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+
 .sync-help-text {
   font-size: 12px;
   opacity: 0.6;

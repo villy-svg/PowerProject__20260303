@@ -77,8 +77,6 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   padding: 8px;
   z-index: 1000;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
 /* Scrollbar Styling for Profile Menu */
@@ -107,10 +105,20 @@
   padding: 4px 12px 8px 12px;
   width: 100%;
   box-sizing: border-box;
+  position: relative;
 }
 
 .dropdown-impersonation-container #impersonation-select-menu {
   width: 100%;
+}
+
+/* Pop the impersonation dropdown to the left side */
+.dropdown-impersonation-container .custom-dropdown-menu {
+  top: -150px !important;
+  right: calc(100% + 10px) !important;
+  left: auto !important;
+  width: 250px !important;
+  max-height: 50vh !important;
 }
 
 .impersonation-menu-active {
