@@ -150,15 +150,10 @@ const TaskCard = ({
     const priorityEmoji = getPriorityEmoji(task.priority);
     const priorityText = task.priority || 'Standard';
     
-    const shareText = `Task Reminder
+    const shareText = `Hi ${actualName},
 
-Hi ${actualName},
-Just a reminder about the task: ${taskName}.
-
-*Current Status:* ${stageEmoji} ${stageName}
-*Priority:* ${priorityEmoji} ${priorityText}
-
-Please take a look when you have a moment. Thanks!`;
+*Task*: ${taskName}.
+*Current Status:* ${stageEmoji} ${stageName} | ${priorityEmoji} ${priorityText}`;
     
     const encoded = encodeURIComponent(shareText);
 
