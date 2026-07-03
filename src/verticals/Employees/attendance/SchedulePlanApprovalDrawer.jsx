@@ -24,6 +24,7 @@
 
 import React, { useState, useCallback } from 'react';
 import '../../../components/tasks/TaskCard.css';
+import { IconChevronDown } from '../../../components/ui/Icons';
 
 // ---------------------------------------------------------------------------
 // Helper — format a 'YYYY-MM-DD' string to readable locale
@@ -41,6 +42,7 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   const [showRejectNote,  setShowRejectNote] = useState(false);
   const [rejectNote,      setRejectNote]     = useState('');
   const [isExpanded,      setIsExpanded]     = useState(false);
+  const [showDetails,     setShowDetails]    = useState(false);
 
   // Compute unique employee count from entries
   const uniqueEmployees = [
@@ -60,13 +62,17 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   };
 
   return (
-    <div className="task-card-master" style={{ '--stage-color': 'var(--brand-blue)', marginBottom: '12px' }}>
+    <div className="task-card-master" style={{ 
+      '--stage-color': 'var(--brand-blue)', 
+      borderLeft: '2px solid color-mix(in srgb, var(--brand-blue), transparent 30%)',
+      marginBottom: '12px' 
+    }}>
       {/* Row 1: Meta */}
       <div className="card-row-1">
         <span className="card-priority priority-high">
           Schedule Plan
         </span>
-        <span className="subtask-tag">
+        <span className="subtask-tag" style={{ display: 'flex' }}>
           {uniqueEmployees.length} Emp • {uniqueDates.length} Days
         </span>
       </div>
@@ -77,12 +83,33 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
           <span className="card-task-name">
             {formatDate(plan.date_from)} → {formatDate(plan.date_to)}
           </span>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            {entryCount} total entries
-          </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-            Submitted by: {plan.submitter?.name || plan.submitter?.email || '—'}
-          </div>
+        </div>
+
+        <div className="mobile-description-container">
+          <button
+            type="button"
+            className="read-more-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails(!showDetails);
+            }}
+          >
+            <span>{showDetails ? 'Read Less' : 'Read More'}</span>
+            <IconChevronDown size={14} className={`read-more-chevron ${showDetails ? 'is-expanded' : ''}`} />
+          </button>
+          
+          {showDetails && (
+            <div className="task-detailed-description">
+              <div className="task-detailed-description-title">Plan Details</div>
+              <p>
+                <strong>Total Entries:</strong> {entryCount}
+                <br/>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                  Submitted by: {plan.submitter?.name || plan.submitter?.email || '—'}
+                </span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -110,7 +137,7 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 
       {/* Action Buttons */}
       {!showRejectNote ? (
-        <div className="card-row-approval" style={{ padding: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '8px' }}>
+        <div className="card-row-approval" style={{ display: 'flex', width: '100%', gap: '8px' }}>
           <button
             className="halo-button btn-approve"
             onClick={() => onApprove(plan)}
@@ -131,20 +158,20 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
           </button>
         </div>
       ) : (
-        <div className="approval-card__reject-note-form" style={{ padding: '8px', borderTop: '1px solid var(--border-color)' }}>
+        <div className="approval-card__reject-note-form" style={{ marginTop: '10px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
           <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`sp-reject-note-${plan.id}`}>
             Rejection Reason (optional)
           </label>
           <textarea
             id={`sp-reject-note-${plan.id}`}
             className="master-input"
-            style={{ width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
+            style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
             value={rejectNote}
             onChange={(e) => setRejectNote(e.target.value)}
             placeholder="Explain the rejection to the contributor…"
             rows={2}
           />
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
             <button
               className="halo-button btn-reject"
               onClick={handleRejectSubmit}
