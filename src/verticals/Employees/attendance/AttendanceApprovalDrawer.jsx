@@ -22,8 +22,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { approveRequest, rejectRequest } from '../../../services/employees/editRequestService';
-import '../../../components/tasks/TaskCard.css';
-import { IconChevronDown } from '../../../components/ui/Icons';
+import '../../../styles/systems/systemLists.css';
+import { IconChevronDown, IconChevronRight } from '../../../components/ui/Icons';
+
 
 // ---------------------------------------------------------------------------
 // STATUS_LABELS: Human-readable labels for the suggested_status enum
@@ -53,45 +54,81 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
     .toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className="task-card-master" style={{ 
-      '--stage-color': 'var(--brand-yellow)', 
-      borderLeft: '2px solid color-mix(in srgb, var(--brand-yellow), transparent 30%)',
-      marginBottom: '12px' 
-    }}>
-      {/* Row 1: Meta */}
-      <div className="card-row-1">
-        <span className="card-priority priority-high">
-          {formattedDate}
-        </span>
-        {request.employees?.emp_code && (
-          <span className="subtask-tag" style={{ display: 'flex' }}>
-            {request.employees.emp_code}
-          </span>
-        )}
-      </div>
-
-      {/* Row 2: Title & Details */}
-      <div className="card-row-2">
-        <div className="card-row-2-title" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <span className="card-task-name">{request.employees?.full_name} • {STATUS_LABELS[request.suggested_status] || request.suggested_status}</span>
+    <div style={{ marginBottom: '12px' }}>
+      <div className={`list-task-row ${(showDetails || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
+        '--stage-color': 'var(--brand-yellow)', 
+        height: 'auto',
+        borderLeft: '2px solid color-mix(in srgb, var(--brand-yellow), transparent 30%)',
+        borderBottomLeftRadius: (showDetails || showRejectNote) ? 0 : '12px',
+        borderBottomRightRadius: (showDetails || showRejectNote) ? 0 : '12px',
+      }}>
+        {/* LEFT SIDE: Identity & Content */}
+        <div className="list-row-main">
+          <div className="list-row-badges">
+            <span className="card-priority priority-high">
+              {formattedDate}
+            </span>
+            {request.employees?.emp_code && (
+              <span className="subtask-tag" style={{ display: 'flex' }}>
+                {request.employees.emp_code}
+              </span>
+            )}
+          </div>
+          
+          <div className="list-row-content">
+            {request.employees?.full_name} • {STATUS_LABELS[request.suggested_status] || request.suggested_status}
+          </div>
         </div>
 
-        <div className="mobile-description-container">
+        {/* RIGHT SIDE: Action Controls */}
+        <div className="list-row-controls" style={{ opacity: 1, pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
+          {!showRejectNote && (
+            <>
+              <button
+                className="halo-button btn-approve"
+                onClick={() => onApprove(request)}
+                disabled={isActing}
+                style={{ padding: '4px 10px' }}
+              >
+                {isActing ? '...' : '✓ Appr'}
+              </button>
+              <button
+                className="halo-button btn-reject"
+                onClick={() => setShowRejectNote(true)}
+                disabled={isActing}
+                style={{ padding: '4px 10px' }}
+              >
+                ✗ Rej
+              </button>
+            </>
+          )}
           <button
-            type="button"
-            className="read-more-btn"
+            className="action-icon-btn"
             onClick={(e) => {
               e.stopPropagation();
               setShowDetails(!showDetails);
             }}
+            title="Toggle Details"
+            style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
           >
-            <span>{showDetails ? 'Read Less' : 'Read More'}</span>
-            <IconChevronDown size={14} className={`read-more-chevron ${showDetails ? 'is-expanded' : ''}`} />
+            {showDetails ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
           </button>
-          
+        </div>
+      </div>
+
+      {/* EXPANDED SECTIONS */}
+      {(showDetails || showRejectNote) && (
+        <div style={{ 
+          margin: '-1px 0 0 0', // attach flush to the bottom
+          padding: '12px 16px', 
+          background: 'var(--panel-bg)',
+          border: '1px solid var(--border-color)',
+          borderTop: 'none',
+          borderBottomLeftRadius: '12px',
+          borderBottomRightRadius: '12px'
+        }}>
           {showDetails && (
-            <div className="task-detailed-description">
-              <div className="task-detailed-description-title">Request Details</div>
+            <div className="task-detailed-description" style={{ border: 'none', padding: 0, background: 'transparent', marginTop: 0 }}>
               <p>
                 <strong>Suggested:</strong> {STATUS_LABELS[request.suggested_status] || request.suggested_status}
                 {request.suggested_shift_type && ` • ${request.suggested_shift_type === 'day' ? '☀ Day' : '🌙 Night'}`}
@@ -109,62 +146,40 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
               </p>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Action Buttons */}
-      {!showRejectNote ? (
-        <div className="card-row-approval" style={{ display: 'flex', width: '100%', gap: '8px' }}>
-          <button
-            className="halo-button btn-approve"
-            onClick={() => onApprove(request)}
-            disabled={isActing}
-            id={`approve-req-${request.id}`}
-            style={{ flex: 1 }}
-          >
-            {isActing ? 'Applying…' : '✓ Approve'}
-          </button>
-          <button
-            className="halo-button btn-reject"
-            onClick={() => setShowRejectNote(true)}
-            disabled={isActing}
-            id={`reject-req-${request.id}`}
-            style={{ flex: 1 }}
-          >
-            ✕ Reject
-          </button>
-        </div>
-      ) : (
-        <div className="approval-card__reject-note-form" style={{ marginTop: '10px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
-          <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`reject-note-${request.id}`}>
-            Rejection Reason (optional)
-          </label>
-          <textarea
-            id={`reject-note-${request.id}`}
-            className="master-input"
-            style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
-            value={rejectNote}
-            onChange={(e) => setRejectNote(e.target.value)}
-            placeholder="Explain the rejection..."
-            rows={2}
-          />
-          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-            <button
-              className="halo-button btn-reject"
-              onClick={handleRejectSubmit}
-              disabled={isActing}
-              style={{ flex: 1 }}
-            >
-              {isActing ? 'Rejecting…' : 'Confirm'}
-            </button>
-            <button
-              className="halo-button"
-              onClick={() => setShowRejectNote(false)}
-              style={{ flex: 1 }}
-            >
-              Cancel
-            </button>
-          </div>
+          {showRejectNote && (
+            <div className="approval-card__reject-note-form" style={{ marginTop: showDetails ? '12px' : '0', paddingTop: showDetails ? '12px' : '0', borderTop: showDetails ? '1px dashed var(--border-color)' : 'none' }}>
+              <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`reject-note-${request.id}`}>
+                Rejection Reason (optional)
+              </label>
+              <textarea
+                id={`reject-note-${request.id}`}
+                className="master-input"
+                style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                placeholder="Explain the rejection..."
+                rows={2}
+              />
+              <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                <button
+                  className="halo-button btn-reject"
+                  onClick={handleRejectSubmit}
+                  disabled={isActing}
+                  style={{ flex: 1 }}
+                >
+                  {isActing ? 'Rejecting…' : 'Confirm'}
+                </button>
+                <button
+                  className="halo-button"
+                  onClick={() => setShowRejectNote(false)}
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

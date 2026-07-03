@@ -23,8 +23,9 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import '../../../components/tasks/TaskCard.css';
-import { IconChevronDown } from '../../../components/ui/Icons';
+import '../../../styles/systems/systemLists.css';
+import { IconChevronDown, IconChevronRight } from '../../../components/ui/Icons';
+
 
 // ---------------------------------------------------------------------------
 // Helper — format a 'YYYY-MM-DD' string to readable locale
@@ -53,7 +54,6 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   const uniqueDates = [
     ...new Set((plan.employee_Schedule_plan_entries || []).map(e => e.shift_date))
   ].sort();
-  const entryCount = plan.employee_Schedule_plan_entries?.length || 0;
 
   const handleRejectSubmit = () => {
     onReject(plan, rejectNote);
@@ -62,132 +62,135 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   };
 
   return (
-    <div className="task-card-master" style={{ 
-      '--stage-color': 'var(--brand-blue)', 
-      borderLeft: '2px solid color-mix(in srgb, var(--brand-blue), transparent 30%)',
-      marginBottom: '12px' 
-    }}>
-      {/* Row 1: Meta */}
-      <div className="card-row-1">
-        <span className="card-priority priority-high">
-          Schedule Plan
-        </span>
-        <span className="subtask-tag" style={{ display: 'flex' }}>
-          {uniqueEmployees.length} Emp • {uniqueDates.length} Days
-        </span>
-      </div>
-
-      {/* Row 2: Title & Details */}
-      <div className="card-row-2">
-        <div className="card-row-2-title" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <span className="card-task-name">
+    <div style={{ marginBottom: '12px' }}>
+      <div className={`list-task-row ${(isExpanded || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
+        '--stage-color': 'var(--brand-blue)', 
+        height: 'auto',
+        borderLeft: '2px solid color-mix(in srgb, var(--brand-blue), transparent 30%)',
+        borderBottomLeftRadius: (isExpanded || showRejectNote) ? 0 : '12px',
+        borderBottomRightRadius: (isExpanded || showRejectNote) ? 0 : '12px',
+      }}>
+        {/* LEFT SIDE: Identity & Content */}
+        <div className="list-row-main">
+          <div className="list-row-badges">
+            <span className="card-priority priority-high">
+              Schedule Plan
+            </span>
+            <span className="subtask-tag" style={{ display: 'flex' }}>
+              {uniqueEmployees.length} Emp • {uniqueDates.length} Days
+            </span>
+          </div>
+          
+          <div className="list-row-content">
             {formatDate(plan.date_from)} → {formatDate(plan.date_to)}
-          </span>
+          </div>
         </div>
 
-        <div className="mobile-description-container">
+        {/* RIGHT SIDE: Action Controls */}
+        <div className="list-row-controls" style={{ opacity: 1, pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
+          {!showRejectNote && (
+            <>
+              <button
+                className="halo-button btn-approve"
+                onClick={() => onApprove(plan)}
+                disabled={isActing}
+                style={{ padding: '4px 10px' }}
+              >
+                {isActing ? '...' : '✓ Appr'}
+              </button>
+              <button
+                className="halo-button btn-reject"
+                onClick={() => setShowRejectNote(true)}
+                disabled={isActing}
+                style={{ padding: '4px 10px' }}
+              >
+                ✗ Rej
+              </button>
+            </>
+          )}
           <button
-            type="button"
-            className="read-more-btn"
+            className="action-icon-btn"
             onClick={(e) => {
               e.stopPropagation();
-              setShowDetails(!showDetails);
+              setIsExpanded(!isExpanded);
             }}
+            title="Toggle Details"
+            style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
           >
-            <span>{showDetails ? 'Read Less' : 'Read More'}</span>
-            <IconChevronDown size={14} className={`read-more-chevron ${showDetails ? 'is-expanded' : ''}`} />
+            {isExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
           </button>
-          
-          {showDetails && (
-            <div className="task-detailed-description">
-              <div className="task-detailed-description-title">Plan Details</div>
-              <p>
-                <strong>Total Entries:</strong> {entryCount}
-                <br/>
-                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
-                  Submitted by: {plan.submitter?.name || plan.submitter?.email || '—'}
-                </span>
-              </p>
+        </div>
+      </div>
+
+      {/* EXPANDED SECTIONS */}
+      {(isExpanded || showRejectNote) && (
+        <div style={{ 
+          margin: '-1px 0 0 0', // attach flush to the bottom
+          padding: '12px 16px', 
+          background: 'var(--panel-bg)',
+          border: '1px solid var(--border-color)',
+          borderTop: 'none',
+          borderBottomLeftRadius: '12px',
+          borderBottomRightRadius: '12px'
+        }}>
+          {isExpanded && (
+            <div className="sp-plan-card__employee-list">
+              {Object.values(employeesData).map(emp => (
+                <div key={emp.employeeId} className="sp-plan-card__employee-item">
+                  <div className="sp-plan-card__employee-header">
+                    <span className="sp-plan-card__emp-name">{emp.name}</span>
+                    <span className="sp-plan-card__emp-count">{emp.shifts.length} shifts</span>
+                  </div>
+                  <div className="sp-plan-card__shift-list">
+                    {emp.shifts.map((shift, idx) => {
+                      const shiftTypeLabel = shift.shift_type === 'day' ? '☀ Day' : '🌙 Night';
+                      const dayLabel = new Date(shift.shift_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+                      return (
+                        <div key={idx} className="sp-plan-card__shift-item">
+                          <span className="sp-shift-date">{dayLabel}</span>
+                          <span className="sp-shift-type">{shiftTypeLabel}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Employee List Toggle */}
-      <div style={{ padding: '0 8px 8px 8px' }}>
-        <button
-          className="halo-button sp-plan-card__expand-btn"
-          onClick={() => setIsExpanded(v => !v)}
-          id={`sp-expand-plan-${plan.id}`}
-          type="button"
-        >
-          {isExpanded ? '▲ Hide employees' : `▼ Show ${uniqueEmployees.length} employees`}
-        </button>
-        {isExpanded && (
-          <div className="sp-plan-card__emp-list" style={{ marginTop: '8px' }}>
-            {uniqueEmployees.map((emp, idx) => (
-              <span key={emp?.id || idx} className="sp-plan-card__emp-chip">
-                {emp?.full_name || '—'}
-                {emp?.emp_code && <span className="hub-badge" style={{ marginLeft: '4px' }}>{emp.emp_code}</span>}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      {!showRejectNote ? (
-        <div className="card-row-approval" style={{ display: 'flex', width: '100%', gap: '8px' }}>
-          <button
-            className="halo-button btn-approve"
-            onClick={() => onApprove(plan)}
-            disabled={isActing}
-            id={`sp-approve-plan-${plan.id}`}
-            style={{ flex: 1 }}
-          >
-            {isActing ? 'Applying…' : '✓ Approve'}
-          </button>
-          <button
-            className="halo-button btn-reject"
-            onClick={() => setShowRejectNote(true)}
-            disabled={isActing}
-            id={`sp-reject-plan-${plan.id}`}
-            style={{ flex: 1 }}
-          >
-            ✕ Reject
-          </button>
-        </div>
-      ) : (
-        <div className="approval-card__reject-note-form" style={{ marginTop: '10px', paddingTop: '12px', borderTop: '1px dashed var(--border-color)' }}>
-          <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`sp-reject-note-${plan.id}`}>
-            Rejection Reason (optional)
-          </label>
-          <textarea
-            id={`sp-reject-note-${plan.id}`}
-            className="master-input"
-            style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
-            value={rejectNote}
-            onChange={(e) => setRejectNote(e.target.value)}
-            placeholder="Explain the rejection to the contributor…"
-            rows={2}
-          />
-          <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-            <button
-              className="halo-button btn-reject"
-              onClick={handleRejectSubmit}
-              disabled={isActing}
-              style={{ flex: 1 }}
-            >
-              {isActing ? 'Rejecting…' : 'Confirm'}
-            </button>
-            <button
-              className="halo-button"
-              onClick={() => setShowRejectNote(false)}
-              style={{ flex: 1 }}
-            >
-              Cancel
-            </button>
-          </div>
+          {showRejectNote && (
+            <div className="approval-card__reject-note-form" style={{ marginTop: isExpanded ? '12px' : '0', paddingTop: isExpanded ? '12px' : '0', borderTop: isExpanded ? '1px dashed var(--border-color)' : 'none' }}>
+              <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`sp-reject-note-${plan.id}`}>
+                Rejection Reason (optional)
+              </label>
+              <textarea
+                id={`sp-reject-note-${plan.id}`}
+                className="master-input"
+                style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                placeholder="Explain the rejection to the contributor…"
+                rows={2}
+              />
+              <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+                <button
+                  className="halo-button btn-reject"
+                  onClick={handleRejectSubmit}
+                  disabled={isActing}
+                  style={{ flex: 1 }}
+                >
+                  {isActing ? 'Rejecting…' : 'Confirm'}
+                </button>
+                <button
+                  className="halo-button"
+                  onClick={() => setShowRejectNote(false)}
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
