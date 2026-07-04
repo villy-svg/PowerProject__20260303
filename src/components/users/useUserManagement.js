@@ -182,6 +182,43 @@ export const useUserManagement = () => {
     setExpandedFeatures(null);
   };
 
+  // 2b. Load Preset
+  const loadPresetPermissions = async (presetUserId) => {
+    if (!presetUserId) return;
+    setLoading(true);
+    setStatus({ type: '', text: '' });
+    
+    try {
+      const presetUser = users.find(u => u.id === presetUserId);
+      if (!presetUser) throw new Error("Preset user not found");
+
+      const [scope, level] = presetUser.role_id?.split('_') || ['vertical', 'viewer'];
+      setEditRoleScope(scope);
+      setEditRoleLevel(level);
+
+      const perms = await userService.fetchUserPermissions(presetUserId);
+
+      const vPermsMap = {};
+      (perms.verticals || []).forEach(v => {
+        vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+      });
+
+      (perms.features || []).forEach(f => {
+        if (vPermsMap[f.vertical_id]) {
+          vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+        }
+      });
+
+      setEditVerticalPermissions(vPermsMap);
+      setStatus({ type: 'success', text: `Permissions loaded from template user: ${presetUser.name}` });
+    } catch (err) {
+      console.error("Error loading preset:", err);
+      setStatus({ type: 'error', text: 'Failed to load preset permissions.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 3. Update Sync
   const handleSyncPermissions = async (e) => {
     if (e) e.preventDefault();
@@ -405,6 +442,7 @@ export const useUserManagement = () => {
   return {
     users, loading, viewMode, setViewMode, status, setStatus,
     editingUser, openEditor, closeEditor, handleSyncPermissions, handleMassSyncPermissions,
+    loadPresetPermissions,
     handleDeactivate, handleReactivate,
     editRoleScope, setEditRoleScope,
     editRoleLevel, handleLevelChange,

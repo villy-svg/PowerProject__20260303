@@ -26,6 +26,7 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
     closeEditor,
     handleSyncPermissions,
     handleMassSyncPermissions,
+    loadPresetPermissions,
     handleDeactivate,
     handleReactivate,
     editRoleScope,
@@ -103,6 +104,8 @@ const UserManagement = ({ setActiveVertical, onShowBottomNav }) => {
       {editingUser && (
         <UserEditorModal
           user={editingUser}
+          users={users}
+          loadPresetPermissions={loadPresetPermissions}
           roleScope={editRoleScope}
           setRoleScope={setEditRoleScope}
           roleLevel={editRoleLevel}

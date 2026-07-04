@@ -255,7 +255,7 @@ const AttendanceApprovalDrawer = ({
 
   return (
     <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div>
         {/* Error state */}
         {actionError && (
           <div className="attendance-board__error" style={{ marginBottom: '16px' }}>

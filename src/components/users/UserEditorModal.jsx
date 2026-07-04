@@ -14,6 +14,8 @@ import RoleTooltip from '../ui/RoleTooltip';
 const UserEditorModal = (props) => {
   const {
     user,
+    users,
+    loadPresetPermissions,
     roleScope,
     setRoleScope,
     roleLevel,
@@ -56,6 +58,21 @@ const UserEditorModal = (props) => {
         </header>
         
         <form onSubmit={onSave}>
+          <div className="preset-selector-section" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-light)' }}>
+            <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset User (Optional)</label>
+            <select 
+              className="halo-input" 
+              style={{ width: '100%', maxWidth: '400px' }}
+              onChange={(e) => loadPresetPermissions(e.target.value)}
+              defaultValue=""
+            >
+              <option value="" disabled>Select a user to clone their permissions...</option>
+              {users && users.filter(u => u.id !== user.id).map(u => (
+                <option key={u.id} value={u.id}>{u.name} {u.email ? `(${u.email})` : ''}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="role-config-grid">
             {/* 1. Scope Selection */}
             <div className="form-section">
