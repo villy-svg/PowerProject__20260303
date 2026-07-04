@@ -148,13 +148,11 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
               <span className="user-name">{u.name}</span>
               <span className="user-email">{u.email}</span>
             </div>
-              {/* Badges moved to bottom actions */}
-            </div>
+            {/* Badges moved to bottom actions */}
           </div>
-          
           <div className="user-card-body">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-start' }}>
-              <div style={{ flex: '1 1 auto', minWidth: '0' }}>
+            <div className="user-card-body-row">
+              <div className="user-card-body-col">
                 <label>Verticals</label>
                 <div className="vertical-tags">
                   {u.role_id?.startsWith('master') ? (
@@ -180,17 +178,17 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                 </div>
               </div>
               
-              <div style={{ flex: '1 1 auto', minWidth: '0' }}>
+              <div className="user-card-body-col">
                 <label>Profile</label>
                 {/* Employee link status — inactive renders faded red, active renders green */}
                 <div className="employee-link-status" style={{marginTop: '4px'}}>
                   {u.linkedEmployee ? (
                     u.linkedEmployee.status === 'Inactive' ? (
-                      <span className="v-tag simple linked-inactive" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                      <span className="v-tag simple linked-inactive">
                         ⚠ Linked: {u.linkedEmployee.full_name} ({u.linkedEmployee.emp_code})
                       </span>
                     ) : (
-                      <span className="v-tag simple linked-active" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                      <span className="v-tag simple linked-active">
                         ✓ {u.linkedEmployee.full_name} ({u.linkedEmployee.emp_code})
                       </span>
                     )
@@ -202,14 +200,14 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
             </div>
           </div>
 
-          <div className="user-card-actions" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-            <div className="user-card-status-tags" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="user-card-actions">
+            <div className="user-card-status-tags">
               <StatusBadge isActive={u.is_active} />
               <span className={`role-badge ${u.role_id}`}>
                 {typeof u.role_id === 'string' ? u.role_id.replace('_', ' ') : u.role_id}
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="user-card-action-btns">
               <button className="icon-btn edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
                 <IconEdit size={18} />
               </button>
