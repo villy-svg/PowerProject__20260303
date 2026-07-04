@@ -178,7 +178,7 @@
   cursor: default;
   background-color: var(--border-color);
   opacity: 0.8;
-  border: 1px solid var(--border-color);
+  border: none;
 }
 .dropdown-item.static:hover {
   background-color: var(--border-color);
