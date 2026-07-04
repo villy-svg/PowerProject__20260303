@@ -206,7 +206,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
 
           <div className="user-card-actions">
             <button className="halo-button edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
-              <IconEdit size={16} /> Edit Access
+              <IconEdit size={16} />
             </button>
             <ToggleStatusBtn user={u} />
           </div>

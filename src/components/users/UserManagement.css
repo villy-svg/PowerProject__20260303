@@ -558,15 +558,17 @@
   display: flex;
   gap: 12px;
   align-items: center;
+  justify-content: flex-end;
   border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 70%);
   padding-top: 16px;
 }
 .user-card-actions .edit-user-btn {
-  flex: 1;
-  display: flex;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  padding: 0;
   border-radius: 8px;
 }
 .v-tag.simple {
