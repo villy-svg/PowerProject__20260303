@@ -1,6 +1,6 @@
 import React from 'react';
 import { VERTICAL_LIST } from '../../constants/verticals';
-import { IconEdit } from '../ui/Icons';
+import { IconEdit, IconLock, IconZap } from '../ui/Icons';
 
 /**
  * UserList Component
@@ -25,7 +25,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
         onClick={() => onDeactivate && onDeactivate(user.id)}
         title="Deactivate this user — removes all access"
       >
-        Deactivate
+        <IconLock size={16} />
       </button>
     ) : (
       <button
@@ -33,7 +33,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
         onClick={() => onReactivate && onReactivate(user.id)}
         title="Reactivate this user — restores base access only"
       >
-        Reactivate
+        <IconZap size={16} />
       </button>
     );
 

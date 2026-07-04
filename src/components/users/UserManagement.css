@@ -535,27 +535,39 @@
   flex-direction: column;
 }
 .user-card-id .user-name {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 .user-card-id .user-email {
   font-size: 13px;
-  opacity: 0.5;
+  opacity: 0.4;
+  margin-top: 2px;
 }
 .user-card-body label {
   display: block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
+  letter-spacing: 0.8px;
+  opacity: 0.4;
   margin-bottom: 8px;
 }
 .user-card-actions {
   margin-top: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 70%);
+  padding-top: 16px;
 }
 .user-card-actions .edit-user-btn {
-  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
 }
 .v-tag.simple {
   background: color-mix(in srgb, var(--text-color), transparent 95%);
@@ -660,15 +672,16 @@
 /* Deactivate button — warning tone (muted by default to reduce cognitive load) */
 .user-row-actions .deactivate-btn,
 .user-card-actions .deactivate-btn {
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: 1px solid var(--border-color);
   color: var(--text-color);
   opacity: 0.6;
-  border-radius: 6px;
-  white-space: nowrap;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 .user-row-actions .deactivate-btn:hover,
@@ -683,14 +696,15 @@
 /* Reactivate button — muted green tone */
 .user-row-actions .reactivate-btn,
 .user-card-actions .reactivate-btn {
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: color-mix(in srgb, var(--badge-green-text), transparent 92%);
   border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 70%);
   color: var(--badge-green-text);
-  border-radius: 6px;
-  white-space: nowrap;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 .user-row-actions .reactivate-btn:hover,
