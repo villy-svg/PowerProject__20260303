@@ -94,8 +94,11 @@
 }
 
 .menu-trigger-btn.active {
-  color: var(--text-color);
-  opacity: 1;
+  color: var(--text-color) !important;
+  opacity: 1 !important;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%) !important;
+  background: var(--halo-bg) !important;
+  box-shadow: 0 0 3px var(--halo-glow) !important;
 }
 
 .menu-trigger-btn.active:hover {

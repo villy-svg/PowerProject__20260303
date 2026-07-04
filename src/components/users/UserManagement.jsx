@@ -3,6 +3,7 @@ import MasterPageHeader from '../layout/MasterPageHeader';
 import UserList from './UserList';
 import UserEditorModal from './UserEditorModal';
 import PermissionSyncModal from './PermissionSyncModal';
+import PresetCreationModal from './PresetCreationModal';
 import { useUserManagement } from './useUserManagement';
 import { userService } from '../../services/auth/userService';
 import './UserManagement.css';
@@ -14,6 +15,7 @@ import './UserManagement.css';
  */
 const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => {
   const [isSyncModalOpen, setIsSyncModalOpen] = React.useState(false);
+  const [isPresetModalOpen, setIsPresetModalOpen] = React.useState(false);
   // 'actual' shows real users; 'preset' shows dummy preset profiles
   const [profileMode, setProfileMode] = React.useState('actual');
 
@@ -77,10 +79,8 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
 
   const userGroups = groupUsersByRole(displayedUsers);
 
-  const handleCreatePreset = async () => {
-    const name = prompt("Enter a name for the new Preset Profile (e.g., 'Preset: Junior Operator'):");
-    if (!name) return;
-
+  const handleCreatePreset = async (name) => {
+    setIsPresetModalOpen(false);
     setStatus({ type: '', text: '' });
 
     try {
@@ -160,7 +160,7 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
             {isMasterAdmin && (
               <button
                 className="halo-button header-action-btn"
-                onClick={handleCreatePreset}
+                onClick={() => setIsPresetModalOpen(true)}
                 title="Create a new dummy preset profile"
               >
                 + Preset
@@ -230,6 +230,14 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
             await handleMassSyncPermissions(sourceId, targetIds);
             setIsSyncModalOpen(false);
           }}
+          loading={loading}
+        />
+      )}
+
+      {isPresetModalOpen && (
+        <PresetCreationModal
+          onClose={() => setIsPresetModalOpen(false)}
+          onSave={handleCreatePreset}
           loading={loading}
         />
       )}

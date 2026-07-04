@@ -92,6 +92,8 @@ const PermissionSyncModal = ({ users, onClose, onSave, loading }) => {
                     selectAll={true}
                     displayMode="pills"
                     closeOnSelectMobile={false}
+                    dropdownDirection="up"
+                    dropdownMaxHeight={200}
                   />
                 )}
               </div>

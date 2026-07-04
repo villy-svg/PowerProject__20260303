@@ -60,6 +60,12 @@
   padding: 4px 0;
 }
 
+.custom-dropdown-menu.direction-up {
+  top: auto;
+  bottom: calc(100% + 5px);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+}
+
 .custom-dropdown-option {
   display: flex;
   align-items: center;

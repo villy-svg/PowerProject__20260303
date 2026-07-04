@@ -50,6 +50,7 @@ const BaseDropdown = ({
   // ── LAYOUT
   fullWidthDropdown = false,
   dropdownMaxHeight = 280,
+  dropdownDirection = 'down', // 'down' | 'up'
 
   // ── ITEM RENDERING
   renderItem = null,
@@ -464,7 +465,7 @@ const BaseDropdown = ({
             }}
           />
           <div 
-            className="bd-menu custom-dropdown-menu fade-in" 
+            className={`bd-menu custom-dropdown-menu fade-in ${dropdownDirection === 'up' ? 'direction-up' : ''}`} 
             ref={dropdownRef}
             role="listbox" 
             aria-multiselectable={mode === 'multi'} 
