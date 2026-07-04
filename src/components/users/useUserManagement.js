@@ -84,7 +84,7 @@ export const useUserManagement = () => {
       // 1a. Fetch basic profiles, all employees (for self-healing matching), and vertical access
       const [profiles, { data: allEmployees }, { data: vAccess }] = await Promise.all([
         userService.fetchUsers(),
-        supabase.from('employees').select('*, employee_roles(seniority_level)'),
+        supabase.from('employees').select('*, employee_roles(role_code, seniority_level)'),
         supabase.from('vertical_access').select('user_id, vertical_id, access_level')
       ]);
 

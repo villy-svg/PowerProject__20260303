@@ -9,12 +9,12 @@ import { IconEdit, IconLock, IconZap } from '../ui/Icons';
  */
 const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) => {
 
-  // Reusable status badge element
+  // Reusable status badge element (glowing dot)
   const StatusBadge = ({ isActive }) =>
     isActive !== false ? (
-      <span className="user-status-badge user-status-badge--active">Active</span>
+      <span className="user-status-dot user-status-dot--active" title="Active"></span>
     ) : (
-      <span className="user-status-badge user-status-badge--inactive">Inactive</span>
+      <span className="user-status-dot user-status-dot--inactive" title="Inactive"></span>
     );
 
   // Reusable toggle action button
@@ -56,7 +56,6 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
           <thead>
             <tr>
               <th>Name / Email</th>
-              <th>Status</th>
               <th>Role</th>
               <th>Vertical Access</th>
               <th>Employee Link</th>
@@ -67,13 +66,13 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
             {users.map(u => (
               <tr key={u.id} className={u.is_active === false ? 'user-row--inactive' : ''}>
                 <td>
-                  <div className="user-identity">
-                    <span className="user-name-cell">{u.name}</span>
-                    <span className="user-email-cell">{u.email}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <StatusBadge isActive={u.is_active} />
+                    <div className="user-identity">
+                      <span className="user-name-cell">{u.name}</span>
+                      <span className="user-email-cell">{u.email}</span>
+                    </div>
                   </div>
-                </td>
-                <td>
-                  <StatusBadge isActive={u.is_active} />
                 </td>
                 <td>
                   <span className={`role-badge ${u.role_id}`}>
@@ -144,9 +143,14 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
       {users.map(u => (
         <div key={u.id} className={`user-card ${u.is_active === false ? 'user-card--inactive' : ''}`}>
           <div className="user-card-header">
-            <div className="user-card-id">
-              <span className="user-name">{u.name}</span>
-              <span className="user-email">{u.email}</span>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ marginTop: '8px' }}>
+                <StatusBadge isActive={u.is_active} />
+              </div>
+              <div className="user-card-id">
+                <span className="user-name">{u.name}</span>
+                <span className="user-email">{u.email}</span>
+              </div>
             </div>
             {/* Badges moved to bottom actions */}
           </div>
@@ -202,7 +206,6 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
 
           <div className="user-card-actions">
             <div className="user-card-status-tags">
-              <StatusBadge isActive={u.is_active} />
               <span className={`role-badge ${u.role_id}`}>
                 {typeof u.role_id === 'string' ? u.role_id.replace('_', ' ') : u.role_id}
               </span>

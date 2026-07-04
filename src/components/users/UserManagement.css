@@ -611,9 +611,9 @@
 }
 .user-card-status-tags {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
 }
 .user-card-action-btns {
   display: flex;
@@ -656,43 +656,19 @@
    USER ACTIVE / INACTIVE STATUS SYSTEM
    ========================================================================== */
 
-/* Status badge pills */
-.user-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.user-status-badge--active {
-  background: color-mix(in srgb, var(--badge-green-text), transparent 88%);
-  border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 70%);
-  color: var(--badge-green-text);
-}
-.user-status-badge--active::before {
-  content: '';
-  width: 6px;
-  height: 6px;
+.user-status-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.user-status-dot--active {
   background: var(--badge-green-text);
   box-shadow: 0 0 6px var(--badge-green-text);
   animation: pulse-dot 2s infinite;
 }
-.user-status-badge--inactive {
-  background: color-mix(in srgb, var(--badge-red-text), transparent 92%);
-  border: 1px solid color-mix(in srgb, var(--badge-red-text), transparent 75%);
-  color: var(--badge-red-text);
-}
-.user-status-badge--inactive::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.user-status-dot--inactive {
   background: var(--badge-red-text);
 }
 @keyframes pulse-dot {

@@ -23,6 +23,7 @@ export const userService = {
           status,
           role_id,
           employee_roles (
+            role_code,
             seniority_level
           )
         )

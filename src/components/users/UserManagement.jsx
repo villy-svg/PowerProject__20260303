@@ -57,8 +57,17 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
     userList.forEach(u => {
       const emp = u.linkedEmployee;
       // Try to get a human-readable role name from the employee record
-      const roleLabel = emp?.role_id
-        ? emp.role_id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      let roleCode = null;
+      if (emp?.employee_roles) {
+        if (Array.isArray(emp.employee_roles)) {
+          roleCode = emp.employee_roles[0]?.role_code;
+        } else {
+          roleCode = emp.employee_roles.role_code;
+        }
+      }
+      
+      const roleLabel = roleCode
+        ? roleCode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
         : 'Unlinked / No Employee Profile';
       if (!groups[roleLabel]) groups[roleLabel] = [];
       groups[roleLabel].push(u);
