@@ -42,13 +42,15 @@
    CUSTOM DROPDOWN POPUP SYSTEM
    Used by AssigneeSelector, HubSelector, and other technical multi-selects.
 */
-.custom-dropdown-menu {
+.custom-dropdown-menu,
+.actions-dropdown-menu,
+.user-dropdown-menu {
   position: absolute;
   top: calc(100% + 5px);
   left: 0;
   right: 0;
   background: #0a0a0a !important; /* Truly solid dark background to prevent bleed-through */
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: none;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   z-index: 1000;

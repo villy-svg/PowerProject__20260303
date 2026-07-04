@@ -59,18 +59,22 @@ const UserEditorModal = (props) => {
         
         <form onSubmit={onSave}>
           <div className="preset-selector-section" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-light)' }}>
-            <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset User (Optional)</label>
-            <select 
-              className="halo-input" 
-              style={{ width: '100%', maxWidth: '400px' }}
-              onChange={(e) => loadPresetPermissions(e.target.value)}
-              defaultValue=""
-            >
-              <option value="" disabled>Select a user to clone their permissions...</option>
-              {users && users.filter(u => u.id !== user.id).map(u => (
-                <option key={u.id} value={u.id}>{u.name} {u.email ? `(${u.email})` : ''}</option>
-              ))}
-            </select>
+            <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset Profile (Optional)</label>
+            {users && users.length > 0 ? (
+              <select
+                className="master-dropdown"
+                style={{ width: '100%', maxWidth: '400px' }}
+                onChange={(e) => loadPresetPermissions(e.target.value)}
+                defaultValue=""
+              >
+                <option value="" disabled>Select a preset to clone its permissions...</option>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            ) : (
+              <span style={{ fontSize: '13px', opacity: 0.5 }}>No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
+            )}
           </div>
 
           <div className="role-config-grid">

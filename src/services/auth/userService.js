@@ -108,4 +108,91 @@ export const userService = {
     if (error) throw error;
     return { success: true };
   },
+
+
+  // ── User Admin Operations (Edge Function) ────────────────────────────────
+  // These operations require the service-role key and use the `user-admin`
+  // Edge Function as a secure proxy. The function verifies master_admin
+  // on the server side — do not rely solely on UI guards.
+
+  /**
+   * Internal helper: invokes the user-admin Edge Function with a given action.
+   * @private
+   */
+  async _userAdminAction(action, params = {}) {
+    const { data, error } = await supabase.functions.invoke('user-admin', {
+      body: { action, ...params },
+    });
+    if (error) throw error;
+    if (data?.success === false) throw new Error(data.error || 'Unknown error from user-admin function');
+    return data?.data ?? {};
+  },
+
+  /**
+   * Creates a dummy @preset.local user for use as a Permission Preset template.
+   * Master admin only — enforced server-side.
+   * @param {string} name - Display name (e.g. "Preset: Junior Operator")
+   */
+  async createPresetUser(name) {
+    return this._userAdminAction('create_preset', { name });
+  },
+
+  /**
+   * Sends a Supabase magic-link invite email to a real employee.
+   * Master admin only — enforced server-side.
+   * @param {string} email
+   * @param {string} [name]
+   */
+  async inviteUser(email, name) {
+    return this._userAdminAction('invite_user', { email, name });
+  },
+
+  /**
+   * Hard-deletes a user: purges all public-schema data then removes auth.users entry.
+   * Use for preset cleanup or permanent account removal. Use deactivateUser() for soft locks.
+   * Master admin only — enforced server-side.
+   * @param {string} userId
+   */
+  async deleteUser(userId) {
+    return this._userAdminAction('delete_user', { userId });
+  },
+
+  /**
+   * Sends a password reset email to a real user account.
+   * Master admin only — enforced server-side.
+   * @param {string} email
+   */
+  async resetUserPassword(email) {
+    return this._userAdminAction('reset_password', { email });
+  },
+
+  /**
+   * Applies a Supabase-layer hard ban (invalidates all sessions immediately).
+   * Complements the is_active soft-lock. Use for security incidents.
+   * Master admin only — enforced server-side.
+   * @param {string} userId
+   */
+  async banUser(userId) {
+    return this._userAdminAction('ban_user', { userId });
+  },
+
+  /**
+   * Lifts a Supabase-layer hard ban. Does NOT restore permissions.
+   * Master admin only — enforced server-side.
+   * @param {string} userId
+   */
+  async unbanUser(userId) {
+    return this._userAdminAction('unban_user', { userId });
+  },
+
+  /**
+   * Renames a preset profile's display name in user_profiles.
+   * Master admin only — enforced server-side.
+   * @param {string} userId
+   * @param {string} newName
+   */
+  async renamePreset(userId, newName) {
+    return this._userAdminAction('rename_preset', { userId, newName });
+  },
 };
+

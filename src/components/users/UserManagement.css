@@ -1,4 +1,37 @@
 /* UserManagement styles */
+@import '../../styles/DropdownSystem.css';
+
+/* ── Role Grouping ─────────────────────────────── */
+.user-role-group {
+  margin-bottom: 24px;
+}
+.user-role-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+}
+.user-role-group-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  opacity: 0.55;
+  color: var(--text-color);
+}
+.user-role-group-count {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 1px 8px;
+  opacity: 0.6;
+}
+
+
 .user-mgmt-header {
   margin-bottom: 32px;
 }
@@ -61,9 +94,12 @@
   height: 36px;
   font-size: 1.2rem;
   line-height: 1;
+  background: transparent;
+  border: none;
 }
 .edit-user-btn:hover {
   transform: translateY(-2px);
+  color: var(--brand-green);
 }
 /* Modal Styling */
 .edit-modal-overlay {
@@ -570,6 +606,9 @@
   justify-content: center;
   padding: 0;
   border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--brand-green);
 }
 .v-tag.simple {
   background: color-mix(in srgb, var(--text-color), transparent 95%);
@@ -680,7 +719,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--border-color);
+  border: none;
   color: var(--text-color);
   opacity: 0.6;
   border-radius: 8px;
@@ -688,8 +727,6 @@
 }
 .user-row-actions .deactivate-btn:hover,
 .user-card-actions .deactivate-btn:hover {
-  background: color-mix(in srgb, var(--priority-urgent), transparent 92%);
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 60%);
   color: var(--badge-red-text);
   opacity: 1;
   transform: translateY(-1px);
@@ -703,16 +740,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--badge-green-text), transparent 92%);
-  border: 1px solid color-mix(in srgb, var(--badge-green-text), transparent 70%);
+  background: transparent;
+  border: none;
   color: var(--badge-green-text);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 .user-row-actions .reactivate-btn:hover,
 .user-card-actions .reactivate-btn:hover {
-  background: color-mix(in srgb, var(--badge-green-text), transparent 82%);
-  border-color: color-mix(in srgb, var(--badge-green-text), transparent 50%);
   transform: translateY(-1px);
 }
 

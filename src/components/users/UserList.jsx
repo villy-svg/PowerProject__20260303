@@ -21,19 +21,19 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
   const ToggleStatusBtn = ({ user }) =>
     user.is_active !== false ? (
       <button
-        className="halo-button deactivate-btn"
+        className="icon-btn deactivate-btn"
         onClick={() => onDeactivate && onDeactivate(user.id)}
         title="Deactivate this user — removes all access"
       >
-        <IconLock size={16} />
+        <IconLock size={18} />
       </button>
     ) : (
       <button
-        className="halo-button reactivate-btn"
+        className="icon-btn reactivate-btn"
         onClick={() => onReactivate && onReactivate(user.id)}
         title="Reactivate this user — restores base access only"
       >
-        <IconZap size={16} />
+        <IconZap size={18} />
       </button>
     );
 
@@ -95,15 +95,12 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                             return mapVerticalLabel(label);
                           })));
                         
-                        return activeVIds.length > 0 ? (
-                          activeVIds.map(vLabel => (
-                            <span key={vLabel} className="v-tag simple">
-                              {vLabel}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="v-tag locked">No Access</span>
-                        );
+                        if (activeVIds.length > 0) {
+                          const initials = activeVIds.map(v => v.charAt(0).toUpperCase()).join('');
+                          return <span className="v-tag simple" title={activeVIds.join(', ')}>{initials}</span>;
+                        } else {
+                          return <span className="v-tag locked">No Access</span>;
+                        }
                       })()
                     )}
                   </div>
@@ -128,8 +125,8 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                 </td>
                 <td>
                   <div className="user-row-actions">
-                    <button className="halo-button edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
-                      <IconEdit size={16} />
+                    <button className="icon-btn edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
+                      <IconEdit size={18} />
                     </button>
                     <ToggleStatusBtn user={u} />
                   </div>
@@ -174,13 +171,12 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                       const label = vInfo ? vInfo.label : vId;
                       return mapVerticalLabel(label);
                     })));
-                  return activeVIds.length > 0 ? (
-                    activeVIds.map(vLabel => (
-                      <span key={vLabel} className="v-tag simple">{vLabel}</span>
-                    ))
-                  ) : (
-                    <span className="v-tag locked">No Access</span>
-                  );
+                  if (activeVIds.length > 0) {
+                    const initials = activeVIds.map(v => v.charAt(0).toUpperCase()).join('');
+                    return <span className="v-tag simple" title={activeVIds.join(', ')}>{initials}</span>;
+                  } else {
+                    return <span className="v-tag locked">No Access</span>;
+                  }
                 })()
               )}
             </div>
@@ -205,8 +201,8 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
           </div>
 
           <div className="user-card-actions">
-            <button className="halo-button edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
-              <IconEdit size={16} />
+            <button className="icon-btn edit-user-btn" onClick={() => onEdit(u)} title="Edit User Permissions">
+              <IconEdit size={18} />
             </button>
             <ToggleStatusBtn user={u} />
           </div>
