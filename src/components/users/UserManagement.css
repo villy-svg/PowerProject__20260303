@@ -696,12 +696,7 @@
 }
 
 /* Card header right slot — status badge + role badge stacked */
-.user-card-header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
+
 
 /* Action buttons row in list view */
 .user-row-actions {
