@@ -255,6 +255,30 @@
   font-style: italic;
 }
 
+/* ── Search result edit button ───────────────────────────── */
+.search-result-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.search-result-edit-btn:hover {
+  opacity: 1;
+  color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 90%);
+}
+
 /* ── Mobile touch targets ────────────────────────────────── */
 @media screen and (max-width: 768px) {
   /* Dashboard: wrapper .mobile-dashboard-search controls position; override inner margins */

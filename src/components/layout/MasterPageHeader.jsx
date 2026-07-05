@@ -53,6 +53,7 @@ const MasterPageHeader = ({
   searchRecords,
   recordType,
   onSearchSelect,
+  onSearchEdit,
   hideSearchBar,
 }) => {
   const { shellType } = useLayoutShell();
@@ -65,11 +66,12 @@ const MasterPageHeader = ({
         records: searchRecords,
         recordType,
         onSelect: onSearchSelect,
+        onEdit: onSearchEdit,
         hideSearchBar,
       });
       return () => setSearchProps(null);
     }
-  }, [searchRecords, recordType, onSearchSelect, hideSearchBar, shellType, setSearchProps]);
+  }, [searchRecords, recordType, onSearchSelect, onSearchEdit, hideSearchBar, shellType, setSearchProps]);
   
   const headerState = useHeaderState({
     isSubSidebarOpen,
@@ -107,6 +109,7 @@ const MasterPageHeader = ({
         searchRecords={searchRecords}
         recordType={recordType}
         onSearchSelect={onSearchSelect}
+        onSearchEdit={onSearchEdit}
         hideSearchBar={hideSearchBar}
       />
     );

@@ -68,10 +68,11 @@
 /* Dropdown Styles - Now Theme Aware */
 .user-dropdown-menu {
   top: calc(100% + 10px);
-  left: auto;
-  right: 0;
+  left: auto !important;
+  right: 0 !important;
   width: 240px; /* Widened slightly to fit the impersonation select cleanly */
   padding: 8px;
+  overflow: visible !important;
 }
 
 /* Scrollbar Styling for Profile Menu */

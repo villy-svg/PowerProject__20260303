@@ -246,6 +246,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         searchRecords={employees}
         recordType="Employees"
         onSearchSelect={ui.openViewModal}
+        onSearchEdit={ui.openEditModal}
         rightActions={
           <>
             {permissions.canCreateEmployees && (

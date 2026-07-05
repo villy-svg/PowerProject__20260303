@@ -6,7 +6,7 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { getBoardLabelForVertical } from '../../constants/taskBoards';
 import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
-import { IconSearch, IconX } from './Icons';
+import { IconSearch, IconX, IconEdit } from './Icons';
 import './SearchBar.css';
 
 /**
@@ -30,7 +30,7 @@ import './SearchBar.css';
  *   recordType {string}  Optional — label for display ("Employee", "Client", etc.)
  *   onSelect   {fn}      Optional — called with the selected record when clicked
  */
-const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record', onSelect }) => {
+const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record', onSelect, onEdit }) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -137,6 +137,13 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
     setQuery('');
   };
 
+  const handleEditClick = (e, item) => {
+    e.stopPropagation();
+    onEdit?.(item);
+    setIsFocused(false);
+    setQuery('');
+  };
+
   const handleClear = () => {
     setQuery('');
     setDebouncedQuery('');
@@ -196,7 +203,7 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
               <ul className="search-results-list">
                 {searchResults.map((item, idx) => (
                   isRecordsMode
-                    ? <RecordResult key={item.id || idx} rec={item} query={debouncedQuery} onClick={() => handleResultClick(item)} />
+                    ? <RecordResult key={item.id || idx} rec={item} query={debouncedQuery} onClick={() => handleResultClick(item)} onEdit={onEdit ? (e) => handleEditClick(e, item) : null} />
                     : <TaskResult  key={item.id}      task={item} query={debouncedQuery} onClick={() => handleResultClick(item)} />
                 ))}
               </ul>
@@ -234,7 +241,7 @@ function TaskResult({ task, query, onClick }) {
 }
 
 /* ── Record result row ───────────────────────────────────────────────────── */
-function RecordResult({ rec, query, onClick }) {
+function RecordResult({ rec, query, onClick, onEdit }) {
   // Derive a display name from whichever field exists
   const primaryName = rec.full_name || rec.name || rec.company_name || '—';
   const secondaryText = rec.email || rec.emp_code || rec.badge_id || rec.phone || '';
@@ -248,9 +255,19 @@ function RecordResult({ rec, query, onClick }) {
           <span className="result-sub">{highlightMatch(secondaryText, query)}</span>
         )}
       </div>
-      {metaText && (
+      {(metaText || onEdit) && (
         <div className="result-badges">
-          <span className="result-badge">{metaText}</span>
+          {metaText && <span className="result-badge">{metaText}</span>}
+          {onEdit && (
+            <button
+              className="search-result-edit-btn"
+              onClick={onEdit}
+              title="Edit Record"
+              aria-label="Edit Record"
+            >
+              <IconEdit size={14} />
+            </button>
+          )}
         </div>
       )}
     </li>
