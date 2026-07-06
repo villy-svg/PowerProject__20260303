@@ -2,6 +2,16 @@ import { useState, useCallback, useMemo } from 'react';
 import { taskService } from '../services/tasks/taskService';
 import { masterErrorHandler } from '../services/core/masterErrorHandler';
 
+const getAllChildIds = (parentId, allTasks) => {
+  let childIds = [];
+  const directChildren = allTasks.filter(t => t.parentTask === parentId);
+  for (const child of directChildren) {
+    childIds.push(child.id);
+    childIds = childIds.concat(getAllChildIds(child.id, allTasks));
+  }
+  return childIds;
+};
+
 /**
  * useTasks Hook
  * Manages all task state and delegates DB operations to taskService.
@@ -107,10 +117,20 @@ export const useTasks = (user) => {
   };
 
   const updateTaskStage = async (taskId, newStageId) => {
+    let childIdsToUpdate = [];
+    if (user?.roleId === 'master_admin' && newStageId === 'COMPLETED') {
+      childIdsToUpdate = getAllChildIds(taskId, tasks);
+    }
+    const idsToUpdate = [taskId, ...childIdsToUpdate];
+
     // Optimistic UI update
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, stageId: newStageId } : t));
+    setTasks(prev => prev.map(t => idsToUpdate.includes(t.id) ? { ...t, stageId: newStageId } : t));
     try {
-      await taskService.updateTaskStage(taskId, newStageId, user?.id);
+      if (childIdsToUpdate.length > 0) {
+        await taskService.bulkUpdateTasks(idsToUpdate, { stage_id: newStageId }, user?.id);
+      } else {
+        await taskService.updateTaskStage(taskId, newStageId, user?.id);
+      }
       // Background reconciliation on success
       await fetchTasks(false);
     } catch (err) {
