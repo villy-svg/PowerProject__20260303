@@ -22,6 +22,22 @@
 --   "primary" reference. Multi-entity links live in task_context_links.
 -- =========================================================================
 
+-- GHOST TABLE (For Idempotent Revert-Repairs)
+-- If daily_tasks was already dropped by a later migration, this recreates an empty 
+-- shell of it so the rest of this file can parse and execute safely without errors.
+-- It will be dropped again safely in 20260706155200.
+CREATE TABLE IF NOT EXISTS public.daily_tasks (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    assigned_to uuid,
+    client_id uuid,
+    partner_id uuid,
+    vendor_id uuid,
+    employee_id uuid,
+    vertical_id text,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now(),
+    stage_id text
+);
 
 -- =========================================================================
 -- SECTION 1: RENAME COLUMNS (snake_case standardization — idempotent)
