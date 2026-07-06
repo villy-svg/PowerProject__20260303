@@ -113,10 +113,11 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     setError(null);
 
     try {
-      const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD;
+      const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
+      const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
       const filters = {};
       
-      // If the user has restricted seniority, only fetch their own attendance row
+      // If the user has restricted seniority or is a viewer, only fetch their own attendance row
       if (isRestricted && user?.employeeId) {
         filters.employeeId = user.employeeId;
       }

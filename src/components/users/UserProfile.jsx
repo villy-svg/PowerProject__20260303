@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { ROLE_LIST } from '../../constants/roles';
 import CustomSelect from '../ui/CustomSelect';
+import BankChangeRequestModal from './BankChangeRequestModal';
 import './UserProfile.css';
 
 const UserProfile = ({ 
@@ -16,6 +17,7 @@ const UserProfile = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showBankHint, setShowBankHint] = useState(false);
+  const [showBankChangeModal, setShowBankChangeModal] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
@@ -113,7 +115,18 @@ const UserProfile = ({
           <div className="dropdown-divider" />
 
           {/* 2. Bank Details of User */}
-          <div className="dropdown-header">Bank Details</div>
+          <div className="dropdown-header user-profile-bank-header">
+            <span>Bank Details</span>
+            {user?.employeeId && (
+              <button 
+                className="bank-edit-btn" 
+                onClick={() => setShowBankChangeModal(true)}
+                title="Request Bank Details Update"
+              >
+                ✏️ Update
+              </button>
+            )}
+          </div>
           <div className="dropdown-item static bank-details-display">
             {user?.bankDetails ? (
               <>
@@ -189,6 +202,18 @@ const UserProfile = ({
             Log Out
           </button>
         </div>
+      )}
+
+      {showBankChangeModal && (
+        <BankChangeRequestModal 
+          user={user} 
+          onClose={() => setShowBankChangeModal(false)}
+          onSuccess={() => {
+            setShowBankChangeModal(false);
+            setIsOpen(false);
+            alert('Bank update request submitted successfully.');
+          }}
+        />
       )}
     </div>
   );

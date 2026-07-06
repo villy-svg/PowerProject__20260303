@@ -29,7 +29,7 @@ const RAW_CONTEXT = {
   /* ── VERTICALS ── */
   'Hubs': {
     none:        { can: [], summary: 'Completely blocked from the Hubs vertical — no boards will be visible.' },
-    viewer:      { can: ['View hub profiles, locations, and operational status', 'Browse hub task boards (Tasks limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'Good for oversight roles. Note: Junior staff (Seniority ≤ 6) only see tasks assigned to or created by them/their reportees.' },
+    viewer:      { can: ['View hub profiles, locations, and operational status', 'Browse hub task boards (Tasks limited by Sphere of Influence if Seniority ≤ 6)', 'Submit escalations and request support'], summary: 'Good for oversight roles and general staff requesting support. Note: Junior staff (Seniority ≤ 6) only see tasks assigned to or created by them/their reportees.' },
     contributor: { can: ['View Hubs data (Tasks limited if Seniority ≤ 6)', 'Submit new hub task entries and daily task completions'], summary: 'Suited for field staff who log work but should not modify existing records. Sphere of Influence applies to task visibility.' },
     editor:      { can: ['View Hubs data (Tasks limited if Seniority ≤ 6)', 'Create and update hub tasks, daily tasks, and escalation records'], summary: 'For hub supervisors who actively manage task flow and daily operations. Sphere of Influence applies to task visibility.' },
     admin:       { can: ['Full control over all Hubs features', 'Create, edit, and delete tasks, templates, and escalations'], summary: 'Grants complete authority over the Hubs vertical. Master Admins bypass all Sphere limitations.' },
@@ -43,7 +43,7 @@ const RAW_CONTEXT = {
   },
   'Employees': {
     none:        { can: [], summary: 'Completely blocked from the Employees vertical.' },
-    viewer:      { can: ['View employee profiles, department assignments, and roles', 'Browse attendance and remarks (Remarks limited by Sphere if Seniority ≤ 6)'], summary: 'For auditors or senior stakeholders. Note: Junior staff only see remarks tied to them or their reportees.' },
+    viewer:      { can: ['View employee profiles, department assignments, and roles', 'Browse attendance and remarks (Remarks limited by Sphere if Seniority ≤ 6)', 'Submit self-only bank details updates'], summary: 'For auditors or senior stakeholders. Note: Junior staff only see remarks tied to them or their reportees.' },
     contributor: { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Submit new attendance entries and add task remarks'], summary: 'For team leads who log attendance and remarks. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
     editor:      { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Create and update employee records, attendance logs, and remarks'], summary: 'For HR managers who actively manage employee data. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
     admin:       { can: ['Full control over all Employees features', 'Manage profiles, attendance, rules & regulations, and all sub-boards'], summary: 'Grants complete authority over the Employees vertical. Master Admins bypass all Sphere limitations.' },
@@ -101,7 +101,7 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — add, edit, and delete remark entries'], summary: 'Complete authority over the Remarks Manager. Master Admins bypass all Sphere limitations.' },
   },
   'Attendance Board': {
-    viewer:      { can: ['View attendance records for all employees', 'See attendance status breakdown and summaries'], summary: 'For HR auditors who monitor attendance without editing.' },
+    viewer:      { can: ['View your own historical attendance records only', 'See personal attendance status breakdown'], summary: 'For standard employees to view their own attendance history.' },
     contributor: { can: ['View attendance records for all employees', 'Suggest edits to existing attendance records (Maker)'], summary: 'For team leads who log attendance corrections requiring approval.' },
     editor:      { can: ['View attendance records', 'Review and approve pending attendance edits (Checker)', 'Directly correct attendance records'], summary: 'For HR managers who maintain and approve attendance data.' },
     admin:       { can: ['Full CRUD — view, suggest, approve, and remove any attendance entry'], summary: 'Complete authority over the Attendance Board.' },
@@ -139,7 +139,7 @@ const RAW_CONTEXT = {
     admin:       { can: ['Full CRUD — add, edit, and delete daily task templates'], summary: 'Complete authority over task templates.' },
   },
   'Escalation Task Board': {
-    viewer:      { can: ['View escalated tasks, urgency levels, and resolution statuses (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see escalations tied to them or their reportees.' },
+    viewer:      { can: ['View escalations (Limited by Sphere if Seniority ≤ 6)', 'Raise and submit new escalation entries'], summary: 'For oversight roles and general staff to request support. Note: Junior staff only see escalations tied to them or their reportees.' },
     contributor: { can: ['View escalations (Limited if Seniority ≤ 6)', 'Raise and submit new escalation entries'], summary: 'For field staff flagging issues. Visibility restricted by Sphere of Influence for Junior staff.' },
     editor:      { can: ['View escalations (Limited if Seniority ≤ 6)', 'Raise new entries and update escalation records and statuses'], summary: 'For supervisors managing resolution. Visibility restricted by Sphere of Influence for Junior staff.' },
     admin:       { can: ['Full CRUD — manage, update, resolve, and close escalation tasks'], summary: 'Complete authority over the Escalation Board. Master Admins bypass all Sphere limitations.' },

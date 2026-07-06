@@ -139,7 +139,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
     });
 
     // --- ESCALATION BOARD CRUD ALIASING ---
-    finalPerms.canCreateEscalationTasks = !!(finalPerms.canCreateHubTasks || finalPerms.canCreate);
+    finalPerms.canCreateEscalationTasks = !!(finalPerms.canCreateHubTasks || finalPerms.canCreate || finalPerms.canAccessEscalationTasks);
     finalPerms.canReadEscalationTasks   = !!(finalPerms.canReadHubTasks   || finalPerms.canRead);
     finalPerms.canUpdateEscalationTasks = !!(finalPerms.canUpdateHubTasks || finalPerms.canUpdate);
     finalPerms.canDeleteEscalationTasks = !!(finalPerms.canDeleteHubTasks || finalPerms.canDelete);

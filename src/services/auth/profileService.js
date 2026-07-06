@@ -160,7 +160,7 @@ export const profileService = {
       const [empResult, allEmpsResult] = await Promise.all([
         supabase
           .from('employees')
-          .select('id, role_id, account_number, ifsc_code, account_name, employee_roles(role_code, seniority_level)')
+          .select('id, role_id, account_number, ifsc_code, account_name, pan_number, employee_roles(role_code, seniority_level)')
           .eq('id', effectiveEmployeeId)
           .maybeSingle(), // Use maybeSingle to prevent PGRST116 crash if record is missing
         supabase.from('employees').select('id, manager_id')
@@ -211,6 +211,7 @@ export const profileService = {
         accountNumber: employeeData.account_number,
         ifscCode: employeeData.ifsc_code,
         accountName: employeeData.account_name,
+        panNumber: employeeData.pan_number,
       } : null,
       employeeRole: employeeData?.employee_roles?.role_code || null,
     };
