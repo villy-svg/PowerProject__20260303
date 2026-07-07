@@ -76,70 +76,78 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="bank-change-modal-overlay">
-      <div className="bank-change-modal">
-        <div className="bank-change-modal-header">
-          <h3>Request Bank Details Change</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+    <div className="modal-overlay">
+      <div className="modal-content" style={{ maxWidth: '450px' }}>
+        <div className="modal-header">
+          <h2>Request Bank Details</h2>
+          <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
-        <form onSubmit={handleSubmit} className="bank-change-form">
-          <p className="bank-change-hint">
+        <form onSubmit={handleSubmit} className="vertical-task-form" style={{ padding: '24px' }}>
+          <p className="status-message" style={{ background: 'var(--halo-bg)', borderColor: 'transparent', color: 'var(--text-color)', opacity: 0.8 }}>
             Changes to your bank details require approval from a Master Admin. 
             Once submitted, your request will be reviewed.
           </p>
 
-          {error && <div className="bank-change-error">{error}</div>}
+          {error && <div className="status-message error">{error}</div>}
 
           <div className="form-group">
             <label>Account Name</label>
-            <input
-              type="text"
-              name="accountName"
-              value={formData.accountName}
-              onChange={handleChange}
-              placeholder="Name on bank account"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="accountName"
+                value={formData.accountName}
+                onChange={handleChange}
+                placeholder="Name on bank account"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
             <label>Account Number</label>
-            <input
-              type="text"
-              name="accountNumber"
-              value={formData.accountNumber}
-              onChange={handleChange}
-              placeholder="Bank account number"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleChange}
+                placeholder="Bank account number"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
             <label>IFSC Code</label>
-            <input
-              type="text"
-              name="ifscCode"
-              value={formData.ifscCode}
-              onChange={handleChange}
-              placeholder="IFSC Code"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="ifscCode"
+                value={formData.ifscCode}
+                onChange={handleChange}
+                placeholder="IFSC Code"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
             <label>PAN Number</label>
-            <input
-              type="text"
-              name="panNumber"
-              value={formData.panNumber}
-              onChange={handleChange}
-              placeholder="PAN Number"
-              required
-            />
+            <div className="form-input-container">
+              <input
+                type="text"
+                name="panNumber"
+                value={formData.panNumber}
+                onChange={handleChange}
+                placeholder="PAN Number"
+                required
+              />
+            </div>
           </div>
 
-          <div className="bank-change-actions">
+          <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none', padding: '16px 0 0 0' }}>
             <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
