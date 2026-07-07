@@ -21,39 +21,49 @@
 -- A. Clean up orphaned polymorphic records (Idempotent — DELETE is always safe)
 DELETE FROM public.task_context_links WHERE source_type = 'daily_task';
 
--- B. Rebuild task_context_links RLS policies (idempotent via DROP IF EXISTS)
+-- B. SECURITY DEFINER helper: fetches vertical_id from tasks bypassing RLS.
+--    This breaks the recursion cycle:
+--      tcl RLS → tasks subquery → tasks RLS → tcl RLS → ∞
+--    By using SECURITY DEFINER the subquery runs as the function owner and
+--    never re-enters the caller's RLS evaluation stack.
+--    (CREATE OR REPLACE is idempotent by definition)
+CREATE OR REPLACE FUNCTION public.get_task_vertical_id(p_task_id uuid)
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT vertical_id FROM public.tasks WHERE id = p_task_id LIMIT 1;
+$$;
+
+-- C. Rebuild task_context_links RLS policies using the helper (idempotent via DROP IF EXISTS)
 -- CRITICAL: Must be done BEFORE dropping daily_tasks to prevent Postgres from
 -- re-validating old policies that reference the now-missing table.
 DROP POLICY IF EXISTS "tcl SELECT" ON public.task_context_links;
 CREATE POLICY "tcl SELECT" ON public.task_context_links
 FOR SELECT USING (
-    (source_type = 'task' AND EXISTS (
-        SELECT 1 FROM public.tasks t
-        WHERE t.id = source_id
-          AND public.get_user_permission_level(t.vertical_id) IN ('viewer','contributor','editor','admin')
-    ))
+    (source_type = 'task'
+     AND public.get_user_permission_level(public.get_task_vertical_id(source_id))
+         IN ('viewer','contributor','editor','admin'))
     OR source_type = 'template'
 );
 
 DROP POLICY IF EXISTS "tcl INSERT" ON public.task_context_links;
 CREATE POLICY "tcl INSERT" ON public.task_context_links
 FOR INSERT WITH CHECK (
-    (source_type = 'task' AND EXISTS (
-        SELECT 1 FROM public.tasks t
-        WHERE t.id = source_id
-          AND public.get_user_permission_level(t.vertical_id) IN ('contributor','editor','admin')
-    ))
+    (source_type = 'task'
+     AND public.get_user_permission_level(public.get_task_vertical_id(source_id))
+         IN ('contributor','editor','admin'))
     OR source_type = 'template'
 );
 
 DROP POLICY IF EXISTS "tcl DELETE" ON public.task_context_links;
 CREATE POLICY "tcl DELETE" ON public.task_context_links
 FOR DELETE USING (
-    (source_type = 'task' AND EXISTS (
-        SELECT 1 FROM public.tasks t
-        WHERE t.id = source_id
-          AND public.get_user_permission_level(t.vertical_id) IN ('editor','admin')
-    ))
+    (source_type = 'task'
+     AND public.get_user_permission_level(public.get_task_vertical_id(source_id))
+         IN ('editor','admin'))
     OR source_type = 'template'
 );
 
@@ -76,7 +86,36 @@ FOR INSERT WITH CHECK (
 
 
 -- =========================================================================
--- 3. Daily Attendances: Permit SELECT for own records for Viewers
+-- 3. Fix infinite RLS recursion (42P17) on tasks table
+-- =========================================================================
+-- Root Cause:
+--   Fetching tasks with `assignees(...)` or `children:tasks!parent_task_id`
+--   triggers a 3-step cycle:
+--     tasks SELECT RLS → assignees() queries task_context_links
+--     → "tcl SELECT" RLS does EXISTS(SELECT 1 FROM tasks ...) → loop.
+--
+-- Fix: Add SECURITY DEFINER to assignees(tasks) so its internal
+--   task_context_links query bypasses RLS, breaking the cycle.
+--   Safe: the function only exposes employees linked to a task row the
+--   caller already has SELECT access to (the parent task is the input).
+-- (CREATE OR REPLACE is idempotent by definition)
+CREATE OR REPLACE FUNCTION public.assignees(t public.tasks)
+RETURNS SETOF public.employees
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT e.* FROM public.employees e
+    JOIN public.task_context_links tcl ON tcl.entity_id = e.id
+    WHERE tcl.source_id = t.id
+      AND tcl.source_type = 'task'
+      AND tcl.entity_type = 'assignee';
+$$;
+
+
+-- =========================================================================
+-- 4. Daily Attendances: Permit SELECT for own records for Viewers
 -- =========================================================================
 DROP POLICY IF EXISTS "Attendance: SELECT for contributor+" ON public.daily_attendances;
 DROP POLICY IF EXISTS "Attendance: SELECT for contributor+ or own record" ON public.daily_attendances;
@@ -94,7 +133,7 @@ CREATE POLICY "Attendance: SELECT for contributor+ or own record"
 
 
 -- =========================================================================
--- 4. rpc_orchestrate_tasks: Full replacement with viewer escalation support
+-- 5. rpc_orchestrate_tasks: Full replacement with viewer escalation support
 --    and scalar-safe jsonb_array_length guard
 --    (CREATE OR REPLACE is idempotent by definition)
 -- =========================================================================
@@ -402,16 +441,18 @@ $$;
 
 
 -- =========================================================================
--- 5. Evolution Log — single consolidated entry (idempotent via ON CONFLICT)
+-- 6. Evolution Log — single consolidated entry (idempotent via ON CONFLICT)
 -- =========================================================================
 INSERT INTO public.database_evolution_log (migration_name, summary, affected_tables)
 VALUES (
   '20260706155200_viewer_rbac_and_escalation_fix',
-  'Decommissioned legacy daily_tasks table; rebuilt task_context_links RLS policies; '
-  || 'allowed viewers to INSERT escalations via tasks INSERT policy; '
+  'Decommissioned legacy daily_tasks table; introduced get_task_vertical_id() SECURITY DEFINER helper '
+  || 'to break tcl→tasks→tcl RLS recursion cycle; rebuilt task_context_links RLS policies to use helper '
+  || 'instead of direct tasks subquery; allowed viewers to INSERT escalations via tasks INSERT policy; '
   || 'allowed viewers to read their own attendance records; '
   || 'replaced rpc_orchestrate_tasks to permit viewer escalation orchestration with 5 security mitigations; '
-  || 'fixed scalar jsonb_array_length crash in viewer payload-size guard.',
+  || 'fixed scalar jsonb_array_length crash in viewer payload-size guard; '
+  || 'fixed infinite RLS recursion (42P17) on tasks by adding SECURITY DEFINER to assignees(tasks) computed column.',
   ARRAY['daily_tasks','task_context_links','tasks','daily_attendances']
 )
 ON CONFLICT DO NOTHING;
