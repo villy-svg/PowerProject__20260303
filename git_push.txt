@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260706 Bug Fixes 1.0.4"
+git commit -m "260707 Bug Fixes 1.0.0"
 git push origin staging 
 
 # 2. Build (on Staging)
@@ -29,6 +29,8 @@ git branch --show-current
 npx supabase link --project-ref dhhbdgzutlltiojbsboi
 npx supabase db push --include-all --yes
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk
+npx supabase migration repair --status reverted 20260706155200
+npx supabase migration repair --status reverted 20260706182000
 npx supabase db push --include-all --yes
 #npx supabase functions deploy user-admin
 #npx supabase migration repair --status reverted 20260423102600
