@@ -43,8 +43,9 @@ const MobileBottomNav = ({
   const isScrollVisible = useScrollDirection(10, 100);
   const { searchProps, isSearchOpen, setIsSearchOpen } = useAppNavigation();
 
+  const isDashboard = !activeVertical;
   const forceShow = showOverlay;
-  const isEffectivelyVisible = forceShow || isScrollVisible;
+  const isEffectivelyVisible = forceShow || isDashboard || isScrollVisible;
   const hasSearch = !searchProps?.hideSearchBar;
   const isBottomNavExpanded = hasSearch && isSearchOpen;
 
@@ -63,7 +64,6 @@ const MobileBottomNav = ({
   // Phase 3 Architecture: MobileBottomNav is the primary navigation on the dashboard.
   // Inside verticals, it is replaced by the mobile-action-tray (MasterPageHeader).
   // It should only appear inside a vertical if the user taps "Switch" (showOverlay).
-  const isDashboard = !activeVertical;
   if (!isDashboard && !showOverlay) {
     return null;
   }

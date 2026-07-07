@@ -177,6 +177,11 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
   };
 
   const filteredEmployees = employees.filter(emp => {
+    // Restrict viewer to their own record only
+    if (permissions?.level === 'viewer' && user?.roleId !== 'master_admin') {
+      if (emp.id !== user?.employeeId) return false;
+    }
+
     const matchesStatus = ui.showInactive || emp.status === 'Active';
 
     const matchesRole = !filters?.role?.length || filters.role.some(r =>

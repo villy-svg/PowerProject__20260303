@@ -117,7 +117,7 @@ const UserProfile = ({
           {/* 2. Bank Details of User */}
           <div className="dropdown-header user-profile-bank-header">
             <span>Bank Details</span>
-            {user?.employeeId && (
+            {(user?.employeeId || user?.bankDetails) && (
               <button 
                 className="bank-edit-btn" 
                 onClick={() => setShowBankChangeModal(true)}
