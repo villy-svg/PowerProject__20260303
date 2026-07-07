@@ -7,6 +7,7 @@ import { supabase } from '../core/supabaseClient';
 import imageCompression from 'browser-image-compression';
 import { taskService } from './taskService';
 import { createEntity } from '../storage/entityService';
+import { generateUUID } from '../../utils/uuid';
 
 const BUCKET_NAME = 'field-submissions';
 
@@ -163,9 +164,9 @@ export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, f
 
   // Step 1: Generate a client-side UUID as the storage folder name.
   // This is ONLY for folder organisation in storage — it does NOT need to match the DB record ID.
-  // Using crypto.randomUUID() ensures each submission attempt gets a fresh, collision-free folder,
+  // Using generateUUID() ensures each submission attempt gets a fresh, collision-free folder,
   // so retrying after a failure will never hit a "resource already exists" storage error.
-  const uploadBatchId = crypto.randomUUID();
+  const uploadBatchId = generateUUID();
 
   // Step 2: Compress all files concurrently (web workers, non-blocking)
   if (onProgress) onProgress({ current: 0, total: totalSteps, label: `Compressing ${files.length} file(s)...` });

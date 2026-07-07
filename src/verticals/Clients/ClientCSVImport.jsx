@@ -2,6 +2,7 @@ import React from 'react';
 import CSVImportButton from '../../components/ui/CSVImportButton';
 import { supabase } from '../../services/core/supabaseClient';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
+import { generateUUID } from '../../utils/uuid';
 
 /**
  * ClientCSVImport — Thin Wrapper
@@ -104,7 +105,7 @@ const ClientCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) 
           const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
           return {
-            id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
+            id: existingMatch?.id || generateUUID(),
             name,
             billing_model_id: lookup(row.billing_model, ctx.modelMap),
             poc_name: row.poc_name || null,

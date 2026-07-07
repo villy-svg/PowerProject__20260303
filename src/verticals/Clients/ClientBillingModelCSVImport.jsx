@@ -3,6 +3,7 @@ import CSVImportButton from '../../components/ui/CSVImportButton';
 // B7 FIX: Use service layer instead of direct Supabase calls (repository pattern).
 import { billingModelService } from '../../services/clients/clientService';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
+import { generateUUID } from '../../utils/uuid';
 import './ClientBillingModelCSVImport.css';
 
 /**
@@ -71,7 +72,7 @@ const ClientBillingModelCSVImport = ({ onImportComplete, className, label = 'Imp
           const existingMatch = possibleMatches.find(e => isHardMatch(row, e)) || possibleMatches[0];
 
           return {
-            id: existingMatch?.id || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
+            id: existingMatch?.id || generateUUID(),
             name,
             code: (row.code || '').toUpperCase().trim() || null,
             description: row.description || null,

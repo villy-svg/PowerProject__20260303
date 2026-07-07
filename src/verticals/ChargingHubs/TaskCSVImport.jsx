@@ -2,6 +2,7 @@ import React from 'react';
 import CSVImportButton from '../../components/ui/CSVImportButton';
 import { supabase } from '../../services/core/supabaseClient';
 import { STAGE_LIST } from '../../constants/stages';
+import { generateUUID } from '../../utils/uuid';
 
 /**
  * TaskCSVImport — Thin Wrapper
@@ -173,7 +174,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className, label }) => {
         const resolvedAssignee = row.assigned_to ? (empMap[row.assigned_to] || empMap[row.assigned_to.toLowerCase()] || null) : null;
 
         const taskRow = {
-          id: existingMatch?.id || row.id || crypto.randomUUID(),
+          id: existingMatch?.id || row.id || generateUUID(),
           text: finalTaskText,
           description: row.description || null,
           priority: row.priority || 'Medium',

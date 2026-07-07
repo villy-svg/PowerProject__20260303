@@ -19,6 +19,7 @@ import {
   employeeCheckOut,
 } from '../services/employees/attendanceService';
 import { supabase } from '../services/core/supabaseClient';
+import { generateUUID } from '../utils/uuid';
 
 // ---------------------------------------------------------------------------
 // Utility: Get a stable device identifier
@@ -38,7 +39,7 @@ async function getDeviceId() {
   // Web fallback: generate and persist a UUID in localStorage
   let webDeviceId = localStorage.getItem('pp_device_id');
   if (!webDeviceId) {
-    webDeviceId = crypto.randomUUID();
+    webDeviceId = generateUUID();
     localStorage.setItem('pp_device_id', webDeviceId);
   }
   return webDeviceId;
