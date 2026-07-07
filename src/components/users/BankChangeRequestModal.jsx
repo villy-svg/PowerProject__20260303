@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../../services/core/supabaseClient';
 import { taskService } from '../../services/tasks/taskService';
 import '../../styles/ManagementForms.css';
@@ -8,7 +9,6 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
     accountName: user?.bankDetails?.accountName || '',
     accountNumber: user?.bankDetails?.accountNumber || '',
     ifscCode: user?.bankDetails?.ifscCode || '',
-    panNumber: user?.bankDetails?.panNumber || '',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +48,6 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
           accountName: user.bankDetails?.accountName || '',
           accountNumber: user.bankDetails?.accountNumber || '',
           ifscCode: user.bankDetails?.ifscCode || '',
-          panNumber: user.bankDetails?.panNumber || '',
         },
         newDetails: formData,
         requestedBy: user.name,
@@ -75,8 +74,8 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
     }
   };
 
-  return (
-    <div className="modal-overlay">
+  return createPortal(
+    <div className="modal-overlay" style={{ zIndex: 999999 }}>
       <div className="modal-content" style={{ maxWidth: '450px' }}>
         <div className="modal-header">
           <h2>Request Bank Details</h2>
@@ -133,20 +132,6 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group" style={{ padding: 0 }}>
-            <label>PAN Number</label>
-            <div className="form-input-container">
-              <input
-                type="text"
-                name="panNumber"
-                value={formData.panNumber}
-                onChange={handleChange}
-                placeholder="PAN Number"
-                required
-              />
-            </div>
-          </div>
-
           <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none', padding: '8px 0 0 0', marginTop: '8px' }}>
             <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
@@ -157,7 +142,8 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
