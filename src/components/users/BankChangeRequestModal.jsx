@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { taskService } from '../../services/tasks/taskService';
-import './BankChangeRequestModal.css';
+import '../../styles/ManagementForms.css';
 
 const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -83,15 +83,15 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
           <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
-        <form onSubmit={handleSubmit} className="vertical-task-form" style={{ padding: '24px' }}>
-          <p className="status-message" style={{ background: 'var(--halo-bg)', borderColor: 'transparent', color: 'var(--text-color)', opacity: 0.8 }}>
+        <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <p className="status-message" style={{ background: 'var(--halo-bg)', borderColor: 'transparent', color: 'var(--text-color)', opacity: 0.8, margin: 0 }}>
             Changes to your bank details require approval from a Master Admin. 
             Once submitted, your request will be reviewed.
           </p>
 
           {error && <div className="status-message error">{error}</div>}
 
-          <div className="form-group">
+          <div className="form-group" style={{ padding: 0 }}>
             <label>Account Name</label>
             <div className="form-input-container">
               <input
@@ -105,7 +105,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ padding: 0 }}>
             <label>Account Number</label>
             <div className="form-input-container">
               <input
@@ -119,7 +119,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ padding: 0 }}>
             <label>IFSC Code</label>
             <div className="form-input-container">
               <input
@@ -133,7 +133,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ padding: 0 }}>
             <label>PAN Number</label>
             <div className="form-input-container">
               <input
@@ -147,7 +147,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none', padding: '16px 0 0 0' }}>
+          <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none', padding: '8px 0 0 0', marginTop: '8px' }}>
             <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
