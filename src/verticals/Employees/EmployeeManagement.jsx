@@ -124,7 +124,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
             const assigneeIds = masterAdmins.map(admin => admin.id);
             
             await taskService.addTask({
-              verticalId: 'EMPLOYEES',
+              verticalId: 'HUBS',
               stageId: 'REVIEW',
               priority: 'High',
               task_board: ['Escalations'],

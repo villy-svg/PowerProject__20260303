@@ -56,7 +56,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
       // Create a BANK_UPDATE task on the Escalations board
       await taskService.addTask({
         text: `Bank Update Request: ${user.name}`,
-        verticalId: 'EMPLOYEES',
+        verticalId: 'HUBS',
         stageId: 'REVIEW',
         priority: 'High',
         task_board: ['Escalations'],
