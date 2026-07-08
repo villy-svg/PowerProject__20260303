@@ -9,6 +9,7 @@ import { supabase } from '../../../services/core/supabaseClient';
 import { useTaskFilters } from './useTaskFilters';
 import { useTaskSelection } from './useTaskSelection';
 import { useTaskPermissions } from './useTaskPermissions';
+import { Capacitor } from '@capacitor/core';
 import { submitProofOfWork } from '../../../services/tasks/submissionService';
 
 /**
@@ -38,11 +39,16 @@ export const useTaskController = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [viewMode, setViewMode] = useState(() =>
-    localStorage.getItem(`powerpod_task_view_${activeVertical}`) ||
-    localStorage.getItem('powerpod_task_view') ||
-    initialViewMode || 'list'
-  );
+  const [viewMode, setViewMode] = useState(() => {
+    if (Capacitor.isNativePlatform()) {
+      const sessionView = sessionStorage.getItem(`session_task_view_${activeVertical}`);
+      if (sessionView) return sessionView;
+      return 'kanban';
+    }
+    return localStorage.getItem(`powerpod_task_view_${activeVertical}`) ||
+      localStorage.getItem('powerpod_task_view') ||
+      initialViewMode || 'list';
+  });
   const [showDeprioritized, setShowDeprioritized] = useState(false);
   const [showReworkOnly, setShowReworkOnly] = useState(false);
   const [showMyTasksOnly, setShowMyTasksOnly] = useState(() =>
@@ -73,6 +79,9 @@ export const useTaskController = (props) => {
 
   // 3. Persistence & Derived State
   useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      sessionStorage.setItem(`session_task_view_${activeVertical}`, viewMode);
+    }
     localStorage.setItem(`powerpod_task_view_${activeVertical}`, viewMode);
   }, [viewMode, activeVertical]);
 
