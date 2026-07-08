@@ -304,7 +304,9 @@ export function useAttendanceSelfService(userId) {
     try { parsedSessions = JSON.parse(parsedSessions); } catch (e) { parsedSessions = []; }
   }
   const hasActiveSession = !!parsedSessions.some(
-    (session) => session.logout_time === null
+    // Capacitor native HTTP on Android can deserialize JSONB null as the string "null".
+    // We treat both as an open (unclosed) session to stay consistent across platforms.
+    (session) => session.logout_time === null || session.logout_time === 'null'
   );
 
   // ---------------------------------------------------------------------------
