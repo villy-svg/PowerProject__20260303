@@ -86,7 +86,7 @@ const MobileHeader = ({
     const clientId = verticals?.CLIENTS?.id || 'CLIENTS';
 
     const isHub = activeVertical === hubId || ['hub_tasks', 'daily_hub_tasks', 'daily_task_templates', 'escalation_tasks'].includes(activeVertical);
-    const isEmp = activeVertical === empId || ['employee_tasks', 'employee_rules_board', 'employee_attendance_board', 'attendance_self_service'].includes(activeVertical);
+    const isEmp = activeVertical === empId || ['employee_tasks', 'employee_rules_board', 'employee_attendance_board', 'employee_leave_wallet', 'attendance_self_service'].includes(activeVertical);
     const isClient = activeVertical === clientId || ['client_tasks', 'leads_funnel'].includes(activeVertical);
 
     const list = [];
@@ -112,6 +112,9 @@ const MobileHeader = ({
       }
       if (permissions?.canAccessEmployeeAttendanceBoard !== false) {
         list.push({ id: 'employee_attendance_board', label: 'Attendance Board' });
+      }
+      if (permissions?.canAccessLeaveWallet !== false) {
+        list.push({ id: 'employee_leave_wallet', label: 'Leave Wallet' });
       }
       if (permissions?.canAccessAttendanceSelfService !== false) {
         list.push({ id: 'attendance_self_service', label: 'Current Attendance' });

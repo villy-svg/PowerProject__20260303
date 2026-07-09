@@ -35,6 +35,7 @@ import {
   ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
 } from '../../verticals/Clients';
 import { DataManagerWorkspace } from '../../verticals/DataManager';
+import { LeaveDashboard } from '../../features/LeaveManagement/components/LeaveDashboard';
 
 // Contexts
 import { useAppNavigation } from '../contexts/AppNavigationContext';
@@ -277,6 +278,21 @@ const ContentRouter = ({
       )}
       {activeVertical === 'employee_attendance_board' && (
         <EmployeeAttendanceBoard
+          user={user}
+          permissions={permissions}
+          setActiveVertical={setActiveVertical}
+          onShowBottomNav={onShowBottomNav}
+          isSubSidebarOpen={isSubSidebarOpen}
+          setIsSubSidebarOpen={setIsSubSidebarOpen}
+          SidebarComponent={SidebarComponent}
+          verticals={verticals}
+          activeVertical={activeVertical}
+        />
+      )}
+      {activeVertical === 'employee_leave_wallet' && (
+        <LeaveDashboard
+          userId={user?.id}
+          managerId={user?.manager_id}
           user={user}
           permissions={permissions}
           setActiveVertical={setActiveVertical}

@@ -163,6 +163,19 @@ const EmployeeSubSidebar = ({
             </div>
           )}
 
+          {/* Leave Wallet button */}
+          {permissions?.canAccessLeaveWallet !== false && (
+            <div className="employee-tasks-btn-wrapper">
+              <button
+                className="halo-button employee-tasks-nav-btn"
+                style={{ opacity: activeVertical === 'employee_leave_wallet' ? 1 : 0.7 }}
+                onClick={() => setActiveVertical('employee_leave_wallet')}
+              >
+                Leave Wallet
+              </button>
+            </div>
+          )}
+
           {/* Employee Self-Service button — for employees to log their own shifts */}
           {permissions?.canAccessAttendanceSelfService !== false && (
             <div className="employee-tasks-btn-wrapper">
