@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useRBAC } from '../../hooks/useRBAC';
+import { useAuth } from '../../app/contexts/AuthContext';
 import { taskService } from '../../services/tasks/taskService';
 import { employeeService } from '../../services/employees/employeeService';
 import { IconCheck, IconX } from '../../components/ui/Icons';
@@ -9,7 +9,7 @@ import { IconCheck, IconX } from '../../components/ui/Icons';
  * Custom metadata injected into the master TaskCard for the Employee Manager.
  */
 const EmployeeTaskTile = ({ task }) => {
-  const { user } = useRBAC();
+  const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
 
   let payload = null;
