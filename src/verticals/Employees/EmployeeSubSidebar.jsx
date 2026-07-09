@@ -163,7 +163,7 @@ const EmployeeSubSidebar = ({
             </div>
           )}
 
-          {/* Leave Wallet button */}
+          {/* Leave Manager button */}
           {permissions?.canAccessLeaveWallet !== false && (
             <div className="employee-tasks-btn-wrapper">
               <button
@@ -171,7 +171,7 @@ const EmployeeSubSidebar = ({
                 style={{ opacity: activeVertical === 'employee_leave_wallet' ? 1 : 0.7 }}
                 onClick={() => setActiveVertical('employee_leave_wallet')}
               >
-                Leave Wallet
+                Leave Manager
               </button>
             </div>
           )}

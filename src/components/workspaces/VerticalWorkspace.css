@@ -242,9 +242,11 @@
   text-decoration: underline;
 }
 
-/* Custom styling to remove ALL CAPS from navigation headers and buttons in the sub-sidebar */
+/* Custom styling to remove ALL CAPS and bold weights from navigation headers and buttons in the sub-sidebar */
 .sub-sidebar-header h3,
 .sub-sidebar-header h3.navigable-header,
-.sub-sidebar .halo-button {
+.sub-sidebar .halo-button,
+.sub-sidebar * {
   text-transform: none !important;
+  font-weight: normal !important;
 }

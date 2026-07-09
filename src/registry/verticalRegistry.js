@@ -37,6 +37,7 @@ export const EMPLOYEE_VIEWS = [
   'employee_tasks',
   'employee_rules_board',
   'employee_attendance_board',
+  'employee_leave_wallet',
   'attendance_self_service',
 ];
 

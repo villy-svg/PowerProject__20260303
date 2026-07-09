@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-
-/**
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';/**
  * Modal to submit a new leave request.
  * Contains logic to calculate days and handle the 2-day advance notice rule.
  */
 export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 0 }) => {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [reason, setReason] = useState('');
 
   // Calculate working days (simple version, assuming every day is 1 day for now)
@@ -14,9 +14,7 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
   // we do simple math.
   const calculateDays = () => {
     if (!startDate || !endDate) return 0;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = end - start;
+    const diffTime = endDate.getTime() - startDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
     return diffDays > 0 ? diffDays : 0;
   };
@@ -34,14 +32,18 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
     // Check 2-day advance notice rule
     const today = new Date();
     today.setHours(0,0,0,0);
-    const start = new Date(startDate);
     
-    const diffToStart = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+    const diffToStart = Math.ceil((startDate - today) / (1000 * 60 * 60 * 24));
     const status = diffToStart < 2 ? 'FLAGGED_FOR_REVIEW' : 'PENDING';
 
+    const formatDateStr = (d) => {
+      const pad = (n) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+
     onSubmit({
-      start_date: startDate,
-      end_date: endDate,
+      start_date: formatDateStr(startDate),
+      end_date: formatDateStr(endDate),
       days_requested: daysRequested,
       reason,
       status
@@ -110,6 +112,19 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
 
   return (
     <div style={overlayStyle}>
+      <style>{`
+        .leave-modal-datepicker {
+          background: transparent;
+          border: none;
+          color: var(--text-color);
+          width: 100%;
+          font-weight: 600;
+          font-size: 0.95rem;
+          outline: none;
+          padding: 0 12px;
+          height: 44px;
+        }
+      `}</style>
       <div style={modalBodyStyle}>
         <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Apply for Leave</h2>
         
@@ -117,12 +132,16 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
           
           <div style={formGroupStyle}>
             <label style={labelStyle}>Start Date</label>
-            <div style={inputContainerStyle}>
-              <input 
-                type="date" 
-                style={inputStyle}
-                value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+            <div style={{ ...inputContainerStyle, padding: 0 }}>
+              <DatePicker 
+                selected={startDate}
+                onChange={date => setStartDate(date)}
+                selectsStart
+                startDate={startDate}
+                endDate={endDate}
+                dateFormat="dd MMM yyyy"
+                placeholderText="Select start date"
+                className="leave-modal-datepicker"
                 required
               />
             </div>
@@ -130,12 +149,17 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>End Date</label>
-            <div style={inputContainerStyle}>
-              <input 
-                type="date" 
-                style={inputStyle}
-                value={endDate}
-                onChange={e => setEndDate(e.target.value)}
+            <div style={{ ...inputContainerStyle, padding: 0 }}>
+              <DatePicker 
+                selected={endDate}
+                onChange={date => setEndDate(date)}
+                selectsEnd
+                startDate={startDate}
+                endDate={endDate}
+                minDate={startDate}
+                dateFormat="dd MMM yyyy"
+                placeholderText="Select end date"
+                className="leave-modal-datepicker"
                 required
               />
             </div>
