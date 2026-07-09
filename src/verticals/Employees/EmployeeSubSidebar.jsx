@@ -164,7 +164,7 @@ const EmployeeSubSidebar = ({
           )}
 
           {/* Leave Manager button */}
-          {permissions?.canAccessLeaveWallet !== false && (
+          {permissions?.canAccessEmployeeLeaveWallet !== false && (
             <div className="employee-tasks-btn-wrapper">
               <button
                 className="halo-button employee-tasks-nav-btn"

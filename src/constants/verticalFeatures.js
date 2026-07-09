@@ -17,7 +17,7 @@ export const VERTICAL_FEATURES = {
     { id: 'canAccessEmployeeAttendanceBoard', label: 'Attendance Board' },
     { id: 'canAccessEmployeeRulesBoard', label: 'Rules & Regulations' },
     { id: 'canAccessAttendanceSelfService', label: 'Current Attendance' },
-    { id: 'canAccessLeaveWallet', label: 'Leave Manager' }
+    { id: 'canAccessEmployeeLeaveWallet', label: 'Leave Manager' }
   ],
   CHARGING_HUBS: [
     { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },

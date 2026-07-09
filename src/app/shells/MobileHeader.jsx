@@ -113,7 +113,7 @@ const MobileHeader = ({
       if (permissions?.canAccessEmployeeAttendanceBoard !== false) {
         list.push({ id: 'employee_attendance_board', label: 'Attendance Board' });
       }
-      if (permissions?.canAccessLeaveWallet !== false) {
+      if (permissions?.canAccessEmployeeLeaveWallet !== false) {
         list.push({ id: 'employee_leave_wallet', label: 'Leave Manager' });
       }
       if (permissions?.canAccessAttendanceSelfService !== false) {

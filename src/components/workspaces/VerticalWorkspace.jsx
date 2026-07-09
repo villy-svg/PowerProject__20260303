@@ -59,7 +59,7 @@ const VerticalWorkspace = ({
   const featureAccessFlag = `canAccess${featureBaseName}`;
 
   const effectiveFeatureFlag = (activeVertical === verticals.CHARGING_HUBS?.id) ? 'canAccessHubTasks' : featureAccessFlag;
-  const isFeatureAuthorized = permissions[effectiveFeatureFlag] && user?.assignedVerticals?.includes(rootVerticalId);
+  const isFeatureAuthorized = permissions[effectiveFeatureFlag] !== false && user?.assignedVerticals?.includes(rootVerticalId);
 
   const isAuthorized = permissions.scope === 'global' || (
     (isFeatureView || activeVertical === verticals.CHARGING_HUBS?.id)

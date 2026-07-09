@@ -10,7 +10,7 @@ export const leaveService = {
       .select(`
         *,
         employee_leave_requests ( start_date, end_date ),
-        employees!employee_leave_ledgers_employee_id_fkey ( first_name, last_name )
+        employees!employee_id ( first_name, last_name )
       `)
       .order('created_at', { ascending: false });
 
@@ -45,7 +45,7 @@ export const leaveService = {
   getLeaveRequests: async (userId, fetchAll = false) => {
     let query = supabase
       .from('employee_leave_requests')
-      .select('*, employees!employee_leave_requests_employee_id_fkey ( first_name, last_name )')
+      .select('*, employees!employee_id ( first_name, last_name )')
       .order('created_at', { ascending: false });
 
     if (!fetchAll && userId) {
