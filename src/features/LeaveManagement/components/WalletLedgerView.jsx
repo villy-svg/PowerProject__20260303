@@ -43,7 +43,9 @@ export const WalletLedgerView = ({ ledger = [], viewAllMode }) => {
                   <tr key={entry.id}>
                     {viewAllMode && (
                       <td className="leave-td bold" style={{ color: 'var(--brand-green)' }}>
-                        {entry.employees?.first_name} {entry.employees?.last_name}
+                        <div style={{ fontWeight: '500' }}>
+                          {entry.employees?.full_name}
+                        </div>
                       </td>
                     )}
                     <td className="leave-td nowrap">{formatDateTime(entry.created_at)}</td>

@@ -54,7 +54,7 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode }) =
               <tr key={req.id}>
                 {viewAllMode && (
                   <td className="leave-td bold" style={{ color: 'var(--brand-green)' }}>
-                    {req.employees?.first_name} {req.employees?.last_name}
+                    {req.employees?.full_name}
                   </td>
                 )}
                 <td className="leave-td">{formatDateTime(req.created_at)}</td>
