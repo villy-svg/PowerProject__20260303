@@ -291,8 +291,8 @@ const ContentRouter = ({
       )}
       {activeVertical === 'employee_leave_wallet' && (
         <LeaveDashboard
-          userId={user?.id}
-          managerId={user?.manager_id}
+          userId={user?.employeeId}
+          managerId={user?.managerId}
           user={user}
           permissions={permissions}
           setActiveVertical={setActiveVertical}
