@@ -178,9 +178,9 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
           </div>
 
           {/* Validation Feedback */}
-          <div style={{ marginBottom: '24px', fontSize: '0.9rem', color: isOverBalance ? 'var(--status-danger, #f43f5e)' : 'inherit' }}>
+          <div style={{ marginBottom: '24px', fontSize: '0.9rem', color: isOverBalance ? 'var(--brand-orange, #f97316)' : 'inherit' }}>
             <strong>Days Requested:</strong> {daysRequested} 
-            {isOverBalance && <span> (Exceeds available balance of {maxBalance})</span>}
+            {isOverBalance && <span> (Exceeds available balance of {maxBalance}. This will result in a negative balance.)</span>}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -201,10 +201,10 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
             <button 
               type="submit" 
               className="halo-button"
-              disabled={isOverBalance || daysRequested <= 0}
+              disabled={daysRequested <= 0}
               style={{
-                opacity: (isOverBalance || daysRequested <= 0) ? 0.5 : 1,
-                cursor: (isOverBalance || daysRequested <= 0) ? 'not-allowed' : 'pointer'
+                opacity: (daysRequested <= 0) ? 0.5 : 1,
+                cursor: (daysRequested <= 0) ? 'not-allowed' : 'pointer'
               }}
             >
               Submit Request
