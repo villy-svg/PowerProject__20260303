@@ -100,6 +100,7 @@ export function resolveVerticalLabels(activeVertical, verticals = {}) {
     employee_tasks:         { label: 'Employees', boardLabel: 'Remarks Manager' },
     employee_rules_board:   { label: 'Employees', boardLabel: 'Rules & Regulations' },
     employee_attendance_board: { label: 'Employees', boardLabel: 'Attendance Board' },
+    employee_leave_wallet:  { label: 'Employees', boardLabel: 'Leave Manager' },
     attendance_self_service:    { label: 'Employees', boardLabel: 'Current Attendance' },
     client_tasks:           { label: 'Clients',   boardLabel: 'Client Task Board' },
     leads_funnel:           { label: 'Clients',   boardLabel: 'Client Task Board' },

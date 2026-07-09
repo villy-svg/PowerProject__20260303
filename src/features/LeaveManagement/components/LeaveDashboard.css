@@ -80,3 +80,39 @@
   display: flex;
   flex-direction: column;
 }
+
+/* ── Layout & States ────────────────────────────────────────── */
+.leave-dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.leave-dashboard-content-area {
+  padding: clamp(1rem, 3vw, 2rem);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.leave-dashboard-toggles-container {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.apply-leave-btn {
+  padding: 8px 20px;
+}
+
+.leave-loading-state {
+  padding: clamp(1rem, 3vw, 2.5rem);
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.leave-error-state {
+  padding: clamp(1rem, 3vw, 2.5rem);
+  color: var(--status-danger);
+}

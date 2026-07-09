@@ -15,6 +15,8 @@
 
 import React, { useState } from 'react';
 import MasterPageHeader from '../../../components/layout/MasterPageHeader';
+import RBACManageButton from '../../../components/ui/RBACManageButton';
+import './LeaveDashboard.css';
 import { useLeaveWallet } from '../hooks/useLeaveWallet';
 import { LeaveApplicationModal } from './LeaveApplicationModal';
 import { LeaveStatusBadge } from './LeaveStatusBadge';
@@ -55,7 +57,7 @@ export const LeaveDashboard = ({
 
   // ─── Left Action: view toggle buttons ──────────────────
   const headerLeftActions = (
-    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+    <div className="leave-dashboard-toggles-container">
       <div className="view-mode-toggle">
         <button
           className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
@@ -74,14 +76,23 @@ export const LeaveDashboard = ({
   );
 
   // ─── Header right action: Apply for Leave ────────────────────────────────
-  const headerRightActions = !isGlobalViewer && (
-    <button
-      className="halo-button"
-      onClick={() => setIsModalOpen(true)}
-      style={{ padding: '8px 20px' }}
-    >
-      + Apply for Leave
-    </button>
+  const headerRightActions = (
+    <>
+      {!isGlobalViewer && (
+        <button
+          className="halo-button apply-leave-btn"
+          onClick={() => setIsModalOpen(true)}
+        >
+          + Apply for Leave
+        </button>
+      )}
+      <RBACManageButton
+        user={user}
+        verticalId="employees"
+        featureId="canAccessEmployeeLeaveWallet"
+        label="Leave Manager"
+      />
+    </>
   );
 
   // ─── Submit handler ───────────────────────────────────────────────────────
@@ -101,7 +112,7 @@ export const LeaveDashboard = ({
   // ─── Loading / Error states ───────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div style={{ padding: 'clamp(1rem, 3vw, 2.5rem)', color: 'var(--text-color)', opacity: 0.6 }}>
+      <div className="leave-loading-state">
         Loading leave data...
       </div>
     );
@@ -109,14 +120,14 @@ export const LeaveDashboard = ({
 
   if (error) {
     return (
-      <div style={{ padding: 'clamp(1rem, 3vw, 2.5rem)', color: 'var(--status-danger)' }}>
+      <div className="leave-error-state">
         ⚠ Error loading data: {error}
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="leave-dashboard-layout">
       <MasterPageHeader
         title={viewMode === 'ledger' 
           ? (isGlobalViewer ? 'Global Ledger' : 'Wallet Ledger') 
@@ -143,7 +154,7 @@ export const LeaveDashboard = ({
         activeVertical={activeVertical}
       />
 
-      <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', flex: 1, overflowY: 'auto' }}>
+      <div className="leave-dashboard-content-area">
         {viewMode === 'leaves' ? (
           <MyLeavesView
             requests={requests}
