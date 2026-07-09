@@ -4,15 +4,21 @@ export const leaveService = {
   /**
    * Fetch the ledger transactions for a user
    */
-  getWalletLedger: async (userId) => {
-    const { data, error } = await supabase
+  getWalletLedger: async (userId, fetchAll = false) => {
+    let query = supabase
       .from('employee_leave_ledgers')
       .select(`
         *,
-        employee_leave_requests ( start_date, end_date )
+        employee_leave_requests ( start_date, end_date ),
+        employees ( first_name, last_name )
       `)
-      .eq('employee_id', userId)
       .order('created_at', { ascending: false });
+
+    if (!fetchAll && userId) {
+      query = query.eq('employee_id', userId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data;
@@ -36,12 +42,17 @@ export const leaveService = {
   /**
    * Fetch user's leave requests
    */
-  getLeaveRequests: async (userId) => {
-    const { data, error } = await supabase
+  getLeaveRequests: async (userId, fetchAll = false) => {
+    let query = supabase
       .from('employee_leave_requests')
-      .select('*')
-      .eq('employee_id', userId)
+      .select('*, employees ( first_name, last_name )')
       .order('created_at', { ascending: false });
+
+    if (!fetchAll && userId) {
+      query = query.eq('employee_id', userId);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data;

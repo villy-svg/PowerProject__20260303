@@ -1,0 +1,82 @@
+/* 
+  LeaveDashboard.css
+  Modular styles for Leave Management dashboard components.
+*/
+
+.leave-table-wrapper {
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.leave-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.leave-th {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  text-transform: uppercase;
+  opacity: 0.5;
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.leave-th.text-right {
+  text-align: right;
+}
+
+.leave-td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.leave-td.nowrap {
+  white-space: nowrap;
+}
+
+.leave-td.text-right {
+  text-align: right;
+}
+
+.leave-td.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.leave-td.bold {
+  font-weight: 700;
+}
+
+.leave-td.extra-bold {
+  font-weight: 800;
+}
+
+.leave-empty-row {
+  text-align: center;
+  opacity: 0.45;
+  padding: 40px 16px;
+}
+
+.leave-balance-banner {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  padding: clamp(1.2rem, 3vw, 2rem);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.leave-balance-info {
+  display: flex;
+  flex-direction: column;
+}

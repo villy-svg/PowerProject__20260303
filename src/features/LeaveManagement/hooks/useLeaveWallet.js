@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { leaveService } from '../services/leaveService';
 
-export const useLeaveWallet = (userId, managerId = null) => {
+export const useLeaveWallet = (userId, managerId = null, fetchAll = false) => {
   const [balance, setBalance] = useState(0);
   const [ledger, setLedger] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -9,15 +9,16 @@ export const useLeaveWallet = (userId, managerId = null) => {
   const [error, setError] = useState(null);
 
   const fetchWalletData = useCallback(async () => {
-    if (!userId) return;
+    // If we're not fetching all and there's no userId, don't fetch
+    if (!fetchAll && !userId) return;
     
     setIsLoading(true);
     setError(null);
     try {
       const [walletBalance, ledgerData, requestsData] = await Promise.all([
-        leaveService.getWalletBalance(userId),
-        leaveService.getWalletLedger(userId),
-        leaveService.getLeaveRequests(userId)
+        fetchAll ? 0 : leaveService.getWalletBalance(userId),
+        leaveService.getWalletLedger(userId, fetchAll),
+        leaveService.getLeaveRequests(userId, fetchAll)
       ]);
       
       setBalance(walletBalance);
@@ -29,7 +30,7 @@ export const useLeaveWallet = (userId, managerId = null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, fetchAll]);
 
   useEffect(() => {
     fetchWalletData();
