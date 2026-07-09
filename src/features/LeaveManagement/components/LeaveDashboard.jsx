@@ -53,8 +53,8 @@ export const LeaveDashboard = ({
   const [isModalOpen, setIsModalOpen]   = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ─── Menu: view toggle buttons (placed in expandedLeft) ──────────────────
-  const headerExpandedLeft = (
+  // ─── Left Action: view toggle buttons ──────────────────
+  const headerLeftActions = (
     <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
       <div className="view-mode-toggle">
         <button
@@ -127,7 +127,8 @@ export const LeaveDashboard = ({
             : 'Track leave balances, history, and requests.'
         }
         rightActions={headerRightActions}
-        expandedLeft={headerExpandedLeft}
+        leftActions={headerLeftActions}
+        hideSearchBar={true}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         hideMenuClose={true}
