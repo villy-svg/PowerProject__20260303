@@ -3,7 +3,7 @@ import { LeaveStatusBadge } from './LeaveStatusBadge';
 import { formatDate, formatDateTime } from '../../../utils/leaveFormatters';
 import './LeaveDashboard.css';
 
-export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode }) => (
+export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, onApprove, onReject }) => (
   <div>
     {/* Balance Banner - Hide for Global Viewers since they don't have a personal balance here */}
     {!viewAllMode && (
@@ -40,12 +40,13 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode }) =
             <th className="leave-th">End Date</th>
             <th className="leave-th">Days</th>
             <th className="leave-th">Status</th>
+            {viewAllMode && <th className="leave-th">Actions</th>}
           </tr>
         </thead>
         <tbody>
           {requests.length === 0 ? (
             <tr>
-              <td colSpan={viewAllMode ? "6" : "5"} className="leave-empty-row">
+              <td colSpan={viewAllMode ? "7" : "5"} className="leave-empty-row">
                 No leave requests yet.
               </td>
             </tr>
@@ -64,6 +65,28 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode }) =
                 <td className="leave-td">
                   <LeaveStatusBadge status={req.status} />
                 </td>
+                {viewAllMode && (
+                  <td className="leave-td">
+                    {req.status === 'PENDING' && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                          className="halo-button"
+                          style={{ padding: '4px 12px', fontSize: '0.8rem' }}
+                          onClick={() => onApprove && onApprove(req.id)}
+                        >
+                          Approve
+                        </button>
+                        <button 
+                          className="halo-button secondary danger"
+                          style={{ padding: '4px 12px', fontSize: '0.8rem', borderColor: 'var(--brand-red)', color: 'var(--brand-red)' }}
+                          onClick={() => onReject && onReject(req.id)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                )}
               </tr>
             ))
           )}

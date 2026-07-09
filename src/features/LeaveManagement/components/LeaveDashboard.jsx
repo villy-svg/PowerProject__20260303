@@ -19,9 +19,11 @@ import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './LeaveDashboard.css';
 import { useLeaveWallet } from '../hooks/useLeaveWallet';
 import { LeaveApplicationModal } from './LeaveApplicationModal';
+import { UpdateWalletBalanceModal } from './UpdateWalletBalanceModal';
 import { LeaveStatusBadge } from './LeaveStatusBadge';
 import { MyLeavesView } from './MyLeavesView';
 import { WalletLedgerView } from './WalletLedgerView';
+import { leaveService } from '../services/leaveService';
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
@@ -53,11 +55,12 @@ export const LeaveDashboard = ({
   const [viewMode, setViewMode]     = useState('leaves'); // 'leaves' | 'ledger'
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen]   = useState(false);
+  const [isUpdateWalletModalOpen, setIsUpdateWalletModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ─── Left Action: view toggle buttons ──────────────────
   const headerLeftActions = (
-    <div className="leave-dashboard-toggles-container">
+    <div className="leave-dashboard-toggles-container" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
       <div className="view-mode-toggle">
         <button
           className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
@@ -72,6 +75,15 @@ export const LeaveDashboard = ({
           {isGlobalViewer ? 'Global Ledger' : 'Wallet Ledger'}
         </button>
       </div>
+      {isGlobalViewer && viewMode === 'ledger' && (
+        <button 
+          className="halo-button secondary" 
+          onClick={() => setIsUpdateWalletModalOpen(true)}
+          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+        >
+          + Update Wallet Balance
+        </button>
+      )}
     </div>
   );
 
@@ -95,7 +107,7 @@ export const LeaveDashboard = ({
     </>
   );
 
-  // ─── Submit handler ───────────────────────────────────────────────────────
+  // ─── Submit handlers ───────────────────────────────────────────────────────
   const handleApply = async (requestData) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -106,6 +118,29 @@ export const LeaveDashboard = ({
       setTimeout(refresh, 500);
     } else {
       alert('Failed to submit request: ' + result.error);
+    }
+  };
+
+  const handleUpdateWallet = async (employeeId, amount, description) => {
+    await leaveService.addManualAdjustment(employeeId, amount, description, user?.employeeId);
+    setTimeout(refresh, 500);
+  };
+
+  const handleApproveLeave = async (requestId) => {
+    try {
+      await leaveService.approveLeaveRequest(requestId, user?.employeeId);
+      refresh();
+    } catch (err) {
+      alert('Failed to approve leave: ' + err.message);
+    }
+  };
+
+  const handleRejectLeave = async (requestId) => {
+    try {
+      await leaveService.rejectLeaveRequest(requestId);
+      refresh();
+    } catch (err) {
+      alert('Failed to reject leave: ' + err.message);
     }
   };
 
@@ -161,6 +196,8 @@ export const LeaveDashboard = ({
             balance={balance}
             onApply={() => setIsModalOpen(true)}
             viewAllMode={isGlobalViewer}
+            onApprove={handleApproveLeave}
+            onReject={handleRejectLeave}
           />
         ) : (
           <WalletLedgerView ledger={ledger} viewAllMode={isGlobalViewer} />
@@ -172,6 +209,12 @@ export const LeaveDashboard = ({
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleApply}
         maxBalance={balance}
+      />
+
+      <UpdateWalletBalanceModal
+        isOpen={isUpdateWalletModalOpen}
+        onClose={() => setIsUpdateWalletModalOpen(false)}
+        onSubmit={handleUpdateWallet}
       />
     </div>
   );

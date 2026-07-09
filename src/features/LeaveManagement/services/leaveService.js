@@ -71,5 +71,50 @@ export const leaveService = {
 
     if (error) throw error;
     return data;
+  },
+
+  /**
+   * Approve a leave request (Admin only)
+   */
+  approveLeaveRequest: async (requestId, adminEmployeeId) => {
+    const { data, error } = await supabase.rpc('approve_leave_request', {
+      p_request_id: requestId,
+      p_admin_employee_id: adminEmployeeId
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Reject a leave request (Admin only)
+   */
+  rejectLeaveRequest: async (requestId) => {
+    const { data, error } = await supabase.rpc('reject_leave_request', {
+      p_request_id: requestId
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * Manually adjust wallet balance (Admin only)
+   */
+  addManualAdjustment: async (employeeId, amount, description, adminEmployeeId) => {
+    const { data, error } = await supabase
+      .from('employee_leave_ledgers')
+      .insert([{
+        employee_id: employeeId,
+        transaction_type: 'MANUAL_ADJUSTMENT',
+        amount: amount,
+        description: description,
+        created_by: adminEmployeeId
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 };
