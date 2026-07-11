@@ -1,26 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';/**
+import 'react-datepicker/dist/react-datepicker.css';
+import { leaveService } from '../services/leaveService';
+
+/**
  * Modal to submit a new leave request.
  * Contains logic to calculate days and handle the 2-day advance notice rule.
  */
-export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 0 }) => {
+export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = {}, employeeId }) => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [reason, setReason] = useState('');
+  const [leaveType, setLeaveType] = useState('SL');
+  const [daysRequested, setDaysRequested] = useState(0);
+  const [isCalculating, setIsCalculating] = useState(false);
 
-  // Calculate working days (simple version, assuming every day is 1 day for now)
-  // In a real system, we'd use a date-fns library to skip weekends, but for this sample,
-  // we do simple math.
-  const calculateDays = () => {
-    if (!startDate || !endDate) return 0;
-    const diffTime = endDate.getTime() - startDate.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
-    return diffDays > 0 ? diffDays : 0;
-  };
+  // Fetch default leave type based on policy
+  useEffect(() => {
+    if (isOpen && employeeId) {
+      leaveService.getDefaultLeaveType(employeeId).then(defaultType => {
+        setLeaveType(defaultType);
+      });
+    }
+  }, [isOpen, employeeId]);
 
-  const daysRequested = calculateDays();
-  const isOverBalance = daysRequested > maxBalance;
+  useEffect(() => {
+    const fetchDays = async () => {
+      if (!startDate || !endDate || !employeeId) {
+        setDaysRequested(0);
+        return;
+      }
+      setIsCalculating(true);
+      try {
+        const pad = (n) => n.toString().padStart(2, '0');
+        const startStr = `${startDate.getFullYear()}-${pad(startDate.getMonth() + 1)}-${pad(startDate.getDate())}`;
+        const endStr = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())}`;
+        
+        const actual = await leaveService.calculateActualLeaveDays(employeeId, startStr, endStr);
+        setDaysRequested(actual);
+      } catch (err) {
+        console.error("Failed to calculate days:", err);
+      } finally {
+        setIsCalculating(false);
+      }
+    };
+    fetchDays();
+  }, [startDate, endDate, employeeId]);
+
+  const currentTypeBalance = maxBalance[leaveType] || 0;
+  const isOverBalance = daysRequested > currentTypeBalance;
 
   // Early return AFTER all state declarations and derived values — safe per React Rules of Hooks
   if (!isOpen) return null;
@@ -46,7 +74,8 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
       end_date: formatDateStr(endDate),
       days_requested: daysRequested,
       reason,
-      status
+      status,
+      leaveType
     });
   };
 
@@ -131,6 +160,23 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
         <form onSubmit={handleSubmit}>
           
           <div style={formGroupStyle}>
+            <label style={labelStyle}>Leave Type</label>
+            <div style={{ ...inputContainerStyle, padding: 0 }}>
+              <select 
+                value={leaveType}
+                onChange={e => setLeaveType(e.target.value)}
+                style={{ ...inputStyle, padding: '0 12px', height: '100%', cursor: 'pointer' }}
+                required
+              >
+                <option value="PL">Privilege Leave (PL)</option>
+                <option value="CL">Casual Leave (CL)</option>
+                <option value="SL">Sick Leave (SL)</option>
+                <option value="COMP_OFF">Compensatory Off (COMP_OFF)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={formGroupStyle}>
             <label style={labelStyle}>Start Date</label>
             <div style={{ ...inputContainerStyle, padding: 0 }}>
               <DatePicker 
@@ -179,8 +225,8 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
 
           {/* Validation Feedback */}
           <div style={{ marginBottom: '24px', fontSize: '0.9rem', color: isOverBalance ? 'var(--brand-orange, #f97316)' : 'inherit' }}>
-            <strong>Days Requested:</strong> {daysRequested} 
-            {isOverBalance && <span> (Exceeds available balance of {maxBalance}. This will result in a negative balance.)</span>}
+            <strong>Days Requested:</strong> {isCalculating ? 'Calculating...' : daysRequested} 
+            {isOverBalance && !isCalculating && <span> (Exceeds available balance of {Number(currentTypeBalance).toFixed(1)}. This will result in a negative balance.)</span>}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -201,13 +247,13 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
             <button 
               type="submit" 
               className="halo-button"
-              disabled={daysRequested <= 0}
+              disabled={daysRequested <= 0 || isCalculating}
               style={{
-                opacity: (daysRequested <= 0) ? 0.5 : 1,
-                cursor: (daysRequested <= 0) ? 'not-allowed' : 'pointer'
+                opacity: (daysRequested <= 0 || isCalculating) ? 0.5 : 1,
+                cursor: (daysRequested <= 0 || isCalculating) ? 'not-allowed' : 'pointer'
               }}
             >
-              Submit Request
+              {isCalculating ? 'Calculating...' : 'Submit Request'}
             </button>
           </div>
 

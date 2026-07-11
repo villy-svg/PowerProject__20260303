@@ -41,6 +41,7 @@ export async function submitEditRequest({
   suggestedLogoutTime = null,
   dailyAttendanceId = null,
   requestedBy,
+  makerNote = null,
 }) {
   const { data, error } = await supabase
     .from('attendance_edit_requests')
@@ -54,6 +55,7 @@ export async function submitEditRequest({
       daily_attendance_id:           dailyAttendanceId,
       requested_by:                  requestedBy,
       request_status:                'pending',   // Always starts as pending
+      maker_note:                    makerNote,
     })
     .select()
     .single();
@@ -113,13 +115,10 @@ export async function fetchPendingRequests() {
 // ---------------------------------------------------------------------------
 // EDITOR (CHECKER): Approve a request
 //
-// Two-step atomic operation:
-//   1. Update the edit request row: request_status='approved', set reviewed_by
-//   2. Upsert into daily_attendances with the suggested values
-//
-// IMPORTANT: These are two separate Supabase calls. If step 2 fails, step 1
-// has already committed. In a future iteration, wrap these in a DB transaction
-// via an RPC function to ensure atomicity.
+// Single atomic operation via RPC:
+//   1. Lock and mark the edit request as approved
+//   2. Upsert into daily_attendances
+//   3. If 'leave', deduct from Leave Wallet
 //
 // @param {object} params
 //   @param {string} params.requestId          - UUID of the attendance_edit_requests row
@@ -128,49 +127,17 @@ export async function fetchPendingRequests() {
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function approveRequest({ requestId, reviewedBy, request }) {
-  // --- STEP 1: Mark the edit request as approved ---
-  const { error: updateError } = await supabase
-    .from('attendance_edit_requests')
-    .update({
-      request_status: 'approved',
-      reviewed_by:    reviewedBy,
-      updated_at:     new Date().toISOString(),
-    })
-    .eq('id', requestId);
+  const { data, error } = await supabase.rpc('approve_attendance_edit_request', {
+    p_request_id: requestId,
+    p_reviewer_id: reviewedBy
+  });
 
-  if (updateError) {
-    console.error('[editRequestService] approveRequest - update request error:', updateError);
-    return { data: null, error: updateError };
+  if (error) {
+    console.error('[editRequestService] approveRequest error:', error);
+    return { data: null, error };
   }
 
-  // --- STEP 2: Upsert into daily_attendances (applying the approved change) ---
-  // ON CONFLICT on (employee_id, shift_date) will UPDATE if record exists, INSERT if not.
-  const upsertPayload = {
-    employee_id:       request.employees?.id,
-    shift_date:        request.shift_date,
-    attendance_status: request.suggested_status,
-    shift_type:        request.suggested_shift_type || null,
-    first_login_time:  request.suggested_first_login_time || null,
-    logout_time:       request.suggested_logout_time || null,
-    updated_at:        new Date().toISOString(),
-  };
-
-  const { data: upsertData, error: upsertError } = await supabase
-    .from('daily_attendances')
-    .upsert(upsertPayload, {
-      onConflict: 'employee_id,shift_date',  // Composite unique key
-    })
-    .select()
-    .single();
-
-  if (upsertError) {
-    console.error('[editRequestService] approveRequest - upsert attendance error:', upsertError);
-    // NOTE: The request was already marked approved above. Log this prominently.
-    // TODO: In Phase 2+, convert to a single atomic RPC.
-    return { data: null, error: upsertError };
-  }
-
-  return { data: upsertData, error: null };
+  return { data, error: null };
 }
 
 // ---------------------------------------------------------------------------

@@ -59,6 +59,7 @@ const AttendanceSuggestEditModal = ({
   const [suggestedShiftType, setSuggestedShiftType] = useState(
     record?.shift_type || ''
   );
+  const [suggestedLeaveReason, setSuggestedLeaveReason] = useState('');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,6 +112,7 @@ const AttendanceSuggestEditModal = ({
         // Link to existing record if it exists (null for future dates)
         dailyAttendanceId:       record?.id || null,
         requestedBy:             currentUser?.id,
+        makerNote:               suggestedStatus === 'leave' ? suggestedLeaveReason : null,
       });
 
       if (error) throw error;
@@ -194,6 +196,25 @@ const AttendanceSuggestEditModal = ({
                   value={suggestedShiftType}
                   onChange={setSuggestedShiftType}
                   options={SHIFT_TYPE_OPTIONS}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Leave Reason (only relevant if suggesting 'leave') */}
+          {suggestedStatus === 'leave' && (
+            <div className="form-group">
+              <label className="form-label" htmlFor="suggest-leave-reason">
+                REASON FOR LEAVE
+              </label>
+              <div className="form-input-container">
+                <textarea
+                  id="suggest-leave-reason"
+                  style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-light)', outline: 'none' }}
+                  placeholder="Enter reason for applying leave on behalf of the employee..."
+                  value={suggestedLeaveReason}
+                  onChange={(e) => setSuggestedLeaveReason(e.target.value)}
+                  required
                 />
               </div>
             </div>

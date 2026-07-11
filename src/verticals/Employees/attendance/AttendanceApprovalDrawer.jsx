@@ -39,7 +39,7 @@ const STATUS_LABELS = {
 // ---------------------------------------------------------------------------
 // RequestCard — renders a single pending request with Approve/Reject actions
 // ---------------------------------------------------------------------------
-const RequestCard = ({ request, onApprove, onReject, isActing }) => {
+const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onToggleSelect }) => {
   const [showRejectNote, setShowRejectNote] = useState(false);
   const [rejectNote, setRejectNote] = useState('');
   const [showDetails, setShowDetails] = useState(false);
@@ -61,9 +61,20 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
         borderLeft: '2px solid color-mix(in srgb, var(--brand-yellow), transparent 30%)',
         borderBottomLeftRadius: (showDetails || showRejectNote) ? 0 : '12px',
         borderBottomRightRadius: (showDetails || showRejectNote) ? 0 : '12px',
+        paddingLeft: '12px',
       }}>
+        {/* CHECKBOX FOR BULK ACTION */}
+        <div style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}>
+          <input 
+            type="checkbox" 
+            checked={isSelected} 
+            onChange={() => onToggleSelect(request.id)}
+            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+          />
+        </div>
+
         {/* LEFT SIDE: Identity & Content */}
-        <div className="list-row-main">
+        <div className="list-row-main" style={{ flex: 1 }}>
           <div className="list-row-badges">
             <span className="card-priority priority-high">
               {formattedDate}
@@ -71,6 +82,11 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
             {request.employees?.emp_code && (
               <span className="subtask-tag" style={{ display: 'flex' }}>
                 {request.employees.emp_code}
+              </span>
+            )}
+            {request.suggested_leave_type && request.suggested_status === 'leave' && (
+              <span className="subtask-tag" style={{ display: 'flex', color: 'var(--brand-purple)', borderColor: 'var(--brand-purple)' }}>
+                {request.suggested_leave_type}
               </span>
             )}
           </div>
@@ -140,6 +156,12 @@ const RequestCard = ({ request, onApprove, onReject, isActing }) => {
                     <br/>
                   </>
                 )}
+                {request.maker_note && (
+                  <>
+                    <strong>Reason: </strong> {request.maker_note}
+                    <br/>
+                  </>
+                )}
                 <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
                   Submitted by: {request.requester?.name || request.requester?.email}
                 </span>
@@ -198,6 +220,7 @@ const AttendanceApprovalDrawer = ({
 }) => {
   const [isActing, setIsActing] = useState(false);
   const [actionError, setActionError] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // If a cell is selected, filter to just that cell's requests; otherwise show all
   const filteredRequests = selectedCell
@@ -206,6 +229,22 @@ const AttendanceApprovalDrawer = ({
         r.shift_date === selectedCell.date
       )
     : pendingRequests;
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredRequests.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredRequests.map(r => r.id));
+    }
+  };
+
+  const toggleSelect = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
 
   // ---------------------------------------------------------------------------
   // Approve handler — calls service, then triggers board refresh
@@ -220,6 +259,7 @@ const AttendanceApprovalDrawer = ({
         request,
       });
       if (error) throw error;
+      setSelectedIds(prev => prev.filter(id => id !== request.id));
       onActionComplete();
     } catch (err) {
       console.error('[AttendanceApprovalDrawer] handleApprove error:', err);
@@ -242,6 +282,7 @@ const AttendanceApprovalDrawer = ({
         reviewNote,
       });
       if (error) throw error;
+      setSelectedIds(prev => prev.filter(id => id !== request.id));
       onActionComplete();
     } catch (err) {
       console.error('[AttendanceApprovalDrawer] handleReject error:', err);
@@ -251,11 +292,93 @@ const AttendanceApprovalDrawer = ({
     }
   }, [currentUser, onActionComplete]);
 
+  const handleBulkApprove = async () => {
+    setIsActing(true);
+    setActionError(null);
+    try {
+      const requestsToApprove = filteredRequests.filter(r => selectedIds.includes(r.id));
+      for (const request of requestsToApprove) {
+        const { error } = await approveRequest({
+          requestId: request.id,
+          reviewedBy: currentUser?.id,
+          request
+        });
+        if (error) throw error;
+      }
+      setSelectedIds([]);
+      onActionComplete();
+    } catch (err) {
+      setActionError('Failed to bulk approve some requests.');
+    } finally {
+      setIsActing(false);
+    }
+  };
+
+  const handleBulkReject = async () => {
+    setIsActing(true);
+    setActionError(null);
+    try {
+      const requestsToReject = filteredRequests.filter(r => selectedIds.includes(r.id));
+      for (const request of requestsToReject) {
+        const { error } = await rejectRequest({
+          requestId: request.id,
+          reviewedBy: currentUser?.id,
+          reviewNote: 'Bulk Rejected'
+        });
+        if (error) throw error;
+      }
+      setSelectedIds([]);
+      onActionComplete();
+    } catch (err) {
+      setActionError('Failed to bulk reject some requests.');
+    } finally {
+      setIsActing(false);
+    }
+  };
+
   if (!isOpen) return null;
+
+  const isAllSelected = filteredRequests.length > 0 && selectedIds.length === filteredRequests.length;
 
   return (
     <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
       <div>
+        {/* Bulk Actions Header */}
+        {filteredRequests.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '0 12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                checked={isAllSelected}
+                onChange={toggleSelectAll}
+                style={{ width: '16px', height: '16px' }}
+              />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Select All</span>
+            </label>
+
+            {selectedIds.length > 0 && (
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button 
+                  className="halo-button btn-approve"
+                  onClick={handleBulkApprove}
+                  disabled={isActing}
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  ✓ Approve ({selectedIds.length})
+                </button>
+                <button 
+                  className="halo-button btn-reject"
+                  onClick={handleBulkReject}
+                  disabled={isActing}
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  ✗ Reject ({selectedIds.length})
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Error state */}
         {actionError && (
           <div className="attendance-board__error" style={{ marginBottom: '16px' }}>
@@ -277,6 +400,8 @@ const AttendanceApprovalDrawer = ({
                 onApprove={handleApprove}
                 onReject={handleReject}
                 isActing={isActing}
+                isSelected={selectedIds.includes(request.id)}
+                onToggleSelect={toggleSelect}
               />
             ))
           )}

@@ -7,6 +7,7 @@ export const UpdateWalletBalanceModal = ({ isOpen, onClose, onSubmit }) => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [leaveType, setLeaveType] = useState('SL');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export const UpdateWalletBalanceModal = ({ isOpen, onClose, onSubmit }) => {
       setSelectedEmployeeId('');
       setAmount('');
       setDescription('');
+      setLeaveType('SL');
     }
   }, [isOpen]);
 
@@ -43,7 +45,7 @@ export const UpdateWalletBalanceModal = ({ isOpen, onClose, onSubmit }) => {
 
     setIsLoading(true);
     try {
-      await onSubmit(selectedEmployeeId, Number(amount), description || 'Manual Adjustment');
+      await onSubmit(selectedEmployeeId, Number(amount), description || 'Manual Adjustment', leaveType);
       onClose();
     } catch (error) {
       console.error('Adjustment failed:', error);
@@ -93,6 +95,20 @@ export const UpdateWalletBalanceModal = ({ isOpen, onClose, onSubmit }) => {
             <small style={{ color: 'var(--text-tertiary)', marginTop: '4px', display: 'block' }}>
               Use positive numbers to add days, negative to deduct.
             </small>
+          </div>
+
+          <div className="leave-form-group">
+            <label>Leave Type</label>
+            <select
+              value={leaveType}
+              onChange={(e) => setLeaveType(e.target.value)}
+              required
+            >
+              <option value="SL">Sick Leave (SL)</option>
+              <option value="PL">Privilege Leave (PL)</option>
+              <option value="CL">Casual Leave (CL)</option>
+              <option value="COMP_OFF">Compensatory Off (COMP_OFF)</option>
+            </select>
           </div>
 
           <div className="leave-form-group">

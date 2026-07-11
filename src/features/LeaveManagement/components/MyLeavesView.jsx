@@ -3,18 +3,22 @@ import { LeaveStatusBadge } from './LeaveStatusBadge';
 import { formatDate, formatDateTime } from '../../../utils/leaveFormatters';
 import './LeaveDashboard.css';
 
-export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, onApprove, onReject }) => (
+export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, page, setPage, totalCount, pageSize }) => (
   <div>
     {/* Balance Banner - Hide for Global Viewers since they don't have a personal balance here */}
     {!viewAllMode && (
       <div className="leave-balance-banner">
-        <div className="leave-balance-info">
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>
-            {balance}
-          </div>
-          <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '4px' }}>
-            days remaining
-          </div>
+        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+          {balance && typeof balance === 'object' && Object.entries(balance).map(([type, amount]) => (
+            <div key={type} className="leave-balance-info" style={{ alignItems: 'flex-start' }}>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>
+                {Number(amount).toFixed(1)}
+              </div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {type}
+              </div>
+            </div>
+          ))}
         </div>
         <button
           className="halo-button"
@@ -27,26 +31,32 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, onA
     )}
 
     {/* Requests Table */}
-    <h3 style={{ marginBottom: '14px', fontWeight: 700, fontSize: '1rem' }}>
-      {viewAllMode ? 'All Leave Requests' : 'Leave History'}
-    </h3>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+      <h3 style={{ fontWeight: 700, fontSize: '1rem', margin: 0 }}>
+        {viewAllMode ? 'All Leave Requests (Day-by-Day)' : 'Leave History (Day-by-Day)'}
+      </h3>
+      {viewAllMode && (
+        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+          * To approve or reject leaves, please use the <strong>Attendance Approval Drawer</strong>.
+        </span>
+      )}
+    </div>
+    
     <div className="leave-table-wrapper">
       <table className="leave-table">
         <thead>
           <tr>
             {viewAllMode && <th className="leave-th">Employee</th>}
             <th className="leave-th">Applied On</th>
-            <th className="leave-th">Start Date</th>
-            <th className="leave-th">End Date</th>
-            <th className="leave-th">Days</th>
+            <th className="leave-th">Leave Date</th>
+            <th className="leave-th">Reason</th>
             <th className="leave-th">Status</th>
-            {viewAllMode && <th className="leave-th">Actions</th>}
           </tr>
         </thead>
         <tbody>
           {requests.length === 0 ? (
             <tr>
-              <td colSpan={viewAllMode ? "7" : "5"} className="leave-empty-row">
+              <td colSpan={viewAllMode ? "5" : "4"} className="leave-empty-row">
                 No leave requests yet.
               </td>
             </tr>
@@ -59,39 +69,42 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, onA
                   </td>
                 )}
                 <td className="leave-td">{formatDateTime(req.created_at)}</td>
-                <td className="leave-td">{formatDate(req.start_date)}</td>
-                <td className="leave-td">{formatDate(req.end_date)}</td>
-                <td className="leave-td bold">{req.days_requested}</td>
-                <td className="leave-td">
-                  <LeaveStatusBadge status={req.status} />
+                <td className="leave-td bold">{formatDate(req.shift_date)}</td>
+                <td className="leave-td" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {req.maker_note || '-'}
                 </td>
-                {viewAllMode && (
-                  <td className="leave-td">
-                    {req.status === 'PENDING' && (
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button 
-                          className="halo-button"
-                          style={{ padding: '4px 12px', fontSize: '0.8rem' }}
-                          onClick={() => onApprove && onApprove(req.id)}
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          className="halo-button secondary danger"
-                          style={{ padding: '4px 12px', fontSize: '0.8rem', borderColor: 'var(--brand-red)', color: 'var(--brand-red)' }}
-                          onClick={() => onReject && onReject(req.id)}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                )}
+                <td className="leave-td">
+                  <LeaveStatusBadge status={req.request_status?.toUpperCase()} />
+                </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
     </div>
+
+    {page !== undefined && totalCount !== undefined && Math.ceil(totalCount / pageSize) > 1 && (
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          Page {page} of {Math.ceil(totalCount / pageSize)}
+        </span>
+        <button 
+          className="halo-button secondary" 
+          disabled={page <= 1} 
+          onClick={() => setPage(page - 1)}
+          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+        >
+          Previous
+        </button>
+        <button 
+          className="halo-button secondary" 
+          disabled={page >= Math.ceil(totalCount / pageSize)} 
+          onClick={() => setPage(page + 1)}
+          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+        >
+          Next
+        </button>
+      </div>
+    )}
   </div>
 );

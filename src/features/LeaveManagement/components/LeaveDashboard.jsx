@@ -49,7 +49,7 @@ export const LeaveDashboard = ({
     permissions?.canManageRoles
   );
 
-  const { balance, ledger, requests, isLoading, error, submitRequest, refresh } =
+  const { balance, ledger, ledgerCount, requests, requestsCount, page, setPage, pageSize, isLoading, error, submitRequest, refresh } =
     useLeaveWallet(userId, managerId, isGlobalViewer);
 
   const [viewMode, setViewMode]     = useState('leaves'); // 'leaves' | 'ledger'
@@ -64,13 +64,13 @@ export const LeaveDashboard = ({
       <div className="view-mode-toggle">
         <button
           className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
-          onClick={() => { setViewMode('leaves'); setIsMenuOpen(false); }}
+          onClick={() => { setViewMode('leaves'); setPage(1); setIsMenuOpen(false); }}
         >
           {isGlobalViewer ? 'All Leaves' : 'My Leaves'}
         </button>
         <button
           className={`view-toggle-btn ${viewMode === 'ledger' ? 'active' : ''}`}
-          onClick={() => { setViewMode('ledger'); setIsMenuOpen(false); }}
+          onClick={() => { setViewMode('ledger'); setPage(1); setIsMenuOpen(false); }}
         >
           {isGlobalViewer ? 'Global Ledger' : 'Wallet Ledger'}
         </button>
@@ -86,8 +86,6 @@ export const LeaveDashboard = ({
       )}
     </div>
   );
-
-  // ─── Header right action: Apply for Leave ────────────────────────────────
   const headerRightActions = (
     <>
       {!isGlobalViewer && (
@@ -111,36 +109,67 @@ export const LeaveDashboard = ({
   const handleApply = async (requestData) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    const result = await submitRequest(requestData);
-    setIsSubmitting(false);
-    if (result.success) {
+    // requestData comes from LeaveApplicationModal with employee_id missing, we add it here
+    const fullRequest = {
+      ...requestData,
+      employee_id: userId,
+      requested_by: user?.id
+    };
+    try {
+      await submitRequest(fullRequest);
       setIsModalOpen(false);
       setTimeout(refresh, 500);
-    } else {
-      alert('Failed to submit request: ' + result.error);
+    } catch (err) {
+      alert('Failed to submit request: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleUpdateWallet = async (employeeId, amount, description) => {
-    await leaveService.addManualAdjustment(employeeId, amount, description, user?.employeeId);
+  const handleUpdateWallet = async (employeeId, amount, description, leaveType) => {
+    await leaveService.addManualAdjustment(employeeId, amount, description, user?.employeeId, leaveType);
     setTimeout(refresh, 500);
   };
 
-  const handleApproveLeave = async (requestId) => {
-    try {
-      await leaveService.approveLeaveRequest(requestId, user?.employeeId);
-      refresh();
-    } catch (err) {
-      alert('Failed to approve leave: ' + err.message);
-    }
-  };
+  const handleRunAccrual = async () => {
+    // Prompt the user for the target month
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const targetMonth = window.prompt(
+      "Enter the month to run accrual for (YYYY-MM). If backfilling, this will use the 1st of that month.",
+      currentMonth
+    );
 
-  const handleRejectLeave = async (requestId) => {
+    if (!targetMonth) return;
+
+    // Validate format
+    if (!/^\d{4}-\d{2}$/.test(targetMonth)) {
+      alert("Invalid format. Please use YYYY-MM (e.g., 2026-06).");
+      return;
+    }
+
+    // Determine the target date based on whether it's the current month or a past month
+    let targetDateStr;
+    if (targetMonth === currentMonth) {
+      // Use today for current month
+      targetDateStr = new Date().toISOString().split('T')[0];
+    } else {
+      // Use the 1st of the target month
+      targetDateStr = `${targetMonth}-01`;
+    }
+
+    if (!window.confirm(`Are you sure you want to run the automated monthly accrual for ${targetMonth}?`)) {
+      return;
+    }
+    
+    setIsSubmitting(true);
     try {
-      await leaveService.rejectLeaveRequest(requestId);
+      await leaveService.runMonthlyAccrual(user?.employeeId, targetDateStr);
       refresh();
+      alert("Monthly accrual completed successfully.");
     } catch (err) {
-      alert('Failed to reject leave: ' + err.message);
+      alert('Failed to run monthly accrual: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -173,7 +202,43 @@ export const LeaveDashboard = ({
             : 'Track leave balances, history, and requests.'
         }
         rightActions={headerRightActions}
-        leftActions={headerLeftActions}
+        leftActions={
+          <div className="leave-dashboard-toggles-container" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div className="view-mode-toggle">
+              <button
+                className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
+                onClick={() => { setViewMode('leaves'); setPage(1); setIsMenuOpen(false); }}
+              >
+                {isGlobalViewer ? 'All Leaves' : 'My Leaves'}
+              </button>
+              <button
+                className={`view-toggle-btn ${viewMode === 'ledger' ? 'active' : ''}`}
+                onClick={() => { setViewMode('ledger'); setPage(1); setIsMenuOpen(false); }}
+              >
+                {isGlobalViewer ? 'Global Ledger' : 'Wallet Ledger'}
+              </button>
+            </div>
+            {isGlobalViewer && viewMode === 'ledger' && (
+              <>
+                <button 
+                  className="halo-button secondary" 
+                  onClick={() => setIsUpdateWalletModalOpen(true)}
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  + Update Wallet Balance
+                </button>
+                <button 
+                  className="halo-button secondary" 
+                  onClick={handleRunAccrual}
+                  disabled={isSubmitting}
+                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
+                >
+                  {isSubmitting ? 'Running...' : 'Run Monthly Accrual'}
+                </button>
+              </>
+            )}
+          </div>
+        }
         hideSearchBar={true}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
@@ -196,11 +261,20 @@ export const LeaveDashboard = ({
             balance={balance}
             onApply={() => setIsModalOpen(true)}
             viewAllMode={isGlobalViewer}
-            onApprove={handleApproveLeave}
-            onReject={handleRejectLeave}
+            page={page}
+            setPage={setPage}
+            totalCount={requestsCount}
+            pageSize={pageSize}
           />
         ) : (
-          <WalletLedgerView ledger={ledger} viewAllMode={isGlobalViewer} />
+          <WalletLedgerView 
+            ledger={ledger} 
+            viewAllMode={isGlobalViewer}
+            page={page}
+            setPage={setPage}
+            totalCount={ledgerCount}
+            pageSize={pageSize}
+          />
         )}
       </div>
 
@@ -209,6 +283,7 @@ export const LeaveDashboard = ({
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleApply}
         maxBalance={balance}
+        employeeId={userId}
       />
 
       <UpdateWalletBalanceModal
