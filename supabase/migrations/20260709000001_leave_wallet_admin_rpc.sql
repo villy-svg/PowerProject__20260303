@@ -14,7 +14,13 @@ DROP COLUMN IF EXISTS reference_request_id CASCADE;
 
 ALTER TABLE public.employee_leave_ledgers 
 ADD COLUMN IF NOT EXISTS reference_edit_request_id UUID REFERENCES public.attendance_edit_requests(id) ON DELETE SET NULL,
-ADD COLUMN IF NOT EXISTS leave_type TEXT NOT NULL DEFAULT 'PL';
+ADD COLUMN IF NOT EXISTS leave_type TEXT DEFAULT 'SL';
+
+-- Backfill any pre-existing rows so NOT NULL can be enforced safely
+UPDATE public.employee_leave_ledgers SET leave_type = 'SL' WHERE leave_type IS NULL;
+
+-- Now enforce NOT NULL
+ALTER TABLE public.employee_leave_ledgers ALTER COLUMN leave_type SET NOT NULL;
 
 ALTER TABLE public.employee_leave_policies
 ADD COLUMN IF NOT EXISTS max_carry_forward NUMERIC DEFAULT -1,
@@ -130,7 +136,7 @@ BEGIN
         ) VALUES (
             v_req.employee_id, 'LEAVE_TAKEN', -1, 
             COALESCE(v_req.maker_note, 'Leave approved via Attendance Board'), 
-            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'PL')
+            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
         );
     END IF;
 
@@ -141,7 +147,7 @@ BEGIN
         ) VALUES (
             v_req.employee_id, 'LEAVE_REFUND', 1, 
             'Leave revoked/changed via Attendance Board', 
-            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'PL')
+            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
         );
     END IF;
 
