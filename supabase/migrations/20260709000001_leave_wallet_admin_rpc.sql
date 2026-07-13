@@ -67,12 +67,21 @@ GRANT SELECT ON public.v_employee_leave_ledgers_with_balance TO authenticated;
 -- 5. Unified RPC: Approve attendance edit request and sync with Leave Ledger
 CREATE OR REPLACE FUNCTION public.approve_attendance_edit_request(
     p_request_id UUID,
-    p_reviewer_id UUID
+    p_reviewer_id UUID   -- auth.uid() / user_profiles.id of the approver
 ) RETURNS VOID AS $$
 DECLARE
-    v_req RECORD;
-    v_old_status public.attendance_status_enum;
+    v_req             RECORD;
+    v_old_status      public.attendance_status_enum;
+    v_reviewer_emp_id UUID;  -- employees.id of the approver (FK-safe for ledger insert)
 BEGIN
+    -- Resolve the reviewer's employees.id from their user_profiles row.
+    -- employee_leave_ledgers.created_by references employees(id), NOT user_profiles(id).
+    -- If the reviewer has no linked employee record, v_reviewer_emp_id stays NULL
+    -- (safe because created_by is ON DELETE SET NULL).
+    SELECT employee_id INTO v_reviewer_emp_id
+    FROM public.user_profiles
+    WHERE id = p_reviewer_id;
+
     -- Lock the edit request
     SELECT * INTO v_req
     FROM public.attendance_edit_requests
@@ -136,7 +145,7 @@ BEGIN
         ) VALUES (
             v_req.employee_id, 'LEAVE_TAKEN', -1, 
             COALESCE(v_req.maker_note, 'Leave approved via Attendance Board'), 
-            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
+            p_request_id, v_reviewer_emp_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
         );
     END IF;
 
@@ -147,7 +156,7 @@ BEGIN
         ) VALUES (
             v_req.employee_id, 'LEAVE_REFUND', 1, 
             'Leave revoked/changed via Attendance Board', 
-            p_request_id, p_reviewer_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
+            p_request_id, v_reviewer_emp_id, v_req.shift_date, COALESCE(v_req.suggested_leave_type, 'SL')
         );
     END IF;
 
