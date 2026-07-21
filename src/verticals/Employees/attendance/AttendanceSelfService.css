@@ -817,12 +817,19 @@
 
 /* Master Admin Force End Button */
 .live-attendance__force-end-btn {
-  padding: 0.3rem 0.6rem;
+  width: calc(1.4rem + 2px);
+  height: calc(1.4rem + 2px);
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.7rem;
   background: rgba(249, 115, 22, 0.1);
   color: #f97316;
   border-color: rgba(249, 115, 22, 0.3);
   margin-left: 0.5rem;
+  line-height: 1;
 }
 
 .live-attendance__force-end-btn:hover {
