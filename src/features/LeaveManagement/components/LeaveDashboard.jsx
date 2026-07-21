@@ -60,7 +60,7 @@ export const LeaveDashboard = ({
 
   // ─── Left Action: view toggle buttons ──────────────────
   const headerLeftActions = (
-    <div className="leave-dashboard-toggles-container" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div className="leave-dashboard-toggles-container u-flex-center-gap-16">
       <div className="view-mode-toggle">
         <button
           className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
@@ -77,9 +77,8 @@ export const LeaveDashboard = ({
       </div>
       {isGlobalViewer && viewMode === 'ledger' && (
         <button 
-          className="halo-button secondary" 
+          className="halo-button secondary btn-sm" 
           onClick={() => setIsUpdateWalletModalOpen(true)}
-          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
         >
           + Update Wallet Balance
         </button>
@@ -203,7 +202,7 @@ export const LeaveDashboard = ({
         }
         rightActions={headerRightActions}
         leftActions={
-          <div className="leave-dashboard-toggles-container" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="leave-dashboard-toggles-container u-flex-center-gap-16">
             <div className="view-mode-toggle">
               <button
                 className={`view-toggle-btn ${viewMode === 'leaves' ? 'active' : ''}`}
@@ -221,17 +220,15 @@ export const LeaveDashboard = ({
             {isGlobalViewer && viewMode === 'ledger' && (
               <>
                 <button 
-                  className="halo-button secondary" 
+                  className="halo-button secondary btn-sm" 
                   onClick={() => setIsUpdateWalletModalOpen(true)}
-                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                 >
                   + Update Wallet Balance
                 </button>
                 <button 
-                  className="halo-button secondary" 
+                  className="halo-button secondary btn-sm" 
                   onClick={handleRunAccrual}
                   disabled={isSubmitting}
-                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                 >
                   {isSubmitting ? 'Running...' : 'Run Monthly Accrual'}
                 </button>

@@ -1,0 +1,78 @@
+/* ModelVerificationForm.css — Component styles for ModelVerificationForm.jsx */
+
+.mvf__model-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mvf__model-tab-btn {
+  cursor: pointer;
+  border-radius: 12px;
+}
+
+.mvf__run-btn {
+  margin-top: 12px;
+  height: 36px;
+  min-width: unset;
+  display: flex;
+  align-items: center;
+}
+
+.mvf__json-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+.mvf__spinner {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-width: 2px;
+}
+
+.mvf__bookmarklet-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.mvf__bookmarklet-title {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 8px;
+}
+
+.mvf__bookmarklet-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.mvf__bookmarklet-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: grab;
+  height: 38px;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-weight: 800;
+  color: var(--brand-green);
+}
+
+.mvf__bookmarklet-desc {
+  flex: 1 1 280px;
+  font-size: 12px;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.mvf__bookmarklet-list {
+  margin: 0;
+  padding-left: 16px;
+  line-height: 1.6;
+}

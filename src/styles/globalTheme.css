@@ -813,11 +813,50 @@ body[data-keyboard="open"] .task-form-actions {
 
 /* ==========================================================================
    8. GLOBAL UTILITY CLASSES (For eliminating inline styles)
+   Naming: .u-{property}-{value}
+   Keep additions minimal — only add classes used 3+ times across files.
    ========================================================================== */
+
+/* ── Flex Layouts ── */
 .u-flex-center-gap {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.u-flex-center-gap-4 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.u-flex-center-gap-6 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.u-flex-center-gap-10 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.u-flex-center-gap-12 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.u-flex-center-gap-16 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.u-flex-gap-2 {
+  display: flex;
+  gap: 2px;
 }
 
 .u-flex-gap-4 {
@@ -825,61 +864,266 @@ body[data-keyboard="open"] .task-form-actions {
   gap: 4px;
 }
 
-.u-text-brand-blue {
-  color: var(--brand-blue);
+.u-flex-gap-8 {
+  display: flex;
+  gap: 8px;
 }
 
-.u-text-brand-green {
-  color: var(--brand-green);
+.u-flex-gap-12 {
+  display: flex;
+  gap: 12px;
 }
 
-.u-text-brand-red {
-  color: var(--priority-urgent);
+.u-flex-gap-16 {
+  display: flex;
+  gap: 16px;
 }
 
-.u-ml-4 {
-  margin-left: 4px;
+.u-flex-gap-24 {
+  display: flex;
+  gap: 24px;
 }
 
-.u-ml-8 {
-  margin-left: 8px;
+.u-flex-col {
+  display: flex;
+  flex-direction: column;
 }
 
-.u-mr-4 {
-  margin-right: 4px;
+.u-flex-col-gap-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.u-mr-6 {
-  margin-right: 6px;
+.u-flex-col-gap-8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.u-mr-8 {
-  margin-right: 8px;
+.u-flex-col-gap-12 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.u-mt-4 {
-  margin-top: 1rem;
+.u-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.u-w-full {
-  width: 100%;
+.u-flex-end {
+  display: flex;
+  justify-content: flex-end;
 }
 
-.u-fw-600 {
-  font-weight: 600;
+.u-flex-end-gap-8 {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.u-fw-700 {
-  font-weight: 700;
+.u-flex-end-gap-12 {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
-.u-opacity-60 {
+.u-flex-end-gap-16 {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.u-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.u-flex-wrap-gap-8 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.u-flex-wrap-gap-32 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.u-flex-1 {
+  flex: 1;
+}
+
+/* ── Display ── */
+.u-block {
+  display: block;
+}
+
+/* ── Margins ── */
+.u-mb-4  { margin-bottom: 4px; }
+.u-mb-8  { margin-bottom: 8px; }
+.u-mb-12 { margin-bottom: 12px; }
+.u-mb-14 { margin-bottom: 14px; }
+.u-mb-16 { margin-bottom: 16px; }
+.u-mb-24 { margin-bottom: 24px; }
+
+.u-mt-4  { margin-top: 4px; }
+.u-mt-8  { margin-top: 8px; }
+.u-mt-16 { margin-top: 16px; }
+.u-mt-24 { margin-top: 24px; }
+.u-mt-1rem { margin-top: 1rem; }
+.u-mt-1p5rem { margin-top: 1.5rem; }
+
+.u-ml-4 { margin-left: 4px; }
+.u-ml-8 { margin-left: 8px; }
+.u-ml-12 { margin-left: 12px; }
+
+.u-mr-4 { margin-right: 4px; }
+.u-mr-6 { margin-right: 6px; }
+.u-mr-8 { margin-right: 8px; }
+.u-mr-12 { margin-right: 12px; }
+
+.u-m-0 { margin: 0; }
+
+/* ── Widths ── */
+.u-w-full { width: 100%; }
+.u-w-60 { min-width: 60px; }
+.u-w-70 { min-width: 70px; }
+
+/* ── Padding ── */
+.u-py-4 { padding-top: 4px; padding-bottom: 4px; }
+
+/* ── Margins Y ── */
+.u-my-4 { margin-top: 4px; margin-bottom: 4px; }
+
+/* ── Typography ── */
+.u-fw-400 { font-weight: 400; }
+.u-fw-600 { font-weight: 600; }
+.u-fw-700 { font-weight: 700; }
+.u-fw-800 { font-weight: 800; }
+.u-fw-900 { font-weight: 900; }
+
+.u-text-xs     { font-size: 0.65rem; }  /* Micro labels */
+.u-text-sm-75  { font-size: 0.75rem; }
+.u-text-sm     { font-size: 0.85rem; }
+.u-text-base   { font-size: 0.95rem; }
+.u-text-lg     { font-size: 1.05rem; }
+
+.u-text-center { text-align: center; }
+
+.u-uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.u-whitespace-prewrap { white-space: pre-wrap; }
+
+.u-overflow-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Colors ── */
+.u-text-brand-blue    { color: var(--brand-blue); }
+.u-text-brand-green   { color: var(--brand-green); }
+.u-text-brand-red     { color: var(--priority-urgent); }
+.u-text-secondary     { color: var(--text-secondary); }
+
+/* ── Opacity ── */
+.u-opacity-30 { opacity: 0.3; }
+.u-opacity-50 { opacity: 0.5; }
+.u-opacity-60 { opacity: 0.6; }
+.u-opacity-70 { opacity: 0.7; }
+.u-opacity-80 { opacity: 0.8; }
+.u-opacity-100 { opacity: 1 !important; }
+
+/* ── Interaction ── */
+.u-pointer-events-auto { pointer-events: auto !important; }
+.u-cursor-grab { cursor: grab; }
+.u-cursor-pointer { cursor: pointer; }
+.u-pointer-none   { pointer-events: none; }
+
+/* ── Combined Utility Presets (Used 5+ times across files) ── */
+/* Center-padded state messages */
+.u-state-center {
+  padding: 24px;
+  text-align: center;
+}
+
+.u-state-center-muted {
+  padding: 24px;
+  text-align: center;
   opacity: 0.6;
 }
 
-.u-p-2rem-center {
-  padding: 2rem;
-  text-align: center;
+/* Muted label caption style */
+.u-label-muted {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* Overflow scroll wrappers */
+.u-overflow-y-auto {
+  overflow-y: auto;
+}
+
+/* ── Small Halo Button Modifier ── */
+/* Compact action button variant (approve/reject rows, filter actions etc.) */
+.halo-button.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  min-width: unset;
+  min-height: unset;
+  height: 32px;
+}
+
+.halo-button.btn-xs {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  min-width: unset;
+  min-height: unset;
+}
+
+/* Icon-only square button (32x32) */
+.halo-button.btn-icon {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  min-width: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Hidden (display:none replacement) ── */
+.u-hidden { display: none; }
+
+/* ── Dropdown Chevron Icon (used in 7+ management components) ── */
+/* Static parts only — pair with inline style={{ transform: ... }} for the dynamic rotation */
+.dropdown-chevron-icon {
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+/* ── CSV Import Error Badge ── */
+/* Replaces hardcoded #ff4444 / rgba(255,68,68,0.1) across CSV import components */
+.csv-error-badge {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
+  color: var(--status-danger);
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
 .badge-viewer {
@@ -888,3 +1132,160 @@ body[data-keyboard="open"] .task-form-actions {
   font-size: 0.6rem;
   padding: 1px 4px;
 }
+
+/* ── Typography Extended ── */
+.u-break-all {
+  word-break: break-all;
+}
+
+/* ── Specific Borders & Padding ── */
+.u-border-l-p8 {
+  border-left: 1px solid var(--border-color);
+  padding-left: 8px;
+}
+
+/* ── Specific Diff Container ── */
+.bank-details-diff-container {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  background: var(--surface-deep);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+/* ── Custom Component Utilities ── */
+.expanded-details-panel {
+  margin: -1px 0 0 0;
+  padding: 12px 16px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.checkbox-sm {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* ── More Padding/Margin Utilities ── */
+.u-w-14 { width: 14px; }
+.u-w-16 { width: 16px; }
+.u-w-full { width: 100%; }
+.u-h-14 { height: 14px; }
+.u-h-16 { height: 16px; }
+.u-h-36 { height: 36px; }
+.u-h-38 { height: 38px; }
+.u-h-100p { height: 100%; }
+.u-min-h-60 { min-height: 60px; }
+.u-min-w-unset { min-width: unset; }
+.u-max-w-200 { max-width: 200px; }
+
+/* ── Spacing ── */
+.u-m-0 { margin: 0; }
+.u-m-x-auto { margin-left: auto; margin-right: auto; }
+.u-mt-8 { margin-top: 8px; }
+.u-mt-12 { margin-top: 12px; }
+.u-mt-24 { margin-top: 24px; }
+.u-mt-32 { margin-top: 32px; }
+.u-mt-1rem { margin-top: 1rem; }
+.u-mt-3rem { margin-top: 3rem; }
+.u-mb-4 { margin-bottom: 4px; }
+.u-mb-8 { margin-bottom: 8px; }
+.u-mb-12 { margin-bottom: 12px; }
+.u-mb-16 { margin-bottom: 16px; }
+.u-mr-4 { margin-right: 4px; }
+.u-ml-6 { margin-left: 6px; }
+
+.u-p-0 { padding: 0; }
+.u-p-8 { padding: 8px; }
+.u-p-10-12 { padding: 10px 12px; }
+.u-p-12 { padding: 12px; }
+.u-p-16 { padding: 16px; }
+.u-p-20 { padding: 20px; }
+.u-pb-8 { padding-bottom: 8px; }
+.u-pt-24 { padding-top: 24px; }
+.u-px-12 { padding-left: 12px; padding-right: 12px; }
+.u-px-16 { padding-left: 16px; padding-right: 16px; }
+.u-py-24 { padding-top: 24px; padding-bottom: 24px; }
+.u-pl-16 { padding-left: 16px; }
+
+/* ── Typography & Colors ── */
+.u-text-upper { text-transform: uppercase; }
+.u-text-0-65rem { font-size: 0.65rem; }
+.u-text-0-7rem { font-size: 0.7rem; }
+.u-text-xs { font-size: 0.75rem; }
+.u-text-sm { font-size: 0.85rem; }
+.u-text-base { font-size: 1rem; }
+.u-text-1-1em { font-size: 1.1em; }
+.u-text-brand-green { color: var(--brand-green); }
+.u-text-danger { color: #ef4444; }
+.u-text-primary { color: var(--text-color); }
+.u-text-tertiary { color: rgba(113, 113, 122, 0.7); }
+.u-text-right { text-align: right; }
+.u-text-left { text-align: left; }
+.u-text-center { text-align: center; }
+.u-line-height-16 { line-height: 1.6; }
+.u-font-mono { font-family: 'JetBrains Mono', monospace; }
+.u-fw-400 { font-weight: 400; }
+.u-fw-500 { font-weight: 500; }
+.u-fw-600 { font-weight: 600; }
+.u-fw-800 { font-weight: 800; }
+.u-fw-900 { font-weight: 900; }
+
+/* ── Flexbox ── */
+.u-flex-center { display: flex; align-items: center; justify-content: center; }
+.u-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.u-flex-center-gap-4 { display: flex; align-items: center; gap: 4px; }
+.u-flex-center-gap-8 { display: flex; align-items: center; gap: 8px; }
+.u-flex-center-gap-10 { display: flex; align-items: center; gap: 10px; }
+.u-flex-gap-4 { display: flex; gap: 4px; }
+.u-flex-gap-12 { display: flex; gap: 12px; }
+.u-flex-col-gap-8 { display: flex; flex-direction: column; gap: 8px; }
+.u-inline-flex-center-gap-6 { display: inline-flex; align-items: center; gap: 6px; }
+.u-flex-wrap-gap-16 { flex-wrap: wrap; gap: 16px; }
+.u-items-center { align-items: center; }
+.u-flex-1 { flex: 1; }
+.u-flex-1-280 { flex: 1 1 280px; }
+.u-flex-end-gap-10 { display: flex; justify-content: flex-end; gap: 10px; }
+.u-flex-end-gap-12 { display: flex; justify-content: flex-end; gap: 12px; }
+
+/* ── Borders & Backgrounds ── */
+.u-bg-card { background: rgba(255, 255, 255, 0.02); }
+.u-bg-transparent { background: transparent; }
+.u-border { border: 1px solid var(--border-color); }
+.u-border-t { border-top: 1px solid var(--border-color); }
+.u-border-t-light { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.u-border-2 { border-width: 2px; }
+.u-border-none { border: none; }
+.u-rounded-10 { border-radius: 10px; }
+.u-rounded-12 { border-radius: 12px; }
+
+/* ── Buttons & Layouts ── */
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+/* ── Dynamic Refactor Utilities ── */
+.u-h-auto { height: auto; }
+.u-mt-0 { margin-top: 0; }
+.u-pt-0 { padding-top: 0; }
+.u-box-border { box-sizing: border-box; }
+.u-min-w-90 { min-width: 90px; }
+.u-text-10px { font-size: 10px; }
+.u-border-t-dashed { border-top: 1px dashed var(--border-color); }
+.u-border-t-none { border-top: none; }
+.u-border-t-2-border { border-top: 2px solid var(--border-color); }
+.u-letter-spacing-05 { letter-spacing: 0.05em; }
+.u-border-brand-purple { border-color: #a855f7; }
+.u-text-brand-purple { color: #a855f7; }
+.u-min-h-80 { min-height: 80px; }
+.u-outline-none { outline: none; }

@@ -92,7 +92,7 @@ export const UpdateWalletBalanceModal = ({ isOpen, onClose, onSubmit }) => {
               placeholder="e.g. 5 (credit) or -2 (debit)"
               required
             />
-            <small style={{ color: 'var(--text-tertiary)', marginTop: '4px', display: 'block' }}>
+            <small className="wallet-balance-modal__hint">
               Use positive numbers to add days, negative to deduct.
             </small>
           </div>

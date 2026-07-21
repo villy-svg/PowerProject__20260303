@@ -58,7 +58,7 @@ const CSVConflictModal = ({
           <div className="option-box">
             <h4>1. Replace All Existing</h4>
             <p>Overwrite all {conflicts.length} duplicates with the new information from your CSV.</p>
-            <button className="halo-button save-btn" style={{ marginTop: '12px' }} onClick={handleReplaceAll}>
+            <button className="halo-button save-btn csv-conflict__replace-btn" onClick={handleReplaceAll}>
               Overwrite All Records
             </button>
           </div>

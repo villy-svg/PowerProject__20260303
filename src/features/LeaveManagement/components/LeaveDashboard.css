@@ -116,3 +116,151 @@
   padding: clamp(1rem, 3vw, 2.5rem);
   color: var(--status-danger);
 }
+
+/* ==========================================================================
+   COMPONENT-SCOPED CLASSES
+   (Replaces static inline styles in MyLeavesView, WalletLedgerView,
+    and UpdateWalletBalanceModal)
+   ========================================================================== */
+
+/* My Leaves — Balance stat items */
+.my-leaves__stat-item {
+  align-items: flex-start;
+}
+
+.my-leaves__stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.my-leaves__stat-label {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Wallet Ledger — Section header */
+.wallet-ledger__header {
+  margin-bottom: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Wallet Ledger — Attendance note text */
+.wallet-ledger__note {
+  font-size: 0.8rem;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* Update Wallet Balance Modal — hint text below input */
+.wallet-balance-modal__hint {
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  display: block;
+}
+
+/* Wallet ledger table */
+.leave-wallet-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.leave-wallet-table th,
+.leave-wallet-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.leave-wallet-table th {
+  text-transform: uppercase;
+  opacity: 0.5;
+  font-weight: 800;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+}
+
+.leave-list-container {
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.leave-empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  opacity: 0.45;
+}
+
+/* master-action-btn: prominent CTA button in leave balance banner */
+.master-action-btn {
+  padding: 12px 28px;
+  font-size: 0.95rem;
+}
+
+/* ── Modal Utility Classes ── */
+.leave-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.leave-modal-body {
+  background: var(--bg-color);
+  border-radius: var(--radius-squircle, 24px);
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  color: var(--text-color);
+  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0,0,0,0.2));
+}
+
+.leave-modal-form-group {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.leave-modal-label {
+  display: block;
+  text-transform: uppercase;
+  opacity: 0.5;
+  font-weight: 800;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.leave-modal-input-container {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.leave-modal-input {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  width: 100%;
+  font-weight: 600;
+  font-size: 0.95rem;
+  outline: none;
+}
+

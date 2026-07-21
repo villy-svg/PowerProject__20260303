@@ -21,16 +21,16 @@ const AttendanceLegend = () => {
       </div>
       <div className="attendance-legend__row">
         <span className="attendance-legend__item attendance-legend__item--absent">
-          <span style={{ fontWeight: 800 }}>ABS</span> <span className="attendance-legend__label">Absent</span>
+          <span className="u-fw-800">ABS</span> <span className="attendance-legend__label">Absent</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--no-show">
-          <span style={{ fontWeight: 800 }}>X</span> <span className="attendance-legend__label">No Show</span>
+          <span className="u-fw-800">X</span> <span className="attendance-legend__label">No Show</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--no-call-no-show">
-          <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span> <span className="attendance-legend__label">No Call No Show</span>
+          <span className="u-fw-900 u-text-1-1em">XX</span> <span className="attendance-legend__label">No Call No Show</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--null">
-          <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> <span className="attendance-legend__label">Not Marked</span>
+          <span className="u-fw-800 u-opacity-50">NULL</span> <span className="attendance-legend__label">Not Marked</span>
         </span>
         <span className="attendance-legend__item attendance-legend__item--pending">
           <span className="attendance-legend__icon-pending">⚠</span> <span className="attendance-legend__label">Pending Edit</span>

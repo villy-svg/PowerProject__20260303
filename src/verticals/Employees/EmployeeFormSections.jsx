@@ -50,19 +50,19 @@ export const BasicDetailsSection = ({ formData, onChange, isViewOnly = false }) 
 );
 
 export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, roles, employees = [], isViewOnly = false }) => (
-  <div className="form-section" style={{ marginTop: '2rem' }}>
+  <div className="form-section u-mt-1p5rem">
     <h3 className="form-section-header">Company Details</h3>
     <div className="form-grid">
       <div className="form-group">
         <label>Employee ID (Permanent)</label>
         <div className="form-input-container">
-          <input type="text" value={formData.emp_code || 'Auto-generated'} readOnly style={{ background: 'transparent', cursor: 'not-allowed', color: 'var(--brand-green)' }} />
+          <input type="text" value={formData.emp_code || 'Auto-generated'} readOnly className="emp-form__field-hint-btn" />
         </div>
       </div>
       <div className="form-group">
         <label>Current Badge ID</label>
         <div className="form-input-container">
-          <input type="text" value={formData.badge_id || 'Auto-generated'} readOnly style={{ background: 'transparent', cursor: 'not-allowed', color: '#007aff' }} />
+          <input type="text" value={formData.badge_id || 'Auto-generated'} readOnly className="emp-form__field-link-btn" />
         </div>
       </div>
       <div className="form-group">
@@ -149,10 +149,10 @@ export const CompanyDetailsSection = ({ formData, onChange, hubs, departments, r
 export const BankDetailsSection = ({ formData, onChange, isViewOnly = false, requiresBankApproval = false }) => {
   return (
     <div className="form-section">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <h3 className="form-section-header" style={{ margin: 0 }}>Bank Details</h3>
+      <div className="u-flex-between u-mb-16">
+        <h3 className="form-section-header u-m-0">Bank Details</h3>
         {requiresBankApproval && !isViewOnly && (
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', opacity: 0.8 }}>
+          <span className="emp-form__field-count">
             🔒 Changes to Bank Details require Master Admin approval
           </span>
         )}

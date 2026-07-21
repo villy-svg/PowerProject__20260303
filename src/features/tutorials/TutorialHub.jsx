@@ -256,11 +256,10 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           </div>
         }
         rightActions={
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div className="u-flex-center-gap">
             {isMasterAdmin && (
               <button 
-                className="halo-button header-back-dashboard-btn"
-                style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }}
+                className="halo-button header-back-dashboard-btn u-border-brand-green u-text-brand-green"
                 onClick={() => {
                   setEditingFlow(null);
                   setIsFormOpen(true);
@@ -282,11 +281,10 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
       <div className="tutorial-categories-grid">
         {categories.map(category => (
           <div key={category} className="tutorial-category-section">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-              <h3 className="category-section-title" style={{ margin: 0 }}>{category}</h3>
+            <div className="u-flex-between u-mb-16 u-flex-wrap-gap-8">
+              <h3 className="category-section-title u-m-0">{category}</h3>
               <button 
                 className="halo-button secondary play-all-btn" 
-                style={{ minWidth: 'auto', padding: '0.35rem 0.75rem', fontSize: '0.8rem', height: '32px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                 onClick={() => handlePlayAll(category)}
               >
                 ▶ Play All
@@ -312,8 +310,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
                     </span>
                     {isMasterAdmin && (
                       <button
-                        className="halo-button secondary edit-tutorial-info-btn"
-                        style={{ minWidth: 'auto', width: '32px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}
+                        className="halo-button secondary btn-icon edit-tutorial-info-btn"
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingFlow(flow);

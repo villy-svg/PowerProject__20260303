@@ -210,7 +210,7 @@ const AttendanceSuggestEditModal = ({
               <div className="form-input-container">
                 <textarea
                   id="suggest-leave-reason"
-                  style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '12px', border: '1px solid var(--border-light)', outline: 'none' }}
+                  className="u-w-full u-min-h-80 u-p-12 u-rounded-12 u-border-light u-outline-none"
                   placeholder="Enter reason for applying leave on behalf of the employee..."
                   value={suggestedLeaveReason}
                   onChange={(e) => setSuggestedLeaveReason(e.target.value)}

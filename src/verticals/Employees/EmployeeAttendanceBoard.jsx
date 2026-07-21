@@ -406,9 +406,8 @@ const EmployeeAttendanceBoard = ({
     <div className="attendance-board__left-actions">
       {viewMode === 'pending-requests' || viewMode === 'pending-plans' ? (
         <button 
-          className="halo-button" 
+          className="halo-button u-flex-center-gap-8" 
           onClick={() => setViewMode('attendance')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
           <span>←</span> Back to Board
         </button>
@@ -439,7 +438,7 @@ const EmployeeAttendanceBoard = ({
         </div>
       ) : (
         // Planner Week Picker & Paintbrush
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div className="u-flex-gap-16 u-items-center">
           <div className="attendance-board__date-range">
             <label className="attendance-board__date-label">Target Week</label>
             <DatePicker
@@ -457,12 +456,12 @@ const EmployeeAttendanceBoard = ({
             />
           </div>
           {canSuggestEdit && (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Paintbrush:</label>
+            <div className="u-flex-gap-8 u-items-center">
+              <label className="u-text-sm u-fw-600 u-text-secondary">Paintbrush:</label>
               <CustomSelect
                 value={paintbrushStatus}
                 onChange={setPaintbrushStatus}
-                style={{ width: '180px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+                className="u-w-180 u-py-4 u-pl-8 u-text-sm-85"
                 options={[
                   { value: 'null', label: 'NULL (Not Marked)' },
                   { value: 'present', label: 'Present (Day)' },
@@ -478,7 +477,7 @@ const EmployeeAttendanceBoard = ({
                 <CustomSelect
                   value={paintbrushHubId}
                   onChange={setPaintbrushHubId}
-                  style={{ width: '130px', paddingBlock: '0.3rem', paddingLeft: '0.6rem', fontSize: '0.85rem' }}
+                  className="u-w-130 u-py-4 u-pl-8 u-text-sm-85"
                   options={[
                     { value: '', label: 'No Hub' },
                     ...hubs.map(h => ({ value: h.id, label: h.hub_code || h.name }))
@@ -532,11 +531,7 @@ const EmployeeAttendanceBoard = ({
             <button
               className="halo-button attendance-board__approval-btn"
               onClick={() => setViewMode('pending-requests')}
-              title="Review individual attendance edit requests."
             >
-              <span className="attendance-board__pending-badge">
-                {pendingRequests.length}
-              </span>
               Pending Approvals
             </button>
           )}
@@ -564,7 +559,7 @@ const EmployeeAttendanceBoard = ({
   );
 
   const headerExpandedLeft = (viewMode === 'pending-requests' || viewMode === 'pending-plans') ? null : (
-    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexWrap: 'wrap', width: '100%' }}>
+    <div className="u-flex-wrap-gap-24 u-items-center u-w-full">
       {canSuggestEdit && (
         <div className="view-mode-toggle">
           <button
@@ -583,24 +578,22 @@ const EmployeeAttendanceBoard = ({
       )}
 
       {/* Date Filter & Pagination */}
-      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <div className="u-flex-gap-16 u-items-center">
         {viewMode === 'attendance' ? (
           <>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '12px' }}>
+            <div className="u-flex-gap-8 u-items-center u-ml-12">
               <button 
-                className="halo-button" 
-                style={{ padding: '4px 12px', fontSize: '0.75rem', minHeight: 'auto' }}
+                className="halo-button btn-xs u-min-h-auto" 
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 ◀ Prev
               </button>
-              <span style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)' }}>
+              <span className="u-text-xs u-fw-800 u-text-secondary">
                 PAGE {page}
               </span>
               <button 
-                className="halo-button" 
-                style={{ padding: '4px 12px', fontSize: '0.75rem', minHeight: 'auto' }}
+                className="halo-button btn-xs u-min-h-auto" 
                 onClick={() => setPage(p => p + 1)}
                 disabled={!hasMore}
               >
@@ -627,21 +620,20 @@ const EmployeeAttendanceBoard = ({
         )}
       </div>
 
-      <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+      <div className="u-flex u-w-full u-items-center">
         <AttendanceLegend />
       </div>
 
       {canSuggestEdit && planner.myPlans.length > 0 && (
         <button 
-          className="halo-button master-action-btn"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          className="halo-button master-action-btn u-flex-center-gap-8"
           onClick={() => {
             setShowMyPlans(true);
             setIsMenuOpen(false);
           }}
         >
           My Plans History
-          <span className="attendance-board__pending-badge" style={{ margin: 0 }}>
+          <span className="attendance-board__pending-badge u-m-0">
             {planner.myPlans.length}
           </span>
         </button>
@@ -688,6 +680,12 @@ const EmployeeAttendanceBoard = ({
       />
 
       {/* Notifications */}
+      {/* Error state */}
+      {actionError && (
+        <div className="attendance-board__error u-mb-16">
+          <p>⚠ {actionError}</p>
+        </div>
+      )}
       {viewMode === 'attendance' && error && (
         <div className="attendance-board__error">
           <p>⚠ {error}</p>

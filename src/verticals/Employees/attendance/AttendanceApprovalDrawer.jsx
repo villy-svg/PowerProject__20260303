@@ -54,38 +54,35 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
     .toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div style={{ marginBottom: '12px' }}>
-      <div className={`list-task-row ${(showDetails || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
+    <div className="u-mb-12">
+      <div className={`list-task-row u-h-auto u-pl-12 ${(showDetails || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
         '--stage-color': 'var(--brand-yellow)', 
-        height: 'auto',
-        borderLeft: '2px solid color-mix(in srgb, var(--brand-yellow), transparent 30%)',
-        borderBottomLeftRadius: (showDetails || showRejectNote) ? 0 : '12px',
-        borderBottomRightRadius: (showDetails || showRejectNote) ? 0 : '12px',
-        paddingLeft: '12px',
+        borderBottomLeftRadius: (showDetails || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
+        borderBottomRightRadius: (showDetails || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
       }}>
         {/* CHECKBOX FOR BULK ACTION */}
-        <div style={{ display: 'flex', alignItems: 'center', marginRight: '12px' }}>
+        <div className="u-flex-center u-mr-12">
           <input 
             type="checkbox" 
             checked={isSelected} 
             onChange={() => onToggleSelect(request.id)}
-            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+            className="checkbox-sm"
           />
         </div>
 
         {/* LEFT SIDE: Identity & Content */}
-        <div className="list-row-main" style={{ flex: 1 }}>
+        <div className="list-row-main u-flex-1">
           <div className="list-row-badges">
             <span className="card-priority priority-high">
               {formattedDate}
             </span>
             {request.employees?.emp_code && (
-              <span className="subtask-tag" style={{ display: 'flex' }}>
+              <span className="subtask-tag u-flex">
                 {request.employees.emp_code}
               </span>
             )}
-            {request.suggested_leave_type && request.suggested_status === 'leave' && (
-              <span className="subtask-tag" style={{ display: 'flex', color: 'var(--brand-purple)', borderColor: 'var(--brand-purple)' }}>
+            {request.suggested_leave_type && (
+              <span className="subtask-tag u-flex u-text-brand-purple u-border-brand-purple">
                 {request.suggested_leave_type}
               </span>
             )}
@@ -97,35 +94,32 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
         </div>
 
         {/* RIGHT SIDE: Action Controls */}
-        <div className="list-row-controls" style={{ opacity: 1, pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
+        <div className="list-row-controls u-flex-gap-8 u-opacity-100 u-pointer-events-auto">
           {!showRejectNote && (
             <>
               <button
-                className="halo-button btn-approve"
+                className="halo-button btn-xs btn-approve"
                 onClick={() => onApprove(request)}
                 disabled={isActing}
-                style={{ padding: '4px 10px' }}
               >
                 {isActing ? '...' : '✓ Appr'}
               </button>
               <button
-                className="halo-button btn-reject"
+                className="halo-button btn-xs btn-reject"
                 onClick={() => setShowRejectNote(true)}
                 disabled={isActing}
-                style={{ padding: '4px 10px' }}
               >
                 ✗ Rej
               </button>
             </>
           )}
           <button
-            className="action-icon-btn"
+            className="action-icon-btn u-text-secondary"
             onClick={(e) => {
               e.stopPropagation();
               setShowDetails(!showDetails);
             }}
             title="Toggle Details"
-            style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
           >
             {showDetails ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
           </button>
@@ -134,17 +128,9 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
 
       {/* EXPANDED SECTIONS */}
       {(showDetails || showRejectNote) && (
-        <div style={{ 
-          margin: '-1px 0 0 0', // attach flush to the bottom
-          padding: '12px 16px', 
-          background: 'var(--panel-bg)',
-          border: '1px solid var(--border-color)',
-          borderTop: 'none',
-          borderBottomLeftRadius: '12px',
-          borderBottomRightRadius: '12px'
-        }}>
+        <div className="expanded-details-panel">
           {showDetails && (
-            <div className="task-detailed-description" style={{ border: 'none', padding: 0, background: 'transparent', marginTop: 0 }}>
+            <div className="task-detailed-description u-border-none u-p-0 u-bg-transparent u-m-0">
               <p>
                 <strong>Suggested:</strong> {STATUS_LABELS[request.suggested_status] || request.suggested_status}
                 {request.suggested_shift_type && ` • ${request.suggested_shift_type === 'day' ? '☀ Day' : '🌙 Night'}`}
@@ -162,7 +148,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
                     <br/>
                   </>
                 )}
-                <span style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem', marginTop: '4px', display: 'block' }}>
+                <span className="u-text-tertiary u-text-sm-75 u-mt-4 u-block">
                   Submitted by: {request.requester?.name || request.requester?.email}
                 </span>
               </p>
@@ -170,32 +156,29 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
           )}
 
           {showRejectNote && (
-            <div className="approval-card__reject-note-form" style={{ marginTop: showDetails ? '12px' : '0', paddingTop: showDetails ? '12px' : '0', borderTop: showDetails ? '1px dashed var(--border-color)' : 'none' }}>
-              <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`reject-note-${request.id}`}>
+            <div className={`approval-card__reject-note-form ${showDetails ? 'u-mt-12 u-pt-12 u-border-t-dashed' : 'u-mt-0 u-pt-0 u-border-t-none'}`}>
+              <label className="form-label u-text-sm-75" htmlFor={`reject-note-${request.id}`}>
                 Rejection Reason (optional)
               </label>
               <textarea
                 id={`reject-note-${request.id}`}
-                className="master-input"
-                style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
+                className="master-input u-w-full u-p-8 u-text-sm u-mt-4 u-mb-8 u-min-h-60 u-box-border"
                 value={rejectNote}
                 onChange={(e) => setRejectNote(e.target.value)}
                 placeholder="Explain the rejection..."
                 rows={2}
               />
-              <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              <div className="u-flex-gap-8 u-w-full">
                 <button
-                  className="halo-button btn-reject"
+                  className="halo-button btn-reject u-flex-1"
                   onClick={handleRejectSubmit}
                   disabled={isActing}
-                  style={{ flex: 1 }}
                 >
                   {isActing ? 'Rejecting…' : 'Confirm'}
                 </button>
                 <button
-                  className="halo-button"
+                  className="halo-button u-flex-1"
                   onClick={() => setShowRejectNote(false)}
-                  style={{ flex: 1 }}
                 >
                   Cancel
                 </button>
@@ -307,7 +290,7 @@ const AttendanceApprovalDrawer = ({
       }
       setSelectedIds([]);
       onActionComplete();
-    } catch (err) {
+    } catch {
       setActionError('Failed to bulk approve some requests.');
     } finally {
       setIsActing(false);
@@ -329,7 +312,7 @@ const AttendanceApprovalDrawer = ({
       }
       setSelectedIds([]);
       onActionComplete();
-    } catch (err) {
+    } catch {
       setActionError('Failed to bulk reject some requests.');
     } finally {
       setIsActing(false);
@@ -341,36 +324,34 @@ const AttendanceApprovalDrawer = ({
   const isAllSelected = filteredRequests.length > 0 && selectedIds.length === filteredRequests.length;
 
   return (
-    <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
+    <div className="approval-page-container u-flex-1 u-overflow-y-auto u-px-16 u-py-24">
       <div>
         {/* Bulk Actions Header */}
         {filteredRequests.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '0 12px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+          <div className="u-flex-between u-mb-16 u-px-12">
+            <label className="u-flex-center-gap-8 u-cursor-pointer">
               <input 
                 type="checkbox" 
                 checked={isAllSelected}
                 onChange={toggleSelectAll}
-                style={{ width: '16px', height: '16px' }}
+                className="checkbox-sm"
               />
-              <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>Select All</span>
+              <span className="u-text-base u-fw-600">Select All</span>
             </label>
 
             {selectedIds.length > 0 && (
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="u-flex-gap-12">
                 <button 
-                  className="halo-button btn-approve"
+                  className="halo-button btn-sm btn-approve"
                   onClick={handleBulkApprove}
                   disabled={isActing}
-                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                 >
                   ✓ Approve ({selectedIds.length})
                 </button>
                 <button 
-                  className="halo-button btn-reject"
+                  className="halo-button btn-sm btn-reject"
                   onClick={handleBulkReject}
                   disabled={isActing}
-                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
                 >
                   ✗ Reject ({selectedIds.length})
                 </button>
@@ -381,7 +362,7 @@ const AttendanceApprovalDrawer = ({
 
         {/* Error state */}
         {actionError && (
-          <div className="attendance-board__error" style={{ marginBottom: '16px' }}>
+          <div className="attendance-board__error u-mb-16">
             <p>⚠ {actionError}</p>
           </div>
         )}
@@ -389,7 +370,7 @@ const AttendanceApprovalDrawer = ({
         {/* Request list */}
         <div className="approval-list-body">
           {filteredRequests.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', opacity: 0.6 }}>
+            <div className="u-state-center-muted">
               <p>No pending requests{selectedCell ? ' for this cell' : ''}.</p>
             </div>
           ) : (

@@ -44,7 +44,7 @@ const PresetCreationModal = ({ onClose, onSave, loading }) => {
                   required
                 />
               </div>
-              <p className="sync-help-text" style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <p className="sync-help-text u-mt-8 u-label-muted u-text-secondary">
                 This will create a new preset user that can be used as a template for syncing permissions.
               </p>
             </div>

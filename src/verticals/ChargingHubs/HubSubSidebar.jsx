@@ -72,21 +72,20 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
     <div style={filterSectionStyle}>
       <div style={groupHeaderStyle} onClick={onToggle}>
         <span style={groupLabelStyle}>{label}</span>
-        <span style={{ opacity: 0.5 }}>
+        <span className="u-opacity-50">
           {isExpanded ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}
         </span>
       </div>
 
       {isExpanded && (
-        <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: '12px' }}>
+        <div className="u-px-12 u-pb-8 u-flex-gap-12">
           <button
             onClick={(e) => {
               e.stopPropagation();
               const allVals = options.map(opt => valueKey ? opt[valueKey] : opt);
               onBatchFilter(filterKey, allVals);
             }}
-            className="text-action-button"
-            style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--brand-green)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+            className="text-action-button u-text-0-65rem u-fw-600 u-text-brand-green u-bg-transparent u-border-none u-p-0 u-cursor-pointer u-opacity-80"
           >
             SELECT ALL
           </button>
@@ -95,8 +94,7 @@ const FilterGroup = ({ label, options, currentFilters, filterKey, displayKey, va
               e.stopPropagation();
               onBatchFilter(filterKey, []);
             }}
-            className="text-action-button"
-            style={{ fontSize: '0.65rem', fontWeight: 600, color: '#ef4444', background: 'none', border: 'none', padding: 0, cursor: 'pointer', opacity: 0.8 }}
+            className="text-action-button u-text-0-65rem u-fw-600 u-text-danger u-bg-transparent u-border-none u-p-0 u-cursor-pointer u-opacity-80"
           >
             CLEAR
           </button>
@@ -164,16 +162,14 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
       {!hideNavigation && (
         <>
           {permissions?.canAccessHubTasks && (
-            <div style={{ padding: '12px', marginBottom: '8px' }}>
+            <div className="u-p-12 u-mb-8">
               <button
-                className="halo-button"
+                className="halo-button u-w-full u-p-10-12"
                 style={{ 
-                  width: '100%', 
                   opacity: activeVertical === 'hub_tasks' ? 1 : 0.7,
                   border: activeVertical === 'hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
                   fontWeight: activeVertical === 'hub_tasks' ? 500 : 400,
-                  transition: 'all 0.2s ease-in-out',
-                  padding: '10px 12px'
+                  transition: 'all 0.2s ease-in-out'
                 }}
                 onClick={() => setActiveVertical('hub_tasks')}
               >
@@ -183,16 +179,14 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
           )}
 
           {permissions?.canAccessDailyHubTasks && (
-            <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+            <div className="u-px-12 u-pb-12 u-mb-8">
               <button
-                className="halo-button"
+                className="halo-button u-w-full u-p-10-12"
                 style={{ 
-                  width: '100%', 
                   opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7,
                   border: activeVertical === 'daily_hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
                   fontWeight: activeVertical === 'daily_hub_tasks' ? 500 : 400,
-                  transition: 'all 0.2s ease-in-out',
-                  padding: '10px 12px'
+                  transition: 'all 0.2s ease-in-out'
                 }}
                 onClick={() => setActiveVertical('daily_hub_tasks')}
               >
@@ -202,17 +196,15 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
           )}
 
           {permissions?.canAccessEscalationTasks && (
-            <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+            <div className="u-px-12 u-pb-12 u-mb-8">
               <button
                 id="btn-nav-escalation"
-                className="halo-button"
+                className="halo-button u-w-full u-p-10-12"
                 style={{ 
-                  width: '100%', 
                   opacity: activeVertical === 'escalation_tasks' ? 1 : 0.7,
                   border: activeVertical === 'escalation_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
                   fontWeight: activeVertical === 'escalation_tasks' ? 500 : 400,
-                  transition: 'all 0.2s ease-in-out',
-                  padding: '10px 12px'
+                  transition: 'all 0.2s ease-in-out'
                 }}
                 onClick={() => setActiveVertical('escalation_tasks')}
               >
@@ -222,16 +214,14 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
           )}
 
           {permissions?.canAccessDailyTaskTemplates && (
-            <div style={{ padding: '0 12px 12px 12px', marginBottom: '8px' }}>
+            <div className="u-px-12 u-pb-12 u-mb-8">
               <button
-                className="halo-button"
+                className="halo-button u-w-full u-p-10-12"
                 style={{ 
-                  width: '100%', 
                   opacity: activeVertical === 'daily_task_templates' ? 1 : 0.7,
                   border: activeVertical === 'daily_task_templates' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
                   fontWeight: activeVertical === 'daily_task_templates' ? 500 : 400,
-                  transition: 'all 0.2s ease-in-out',
-                  padding: '10px 12px'
+                  transition: 'all 0.2s ease-in-out'
                 }}
                 onClick={() => setActiveVertical('daily_task_templates')}
               >
@@ -246,10 +236,10 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         className="filters-row-toggle" 
         onClick={() => setShowFilters(!showFilters)}
       >
-        <p style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <p className="u-flex-center-gap-4">
           FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}
         </p>
-        <div style={{ display: 'flex', gap: '4px' }}>
+        <div className="u-flex-gap-4">
           <button
             onClick={(e) => { e.stopPropagation(); onFilterChange('duplicatesOnly', !filters.duplicatesOnly); }}
             className={`filters-action-btn ${filters.duplicatesOnly ? 'active' : ''}`}
@@ -334,7 +324,7 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
       )}
 
       {!hideNavigation && (
-        <div className="sub-nav-item" style={{ marginTop: '24px', opacity: 0.4 }}>
+        <div className="sub-nav-item u-mt-24 u-opacity-50">
           <div className="sub-nav-text">
             <p>Module Navigation</p>
             <small>Vertical Active</small>

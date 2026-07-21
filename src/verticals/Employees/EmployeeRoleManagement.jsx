@@ -145,8 +145,8 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
                   className="filters-row-toggle"
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
-                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                  <p className="u-uppercase">Data Operations</p>
+                  <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
                     <IconChevronDown size={10} />
                   </span>
                 </div>
@@ -196,7 +196,7 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
                 <th>Code</th>
                 <th>Seniority</th>
                 <th>Description</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -207,8 +207,8 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
                   <td>
                     <span className="seniority-tag">Level {role.seniority_level || 1}</span>
                   </td>
-                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{role.description || '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="u-opacity-70 u-text-sm">{role.description || '—'}</td>
+                  <td className="text-right">
                     <div className="table-actions">
                       {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(role)} title="Edit">✎</button>}
                       {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(role.id)} title="Delete">×</button>}

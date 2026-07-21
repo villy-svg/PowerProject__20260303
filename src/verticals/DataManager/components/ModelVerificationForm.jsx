@@ -95,7 +95,7 @@ const ModelVerificationForm = () => {
   return (
     <div className="dm-card dm-card-centered">
       <div className="dm-card__header">
-        <h2 className="dm-card__title" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <h2 className="dm-card__title u-flex-center-gap-10">
           <span>🔍</span> Model Verification Board
         </h2>
         <p className="dm-card__description">
@@ -104,11 +104,10 @@ const ModelVerificationForm = () => {
       </div>
 
       {/* Mode Selector Tab Group */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+      <div className="u-flex-center-gap-10 u-mb-24">
         <button
           type="button"
-          className={`halo-button dm-tab-btn ${mode === 'automated' ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
-          style={{ cursor: 'pointer', borderRadius: '12px' }}
+          className={`halo-button dm-tab-btn ${mode === 'automated' ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'} u-cursor-pointer u-rounded-12`}
           onClick={() => setMode('automated')}
           disabled={loading}
         >
@@ -116,8 +115,7 @@ const ModelVerificationForm = () => {
         </button>
         <button
           type="button"
-          className={`halo-button dm-tab-btn ${mode === 'manual' ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
-          style={{ cursor: 'pointer', borderRadius: '12px' }}
+          className={`halo-button dm-tab-btn ${mode === 'manual' ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'} u-cursor-pointer u-rounded-12`}
           onClick={() => setMode('manual')}
           disabled={loading}
         >
@@ -127,15 +125,14 @@ const ModelVerificationForm = () => {
 
       {/* Cloudflare/DDoS Warning Banner */}
       {mode === 'automated' && isScrapingBlocked && (
-        <div className="dm-alert dm-alert--error" style={{ marginBottom: '20px' }}>
+        <div className="dm-alert dm-alert--error u-mb-24">
           <strong>⚠️ Scraping Blocked by Cloudflare/DDoS Protection</strong>
           <p>
             The target website is blocking automated requests. You can bypass this by opening the page in your browser, copying the page source (Ctrl+U / Right Click -&gt; View Page Source), and pasting it here.
           </p>
           <button
             type="button"
-            className="halo-button dm-action-btn"
-            style={{ marginTop: '12px', height: '36px', minWidth: 'unset', display: 'flex', alignItems: 'center' }}
+            className="halo-button dm-action-btn u-mt-12 u-min-w-unset u-flex-center u-h-36"
             onClick={() => {
               setMode('manual');
               setOutput('');
@@ -203,8 +200,7 @@ const ModelVerificationForm = () => {
               onChange={(e) => setPastedHtml(e.target.value)}
               rows={8}
               placeholder="Right-click target page -> View Source / Inspect, copy the HTML content and paste it here..."
-              className="dm-textarea"
-              style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px' }}
+              className="dm-textarea u-font-mono u-text-sm"
               disabled={loading}
               required
             />
@@ -247,7 +243,7 @@ const ModelVerificationForm = () => {
           >
             {loading ? (
               <>
-                <span className="dm-spinner dm-spinner--sm" style={{ width: '14px', height: '14px', margin: 0, borderWidth: '2px' }} />
+                <span className="dm-spinner dm-spinner--sm u-w-14 u-h-14 u-m-0 u-border-2" />
                 {mode === 'manual' ? 'Parsing...' : 'Scraping...'}
               </>
             ) : (
@@ -258,32 +254,21 @@ const ModelVerificationForm = () => {
       </form>
 
       {/* Chrome Bookmarklet Tool */}
-      <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
-        <h3 className="dm-card__title" style={{ fontSize: '16px', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '8px' }}>
+      <div className="u-mt-32 u-pt-24 u-border-t">
+        <h3 className="dm-card__title u-text-base u-flex-center-gap-8 u-mb-8">
           <span>🔖</span> Chrome Bookmarklet Integration
         </h3>
-        <p className="dm-card__description" style={{ fontSize: '13px', marginBottom: '16px' }}>
+        <p className="dm-card__description u-text-sm u-mb-16">
           Bypass server blocks completely! Drag the button below to your Bookmarks Bar, then click it when viewing any vehicle details page on Chrome to copy the value.
         </p>
 
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '16px' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', justifyContent: 'space-between' }}>
+        <div className="u-bg-card u-border u-rounded-12 u-p-16">
+          <div className="u-flex-between u-flex-wrap-gap-16 u-items-center">
             <div>
-              <span className="dm-label" style={{ marginBottom: '4px', opacity: 0.5 }}>1. DRAG TO BOOKMARKS BAR</span>
+              <span className="dm-label u-mb-4 u-opacity-50">1. DRAG TO BOOKMARKS BAR</span>
               <a
                 ref={bookmarkletRef}
-                className="halo-button"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'grab',
-                  height: '38px',
-                  borderRadius: '10px',
-                  padding: '0 16px',
-                  fontWeight: '800',
-                  color: 'var(--brand-green)'
-                }}
+                className="halo-button u-inline-flex-center-gap-6 u-cursor-grab u-h-38 u-rounded-10 u-px-16 u-fw-800 u-text-brand-green"
                 onClick={(e) => {
                   e.preventDefault();
                   alert('Installation: Drag this button up to your browser Bookmarks Bar (Ctrl+Shift+B if hidden) to install.');
@@ -293,9 +278,9 @@ const ModelVerificationForm = () => {
               </a>
             </div>
 
-            <div style={{ flex: '1 1 280px', fontSize: '12px', color: 'var(--text-color)', opacity: 0.8 }}>
-              <span className="dm-label" style={{ marginBottom: '4px', opacity: 0.5 }}>2. HOW TO USE</span>
-              <ol style={{ margin: 0, paddingLeft: '16px', lineHeight: '1.6' }}>
+            <div className="u-flex-1-280 u-text-xs u-text-primary u-opacity-80">
+              <span className="dm-label u-mb-4 u-opacity-50">2. HOW TO USE</span>
+              <ol className="u-m-0 u-pl-16 u-line-height-16">
                 <li>Make sure your bookmarks bar is visible (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>).</li>
                 <li>Drag the green button above onto your bookmarks bar.</li>
                 <li>Visit the page on <strong>carinfo.app</strong> (e.g. your vehicle URL).</li>

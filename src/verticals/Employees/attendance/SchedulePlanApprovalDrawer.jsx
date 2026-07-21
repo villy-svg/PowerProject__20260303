@@ -43,7 +43,6 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   const [showRejectNote,  setShowRejectNote] = useState(false);
   const [rejectNote,      setRejectNote]     = useState('');
   const [isExpanded,      setIsExpanded]     = useState(false);
-  const [showDetails,     setShowDetails]    = useState(false);
 
   // Compute unique employee count from entries
   const uniqueEmployees = [
@@ -55,6 +54,18 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
     ...new Set((plan.employee_Schedule_plan_entries || []).map(e => e.shift_date))
   ].sort();
 
+  const employeesData = (plan.employee_Schedule_plan_entries || []).reduce((acc, entry) => {
+    if (!acc[entry.employee_id]) {
+      acc[entry.employee_id] = {
+        employeeId: entry.employee_id,
+        name: entry.employees?.full_name || entry.employees?.emp_code || 'Unknown Employee',
+        shifts: []
+      };
+    }
+    acc[entry.employee_id].shifts.push(entry);
+    return acc;
+  }, {});
+
   const handleRejectSubmit = () => {
     onReject(plan, rejectNote);
     setShowRejectNote(false);
@@ -62,13 +73,11 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   };
 
   return (
-    <div style={{ marginBottom: '12px' }}>
-      <div className={`list-task-row ${(isExpanded || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
+    <div className="u-mb-12">
+      <div className={`list-task-row u-h-auto ${(isExpanded || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
         '--stage-color': 'var(--brand-blue)', 
-        height: 'auto',
-        borderLeft: '2px solid color-mix(in srgb, var(--brand-blue), transparent 30%)',
-        borderBottomLeftRadius: (isExpanded || showRejectNote) ? 0 : '12px',
-        borderBottomRightRadius: (isExpanded || showRejectNote) ? 0 : '12px',
+        borderBottomLeftRadius: (isExpanded || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
+        borderBottomRightRadius: (isExpanded || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
       }}>
         {/* LEFT SIDE: Identity & Content */}
         <div className="list-row-main">
@@ -76,7 +85,7 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
             <span className="card-priority priority-high">
               Schedule Plan
             </span>
-            <span className="subtask-tag" style={{ display: 'flex' }}>
+            <span className="subtask-tag u-flex">
               {uniqueEmployees.length} Emp • {uniqueDates.length} Days
             </span>
           </div>
@@ -87,35 +96,32 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
         </div>
 
         {/* RIGHT SIDE: Action Controls */}
-        <div className="list-row-controls" style={{ opacity: 1, pointerEvents: 'auto', display: 'flex', gap: '8px' }}>
+        <div className="list-row-controls u-flex-gap-8 u-opacity-100 u-pointer-events-auto">
           {!showRejectNote && (
             <>
               <button
-                className="halo-button btn-approve"
+                className="halo-button btn-xs btn-approve"
                 onClick={() => onApprove(plan)}
                 disabled={isActing}
-                style={{ padding: '4px 10px' }}
               >
                 {isActing ? '...' : '✓ Appr'}
               </button>
               <button
-                className="halo-button btn-reject"
+                className="halo-button btn-xs btn-reject"
                 onClick={() => setShowRejectNote(true)}
                 disabled={isActing}
-                style={{ padding: '4px 10px' }}
               >
                 ✗ Rej
               </button>
             </>
           )}
           <button
-            className="action-icon-btn"
+            className="action-icon-btn u-text-secondary"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
             title="Toggle Details"
-            style={{ width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
           >
             {isExpanded ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
           </button>
@@ -124,15 +130,7 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 
       {/* EXPANDED SECTIONS */}
       {(isExpanded || showRejectNote) && (
-        <div style={{ 
-          margin: '-1px 0 0 0', // attach flush to the bottom
-          padding: '12px 16px', 
-          background: 'var(--panel-bg)',
-          border: '1px solid var(--border-color)',
-          borderTop: 'none',
-          borderBottomLeftRadius: '12px',
-          borderBottomRightRadius: '12px'
-        }}>
+        <div className="expanded-details-panel">
           {isExpanded && (
             <div className="sp-plan-card__employee-list">
               {Object.values(employeesData).map(emp => (
@@ -159,32 +157,29 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
           )}
 
           {showRejectNote && (
-            <div className="approval-card__reject-note-form" style={{ marginTop: isExpanded ? '12px' : '0', paddingTop: isExpanded ? '12px' : '0', borderTop: isExpanded ? '1px dashed var(--border-color)' : 'none' }}>
-              <label className="form-label" style={{ fontSize: '0.75rem' }} htmlFor={`sp-reject-note-${plan.id}`}>
+            <div className={`approval-card__reject-note-form ${isExpanded ? 'u-mt-12 u-pt-12 u-border-t-dashed' : 'u-mt-0 u-pt-0 u-border-t-none'}`}>
+              <label className="form-label u-text-sm-75" htmlFor={`sp-reject-note-${plan.id}`}>
                 Rejection Reason (optional)
               </label>
               <textarea
                 id={`sp-reject-note-${plan.id}`}
-                className="master-input"
-                style={{ boxSizing: 'border-box', width: '100%', padding: '8px', fontSize: '0.8rem', marginTop: '4px', marginBottom: '8px', minHeight: '60px' }}
+                className="master-input u-w-full u-p-8 u-text-sm u-mt-4 u-mb-8 u-min-h-60 u-box-border"
                 value={rejectNote}
                 onChange={(e) => setRejectNote(e.target.value)}
                 placeholder="Explain the rejection to the contributor…"
                 rows={2}
               />
-              <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+              <div className="u-flex-gap-8 u-w-full">
                 <button
-                  className="halo-button btn-reject"
+                  className="halo-button btn-reject u-flex-1"
                   onClick={handleRejectSubmit}
                   disabled={isActing}
-                  style={{ flex: 1 }}
                 >
                   {isActing ? 'Rejecting…' : 'Confirm'}
                 </button>
                 <button
-                  className="halo-button"
+                  className="halo-button u-flex-1"
                   onClick={() => setShowRejectNote(false)}
-                  style={{ flex: 1 }}
                 >
                   Cancel
                 </button>
@@ -263,11 +258,11 @@ const SchedulePlanApprovalDrawer = ({
   if (!isOpen) return null;
 
   return (
-    <div className="approval-page-container" style={{ flex: 1, overflowY: 'auto', padding: '24px 16px' }}>
+    <div className="approval-page-container u-flex-1 u-overflow-y-auto u-px-16 u-py-24">
       <div>
         {/* Error state */}
         {actionError && (
-          <div className="attendance-board__error" style={{ marginBottom: '16px' }}>
+          <div className="attendance-board__error u-mb-16">
             <p>⚠ {actionError}</p>
           </div>
         )}
@@ -275,9 +270,9 @@ const SchedulePlanApprovalDrawer = ({
         {/* Plan list */}
         <div className="approval-list-body">
           {planner.isLoading ? (
-            <div style={{ padding: '24px', textAlign: 'center' }}>Loading plans…</div>
+            <div className="u-state-center-muted">Loading plans…</div>
           ) : planner.pendingPlans.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', opacity: 0.6 }}>
+            <div className="u-state-center-muted">
               <p>No pending plans for approval.</p>
             </div>
           ) : (

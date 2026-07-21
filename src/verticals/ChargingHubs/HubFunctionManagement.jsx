@@ -140,7 +140,7 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
                   className="filters-row-toggle"
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
-                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <p className="u-text-upper">Data Operations</p>
                   <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
                     <IconChevronDown size={10} />
                   </span>
@@ -194,7 +194,7 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
                 <th>Function Name</th>
                 <th>Code</th>
                 <th>Description</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="u-text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -202,8 +202,8 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
                 <tr key={fn.id}>
                   <td className="name-cell">{fn.name}</td>
                   <td><code className="code-font">{fn.function_code || '—'}</code></td>
-                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{fn.description || '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="u-opacity-70 u-text-sm">{fn.description || '—'}</td>
+                  <td className="u-text-right">
                     <div className="table-actions">
                       {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(fn)} title="Edit">✎</button>}
                       {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(fn.id)} title="Delete">×</button>}

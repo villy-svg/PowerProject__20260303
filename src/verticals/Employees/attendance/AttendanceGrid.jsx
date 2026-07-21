@@ -60,25 +60,24 @@ const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employ
   } else if (status === 'leave') {
     icon = <IconFile size={16} />;
   } else if (status === 'absent') {
-    icon = <span style={{ fontWeight: 800 }}>ABS</span>;
+    icon = <span className="u-fw-800">ABS</span>;
   } else if (status === 'no-show') {
-    icon = <span style={{ fontWeight: 800 }}>X</span>;
+    icon = <span className="u-fw-800">X</span>;
   } else if (status === 'no-call-no-show') {
-    icon = <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span>;
+    icon = <span className="u-fw-900 u-text-1-1em">XX</span>;
   } else {
-    icon = <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span>;
+    icon = <span className="u-fw-800 u-opacity-50">NULL</span>;
   }
 
   if (isEditing) {
     return (
       <td className={`attendance-cell ${meta.className} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''}`}>
         <div 
-          style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '4px', minWidth: '90px' }}
+          className="u-flex-col-gap-4 u-p-4 u-min-w-90"
           onClick={e => e.stopPropagation()}
         >
           <select 
-            className="master-dropdown" 
-            style={{ width: '100%', fontSize: '10px', padding: '4px', height: 'auto' }}
+            className="master-dropdown u-w-full u-text-10px u-p-4 u-h-auto" 
             value={status} 
             onChange={e => onCellChange(employeeId, date, e.target.value, record?.hub_id || '')}
             autoFocus
@@ -94,8 +93,7 @@ const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employ
           </select>
           {(status === 'present' || status === 'present-night') && (
             <select
-              className="master-dropdown"
-              style={{ width: '100%', fontSize: '10px', padding: '4px', height: 'auto' }}
+              className="master-dropdown u-w-full u-text-10px u-p-4 u-h-auto"
               value={record?.hub_id || ''}
               onChange={e => onCellChange(employeeId, date, status, e.target.value)}
             >
@@ -117,7 +115,7 @@ const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employ
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       aria-label={`Status: ${status}${hasPendingEdit ? ', has pending edit' : ''}`}
     >
-      <span className="attendance-cell__status-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span className="attendance-cell__status-label u-flex-center">
         {icon}
       </span>
       {/* Pending edit indicator badge */}
@@ -227,8 +225,8 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
             : Object.entries(groupedEmployees).map(([groupName, groupEmployees]) => (
                 <React.Fragment key={groupName}>
                   {groupByHub && (
-                    <tr className="attendance-grid__group-header" style={{ backgroundColor: 'var(--bg-secondary)', borderTop: '2px solid var(--border-color)' }}>
-                      <td colSpan={dateRange.length + 1} style={{ padding: '8px 12px', fontWeight: 'bold', color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <tr className="attendance-grid__group-header u-bg-secondary u-border-t-2-border">
+                      <td colSpan={dateRange.length + 1} className="u-px-12 u-py-8 u-fw-bold u-text-secondary u-text-sm-85 u-uppercase u-letter-spacing-05">
                         {groupName}
                       </td>
                     </tr>

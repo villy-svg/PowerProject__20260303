@@ -66,7 +66,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
             {users.map(u => (
               <tr key={u.id} className={u.is_active === false ? 'user-row--inactive' : ''}>
                 <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="u-flex-center-gap-12">
                     <StatusBadge isActive={u.is_active} />
                     <div className="user-identity">
                       <span className="user-name-cell">{u.name}</span>
@@ -143,8 +143,8 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
       {users.map(u => (
         <div key={u.id} className={`user-card ${u.is_active === false ? 'user-card--inactive' : ''}`}>
           <div className="user-card-header">
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <div style={{ marginTop: '8px' }}>
+            <div className="user-list__item-content">
+              <div className="u-mt-8">
                 <StatusBadge isActive={u.is_active} />
               </div>
               <div className="user-card-id">
@@ -185,7 +185,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
               <div className="user-card-body-col">
                 <label>Profile</label>
                 {/* Employee link status — inactive renders faded red, active renders green */}
-                <div className="employee-link-status" style={{marginTop: '4px'}}>
+                <div className="employee-link-status u-mt-4">
                   {u.linkedEmployee ? (
                     u.linkedEmployee.status === 'Inactive' ? (
                       <span className="v-tag simple linked-inactive">

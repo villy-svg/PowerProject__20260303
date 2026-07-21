@@ -171,7 +171,7 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
       />
 
       {status.text && (
-        <div className={`status-banner ${status.type}`} style={{ marginTop: '20px' }}>
+        <div className={`status-banner ${status.type} user-management__section-gap`}>
           <span>{status.text}</span>
           <button className="action-icon-btn" onClick={() => setStatus({ type: '', text: '' })}>×</button>
         </div>
@@ -195,7 +195,7 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
       ))}
 
       {displayedUsers.length === 0 && !loading && (
-        <div className="empty-state" style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>
+        <div className="empty-state user-management__empty-state">
           {profileMode === 'preset'
             ? 'No preset profiles yet. Click "+ Preset" to create one.'
             : 'No user profiles found.'}

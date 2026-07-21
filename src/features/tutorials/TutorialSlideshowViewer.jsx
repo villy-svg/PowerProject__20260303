@@ -133,31 +133,28 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     if (!isMasterAdmin) return null;
     if (isEditing) {
       return (
-        <div className="slide-edit-controls-bar" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="slideshow-viewer__nav-toolbar slide-edit-controls-bar">
           <button 
-            className="halo-button danger" 
+            className="halo-button danger btn-icon" 
             onClick={handleDeleteSlide} 
             disabled={saving || editableSlides.length <= 1} 
             title="Delete Slide"
             aria-label="Delete Slide"
-            style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <IconTrash size={16} />
           </button>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div className="u-flex-center-gap">
             <button 
-              className="halo-button secondary" 
+              className="halo-button secondary btn-sm" 
               onClick={() => setIsEditing(false)} 
-              disabled={saving} 
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px' }}
+              disabled={saving}
             >
               Cancel
             </button>
             <button 
-              className="halo-button" 
+              className="halo-button btn-sm" 
               onClick={handleSave} 
-              disabled={saving} 
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px' }}
+              disabled={saving}
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>
@@ -166,22 +163,20 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
       );
     }
     return (
-      <div className="slide-edit-trigger" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+      <div className="slideshow-viewer__footer-actions slide-edit-trigger">
         <button 
-          className="halo-button secondary" 
+          className="halo-button secondary btn-icon" 
           onClick={handleAddSlide} 
           title="Add Slide"
           aria-label="Add Slide"
-          style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <IconPlus size={16} />
         </button>
         <button 
-          className="halo-button secondary" 
+          className="halo-button secondary btn-icon" 
           onClick={() => setIsEditing(true)} 
           title="Edit Slide"
           aria-label="Edit Slide"
-          style={{ padding: '0.35rem 0.5rem', fontSize: '0.8rem', minWidth: 'auto', height: '32px', width: '32px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <IconEdit size={16} />
         </button>
@@ -222,35 +217,26 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             })()}
             
             {isEditing ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '1rem' }}>
+              <div className="u-flex-col u-w-full u-mt-1rem u-gap-12">
                 <input 
                   type="text" 
                   value={editTitle} 
                   onChange={e => setEditTitle(e.target.value)} 
                   placeholder="Slide Title"
-                  style={{ 
-                    width: '100%', 
-                    padding: '0.5rem', 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    borderRadius: '4px', 
-                    color: '#fff', 
-                    fontSize: '1.1rem', 
-                    fontWeight: 'bold'
-                  }}
+                  className="slideshow-editor__input"
                 />
                 <textarea 
                   value={editText} 
                   onChange={e => setEditText(e.target.value)} 
                   placeholder="Slide Content Text"
                   rows={4}
-                  style={{ width: '100%', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.9rem', resize: 'vertical' }}
+                  className="slideshow-editor__textarea"
                 />
               </div>
             ) : (
               <>
                 <h2 className="onboarding-title">{currentSlide.title}</h2>
-                <p className="onboarding-text" style={{ whiteSpace: 'pre-wrap' }}>{currentSlide.text}</p>
+                <p className="onboarding-text u-whitespace-prewrap">{currentSlide.text}</p>
               </>
             )}
             {renderEditControls()}
@@ -400,7 +386,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                             y={Math.min(ann.y1, ann.y2) - 8} 
                             width="40" 
                             height="10"
-                            style={{ overflow: 'visible', pointerEvents: 'none' }}
+                            className="slideshow-viewer__overlay-layer"
                           >
                             <div className="arrow-text-label">
                               {ann.label}
@@ -417,37 +403,28 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
 
         {/* Footer controls & Description bar */}
         <div className="slideshow-modal-footer">
-          <div className="slideshow-caption-box" style={{ width: '100%' }}>
+          <div className="slideshow-caption-box u-w-full">
             {isEditing ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+              <div className="u-flex-col u-w-full u-gap-8">
                 <input 
                   type="text" 
                   value={editTitle} 
                   onChange={e => setEditTitle(e.target.value)} 
                   placeholder="Slide Title"
-                  style={{ 
-                    width: '100%', 
-                    padding: '0.4rem', 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    borderRadius: '4px', 
-                    color: '#fff', 
-                    fontSize: '0.95rem', 
-                    fontWeight: 'bold'
-                  }}
+                  className="slideshow-editor__input slideshow-editor__input--sm"
                 />
                 <textarea 
                   value={editText} 
                   onChange={e => setEditText(e.target.value)} 
                   placeholder="Slide Caption Text"
                   rows={2}
-                  style={{ width: '100%', padding: '0.4rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', color: '#fff', fontSize: '0.85rem', resize: 'vertical' }}
+                  className="slideshow-editor__textarea slideshow-editor__textarea--sm"
                 />
               </div>
             ) : (
               <>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.95rem', color: '#fff' }}>{currentSlide.title}</h4>
-                <p className="slideshow-caption-text" style={{ whiteSpace: 'pre-wrap' }}>{currentSlide.text || currentSlide.caption}</p>
+                <h4 className="slideshow-editor__label">{currentSlide.title}</h4>
+                <p className="slideshow-caption-text u-whitespace-prewrap">{currentSlide.text || currentSlide.caption}</p>
               </>
             )}
             {renderEditControls()}

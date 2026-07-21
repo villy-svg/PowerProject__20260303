@@ -46,17 +46,17 @@ const DepartmentCSVImport = ({ onImportComplete, className, label = 'Import Depa
 
   const renderConflictTile = (conflict) => (
     <div className="tile-content">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-        <h5 style={{ margin: 0, fontWeight: 600, color: 'var(--brand-green)' }}>
+      <div className="u-flex-between u-mb-4">
+        <h5 className="u-m-0 u-fw-600 u-text-brand-green">
           {conflict.csvRow['Department Name'] || conflict.csvRow.name}
         </h5>
         {conflict.matchMode === 'hard' && (
-          <span style={{ fontSize: '0.6rem', padding: '2px 6px', background: 'rgba(255,68,68,0.1)', color: '#ff4444', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+          <span className="csv-error-badge">
             Code Match
           </span>
         )}
       </div>
-      <p style={{ fontSize: '0.8rem', opacity: 0.7, margin: 0 }}>Code: {conflict.csvRow['Code'] || conflict.csvRow.dept_code || 'None'}</p>
+      <p className="u-text-sm-75 u-opacity-70 u-m-0">Code: {conflict.csvRow['Code'] || conflict.csvRow.dept_code || 'None'}</p>
     </div>
   );
 

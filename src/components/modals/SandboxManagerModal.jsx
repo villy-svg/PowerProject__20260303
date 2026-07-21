@@ -215,9 +215,9 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
   return (
     <div className="sandbox-modal-overlay">
       <div className="sandbox-modal-card">
-        <header className="sandbox-modal-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <header className="sandbox-modal-header u-flex-center-gap">
           <IconWarning size={20} style={{ color: 'var(--brand-yellow)' }} />
-          <h2 style={{ margin: 0 }}>DEVELOPMENT SANDBOX MANAGER</h2>
+          <h2 className="u-m-0">DEVELOPMENT SANDBOX MANAGER</h2>
           <button className="sandbox-close-btn" onClick={onClose}>&times;</button>
         </header>
 

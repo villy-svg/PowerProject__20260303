@@ -122,7 +122,7 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
 
       <div className="attendance-summary-pills">
         <span className="attendance-summary-pill">
-          <span style={{ opacity: 0.7 }}>Total</span> {dateRange.length}
+          <span className="u-opacity-70">Total</span> {dateRange.length}
         </span>
         <span className="attendance-summary-pill attendance-summary-pill--present">
           <IconSun size={14} /> {counts.presentDay}
@@ -137,16 +137,16 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
           <IconFile size={14} /> {counts.leave}
         </span>
         <span className="attendance-summary-pill attendance-summary-pill--absent">
-          <span style={{ fontWeight: 800 }}>ABS</span> {counts.absent}
+          <span className="u-fw-800">ABS</span> {counts.absent}
         </span>
         <span className="attendance-summary-pill attendance-summary-pill--no-show">
-          <span style={{ fontWeight: 800 }}>X</span> {counts.noShow}
+          <span className="u-fw-800">X</span> {counts.noShow}
         </span>
         <span className="attendance-summary-pill attendance-summary-pill--no-call-no-show">
-          <span style={{ fontWeight: 900 }}>XX</span> {counts.noCallNoShow}
+          <span className="u-fw-900">XX</span> {counts.noCallNoShow}
         </span>
         <span className="attendance-summary-pill attendance-summary-pill--null">
-          <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> {counts.nullCount}
+          <span className="u-fw-800 u-opacity-50">NULL</span> {counts.nullCount}
         </span>
       </div>
 
@@ -170,14 +170,14 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
                 {formatDate(date)}
               </div>
               <div className="attendance-list-item__details">
-                <span className="attendance-list-item__status-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="attendance-list-item__status-label u-flex-center-gap-4">
                   {status === 'present' ? (shiftType === 'night' ? <IconMoon size={16} /> : <IconSun size={16} />) : null}
                   {status === 'week-off' ? <IconCoffee size={16} /> : null}
                   {status === 'leave' ? <IconFile size={16} /> : null}
-                  {status === 'absent' ? <span style={{ fontWeight: 800 }}>ABS</span> : null}
-                  {status === 'no-show' ? <span style={{ fontWeight: 800 }}>X</span> : null}
-                  {status === 'no-call-no-show' ? <span style={{ fontWeight: 900, fontSize: '1.1em' }}>XX</span> : null}
-                  {status === 'null' ? <span style={{ fontWeight: 800, opacity: 0.5 }}>NULL</span> : null}
+                  {status === 'absent' ? <span className="u-fw-800">ABS</span> : null}
+                  {status === 'no-show' ? <span className="u-fw-800">X</span> : null}
+                  {status === 'no-call-no-show' ? <span className="u-fw-900 u-text-1-1em">XX</span> : null}
+                  {status === 'null' ? <span className="u-fw-800 u-opacity-50">NULL</span> : null}
                 </span>
                 {hasPendingEdit && (
                   <span className="attendance-list-item__pending-badge">⚠ Pending</span>

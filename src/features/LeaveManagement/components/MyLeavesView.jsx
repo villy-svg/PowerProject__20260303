@@ -8,22 +8,21 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, pag
     {/* Balance Banner - Hide for Global Viewers since they don't have a personal balance here */}
     {!viewAllMode && (
       <div className="leave-balance-banner">
-        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+        <div className="u-flex-wrap-gap-32">
           {balance && typeof balance === 'object' && Object.entries(balance).map(([type, amount]) => (
-            <div key={type} className="leave-balance-info" style={{ alignItems: 'flex-start' }}>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, lineHeight: 1 }}>
+            <div key={type} className="leave-balance-info my-leaves__stat-item">
+              <div className="my-leaves__stat-value">
                 {Number(amount).toFixed(1)}
               </div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.5, marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div className="my-leaves__stat-label">
                 {type}
               </div>
             </div>
           ))}
         </div>
         <button
-          className="halo-button"
+          className="halo-button master-action-btn"
           onClick={onApply}
-          style={{ padding: '12px 28px', fontSize: '0.95rem' }}
         >
           + Apply for Leave
         </button>
@@ -31,12 +30,12 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, pag
     )}
 
     {/* Requests Table */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-      <h3 style={{ fontWeight: 700, fontSize: '1rem', margin: 0 }}>
+    <div className="u-flex-between u-mb-14">
+      <h3 className="u-fw-700 u-m-0">
         {viewAllMode ? 'All Leave Requests (Day-by-Day)' : 'Leave History (Day-by-Day)'}
       </h3>
       {viewAllMode && (
-        <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>
+        <span className="u-label-muted">
           * To approve or reject leaves, please use the <strong>Attendance Approval Drawer</strong>.
         </span>
       )}
@@ -64,13 +63,13 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, pag
             requests.map((req) => (
               <tr key={req.id}>
                 {viewAllMode && (
-                  <td className="leave-td bold" style={{ color: 'var(--brand-green)' }}>
+                  <td className="leave-td bold u-text-brand-green">
                     {req.employees?.full_name}
                   </td>
                 )}
                 <td className="leave-td">{formatDateTime(req.created_at)}</td>
                 <td className="leave-td bold">{formatDate(req.shift_date)}</td>
-                <td className="leave-td" style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <td className="leave-td u-overflow-ellipsis u-max-w-200">
                   {req.maker_note || '-'}
                 </td>
                 <td className="leave-td">
@@ -84,23 +83,21 @@ export const MyLeavesView = ({ requests = [], balance, onApply, viewAllMode, pag
     </div>
 
     {page !== undefined && totalCount !== undefined && Math.ceil(totalCount / pageSize) > 1 && (
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+      <div className="u-flex-end-gap-16 u-mt-16">
+        <span className="u-text-sm u-text-secondary">
           Page {page} of {Math.ceil(totalCount / pageSize)}
         </span>
         <button 
-          className="halo-button secondary" 
+          className="halo-button secondary btn-sm" 
           disabled={page <= 1} 
           onClick={() => setPage(page - 1)}
-          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
         >
           Previous
         </button>
         <button 
-          className="halo-button secondary" 
+          className="halo-button secondary btn-sm" 
           disabled={page >= Math.ceil(totalCount / pageSize)} 
           onClick={() => setPage(page + 1)}
-          style={{ padding: '6px 12px', fontSize: '0.85rem' }}
         >
           Next
         </button>

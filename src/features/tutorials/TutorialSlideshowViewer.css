@@ -829,6 +829,98 @@
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
   }
 }
+/* ==========================================================================
+   SLIDESHOW EDITOR / COMPONENT CLASSES
+   (Replaces static inline styles in TutorialSlideshowViewer.jsx)
+   ========================================================================== */
 
+/* Nav toolbar row in edit mode */
+.slideshow-viewer__nav-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Footer trigger row (non-edit mode) */
+.slideshow-viewer__footer-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Editor text input */
+.slideshow-editor__input {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text-color, #fff);
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* Smaller editor input variant used in the modal footer */
+.slideshow-editor__input--sm {
+  font-size: 0.95rem;
+  padding: 0.4rem;
+}
+
+/* Editor textarea */
+.slideshow-editor__textarea {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: var(--text-color, #fff);
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+/* Smaller editor textarea variant used in the modal footer */
+.slideshow-editor__textarea--sm {
+  font-size: 0.85rem;
+  padding: 0.4rem;
+}
+
+/* Caption title label (replaces h4 inline style in footer) */
+.slideshow-editor__label {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  color: var(--text-color, #fff);
+}
+
+/* foreignObject overlay layer for SVG arrows */
+.slideshow-viewer__overlay-layer {
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Play All button — small inline size */
+.play-all-btn {
+  min-width: auto;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Icon-only square button (32x32) for edit controls */
+.halo-button.btn-icon {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  min-width: auto;
+  height: 32px;
+  width: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 

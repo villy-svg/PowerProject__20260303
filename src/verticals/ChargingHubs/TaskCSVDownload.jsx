@@ -112,7 +112,6 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
       onDownload={handleDownload}
       validations={isTemplate ? validations : []}
       className={className}
-      style={{}}
     />
   );
 };

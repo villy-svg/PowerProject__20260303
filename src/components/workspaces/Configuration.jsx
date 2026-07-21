@@ -262,7 +262,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                           <h4>{item.title}</h4>
                           <p>{item.desc}</p>
                           {item.buttonLabel && (
-                            <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                            <button className="halo-button u-mt-16 u-w-full">
                               {item.buttonLabel}
                             </button>
                           )}
@@ -299,7 +299,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                   <div className="tile-info">
                     <h4>User Management</h4>
                     <p>Assign roles and vertical access to specific team members.</p>
-                    <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                    <button className="halo-button u-mt-16 u-w-full">
                       Manage Team
                     </button>
                   </div>
@@ -308,7 +308,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                   <div className="tile-info">
                     <h4>Access Control Matrix</h4>
                     <p>Define permissions for all roles globally.</p>
-                    <button className="halo-button" style={{ marginTop: '16px', width: '100%' }}>
+                    <button className="halo-button u-mt-16 u-w-full">
                       Manage Role Permissions
                     </button>
                   </div>
@@ -318,7 +318,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                     <div className="tile-info">
                       <h4>🛠️ Dev: Test Run</h4>
                       <p>Execute custom one-time database scripts (Master Admin only).</p>
-                      <button className="halo-button" style={{ marginTop: '16px', width: '100%', borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }} disabled={testRunning}>
+                      <button className="halo-button u-mt-16 u-w-full" style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }} disabled={testRunning}>
                         {testRunning ? 'Running Script...' : 'Execute Test Run'}
                       </button>
                     </div>

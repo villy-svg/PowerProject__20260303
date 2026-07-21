@@ -114,7 +114,7 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
                   className="filters-row-toggle"
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
-                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                  <p className="u-text-upper">Data Operations</p>
                   <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
                     <IconChevronDown size={10} />
                   </span>
@@ -184,7 +184,7 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
                 <th>Service Name</th>
                 <th>Code</th>
                 <th>Description</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="u-text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -192,8 +192,8 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
                 <tr key={cat.id}>
                   <td className="name-cell">{cat.name}</td>
                   <td><code className="code-font">{cat.code || '—'}</code></td>
-                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{cat.description || '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="u-opacity-70 u-text-sm">{cat.description || '—'}</td>
+                  <td className="u-text-right">
                     <div className="table-actions">
                       {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>}
                       {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>}

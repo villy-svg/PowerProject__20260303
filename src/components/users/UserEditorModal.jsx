@@ -59,22 +59,25 @@ const UserEditorModal = (props) => {
         
         <form onSubmit={onSave}>
           <div className="preset-selector-section" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-light)' }}>
-            <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset Profile (Optional)</label>
-            {users && users.length > 0 ? (
-              <select
-                className="master-dropdown"
-                style={{ width: '100%', maxWidth: '400px' }}
-                onChange={(e) => loadPresetPermissions(e.target.value)}
-                defaultValue=""
-              >
-                <option value="" disabled>Select a preset to clone its permissions...</option>
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            ) : (
-              <span style={{ fontSize: '13px', opacity: 0.5 }}>No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
-            )}
+            <div className="form-group" style={{ maxWidth: '400px', padding: 0 }}>
+              <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset Profile (Optional)</label>
+              {users && users.length > 0 ? (
+                <div className="form-input-container">
+                  <select
+                    className="master-dropdown"
+                    onChange={(e) => loadPresetPermissions(e.target.value)}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select a preset to clone its permissions...</option>
+                    {users.map(u => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <span style={{ fontSize: '13px', opacity: 0.5 }}>No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
+              )}
+            </div>
           </div>
 
           <div className="role-config-grid">

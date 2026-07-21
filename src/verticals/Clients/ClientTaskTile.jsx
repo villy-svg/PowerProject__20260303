@@ -24,12 +24,12 @@ const ClientTaskTile = ({ task, onClick }) => {
         <h4 className="task-tile-title">{task.text}</h4>
         {task.description && <p className="task-tile-desc">{task.description}</p>}
         
-        <div className="task-tile-footer" style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="task-tile-footer u-mt-8 u-flex-between u-items-center">
           {/* If the task has a related client assigned, we can display it here in the future */}
-          <span className="task-tile-date" style={{ fontSize: '0.65rem', opacity: 0.5 }}>
+          <span className="task-tile-date u-opacity-50" style={{ fontSize: '0.65rem' }}>
             {new Date(task.updated_at).toLocaleDateString()}
           </span>
-          <span className="priority-label" style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', color: getPriorityColor(task.priority) }}>
+          <span className="priority-label u-fw-800 u-text-upper" style={{ fontSize: '0.6rem', color: getPriorityColor(task.priority) }}>
             {task.priority}
           </span>
         </div>

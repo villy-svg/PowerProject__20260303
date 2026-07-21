@@ -38,8 +38,8 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
 
   if (!permissions?.canAccessClients && !(permissions?.scope === 'global')) {
     return (
-      <div className="empty-state" style={{ marginTop: '100px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>🔒</div>
+      <div className="empty-state client-management__loading-center">
+        <div className="client-management__loading-icon">🔒</div>
         <h3>Access Restricted</h3>
         <p>You do not have permission to view the Client List.</p>
       </div>
@@ -201,7 +201,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
               title={ui.showInactive ? 'Hide Inactive' : 'Show Inactive'}
               style={{ fontWeight: 600, textDecoration: ui.showInactive ? 'none' : 'line-through' }}
             >
-              <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
+              <IconChevronDown size={14} className="u-mr-4 u-opacity-80" />
               INACTIVE
             </button>
           </>
@@ -213,7 +213,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                 className="filters-row-toggle"
                 onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
               >
-                <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
+                <p className="u-text-upper">Data Operations</p>
                 <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
                   <IconChevronDown size={10} />
                 </span>
@@ -238,13 +238,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
       {loading ? (
         <div className="loading-spinner">Loading Clients...</div>
       ) : clients.length === 0 ? (
-        <div className="empty-state" style={{ marginTop: '50px' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🏢</div>
+        <div className="empty-state u-mt-3rem">
+          <div className="client-management__empty-icon">🏢</div>
           <h3>Client Database Empty</h3>
           <p>Click "+ Add Client" to insert your first client record.</p>
         </div>
       ) : (
-        <div style={{ marginTop: '1rem' }}>
+        <div className="u-mt-1rem">
           {/* ACTIVE SECTION */}
           <div className="status-section">
             <h4 className="client-section-title">Active Clients ({activeClients.length})</h4>
@@ -255,17 +255,9 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                 {Object.values(activeByBillingModel)
                   .sort((a, b) => a.billingModelName.localeCompare(b.billingModelName))
                   .map(({ billingModelName, clients: clientsInModel }) => (
-                    <div key={billingModelName} className="role-group-section" style={{ marginBottom: '2.5rem' }}>
-                      <h5 style={{
-                        margin: '0 0 1rem 0',
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        color: 'var(--brand-green)',
-                        opacity: 0.9,
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
-                        paddingBottom: '0.5rem',
-                      }}>
-                        {billingModelName} <span style={{ opacity: 0.5, fontSize: '0.8rem', marginLeft: '6px' }}>({clientsInModel.length})</span>
+                    <div key={billingModelName} className="role-group-section client-management__content-area">
+                      <h5 className="client-management__section-header">
+                        {billingModelName} <span className="u-opacity-50 u-text-xs u-ml-6">({clientsInModel.length})</span>
                       </h5>
                       <div className={ui.viewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
                         {clientsInModel.map(client => {
@@ -300,13 +292,13 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
 
           {/* INACTIVE SECTION */}
           {ui.showInactive && (
-            <div className="status-section inactive-section" style={{ marginTop: '3rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                <h4 className="client-section-title" style={{ margin: 0, opacity: 0.5 }}>Inactive / History ({inactiveClients.length})</h4>
-                <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.05)' }} />
+            <div className="status-section inactive-section client-management__inactive-section">
+              <div className="u-flex-center-gap-10 u-mb-24">
+                <h4 className="client-section-title u-m-0 u-opacity-50">Inactive / History ({inactiveClients.length})</h4>
+                <div className="client-management__divider-line" />
               </div>
               {inactiveClients.length === 0 ? (
-                <p className="client-empty-sub-state" style={{ opacity: 0.3 }}>No inactive records.</p>
+                <p className="client-empty-sub-state u-opacity-30">No inactive records.</p>
               ) : (
                 <div className={ui.viewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
                   {inactiveClients.map(client => {
@@ -379,9 +371,9 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
         }}
         renderConflictTile={(c) => (
           <div className="conflict-emp-tile">
-            <h5 style={{ color: 'var(--brand-green)', margin: '0 0 4px 0' }}>{c.name}</h5>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{c.poc_email || 'No Email'}</p>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{c.poc_phone || 'No Phone'}</p>
+            <h5 className="u-text-brand-green u-m-0 u-mb-4">{c.name}</h5>
+            <p className="u-text-sm u-opacity-70">{c.poc_email || 'No Email'}</p>
+            <p className="u-text-sm u-opacity-70">{c.poc_phone || 'No Phone'}</p>
           </div>
         )}
       />

@@ -12,10 +12,10 @@ const RuleCard = ({ rule }) => {
 
   return (
     <div className="rule-card">
-      <div className="rule-card-header" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+      <div className="rule-card-header u-flex-col">
         <h4 className="rule-card-title">{rule.title}</h4>
         {rule.impact && (
-          <div className="rule-card-subtitle" style={{ whiteSpace: 'pre-wrap', marginTop: '6px', fontSize: '0.8rem', color: '#ef4444', fontWeight: '600', opacity: 0.9 }}>
+          <div className="rule-card-subtitle u-whitespace-prewrap u-mt-6 u-text-danger u-fw-600 u-opacity-80 u-text-0-7rem">
             {rule.impact}
           </div>
         )}

@@ -1,0 +1,17 @@
+/* ── EmployeeCard Component Styles ── */
+
+/* Employee name heading */
+.emp-card__name {
+  font-size: 1.05rem;
+  margin: 4px 0;
+}
+
+/* Contact / meta info section */
+.emp-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}

@@ -79,68 +79,8 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
     });
   };
 
-  // Inline styling for the "Block-in-a-Box" and Modal specifications
-  const overlayStyle = {
-    position: 'fixed',
-    inset: 0,
-    background: 'rgba(0,0,0,0.6)',
-    backdropFilter: 'blur(4px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 9999
-  };
-
-  const modalBodyStyle = {
-    background: 'var(--bg-color)',
-    borderRadius: 'var(--radius-squircle, 24px)',
-    border: '1px solid var(--border-color)',
-    padding: '24px',
-    width: '90%',
-    maxWidth: '500px',
-    color: 'var(--text-color)',
-    boxShadow: 'var(--shadow-premium, 0 12px 40px rgba(0,0,0,0.2))'
-  };
-
-  const formGroupStyle = {
-    background: 'rgba(255, 255, 255, 0.02)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '14px',
-    marginBottom: '16px'
-  };
-
-  const labelStyle = {
-    display: 'block',
-    textTransform: 'uppercase',
-    opacity: 0.5,
-    fontWeight: 800,
-    fontSize: '0.75rem',
-    marginBottom: '8px'
-  };
-
-  const inputContainerStyle = {
-    background: 'var(--halo-bg)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    minHeight: '44px',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 12px'
-  };
-
-  const inputStyle = {
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--text-color)',
-    width: '100%',
-    fontWeight: 600,
-    fontSize: '0.95rem',
-    outline: 'none'
-  };
-
   return (
-    <div style={overlayStyle}>
+    <div className="leave-modal-overlay">
       <style>{`
         .leave-modal-datepicker {
           background: transparent;
@@ -154,18 +94,18 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
           height: 44px;
         }
       `}</style>
-      <div style={modalBodyStyle}>
-        <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Apply for Leave</h2>
+      <div className="leave-modal-body">
+        <h2 className="u-mt-0 u-mb-24">Apply for Leave</h2>
         
         <form onSubmit={handleSubmit}>
           
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Leave Type</label>
-            <div style={{ ...inputContainerStyle, padding: 0 }}>
+          <div className="leave-modal-form-group">
+            <label className="leave-modal-label">Leave Type</label>
+            <div className="leave-modal-input-container u-p-0">
               <select 
                 value={leaveType}
                 onChange={e => setLeaveType(e.target.value)}
-                style={{ ...inputStyle, padding: '0 12px', height: '100%', cursor: 'pointer' }}
+                className="leave-modal-input u-px-12 u-h-100p u-cursor-pointer"
                 required
               >
                 <option value="PL">Privilege Leave (PL)</option>
@@ -176,9 +116,9 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
             </div>
           </div>
 
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Start Date</label>
-            <div style={{ ...inputContainerStyle, padding: 0 }}>
+          <div className="leave-modal-form-group">
+            <label className="leave-modal-label">Start Date</label>
+            <div className="leave-modal-input-container u-p-0">
               <DatePicker 
                 selected={startDate}
                 onChange={date => setStartDate(date)}
@@ -193,9 +133,9 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
             </div>
           </div>
 
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>End Date</label>
-            <div style={{ ...inputContainerStyle, padding: 0 }}>
+          <div className="leave-modal-form-group">
+            <label className="leave-modal-label">End Date</label>
+            <div className="leave-modal-input-container u-p-0">
               <DatePicker 
                 selected={endDate}
                 onChange={date => setEndDate(date)}
@@ -211,11 +151,11 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
             </div>
           </div>
 
-          <div style={formGroupStyle}>
-            <label style={labelStyle}>Reason (Optional)</label>
-            <div style={{...inputContainerStyle, minHeight: '80px', padding: '12px'}}>
+          <div className="leave-modal-form-group">
+            <label className="leave-modal-label">Reason (Optional)</label>
+            <div className="leave-modal-input-container u-min-h-80 u-p-12">
               <textarea 
-                style={{...inputStyle, height: '100%', resize: 'none'}}
+                className="leave-modal-input u-h-100p u-resize-none"
                 value={reason}
                 onChange={e => setReason(e.target.value)}
                 placeholder="Going on vacation..."
@@ -224,23 +164,16 @@ export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = 
           </div>
 
           {/* Validation Feedback */}
-          <div style={{ marginBottom: '24px', fontSize: '0.9rem', color: isOverBalance ? 'var(--brand-orange, #f97316)' : 'inherit' }}>
+          <div className="u-mb-24 u-text-sm" style={{ color: isOverBalance ? 'var(--brand-orange, #f97316)' : 'inherit' }}>
             <strong>Days Requested:</strong> {isCalculating ? 'Calculating...' : daysRequested} 
             {isOverBalance && !isCalculating && <span> (Exceeds available balance of {Number(currentTypeBalance).toFixed(1)}. This will result in a negative balance.)</span>}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+          <div className="u-flex-end-gap-12">
             <button 
               type="button" 
               onClick={onClose}
-              style={{
-                background: 'transparent', 
-                border: 'none', 
-                color: 'var(--text-color)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                padding: '8px 16px'
-              }}
+              className="btn-text"
             >
               Cancel
             </button>

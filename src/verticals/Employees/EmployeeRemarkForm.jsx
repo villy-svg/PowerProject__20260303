@@ -171,10 +171,10 @@ const EmployeeRemarkForm = ({
             </div>
 
             <div className="form-group upload-section">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <div className="u-flex-between u-mb-4">
                 <label className="section-label">Attach Photo(s)</label>
                 {files.length > 0 && (
-                  <span className="batch-counter" style={{ fontSize: '0.85rem', opacity: 0.6 }}>
+                  <span className="batch-counter u-text-sm u-opacity-60">
                     {files.length} / 10 images
                   </span>
                 )}
@@ -203,7 +203,7 @@ const EmployeeRemarkForm = ({
                       handleFiles(e.target.files);
                     }
                   }} 
-                  style={{ display: 'none' }}
+                  className="u-hidden"
                 />
                 <div className="upload-icon">📸</div>
                 <div className="upload-text">

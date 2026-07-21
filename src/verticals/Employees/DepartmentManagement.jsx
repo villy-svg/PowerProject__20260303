@@ -144,8 +144,8 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
                   className="filters-row-toggle"
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
-                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                  <p className="u-uppercase">Data Operations</p>
+                  <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
                     <IconChevronDown size={10} />
                   </span>
                 </div>
@@ -193,7 +193,7 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
                 <th>Department Name</th>
                 <th>Code</th>
                 <th>Description</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -201,8 +201,8 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
                 <tr key={dept.id}>
                   <td className="name-cell">{dept.name}</td>
                   <td><code className="code-font">{dept.dept_code || '—'}</code></td>
-                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{dept.description || '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="u-opacity-70 u-text-sm">{dept.description || '—'}</td>
+                  <td className="text-right">
                     <div className="table-actions">
                       {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(dept)} title="Edit">✎</button>}
                       {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(dept.id)} title="Delete">×</button>}

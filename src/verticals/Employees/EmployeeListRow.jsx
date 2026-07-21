@@ -68,7 +68,7 @@ const EmployeeListRow = ({
 
         {/* 2. Metadata (Badges) - Following ListViewRow North Star */}
         <div className="list-row-badges">
-          <span className={`card-priority ${emp.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`} style={{ minWidth: '70px', textAlign: 'center' }}>
+          <span className={`card-priority u-w-70 u-text-center ${emp.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`}>
             {emp.status}
           </span>
           <span className="dept-badge">{emp.dept_code || 'DEPT'}</span>
@@ -98,12 +98,12 @@ const EmployeeListRow = ({
         </div>
 
         {/* 3. Content (Name + Details) */}
-        <div className="list-row-content" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ color: 'var(--text-secondary)', opacity: 0.5, fontSize: '0.7rem', minWidth: '60px' }}>
+        <div className="list-row-content u-flex-center-gap-12">
+          <span className="u-text-secondary u-opacity-50 u-text-xs u-w-60">
             {emp.badge_id || emp.id.slice(0, 5)}
           </span>
-          <span className="list-name" style={{ fontWeight: 700 }}>{emp.full_name}</span>
-          <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{emp.phone}</span>
+          <span className="list-name u-fw-700">{emp.full_name}</span>
+          <span className="u-text-sm u-opacity-50">{emp.phone}</span>
         </div>
       </div>
 
@@ -148,27 +148,27 @@ const EmployeeListRow = ({
 
       {/* 5. Expanded Details (North Star: TaskListView details) */}
       {isRowExpanded && (
-        <div className="list-row-details fade-in" style={{ padding: '12px 12px 12px 36px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)', fontSize: '0.85rem' }}>
-          <div className="details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        <div className="list-row-details fade-in list-row-expanded-details">
+          <div className="details-grid details-grid-auto">
             <div className="detail-col">
-              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Personal Info</h6>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <h6 className="detail-col-header">Personal Info</h6>
+              <div className="u-flex-col-gap-4">
                 <div>🎂 DOB: {emp.dob ? new Date(emp.dob).toLocaleDateString() : 'Not set'}</div>
                 <div>📅 Joined: {emp.hire_date ? new Date(emp.hire_date).toLocaleDateString() : 'N/A'}</div>
                 <div>👤 Gender: {emp.gender || 'N/A'}</div>
               </div>
             </div>
             <div className="detail-col">
-              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Bank Details</h6>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <h6 className="detail-col-header">Bank Details</h6>
+              <div className="u-flex-col-gap-4">
                 <div>💳 Acc: {emp.account_number || 'Missing'}</div>
                 <div>🏦 IFSC: {emp.ifsc_code || 'Missing'}</div>
                 <div>🆔 PAN: {emp.pan_number || 'Missing'}</div>
               </div>
             </div>
             <div className="detail-col">
-              <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem' }}>Organization</h6>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <h6 className="detail-col-header">Organization</h6>
+              <div className="u-flex-col-gap-4">
                 <div>🏢 Dept: {emp.dept_code}</div>
                 <div>📍 Hub: {emp.hub_code}</div>
                 <div>👤 Manager: {emp.manager_name}</div>
@@ -180,20 +180,20 @@ const EmployeeListRow = ({
 
       {/* Remarks Drawer */}
       {showRemarks && (
-        <div className="list-row-details fade-in" style={{ padding: '12px 12px 12px 36px', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.15)', fontSize: '0.85rem' }}>
-          <h6 style={{ margin: '0 0 8px 0', opacity: 0.4, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: '0.5px' }}>Remarks Summary ({remarks.length})</h6>
+        <div className="list-row-details fade-in list-row-remarks-drawer">
+          <h6 className="remarks-drawer-header">Remarks Summary ({remarks.length})</h6>
           {remarks.length === 0 ? (
-            <div className="remark-empty-state" style={{ padding: '4px 0', opacity: 0.5 }}>No remarks assigned</div>
+            <div className="remark-empty-state u-opacity-50 u-py-4">No remarks assigned</div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '600px' }}>
+            <div className="remarks-list-container">
               {remarks.map((r) => (
                 <div key={r.id} className="remark-summary-item" title={r.description || r.text}>
                   <span className="remark-summary-text">{r.text}</span>
                   <div className="remark-summary-meta">
-                    <span className={`result-badge pri-${(r.priority || 'Medium').toLowerCase()}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                    <span className={`result-badge badge-sm-uppercase pri-${(r.priority || 'Medium').toLowerCase()}`}>
                       {resolvePriorityLabel(r.priority, r.verticalId)}
                     </span>
-                    <span className={`result-badge stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                    <span className={`result-badge badge-sm-uppercase stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`}>
                       {r.stageId || 'Backlog'}
                     </span>
                   </div>

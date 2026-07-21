@@ -194,15 +194,15 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
                 />
               </div>
 
-              <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <div className="form-group u-mt-24">
                 <label>Service Category Matrix</label>
                 <div className="matrix-container">
-                  <table className="permissions-table client-matrix-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <table className="permissions-table client-matrix-table u-w-full" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                       <tr>
-                        <th style={{ textAlign: 'left', padding: '12px' }}>Vehicle Category</th>
+                        <th className="u-text-left u-p-12">Vehicle Category</th>
                         {serviceCategories.map(service => (
-                          <th key={service.id} style={{ textAlign: 'center', padding: '12px', fontSize: '0.75rem' }}>
+                          <th key={service.id} className="u-text-center u-p-12 u-text-xs">
                             {service.code || service.name}
                           </th>
                         ))}
@@ -210,15 +210,15 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
                     </thead>
                     <tbody>
                       {vehicleCategories.map(vehicle => (
-                        <tr key={vehicle.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '12px', fontSize: '0.85rem', fontWeight: 600 }}>
-                            {vehicle.name} <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>({vehicle.code})</span>
+                        <tr key={vehicle.id} className="u-border-t-light">
+                          <td className="u-p-12 u-text-sm u-fw-600">
+                            {vehicle.name} <span className="u-opacity-50 u-text-xs">({vehicle.code})</span>
                           </td>
                           {serviceCategories.map(service => {
                             const isChecked = formData.category_matrix[vehicle.id]?.[service.id] || false;
                             return (
-                              <td key={service.id} style={{ textAlign: 'center', padding: '12px' }}>
-                                <label className="switch" style={{ margin: '0 auto' }}>
+                              <td key={service.id} className="u-text-center u-p-12">
+                                <label className="switch u-m-x-auto">
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
@@ -260,7 +260,7 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
                       ))}
                       {vehicleCategories.length === 0 && (
                         <tr>
-                          <td colSpan={serviceCategories.length + 1} style={{ textAlign: 'center', padding: '20px', opacity: 0.5 }}>
+                          <td colSpan={serviceCategories.length + 1} className="u-text-center u-p-20 u-opacity-50">
                             No vehicle categories defined.
                           </td>
                         </tr>
@@ -268,12 +268,12 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
                     </tbody>
                   </table>
                 </div>
-                <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '8px' }}>
+                <p className="u-opacity-50 u-mt-8" style={{ fontSize: '0.7rem' }}>
                   * Select the services applicable for each vehicle category.
                 </p>
               </div>
 
-              <div className="form-group" style={{ marginTop: '1rem' }}>
+              <div className="form-group u-mt-1rem">
                 <label>Billing Model</label>
                 <div className="form-input-container">
                   <CustomSelect
@@ -350,7 +350,7 @@ const ClientForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly 
           </button>
         )}
         {currentPage < 2 ? (
-          <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'flex-end' }}>
+          <div className="u-flex-1 u-flex-end-gap-10">
             <button type="submit" className="halo-button next-btn">
               {isViewOnly ? 'Next ➔' : (isDirty ? 'Continue ➔' : 'Next ➔')}
             </button>

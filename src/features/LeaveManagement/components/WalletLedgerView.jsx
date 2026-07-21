@@ -8,7 +8,7 @@ export const WalletLedgerView = ({ ledger = [], viewAllMode, page, setPage, tota
 
   return (
     <div>
-      <h3 style={{ marginBottom: '14px', fontWeight: 700, fontSize: '1rem' }}>
+      <h3 className="wallet-ledger__header">
         {viewAllMode ? 'Global Wallet Ledger' : 'Wallet Ledger'}
       </h3>
 
@@ -34,7 +34,7 @@ export const WalletLedgerView = ({ ledger = [], viewAllMode, page, setPage, tota
                 return (
                   <tr key={entry.id}>
                     {viewAllMode && (
-                      <td style={{ fontWeight: 600 }}>{entry.employees?.full_name || 'Unknown'}</td>
+                      <td className="u-fw-600">{entry.employees?.full_name || 'Unknown'}</td>
                     )}
                     <td>{formatDateTime(entry.created_at)}</td>
                     <td>
@@ -48,14 +48,14 @@ export const WalletLedgerView = ({ ledger = [], viewAllMode, page, setPage, tota
                       {isCredit ? '+' : ''}{Number(entry.amount).toFixed(1)}
                     </td>
                     {!viewAllMode && (
-                      <td style={{ fontWeight: 600 }}>
+                      <td className="u-fw-600">
                         {Number(entry.running_balance || 0).toFixed(1)}
                       </td>
                     )}
-                    <td style={{ color: 'var(--text-secondary)' }}>
+                    <td className="u-text-secondary">
                       {entry.description}
                       {entry.attendance_edit_requests?.maker_note && (
-                        <div style={{ fontSize: '0.8rem', fontStyle: 'italic', marginTop: '4px' }}>
+                        <div className="wallet-ledger__note">
                           Note: {entry.attendance_edit_requests.maker_note}
                         </div>
                       )}
@@ -69,23 +69,21 @@ export const WalletLedgerView = ({ ledger = [], viewAllMode, page, setPage, tota
       </div>
 
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px', marginTop: '16px' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        <div className="u-flex-end-gap-16 u-mt-16">
+          <span className="u-text-sm u-text-secondary">
             Page {page} of {totalPages}
           </span>
           <button 
-            className="halo-button secondary" 
+            className="halo-button secondary btn-sm" 
             disabled={page <= 1} 
             onClick={() => setPage(page - 1)}
-            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
           >
             Previous
           </button>
           <button 
-            className="halo-button secondary" 
+            className="halo-button secondary btn-sm" 
             disabled={page >= totalPages} 
             onClick={() => setPage(page + 1)}
-            style={{ padding: '6px 12px', fontSize: '0.85rem' }}
           >
             Next
           </button>

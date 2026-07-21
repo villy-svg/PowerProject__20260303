@@ -79,7 +79,7 @@ const CategoryFormModal = ({ isOpen, onClose, editingItem, onSave }) => {
               <label>Description</label>
               <div className="form-input-container">
                 <textarea
-                  style={{ minHeight: '80px' }}
+                  className="u-min-h-80"
                   rows={3}
                   value={form.description}
                   onChange={e => setForm(p => ({ ...p, description: e.target.value }))}

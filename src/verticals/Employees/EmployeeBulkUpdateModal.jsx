@@ -71,12 +71,12 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
   };
 
   return (
-    <form className="bulk-update-form" onSubmit={handleSubmit} style={{ padding: '1rem' }}>
-      <p style={{ margin: '0 0 1.5rem 0', opacity: 0.7, fontSize: '0.9rem' }}>
+    <form className="bulk-update-form u-p-16" onSubmit={handleSubmit}>
+      <p className="u-m-0 u-mb-24 u-opacity-70 u-text-sm">
         You are updating <strong>{selectedCount}</strong> employees. Select the fields you wish to modify:
       </p>
 
-      <div className="form-grid" style={{ gap: '1.5rem' }}>
+      <div className="form-grid u-flex-wrap-gap-24">
         {/* Hub */}
         <div className="bulk-field-row">
           <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('hub_id')}>
@@ -168,8 +168,8 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
         </div>
       </div>
 
-      <div className="form-footer" style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
-        <button type="submit" className="halo-button save-btn" disabled={loading} style={{ width: '100%' }}>
+      <div className="form-footer u-mt-32 u-border-t-light u-pt-24">
+        <button type="submit" className="halo-button save-btn u-w-full" disabled={loading}>
           {loading ? 'Processing Bulk Update...' : `Apply Changes to ${selectedCount} Employees`}
         </button>
       </div>

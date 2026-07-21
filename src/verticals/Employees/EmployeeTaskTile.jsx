@@ -56,39 +56,39 @@ const EmployeeTaskTile = ({ task }) => {
     };
 
     return (
-      <div className="hub-tile-meta" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+      <div className="hub-tile-meta u-flex-col-gap-8 u-w-full">
+        <div className="u-text-sm u-text-secondary">
           Requested by: {payload.requestedByName}
         </div>
-        <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', background: 'var(--bg-light)', padding: '8px', borderRadius: '4px' }}>
-          <div style={{ flex: 1 }}>
+        <div className="bank-details-diff-container">
+          <div className="u-flex-1">
             <strong>Old Details</strong>
-            <div style={{ wordBreak: 'break-all' }}>A/C: {payload.oldDetails.accountNumber || 'N/A'}</div>
+            <div className="u-break-all">A/C: {payload.oldDetails.accountNumber || 'N/A'}</div>
             <div>IFSC: {payload.oldDetails.ifscCode || 'N/A'}</div>
             <div>Name: {payload.oldDetails.accountName || 'N/A'}</div>
             <div>PAN: {payload.oldDetails.panNumber || 'N/A'}</div>
           </div>
-          <div style={{ flex: 1, borderLeft: '1px solid var(--border-color)', paddingLeft: '8px' }}>
+          <div className="u-flex-1 u-border-l-p8">
             <strong>New Details</strong>
-            <div style={{ wordBreak: 'break-all', color: payload.newDetails.accountNumber !== payload.oldDetails.accountNumber ? 'var(--brand-green)' : 'inherit' }}>A/C: {payload.newDetails.accountNumber || 'N/A'}</div>
+            <div className="u-break-all" style={{ color: payload.newDetails.accountNumber !== payload.oldDetails.accountNumber ? 'var(--brand-green)' : 'inherit' }}>A/C: {payload.newDetails.accountNumber || 'N/A'}</div>
             <div style={{ color: payload.newDetails.ifscCode !== payload.oldDetails.ifscCode ? 'var(--brand-green)' : 'inherit' }}>IFSC: {payload.newDetails.ifscCode || 'N/A'}</div>
             <div style={{ color: payload.newDetails.accountName !== payload.oldDetails.accountName ? 'var(--brand-green)' : 'inherit' }}>Name: {payload.newDetails.accountName || 'N/A'}</div>
             <div style={{ color: payload.newDetails.panNumber !== payload.oldDetails.panNumber ? 'var(--brand-green)' : 'inherit' }}>PAN: {payload.newDetails.panNumber || 'N/A'}</div>
           </div>
         </div>
         {user?.roleId === 'master_admin' && (
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+          <div className="u-flex-gap-8 u-mt-4">
             <button 
               onClick={handleAccept} 
               disabled={isProcessing}
-              style={{ flex: 1, padding: '4px 8px', background: 'var(--brand-green)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              className="halo-button btn-sm btn-approve u-flex-1"
             >
               <IconCheck size={14} /> Accept
             </button>
             <button 
               onClick={handleReject} 
               disabled={isProcessing}
-              style={{ flex: 1, padding: '4px 8px', background: 'var(--brand-red)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              className="halo-button btn-sm btn-reject u-flex-1"
             >
               <IconX size={14} /> Reject
             </button>

@@ -40,13 +40,13 @@ const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => 
 
   const renderConflictTile = (conflict) => (
     <div className="tile-content">
-      <h5 style={{ margin: '0 0 4px 0', fontWeight: 800, color: 'var(--brand-green)' }}>
+      <h5 className="u-m-0 u-mb-4 u-fw-800 u-text-brand-green">
         {conflict.csvRow.name}
       </h5>
-      <div style={{ fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
+      <div className="u-text-sm u-opacity-70" style={{ lineHeight: 1.4 }}>
         <strong>Code:</strong> {conflict.csvRow.hub_code}<br />
         <strong>New City:</strong> {conflict.csvRow.city || 'N/A'}<br />
-        <em style={{ fontSize: '0.7rem' }}>Existing: {conflict.existingRecord.name}</em>
+        <em className="u-text-0-7rem">Existing: {conflict.existingRecord.name}</em>
       </div>
     </div>
   );

@@ -1,4 +1,44 @@
 /* ClientForm.css */
+/* Extracted from inline styles */
+.client-form__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.client-form__th {
+  text-align: left;
+  padding: 12px;
+}
+.client-form__th--center {
+  text-align: center;
+  padding: 12px;
+  font-size: 0.75rem;
+}
+.client-form__tr-separator {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.client-form__td {
+  padding: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.client-form__td--center {
+  text-align: center;
+  padding: 12px;
+}
+.client-form__switch-auto {
+  margin: 0 auto;
+}
+.client-form__empty-cell {
+  text-align: center;
+  padding: 20px;
+  opacity: 0.5;
+}
+.client-form__footer-actions {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  justify-content: flex-end;
+}
 @import '../../styles/DropdownSystem.css';
 .client-form-container {
   display: flex;

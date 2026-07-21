@@ -95,28 +95,28 @@ const EmployeeCard = ({
         {emp.is_app_user ? (
           <span className="app-user-badge-mini" title="Has App Access">USER</span>
         ) : (
-          <span className="badge-base badge-danger" style={{ fontSize: '0.6rem' }} title="Not onboarded">NOT USER</span>
+          <span className="badge-base badge-danger u-text-xs" title="Not onboarded">NOT USER</span>
         )}
         {emp.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
         {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
-          <span className="badge-base badge-danger" style={{ fontSize: '0.6rem' }}>BANK MISSING</span>
+          <span className="badge-base badge-danger u-text-xs">BANK MISSING</span>
         )}
       </div>
 
       {/* Row 2: Title (Name) */}
       <div className="card-row-2">
-        <h3 className="card-task-name employee-card-name" style={{ fontSize: '1.05rem', margin: '4px 0' }}>
+        <h3 className="card-task-name employee-card-name u-text-lg u-my-4">
           {emp.full_name || 'Unnamed Employee'}
         </h3>
       </div>
 
       {/* Detail Row (Contact) - Clean and Neutralized */}
-      <div className="employee-card-contact" style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.8rem', opacity: 0.6, marginTop: '4px' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="employee-card-contact u-flex-col u-flex-gap-2 u-text-sm u-opacity-60 u-mt-4">
+        <div className="u-flex-wrap-gap-8">
           <span>ID: {emp.badge_id || emp.id.slice(0, 8)}</span>
-          {emp.hire_date && <span style={{ fontWeight: 600, color: 'var(--brand-green)' }}>📅 Joined: {new Date(emp.hire_date).toLocaleDateString()}</span>}
+          {emp.hire_date && <span className="u-fw-600 u-text-brand-green">📅 Joined: {new Date(emp.hire_date).toLocaleDateString()}</span>}
           <span>📞 {emp.phone || 'N/A'}</span>
-          {emp.email && <span style={{ opacity: 0.8 }}>✉️ {emp.email}</span>}
+          {emp.email && <span className="u-opacity-80">✉️ {emp.email}</span>}
         </div>
         {emp.manager_name && emp.manager_name !== 'None' && (
           <div className="manager-info">👤 Mgr: {emp.manager_name}</div>
@@ -176,10 +176,10 @@ const EmployeeCard = ({
               <div key={r.id} className="remark-summary-item" title={r.description || r.text}>
                 <span className="remark-summary-text">{r.text}</span>
                 <div className="remark-summary-meta">
-                  <span className={`result-badge pri-${(r.priority || 'Medium').toLowerCase()}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                  <span className={`result-badge badge-sm-uppercase pri-${(r.priority || 'Medium').toLowerCase()}`}>
                     {resolvePriorityLabel(r.priority, r.verticalId)}
                   </span>
-                  <span className={`result-badge stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`} style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 800 }}>
+                  <span className={`result-badge badge-sm-uppercase stage-${(r.stageId || 'BACKLOG').toLowerCase().replace(/_/g, '-')}`}>
                     {r.stageId || 'Backlog'}
                   </span>
                 </div>

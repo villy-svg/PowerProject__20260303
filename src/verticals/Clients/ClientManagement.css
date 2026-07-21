@@ -1,4 +1,41 @@
 /* ClientManagement.css — Styling for Client Tiles and List View */
+
+/* Extracted from inline styles */
+.client-management__loading-center {
+  margin-top: 100px;
+}
+.client-management__loading-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+.client-management__empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+.client-management__content-area {
+  margin-bottom: 2.5rem;
+}
+.client-management__section-header {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--brand-green);
+  opacity: 0.9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 0.5rem;
+}
+.client-management__inactive-section {
+  margin-top: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 2rem;
+}
+.client-management__divider-line {
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
 /* Shared List Row Styles (Sync with Task Board) */
 
 .client-grid {
