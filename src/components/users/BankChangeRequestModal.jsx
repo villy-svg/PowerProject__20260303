@@ -82,57 +82,61 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
           <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
-        <form onSubmit={handleSubmit} className="u-p-24 u-flex-col-gap-16">
-          <p className="status-message u-bg-halo u-border-none u-text-primary u-opacity-80 u-m-0">
-            Changes to your bank details require approval from a Master Admin. 
-            Once submitted, your request will be reviewed.
-          </p>
+        <form onSubmit={handleSubmit} className="vertical-task-form">
+          <div className="modal-content-area u-flex-col-gap-16">
+            <p className="status-message u-bg-halo u-border-none u-text-primary u-opacity-80 u-m-0">
+              Changes to your bank details require approval from a Master Admin. 
+              Once submitted, your request will be reviewed.
+            </p>
 
-          {error && <div className="status-message error">{error}</div>}
+            {error && <div className="status-message error">{error}</div>}
 
-          <div className="form-group u-p-0">
-            <label>Account Name</label>
-            <div className="form-input-container">
-              <input
-                type="text"
-                name="accountName"
-                value={formData.accountName}
-                onChange={handleChange}
-                placeholder="Name on bank account"
-                required
-              />
+            <div className="form-group">
+              <label>Account Name</label>
+              <div className="form-input-container">
+                <input
+                  type="text"
+                  name="accountName"
+                  value={formData.accountName}
+                  onChange={handleChange}
+                  placeholder="Name on bank account"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Account Number</label>
+              <div className="form-input-container">
+                <input
+                  type="tel"
+                  name="accountNumber"
+                  value={formData.accountNumber}
+                  onChange={handleChange}
+                  placeholder="Bank account number"
+                  inputMode="numeric"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>IFSC Code</label>
+              <div className="form-input-container">
+                <input
+                  type="text"
+                  name="ifscCode"
+                  value={formData.ifscCode}
+                  onChange={handleChange}
+                  placeholder="IFSC Code"
+                  className="u-text-upper"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="form-group u-p-0">
-            <label>Account Number</label>
-            <div className="form-input-container">
-              <input
-                type="text"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleChange}
-                placeholder="Bank account number"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group u-p-0">
-            <label>IFSC Code</label>
-            <div className="form-input-container">
-              <input
-                type="text"
-                name="ifscCode"
-                value={formData.ifscCode}
-                onChange={handleChange}
-                placeholder="IFSC Code"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="modal-footer u-bg-transparent u-border-none u-pt-8 u-px-0 u-pb-0 u-mt-8">
+          <div className="modal-footer sticky">
             <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
