@@ -58,9 +58,9 @@ const UserEditorModal = (props) => {
         </header>
         
         <form onSubmit={onSave}>
-          <div className="preset-selector-section" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-light)' }}>
-            <div className="form-group" style={{ maxWidth: '400px', padding: 0 }}>
-              <label className="section-label" style={{ marginBottom: '8px', display: 'block' }}>Load from Preset Profile (Optional)</label>
+          <div className="preset-selector-section u-px-20 u-py-16 u-border-b-light">
+            <div className="form-group u-max-w-400 u-p-0">
+              <label className="section-label u-mb-8 u-block">Load from Preset Profile (Optional)</label>
               {users && users.length > 0 ? (
                 <div className="form-input-container">
                   <select
@@ -75,7 +75,7 @@ const UserEditorModal = (props) => {
                   </select>
                 </div>
               ) : (
-                <span style={{ fontSize: '13px', opacity: 0.5 }}>No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
+                <span className="u-text-13px u-opacity-50">No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
               )}
             </div>
           </div>

@@ -75,22 +75,22 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
   };
 
   return createPortal(
-    <div className="modal-overlay" style={{ zIndex: 999999 }}>
-      <div className="modal-content" style={{ maxWidth: '450px' }}>
+    <div className="modal-overlay u-z-999999">
+      <div className="modal-content u-max-w-450">
         <div className="modal-header">
           <h2>Request Bank Details</h2>
           <button className="close-modal" onClick={onClose}>×</button>
         </div>
         
-        <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <p className="status-message" style={{ background: 'var(--halo-bg)', borderColor: 'transparent', color: 'var(--text-color)', opacity: 0.8, margin: 0 }}>
+        <form onSubmit={handleSubmit} className="u-p-24 u-flex-col-gap-16">
+          <p className="status-message u-bg-halo u-border-none u-text-primary u-opacity-80 u-m-0">
             Changes to your bank details require approval from a Master Admin. 
             Once submitted, your request will be reviewed.
           </p>
 
           {error && <div className="status-message error">{error}</div>}
 
-          <div className="form-group" style={{ padding: 0 }}>
+          <div className="form-group u-p-0">
             <label>Account Name</label>
             <div className="form-input-container">
               <input
@@ -104,7 +104,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group" style={{ padding: 0 }}>
+          <div className="form-group u-p-0">
             <label>Account Number</label>
             <div className="form-input-container">
               <input
@@ -118,7 +118,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="form-group" style={{ padding: 0 }}>
+          <div className="form-group u-p-0">
             <label>IFSC Code</label>
             <div className="form-input-container">
               <input
@@ -132,7 +132,7 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="modal-footer" style={{ background: 'transparent', borderTop: 'none', padding: '8px 0 0 0', marginTop: '8px' }}>
+          <div className="modal-footer u-bg-transparent u-border-none u-pt-8 u-px-0 u-pb-0 u-mt-8">
             <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>

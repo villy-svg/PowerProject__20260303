@@ -141,7 +141,7 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content hub-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '680px' }}>
+      <div className="modal-content hub-modal u-max-w-680" onClick={e => e.stopPropagation()}>
         <header className="modal-header">
           <h2>{editingItem ? 'Edit Rule' : 'New Rule'}</h2>
           <button className="close-modal" onClick={onClose}>&times;</button>
@@ -149,12 +149,12 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
         <form onSubmit={handleSubmit} className="vertical-task-form">
           <div className="modal-content-area">
             {hasDraft && (
-              <div className="status-message success" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="status-message success u-flex-between u-mb-16">
                 <span>📝 Restored unfinished draft from your browser.</span>
                 <button 
                   type="button" 
                   onClick={handleDiscardDraft} 
-                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.75rem', textDecoration: 'underline' }}
+                  className="u-bg-none u-border-none u-text-danger u-cursor-pointer u-fw-bold u-text-xs u-underline"
                 >
                   Discard Draft
                 </button>
@@ -254,8 +254,8 @@ const RuleFormModal = ({ isOpen, onClose, editingItem, categories, subCategories
                   />
                 </div>
               </div>
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.25rem' }}>
-                <label style={{ margin: 0 }}>Active</label>
+              <div className="form-group u-flex-center-gap-12 u-pt-4">
+                <label className="u-m-0">Active</label>
                 <button
                   type="button"
                   className={`rule-toggle ${form.is_active ? 'on' : ''}`}

@@ -135,7 +135,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
         {loading && <div className="loading-spinner">Loading...</div>}
 
         {!loading && loadError && (
-          <div className="rule-empty-panel" style={{ color: 'var(--error-color, #ef4444)', opacity: 1 }}>
+          <div className="rule-empty-panel u-text-danger u-opacity-100">
             <p>⚠️ {loadError}</p>
           </div>
         )}
@@ -144,7 +144,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
         {!loading && activeTab === 'rules' && (
           <>
             {/* Category filter */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div className="u-flex-between-wrap-gap-8 u-mb-12">
               <div className="rule-cat-filter">
                 <button
                   className={`rule-cat-filter-btn ${filterCatId === 'all' ? 'active' : ''}`}
@@ -161,8 +161,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
                 ))}
               </div>
               <button
-                className="halo-button secondary"
-                style={{ fontSize: '0.72rem', padding: '0.3rem 0.75rem' }}
+                className="halo-button secondary u-text-xs u-px-12 u-py-4"
                 onClick={() => setShowInactive(prev => !prev)}
               >
                 {showInactive ? 'Hide Inactive' : 'Show Inactive'}
@@ -190,7 +189,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
                         <span className="rule-badge">{catName}</span>
                         {subName && <span className="rule-badge">{subName}</span>}
                         {rule.impact && (
-                          <span className="rule-badge" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', whiteSpace: 'pre-wrap' }}>
+                          <span className="rule-badge u-bg-danger-10 u-text-danger u-border-danger-20 u-whitespace-prewrap">
                             Impact: {rule.impact}
                           </span>
                         )}
@@ -199,7 +198,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
                             Eff: {new Date(rule.effective_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
                         )}
-                        {rule.drive_url && <span className="rule-badge" style={{ color: 'var(--brand-green)' }}>📄 Drive</span>}
+                        {rule.drive_url && <span className="rule-badge u-text-brand-green">📄 Drive</span>}
                       </div>
                     </div>
                     <div className="rule-item-actions">
@@ -220,8 +219,8 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
               <div key={cat.id} className="hub-card">
                 <div className="hub-code-tag">{cat.icon || '📋'}</div>
                 <h3>{cat.name}</h3>
-                <p className="hub-city" style={{ whiteSpace: 'pre-wrap' }}>{cat.description || 'No description'}</p>
-                <p style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.25rem' }}>
+                <p className="hub-city u-whitespace-prewrap">{cat.description || 'No description'}</p>
+                <p className="u-text-xs u-opacity-50 u-mt-4">
                   Order: {cat.sort_order}
                 </p>
                 <div className="hub-actions">
@@ -247,7 +246,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
                   <th>Sub-Category</th>
                   <th>Parent Category</th>
                   <th>Sort Order</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th className="u-text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,7 +261,7 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
                         </span>
                       </td>
                       <td><code className="code-font">{sub.sort_order}</code></td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td className="u-text-right">
                         <div className="table-actions">
                           <button className="icon-btn edit" onClick={() => setSubModal({ open: true, item: sub })} title="Edit">✎</button>
                           <button className="icon-btn delete" onClick={() => handleDeleteSubCategory(sub.id)} title="Delete">×</button>

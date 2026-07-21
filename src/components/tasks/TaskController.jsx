@@ -244,8 +244,8 @@ const TaskController = (props) => {
                     className="filters-row-toggle"
                     onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                   >
-                    <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
-                    <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                    <p className="u-uppercase">Data Operations</p>
+                    <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
                       <IconChevronDown size={10} />
                     </span>
                   </div>

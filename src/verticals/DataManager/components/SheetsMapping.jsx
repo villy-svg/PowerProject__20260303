@@ -3,7 +3,7 @@ import React from 'react';
 const SheetsMapping = ({ tabSettings, onSettingChange }) => {
   return (
     <div className="dm-card">
-      <div style={{ marginBottom: '20px' }}>
+      <div className="u-mb-24">
         <h3 className="dm-card__title">Configure Sheets Mapping</h3>
         <p className="dm-card__description">
           Define the specific tab mappings for validation and historical storage.

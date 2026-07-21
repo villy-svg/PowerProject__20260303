@@ -91,7 +91,6 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
       filename={filename || (isTemplate ? 'employee_template.xlsx' : `employees_export_${new Date().toISOString().split('T')[0]}.xlsx`)}
       onDownload={handleDownload}
       validations={isTemplate ? validations : []}
-      style={{}}
       className={className}
     />
   );

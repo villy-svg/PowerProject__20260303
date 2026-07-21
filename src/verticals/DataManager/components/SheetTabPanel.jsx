@@ -18,14 +18,13 @@ import ScraperPanel from './ScraperPanel';
 const TabList = ({ tabs, activeTab, tabLoading, onTabChange }) => (
   <div>
     <h3 className="dm-tab-bar__title">Available Sheet Tabs</h3>
-    <div className="dm-tab-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+    <div className="dm-tab-list u-flex-wrap-gap-8">
       {tabs.map(tab => (
-        <div key={tab} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <div key={tab} className="u-flex-center-gap-4">
           <button
             onClick={() => onTabChange(tab)}
-            className={`halo-button dm-tab-btn ${tab === activeTab ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
+            className={`halo-button dm-tab-btn u-m-0 ${tab === activeTab ? 'dm-tab-btn--active' : 'dm-tab-btn--inactive'}`}
             disabled={tabLoading}
-            style={{ margin: 0 }}
           >
             {tab}
           </button>

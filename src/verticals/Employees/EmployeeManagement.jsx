@@ -291,7 +291,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
               onClick={() => ui.setShowInactive(!ui.showInactive)}
               title={ui.showInactive ? "Hide Inactive" : "Show Inactive"}
             >
-              <IconChevronDown size={14} style={{ marginRight: '4px', opacity: 0.8 }} />
+              <IconChevronDown size={14} className="u-mr-4 u-opacity-80" />
               INACTIVE
             </button>
           </>
@@ -303,14 +303,14 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                 className="filters-row-toggle"
                 onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
               >
-                <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
-                <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                <p className="u-uppercase">Data Operations</p>
+                <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
                   <IconChevronDown size={10} />
                 </span>
               </div>
               {isActionsDropdownOpen && (
                 <div className="actions-dropdown-menu">
-                  <div className="master-action-btn" onClick={() => { setGroupBy(groupBy === 'role' ? 'hub' : 'role'); setIsActionsDropdownOpen(false); }} style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                  <div className="master-action-btn u-px-12 u-py-8 u-cursor-pointer" onClick={() => { setGroupBy(groupBy === 'role' ? 'hub' : 'role'); setIsActionsDropdownOpen(false); }}>
                     Group By: <strong>{groupBy === 'role' ? 'Role' : 'Hub'}</strong>
                   </div>
                   <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
@@ -562,9 +562,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         }}
         renderConflictTile={(emp) => (
           <div className="conflict-emp-tile">
-            <h5 style={{ color: 'var(--brand-green)', margin: '0 0 4px 0' }}>{emp.full_name}</h5>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{emp.email || 'No Email'}</p>
-            <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{emp.phone || 'No Phone'}</p>
+            <h5 className="u-text-brand-green u-m-0 u-mb-4">{emp.full_name}</h5>
+            <p className="u-text-sm u-opacity-70">{emp.email || 'No Email'}</p>
+            <p className="u-text-sm u-opacity-70">{emp.phone || 'No Phone'}</p>
           </div>
         )}
       />

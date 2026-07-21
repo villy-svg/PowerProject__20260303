@@ -22,9 +22,9 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
     : 0;
 
   return (
-    <div className="dm-card" style={{ marginBottom: '24px' }}>
+    <div className="dm-card u-mb-24">
       <div className="dm-card__header">
-        <h3 className="dm-card__title" style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h3 className="dm-card__title u-text-1-1em u-flex-center-gap-8">
           <span>🌐</span> HTML Web Scraper
         </h3>
         <p className="dm-card__description">
@@ -65,9 +65,8 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
 
         <button
           type="submit"
-          className="halo-button primary dm-action-btn"
+          className="halo-button primary dm-action-btn u-whitespace-nowrap"
           disabled={disabled || !targetField.trim() || !outputColumn.trim()}
-          style={{ height: '42px', whiteSpace: 'nowrap' }}
         >
           {progress && progress.current < progress.total ? 'Scraping...' : 'Run Scraper on Sheet'}
         </button>

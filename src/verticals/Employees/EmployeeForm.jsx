@@ -370,7 +370,7 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
                   {loading ? 'Processing...' : 'Save Changes'}
                 </button>
               ) : (
-                <button type="button" className="halo-button close-btn secondary-action" onClick={onCancel} style={{ opacity: 0.6 }}>
+                <button type="button" className="halo-button close-btn secondary-action u-opacity-60" onClick={onCancel}>
                   Close
                 </button>
               )
@@ -386,7 +386,7 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
                 {loading ? 'Processing...' : (initialData.id ? 'Save Changes' : 'Create Record')}
               </button>
             ) : (
-              <button type="button" className="halo-button close-btn" onClick={onCancel} style={{ opacity: 0.6 }}>
+              <button type="button" className="halo-button close-btn u-opacity-60" onClick={onCancel}>
                 Close
               </button>
             )
