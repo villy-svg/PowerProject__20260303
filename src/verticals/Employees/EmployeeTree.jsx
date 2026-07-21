@@ -25,19 +25,21 @@ const EmployeeTree = ({
   const [showOthersIds, setShowOthersIds] = useState(new Set());
   const hasInitializedRef = React.useRef(false);
 
+  const activeEmployees = useMemo(() => employees.filter(e => e.status !== 'Inactive'), [employees]);
+
   // Build tree from flat data
   const treeData = useMemo(() => {
-    return hierarchyUtils.buildTree(employees, 'id', 'manager_id');
-  }, [employees]);
+    return hierarchyUtils.buildTree(activeEmployees, 'id', 'manager_id');
+  }, [activeEmployees]);
 
   // Identify the "Management Line" (Path from Roots to Current User)
   const pathIds = useMemo(() => {
-    if (!user || !employees.length) return new Set();
-    const currentUser = employees.find(e => e.email === user.email || e.user_id === user.id);
+    if (!user || !activeEmployees.length) return new Set();
+    const currentUser = activeEmployees.find(e => e.email === user.email || e.user_id === user.id);
     if (!currentUser) return new Set();
-    const ancestors = hierarchyUtils.getAncestors(employees, currentUser.id, 'id', 'manager_id');
+    const ancestors = hierarchyUtils.getAncestors(activeEmployees, currentUser.id, 'id', 'manager_id');
     return new Set([...ancestors.map(a => a.id), currentUser.id]);
-  }, [user, employees]);
+  }, [user, activeEmployees]);
 
   useEffect(() => {
     if (pathIds.size > 0 && !hasInitializedRef.current) {
@@ -141,7 +143,7 @@ const EmployeeTree = ({
     );
   };
 
-  if (!employees.length) return <div className="empty-state">No employees found.</div>;
+  if (!activeEmployees.length) return <div className="empty-state">No active employees found.</div>;
 
   return (
     <div className="employee-tree-container">
