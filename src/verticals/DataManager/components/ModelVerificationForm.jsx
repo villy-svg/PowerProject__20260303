@@ -94,11 +94,11 @@ const ModelVerificationForm = () => {
 
   return (
     <div className="dm-card dm-card-centered">
-      <div className="dm-card__header">
-        <h2 className="dm-card__title u-flex-center-gap-10">
+      <div className="u-mb-24">
+        <h2 className="u-text-brand-green u-fw-800 u-mb-8 u-text-1-1em u-flex-center-gap-10">
           <span>🔍</span> Model Verification Board
         </h2>
-        <p className="dm-card__description">
+        <p className="u-text-sm u-opacity-70 u-m-0">
           Test and verify HTML structures by scraping single vehicle details or parsing manually pasted HTML page source code.
         </p>
       </div>
@@ -255,10 +255,10 @@ const ModelVerificationForm = () => {
 
       {/* Chrome Bookmarklet Tool */}
       <div className="u-mt-32 u-pt-24 u-border-t">
-        <h3 className="dm-card__title u-text-base u-flex-center-gap-8 u-mb-8">
+        <h3 className="u-text-brand-green u-fw-800 u-text-base u-flex-center-gap-8 u-mb-8">
           <span>🔖</span> Chrome Bookmarklet Integration
         </h3>
-        <p className="dm-card__description u-text-sm u-mb-16">
+        <p className="u-text-sm u-opacity-70 u-m-0 u-mb-16">
           Bypass server blocks completely! Drag the button below to your Bookmarks Bar, then click it when viewing any vehicle details page on Chrome to copy the value.
         </p>
 

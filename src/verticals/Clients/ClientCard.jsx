@@ -77,15 +77,15 @@ const ClientCard = ({ client, tasks = [], onEdit, onView, onDelete, onToggleStat
 
       {/* Row 2: Title (Name) */}
       <div className="card-row-2">
-        <h3 className="card-task-name client-card-name" style={{ fontSize: '1.05rem', margin: '4px 0' }}>
+        <h3 className="card-task-name client-card-name u-text-lg u-my-4">
           {client.name || 'Untitled Client'}
         </h3>
       </div>
 
       {/* Detail Row (PoC) */}
-      <div className="client-card-poc" style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.8rem', opacity: 0.6, marginTop: '4px' }}>
+      <div className="client-card-poc u-flex-col u-flex-gap-2 u-text-sm u-opacity-60 u-mt-4">
         {client.poc_name && (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="u-flex-wrap-gap-8">
             <span>👤 {client.poc_name}</span>
             <span>📞 {formatPhone(client.poc_phone)}</span>
           </div>

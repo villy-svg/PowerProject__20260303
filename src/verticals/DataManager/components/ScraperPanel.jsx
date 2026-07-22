@@ -23,11 +23,11 @@ const ScraperPanel = ({ onRunScraper, progress, disabled }) => {
 
   return (
     <div className="dm-card u-mb-24">
-      <div className="dm-card__header">
-        <h3 className="dm-card__title u-text-1-1em u-flex-center-gap-8">
+      <div className="u-mb-24">
+        <h3 className="u-text-brand-green u-fw-800 u-mb-8 u-text-1-1em u-flex-center-gap-8">
           <span>🌐</span> HTML Web Scraper
         </h3>
-        <p className="dm-card__description">
+        <p className="u-text-sm u-opacity-70 u-m-0">
           Calculate Final URLs automatically and scrape specific HTML data fields into the grid.
         </p>
       </div>

@@ -4,8 +4,8 @@ const SheetsMapping = ({ tabSettings, onSettingChange }) => {
   return (
     <div className="dm-card">
       <div className="u-mb-24">
-        <h3 className="dm-card__title">Configure Sheets Mapping</h3>
-        <p className="dm-card__description">
+        <h3 className="u-text-brand-green u-fw-800 u-mb-8 u-text-1-1em">Configure Sheets Mapping</h3>
+        <p className="u-text-sm u-opacity-70 u-m-0">
           Define the specific tab mappings for validation and historical storage.
         </p>
       </div>

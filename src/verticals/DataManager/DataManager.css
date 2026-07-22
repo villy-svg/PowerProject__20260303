@@ -88,23 +88,7 @@
   gap: 20px;
 }
 
-/* Card header, title, and description — used by SpreadsheetForm */
-.dm-card__header {
-  margin-bottom: 24px;
-}
-
-.dm-card__title {
-  color: var(--brand-mint);
-  text-shadow: 0 0 10px var(--halo-glow);
-  margin: 0 0 8px;
-}
-
-.dm-card__description {
-  color: var(--text-color);
-  opacity: 0.7;
-  margin: 0;
-  font-size: 14px;
-}
+/* Header elements removed (migrated to global utility classes) */
 
 /* ==========================================================================
    DM ALERT BANNERS

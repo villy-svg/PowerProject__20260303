@@ -1,5 +1,6 @@
 /* globalTheme.css - Shared Design Tokens and Global UI Components */
 @import "./systems/systemLists.css";
+@import "./systems/systemCards.css";
 @import "./systems/systemBadges.css";
 
 /* ==========================================================================
