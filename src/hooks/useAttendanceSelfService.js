@@ -154,7 +154,7 @@ async function fireOvertimeNotification(setAlarmFired) {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         // eslint-disable-next-line no-new
-        new Notification(title, { body, icon: '/pwa-192x192.png' });
+        new Notification(title, { body, icon: '/logos/pwa-icon-512.png' });
         return; // Notification sent — no need for in-page banner
       }
     }

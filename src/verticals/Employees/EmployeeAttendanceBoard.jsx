@@ -681,11 +681,6 @@ const EmployeeAttendanceBoard = ({
 
       {/* Notifications */}
       {/* Error state */}
-      {actionError && (
-        <div className="attendance-board__error u-mb-16">
-          <p>⚠ {actionError}</p>
-        </div>
-      )}
       {viewMode === 'attendance' && error && (
         <div className="attendance-board__error">
           <p>⚠ {error}</p>
