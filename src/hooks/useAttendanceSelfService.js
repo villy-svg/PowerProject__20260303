@@ -144,25 +144,46 @@ function scheduleOvertimeAlarm(loginTimeIso, onAlarm) {
 // ---------------------------------------------------------------------------
 // Utility: Fire the overtime notification.
 // Attempts browser Notification API first; falls back to a state flag.
+//
+// Android 8 fix: The Web Notification API is not functional inside a
+// Capacitor Android WebView. On some Android 8 devices, 'Notification' is
+// defined in window but Notification.requestPermission() throws or never
+// resolves, leaving the alarm logic stuck. We guard with isNativePlatform():
+//   - Native (Android/iOS): skip directly to the reliable in-page banner.
+//   - Web browser: attempt the Notification API as before (no behaviour change).
 // ---------------------------------------------------------------------------
 async function fireOvertimeNotification(setAlarmFired) {
   const title = '⏰ Shift Overtime Reminder';
   const body  = 'You have been on shift for 12 hours. Please remember to end your shift!';
 
+  // Check if running inside a Capacitor native shell (Android / iOS app).
+  // Dynamic import keeps @capacitor/core out of the critical web bundle path.
+  let isNative = false;
   try {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        // eslint-disable-next-line no-new
-        new Notification(title, { body, icon: '/logos/pwa-icon-512.png' });
-        return; // Notification sent — no need for in-page banner
-      }
-    }
+    const { Capacitor } = await import('@capacitor/core');
+    isNative = Capacitor?.isNativePlatform() || false;
   } catch (e) {
-    console.warn('[useAttendanceSelfService] Notification API unavailable:', e);
+    // @capacitor/core not available — definitely a web browser
   }
 
-  // Fallback: raise in-page alarm banner
+  if (!isNative) {
+    // Web browser path: attempt the Notification API
+    try {
+      if ('Notification' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          // eslint-disable-next-line no-new
+          new Notification(title, { body, icon: '/logos/pwa-icon-512.png' });
+          return; // Notification sent — no need for in-page banner
+        }
+      }
+    } catch (e) {
+      console.warn('[useAttendanceSelfService] Notification API unavailable:', e);
+    }
+  }
+
+  // Fallback (always used on native, used on web when Notification is denied/unavailable):
+  // raise the in-page alarm banner.
   setAlarmFired(true);
 }
 

@@ -100,6 +100,12 @@ export default defineConfig(({ mode }) => {
     ],
     server: { open: true },
     build: {
+      // Android 8 WebView fix: target ES2015 so Vite/Rollup transpiles modern
+      // syntax (numeric separators, optional chaining, etc.) that Chrome 64
+      // (Android 8 WebView) does not support. Without this, Vite defaults to
+      // 'modules' which passes ES2021+ syntax through untranspiled.
+      // ES2015 is safe for all WebViews since Android 5 (API 21+).
+      target: 'es2015',
       rollupOptions: {
         output: {
           manualChunks(id) {

@@ -14,6 +14,26 @@
 import { supabase } from '../core/supabaseClient';
 
 // ---------------------------------------------------------------------------
+// Utility: toISTDateString(date)
+//
+// Returns a 'YYYY-MM-DD' string in the Asia/Kolkata (IST, UTC+5:30) timezone.
+//
+// Why NOT Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' })?
+// Android 8 (Chrome 64 WebView) has incomplete Intl locale data. The 'en-CA'
+// locale may not be available or may return a non-YYYY-MM-DD format (e.g.
+// 'DD/MM/YYYY'), causing DB queries to produce empty results and making the
+// attendance screen falsely appear blank for checked-in employees.
+//
+// This approach is locale-independent: it applies a fixed UTC+5:30 offset and
+// extracts the ISO date string slice, which always produces 'YYYY-MM-DD'.
+// ---------------------------------------------------------------------------
+function toISTDateString(date) {
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // +5:30
+  const istDate = new Date(date.getTime() + IST_OFFSET_MS);
+  return istDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+}
+
+// ---------------------------------------------------------------------------
 // MANAGER BOARD: Fetch attendance records for a date range
 //
 // Joins with attendance_edit_requests to include a `has_pending_edit` flag
@@ -186,12 +206,12 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchMyTodayAttendance(userId) {
-  // en-CA locale produces YYYY-MM-DD natively, matching the DB shift_date column.
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  // toISTDateString() produces YYYY-MM-DD in IST — locale-independent (Android 8 safe).
+  const today = toISTDateString(new Date());
 
   // 3-day safety window — catches night-shift crossover without surfacing stale zombies.
   const threeDaysAgoMs = Date.now() - (3 * 24 * 60 * 60 * 1000);
-  const threeDaysAgo = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(threeDaysAgoMs));
+  const threeDaysAgo = toISTDateString(new Date(threeDaysAgoMs));
 
   // -------------------------------------------------------------------------
   // Step 1: Resolve the caller's employee_id from their profile.
@@ -314,7 +334,8 @@ export async function fetchLiveAttendance() {
   // open session.
   const today = new Date();
   const threeDaysAgoMs = today.getTime() - (3 * 24 * 60 * 60 * 1000);
-  const threeDaysAgo = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(threeDaysAgoMs));
+  // toISTDateString() is locale-independent — safe on Android 8 Chrome 64 WebView.
+  const threeDaysAgo = toISTDateString(new Date(threeDaysAgoMs));
 
   const { data, error } = await supabase
     .from('daily_attendances')

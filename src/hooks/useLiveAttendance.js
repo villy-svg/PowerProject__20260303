@@ -21,8 +21,10 @@ const STANDARD_SHIFT_HOURS = 12;
 
 // ---------------------------------------------------------------------------
 // Poll interval: 60 seconds
+// Android 8 (Chrome 64 WebView) fix: use plain integer — numeric separators
+// (60_000) are ES2021 and unsupported on Android 8 WebView, causing a crash.
 // ---------------------------------------------------------------------------
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 60000;
 
 // ---------------------------------------------------------------------------
 // Utility: Compute hours worked from a login_time ISO string to now.

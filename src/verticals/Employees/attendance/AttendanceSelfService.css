@@ -845,6 +845,56 @@
 }
 
 /* --------------------------------------------------------------------------
+   Inline confirm group — Android 8 fix for window.confirm() being blocked
+   in Capacitor WebView. Shows ✓ / ✕ buttons inline instead of a native dialog.
+   -------------------------------------------------------------------------- */
+.live-attendance__force-confirm-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.live-attendance__force-confirm-btn,
+.live-attendance__force-cancel-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem !important;
+  min-height: 1.6rem !important;
+  border-radius: 50%;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.live-attendance__force-confirm-btn {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--status-success, #10b981);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.live-attendance__force-confirm-btn:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.live-attendance__force-cancel-btn {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--status-danger, #f43f5e);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.live-attendance__force-cancel-btn:hover {
+  background: rgba(244, 63, 94, 0.2);
+}
+
+/* --------------------------------------------------------------------------
    SECTION 11: Responsive adjustments for smaller screens
    -------------------------------------------------------------------------- */
 @media screen and (max-width: 480px) {

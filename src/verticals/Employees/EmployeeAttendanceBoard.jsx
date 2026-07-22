@@ -414,7 +414,6 @@ const EmployeeAttendanceBoard = ({
       ) : viewMode === 'attendance' ? (
         // Standard Attendance Date Pickers
         <div className="attendance-board__date-range">
-          <label className="attendance-board__date-label">Date Range</label>
           <DatePicker
             selectsRange={true}
             startDate={parsedStart}
@@ -433,7 +432,7 @@ const EmployeeAttendanceBoard = ({
             onClick={handleApplyDates}
             aria-label="Apply Dates"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            Apply
           </button>
         </div>
       ) : (
@@ -527,12 +526,12 @@ const EmployeeAttendanceBoard = ({
           )}
 
           {/* Individual edit request approval queue badge — editors only */}
-          {canApprove && !!pendingRequests.length && (
+          {canApprove && (
             <button
               className="halo-button attendance-board__approval-btn"
               onClick={() => setViewMode('pending-requests')}
             >
-              Pending Approvals
+              Approvals
             </button>
           )}
 

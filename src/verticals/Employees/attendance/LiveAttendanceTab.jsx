@@ -46,7 +46,8 @@ const LiveHoursCounter = ({ loginTime, standardShiftHours }) => {
       const diff = (Date.now() - new Date(loginTime).getTime()) / (1000 * 60 * 60);
       setHoursWorked(Math.max(0, diff));
     };
-    tickRef.current = setInterval(computeHours, 60_000);
+    // Android 8 fix: use 60000 instead of 60_000 (numeric separators unsupported on Chrome 64)
+    tickRef.current = setInterval(computeHours, 60000);
     return () => clearInterval(tickRef.current);
   }, [loginTime]);
 
@@ -66,13 +67,23 @@ const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout, 
   const hoursWorked = (now - new Date(session.loginTime).getTime()) / (1000 * 60 * 60);
   const isOvertime  = hoursWorked >= standardShiftHours;
   const [isEnding, setIsEnding] = useState(false);
+  // Android 8 fix: window.confirm() is suppressed by Capacitor WebView on Android 8.
+  // Use an inline confirmation state instead of the native dialog.
+  const [isConfirming, setIsConfirming] = useState(false);
 
-  const handleEndShift = async () => {
-    if (window.confirm(`Force end shift for ${session.fullName}?`)) {
-      setIsEnding(true);
-      await onForceCheckout(session.recordId, session.sessions);
-      setIsEnding(false);
-    }
+  const handleEndShift = () => {
+    setIsConfirming(true);
+  };
+
+  const handleConfirm = async () => {
+    setIsConfirming(false);
+    setIsEnding(true);
+    await onForceCheckout(session.recordId, session.sessions);
+    setIsEnding(false);
+  };
+
+  const handleCancel = () => {
+    setIsConfirming(false);
   };
 
   return (
@@ -94,14 +105,34 @@ const UserRow = ({ session, standardShiftHours, isMasterAdmin, onForceCheckout, 
         )}
         <LiveHoursCounter loginTime={session.loginTime} standardShiftHours={standardShiftHours} />
         {isMasterAdmin && (
-          <button 
-            className="halo-button live-attendance__force-end-btn"
-            onClick={handleEndShift}
-            disabled={isEnding}
-            title="Force End Shift"
-          >
-            {isEnding ? 'Ending...' : '🚫'}
-          </button>
+          isConfirming ? (
+            /* Inline confirm UI — replaces window.confirm() which is blocked on Android 8 */
+            <span className="live-attendance__force-confirm-group">
+              <button
+                className="halo-button live-attendance__force-confirm-btn"
+                onClick={handleConfirm}
+                title="Confirm end shift"
+              >
+                ✓
+              </button>
+              <button
+                className="halo-button live-attendance__force-cancel-btn"
+                onClick={handleCancel}
+                title="Cancel"
+              >
+                ✕
+              </button>
+            </span>
+          ) : (
+            <button
+              className="halo-button live-attendance__force-end-btn"
+              onClick={handleEndShift}
+              disabled={isEnding}
+              title="Force End Shift"
+            >
+              {isEnding ? 'Ending...' : '🚫'}
+            </button>
+          )
         )}
       </div>
     </div>

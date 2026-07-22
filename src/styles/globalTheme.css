@@ -245,7 +245,8 @@
 /* Master Action Buttons */
 .master-action-btn {
   padding: 10px 20px;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 /* View Toggles (Master Header System Standard) */
@@ -637,7 +638,7 @@
   }
   .master-action-btn {
     padding: 10px 16px;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     min-height: 44px;
   }
   /* View toggles — larger touch targets */
@@ -723,7 +724,7 @@
   }
   .master-action-btn {
     padding: 10px 14px;
-    font-size: 0.78rem;
+    font-size: 0.65rem;
     width: 100%;
     min-height: 44px;
   }

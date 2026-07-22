@@ -7,7 +7,7 @@
 /* ── Core RBAC Button ────────────────────────────────────────────── */
 .rbac-manage-btn {
   /* Inherit .halo-button base, add a subtle amber security tint */
-  border-color: color-mix(in srgb, var(--brand-amber), transparent 55%) !important;
+  border: none !important;
   color: var(--brand-amber) !important;
   background: color-mix(in srgb, var(--brand-amber), transparent 94%) !important;
   box-shadow: 0 0 4px color-mix(in srgb, var(--brand-amber), transparent 88%) !important;
@@ -16,10 +16,12 @@
   gap: 6px;
   white-space: nowrap;
   font-size: 0.7rem;
+  font-weight: 600 !important;
 }
 
+.rbac-manage-btn:hover {
   background: color-mix(in srgb, var(--brand-amber), transparent 88%) !important;
-  border-color: var(--brand-amber) !important;
+  border: none !important;
   box-shadow: 0 0 14px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
 }
 
