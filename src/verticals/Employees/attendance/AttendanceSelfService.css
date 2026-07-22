@@ -19,8 +19,6 @@
   flex: 1;
   padding: clamp(1.5rem, 5vw, 3rem);
   gap: 1.5rem;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .self-service__header {
