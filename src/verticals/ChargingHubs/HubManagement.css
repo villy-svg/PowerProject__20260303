@@ -71,6 +71,7 @@
 .hub-card-top-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   width: 100%;
 }
@@ -115,9 +116,9 @@
   margin: 0;
 }
 .edit-btn, .delete-btn {
-  padding: 8px;
-  min-width: 36px;
-  height: 36px;
+  padding: 4px;
+  min-width: 28px;
+  height: 28px;
   font-size: 1.2rem;
   line-height: 1;
   background: transparent !important;
@@ -295,4 +296,56 @@
   .hub-card h3 {
     font-size: 1.1rem;
   }
+}
+
+/* Refactored inline styles */
+.divider {
+  opacity: 0.3;
+}
+
+.duplicate-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.actions-col {
+  text-align: right;
+}
+
+.data-operations-label {
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.dropdown-icon {
+  opacity: 0.5;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.error-boundary-container {
+  padding: 20px;
+  text-align: center;
+}
+
+.error-boundary-details {
+  margin-top: 20px;
+}
+
+.error-boundary-pre {
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.reload-page-btn {
+  margin-top: 20px;
 }

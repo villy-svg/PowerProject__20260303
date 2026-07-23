@@ -81,15 +81,18 @@
   font-size: 0.75rem;
   color: var(--brand-emerald);
   border-color: transparent;
-  background: color-mix(in srgb, var(--brand-emerald), transparent 95%);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
   padding: 0 16px;
   height: 32px;
 }
 
 .online-sync-banner .reconnect-sync-btn:hover {
   border-color: transparent;
-  background: color-mix(in srgb, var(--brand-emerald), transparent 90%);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-emerald), transparent 80%);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 /* Animations */

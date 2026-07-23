@@ -30,16 +30,17 @@ class HubManagementErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h2>Hub Management Error</h2>
-          <p>Something went wrong loading the Hub Management component.</p>
-          <details style={{ marginTop: '20px' }}>
+        <div className="error-boundary-container">
+          <h2>Something went wrong in HubManagement.</h2>
+          <details className="error-boundary-details">
             <summary>Error Details</summary>
-            <pre style={{ textAlign: 'left', background: '#f5f5f5', padding: '10px' }}>
-              {this.state.error?.toString()}
+            <pre className="error-boundary-pre">
+              {this.state.error && this.state.error.toString()}
+              <br />
+              {this.state.errorInfo && this.state.errorInfo.componentStack}
             </pre>
           </details>
-          <button onClick={() => window.location.reload()} style={{ marginTop: '20px' }}>
+          <button onClick={() => window.location.reload()} className="halo-button reload-page-btn">
             Reload Page
           </button>
         </div>
@@ -243,9 +244,9 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                   className="filters-row-toggle"
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
-                  <p style={{ textTransform: 'uppercase' }}>Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
-                    <IconChevronDown size={10} />
+                  <p className="data-operations-label">Data Operations</p>
+                  <span className={`dropdown-icon ${isActionsDropdownOpen ? 'open' : ''}`}>
+                    <IconChevronDown size={16} />
                   </span>
                 </div>
                 {isActionsDropdownOpen && (
@@ -275,10 +276,17 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
           {hubsWithDuplicateInfo.map(hub => (
             <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
               {hub.isDuplicate && (
-                <span className="duplicate-badge" style={{ position: 'absolute', top: '10px', right: '10px' }}>DUP</span>
+                <span className="duplicate-badge">DUP</span>
               )}
               <div className="hub-card-top-row">
                 <h3 className="hub-code-large">{hub.hub_code || 'NO CODE'}</h3>
+                <div className={`status-badge ${hub.status?.toLowerCase()}`}>{hub.status}</div>
+              </div>
+              
+              <div className="hub-card-bottom-row">
+                <p className="hub-name-small">{hub.name}</p>
+                <span className="divider">|</span>
+                <p className="hub-city">{hub.city || 'No city set'}</p>
                 <div className="hub-actions">
                   {permissions.canUpdate && (
                     <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">
@@ -291,13 +299,6 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                     </button>
                   )}
                 </div>
-                <div className={`status-badge ${hub.status?.toLowerCase()}`}>{hub.status}</div>
-              </div>
-              
-              <div className="hub-card-bottom-row">
-                <p className="hub-name-small">{hub.name}</p>
-                <span style={{ opacity: 0.3 }}>|</span>
-                <p className="hub-city">{hub.city || 'No city set'}</p>
               </div>
             </div>
           ))}
@@ -316,7 +317,7 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                 <th>Code</th>
                 <th>City/Address</th>
                 <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="actions-col">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -331,7 +332,7 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                   <td>
                     <span className={`status-pill ${hub.status}`}>{hub.status}</span>
                   </td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="actions-col">
                     <div className="table-actions">
                       {permissions.canUpdate && (
                         <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">
