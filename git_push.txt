@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260721 Code Refactor 1.1.1"
+git commit -m "260723 Code Refactor 1.0.0"
 git push origin staging
 
 # 2. Build (on Staging)
@@ -27,10 +27,8 @@ git branch --show-current
 
 #Check Current Supabase Link : staging : eeoibqxhfkrgbylnluvk | prod : dhhbdgzutlltiojbsboi
 npx supabase link --project-ref dhhbdgzutlltiojbsboi
-npx supabase migration repair --status reverted 20260709000001
 npx supabase db push --include-all --yes
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk
-npx supabase migration repair --status reverted 20260709000001
 npx supabase db push --include-all --yes
 #npx supabase functions deploy user-admin
 #npx supabase migration repair --status reverted 20260709000001

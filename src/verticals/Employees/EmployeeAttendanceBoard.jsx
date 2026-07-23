@@ -426,6 +426,7 @@ const EmployeeAttendanceBoard = ({
             wrapperClassName="attendance-board__date-wrapper"
             portalId="root"
             placeholderText="Select Date Range"
+            customInput={<CustomDateInput />}
           />
           <button 
             className="attendance-board__go-btn" 
@@ -767,6 +768,21 @@ const EmployeeAttendanceBoard = ({
     </div>
   );
 };
+
+const CustomDateInput = React.forwardRef(({ value, onClick, className, placeholder }, ref) => {
+  const formattedValue = value ? value.replace(' - ', '  to  ') : '';
+  return (
+    <input
+      value={formattedValue}
+      onClick={onClick}
+      className={className}
+      placeholder={placeholder}
+      ref={ref}
+      readOnly
+    />
+  );
+});
+CustomDateInput.displayName = 'CustomDateInput';
 
 export default EmployeeAttendanceBoard;
 

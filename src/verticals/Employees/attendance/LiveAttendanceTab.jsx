@@ -242,16 +242,21 @@ const LiveAttendanceTab = ({ user }) => {
     <div className="live-attendance__container">
       {/* Summary bar */}
       <div className="live-attendance__summary-bar">
-        <span className="live-attendance__summary-count">
-          <span className="live-attendance__pulse-dot" />
-          {totalActive} currently active
-        </span>
+        <div className="live-attendance__summary-count">
+          <div className="live-attendance__summary-number">
+            <span className="live-attendance__pulse-dot" />
+            {totalActive}
+          </div>
+          <div className="live-attendance__summary-label">
+            Active Employees
+          </div>
+        </div>
         <button
           className="live-attendance__refresh-btn halo-button"
           onClick={refresh}
           title="Refresh live data"
         >
-          ↺ Refresh
+          ↺
         </button>
       </div>
       <p className="live-attendance__last-refresh">Last updated {lastRefreshLabel}</p>

@@ -54,7 +54,8 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
   const ui = useManagementUI({ storageKey: 'powerpod_hub_view' });
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active' });
+  // lat/lng store GPS coordinates; meta stores arbitrary jsonb (not exposed in UI here)
+  const [formData, setFormData] = useState({ name: '', hub_code: '', city: '', status: 'active', lat: '', lng: '' });
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
 
@@ -109,11 +110,14 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
         name: hub.name,
         hub_code: hub.hub_code || '',
         city: hub.city || '',
-        status: hub.status || 'active'
+        status: hub.status || 'active',
+        // Populate lat/lng from existing hub data (null → empty string for controlled input)
+        lat: hub.lat != null ? String(hub.lat) : '',
+        lng: hub.lng != null ? String(hub.lng) : ''
       });
     } else {
       ui.openAddModal();
-      setFormData({ name: '', hub_code: '', city: '', status: 'active' });
+      setFormData({ name: '', hub_code: '', city: '', status: 'active', lat: '', lng: '' });
     }
     setStatusMsg({ type: '', text: '' });
   };
@@ -124,8 +128,17 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
     setStatusMsg({ type: '', text: '' });
 
     try {
+      // Parse lat/lng strings to float; store null if empty/invalid so DB stays clean
+      const parsedLat = formData.lat !== '' && !isNaN(parseFloat(formData.lat)) ? parseFloat(formData.lat) : null;
+      const parsedLng = formData.lng !== '' && !isNaN(parseFloat(formData.lng)) ? parseFloat(formData.lng) : null;
+
       const hubData = {
-        ...formData,
+        name: formData.name,
+        hub_code: formData.hub_code,
+        city: formData.city,
+        status: formData.status,
+        lat: parsedLat,
+        lng: parsedLng,
         updated_at: new Date().toISOString()
       };
 
@@ -264,21 +277,27 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
               {hub.isDuplicate && (
                 <span className="duplicate-badge" style={{ position: 'absolute', top: '10px', right: '10px' }}>DUP</span>
               )}
-              <div className={`status-badge ${hub.status}`}>{hub.status}</div>
-              <div className="hub-code-tag">{hub.hub_code || 'NO CODE'}</div>
-              <h3>{hub.name}</h3>
-              <p className="hub-city">{hub.city || 'No city set'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && (
-                  <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">
-                    <IconEdit size={16} />
-                  </button>
-                )}
-                {permissions.canDelete && (
-                  <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)} title="Delete Hub">
-                    <IconTrash size={16} />
-                  </button>
-                )}
+              <div className="hub-card-top-row">
+                <h3 className="hub-code-large">{hub.hub_code || 'NO CODE'}</h3>
+                <div className="hub-actions">
+                  {permissions.canUpdate && (
+                    <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">
+                      <IconEdit size={16} />
+                    </button>
+                  )}
+                  {permissions.canDelete && (
+                    <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)} title="Delete Hub">
+                      <IconTrash size={16} />
+                    </button>
+                  )}
+                </div>
+                <div className={`status-badge ${hub.status?.toLowerCase()}`}>{hub.status}</div>
+              </div>
+              
+              <div className="hub-card-bottom-row">
+                <p className="hub-name-small">{hub.name}</p>
+                <span style={{ opacity: 0.3 }}>|</span>
+                <p className="hub-city">{hub.city || 'No city set'}</p>
               </div>
             </div>
           ))}
@@ -396,6 +415,35 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                           { label: 'Maintenance', value: 'maintenance' },
                           { label: 'Inactive', value: 'inactive' }
                         ]}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* GPS Coordinates — stored as lat/lng float8 columns */}
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Latitude</label>
+                    <div className="form-input-container">
+                      <input
+                        type="number"
+                        step="any"
+                        value={formData.lat}
+                        onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
+                        placeholder="e.g. 28.6139"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Longitude</label>
+                    <div className="form-input-container">
+                      <input
+                        type="number"
+                        step="any"
+                        value={formData.lng}
+                        onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
+                        placeholder="e.g. 77.2090"
                       />
                     </div>
                   </div>

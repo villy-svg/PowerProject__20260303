@@ -22,8 +22,8 @@
 /* Grid and Cards */
 .hubs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
   max-height: calc(100vh - 280px); /* Strict height for container scroll */
   overflow-y: auto;
   padding-right: 8px;
@@ -45,48 +45,74 @@
   background: var(--brand-green);
 }
 .hub-card {
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 24px;
+  background: rgba(255, 255, 255, 0.02); /* Soft glass background */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Satin edge */
+  backdrop-filter: blur(var(--glass-blur, 16px)); /* Glassmorphism */
+  border-radius: var(--radius-squircle, 24px); /* Squircle corner */
+  padding: 16px;
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 160px;
+  gap: 12px;
+  min-height: 100px;
 }
 .hub-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--brand-mint);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0, 0, 0, 0.2));
 }
 /* .status-badge definition merged into the one below at line 113 */
-.status-badge.active { background: rgba(34, 197, 94, 0.1); color: var(--priority-low); }
-.status-badge.maintenance { background: rgba(234, 179, 8, 0.1); color: var(--priority-medium); }
-.status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: var(--brand-red); }
-.hub-code-tag {
-  display: inline-block;
-  background: var(--halo-bg);
-  color: var(--brand-green);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
-  margin-bottom: 12px;
+.status-badge.active { background: transparent; color: var(--priority-low); }
+.status-badge.maintenance { background: transparent; color: var(--priority-medium); }
+.status-badge.inactive { background: transparent; color: var(--brand-red); }
+.hub-card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
-.hub-card h3 {
-  margin: 0 0 12px 0;
-  font-size: 1.2rem;
+
+.hub-card-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.hub-code-tag {
+  display: inline-flex;
+  background: transparent;
+  color: var(--brand-green);
+  padding: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: none;
+  margin: 0;
+}
+
+.hub-name-small {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.hub-code-large {
+  margin: 0;
+  font-size: 1.25rem;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--brand-green);
+  letter-spacing: 1px;
 }
+
 .hub-card .hub-city {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  margin-bottom: 20px;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin: 0;
 }
 .edit-btn, .delete-btn {
   padding: 8px;
@@ -94,27 +120,39 @@
   height: 36px;
   font-size: 1.2rem;
   line-height: 1;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.edit-btn:hover, .delete-btn:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 .hub-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: auto;
+  margin-left: auto;
 }
-/* Merged: canonical status badge rule */
+/* Canonical status badge rule */
 .status-badge {
   display: inline-block;
-  margin-bottom: 12px;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0;
+  border-radius: 0;
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  /* Corner positioning when used inside hub-card */
+}
+/* When used outside hub-card-main (legacy / other contexts) keep absolute */
+.hub-card > .status-badge {
   position: absolute;
   top: 24px;
   right: 24px;
+  margin-bottom: 0;
 }
 /* List View Styling */
 .hubs-list-view {

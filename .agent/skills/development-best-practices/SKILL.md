@@ -32,7 +32,7 @@ When writing code, adding new features, or modifying existing components, always
 - **Limit Prop Drilling:** If you are passing a prop down through 3 or 4 layers, utilize React Context or state management to provide data globally, keeping intermediary components modular and dumb.
 
 ### 5. CSS & Design System Consistency
-- **Rely on the Design System:** Don't write inline styles for colors, padding, or standard UI elements. Always use global classes (like `.halo-button` or `.master-action-btn`) and CSS variables (`var(--brand-green)`) to ensure sweeping design updates apply uniformly across the application.
+- **ZERO INLINE STYLING POLICY (STRICT):** NEVER use the `style={{}}` prop or inline HTML styles under ANY circumstances. Even for layout properties (like `display: flex`), positioning, or dynamic spacing, you MUST use CSS classes. All styling MUST be strictly separated into external `.css` files. Rely on global classes (like `.halo-button`) and CSS variables (`var(--brand-green)`) to ensure sweeping design updates apply uniformly across the application.
 - **Responsive Layouts:** Avoid hardcoded pixel widths (`width: 400px`). Rely on Flexbox, CSS Grid, and relative percentages so the application adapts elegantly to different monitor sizes.
 - **Avoid `!important` Tags:** Do NOT use `!important` in CSS to force styles. Overuse makes the stylesheet unmaintainable and causes specificity wars. If a style isn't applying, increase CSS specificity naturally (e.g., chaining class names like `.my-component.active`) or clean up redundant rules instead of brute-forcing it with `!important`.
 
