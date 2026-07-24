@@ -22,35 +22,18 @@ import { supabase } from '../../../services/core/supabaseClient';
 import './AttendanceSelfService.css';
 
 // ---------------------------------------------------------------------------
-// Utility: Haversine distance between two GPS coordinates — returns metres.
-// Returns null if any argument is missing (no hub coords or no employee GPS).
-// ---------------------------------------------------------------------------
-function haversineMetres(empLat, empLng, hubLat, hubLng) {
-  if (empLat == null || empLng == null || hubLat == null || hubLng == null) return null;
-  const R = 6371000; // Earth radius in metres
-  const toRad = (deg) => (deg * Math.PI) / 180;
-  const dLat = toRad(hubLat - empLat);
-  const dLng = toRad(hubLng - empLng);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(empLat)) * Math.cos(toRad(hubLat)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.asin(Math.sqrt(a));
-}
-
-// ---------------------------------------------------------------------------
 // Utility: Format metres for display.
-// < 1 km  → "347 m"   |   ≥ 1 km → "1.23 km"   |   null → "—"
+// Always shows in metres (e.g., "1234 m") | null → "—"
 // ---------------------------------------------------------------------------
 function formatDistance(metres) {
   if (metres === null || metres === undefined) return '—';
-  if (metres < 1000) return `${Math.round(metres)} m`;
-  return `${(metres / 1000).toFixed(2)} km`;
+  return `${Math.round(metres)} m`;
 }
 
 // ---------------------------------------------------------------------------
 // Utility: Build the plain-text WhatsApp share message
 // ---------------------------------------------------------------------------
-function buildShareText({ action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceMetres }) {
+function buildShareText({ action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceFromHub }) {
   const actionLabel = action === 'checkin' ? '✅ Shift Started' : '👋 Shift Ended';
   const shiftLabel  = record?.shift_type === 'day' ? '☀ Day Shift' : '🌙 Night Shift';
   const timeDisplay = new Date(timestamp).toLocaleString('en-IN', {
@@ -70,7 +53,7 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
     `🕐 ${timeDisplay}`,
     `${geoTag}`,
     `📱 Device: ${deviceId?.slice(-8) || 'Unknown'}`, // Show last 8 chars of device ID
-    `📏 Dist. from Hub: ${formatDistance(distanceMetres)}${distanceMetres != null && distanceMetres > 15 ? ' *CHECK LOCATION*' : ''}`,
+    `📏 Dist. from Hub: ${formatDistance(distanceFromHub)}${distanceFromHub != null && distanceFromHub > 15 ? ' *CHECK LOCATION*' : ''}`,
   ].join('\n');
 }
 
@@ -82,8 +65,6 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
 
   const [resolvedHubName, setResolvedHubName] = useState('—');
   const [resolvedEmpName, setResolvedEmpName] = useState(user?.name || 'Employee');
-  // Hub coordinates fetched alongside hub name — used for JS-side distance calc.
-  const [hubCoords, setHubCoords] = useState(null); // { lat, lng } or null
 
   useEffect(() => {
     const fetchNames = async () => {
@@ -101,15 +82,10 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
         }
       }
 
-      // 2. Resolve hub name AND coordinates (lat, lng) in a single query.
+      // 2. Resolve hub name
       //    We use session_logs_data to find the relevant hub_id.
       if (record?.employees?.hubs?.name) {
         setResolvedHubName(record.employees.hubs.name);
-        // If the joined hub already carries lat/lng, capture them.
-        const h = record.employees.hubs;
-        if (h.lat != null && h.lng != null) {
-          setHubCoords({ lat: h.lat, lng: h.lng });
-        }
       } else {
         // Find hub_id from the last session in session_logs_data
         let sessions = record?.session_logs_data || [];
@@ -120,17 +96,13 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
         const hubId = lastSession?.hub_id;
 
         if (hubId) {
-          // Fetch name + coordinates together — no extra round-trip needed.
           const { data: hubData } = await supabase
             .from('hubs')
-            .select('name, hub_code, lat, lng')
+            .select('name, hub_code')
             .eq('id', hubId)
             .single();
           if (hubData) {
             setResolvedHubName(hubData.name || hubData.hub_code || '—');
-            if (hubData.lat != null && hubData.lng != null) {
-              setHubCoords({ lat: hubData.lat, lng: hubData.lng });
-            }
           }
         }
       }
@@ -140,15 +112,21 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
   }, [record, user]);
 
   // ---------------------------------------------------------------------------
-  // Compute distance from hub in the frontend — pure JS, no DB column needed.
-  // geolocation = { lat, lng, accuracy } captured at check-in/out time.
-  // hubCoords   = { lat, lng } fetched above from hubs.lat / hubs.lng.
-  // Returns null when either piece is missing (hub has no coords, or GPS denied).
+  // Resolve distance_from_hub_m from the last session log entry.
+  // On check-in:  the new open session already carries the distance.
+  // On check-out: the RPC closes the open session and writes the distance there.
+  // We always read from the last entry in session_logs_data.
   // ---------------------------------------------------------------------------
-  const distanceMetres = useMemo(() => {
-    if (!geolocation || !hubCoords) return null;
-    return haversineMetres(geolocation.lat, geolocation.lng, hubCoords.lat, hubCoords.lng);
-  }, [geolocation, hubCoords]);
+  const distanceFromHub = useMemo(() => {
+    let sessions = record?.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch (e) { sessions = []; }
+    }
+    const lastSession = sessions[sessions.length - 1];
+    const raw = lastSession?.distance_from_hub_m;
+    // Treat explicit null as null (hub has no coords); undefined also → null.
+    return raw !== undefined ? raw : null;
+  }, [record]);
 
   const employeeName = resolvedEmpName;
   const hubName      = resolvedHubName;
@@ -158,8 +136,8 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
 
   // Memoize share text to avoid rebuilding on every render
   const shareText = useMemo(() => buildShareText({
-    action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceMetres,
-  }), [action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceMetres]);
+    action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceFromHub,
+  }), [action, record, deviceId, geolocation, timestamp, employeeName, hubName, distanceFromHub]);
 
   // Format timestamp for display
   const timeDisplay = timestamp
@@ -265,15 +243,15 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
             </div>
           </div>
 
-          {/* Distance from Hub — computed in JS using hub lat/lng vs employee GPS fix */}
+          {/* Distance from Hub — populated by the database RPC after check-in/out */}
           <div className="receipt__detail-row">
             <span className="receipt__detail-icon">📏</span>
             <div>
               <p className="receipt__detail-label">DIST. FROM HUB</p>
               <p className="receipt__detail-value">
-                {formatDistance(distanceMetres)}
-                {distanceMetres != null && distanceMetres > 15 && (
-                  <span className="receipt__location-warning">CHECK LOCATION</span>
+                {formatDistance(distanceFromHub)}
+                {distanceFromHub != null && distanceFromHub > 15 && (
+                  <span className="receipt__location-warning"> CHECK LOCATION</span>
                 )}
               </p>
             </div>
