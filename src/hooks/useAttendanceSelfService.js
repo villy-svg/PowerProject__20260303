@@ -74,7 +74,7 @@ async function captureGeolocation() {
         throw new Error('Location permission is required to update attendance. Please enable it in device settings.');
       }
 
-      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, maximumAge: 0 });
       return {
         lat:      position.coords.latitude,
         lng:      position.coords.longitude,
@@ -91,7 +91,7 @@ async function captureGeolocation() {
         navigator.geolocation.getCurrentPosition(
           (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy }),
           ()    => resolve(null),  // Denied — non-blocking on web
-          { enableHighAccuracy: true, timeout: 8000 }
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
         );
       });
     } catch {
