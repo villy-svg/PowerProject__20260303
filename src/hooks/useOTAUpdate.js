@@ -1,10 +1,10 @@
 /**
  * useOTAUpdate Hook
  *
- * Manages OTA update lifecycle:
- * 1. On mount, notify plugin that current bundle is healthy
- * 2. Check for updates once (respecting interval throttle)
- * 3. Expose update state for optional UI display
+ * Manages OTA update lifecycle with three distinct UI stages:
+ *  1. updateDetected   — A newer version exists on GitHub. Show toast.
+ *  2. isApplying       — Bundle is downloading in the background.
+ *  3. downloadComplete — Bundle downloaded & applied. Show restart modal.
  *
  * CRITICAL: All operations are no-ops on web platform.
  *
@@ -22,12 +22,23 @@ import { OTA_CONFIG } from '../constants/appVersion';
 const LAST_CHECK_KEY = 'ota_last_check_timestamp';
 
 export function useOTAUpdate() {
+  // updateAvailable: true once we confirm GitHub has a newer version
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  // updateDetected: triggers the initial pop-up toast (update found, download starting)
+  const [updateDetected, setUpdateDetected] = useState(false);
+  // updateVersion: the semver string of the new release (e.g. "2.3.5")
   const [updateVersion, setUpdateVersion] = useState(null);
+  // isChecking: true while the GitHub API call is in flight
   const [isChecking, setIsChecking] = useState(false);
+  // isApplying: true while the bundle ZIP is downloading & being applied
   const [isApplying, setIsApplying] = useState(false);
+  // downloadComplete: true once the bundle is ready — triggers the restart modal
+  const [downloadComplete, setDownloadComplete] = useState(false);
+  // showRestartModal: user-controlled visibility of the restart prompt
+  const [showRestartModal, setShowRestartModal] = useState(false);
 
-  // Notify plugin on mount that the current bundle is working
+  // Notify plugin on mount that the current bundle is working.
+  // If a bad bundle was applied last time, this confirms the rollback succeeded.
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
@@ -42,11 +53,11 @@ export function useOTAUpdate() {
     init();
   }, []);
 
-  // Check for updates (throttled)
+  // Check for updates (throttled by OTA_CONFIG.checkIntervalMs)
   const checkForUpdate = useCallback(async () => {
     if (!Capacitor.isNativePlatform()) return;
 
-    // Throttle: Don't check more often than the configured interval
+    // Throttle: Don't check more often than the configured interval (default: 1 hr)
     try {
       const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
       if (lastCheck) {
@@ -65,15 +76,25 @@ export function useOTAUpdate() {
       const result = await otaUpdateService.checkForUpdate();
 
       if (result.hasUpdate) {
+        // Stage 1: Update detected — show the toast immediately
         setUpdateAvailable(true);
+        setUpdateDetected(true);
         setUpdateVersion(result.version);
-        // Auto-apply in background
+
+        // Stage 2: Apply in the background (download is silent, user keeps working)
         setIsApplying(true);
-        await otaUpdateService.applyUpdate(result.downloadUrl, result.version);
+        const applied = await otaUpdateService.applyUpdate(result.downloadUrl, result.version);
         setIsApplying(false);
+
+        if (applied) {
+          // Stage 3: Download complete — show the restart modal, dismiss the toast
+          setDownloadComplete(true);
+          setShowRestartModal(true);
+          setUpdateDetected(false);
+        }
       }
 
-      // Record successful check timestamp
+      // Record the timestamp of this successful check
       try {
         localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
       } catch (e) {
@@ -81,25 +102,40 @@ export function useOTAUpdate() {
       }
     } catch (error) {
       console.error('[useOTAUpdate] Check failed:', error);
+      setIsApplying(false);
     } finally {
       setIsChecking(false);
     }
   }, []);
 
-  // Auto-check on mount
+  // Auto-check on mount — delayed by 3 seconds to not block app startup rendering
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    // Delay the check slightly to not block app startup
     const timer = setTimeout(checkForUpdate, 3000);
     return () => clearTimeout(timer);
   }, [checkForUpdate]);
 
+  /** Dismiss the initial update-detected toast (download continues in background) */
+  const dismissUpdateToast = useCallback(() => {
+    setUpdateDetected(false);
+  }, []);
+
+  /** Dismiss the restart modal (update will apply on next natural restart) */
+  const dismissRestartModal = useCallback(() => {
+    setShowRestartModal(false);
+  }, []);
+
   return {
     updateAvailable,
+    updateDetected,
     updateVersion,
     isChecking,
     isApplying,
+    downloadComplete,
+    showRestartModal,
     checkForUpdate,
+    dismissUpdateToast,
+    dismissRestartModal,
   };
 }

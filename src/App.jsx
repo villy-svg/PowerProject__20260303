@@ -34,6 +34,10 @@ import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewe
 import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
 import { fetchRules } from './services/employees/rulesService';
 import { getRuleLogo, LOGO_KEYWORD_MAPPINGS } from './features/tutorials/logoConfig';
+import OTAUpdateToast from './components/ota/OTAUpdateToast';
+import OTARestartModal from './components/ota/OTARestartModal';
+import { otaUpdateService } from './services/core/otaUpdateService';
+import { OTAContextProvider } from './app/contexts/OTAContext';
 
 // TanStack Query Imports
 import { QueryClient } from '@tanstack/react-query';
@@ -97,7 +101,19 @@ function AppShell({ verticals, verticalList }) {
   });
 
   const currentUserPermissions = useRBAC(user, activeVertical, verticals);
-  useOTAUpdate();
+
+  // OTA Update — exposes multi-stage state for toast and restart modal UI
+  const otaState = useOTAUpdate();
+  const {
+    updateAvailable,
+    updateDetected,
+    updateVersion,
+    isApplying,
+    showRestartModal,
+    dismissUpdateToast,
+    dismissRestartModal,
+  } = otaState;
+
   // Push notification registration + in-app bell state.
   // Mounted here so it is active for the entire authenticated session.
   usePushNotifications({ user });
@@ -355,40 +371,63 @@ function AppShell({ verticals, verticalList }) {
   // ─── LAYOUT SHELL SWITCHOVER ───────────────────────────────────────
   // All chrome (sidebar, header, nav) is now handled by LayoutShell.
   // AppShell only provides data props and renders ContentRouter.
+  // OTAContextProvider wraps everything so UserProfile (in mobile header
+  // inside ExecutiveSummary) can read updateAvailable without prop drilling.
   return (
-    <>
-      <LayoutShell
-        user={user}
-        permissions={currentUserPermissions}
-        verticals={verticals}
-        verticalList={verticalList}
-        onLogout={handleLogout}
-        realUser={realUser}
-        impersonatedUser={impersonatedUser}
-        impersonationUsers={impersonationUsers}
-        onImpersonate={handleImpersonate}
-      >
-        <ContentRouter
-          verticals={verticals}
-          verticalList={verticalList}
-          permissions={currentUserPermissions}
-          rolePermissions={rolePermissions}
-          setRolePermissions={setRolePermissions}
-        />
-      </LayoutShell>
-
-      {currentTutorialIndex >= 0 && tutorialQueue[currentTutorialIndex] && (
-        <TutorialSlideshowViewer
-          flow={tutorialQueue[currentTutorialIndex]}
-          platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
-          onClose={handleCloseTutorial}
+    <OTAContextProvider value={otaState}>
+      <>
+        <LayoutShell
           user={user}
           permissions={currentUserPermissions}
-          preventSkip={tutorialQueue[currentTutorialIndex].id !== 'customer_support' && user?.roleId !== 'master_admin'}
-          onlyFirstSlide={true}
-        />
-      )}
-    </>
+          verticals={verticals}
+          verticalList={verticalList}
+          onLogout={handleLogout}
+          realUser={realUser}
+          impersonatedUser={impersonatedUser}
+          impersonationUsers={impersonationUsers}
+          onImpersonate={handleImpersonate}
+        >
+          <ContentRouter
+            verticals={verticals}
+            verticalList={verticalList}
+            permissions={currentUserPermissions}
+            rolePermissions={rolePermissions}
+            setRolePermissions={setRolePermissions}
+          />
+        </LayoutShell>
+
+        {currentTutorialIndex >= 0 && tutorialQueue[currentTutorialIndex] && (
+          <TutorialSlideshowViewer
+            flow={tutorialQueue[currentTutorialIndex]}
+            platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
+            onClose={handleCloseTutorial}
+            user={user}
+            permissions={currentUserPermissions}
+            preventSkip={tutorialQueue[currentTutorialIndex].id !== 'customer_support' && user?.roleId !== 'master_admin'}
+            onlyFirstSlide={true}
+          />
+        )}
+
+        {/* OTA Stage 1: Update detected toast — shown while download runs in background */}
+        {updateDetected && (
+          <OTAUpdateToast
+            version={updateVersion}
+            isApplying={isApplying}
+            onDismiss={dismissUpdateToast}
+          />
+        )}
+
+        {/* OTA Stage 3: Restart modal — shown after bundle download completes */}
+        {showRestartModal && (
+          <OTARestartModal
+            currentVersion={APP_VERSION}
+            newVersion={updateVersion}
+            onRestartNow={() => otaUpdateService.restartNow()}
+            onRestartLater={dismissRestartModal}
+          />
+        )}
+      </>
+    </OTAContextProvider>
   );
 }
 

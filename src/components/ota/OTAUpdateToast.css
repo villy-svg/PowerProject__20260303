@@ -1,0 +1,155 @@
+/* ======================================================
+   OTAUpdateToast.css
+   Floating toast for OTA update detection.
+   Design System: glassmorphism, CSS variables only.
+   Position: fixed bottom-right (desktop), bottom-center (mobile).
+   ====================================================== */
+
+/* Toast container — fixed overlay, slides in from bottom */
+.ota-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+  min-width: 280px;
+  max-width: 360px;
+
+  background: color-mix(in srgb, var(--bg-color), transparent 10%);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 50%);
+  border-radius: var(--radius-squircle, 20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 20px var(--halo-glow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  animation: ota-toast-slide-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Icon circle */
+.ota-toast__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  color: var(--brand-green);
+  box-shadow: 0 0 12px var(--halo-glow);
+}
+
+/* Text block */
+.ota-toast__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ota-toast__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.ota-toast__version {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--brand-green);
+  background: var(--halo-bg);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.ota-toast__subtitle {
+  font-size: 0.72rem;
+  color: var(--text-color);
+  opacity: 0.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Spinner — spins while bundle is downloading */
+.ota-toast__spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in srgb, var(--brand-green), transparent 70%);
+  border-top-color: var(--brand-green);
+  border-radius: 50%;
+  animation: ota-spinner-rotate 0.8s linear infinite;
+}
+
+/* Dismiss (×) button */
+.ota-toast__dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.ota-toast__dismiss:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 85%);
+}
+
+/* ── Animations ── */
+@keyframes ota-toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ota-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Mobile: full-width bar at bottom ── */
+@media screen and (max-width: 480px) {
+  .ota-toast {
+    left: 12px;
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)); /* above mobile nav bar */
+    min-width: unset;
+    max-width: unset;
+    border-radius: 16px;
+  }
+
+  .ota-toast__title {
+    font-size: 0.8rem;
+  }
+}

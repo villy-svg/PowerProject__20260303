@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { ROLE_LIST } from '../../constants/roles';
 import CustomSelect from '../ui/CustomSelect';
 import BankChangeRequestModal from './BankChangeRequestModal';
+import { useOTAContext } from '../../app/contexts/OTAContext';
 import './UserProfile.css';
 
 const UserProfile = ({ 
@@ -13,12 +15,15 @@ const UserProfile = ({
   realUser,
   impersonatedUser,
   impersonationUsers,
-  onImpersonate
+  onImpersonate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showBankHint, setShowBankHint] = useState(false);
   const [showBankChangeModal, setShowBankChangeModal] = useState(false);
   const dropdownRef = useRef(null);
+
+  // OTA update state — consumed from context, no prop drilling needed
+  const { updateAvailable } = useOTAContext();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -138,6 +143,18 @@ const UserProfile = ({
               <span className="bank-empty">No linked bank account.</span>
             )}
           </div>
+
+          {/* OTA Update Button — shown below bank details on native platform when update is available */}
+          {Capacitor.isNativePlatform() && updateAvailable && (
+            <button
+              id="profile-update-app-btn"
+              className="dropdown-item update-app-btn"
+              onClick={() => { setIsOpen(false); }}
+            >
+              <span className="update-app-btn__dot" aria-hidden="true" />
+              Update App
+            </button>
+          )}
 
           <div className="dropdown-divider" />
 

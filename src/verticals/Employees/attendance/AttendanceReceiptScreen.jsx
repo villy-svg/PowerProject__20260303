@@ -53,7 +53,7 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
     `🕐 ${timeDisplay}`,
     `${geoTag}`,
     `📱 Device: ${deviceId?.slice(-8) || 'Unknown'}`, // Show last 8 chars of device ID
-    `📏 Dist. from Hub: ${formatDistance(distanceFromHub)}${distanceFromHub != null && distanceFromHub > 15 ? ' *CHECK LOCATION*' : ''}`,
+    `📏 Dist. from Hub: ${formatDistance(distanceFromHub)}${distanceFromHub != null && distanceFromHub > 50 ? ' *CHECK LOCATION*' : ''}`,
   ].join('\n');
 }
 
@@ -250,7 +250,7 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
               <p className="receipt__detail-label">DIST. FROM HUB</p>
               <p className="receipt__detail-value">
                 {formatDistance(distanceFromHub)}
-                {distanceFromHub != null && distanceFromHub > 15 && (
+                {distanceFromHub != null && distanceFromHub > 50 && (
                   <span className="receipt__location-warning"> CHECK LOCATION</span>
                 )}
               </p>

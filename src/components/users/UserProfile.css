@@ -334,3 +334,49 @@
   color: #2563eb;
 }
 
+/* ── OTA Update App Button ─────────────────────────────
+   Shown in the dropdown when a native OTA update is ready.
+   Uses status-warning (amber) to draw attention.
+   ─────────────────────────────────────────────────── */
+.update-app-btn {
+  position: relative;
+  color: var(--status-warning, #f59e0b) !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  font-weight: 800 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 10px !important;
+  justify-content: flex-start;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.update-app-btn:hover {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+/* Pulsing amber dot indicator */
+.update-app-btn__dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-warning, #f59e0b);
+  animation: ota-btn-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ota-btn-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+    opacity: 0.85;
+  }
+}

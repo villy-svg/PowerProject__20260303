@@ -214,6 +214,22 @@ async function checkAndApply() {
   }
 }
 
+/**
+ * Immediately reloads the WebView into the newly downloaded bundle.
+ * Should only be called after applyUpdate() has resolved successfully.
+ * The user will see a brief flash as the WebView reloads.
+ */
+async function restartNow() {
+  if (!Capacitor.isNativePlatform()) return;
+
+  try {
+    console.log('[OTA] Reloading into new bundle...');
+    await CapacitorUpdater.reload();
+  } catch (error) {
+    console.error('[OTA] reload() failed:', error);
+  }
+}
+
 export const otaUpdateService = {
   checkForUpdate,
   applyUpdate,
@@ -221,4 +237,5 @@ export const otaUpdateService = {
   checkAndApply,
   getCurrentEnvironment,
   isNewerVersion,
+  restartNow,
 };
