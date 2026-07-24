@@ -144,17 +144,17 @@ const UserProfile = ({
             )}
           </div>
 
-          {/* OTA Update Button — shown below bank details on native platform when update is available */}
-          {Capacitor.isNativePlatform() && updateAvailable && (
-            <button
-              id="profile-update-app-btn"
-              className="dropdown-item update-app-btn"
-              onClick={() => { setIsOpen(false); }}
-            >
-              <span className="update-app-btn__dot" aria-hidden="true" />
-              Update App
-            </button>
-          )}
+          {/* OTA Update Button — always visible, but disabled unless an update is pending */}
+          <button
+            id="profile-update-app-btn"
+            className={`dropdown-item update-app-btn ${!updateAvailable ? 'disabled' : ''}`}
+            onClick={() => { setIsOpen(false); }}
+            disabled={!updateAvailable}
+            title={updateAvailable ? "A new update is ready" : "App is up to date"}
+          >
+            {updateAvailable && <span className="update-app-btn__dot" aria-hidden="true" />}
+            Update App
+          </button>
 
           <div className="dropdown-divider" />
 
