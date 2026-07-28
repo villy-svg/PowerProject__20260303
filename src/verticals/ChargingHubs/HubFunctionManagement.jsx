@@ -141,7 +141,7 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
                   onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
                 >
                   <p className="u-text-upper">Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
+                  <span className={`dropdown-icon ${isActionsDropdownOpen ? 'open' : ''}`}>
                     <IconChevronDown size={10} />
                   </span>
                 </div>
@@ -171,13 +171,22 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
         <div className="hubs-grid">
           {functions.map(fn => (
             <div key={fn.id} className="hub-card">
-              <div className="hub-code-tag">{fn.function_code || 'NO CODE'}</div>
-              <h3>{fn.name}</h3>
-              <p className="hub-city">{fn.description || 'No description provided'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(fn)} title="Edit Function">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(fn.id)} title="Delete Function">×</button>}
+              {/* Top row: function code badge + action buttons */}
+              <div className="hub-card-top-row">
+                <span className="hub-code-tag">{fn.function_code || '—'}</span>
+                <div className="hub-actions">
+                  {permissions.canUpdate && (
+                    <button className="edit-btn" onClick={() => handleOpenModal(fn)} title="Edit Function">✎</button>
+                  )}
+                  {permissions.canDelete && (
+                    <button className="delete-btn" onClick={() => handleDelete(fn.id)} title="Delete Function">×</button>
+                  )}
+                </div>
               </div>
+              {/* Function name */}
+              <p className="hub-name-small">{fn.name}</p>
+              {/* Description */}
+              <p className="hub-city">{fn.description || 'No description provided.'}</p>
             </div>
           ))}
           {functions.length === 0 && !loading && (
@@ -216,54 +225,69 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
         </div>
       )}
 
+      {/* ── Modal (sibling to grid/list, always accessible) ── */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content hub-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header */}
             <header className="modal-header">
               <h2>{editingFunction ? 'Edit Hub Function' : 'Create New Function'}</h2>
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
 
+            {/* Scrollable Form Body */}
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Function Name</label>
-                  <input 
-                    type="text" 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Maintenance, Inspection, Cleaning"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  {/* Function Name */}
+                  <div className="form-group">
+                    <label>Function Name</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Maintenance, Inspection, Cleaning"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Function Code */}
+                  <div className="form-group">
+                    <label>Function Code (Short ID)</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.function_code}
+                        onChange={(e) => setFormData({ ...formData, function_code: e.target.value })}
+                        placeholder="e.g. MNT, CLN, INSP"
+                      />
+                    </div>
+                  </div>
                 </div>
 
+                {/* Description */}
                 <div className="form-group">
-                  <label>Function Code (Short ID)</label>
-                  <input 
-                    type="text" 
-                    value={formData.function_code} 
-                    onChange={(e) => setFormData({...formData, function_code: e.target.value})}
-                    placeholder="e.g. MNT, CLN, INSP"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="What does this function involve?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
+
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>
+                    {statusMsg.text}
+                  </div>
+                )}
               </div>
 
-              <div className="form-group">
-                <label>Description</label>
-                <textarea 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="What does this function involve?"
-                  rows={4}
-                />
-              </div>
-
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
-
+              {/* Sticky Modal Footer */}
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>
@@ -279,3 +303,4 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
 };
 
 export default HubFunctionManagement;
+

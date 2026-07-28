@@ -8,7 +8,8 @@ import {
   deleteSubCategory,
   deleteRule, toggleRuleActive,
 } from '../../services/employees/rulesService';
-import '../ChargingHubs/HubFunctionManagement.css'; // Shared management styles
+import '../../styles/ManagementForms.css';
+import '../ChargingHubs/HubManagement.css'; // Shared management styles
 import './EmployeeRulesBoard.css'; // Badge styles
 import './RuleManagement.css'; // Tab & Row styles
 import CategoryFormModal from './CategoryFormModal';
@@ -217,16 +218,18 @@ const RuleManagement = ({ user, setActiveVertical, onShowBottomNav }) => {
           <div className="hubs-grid">
             {categories.map(cat => (
               <div key={cat.id} className="hub-card">
-                <div className="hub-code-tag">{cat.icon || '📋'}</div>
-                <h3>{cat.name}</h3>
+                <div className="hub-card-top-row">
+                  <span className="hub-code-tag">{cat.icon || '📋'}</span>
+                  <div className="hub-actions">
+                    <button className="edit-btn" onClick={() => setCatModal({ open: true, item: cat })} title="Edit">✎</button>
+                    <button className="delete-btn" onClick={() => handleDeleteCategory(cat.id)} title="Delete">×</button>
+                  </div>
+                </div>
+                <p className="hub-name-small">{cat.name}</p>
                 <p className="hub-city u-whitespace-prewrap">{cat.description || 'No description'}</p>
                 <p className="u-text-xs u-opacity-50 u-mt-4">
                   Order: {cat.sort_order}
                 </p>
-                <div className="hub-actions">
-                  <button className="halo-button edit-btn" onClick={() => setCatModal({ open: true, item: cat })} title="Edit">✎</button>
-                  <button className="halo-button delete-btn" onClick={() => handleDeleteCategory(cat.id)} title="Delete">×</button>
-                </div>
               </div>
             ))}
             {categories.length === 0 && (

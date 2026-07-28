@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeRoleManagement.css';
+import '../../styles/ManagementForms.css';
 import '../ChargingHubs/HubManagement.css'; // Global grid/list layout logic
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
@@ -171,14 +172,18 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
         <div className="hubs-grid">
           {roles.map(role => (
             <div key={role.id} className="hub-card">
-              <div className="hub-code-tag">{role.role_code || 'NO CODE'}</div>
-              <div className="seniority-tag">Level {role.seniority_level || 1}</div>
-              <h3>{role.name}</h3>
-              <p className="hub-city">{role.description || 'No description provided'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(role)} title="Edit Role">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(role.id)} title="Delete Role">×</button>}
+              <div className="hub-card-top-row">
+                <div className="u-flex-center-gap-8">
+                  <span className="hub-code-tag">{role.role_code || 'NO CODE'}</span>
+                  <span className="seniority-tag">Level {role.seniority_level || 1}</span>
+                </div>
+                <div className="hub-actions">
+                  {permissions.canUpdate && <button className="edit-btn" onClick={() => handleOpenModal(role)} title="Edit Role">✎</button>}
+                  {permissions.canDelete && <button className="delete-btn" onClick={() => handleDelete(role.id)} title="Delete Role">×</button>}
+                </div>
               </div>
+              <p className="hub-name-small">{role.name}</p>
+              <p className="hub-city">{role.description || 'No description provided'}</p>
             </div>
           ))}
           {roles.length === 0 && !loading && (
@@ -230,57 +235,67 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Role Name</label>
-                  <input 
-                    type="text" 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Senior Developer, Marketing Associate"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Role Name</label>
+                    <div className="form-input-container">
+                      <input 
+                        type="text" 
+                        value={formData.name} 
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="e.g. Senior Developer, Marketing Associate"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Role Code</label>
+                    <div className="form-input-container">
+                      <input 
+                        type="text" 
+                        value={formData.role_code} 
+                        onChange={(e) => setFormData({...formData, role_code: e.target.value})}
+                        placeholder="e.g. SR-DEV, MKT-ASC"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Seniority Level</label>
+                    <div className="form-input-container">
+                      <input 
+                        type="number" 
+                        min="1" 
+                        max="10"
+                        value={formData.seniority_level} 
+                        onChange={(e) => setFormData({...formData, seniority_level: parseInt(e.target.value) || 1})}
+                        placeholder="1-10 (1=lowest, 10=highest)"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Role Code</label>
-                  <input 
-                    type="text" 
-                    value={formData.role_code} 
-                    onChange={(e) => setFormData({...formData, role_code: e.target.value})}
-                    placeholder="e.g. SR-DEV, MKT-ASC"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea 
+                      value={formData.description} 
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="What are the key responsibilities of this role?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Seniority Level</label>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    max="10"
-                    value={formData.seniority_level} 
-                    onChange={(e) => setFormData({...formData, seniority_level: parseInt(e.target.value) || 1})}
-                    placeholder="1-10 (1=lowest, 10=highest)"
-                    required
-                  />
-                </div>
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>
+                    {statusMsg.text}
+                  </div>
+                )}
               </div>
-
-              <div className="form-group">
-                <label>Description</label>
-                <textarea 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="What are the key responsibilities of this role?"
-                  rows={4}
-                />
-              </div>
-
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
 
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>

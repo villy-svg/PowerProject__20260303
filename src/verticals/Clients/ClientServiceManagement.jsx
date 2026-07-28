@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { clientServiceManager } from '../../services/clients/clientService';
+import '../../styles/ManagementForms.css';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
@@ -161,13 +162,15 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
         <div className="hubs-grid">
           {categories.map(cat => (
             <div key={cat.id} className="hub-card">
-              <div className="hub-code-tag">{cat.code || 'NO CODE'}</div>
-              <h3>{cat.name}</h3>
-              <p className="hub-city">{cat.description || 'No description provided'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)} title="Edit Service">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)} title="Delete Service">×</button>}
+              <div className="hub-card-top-row">
+                <span className="hub-code-tag">{cat.code || 'NO CODE'}</span>
+                <div className="hub-actions">
+                  {permissions.canUpdate && <button className="edit-btn" onClick={() => handleOpenModal(cat)} title="Edit Service">✎</button>}
+                  {permissions.canDelete && <button className="delete-btn" onClick={() => handleDelete(cat.id)} title="Delete Service">×</button>}
+                </div>
               </div>
+              <p className="hub-name-small">{cat.name}</p>
+              <p className="hub-city">{cat.description || 'No description provided'}</p>
             </div>
           ))}
           {categories.length === 0 && !loading && (
@@ -177,7 +180,7 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -218,39 +221,47 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Service Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Full Maintenance, AMC"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Service Name</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Full Maintenance, AMC"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Service Code</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        placeholder="e.g. MAINT, AMC"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="form-group">
-                  <label>Service Code</label>
-                  <input
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g. MAINT, AMC"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="What does this service entail?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
+                )}
               </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="What does this service entail?"
-                  rows={4}
-                />
-              </div>
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
-              )}
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>

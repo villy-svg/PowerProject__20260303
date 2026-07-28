@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { clientCategoryService, clientServiceManager } from '../../services/clients/clientService';
+import '../../styles/ManagementForms.css';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
@@ -177,8 +178,14 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
         <div className="hubs-grid">
           {categories.map(cat => (
             <div key={cat.id} className="hub-card">
-              <div className="hub-code-tag">{cat.code || 'NO CODE'}</div>
-              <h3>{cat.name}</h3>
+              <div className="hub-card-top-row">
+                <span className="hub-code-tag">{cat.code || 'NO CODE'}</span>
+                <div className="hub-actions">
+                  {permissions.canUpdate && <button className="edit-btn" onClick={() => handleOpenModal(cat)} title="Edit Category">✎</button>}
+                  {permissions.canDelete && <button className="delete-btn" onClick={() => handleDelete(cat.id)} title="Delete Category">×</button>}
+                </div>
+              </div>
+              <p className="hub-name-small">{cat.name}</p>
               <p className="hub-city">{cat.description || 'No description provided'}</p>
               {cat.default_service_code && (
                 <div style={{ marginTop: '8px', fontSize: '0.8rem' }}>
@@ -186,10 +193,6 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
                   <code style={{ color: 'var(--brand-green)', fontWeight: 600 }}>{cat.default_service_code}</code>
                 </div>
               )}
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(cat)} title="Edit Category">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(cat.id)} title="Delete Category">×</button>}
-              </div>
             </div>
           ))}
           {categories.length === 0 && !loading && (
@@ -199,7 +202,7 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -242,54 +245,64 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Category Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Enterprise, SME, Retail"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Category Name</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Enterprise, SME, Retail"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Category Code</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        placeholder="e.g. ENT, SME, RTL"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Default Client Service</label>
+                    <div className="form-input-container">
+                      <select
+                        className="master-dropdown"
+                        value={formData.default_service_code}
+                        onChange={(e) => setFormData({ ...formData, default_service_code: e.target.value })}
+                      >
+                        <option value="">-- No Default Service --</option>
+                        {services.map(svc => (
+                          <option key={svc.id} value={svc.code}>
+                            {svc.name} ({svc.code})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
                 <div className="form-group">
-                  <label>Category Code</label>
-                  <input
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g. ENT, SME, RTL"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="What type of clients belong to this category?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Default Client Service</label>
-                  <select
-                    className="master-dropdown"
-                    value={formData.default_service_code}
-                    onChange={(e) => setFormData({ ...formData, default_service_code: e.target.value })}
-                  >
-                    <option value="">-- No Default Service --</option>
-                    {services.map(svc => (
-                      <option key={svc.id} value={svc.code}>
-                        {svc.name} ({svc.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
+                )}
               </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="What type of clients belong to this category?"
-                  rows={4}
-                />
-              </div>
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
-              )}
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>

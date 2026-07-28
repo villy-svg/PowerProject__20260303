@@ -1,5 +1,9 @@
-/* HubFunctionManagement uses HubManagement styles primarily */
-/* Shared table/list styles provided by HubManagement.css */
+/* HubFunctionManagement.css
+   Pulls in the global ManagementForms + HubManagement foundations so
+   cards, lists, and modals all inherit the design-system tokens correctly. */
+@import '../../styles/ManagementForms.css';
+@import './HubManagement.css';
+
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
@@ -16,7 +20,8 @@
   .management-view-header {
     margin-bottom: 24px;
   }
-  .management-table th, .management-table td {
+  .management-table th,
+  .management-table td {
     padding: 12px 16px;
   }
 }

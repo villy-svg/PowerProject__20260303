@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { billingModelService } from '../../services/clients/clientService';
+import '../../styles/ManagementForms.css';
 import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
@@ -137,13 +138,15 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
         <div className="hubs-grid">
           {models.map(model => (
             <div key={model.id} className="hub-card">
-              <div className="hub-code-tag">{model.code || 'NO CODE'}</div>
-              <h3>{model.name}</h3>
-              <p className="hub-city">{model.description || 'No description provided'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(model)} title="Edit Billing Model">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(model.id)} title="Delete Billing Model">×</button>}
+              <div className="hub-card-top-row">
+                <span className="hub-code-tag">{model.code || 'NO CODE'}</span>
+                <div className="hub-actions">
+                  {permissions.canUpdate && <button className="edit-btn" onClick={() => handleOpenModal(model)} title="Edit Billing Model">✎</button>}
+                  {permissions.canDelete && <button className="delete-btn" onClick={() => handleDelete(model.id)} title="Delete Billing Model">×</button>}
+                </div>
               </div>
+              <p className="hub-name-small">{model.name}</p>
+              <p className="hub-city">{model.description || 'No description provided'}</p>
             </div>
           ))}
           {models.length === 0 && !loading && (
@@ -153,7 +156,7 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
           )}
         </div>
       ) : (
-        <div className="hubs-list-view">
+        <div className="hubs-list-view responsive-table-wrapper">
           <table className="management-table">
             <thead>
               <tr>
@@ -194,39 +197,47 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
               <button className="close-modal" onClick={() => setIsModalOpen(false)}>&times;</button>
             </header>
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Billing Model Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Per Session, Monthly Retainer, Revenue Share"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Billing Model Name</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Per Session, Monthly Retainer, Revenue Share"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label>Code</label>
+                    <div className="form-input-container">
+                      <input
+                        type="text"
+                        value={formData.code}
+                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                        placeholder="e.g. PER-SES, MNT-RET, REV-SHR"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="form-group">
-                  <label>Code</label>
-                  <input
-                    type="text"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g. PER-SES, MNT-RET, REV-SHR"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="How does this billing model work?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
+                )}
               </div>
-              <div className="form-group">
-                <label>Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="How does this billing model work?"
-                  rows={4}
-                />
-              </div>
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>{statusMsg.text}</div>
-              )}
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
                 <button type="submit" className="halo-button save-btn" disabled={loading}>

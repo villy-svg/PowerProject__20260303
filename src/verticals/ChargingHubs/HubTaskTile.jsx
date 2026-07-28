@@ -88,10 +88,10 @@ const HubTaskTile = ({ task }) => {
           </div>
           <div className="u-flex-1 u-border-l-p8">
             <strong>New Details</strong>
-            <div className="u-break-all" style={{ color: payload.newDetails.accountNumber !== payload.oldDetails.accountNumber ? 'var(--brand-green)' : 'inherit' }}>A/C: {payload.newDetails.accountNumber || 'N/A'}</div>
-            <div style={{ color: payload.newDetails.ifscCode !== payload.oldDetails.ifscCode ? 'var(--brand-green)' : 'inherit' }}>IFSC: {payload.newDetails.ifscCode || 'N/A'}</div>
-            <div style={{ color: payload.newDetails.accountName !== payload.oldDetails.accountName ? 'var(--brand-green)' : 'inherit' }}>Name: {payload.newDetails.accountName || 'N/A'}</div>
-            <div style={{ color: payload.newDetails.panNumber !== payload.oldDetails.panNumber ? 'var(--brand-green)' : 'inherit' }}>PAN: {payload.newDetails.panNumber || 'N/A'}</div>
+            <div className={`u-break-all ${payload.newDetails.accountNumber !== payload.oldDetails.accountNumber ? 'u-text-brand-green' : ''}`}>A/C: {payload.newDetails.accountNumber || 'N/A'}</div>
+            <div className={payload.newDetails.ifscCode !== payload.oldDetails.ifscCode ? 'u-text-brand-green' : ''}>IFSC: {payload.newDetails.ifscCode || 'N/A'}</div>
+            <div className={payload.newDetails.accountName !== payload.oldDetails.accountName ? 'u-text-brand-green' : ''}>Name: {payload.newDetails.accountName || 'N/A'}</div>
+            <div className={payload.newDetails.panNumber !== payload.oldDetails.panNumber ? 'u-text-brand-green' : ''}>PAN: {payload.newDetails.panNumber || 'N/A'}</div>
           </div>
         </div>
         {user?.roleId === 'master_admin' && (

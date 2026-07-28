@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import '../ChargingHubs/HubFunctionManagement.css'; // Reuse styles
+import '../../styles/ManagementForms.css';
+import '../ChargingHubs/HubManagement.css';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
@@ -170,13 +171,15 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
         <div className="hubs-grid">
           {departments.map(dept => (
             <div key={dept.id} className="hub-card">
-              <div className="hub-code-tag">{dept.dept_code || 'NO CODE'}</div>
-              <h3>{dept.name}</h3>
-              <p className="hub-city">{dept.description || 'No description provided'}</p>
-              <div className="hub-actions">
-                {permissions.canUpdate && <button className="halo-button edit-btn" onClick={() => handleOpenModal(dept)} title="Edit Department">✎</button>}
-                {permissions.canDelete && <button className="halo-button delete-btn" onClick={() => handleDelete(dept.id)} title="Delete Department">×</button>}
+              <div className="hub-card-top-row">
+                <span className="hub-code-tag">{dept.dept_code || 'NO CODE'}</span>
+                <div className="hub-actions">
+                  {permissions.canUpdate && <button className="edit-btn" onClick={() => handleOpenModal(dept)} title="Edit Department">✎</button>}
+                  {permissions.canDelete && <button className="delete-btn" onClick={() => handleDelete(dept.id)} title="Delete Department">×</button>}
+                </div>
               </div>
+              <p className="hub-name-small">{dept.name}</p>
+              <p className="hub-city">{dept.description || 'No description provided'}</p>
             </div>
           ))}
           {departments.length === 0 && !loading && (
@@ -224,44 +227,52 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
             </header>
 
             <form onSubmit={handleSubmit} className="vertical-task-form">
-              <div className="form-row-grid">
-                <div className="form-group">
-                  <label>Department Name</label>
-                  <input 
-                    type="text" 
-                    value={formData.name} 
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="e.g. Engineering, Marketing, Operations"
-                    required
-                  />
+              <div className="modal-content-area">
+                <div className="form-row-grid">
+                  <div className="form-group">
+                    <label>Department Name</label>
+                    <div className="form-input-container">
+                      <input 
+                        type="text" 
+                        value={formData.name} 
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        placeholder="e.g. Engineering, Marketing, Operations"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Department Code</label>
+                    <div className="form-input-container">
+                      <input 
+                        type="text" 
+                        value={formData.dept_code} 
+                        onChange={(e) => setFormData({...formData, dept_code: e.target.value})}
+                        placeholder="e.g. ENG, MKT, OPS"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Department Code</label>
-                  <input 
-                    type="text" 
-                    value={formData.dept_code} 
-                    onChange={(e) => setFormData({...formData, dept_code: e.target.value})}
-                    placeholder="e.g. ENG, MKT, OPS"
-                  />
+                  <label>Description</label>
+                  <div className="form-input-container">
+                    <textarea 
+                      value={formData.description} 
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      placeholder="What is this department responsible for?"
+                      rows={4}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="form-group">
-                <label>Description</label>
-                <textarea 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="What is this department responsible for?"
-                  rows={4}
-                />
+                {statusMsg.text && (
+                  <div className={`status-message ${statusMsg.type}`}>
+                    {statusMsg.text}
+                  </div>
+                )}
               </div>
-
-              {statusMsg.text && (
-                <div className={`status-message ${statusMsg.type}`}>
-                  {statusMsg.text}
-                </div>
-              )}
 
               <div className="modal-footer">
                 <button type="button" className="halo-button cancel-btn" onClick={() => setIsModalOpen(false)}>Cancel</button>
