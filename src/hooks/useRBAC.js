@@ -45,6 +45,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessEmployeeRulesBoard: true,
         canAccessAttendanceSelfService: true,
         canAccessLeaveWallet: true,
+        canSkipTutorial: !!baseCaps.canCreate,
       };
 
       // Ensure feature-specific CRUD flags match global CRUD flags for master roles
@@ -118,6 +119,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
       canAccessConfig: verticalLevel === 'admin',
       canViewKanbanHierarchy,
       canAccessEscalationTasks: !!(featureLevels['canAccessHubTasks'] || verticalLevel !== 'none'),
+      canSkipTutorial: !!effectiveCaps.canCreate,
     };
 
     // 4. Feature-granular CRUD flags

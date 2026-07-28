@@ -435,6 +435,26 @@
   top: -12px;
 }
 
+/* Thought bubble alignment transforms */
+.annotation-thought-bubble.align-right { transform: translate(-85%, -120%); }
+.annotation-thought-bubble.align-left { transform: translate(-15%, -120%); }
+.annotation-thought-bubble.align-bottom-right { transform: translate(-85%, 20px); }
+.annotation-thought-bubble.align-bottom-left { transform: translate(-15%, 20px); }
+
+/* Thought bubble pointer/pulse alignments */
+.annotation-thought-bubble.align-right .thought-bubble-pulse,
+.annotation-thought-bubble.align-right .thought-bubble-pointer,
+.annotation-thought-bubble.align-bottom-right .thought-bubble-pulse,
+.annotation-thought-bubble.align-bottom-right .thought-bubble-pointer {
+  left: 85%;
+}
+.annotation-thought-bubble.align-left .thought-bubble-pulse,
+.annotation-thought-bubble.align-left .thought-bubble-pointer,
+.annotation-thought-bubble.align-bottom-left .thought-bubble-pulse,
+.annotation-thought-bubble.align-bottom-left .thought-bubble-pointer {
+  left: 15%;
+}
+
 /* Annotation SVG Overlay (Arrows) */
 .annotations-svg-overlay {
   position: absolute;
@@ -509,6 +529,10 @@
   opacity: 0.25;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.next-action-btn {
+  --stage-accent: var(--brand-green);
 }
 
 .slideshow-step-dots {
@@ -776,6 +800,7 @@
 }
 
 .onboarding-next-btn {
+  --stage-accent: var(--brand-green);
   width: 100%;
   padding: 12px !important; /* Shrunk vertical padding of next button */
   font-size: 1rem !important;

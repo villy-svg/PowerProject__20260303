@@ -9,6 +9,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [slideTimeRemaining, setSlideTimeRemaining] = useState(0);
 
   const baseSlides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
   const [editableSlides, setEditableSlides] = useState(
@@ -35,7 +36,17 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
 
   if (!currentSlide) return null;
 
+  const canSkipTutorial = permissions?.canSkipTutorial;
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
+
+  useEffect(() => {
+    if (canSkipTutorial) return;
+    setSlideTimeRemaining(10);
+    const interval = setInterval(() => {
+      setSlideTimeRemaining(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [slideIndex, canSkipTutorial]);
 
   const handleNext = () => {
     if (slideIndex < editableSlides.length - 1) {
@@ -196,7 +207,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             ) : (
               <div className="onboarding-back-placeholder" />
             )}
-            {!preventSkip && <button className="onboarding-skip-btn" onClick={() => onClose(false)}>Skip</button>}
+            {!preventSkip && canSkipTutorial && <button className="onboarding-skip-btn" onClick={() => onClose(false)}>Skip</button>}
           </div>
           
           <div className="onboarding-content-body">
@@ -248,7 +259,10 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                 <div 
                   key={idx} 
                   className={`step-dot-indicator ${slideIndex === idx ? 'active' : ''}`}
-                  onClick={() => setSlideIndex(idx)}
+                  onClick={() => {
+                    if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
+                    setSlideIndex(idx);
+                  }}
                 />
               ))}
             </div>
@@ -256,12 +270,13 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             <button 
               className="halo-button onboarding-next-btn"
               onClick={handleNext}
-              disabled={isEditing}
-              style={{ '--stage-accent': 'var(--brand-green)' }}
+              disabled={isEditing || (!canSkipTutorial && slideTimeRemaining > 0)}
             >
-              {slideIndex === editableSlides.length - 1 
-                ? (flow.id?.startsWith('rule_') ? 'Finish' : 'Get Started') 
-                : 'Next'}
+              {!canSkipTutorial && slideTimeRemaining > 0 
+                ? `Wait ${slideTimeRemaining}s` 
+                : (slideIndex === editableSlides.length - 1 
+                  ? (flow.id?.startsWith('rule_') ? 'Finish' : 'Get Started') 
+                  : 'Next')}
             </button>
           </div>
         </div>
@@ -278,7 +293,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             <span className="flow-category-label">{flow.category}</span>
             <h3 className="slideshow-flow-title">{flow.title}</h3>
           </div>
-          {!preventSkip && (
+          {!preventSkip && canSkipTutorial && (
             <button className="slideshow-close-btn" onClick={() => onClose(false)}>
               <IconX size={20} />
             </button>
@@ -322,35 +337,20 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                 }
 
                 if (ann.type === 'thought') {
-                  const alignStyle = ann.align === 'right' 
-                    ? { transform: 'translate(-85%, -120%)' } 
-                    : ann.align === 'left'
-                    ? { transform: 'translate(-15%, -120%)' }
-                    : ann.align === 'bottom-right'
-                    ? { transform: 'translate(-85%, 20px)' }
-                    : ann.align === 'bottom-left'
-                    ? { transform: 'translate(-15%, 20px)' }
-                    : {};
-                  const anchorLeft = ann.align === 'right' || ann.align === 'bottom-right'
-                    ? '85%' 
-                    : ann.align === 'left' || ann.align === 'bottom-left'
-                    ? '15%'
-                    : '50%';
                   return (
                     <div 
                       key={idx}
                       className={`annotation-thought-bubble animate-fade-in ${ann.align ? `align-${ann.align}` : ''}`}
                       style={{
                         top: `${ann.top}%`,
-                        left: `${ann.left}%`,
-                        ...alignStyle
+                        left: `${ann.left}%`
                       }}
                     >
-                      <div className="thought-bubble-pulse" style={{ left: anchorLeft }}></div>
+                      <div className="thought-bubble-pulse"></div>
                       <div className="thought-bubble-text">
                         {ann.text}
                       </div>
-                      <div className="thought-bubble-pointer" style={{ left: anchorLeft }}></div>
+                      <div className="thought-bubble-pointer"></div>
                     </div>
                   );
                 }
@@ -446,7 +446,10 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                 <div 
                   key={idx} 
                   className={`step-dot-indicator ${slideIndex === idx ? 'active' : ''}`}
-                  onClick={() => setSlideIndex(idx)}
+                  onClick={() => {
+                    if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
+                    setSlideIndex(idx);
+                  }}
                 />
               ))}
             </div>
@@ -454,11 +457,12 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
             <button 
               className="halo-button slideshow-control-btn next-action-btn"
               onClick={handleNext}
-              disabled={isEditing}
-              style={{ '--stage-accent': 'var(--brand-green)' }}
+              disabled={isEditing || (!canSkipTutorial && slideTimeRemaining > 0)}
             >
-              {slideIndex === editableSlides.length - 1 ? 'Finish' : 'Next'}
-              <IconChevronRight size={16} />
+              {!canSkipTutorial && slideTimeRemaining > 0 
+                ? `Wait ${slideTimeRemaining}s` 
+                : (slideIndex === editableSlides.length - 1 ? 'Finish' : 'Next')}
+              {(!(!canSkipTutorial && slideTimeRemaining > 0)) && <IconChevronRight size={16} />}
             </button>
           </div>
         </div>
