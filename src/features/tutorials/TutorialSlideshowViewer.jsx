@@ -51,6 +51,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const handleNext = () => {
     if (slideIndex < editableSlides.length - 1) {
       setSlideIndex(slideIndex + 1);
+      if (!canSkipTutorial) setSlideTimeRemaining(10);
     } else {
       onClose(true); // Completed
     }
@@ -59,6 +60,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const handlePrev = () => {
     if (slideIndex > 0) {
       setSlideIndex(slideIndex - 1);
+      if (!canSkipTutorial) setSlideTimeRemaining(10);
     }
   };
 
@@ -262,6 +264,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   onClick={() => {
                     if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
                     setSlideIndex(idx);
+                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(10);
                   }}
                 />
               ))}
@@ -449,6 +452,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   onClick={() => {
                     if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
                     setSlideIndex(idx);
+                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(10);
                   }}
                 />
               ))}

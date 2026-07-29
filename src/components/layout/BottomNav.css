@@ -9,10 +9,10 @@
   right: 0;
   z-index: 2005;
   display: none;
-  background: color-mix(in srgb, var(--bg-color), transparent 10%);
+  background: color-mix(in srgb, var(--bg-color), transparent 5%);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15); /* Increased border visibility */
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25);
   
@@ -113,8 +113,8 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--text-color);
-  opacity: 0.6;
+  color: #a1a1aa; /* Crisp neutral grey for black background */
+  opacity: 0.9; /* High opacity to prevent muddiness */
   gap: 4px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 44px;
