@@ -130,7 +130,7 @@ serve(async (req: Request) => {
           success: false, 
           error: "CAPTCHA verification failed", 
           code: "CAPTCHA_INVALID",
-          details: captchaValid.payload 
+          details: { ...captchaValid.payload, receivedToken: captchaToken } 
         }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
