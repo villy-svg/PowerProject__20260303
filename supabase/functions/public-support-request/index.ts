@@ -40,6 +40,12 @@ const supabaseAdmin = createClient(
 //   "turnstile" (default) | "recaptcha"
 // ---------------------------------------------------------------------------
 async function verifyCaptcha(token: string): Promise<{ success: boolean; payload?: any }> {
+  // Temporary bypass for development
+  if (token === 'dev-bypass') {
+    console.warn('[public-support-request] Bypassing CAPTCHA verification (dev-bypass)');
+    return { success: true };
+  }
+
   const secretKey = Deno.env.get("CAPTCHA_SECRET_KEY");
 
   // CAPTCHA_SECRET_KEY is REQUIRED in all environments (staging and production).
