@@ -267,18 +267,7 @@ const PublicSupportForm = () => {
     }
   };
 
-  // ── Render: init error ─────────────────────────────────────────────────────
-  if (initError) {
-    return (
-      <div className="psf-page">
-        <div className="psf-card">
-          <div className="psf-alert psf-alert--error">
-            <span>{initError}</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   // ── Render: success state ──────────────────────────────────────────────────
   if (isSubmitted) {
@@ -366,7 +355,7 @@ const PublicSupportForm = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
-                disabled={!isReady || isSubmitting}
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -442,9 +431,8 @@ const PublicSupportForm = () => {
           {/* Submit button */}
           <button
             type="submit"
-            className="psf-submit-btn"
-            id="psf-submit"
-            disabled={!isReady || isSubmitting}
+            className={`psf-submit-btn ${isSubmitting ? 'psf-submit-btn--loading' : ''}`}
+            disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
