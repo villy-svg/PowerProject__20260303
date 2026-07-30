@@ -11,7 +11,7 @@ import { getEmployeeSubmissions, submitProofOfWork } from '../../services/tasks/
  * Form for adding or editing employee records.
  * Features a 4-page wizard flow with View-Only support.
  */
-const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false }) => {
+const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false, allowDocumentUpload = false }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -278,7 +278,7 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
                   <div className="loading-spinner">Loading documents...</div>
                 ) : (
                   <div className="documents-section-container">
-                    {!isViewOnly && (
+                    {(!isViewOnly || allowDocumentUpload) && (
                       <div className="upload-dropzone">
                         <input
                           type="file"

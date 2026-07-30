@@ -44,9 +44,9 @@ const RAW_CONTEXT = {
   'Employees': {
     none:        { can: [], summary: 'Completely blocked from the Employees vertical.' },
     viewer:      { can: ['View employee profiles, department assignments, and roles', 'Browse attendance and remarks (Remarks limited by Sphere if Seniority ≤ 6)', 'Submit self-only bank details updates'], summary: 'For auditors or senior stakeholders. Note: Junior staff only see remarks tied to them or their reportees.' },
-    contributor: { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Submit new attendance entries and add task remarks'], summary: 'For team leads who log attendance and remarks. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
-    editor:      { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Create and update employee records, attendance logs, and remarks'], summary: 'For HR managers who actively manage employee data. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
-    admin:       { can: ['Full control over all Employees features', 'Manage profiles, attendance, rules & regulations, and all sub-boards'], summary: 'Grants complete authority over the Employees vertical. Master Admins bypass all Sphere limitations.' },
+    contributor: { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Submit new attendance entries and add task remarks', 'Add initial bank details during onboarding'], summary: 'For team leads who log attendance and remarks. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    editor:      { can: ['View Employee data (Remarks limited if Seniority ≤ 6)', 'Create and update employee records, attendance logs, and remarks', 'Update existing bank details (Requires Master Admin approval)'], summary: 'For HR managers who actively manage employee data. Remark visibility is restricted by Sphere of Influence for Junior staff.' },
+    admin:       { can: ['Full control over all Employees features', 'Manage profiles, attendance, rules & regulations, and all sub-boards', 'Add or update bank details directly (No approval required)'], summary: 'Grants complete authority over the Employees vertical. Master Admins bypass all Sphere limitations.' },
   },
   'Partners': {
     viewer:      { can: ['View partner profiles and associated data (read-only)'], summary: 'Read-only visibility into partner relationships.' },
@@ -90,9 +90,9 @@ const RAW_CONTEXT = {
   /* ── EMPLOYEES FEATURES ── */
   'Employees List': {
     viewer:      { can: ['Browse employee profiles, roles, and department assignments'], summary: 'Read-only access to the employee directory.' },
-    contributor: { can: ['Browse employee profiles', 'Onboard and register new employee records'], summary: 'For HR staff who add new employees but do not edit existing profiles.' },
-    editor:      { can: ['Browse employee profiles', 'Onboard new employees and update existing profiles'], summary: 'For HR managers who maintain the full employee directory.' },
-    admin:       { can: ['Full CRUD — add, edit, and permanently remove employee records'], summary: 'Complete authority over the Employees List.' },
+    contributor: { can: ['Browse employee profiles', 'Onboard and register new employee records', 'Add initial bank details for new employees'], summary: 'For HR staff who add new employees but do not edit existing profiles.' },
+    editor:      { can: ['Browse employee profiles', 'Onboard new employees and update existing profiles', 'Update employee bank details (Requires Master Admin approval)'], summary: 'For HR managers who maintain the full employee directory.' },
+    admin:       { can: ['Full CRUD — add, edit, and permanently remove employee records', 'Add or update bank details directly (No approval required)'], summary: 'Complete authority over the Employees List.' },
   },
   'Remarks Manager': {
     viewer:      { can: ['View task remarks and their full history (Limited by Sphere of Influence if Seniority ≤ 6)'], summary: 'For oversight roles. Note: Junior staff only see remarks assigned to/created by them or their reportees.' },
