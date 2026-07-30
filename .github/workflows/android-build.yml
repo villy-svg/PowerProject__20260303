@@ -73,10 +73,6 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      # ── 6. Setup Android SDK ──
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       # ── 7. Install Dependencies ──
       - name: Install Dependencies
         run: npm ci

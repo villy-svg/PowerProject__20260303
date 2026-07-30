@@ -177,10 +177,10 @@ serve(async (req: Request) => {
     // -------------------------------------------------------------------------
     // 4. Insert the task via Service Role key (bypasses RLS entirely)
     //
-    // Column mapping (corrected from runbook):
-    //   verticalid   — NOT "verticalId" — the actual column name in tasks table
-    //   stageid      — NOT NULL in schema; must be provided
-    //   assigned_to  — NOT "assignedTo" — snake_case column name
+    // Column mapping:
+    //   vertical_id  — must match valid verticals
+    //   stage_id     — NOT NULL in schema; must be provided
+    //   assigned_to  — snake_case column name
     // -------------------------------------------------------------------------
     const taskText = imageStoragePath
       ? `${summary.trim()} [Photo attached: ${imageStoragePath}]`
@@ -190,8 +190,9 @@ serve(async (req: Request) => {
       .from("tasks")
       .insert({
         text: taskText,
-        verticalid: "escalation_tasks",
-        stageid: "BACKLOG",
+        vertical_id: "CHARGING_HUBS",
+        stage_id: "BACKLOG",
+        task_board: ["Escalations"],
         priority: "High",
         assigned_to: managerId,
         hub_id: hubId ?? null,
