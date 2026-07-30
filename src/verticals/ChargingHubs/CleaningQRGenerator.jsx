@@ -29,7 +29,7 @@ import './CleaningQRGenerator.css';
  * Uses window.location.origin so the URL is always correct in any environment.
  */
 function buildReportUrl(hubId, managerId, summary) {
-  const base = `${window.location.origin}/support`;
+  const base = `${window.location.origin}/#/support`;
   const params = new URLSearchParams();
   if (hubId) params.set('hubId', hubId);
   if (managerId) params.set('managerId', managerId);

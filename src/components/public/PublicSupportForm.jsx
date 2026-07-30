@@ -117,11 +117,16 @@ const PublicSupportForm = () => {
 
   // ── Parse URL params on mount ──────────────────────────────────────────────
   useEffect(() => {
-    const sp = new URLSearchParams(window.location.search);
+    // Because the route is /#/support?hubId=..., window.location.search is empty.
+    // We must extract the query string from the hash.
+    const hashSplit = window.location.hash.split('?');
+    const queryString = hashSplit.length > 1 ? hashSplit[1] : '';
+    const searchParams = new URLSearchParams(queryString);
+    
     setParams({
-      hubId: sp.get('hubId') ?? null,
-      managerId: sp.get('managerId') ?? null,
-      summary: sp.get('summary') ?? 'Cleaning Issue',
+      hubId: searchParams.get('hubId'),
+      managerId: searchParams.get('managerId'),
+      summary: searchParams.get('summary') || '',
     });
   }, []);
 
