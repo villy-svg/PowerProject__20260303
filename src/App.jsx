@@ -508,6 +508,13 @@ function App() {
     requestLocationOnStartup();
   }, []);
 
+  // ─── PUBLIC ROUTE BYPASS ─────────────────────────────────────────────────
+  // Must be FIRST — before loading screen and before session check.
+  // Anonymous QR code users must never see the login page.
+  if (window.location.hash.startsWith('#/support')) {
+    return <PublicSupportForm />;
+  }
+
   if (isAppInitializing) {
     return (
       <div className="app-container" data-theme={darkMode ? 'dark' : 'light'}>
@@ -517,13 +524,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  // ─── PUBLIC ROUTE BYPASS ─────────────────────────────────────────────────
-  // Must be AFTER isAppInitializing (otherwise it spins on the loading screen)
-  // and BEFORE the !session check (anonymous users need access to this route).
-  if (window.location.hash.startsWith('#/support')) {
-    return <PublicSupportForm />;
   }
 
   if (!session) {
