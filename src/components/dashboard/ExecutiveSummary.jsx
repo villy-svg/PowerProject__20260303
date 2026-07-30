@@ -53,6 +53,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
+  const attendancePermissions = useRBAC(user, 'attendance_self_service', verticals);
+  
   const isSMRole = 
     user?.employeeRole === 'SM' || 
     user?.employeeRole === 'site_manager' || 
@@ -630,7 +632,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       {activeView === 'attendance_self_service' && (
         <AttendanceSelfServiceContent
           user={user}
-          permissions={permissions}
+          permissions={attendancePermissions}
         />
       )}
 
