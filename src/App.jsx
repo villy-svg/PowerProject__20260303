@@ -522,7 +522,7 @@ function App() {
   // ─── PUBLIC ROUTE BYPASS ─────────────────────────────────────────────────
   // Must be AFTER isAppInitializing (otherwise it spins on the loading screen)
   // and BEFORE the !session check (anonymous users need access to this route).
-  if (window.location.pathname === '/public/report') {
+  if (window.location.pathname === '/support') {
     return <PublicSupportForm />;
   }
 
