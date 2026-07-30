@@ -5,6 +5,16 @@
   gap: 2rem;
   padding: 1rem;
 }
+
+.employee-form {
+  padding: 0 24px;
+}
+
+@media screen and (max-width: 480px) {
+  .employee-form {
+    padding: 0 16px;
+  }
+}
 .form-section-header {
   font-size: 1.1rem;
   font-weight: 700;
