@@ -101,11 +101,13 @@ const PublicSupportForm = () => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   // ── Lifecycle state ────────────────────────────────────────────────────────
-  const [isReady, setIsReady] = useState(false);      // true once anon sign-in done
+  // Note: anonymous sign-in is intentionally omitted. The Edge Function uses
+  // SUPABASE_SERVICE_ROLE_KEY (bypasses RLS) and validates requests via hCaptcha.
+  // Supabase Auth's captcha-protection setting would block bare signInAnonymously()
+  // calls, and a caller JWT is not required by the function.
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState(null);
-  const [initError, setInitError] = useState(null);
 
   const fileInputRef = useRef(null);
 
@@ -130,23 +132,7 @@ const PublicSupportForm = () => {
     });
   }, []);
 
-  // ── Anonymous sign-in on mount (provides a valid JWT to the Edge Function) ─
-  useEffect(() => {
-    const signInAnon = async () => {
-      try {
-        const { error: signInError } = await supabase.auth.signInAnonymously();
-        if (signInError) {
-          // Non-fatal if anon sign-in is disabled — the Edge Function uses Service Role anyway
-          console.warn('[PublicSupportForm] Anonymous sign-in failed (non-fatal):', signInError.message);
-        }
-      } catch (err) {
-        console.warn('[PublicSupportForm] Anonymous sign-in exception (non-fatal):', err);
-      } finally {
-        setIsReady(true);
-      }
-    };
-    signInAnon();
-  }, []);
+  // Anonymous sign-in removed — not needed. See comment on lifecycle state above.
 
   // ── Inject hCaptcha script and render invisible widget ─────────────────────
   // hCaptcha invisible: the widget is rendered into a hidden div, then executed
