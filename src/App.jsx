@@ -208,7 +208,7 @@ function AppShell({ verticals, verticalList }) {
 
   useEffect(() => {
     const checkOnboarding = async () => {
-      if (user && user.isActive !== false) {
+      if (user && user.isActive !== false && user.roleId !== 'master_admin') {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
         const storageKey = isStandalone ? `intro_tutorial_seen_standalone_${APP_VERSION}` : `intro_tutorial_seen_${APP_VERSION}`;
         const seen = localStorage.getItem(storageKey);
