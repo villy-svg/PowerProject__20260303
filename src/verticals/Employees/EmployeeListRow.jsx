@@ -109,7 +109,7 @@ const EmployeeListRow = ({
 
       {/* 4. Controls (Actions) - Following ListViewRow North Star */}
       <div className="list-row-controls">
-        {permissions.canUpdate && (
+        {(permissions.canUpdate || permissions.canCreate) && (
           <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit Employee Profile">
             <IconEdit size={14} />
           </button>

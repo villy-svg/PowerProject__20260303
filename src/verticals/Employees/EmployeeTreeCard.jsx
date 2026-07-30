@@ -67,7 +67,7 @@ const EmployeeTreeCard = ({
       </div>
 
       <div className="tree-card-actions">
-        {permissions.canUpdate && (
+        {(permissions.canUpdate || permissions.canCreate) && (
           <button 
             className="action-icon-btn edit-pencil" 
             onClick={(e) => { e.stopPropagation(); onEdit(emp); }} 

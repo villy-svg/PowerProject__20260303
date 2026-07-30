@@ -136,7 +136,7 @@ const EmployeeCard = ({
         </div>
         
         <div className="task-management-actions">
-          {permissions.canUpdate && (
+          {(permissions.canUpdate || permissions.canCreate) && (
             <button
               className="action-icon-btn"
               onClick={(e) => { e.stopPropagation(); onEdit(emp); }}
