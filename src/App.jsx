@@ -28,6 +28,7 @@ import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 import { APP_VERSION } from './constants/appVersion';
 
 import Login from './components/auth/Login';
+import PublicSupportForm from './components/public/PublicSupportForm';
 import PendingActivation from './components/auth/PendingActivation';
 import OnlineSyncBanner from './components/ui/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
@@ -516,6 +517,13 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  // ─── PUBLIC ROUTE BYPASS ─────────────────────────────────────────────────
+  // Must be AFTER isAppInitializing (otherwise it spins on the loading screen)
+  // and BEFORE the !session check (anonymous users need access to this route).
+  if (window.location.pathname === '/public/report') {
+    return <PublicSupportForm />;
   }
 
   if (!session) {

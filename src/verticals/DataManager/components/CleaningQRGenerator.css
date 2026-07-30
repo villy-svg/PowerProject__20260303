@@ -1,0 +1,264 @@
+/**
+ * CleaningQRGenerator.css
+ *
+ * Scoped styles for the Cleaning QR Code Generator admin tile.
+ * Uses the .cqr- prefix (Cleaning QR) throughout.
+ * All colors reference design-system tokens — no hardcoded hex values.
+ */
+
+/* ==========================================================================
+   OUTER WRAPPER
+   ========================================================================== */
+.cqr-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  max-width: 700px;
+}
+
+/* Page title row */
+.cqr-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cqr-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-mint);
+  text-shadow: 0 0 10px var(--halo-glow);
+  margin: 0;
+}
+
+.cqr-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.55;
+  margin: 0;
+}
+
+/* ==========================================================================
+   FORM CARD — Block-in-a-Box (mirrors ManagementForms.css conventions)
+   ========================================================================== */
+.cqr-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-premium);
+}
+
+/* Each label + control pair */
+.cqr-form-group {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.cqr-form-group:focus-within {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--brand-mint);
+}
+
+.cqr-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-color);
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+/* Inner value box */
+.cqr-input-container {
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  min-height: 44px;
+  overflow: hidden;
+}
+
+/* Text input */
+.cqr-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--brand-mint);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.cqr-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.35;
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   QR PREVIEW PANEL
+   ========================================================================== */
+.cqr-preview-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-premium);
+}
+
+.cqr-preview-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-color);
+  opacity: 0.5;
+  margin: 0;
+  align-self: flex-start;
+}
+
+/* White QR canvas background (QR codes require high contrast) */
+.cqr-canvas-wrap {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 0 20px var(--halo-glow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Placeholder shown before hub + manager are selected */
+.cqr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 160px;
+  color: var(--text-color);
+  opacity: 0.3;
+  text-align: center;
+}
+
+.cqr-placeholder-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--brand-mint);
+  opacity: 0.4;
+}
+
+.cqr-placeholder-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* URL preview pill below the QR canvas */
+.cqr-url-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cqr-url-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text-color);
+  opacity: 0.55;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   ACTION BUTTONS ROW
+   ========================================================================== */
+.cqr-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-self: stretch;
+}
+
+.cqr-actions .halo-button {
+  flex: 1;
+  min-width: 120px;
+  min-height: 44px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ==========================================================================
+   LOADING / EMPTY STATES
+   ========================================================================== */
+.cqr-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 8px 0;
+  font-size: 0.8rem;
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+.cqr-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--brand-mint);
+  border-radius: 50%;
+  animation: cqr-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cqr-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  .cqr-wrapper {
+    padding: 1rem;
+  }
+
+  .cqr-actions {
+    flex-direction: column;
+  }
+
+  .cqr-actions .halo-button {
+    width: 100%;
+    min-height: 48px;
+  }
+}

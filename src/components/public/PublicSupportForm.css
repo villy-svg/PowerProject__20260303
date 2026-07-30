@@ -1,0 +1,458 @@
+/**
+ * PublicSupportForm.css
+ *
+ * Scoped styles for the public-facing support form.
+ * Uses the .psf- prefix (Public Support Form) throughout to prevent
+ * any global CSS leakage. All colors use design-system tokens.
+ *
+ * This file is self-contained: it imports no other app CSS and intentionally
+ * re-declares the minimum set of tokens needed so the page works without
+ * the full app bundle being loaded.
+ */
+
+/* ==========================================================================
+   DESIGN TOKEN BOOTSTRAP
+   A minimal set of tokens mirrored from globalTheme.css so the public
+   page renders correctly without importing the full app CSS tree.
+   ========================================================================== */
+:root {
+  --psf-bg:            #050505;
+  --psf-panel:         #0d0d0d;
+  --psf-border:        rgba(255, 255, 255, 0.08);
+  --psf-border-focus:  #0d9488;
+  --psf-mint:          #0d9488;
+  --psf-text:          #d4d4d8;
+  --psf-text-dim:      rgba(212, 212, 216, 0.5);
+  --psf-halo-bg:       rgba(13, 148, 136, 0.05);
+  --psf-halo-glow:     rgba(13, 148, 136, 0.2);
+  --psf-danger:        #f43f5e;
+  --psf-success:       #10b981;
+  --psf-radius-card:   24px;
+  --psf-radius-btn:    12px;
+  --psf-radius-input:  8px;
+  --psf-blur:          20px;
+  --psf-shadow:        0 24px 80px rgba(0, 0, 0, 0.6);
+  --psf-font:          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --psf-font-mono:     "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+}
+
+/* ==========================================================================
+   PAGE SHELL
+   Full-viewport dark canvas — renders as standalone public page
+   ========================================================================== */
+.psf-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--psf-bg);
+  font-family: var(--psf-font);
+  color: var(--psf-text);
+  padding: clamp(1rem, 4vw, 2rem);
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   FORM CARD
+   Glassmorphism card — the main surface element
+   ========================================================================== */
+.psf-card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--psf-panel);
+  border: 1px solid var(--psf-border);
+  border-radius: var(--psf-radius-card);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  box-shadow: var(--psf-shadow);
+  backdrop-filter: blur(var(--psf-blur));
+  -webkit-backdrop-filter: blur(var(--psf-blur));
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: psf-fadeUp 0.4s ease-out both;
+}
+
+@keyframes psf-fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.psf-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.psf-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.psf-brand-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--psf-mint);
+  flex-shrink: 0;
+}
+
+.psf-brand-label {
+  font-family: var(--psf-font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--psf-mint);
+  opacity: 0.8;
+}
+
+.psf-title {
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-weight: 800;
+  color: var(--psf-text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.psf-subtitle {
+  font-size: 0.875rem;
+  color: var(--psf-text-dim);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   CONTEXT BADGES
+   Displays the pre-filled hubId / managerId extracted from URL params
+   ========================================================================== */
+.psf-context-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.psf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--psf-font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  min-height: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--psf-border);
+  border-radius: 4px;
+  color: var(--psf-text);
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   FORM BODY — Block-in-a-Box pattern (mirrors ManagementForms.css)
+   ========================================================================== */
+.psf-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Outer block */
+.psf-form-group {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--psf-border);
+  border-radius: 12px;
+  padding: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.psf-form-group:focus-within {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--psf-border-focus);
+}
+
+.psf-label {
+  display: block;
+  font-family: var(--psf-font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--psf-text);
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+/* Inner value box */
+.psf-input-container {
+  background: var(--psf-halo-bg);
+  border: 1px solid var(--psf-border);
+  border-radius: var(--psf-radius-input);
+  min-height: 44px;
+  overflow: hidden;
+}
+
+.psf-textarea {
+  width: 100%;
+  min-height: 100px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--psf-text);
+  font-family: var(--psf-font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 12px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.psf-textarea::placeholder {
+  color: var(--psf-text-dim);
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   DROPZONE
+   ========================================================================== */
+.psf-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 120px;
+  padding: 1.5rem 1rem;
+  background: var(--psf-halo-bg);
+  border: 1.5px dashed var(--psf-border);
+  border-radius: var(--psf-radius-input);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  text-align: center;
+}
+
+.psf-dropzone:hover,
+.psf-dropzone--active {
+  border-color: var(--psf-mint);
+  background: rgba(13, 148, 136, 0.08);
+}
+
+.psf-dropzone-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--psf-mint);
+  opacity: 0.7;
+}
+
+.psf-dropzone-text {
+  font-size: 0.85rem;
+  color: var(--psf-text-dim);
+  margin: 0;
+}
+
+.psf-dropzone-hint {
+  font-family: var(--psf-font-mono);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--psf-text-dim);
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* Hidden native file input */
+.psf-file-input {
+  display: none;
+}
+
+/* Image preview thumbnail */
+.psf-preview {
+  position: relative;
+  display: inline-flex;
+  margin-top: 0.5rem;
+}
+
+.psf-preview-img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--psf-border);
+}
+
+.psf-preview-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--psf-border);
+  border-radius: 50%;
+  color: var(--psf-text);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+
+.psf-preview-remove:hover {
+  background: var(--psf-danger);
+}
+
+/* ==========================================================================
+   STATUS MESSAGES
+   ========================================================================== */
+.psf-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.psf-alert--error {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: var(--psf-danger);
+}
+
+.psf-alert--success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--psf-success);
+}
+
+/* ==========================================================================
+   SUBMIT BUTTON — Halo Button pattern
+   ========================================================================== */
+.psf-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 1.5rem;
+  background: var(--psf-halo-bg);
+  border: 1px solid color-mix(in srgb, var(--psf-mint), transparent 60%);
+  border-radius: var(--psf-radius-btn);
+  color: var(--psf-mint);
+  font-family: var(--psf-font);
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 3px var(--psf-halo-glow);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.psf-submit-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--psf-mint), transparent 85%);
+  border-color: var(--psf-mint);
+  border-width: 2px;
+  box-shadow: 0 0 20px var(--psf-halo-glow);
+  transform: translateY(-1px);
+}
+
+.psf-submit-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.psf-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(13, 148, 136, 0.3);
+  border-top-color: var(--psf-mint);
+  border-radius: 50%;
+  animation: psf-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes psf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   SUCCESS STATE — replaces the form after successful submission
+   ========================================================================== */
+.psf-success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.psf-success-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--psf-success);
+  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.4));
+}
+
+.psf-success-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--psf-text);
+  margin: 0;
+}
+
+.psf-success-body {
+  font-size: 0.875rem;
+  color: var(--psf-text-dim);
+  margin: 0;
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.psf-footer {
+  text-align: center;
+  font-family: var(--psf-font-mono);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--psf-text-dim);
+  opacity: 0.4;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE
+   All mobile rules are scoped inside max-width queries — zero desktop impact.
+   ========================================================================== */
+@media screen and (max-width: 480px) {
+  .psf-card {
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .psf-submit-btn {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  .psf-textarea {
+    font-size: 16px; /* Prevents iOS Safari auto-zoom */
+  }
+}

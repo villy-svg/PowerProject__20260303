@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 .env
+.env.*
+.env.staging
 dist
 build
 dist-ssr
