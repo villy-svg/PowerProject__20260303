@@ -7,13 +7,28 @@
  */
 
 /* ==========================================================================
-   OUTER WRAPPER
+   OUTER WRAPPERS
    ========================================================================== */
+.cqr-page {
+  height: calc(100vh - 100px);
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centers the 700px wrapper */
+}
+
+.cqr-back-btn {
+  margin-bottom: 16px;
+}
+
 .cqr-wrapper {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding: clamp(1.5rem, 3vw, 2rem) 1rem;
+  width: 100%;
   max-width: 700px;
 }
 

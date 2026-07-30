@@ -128,6 +128,15 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
         action: () => setActiveVertical('hub_function_management'),
         adminOnly: true,
         buttonLabel: 'Manage Functions'
+      },
+      {
+        id: 'cleaning_qr_generator',
+        title: 'Cleaning QR Generator',
+        desc: 'Generate public-facing QR codes for users to submit cleaning requests.',
+        icon: '',
+        action: () => setActiveVertical('cleaning_qr_generator'),
+        adminOnly: true,
+        buttonLabel: 'QR Generator'
       }
     ],
     // Placeholders for other verticals

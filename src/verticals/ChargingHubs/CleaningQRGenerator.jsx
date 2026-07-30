@@ -17,7 +17,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
-import { supabase } from '../../../services/core/supabaseClient';
+import { supabase } from '../../services/core/supabaseClient';
 import './CleaningQRGenerator.css';
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ function buildReportUrl(hubId, managerId, summary) {
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
-const CleaningQRGenerator = ({ permissions = {} }) => {
+const CleaningQRGenerator = ({ permissions = {}, onBack }) => {
   // ── Data state ────────────────────────────────────────────────────────────
   const [hubs, setHubs] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -103,13 +103,19 @@ const CleaningQRGenerator = ({ permissions = {} }) => {
       try {
         const { data, error } = await supabase
           .from('employees')
-          .select('id, full_name, emp_code, role')
-          .eq('hub_id', selectedHubId)
-          .eq('status', 'Active')
-          .order('full_name', { ascending: true });
+          .select('id, full_name, emp_code, role, employee_roles(seniority_level)')
+          .eq('status', 'Active');
 
         if (error) throw error;
-        setManagers(data || []);
+        
+        const sortedData = (data || []).sort((a, b) => {
+          const senA = a.employee_roles?.seniority_level ?? 0;
+          const senB = b.employee_roles?.seniority_level ?? 0;
+          if (senA !== senB) return senB - senA; // Higher numbers = higher seniority, so they come first
+          return a.full_name.localeCompare(b.full_name);
+        });
+        
+        setManagers(sortedData);
       } catch (err) {
         console.error('[CleaningQRGenerator] Failed to fetch managers:', err);
       } finally {
@@ -154,10 +160,16 @@ const CleaningQRGenerator = ({ permissions = {} }) => {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="cqr-wrapper">
+    <div className="cqr-page">
+      <div className="cqr-wrapper">
 
-      {/* Header */}
+        {/* Header */}
       <div className="cqr-header">
+        {onBack && (
+          <button className="halo-button halo-button--secondary halo-button--small cqr-back-btn" onClick={onBack}>
+            &larr; Back to Configuration
+          </button>
+        )}
         <h2 className="cqr-title">Cleaning QR Generator</h2>
         <p className="cqr-subtitle">
           Generate a QR code that cleaning staff can scan to report facility issues directly
@@ -197,38 +209,40 @@ const CleaningQRGenerator = ({ permissions = {} }) => {
           </div>
         </div>
 
-        {/* Manager selector — only shown after a hub is chosen */}
-        {selectedHubId && (
-          <div className="cqr-form-group">
-            <label className="cqr-label" htmlFor="cqr-manager-select">
-              Assign to Manager
-            </label>
-            <div className="cqr-input-container">
-              {loadingManagers ? (
-                <div className="cqr-loading">
-                  <span className="cqr-spinner" aria-hidden="true" />
-                  Loading staff…
-                </div>
-              ) : managers.length === 0 ? (
-                <div className="cqr-loading">No active staff found at this hub.</div>
-              ) : (
-                <select
-                  id="cqr-manager-select"
-                  className="cqr-input master-dropdown"
-                  value={selectedManagerId}
-                  onChange={(e) => setSelectedManagerId(e.target.value)}
-                >
-                  <option value="">— Select a Manager —</option>
-                  {managers.map((emp) => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.full_name}{emp.emp_code ? ` · ${emp.emp_code}` : ''}{emp.role ? ` — ${emp.role}` : ''}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
+        {/* Manager selector — always visible, but disabled if no hub is selected */}
+        <div className="cqr-form-group">
+          <label className="cqr-label" htmlFor="cqr-manager-select">
+            Assign to Manager
+          </label>
+          <div className="cqr-input-container">
+            {!selectedHubId ? (
+              <select className="cqr-input master-dropdown" disabled>
+                <option>— Select a Hub first —</option>
+              </select>
+            ) : loadingManagers ? (
+              <div className="cqr-loading">
+                <span className="cqr-spinner" aria-hidden="true" />
+                Loading staff…
+              </div>
+            ) : managers.length === 0 ? (
+              <div className="cqr-loading">No active staff found at this hub.</div>
+            ) : (
+              <select
+                id="cqr-manager-select"
+                className="cqr-input master-dropdown"
+                value={selectedManagerId}
+                onChange={(e) => setSelectedManagerId(e.target.value)}
+              >
+                <option value="">— Select a Manager —</option>
+                {managers.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.full_name}{emp.emp_code ? ` · ${emp.emp_code}` : ''}{emp.role ? ` — ${emp.role}` : ''}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Custom summary label — lets admin set the issue category */}
         <div className="cqr-form-group">
@@ -331,7 +345,7 @@ const CleaningQRGenerator = ({ permissions = {} }) => {
           </div>
         )}
       </div>
-
+      </div>
     </div>
   );
 };

@@ -20,7 +20,6 @@ import SpreadsheetForm from './components/SpreadsheetForm';
 import SheetsMapping from './components/SheetsMapping';
 import SheetTabPanel from './components/SheetTabPanel';
 import ModelVerificationForm from './components/ModelVerificationForm';
-import CleaningQRGenerator from './components/CleaningQRGenerator';
 import './DataManager.css';
 
 const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
@@ -44,16 +43,6 @@ const DataManagerWorkspace = ({ permissions = {}, activeVertical }) => {
       <div className="dm-scroll-area">
         <div className="dm-workspace">
           <ModelVerificationForm />
-        </div>
-      </div>
-    );
-  }
-
-  if (activeVertical === 'cleaning_qr_generator') {
-    return (
-      <div className="dm-scroll-area">
-        <div className="dm-workspace">
-          <CleaningQRGenerator permissions={permissions} />
         </div>
       </div>
     );

@@ -27,6 +27,7 @@ import TutorialHub from '../../features/tutorials/TutorialHub';
 import {
   HubManagement, HubFunctionManagement, DailyTasksManagement,
 } from '../../verticals/ChargingHubs';
+import CleaningQRGenerator from '../../verticals/ChargingHubs/CleaningQRGenerator';
 import {
   EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
   EmployeeRulesBoard, EmployeeAttendanceBoard, RuleManagement, AttendanceSelfService,
@@ -147,6 +148,15 @@ const ContentRouter = ({
         permissions={permissions}
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
+      />
+    );
+  }
+
+  if (activeVertical === 'cleaning_qr_generator') {
+    return (
+      <CleaningQRGenerator 
+        permissions={permissions}
+        onBack={() => setActiveVertical('configuration')}
       />
     );
   }

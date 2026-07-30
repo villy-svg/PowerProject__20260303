@@ -45,6 +45,7 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         canAccessEmployeeRulesBoard: true,
         canAccessAttendanceSelfService: true,
         canAccessLeaveWallet: true,
+        canAccessConfig: true,
         canSkipTutorial: !!baseCaps.canCreate,
       };
 
