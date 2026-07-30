@@ -39,7 +39,7 @@ const supabaseAdmin = createClient(
 // The CAPTCHA provider is selected by the CAPTCHA_PROVIDER env var:
 //   "turnstile" (default) | "recaptcha"
 // ---------------------------------------------------------------------------
-async function verifyCaptcha(token: string): Promise<boolean> {
+async function verifyCaptcha(token: string): Promise<{ success: boolean; payload?: any }> {
   const secretKey = Deno.env.get("CAPTCHA_SECRET_KEY");
 
   // CAPTCHA_SECRET_KEY is REQUIRED in all environments (staging and production).
@@ -50,7 +50,7 @@ async function verifyCaptcha(token: string): Promise<boolean> {
       "[public-support-request] CAPTCHA_SECRET_KEY is not set. " +
       "Set this secret in the Supabase Dashboard under Edge Functions → Secrets."
     );
-    return false;
+    return { success: false, payload: { error: "Missing CAPTCHA_SECRET_KEY" } };
   }
 
   // hCaptcha verification endpoint
@@ -63,10 +63,10 @@ async function verifyCaptcha(token: string): Promise<boolean> {
       body: new URLSearchParams({ secret: secretKey, response: token }),
     });
     const data = await res.json();
-    return data.success === true;
+    return { success: data.success === true, payload: data };
   } catch (err) {
     console.error("[public-support-request] hCaptcha verification fetch error:", err);
-    return false;
+    return { success: false, payload: { error: err.message } };
   }
 }
 
@@ -123,10 +123,15 @@ serve(async (req: Request) => {
     // 2. Verify CAPTCHA — reject invalid tokens with 403
     // -------------------------------------------------------------------------
     const captchaValid = await verifyCaptcha(captchaToken);
-    if (!captchaValid) {
-      console.warn("[public-support-request] CAPTCHA verification failed.");
+    if (!captchaValid.success) {
+      console.warn("[public-support-request] CAPTCHA verification failed.", captchaValid.payload);
       return new Response(
-        JSON.stringify({ success: false, error: "CAPTCHA verification failed", code: "CAPTCHA_INVALID" }),
+        JSON.stringify({ 
+          success: false, 
+          error: "CAPTCHA verification failed", 
+          code: "CAPTCHA_INVALID",
+          details: captchaValid.payload 
+        }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
