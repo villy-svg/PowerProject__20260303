@@ -131,8 +131,10 @@ export const normalizeTask = (row) => {
     vendor_id: row.metadata?.entity_links?.vendor_id || [],
 
     latestSubmission,
+    submissions,   // Full array — required by AttachmentBadge to scan all photos across submissions
     submissionBy: latestSubmission?.submitted_by || row.metadata?.submission_by,
     metadata: row.metadata || {},
+
   };
 };
 

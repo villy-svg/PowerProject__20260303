@@ -5,24 +5,53 @@ import './AttachmentBadge.css';
  * AttachmentBadge
  *
  * Renders a small persistent 📷 camera badge on any task card/row when the
- * task's latest submission contains image attachments. Clicking the badge opens
- * a fullscreen lightbox slideshow of those images.
+ * task has any submission containing image attachments. Clicking the badge
+ * opens a fullscreen lightbox slideshow of ALL images across ALL submissions.
+ *
+ * Previously this read only task.latestSubmission.links, which caused a bug:
+ * once a manager submitted Proof of Work (submission #2), the original public
+ * report photo (submission #1) became permanently invisible from the task card.
+ *
+ * Fix: reads task.submissions (the full array from TASK_SELECT) and aggregates
+ * all image links across every submission, ordered newest-submission-first.
  *
  * Designed for use in TaskCard (Kanban) and ListViewRow (List view) — the two
  * modular root components — so vertical-specific files never need to be touched.
  *
  * Props:
- *   task (object): A normalized task object. Reads task.latestSubmission.links
+ *   task (object): A normalized task object.
+ *                  Reads task.submissions[] — each item has a .links array.
+ *                  Falls back to task.latestSubmission.links for legacy compat.
  */
 const AttachmentBadge = ({ task }) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
 
-  // ── Derive image links from the latest submission ──────────────────────────
-  const links = task?.latestSubmission?.links;
-  const imageLinks = Array.isArray(links)
-    ? links.filter(l => l?.mime_type?.startsWith('image/') && l?.url)
-    : [];
+  // ── Aggregate image links from ALL submissions ─────────────────────────────
+  // Primary source: full submissions array (TASK_SELECT includes links + comment)
+  // Fallback: latestSubmission.links (legacy path for any cached/older data)
+  const allSubmissions = Array.isArray(task?.submissions) ? task.submissions : [];
+
+  let imageLinks = [];
+
+  if (allSubmissions.length > 0) {
+    // Sort submissions newest-first (highest submission_number first) so the
+    // lightbox slideshow opens with the most recent photos at index 0.
+    const sorted = [...allSubmissions].sort(
+      (a, b) => (b.submission_number || 0) - (a.submission_number || 0)
+    );
+    imageLinks = sorted.flatMap((s) =>
+      Array.isArray(s.links)
+        ? s.links.filter((l) => l?.mime_type?.startsWith('image/') && l?.url)
+        : []
+    );
+  } else if (task?.latestSubmission?.links) {
+    // Fallback for legacy normalised task objects that don't carry full submissions[]
+    const fallbackLinks = task.latestSubmission.links;
+    imageLinks = Array.isArray(fallbackLinks)
+      ? fallbackLinks.filter((l) => l?.mime_type?.startsWith('image/') && l?.url)
+      : [];
+  }
 
   // No images → nothing to render
   if (imageLinks.length === 0) return null;

@@ -5,7 +5,7 @@
 // Required env vars (set in Supabase Dashboard → Edge Functions → Secrets):
 //   SUPABASE_URL           — auto-injected by Supabase runtime
 //   SUPABASE_SERVICE_ROLE_KEY — auto-injected by Supabase runtime
-//   CAPTCHA_SECRET_KEY     — Cloudflare Turnstile secret OR Google reCAPTCHA v3 secret key
+//   CAPTCHA_SECRET_KEY     — hCaptcha secret key
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -30,14 +30,7 @@ const supabaseAdmin = createClient(
 );
 
 // ---------------------------------------------------------------------------
-// CAPTCHA Verification
-//
-// Supports both:
-//   - Cloudflare Turnstile  (POST https://challenges.cloudflare.com/turnstile/v0/siteverify)
-//   - Google reCAPTCHA v3   (POST https://www.google.com/recaptcha/api/siteverify)
-//
-// The CAPTCHA provider is selected by the CAPTCHA_PROVIDER env var:
-//   "turnstile" (default) | "recaptcha"
+// CAPTCHA Verification (hCaptcha)
 // ---------------------------------------------------------------------------
 async function verifyCaptcha(token: string): Promise<{ success: boolean; payload?: any }> {
   // Temporary bypass for development
@@ -60,8 +53,6 @@ async function verifyCaptcha(token: string): Promise<{ success: boolean; payload
   }
 
   // hCaptcha verification endpoint
-  // POST body params: secret (your secret key) + response (the token from the widget)
-  // Response shape: { success: boolean, challenge_ts: string, hostname: string, ... }
   try {
     const res = await fetch("https://api.hcaptcha.com/siteverify", {
       method: "POST",
@@ -143,9 +134,31 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
-    // 3. Optionally upload image to Supabase Storage
+    // 3. Look up the user_profiles.id for this manager employee (for submitted_by).
+    //    managerId = employees.id, but submissions.submitted_by → user_profiles.id.
+    //    This is a best-effort lookup; falls back to null if the manager has no
+    //    linked auth account (e.g. employee added manually, never logged in).
+    // -------------------------------------------------------------------------
+    let managerUserProfileId: string | null = null;
+    try {
+      const { data: profileData } = await supabaseAdmin
+        .from("user_profiles")
+        .select("id")
+        .eq("employee_id", managerId)
+        .maybeSingle();
+      managerUserProfileId = profileData?.id ?? null;
+    } catch (profileErr) {
+      // Non-fatal — submission will be created with submitted_by = null
+      console.warn("[public-support-request] Could not resolve manager user profile:", profileErr);
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Optionally upload image to Supabase Storage
     // -------------------------------------------------------------------------
     let imageStoragePath: string | null = null;
+    let imagePublicUrl: string | null = null;
+    let imageFinalMimeType: string | null = null;
+
     if (imageBase64 && imageMimeType) {
       try {
         // Decode base64 → Uint8Array
@@ -168,6 +181,13 @@ serve(async (req: Request) => {
           console.warn("[public-support-request] Image upload failed:", uploadError.message);
         } else {
           imageStoragePath = fileName;
+          imageFinalMimeType = imageMimeType;
+
+          // Resolve the public URL so it can be stored in submission.links
+          const { data: urlData } = supabaseAdmin.storage
+            .from("submission-files")
+            .getPublicUrl(fileName);
+          imagePublicUrl = urlData?.publicUrl ?? null;
         }
       } catch (imgErr) {
         console.warn("[public-support-request] Image processing error:", imgErr);
@@ -175,30 +195,22 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
-    // 4. Insert the task via Service Role key (bypasses RLS entirely)
+    // 5. Insert the task via Service Role key (bypasses RLS entirely)
     //
-    // Column mapping:
-    //   vertical_id  — must match valid verticals
-    //   stage_id     — NOT NULL in schema; must be provided
-    //   assigned_to  — snake_case column name
+    // NOTE: task text and description are kept clean — no raw file paths.
+    // The image is instead stored via a submissions record (step 7).
     // -------------------------------------------------------------------------
-    const taskText = imageStoragePath
-      ? `${summary.trim()} [Photo attached: ${imageStoragePath}]`
-      : summary.trim();
-
     const { data: taskData, error: taskError } = await supabaseAdmin
       .from("tasks")
       .insert({
-        text: taskText,
+        text: summary.trim(),
         vertical_id: "CHARGING_HUBS",
         stage_id: "BACKLOG",
         task_board: ["Escalations"],
         priority: "Urgent",
         assigned_to: managerId,
         hub_id: hubId ?? null,
-        description: imageStoragePath
-          ? `Public cleaning report submitted via QR code. Photo: ${imageStoragePath}`
-          : "Public cleaning report submitted via QR code.",
+        description: "Public cleaning report submitted via QR code.",
       })
       .select("id")
       .single();
@@ -212,12 +224,12 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
-    // 5. Insert context links for polymorphic multi-hub/assignee support
+    // 6. Insert context links for polymorphic multi-hub/assignee support
     // -------------------------------------------------------------------------
     if (taskData?.id) {
-      const links = [];
+      const contextLinks = [];
       if (hubId) {
-        links.push({
+        contextLinks.push({
           source_id: taskData.id,
           source_type: "task",
           entity_type: "hub",
@@ -226,7 +238,7 @@ serve(async (req: Request) => {
         });
       }
       if (managerId) {
-        links.push({
+        contextLinks.push({
           source_id: taskData.id,
           source_type: "task",
           entity_type: "assignee",
@@ -234,14 +246,53 @@ serve(async (req: Request) => {
           is_active: true,
         });
       }
-      if (links.length > 0) {
+      if (contextLinks.length > 0) {
         const { error: linksError } = await supabaseAdmin
           .from("task_context_links")
-          .insert(links);
+          .insert(contextLinks);
 
         if (linksError) {
           console.warn("[public-support-request] Failed to insert context links:", linksError);
         }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. If an image was uploaded, create a submission record so the photo
+    //    renders as a clickable camera badge (📷) in the Kanban UI and is
+    //    visible in the Submission History timeline.
+    //
+    //    Key decisions:
+    //    - status = 'approved'  → skips the manager's Approve/Reject queue
+    //    - comment matches the exact string the UI checks so it renders as
+    //      "📎 Creation Attachments" instead of a submitter name
+    //    - submitted_by = managerUserProfileId (nullable — OK after migration)
+    // -------------------------------------------------------------------------
+    if (taskData?.id && imagePublicUrl && imageStoragePath) {
+      const ext = imageStoragePath.split(".").pop() ?? "jpg";
+      const submissionLinks = [
+        {
+          file_name: `public_report.${ext}`,
+          url: imagePublicUrl,
+          provider: "supabase",
+          tier: "hot",
+          mime_type: imageFinalMimeType ?? "image/jpeg",
+        },
+      ];
+
+      const { error: submissionError } = await supabaseAdmin
+        .from("submissions")
+        .insert({
+          task_id: taskData.id,
+          submitted_by: managerUserProfileId, // null if manager has no auth account
+          status: "approved",
+          comment: "Attached photos during task creation.",
+          links: submissionLinks,
+        });
+
+      if (submissionError) {
+        // Non-fatal: task is already created. Log and continue.
+        console.warn("[public-support-request] Failed to insert submission record:", submissionError);
       }
     }
 
