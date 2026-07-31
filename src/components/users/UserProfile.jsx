@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { ROLE_LIST } from '../../constants/roles';
-import CustomSelect from '../ui/CustomSelect';
 import BankChangeRequestModal from './BankChangeRequestModal';
 import { useOTAContext } from '../../app/contexts/OTAContext';
 import './UserProfile.css';
@@ -18,48 +17,39 @@ const UserProfile = ({
   onImpersonate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuView, setMenuView] = useState('main'); // 'main' | 'impersonate'
+  const [searchQuery, setSearchQuery] = useState('');
   const [showBankHint, setShowBankHint] = useState(false);
   const [showBankChangeModal, setShowBankChangeModal] = useState(false);
   const dropdownRef = useRef(null);
 
-  // OTA update state — consumed from context, no prop drilling needed
   const { updateAvailable } = useOTAContext();
 
-  // Close dropdown when clicking outside
+  const closeMenu = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setMenuView('main');
+      setSearchQuery('');
+    }, 200);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
+        closeMenu();
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Show bank hint on mobile
   useEffect(() => {
     if (window.innerWidth <= 768) {
       setShowBankHint(true);
     }
   }, []);
 
-  const roles = ROLE_LIST;
-
-  const handleRoleSelect = (roleId) => {
-    // If switching to a vertical role, we default to the first vertical if none assigned
-    const defaultVertical = (roleId.includes('vertical') && !user.assignedVertical) 
-      ? VERTICAL_LIST[0].id 
-      : user.assignedVertical;
-
-    onRoleChange(roleId, defaultVertical);
-  };
-
-  const handleVerticalSelect = (vId) => {
-    onRoleChange(user.roleId, vId);
-  };
-
   const displayName = user?.name || "Guest User";
-  // Updated initials logic to handle single names or empty strings safely
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -67,19 +57,28 @@ const UserProfile = ({
     .join('')
     .toUpperCase();
 
-  const isVerticalRole = user?.roleId === 'vertical_admin' || user?.roleId === 'vertical_viewer';
-
   const handleToggleClick = () => {
-    setIsOpen(!isOpen);
-    if (showBankHint) {
-      setShowBankHint(false);
+    if (!isOpen) {
+      setIsOpen(true);
+      if (showBankHint) setShowBankHint(false);
+    } else {
+      closeMenu();
     }
   };
+
+  const filteredImpersonationUsers = useMemo(() => {
+    if (!impersonationUsers) return [];
+    if (!searchQuery) return impersonationUsers;
+    const q = searchQuery.toLowerCase();
+    return impersonationUsers.filter(u => 
+      (u.name || '').toLowerCase().includes(q) || 
+      (u.role_id || '').toLowerCase().includes(q)
+    );
+  }, [impersonationUsers, searchQuery]);
 
   return (
     <div className="user-profile-container" ref={dropdownRef}>
       <button className="user-profile-toggle" onClick={handleToggleClick}>
-        {/* WRAPPER FOR TEXT: This div is styled in CSS to stack vertically */}
         <div className="user-info-text">
           <span className="user-name">{displayName}</span>
           <span className="user-role">{user?.role}</span>
@@ -111,113 +110,140 @@ const UserProfile = ({
 
       {isOpen && (
         <div className="user-dropdown-menu">
-          {/* 1. Name */}
-          <div className="dropdown-header">Name</div>
-          <div className="dropdown-item static name-display">
-            {displayName}
-          </div>
-          
-          <div className="dropdown-divider" />
-
-          {/* 2. Bank Details of User */}
-          <div className="dropdown-header user-profile-bank-header">
-            <span>Bank Details</span>
-            {(user?.employeeId || user?.bankDetails) && (
-              <button 
-                className="bank-edit-btn" 
-                onClick={() => setShowBankChangeModal(true)}
-                title="Request Bank Details Update"
-              >
-                ✏️ Update
-              </button>
-            )}
-          </div>
-          <div className="dropdown-item static bank-details-display">
-            {user?.bankDetails ? (
-              <>
-                <span><strong>Name:</strong> {user.bankDetails.accountName || 'N/A'}</span>
-                <span><strong>A/C No:</strong> {user.bankDetails.accountNumber || 'N/A'}</span>
-                <span><strong>IFSC:</strong> {user.bankDetails.ifscCode || 'N/A'}</span>
-              </>
-            ) : (
-              <span className="bank-empty">No linked bank account.</span>
-            )}
-          </div>
-
-          {/* OTA Update Button — always visible, but disabled unless an update is pending */}
-          <button
-            id="profile-update-app-btn"
-            className={`dropdown-item update-app-btn ${!updateAvailable ? 'disabled' : ''}`}
-            onClick={() => { setIsOpen(false); }}
-            disabled={!updateAvailable}
-            title={updateAvailable ? "A new update is ready" : "App is up to date"}
-          >
-            {updateAvailable && <span className="update-app-btn__dot" aria-hidden="true" />}
-            Update App
-          </button>
-
-          <div className="dropdown-divider" />
-
-          {/* 3. Employee Role */}
-          <div className="dropdown-header">Employee Role</div>
-          <div className="dropdown-item static">
-            <span className="role-label">
-              {user?.employeeRole ? user.employeeRole.replace('_', ' ').toUpperCase() : 'NO EMPLOYEE ROLE'}
-            </span>
-          </div>
-
-          <div className="dropdown-divider" />
-
-          {/* 4. User Role */}
-          <div className="dropdown-header">User Role</div>
-          <div className="dropdown-item static">
-            <span className="role-label">
-              {user?.roleId ? user.roleId.replace('_', ' ').toUpperCase() : 'GUEST'}
-            </span>
-          </div>
-
-          {/* 5. Simulate User */}
-          {realUser?.roleId === 'master_admin' && (
+          {menuView === 'main' ? (
             <>
-              <div className="dropdown-divider" />
-              <div className="dropdown-header impersonation-section-title">Impersonation Simulator</div>
-              <div className="dropdown-impersonation-container">
-                {impersonatedUser ? (
-                  <div className="impersonation-menu-active">
-                    <span className="impersonation-menu-label">
-                      Viewing: <strong>{impersonatedUser.name}</strong>
+              <div className="dropdown-user-info">
+                <div className="dropdown-user-details">
+                  <span className="dropdown-user-name">{displayName}</span>
+                  <span className="dropdown-user-role">
+                    {user?.roleId ? user.roleId.replace('_', ' ').toUpperCase() : 'GUEST'}
+                  </span>
+                  {(user?.department || user?.employeeRole) && (
+                    <span className="dropdown-user-employee-role">
+                      {[
+                        user?.department, 
+                        user?.employeeRole ? user.employeeRole.replace('_', ' ').toUpperCase() : null
+                      ].filter(Boolean).join(' • ')}
                     </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="dropdown-divider" />
+
+              <div className="dropdown-section">
+                <div className="dropdown-section-header">
+                  <span>Bank Details</span>
+                  {(user?.employeeId || user?.bankDetails) && (
                     <button 
-                      className="halo-button impersonation-menu-stop-btn" 
-                      onClick={() => { onImpersonate(null); setIsOpen(false); }}
+                      className="dropdown-action-btn" 
+                      onClick={() => setShowBankChangeModal(true)}
                     >
-                      Stop Simulation
+                      Update
                     </button>
+                  )}
+                </div>
+                <div className="dropdown-static-content">
+                  {user?.bankDetails ? (
+                    <div className="bank-info-grid">
+                      <span className="bank-label">A/C Name</span>
+                      <span className="bank-value">{user.bankDetails.accountName || 'N/A'}</span>
+                      <span className="bank-label">A/C No</span>
+                      <span className="bank-value">{user.bankDetails.accountNumber || 'N/A'}</span>
+                      <span className="bank-label">IFSC</span>
+                      <span className="bank-value">{user.bankDetails.ifscCode || 'N/A'}</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted">No linked bank account.</span>
+                  )}
+                </div>
+              </div>
+
+              {realUser?.roleId === 'master_admin' && (
+                <>
+                  <div className="dropdown-divider" />
+                  <div className="dropdown-section">
+                    <div className="dropdown-section-header">Admin Tools</div>
+                    {impersonatedUser ? (
+                      <button 
+                        className="dropdown-item destructive"
+                        onClick={() => { onImpersonate(null); closeMenu(); }}
+                      >
+                        Stop Simulating {impersonatedUser.name}
+                      </button>
+                    ) : (
+                      <button 
+                        className="dropdown-item nav-item"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuView('impersonate');
+                        }}
+                      >
+                        <span>Simulate User</span>
+                        <svg className="chevron-right" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                      </button>
+                    )}
                   </div>
-                ) : (
-                  <CustomSelect
-                    id="impersonation-select-menu"
-                    placeholder="Simulate User..."
-                    options={impersonationUsers?.map(u => ({
-                      value: u.id,
-                      label: `${u.name} (${u.role_id})`
-                    })) || []}
-                    onChange={(val) => { onImpersonate(val); setIsOpen(false); }}
-                  />
+                </>
+              )}
+
+              <div className="dropdown-divider" />
+
+              {updateAvailable && (
+                <button
+                  className="dropdown-item update-item"
+                  onClick={() => closeMenu()}
+                >
+                  <span className="update-dot" />
+                  Update App Available
+                </button>
+              )}
+
+              <button className="dropdown-item" onClick={() => { onConfigClick(); closeMenu(); }}>
+                Configuration
+              </button>
+
+              <button className="dropdown-item" onClick={() => { onLogout(); closeMenu(); }}>
+                Log Out
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="dropdown-header-nav">
+                <button className="back-btn" onClick={() => setMenuView('main')}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                  Back
+                </button>
+                <span className="title">Simulate User</span>
+              </div>
+              <div className="dropdown-search-box">
+                <input 
+                  type="text" 
+                  placeholder="Search users..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="dropdown-scroll-list">
+                {filteredImpersonationUsers.map(u => (
+                  <button 
+                    key={u.id}
+                    className="dropdown-item user-select-item"
+                    onClick={() => { onImpersonate(u.id); closeMenu(); }}
+                  >
+                    <div className="user-select-info">
+                      <span className="user-name">{u.name}</span>
+                      <span className="user-role-sub">{u.role_id}</span>
+                    </div>
+                  </button>
+                ))}
+                {filteredImpersonationUsers.length === 0 && (
+                  <div className="empty-search">No users found</div>
                 )}
               </div>
             </>
           )}
-
-          <div className="dropdown-divider" />
-          
-          <button className="dropdown-item config-link" onClick={() => { onConfigClick(); setIsOpen(false); }}>
-            Configuration
-          </button>
-          
-          <button className="dropdown-item logout-button" onClick={() => { onLogout(); setIsOpen(false); }}>
-            Log Out
-          </button>
         </div>
       )}
 
@@ -227,7 +253,7 @@ const UserProfile = ({
           onClose={() => setShowBankChangeModal(false)}
           onSuccess={() => {
             setShowBankChangeModal(false);
-            setIsOpen(false);
+            closeMenu();
             alert('Bank update request submitted successfully.');
           }}
         />

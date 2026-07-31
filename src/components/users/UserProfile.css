@@ -1,276 +1,383 @@
-/* UserProfile.css */
+/* UserProfile.css - Clean and Standardized */
+
 .user-profile-container {
   position: relative;
   display: inline-block;
 }
+
 .user-profile-toggle {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  background: var(--bg-color); 
-  border: 1px solid var(--border-color);
-  padding: 6px 6px 6px 16px; /* Balanced padding */
-  border-radius: 12px; /* Matching avatar radius */
+  background: var(--bg-color, #1a1a1a); 
+  border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+  padding: 6px 6px 6px 16px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: fit-content;
 }
+
 .user-profile-toggle:hover {
-  background-color: var(--halo-bg);
-  border-color: var(--brand-green);
-  border-width: 2px;
-  padding: 5px 5px 5px 15px; /* Offset for border-width increase */
-  box-shadow: 0 0 15px var(--halo-glow);
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
 }
-/* THE FIX: Absolute Vertical Stacking */
+
 .user-info-text {
   display: flex;
   flex-direction: column; 
   align-items: flex-start; 
   text-align: left;
   line-height: 1.2;
-  flex: 1; /* Takes up available space to prevent "smushing" */
 }
+
 .user-name {
-  color: var(--text-color);
-  font-weight: 700;
+  color: var(--text-color, #fff);
+  font-weight: 600;
   font-size: 0.85rem;
   white-space: nowrap;
-  display: block; 
 }
+
 .user-role {
-  /* Dynamic opacity for subtle role text in any theme */
-  color: var(--text-color);
-  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.7rem;
-  font-weight: 400;
-  margin-top: 1px;
+  font-weight: 500;
+  margin-top: 2px;
   white-space: nowrap;
-  display: block;
 }
+
 .user-avatar {
   width: 32px;
   height: 32px;
-  background-color: var(--halo-bg); 
-  color: var(--brand-green);
-  border-radius: 8px; /* Matching button radius */
+  background-color: transparent; 
+  color: var(--text-color, #fff);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 800;
-  flex-shrink: 0;
-  box-shadow: 0 0 12px var(--halo-glow);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
-}
-/* Dropdown Styles - Now Theme Aware */
-/* Use parent+child selector for higher specificity than the shared DropdownSystem rule */
-.user-profile-container .user-dropdown-menu {
-  top: calc(100% + 10px);
-  left: auto;
-  right: 0;
-  width: 240px;
-  max-width: calc(100vw - 16px); /* Safety net: never exceed viewport width */
-  padding: 8px;
-}
-
-/* Scrollbar Styling for Profile Menu */
-.user-dropdown-menu::-webkit-scrollbar {
-  width: 6px;
-}
-.user-dropdown-menu::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
-.user-dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* On-demand Impersonation Menu Section */
-.impersonation-section-title {
-  color: var(--brand-green) !important;
-  opacity: 0.85 !important;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem !important;
-  letter-spacing: 0.5px;
-  padding: 4px 12px 6px 12px !important;
-}
-
-.dropdown-impersonation-container {
-  padding: 4px 12px 8px 12px;
-  width: 100%;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.dropdown-impersonation-container #impersonation-select-menu {
-  width: 100%;
-}
-
-/* Expand the impersonation dropdown inline instead of popping out to prevent clipping */
-.dropdown-impersonation-container .custom-dropdown-menu {
-  position: relative !important;
-  top: 0 !important;
-  right: auto !important;
-  left: auto !important;
-  width: 100% !important;
-  max-height: 200px !important;
-  margin-top: 8px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
-}
-
-.impersonation-menu-active {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.impersonation-menu-label {
-  font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.8;
-  line-height: 1.3;
-}
-
-.impersonation-menu-stop-btn {
-  width: 100% !important;
-  padding: 8px 12px !important;
-  background: rgba(239, 68, 68, 0.1) !important;
-  color: var(--brand-red, #ef4444) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  border-radius: 8px !important;
-  font-weight: 800 !important;
-  min-height: auto !important;
-  font-size: 0.7rem !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.impersonation-menu-stop-btn:hover {
-  background: var(--brand-red, #ef4444) !important;
-  color: #fff !important;
-  border-color: var(--brand-red, #ef4444) !important;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25) !important;
-}
-
-.dropdown-header {
-  padding: 8px 12px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--text-color);
-  opacity: 0.6;
+  flex-shrink: 0;
+  border: none;
+}
+
+/* Dropdown Menu styling - similar to Radix/Vercel */
+.user-profile-container .user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto; /* Required to override DropdownSystem.css */
+  width: 260px;
+  max-width: calc(100vw - 32px); /* Safety net for mobile */
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+}
+
+.dropdown-user-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--brand-green, #10b981);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.dropdown-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-user-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.dropdown-user-role {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+.dropdown-user-employee-role {
+  color: var(--brand-green, #10b981);
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
+
+.dropdown-section {
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dropdown-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+.dropdown-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-color, #fff);
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.dropdown-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-static-content {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bank-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+
+.bank-label {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+.bank-value {
+  color: #fff;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.text-muted {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+}
+
 .dropdown-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: none;
+  justify-content: flex-start;
+  padding: 8px 10px;
   background: transparent;
-  color: var(--text-color);
-  font-size: 0.7rem;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
   text-align: left;
 }
-.dropdown-item.static {
-  cursor: default;
-  background-color: var(--border-color);
-  opacity: 0.8;
-  border: none;
-}
-.dropdown-item.static:hover {
-  background-color: var(--border-color);
-}
-.dropdown-divider {
-  height: 1px;
-  background-color: var(--border-color);
-  margin: 8px 0;
-}
-/* === STATIC STYLE REPLACEMENTS (moved from inline JSX) === */
 
-/* Name display item (matches other field values) */
-.dropdown-item.name-display {
-  font-size: 0.7rem;
-  font-weight: 500;
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
-/* Bank details display block: vertical column layout */
-.bank-details-display {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  min-height: auto;
-  padding: 10px 12px;
+.dropdown-item.destructive {
+  color: #ef4444;
 }
 
-/* Each bank field row text (field value) */
-.bank-details-display span {
-  font-size: 0.7rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
+.dropdown-item.destructive:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.dropdown-item.nav-item {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.dropdown-item.nav-item span {
+  white-space: nowrap;
+}
+
+.dropdown-item.nav-item .chevron-right {
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.dropdown-item.update-item {
+  color: var(--status-warning, #f59e0b);
   gap: 8px;
 }
 
-/* Inline field names (matches .dropdown-header) */
-.bank-details-display strong {
+.dropdown-item.update-item:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.update-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--status-warning, #f59e0b);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+/* Impersonate View Styles */
+.dropdown-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 4px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--text-color);
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin-left: -4px;
 }
 
-/* Empty state row for bank details */
-.bank-details-display .bank-empty {
-  opacity: 0.6;
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-/* Role label text inside dropdown items (inherits from .dropdown-item, 0.85rem) */
-.role-label {
-  opacity: 0.9;
+.dropdown-header-nav .title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
 }
 
-/* Profile avatar icon: slightly dimmed */
-.user-avatar svg {
-  opacity: 0.9;
+.dropdown-search-box {
+  padding: 0 8px 8px 8px;
 }
 
-/* Bank Details Hint Dialog */
+.dropdown-search-box input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #fff;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.dropdown-search-box input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dropdown-scroll-list {
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.dropdown-scroll-list::-webkit-scrollbar {
+  width: 4px;
+}
+.dropdown-scroll-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.user-select-item {
+  padding: 8px;
+}
+
+.user-select-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-select-info .user-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.user-select-info .user-role-sub {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.empty-search {
+  padding: 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+}
+
+/* Tooltips */
 .bank-hint-glow {
-  animation: pulse-glow-brand 2s infinite !important;
-  border-color: var(--brand-green) !important;
+  animation: pulse-glow-brand 2s infinite;
+  border-color: var(--brand-green, #10b981) !important;
 }
 
 @keyframes pulse-glow-brand {
-  0% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .bank-details-hint-dialog {
   position: absolute;
   top: calc(100% + 14px);
   right: -5px;
-  background: var(--bg-color);
-  border: 1px solid var(--brand-green);
+  background: #111;
+  border: 1px solid var(--brand-green, #10b981);
   border-radius: 12px;
   padding: 12px 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(16, 185, 129, 0.2);
@@ -290,125 +397,26 @@
   right: 15px;
   width: 10px;
   height: 10px;
-  background: var(--bg-color);
-  border-top: 1px solid var(--brand-green);
-  border-left: 1px solid var(--brand-green);
+  background: #111;
+  border-top: 1px solid var(--brand-green, #10b981);
+  border-left: 1px solid var(--brand-green, #10b981);
   transform: rotate(45deg);
 }
 
 .bank-details-hint-dialog .hint-text-en {
   font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--text-color);
+  font-weight: 700;
+  color: #fff;
   margin-bottom: 4px;
 }
 
 .bank-details-hint-dialog .hint-text-kn {
   font-size: 0.75rem;
   font-weight: 400;
-  color: var(--brand-green);
+  color: var(--brand-green, #10b981);
 }
 
 @keyframes slide-up-fade {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Bottom Action Links */
-.config-link, .logout-button {
-  font-size: 0.8rem !important;
-}
-
-.user-profile-bank-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 1;
-}
-
-.user-profile-bank-header > span {
-  opacity: 0.5;
-}
-
-.bank-edit-btn {
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563eb;
-  border: 1px solid rgba(37, 99, 235, 0.2);
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-family, sans-serif);
-}
-
-.bank-edit-btn:hover {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-/* ── OTA Update App Button ─────────────────────────────
-   Shown in the dropdown when a native OTA update is ready.
-   Uses status-warning (amber) to draw attention.
-   ─────────────────────────────────────────────────── */
-.update-app-btn {
-  position: relative;
-  color: var(--status-warning, #f59e0b) !important;
-  background: rgba(245, 158, 11, 0.08) !important;
-  border: 1px solid rgba(245, 158, 11, 0.25) !important;
-  font-weight: 600 !important;
-  font-size: 0.7rem !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-radius: 10px !important;
-  justify-content: flex-start;
-  gap: 10px;
-  transition: all 0.2s ease;
-}
-
-.update-app-btn:hover {
-  background: rgba(245, 158, 11, 0.16) !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
-}
-
-.update-app-btn.disabled {
-  color: var(--text-color) !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none; /* Prevents hover effects */
-}
-
-/* Pulsing amber dot indicator */
-.update-app-btn__dot {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--status-warning, #f59e0b);
-  animation: ota-btn-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes ota-btn-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
-    opacity: 1;
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
-    opacity: 0.85;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
