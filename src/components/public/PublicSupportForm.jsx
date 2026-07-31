@@ -117,6 +117,8 @@ const PublicSupportForm = () => {
   // hCaptcha widget ID ref — returned by hcaptcha.render() and used for execute()
   const hcaptchaWidgetId = useRef(null);
 
+  const [hubCode, setHubCode] = useState(null);
+
   // ── Parse URL params on mount ──────────────────────────────────────────────
   useEffect(() => {
     // Because the route is /#/support?hubId=..., window.location.search is empty.
@@ -125,11 +127,26 @@ const PublicSupportForm = () => {
     const queryString = hashSplit.length > 1 ? hashSplit[1] : '';
     const searchParams = new URLSearchParams(queryString);
     
+    const urlHubId = searchParams.get('hubId');
     setParams({
-      hubId: searchParams.get('hubId'),
+      hubId: urlHubId,
       managerId: searchParams.get('managerId'),
       summary: searchParams.get('summary') || '',
     });
+
+    if (urlHubId) {
+      supabase
+        .from('hubs')
+        .select('hub_code')
+        .eq('id', urlHubId)
+        .single()
+        .then(({ data, error }) => {
+          if (!error && data?.hub_code) {
+            setHubCode(data.hub_code);
+          }
+        })
+        .catch(err => console.error("[PublicSupportForm] Failed to fetch hub code:", err));
+    }
   }, []);
 
   // Anonymous sign-in removed — not needed. See comment on lifecycle state above.
@@ -333,7 +350,7 @@ const PublicSupportForm = () => {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                Hub: {params.hubId.slice(0, 8)}…
+                Hub: {hubCode || params.hubId.slice(0, 8)}
               </span>
             )}
           </div>

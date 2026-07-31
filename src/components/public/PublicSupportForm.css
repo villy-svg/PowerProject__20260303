@@ -15,7 +15,7 @@
    A minimal set of tokens mirrored from globalTheme.css so the public
    page renders correctly without importing the full app CSS tree.
    ========================================================================== */
-:root {
+.psf-page {
   --psf-bg:            var(--bg-color);
   --psf-panel:         var(--bg-color);
   --psf-border:        rgba(255, 255, 255, 0.08);
@@ -60,7 +60,8 @@
 .psf-card {
   width: 100%;
   max-width: 520px;
-  margin: auto;
+  margin: 0 auto;
+  margin-bottom: 2rem;
   background: var(--psf-panel);
   border: 1px solid var(--psf-border);
   border-radius: var(--psf-radius-card);
