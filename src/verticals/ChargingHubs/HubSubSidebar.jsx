@@ -232,10 +232,12 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
         </>
       )}
 
-      <div 
-        className="filters-row-toggle" 
-        onClick={() => setShowFilters(!showFilters)}
-      >
+      {false && (
+        <>
+          <div 
+            className="filters-row-toggle" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
         <p className="u-flex-center-gap-4">
           FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}
         </p>
@@ -321,6 +323,8 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             isMobileMenu={!!hideNavigation}
           />
         </div>
+      )}
+        </>
       )}
 
       {!hideNavigation && (

@@ -200,10 +200,12 @@ const EmployeeSubSidebar = ({
         </>
       )}
 
-      <div 
-        className="filters-row-toggle" 
-        onClick={() => setShowFilters(!showFilters)}
-      >
+      {false && (
+        <>
+          <div 
+            className="filters-row-toggle" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
         <p>FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
         <div className="filters-reset-wrapper">
           <button
@@ -266,6 +268,8 @@ const EmployeeSubSidebar = ({
             isMobileMenu={!!hideNavigation}
           />
         </div>
+      )}
+        </>
       )}
 
       {!hideNavigation && (

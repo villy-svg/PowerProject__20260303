@@ -205,10 +205,12 @@ const ClientSubSidebar = ({
         </>
       )}
 
-      <div 
-        className="filters-row-toggle" 
-        onClick={() => setShowFilters(!showFilters)}
-      >
+      {false && (
+        <>
+          <div 
+            className="filters-row-toggle" 
+            onClick={() => setShowFilters(!showFilters)}
+          >
         <p className="u-flex-center-gap-4">FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
         <div className="u-flex-gap-4">
           <button
@@ -264,6 +266,8 @@ const ClientSubSidebar = ({
             isMobileMenu={!!hideNavigation}
           />
         </div>
+      )}
+        </>
       )}
 
       {!hideNavigation && (

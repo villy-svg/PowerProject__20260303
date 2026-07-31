@@ -5,8 +5,8 @@
   height: 100dvh;
   background-color: var(--surface-card);
   border-right: 1px solid transparent;
-  z-index: 10;
-  width: 280px;
+  z-index: 1005;
+  width: 200px;
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Critical for the 'sliding door' effect */
@@ -23,9 +23,9 @@
    Merged redundancies and applied space-between to push config to bottom 
 */
 .sidebar-content-wrapper {
-  width: 280px; 
+  width: 200px; 
   height: 100%;
-  padding: 20px;
+  padding: 12px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -68,7 +68,7 @@
   margin: 0;
 }
 .sidebar-nav li {
-  padding: 12px 15px;
+  padding: 10px 12px;
   margin-bottom: 4px;
   border-radius: var(--radius-button);
   cursor: pointer;
@@ -131,7 +131,7 @@
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;
-  opacity: 0.5;
+  opacity: 0.7;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -140,7 +140,7 @@
 .v-toggle-btn:hover {
   opacity: 1;
   background: var(--border-color);
-  color: var(--brand-green);
+  color: var(--text-color);
 }
 .v-toggle-btn.active {
   opacity: 1;
@@ -148,7 +148,7 @@
 }
 .sidebar-nav ul.sub-nav-list {
   list-style: none;
-  padding: 0 0 8px 30px;
+  padding: 0 0 8px 24px;
   margin: 0;
   display: flex;
   flex-direction: column;

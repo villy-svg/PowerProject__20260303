@@ -98,8 +98,11 @@ const EmployeeCard = ({
           <span className="badge-base badge-danger u-text-xs" title="Not onboarded">NOT USER</span>
         )}
         {emp.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
-        {(!emp.account_number || !emp.ifsc_code || !emp.account_name || !emp.pan_number) && (
-          <span className="badge-base badge-danger u-text-xs">BANK MISSING</span>
+        {(!emp.account_number || !emp.ifsc_code || !emp.account_name) && (
+          <span className="badge-base badge-danger u-text-xs">BANK NA</span>
+        )}
+        {!emp.pan_number && (
+          <span className="badge-base badge-danger u-text-xs">PAN NA</span>
         )}
       </div>
 

@@ -193,7 +193,7 @@ serve(async (req: Request) => {
         vertical_id: "CHARGING_HUBS",
         stage_id: "BACKLOG",
         task_board: ["Escalations"],
-        priority: "High",
+        priority: "Urgent",
         assigned_to: managerId,
         hub_id: hubId ?? null,
         description: imageStoragePath
