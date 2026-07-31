@@ -96,8 +96,7 @@ const PublicSupportForm = () => {
 
   // ── Form state ─────────────────────────────────────────────────────────────
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
 
   // ── Lifecycle state ────────────────────────────────────────────────────────
@@ -171,44 +170,44 @@ const PublicSupportForm = () => {
       hcaptchaWidgetId.current = window.hcaptcha.render(container, {
         sitekey: captchaSiteKey,
         size: 'invisible',
-        // Callback not needed — we use the async execute() API instead
       });
     };
 
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup: remove global onload hook if component unmounts before script loads
       delete window._hcaptchaOnLoad;
     };
   }, [captchaSiteKey]);
 
-  // ── Image selection & compression ─────────────────────────────────────────
-  const handleFileSelect = useCallback(async (file) => {
-    if (!file) return;
+  // ── Image Handlers ─────────────────────────────────────────────────────────
+  const handleFileSelect = useCallback((files) => {
+    const validFiles = Array.from(files).filter(file => {
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        setError('Please upload a JPEG, PNG, WebP, or HEIC image.');
+        return false;
+      }
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setError('Images must be smaller than 25 MB.');
+        return false;
+      }
+      return true;
+    });
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      setError('Please upload a JPEG, PNG, WebP, or HEIC image.');
-      return;
+    if (validFiles.length > 0) {
+      setError(null);
+      setImageFiles(prev => [...prev, ...validFiles]);
     }
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      setError('Image must be smaller than 25 MB.');
-      return;
-    }
-    setError(null);
-    setImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
   }, []);
 
   const handleFileInputChange = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (file) handleFileSelect(file);
+    if (e.target.files?.length) handleFileSelect(e.target.files);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }, [handleFileSelect]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragOver(false);
-    const file = e.dataTransfer.files?.[0];
     if (file) handleFileSelect(file);
   }, [handleFileSelect]);
 
@@ -244,13 +243,20 @@ const PublicSupportForm = () => {
         ? await executeCaptcha(hcaptchaWidgetId.current)
         : 'dev-bypass';
 
-      // 2. Process image if provided
-      let imageBase64 = null;
-      let imageMimeType = null;
-      if (imageFile) {
-        const compressed = await compressImage(imageFile);
-        imageBase64 = compressed.base64;
-        imageMimeType = compressed.mimeType;
+      // 2. Process images if provided
+      const processedImages = [];
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          try {
+            const compressed = await compressImage(file);
+            processedImages.push({
+              base64: compressed.base64,
+              mimeType: compressed.mimeType
+            });
+          } catch (err) {
+            console.warn("[PublicSupportForm] Image compression failed:", err);
+          }
+        }
       }
 
       // 3. Call the Edge Function
@@ -264,8 +270,7 @@ const PublicSupportForm = () => {
             summary: params.summary
               ? `${params.summary}: ${description.trim()}`
               : description.trim(),
-            imageBase64,
-            imageMimeType,
+            images: processedImages,
           },
         }
       );
@@ -381,52 +386,59 @@ const PublicSupportForm = () => {
           {/* Photo upload */}
           <div className="psf-form-group">
             <label className="psf-label">
-              Attach a Photo <span style={{ opacity: 0.5, fontWeight: 400 }}>(optional)</span>
+              Attach Photos <span style={{ opacity: 0.5, fontWeight: 400 }}>(optional)</span>
             </label>
 
-            {imagePreviewUrl ? (
-              <div className="psf-preview">
-                <img
-                  className="psf-preview-img"
-                  src={imagePreviewUrl}
-                  alt="Selected photo preview"
-                />
-                <button
-                  type="button"
-                  className="psf-preview-remove"
-                  onClick={handleRemoveImage}
-                  aria-label="Remove photo"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <div
-                className={`psf-dropzone${isDragOver ? ' psf-dropzone--active' : ''}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
-                aria-label="Upload photo"
-              >
-                {/* Upload icon */}
-                <svg className="psf-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <p className="psf-dropzone-text">Tap to attach a photo, or drag &amp; drop</p>
-                <p className="psf-dropzone-hint">JPEG, PNG, WebP, HEIC — max 25 MB</p>
+            {imageFiles.length > 0 && (
+              <div className="psf-previews-list">
+                {imageFiles.map((file, idx) => (
+                  <div key={idx} className="psf-preview-compact">
+                    <div className="psf-preview-compact-info">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--psf-mint)" strokeWidth={2}>
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                      <span className="psf-preview-filename">{file.name || 'Attached Photo'}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="psf-preview-remove"
+                      onClick={() => handleRemoveImage(idx)}
+                      aria-label="Remove photo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
+
+            <div
+              className={`psf-dropzone${isDragOver ? ' psf-dropzone--active' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+              aria-label="Upload photo"
+            >
+              <svg className="psf-dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <p className="psf-dropzone-text">{imageFiles.length > 0 ? "Tap to add another photo, or drag & drop" : "Tap to attach a photo, or drag & drop"}</p>
+              <p className="psf-dropzone-hint">JPEG, PNG, WebP, HEIC — max 25 MB</p>
+            </div>
 
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+              multiple
               className="psf-file-input"
               onChange={handleFileInputChange}
               aria-label="File upload input"

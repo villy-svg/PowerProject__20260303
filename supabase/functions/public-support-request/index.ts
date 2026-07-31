@@ -93,8 +93,7 @@ serve(async (req: Request) => {
       hubId,
       managerId,
       summary,
-      imageBase64,   // Optional — base64-encoded image string (without the data: prefix)
-      imageMimeType, // Optional — e.g. "image/jpeg"
+      images, // Optional — Array of { base64: string, mimeType: string }
     } = body;
 
     if (!captchaToken) {
@@ -153,44 +152,51 @@ serve(async (req: Request) => {
     }
 
     // -------------------------------------------------------------------------
-    // 4. Optionally upload image to Supabase Storage
+    // 4. Optionally upload images to Supabase Storage
     // -------------------------------------------------------------------------
-    let imageStoragePath: string | null = null;
-    let imagePublicUrl: string | null = null;
-    let imageFinalMimeType: string | null = null;
+    const submissionLinks: any[] = [];
 
-    if (imageBase64 && imageMimeType) {
-      try {
-        // Decode base64 → Uint8Array
-        const binaryStr = atob(imageBase64);
-        const bytes = new Uint8Array(binaryStr.length);
-        for (let i = 0; i < binaryStr.length; i++) {
-          bytes[i] = binaryStr.charCodeAt(i);
-        }
+    if (Array.isArray(images) && images.length > 0) {
+      for (const img of images) {
+        if (!img.base64 || !img.mimeType) continue;
+        
+        try {
+          // Decode base64 → Uint8Array
+          const binaryStr = atob(img.base64);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
 
-        // Derive file extension from MIME type (image/jpeg → jpg, image/png → png, etc.)
-        const ext = imageMimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
-        const fileName = `public-reports/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+          // Derive file extension from MIME type
+          const ext = img.mimeType.split("/")[1]?.replace("jpeg", "jpg") ?? "jpg";
+          const fileName = `public-reports/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
-        const { error: uploadError } = await supabaseAdmin.storage
-          .from("field-submissions")
-          .upload(fileName, bytes, { contentType: imageMimeType, upsert: false });
-
-        if (uploadError) {
-          // Non-fatal: log but continue — the task will still be created
-          console.warn("[public-support-request] Image upload failed:", uploadError.message);
-        } else {
-          imageStoragePath = fileName;
-          imageFinalMimeType = imageMimeType;
-
-          // Resolve the public URL so it can be stored in submission.links
-          const { data: urlData } = supabaseAdmin.storage
+          const { error: uploadError } = await supabaseAdmin.storage
             .from("field-submissions")
-            .getPublicUrl(fileName);
-          imagePublicUrl = urlData?.publicUrl ?? null;
+            .upload(fileName, bytes, { contentType: img.mimeType, upsert: false });
+
+          if (uploadError) {
+            console.warn("[public-support-request] Image upload failed:", uploadError.message);
+          } else {
+            // Resolve the public URL
+            const { data: urlData } = supabaseAdmin.storage
+              .from("field-submissions")
+              .getPublicUrl(fileName);
+              
+            if (urlData?.publicUrl) {
+              submissionLinks.push({
+                file_name: `public_report_${submissionLinks.length + 1}.${ext}`,
+                url: urlData.publicUrl,
+                provider: "supabase",
+                tier: "hot",
+                mime_type: img.mimeType,
+              });
+            }
+          }
+        } catch (imgErr) {
+          console.warn("[public-support-request] Image processing error:", imgErr);
         }
-      } catch (imgErr) {
-        console.warn("[public-support-request] Image processing error:", imgErr);
       }
     }
 
@@ -268,17 +274,7 @@ serve(async (req: Request) => {
     //      "📎 Creation Attachments" instead of a submitter name
     //    - submitted_by = managerUserProfileId (nullable — OK after migration)
     // -------------------------------------------------------------------------
-    if (taskData?.id && imagePublicUrl && imageStoragePath) {
-      const ext = imageStoragePath.split(".").pop() ?? "jpg";
-      const submissionLinks = [
-        {
-          file_name: `public_report.${ext}`,
-          url: imagePublicUrl,
-          provider: "supabase",
-          tier: "hot",
-          mime_type: imageFinalMimeType ?? "image/jpeg",
-        },
-      ];
+    if (taskData?.id && submissionLinks.length > 0) {
 
       const { error: submissionError } = await supabaseAdmin
         .from("submissions")

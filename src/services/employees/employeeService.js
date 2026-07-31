@@ -184,6 +184,31 @@ export const employeeService = {
   },
 
   /**
+   * Update only the bank details for an employee.
+   * @param {string} id
+   * @param {Object} bankDetails
+   * @returns {Object} The updated employee row.
+   */
+  async updateEmployeeBankDetails(id, bankDetails) {
+    const row = {
+      account_number: bankDetails.accountNumber,
+      ifsc_code: bankDetails.ifscCode,
+      account_name: bankDetails.accountName,
+      pan_number: bankDetails.panNumber,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase.from('employees').update(row).eq('id', id).select();
+    if (error) throw error;
+
+    if (data?.[0]) {
+      await logEmployeeHistory(id, data[0], 'UPDATE_BANK_DETAILS');
+    }
+
+    return data[0];
+  },
+
+  /**
    * Toggle an employee's active/inactive status.
    * @param {string} id
    * @param {'Active'|'Inactive'} currentStatus

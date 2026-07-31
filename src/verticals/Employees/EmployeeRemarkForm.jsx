@@ -227,6 +227,7 @@ const EmployeeRemarkForm = ({
           <div className="history-tab-content fade-in">
             <SubmissionHistory 
               taskId={initialData?.id} 
+              task={initialData}
               permissions={permissions} 
               currentUser={currentUser} 
               onStatusUpdate={onSubmissionStatusUpdate} 

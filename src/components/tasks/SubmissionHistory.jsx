@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSubmissionsForTask, updateSubmissionStatus } from '../../services/tasks/submissionService';
+import { employeeService } from '../../services/employees/employeeService';
+import { taskService } from '../../services/tasks/taskService';
 import RejectionModal from '../modals/RejectionModal';
 import { IconDatabase, IconFile, IconCheck, IconX } from '../ui/Icons';
 import './SubmissionHistory.css';
@@ -10,12 +12,14 @@ import './SubmissionHistory.css';
  * Managers (editor+) can approve/reject pending submissions inline.
  *
  * Props:
+ * Props:
  * - taskId (string): The task ID to fetch submissions for
+ * - task (object): The task object itself
  * - permissions (object): Current user's permissions ({ canUpdate, level })
  * - currentUser (object): Current user ({ id })
  * - onStatusUpdate (fn): Optional callback after a successful status change (submissionId, newStatus)
  */
-const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatusUpdate, onCountLoad }) => {
+const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, onStatusUpdate, onCountLoad }) => {
   const [submissions, setSubmissions] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,8 +89,40 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
     return profile.name || profile.email || 'Unknown';
   };
 
-  // Don't render if no submissions and not loading
-  if (!loading && submissions.length === 0) {
+  // Don't render if no submissions and not loading (and not a bank update)
+  let bankUpdatePayload = null;
+  if (task?.description && task.description.includes('"BANK_UPDATE"')) {
+    try {
+      const parsed = JSON.parse(task.description);
+      if (parsed.type === 'BANK_UPDATE') {
+        bankUpdatePayload = parsed;
+      }
+    } catch (e) {
+      // Not JSON
+    }
+  }
+
+  const handleBankApproval = async (status) => {
+    if (!bankUpdatePayload) return;
+    setUpdating('bank_update');
+    try {
+      if (status === 'approved') {
+        await employeeService.updateEmployeeBankDetails(bankUpdatePayload.employeeId, bankUpdatePayload.newDetails);
+      }
+      
+      const newStage = status === 'approved' ? 'RESOLVED' : 'CANCELLED';
+      await taskService.updateTaskStage(task.id, newStage, currentUser.id);
+      
+      alert(`Bank Update ${status === 'approved' ? 'Approved & Applied' : 'Rejected'}.`);
+      if (onStatusUpdate) onStatusUpdate(); // close modal/refresh
+    } catch (err) {
+      alert(`Action failed: ${err.message}`);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  if (!loading && submissions.length === 0 && !bankUpdatePayload) {
     return (
       <div className="submission-history">
         <div className="submission-history-header">
@@ -113,6 +149,66 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
           )}
         </span>
       </div>
+
+      {bankUpdatePayload && (
+        <div className="bank-update-review-card u-mb-16" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--surface-color)' }}>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>
+            🏦 Bank Details Update Request
+          </h4>
+          <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            <strong>{bankUpdatePayload.employeeName}</strong> requested an update to their bank details.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 'bold' }}>Current Details</div>
+              <div style={{ fontSize: '0.85rem' }}>
+                <div><strong>A/C Name:</strong> {bankUpdatePayload.oldDetails.accountName || 'N/A'}</div>
+                <div><strong>A/C Number:</strong> {bankUpdatePayload.oldDetails.accountNumber || 'N/A'}</div>
+                <div><strong>IFSC:</strong> {bankUpdatePayload.oldDetails.ifscCode || 'N/A'}</div>
+                <div><strong>PAN:</strong> {bankUpdatePayload.oldDetails.panNumber || 'N/A'}</div>
+              </div>
+            </div>
+            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px', border: '1px solid var(--brand-blue)' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-blue)', marginBottom: '8px', fontWeight: 'bold' }}>Requested Details</div>
+              <div style={{ fontSize: '0.85rem' }}>
+                <div><strong>A/C Name:</strong> {bankUpdatePayload.newDetails.accountName || 'N/A'}</div>
+                <div><strong>A/C Number:</strong> {bankUpdatePayload.newDetails.accountNumber || 'N/A'}</div>
+                <div><strong>IFSC:</strong> {bankUpdatePayload.newDetails.ifscCode || 'N/A'}</div>
+                <div><strong>PAN:</strong> {bankUpdatePayload.newDetails.panNumber || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+
+          {canReview && task.stageId !== 'RESOLVED' && task.stageId !== 'CANCELLED' && (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                type="button" 
+                className="halo-button" 
+                style={{ background: 'var(--success-color)', color: 'white', borderColor: 'var(--success-color)' }}
+                onClick={() => handleBankApproval('approved')}
+                disabled={updating === 'bank_update'}
+              >
+                {updating === 'bank_update' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve & Update Employee</>}
+              </button>
+              <button 
+                type="button" 
+                className="halo-button secondary" 
+                style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }}
+                onClick={() => handleBankApproval('rejected')}
+                disabled={updating === 'bank_update'}
+              >
+                {updating === 'bank_update' ? 'Processing...' : <><IconX size={14} className="u-mr-4" /> Reject</>}
+              </button>
+            </div>
+          )}
+          {(task.stageId === 'RESOLVED' || task.stageId === 'CANCELLED') && (
+            <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+              This request has been {task.stageId === 'RESOLVED' ? 'Approved' : 'Rejected'}.
+            </div>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="submission-loading">Loading submissions...</div>
