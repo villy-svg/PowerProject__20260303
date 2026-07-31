@@ -314,18 +314,11 @@ const ListViewRow = ({
           {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
             <>
               <button
-                className="halo-button btn-approve review-action-btn"
-                onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
-                title="Approve Submission"
+                className="halo-button btn-review-submissions review-action-btn"
+                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+                title="Review Submissions"
               >
-                ✓ Appr
-              </button>
-              <button
-                className="halo-button btn-reject review-action-btn"
-                onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
-                title="Reject Submission & Request Rework"
-              >
-                ✗ Rej
+                Check Submissions
               </button>
             </>
           )}

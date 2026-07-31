@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { IconCamera } from '../ui/Icons';
 import './AttachmentBadge.css';
 
 /**
@@ -53,8 +55,7 @@ const AttachmentBadge = ({ task }) => {
       : [];
   }
 
-  // No images → nothing to render
-  if (imageLinks.length === 0) return null;
+  // Even if there are no images, we will render a disabled badge.
 
   // ── Lightbox navigation helpers ────────────────────────────────────────────
   const goNext = useCallback((e) => {
@@ -102,12 +103,13 @@ const AttachmentBadge = ({ task }) => {
       {/* ── Camera Badge ─────────────────────────────────────────────────── */}
       <button
         type="button"
-        className="attachment-camera-badge"
-        onClick={handleBadgeClick}
-        title={`${imageLinks.length} photo${imageLinks.length > 1 ? 's' : ''} attached — click to view`}
-        aria-label="View attached photos"
+        className={`attachment-camera-badge ${imageLinks.length === 0 ? 'disabled' : ''}`}
+        onClick={imageLinks.length > 0 ? handleBadgeClick : undefined}
+        title={imageLinks.length > 0 ? `${imageLinks.length} photo${imageLinks.length > 1 ? 's' : ''} attached — click to view` : 'No photos attached'}
+        aria-label={imageLinks.length > 0 ? "View attached photos" : "No attached photos"}
+        disabled={imageLinks.length === 0}
       >
-        📷
+        <IconCamera size={15} />
         {imageLinks.length > 1 && (
           <span className="attachment-camera-count">{imageLinks.length}</span>
         )}

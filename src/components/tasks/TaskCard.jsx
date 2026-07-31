@@ -448,18 +448,11 @@ const TaskCard = ({
       {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
         <div className="card-row-approval">
           <button
-            className="halo-button btn-approve"
-            onClick={(e) => { e.stopPropagation(); handleApproveSubmission(task.id, task.latestSubmission.id); }}
-            title="Approve Submission"
+            className="halo-button btn-review-submissions"
+            onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+            title="Review Submissions"
           >
-            ✓ Appr
-          </button>
-          <button
-            className="halo-button btn-reject"
-            onClick={(e) => { e.stopPropagation(); handleRejectClick(task); }}
-            title="Reject Submission & Request Rework"
-          >
-            ✗ Rej
+            Check Submissions
           </button>
         </div>
       )}

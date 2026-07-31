@@ -21,7 +21,7 @@
   --psf-border:        rgba(255, 255, 255, 0.08);
   --psf-border-focus:  var(--brand-green);
   --psf-mint:          var(--brand-green);
-  --psf-text:          var(--border-color);
+  --psf-text:          var(--text-color);
   --psf-text-dim:      rgba(212, 212, 216, 0.5);
   --psf-halo-bg:       rgba(13, 148, 136, 0.05);
   --psf-halo-glow:     rgba(13, 148, 136, 0.2);
@@ -43,12 +43,13 @@
 .psf-page {
   min-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
   background: var(--psf-bg);
   font-family: var(--psf-font);
   color: var(--psf-text);
-  padding: clamp(1rem, 4vw, 2rem);
+  padding: 2rem 1rem;
   box-sizing: border-box;
 }
 
@@ -59,6 +60,7 @@
 .psf-card {
   width: 100%;
   max-width: 520px;
+  margin: auto;
   background: var(--psf-panel);
   border: 1px solid var(--psf-border);
   border-radius: var(--psf-radius-card);

@@ -23,15 +23,23 @@
   flex-shrink: 0;
 }
 
-.attachment-camera-badge:hover {
+.attachment-camera-badge:hover:not(.disabled) {
   background: color-mix(in srgb, var(--brand-mint), transparent 65%);
   border-color: var(--brand-mint);
   box-shadow: 0 0 8px color-mix(in srgb, var(--brand-mint), transparent 60%);
   transform: scale(1.05);
 }
 
-.attachment-camera-badge:active {
+.attachment-camera-badge:active:not(.disabled) {
   transform: scale(0.97);
+}
+
+.attachment-camera-badge.disabled {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-color);
+  opacity: 0.35;
+  cursor: default;
 }
 
 .attachment-camera-count {

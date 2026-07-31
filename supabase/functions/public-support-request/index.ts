@@ -173,7 +173,7 @@ serve(async (req: Request) => {
         const fileName = `public-reports/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
         const { error: uploadError } = await supabaseAdmin.storage
-          .from("submission-files")
+          .from("field-submissions")
           .upload(fileName, bytes, { contentType: imageMimeType, upsert: false });
 
         if (uploadError) {
@@ -185,7 +185,7 @@ serve(async (req: Request) => {
 
           // Resolve the public URL so it can be stored in submission.links
           const { data: urlData } = supabaseAdmin.storage
-            .from("submission-files")
+            .from("field-submissions")
             .getPublicUrl(fileName);
           imagePublicUrl = urlData?.publicUrl ?? null;
         }
