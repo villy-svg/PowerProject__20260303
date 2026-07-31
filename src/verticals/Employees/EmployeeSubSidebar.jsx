@@ -125,6 +125,8 @@ const EmployeeSubSidebar = ({
     <div className="sub-sidebar-body">
       {!hideNavigation && (
         <>
+
+
           {permissions?.canAccessEmployeeTasks && (
             <div className="employee-tasks-btn-wrapper">
               <button
@@ -188,98 +190,10 @@ const EmployeeSubSidebar = ({
               </button>
             </div>
           )}
-
-          {/* Nav Toggle Header */}
-          <div className="sidebar-title-row">
-            {permissions?.canAccessEmployees ? (
-               <p className="sidebar-title-text">Employees</p>
-            ) : (
-               <p className="sidebar-title-text disabled">Employees</p>
-            )}
-          </div>
         </>
       )}
 
-      {false && (
-        <>
-          <div 
-            className="filters-row-toggle" 
-            onClick={() => setShowFilters(!showFilters)}
-          >
-        <p>FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
-        <div className="filters-reset-wrapper">
-          <button
-            onClick={(e) => { e.stopPropagation(); onFilterChange('highRemarksOnly', !filters.highRemarksOnly); }}
-            className={`filters-action-btn ${filters.highRemarksOnly ? 'active' : ''}`}
-            title="High Remarks Only"
-          >
-            HIGH
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onReset(); }}
-            className="filters-action-btn"
-          >
-            RESET
-          </button>
-        </div>
-      </div>
 
-      {showFilters && (
-        <div className="filters-content">
-          <FilterGroup
-            label="Employee Role"
-            options={filterOptions.roles}
-            currentFilters={filters.role}
-            filterKey="role"
-            displayKey="role_code"
-            valueKey="role_code"
-            isExpanded={expandedGroups.role}
-            onToggle={() => toggleGroup('role')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-
-          <FilterGroup
-            label="Primary Hub"
-            options={filterOptions.hubs}
-            currentFilters={filters.hub}
-            filterKey="hub"
-            displayKey="hub_code"
-            valueKey="id"
-            isExpanded={expandedGroups.hub}
-            onToggle={() => toggleGroup('hub')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-
-          <FilterGroup
-            label="Department"
-            options={filterOptions.departments}
-            currentFilters={filters.department}
-            filterKey="department"
-            displayKey="dept_code"
-            valueKey="dept_code"
-            isExpanded={expandedGroups.department}
-            onToggle={() => toggleGroup('department')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-        </div>
-      )}
-        </>
-      )}
-
-      {!hideNavigation && (
-        <div className="sub-nav-item sidebar-footer-info">
-          <div className="sub-nav-text">
-            <p>Employee Manager</p>
-            <small>Task Board Active</small>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

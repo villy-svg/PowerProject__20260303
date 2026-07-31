@@ -25,7 +25,7 @@ import powerLogo from '../../assets/logo.svg';
 import SearchBar from '../../components/ui/SearchBar';
 import NotificationBell from '../../components/ui/NotificationBell';
 import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
-import { IconBulb, IconWarning } from '../../components/ui/Icons';
+import { IconBulb, IconWarning, IconAlertCircle } from '../../components/ui/Icons';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -92,7 +92,7 @@ const DesktopLayout = ({
                 onClick={() => setIsSandboxOpen(true)}
                 title="Sandbox Active"
               >
-                <IconWarning size={16} style={{ color: 'var(--brand-yellow)' }} />
+                <IconWarning size={14} />
               </button>
             )}
             <NotificationBell user={user} />

@@ -125,6 +125,25 @@
 .theme-toggle-btn:hover {
   background-color: var(--border-color);
 }
+.app-header .header-sandbox-btn {
+  margin-right: 24px;
+  font-size: 0.8rem;
+  padding: 0 16px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #f59e0b !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 .header-tutorial-btn {
   margin-right: 24px;
   font-size: 0.8rem;
@@ -181,62 +200,7 @@
     font-size: 1.3rem;
   }
   
-  /* Completely remove borders and backgrounds of collapsed buttons, centering icons perfectly */
-  .app-header .header-tutorial-btn,
-  .app-header .header-tutorial-btn.active {
-    font-size: 0; /* Hide original text & emoji */
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    max-width: 32px;
-    min-height: auto;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-right: 16px;
-  }
-  .header-tutorial-btn::after {
-    content: "💡";
-    font-size: 1.35rem;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    line-height: 1;
-  }
-  
-  .app-header .header-sandbox-btn {
-    font-size: 0; /* Hide original text & emoji */
-    border: none;
-    background: transparent;
-    box-shadow: none;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    max-width: 32px;
-    min-height: auto;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-right: 16px;
-  }
-  .header-sandbox-btn::after {
-    content: "⚠️";
-    font-size: 1.35rem;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    line-height: 1;
-  }
-  
+
   .impersonation-header-wrapper {
     margin-right: 8px;
     padding: 2px 8px;

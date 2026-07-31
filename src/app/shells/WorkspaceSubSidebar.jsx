@@ -44,16 +44,17 @@ const WorkspaceSubSidebar = ({
           {isSubSidebarOpen ? <IconChevronLeft size={16} /> : <IconChevronRight size={16} />}
         </button>
 
-        <h3
-          className={onHeaderClick ? 'navigable-header' : ''}
+        <button
+          className={`halo-button ${onHeaderClick ? 'navigable-header' : ''}`}
           onClick={onHeaderClick}
           title={onHeaderClick ? "Click to open Management View" : ""}
+          style={{ width: '100%', padding: '8px 16px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >
           {label}
-        </h3>
+        </button>
       </div>
 
-      {SidebarComponent ? (
+      {SidebarComponent && (
         <SidebarComponent
           user={user}
           permissions={permissions}
@@ -67,15 +68,6 @@ const WorkspaceSubSidebar = ({
           filters={filters}
           tasks={tasks}
         />
-      ) : (
-        <div className="sub-sidebar-body">
-          <div className="sub-nav-item">
-            <div className="sub-nav-text">
-              <p>{label} Workspace</p>
-              <small>Session Role: {user?.roleId || 'User'}</small>
-            </div>
-          </div>
-        </div>
       )}
     </aside>
   );

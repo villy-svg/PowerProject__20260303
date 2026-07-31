@@ -211,6 +211,40 @@ serve(async (req: Request) => {
       );
     }
 
+    // -------------------------------------------------------------------------
+    // 5. Insert context links for polymorphic multi-hub/assignee support
+    // -------------------------------------------------------------------------
+    if (taskData?.id) {
+      const links = [];
+      if (hubId) {
+        links.push({
+          source_id: taskData.id,
+          source_type: "task",
+          entity_type: "hub",
+          entity_id: hubId,
+          is_active: true,
+        });
+      }
+      if (managerId) {
+        links.push({
+          source_id: taskData.id,
+          source_type: "task",
+          entity_type: "assignee",
+          entity_id: managerId,
+          is_active: true,
+        });
+      }
+      if (links.length > 0) {
+        const { error: linksError } = await supabaseAdmin
+          .from("task_context_links")
+          .insert(links);
+
+        if (linksError) {
+          console.warn("[public-support-request] Failed to insert context links:", linksError);
+        }
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

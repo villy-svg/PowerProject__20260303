@@ -131,4 +131,11 @@ button {
   visibility: visible;
   opacity: 1;
   transform: translateY(4px);
-}
+}
+
+.standard-icon {
+  opacity: 0.6;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+

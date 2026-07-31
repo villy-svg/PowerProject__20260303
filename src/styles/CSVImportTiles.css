@@ -25,7 +25,7 @@
 
 .csv-match-badge.hard-match {
   background: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
+  color: var(--status-danger);
 }
 
 .csv-tile-meta {

@@ -41,25 +41,25 @@
 .attendance-legend__item--present,
 .attendance-legend__item--present-night { 
   background: transparent;
-  color: var(--status-success, #22c55e);
+  color: var(--status-success, var(--status-success));
 }
 .attendance-legend__item--week-off { 
   background: transparent;
-  color: var(--status-info, #3b82f6);
+  color: var(--status-info, var(--status-neutral));
 }
 .attendance-legend__item--leave { 
   background: transparent;
-  color: var(--status-info, #3b82f6);
+  color: var(--status-info, var(--status-neutral));
 }
 .attendance-legend__item--absent,
 .attendance-legend__item--no-show,
 .attendance-legend__item--no-call-no-show { 
   background: transparent;
-  color: var(--status-danger, #ef4444);
+  color: var(--status-danger, var(--status-danger));
 }
 .attendance-legend__item--pending { 
   background: transparent;
-  color: var(--status-warning, #f97316);
+  color: var(--status-warning, var(--status-warning));
 }
 
 .attendance-legend__icon-pending {

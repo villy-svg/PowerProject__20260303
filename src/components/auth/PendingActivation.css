@@ -4,7 +4,7 @@
   align-items: center;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: var(--bg-color); /* §8: use token, not hardcoded #050505 */
+  background-color: var(--bg-color); /* §8: use token, not hardcoded var(--bg-color) */
   color: var(--text-color);
   padding: 24px;
   position: relative;
@@ -67,7 +67,7 @@
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.7) 100%);
+  background: linear-gradient(135deg, var(--text-color) 0%, rgba(255, 255, 255, 0.7) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -131,7 +131,7 @@
   font-size: clamp(20px, 4vw, 24px);
   font-weight: 700;
   margin: 0;
-  color: var(--color-white); /* §8: use token, not raw #ffffff */
+  color: var(--color-white); /* §8: use token, not raw var(--text-color) */
 }
 
 .pending-activation-content p {

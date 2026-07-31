@@ -112,7 +112,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-color, #09090b);
+  background: var(--bg-color, var(--bg-color));
   border: 1px solid var(--border-color);
   border-radius: var(--radius-button, 12px);
   box-shadow: var(--shadow-premium, 0 12px 40px rgba(0, 0, 0, 0.35));

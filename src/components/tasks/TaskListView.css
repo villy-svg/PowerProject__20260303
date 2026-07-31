@@ -97,7 +97,7 @@
 .list-task-row .standard-icon {
   opacity: 0.9 !important; 
   filter: contrast(1.2);
-  color: #ffffff !important;
+  color: var(--text-color) !important;
 }
 .list-task-row button:hover .standard-icon {
   opacity: 1 !important;
@@ -106,7 +106,7 @@
 
 
 .list-task-row .card-delete-button:hover .standard-icon {
-  color: #ef4444;
+  color: var(--status-danger);
 }
 .list-task-row .card-add-sub-button:hover .standard-icon,
 .list-task-row .card-reprio-button:hover .standard-icon,

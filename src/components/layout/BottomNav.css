@@ -113,7 +113,7 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: #a1a1aa; /* Crisp neutral grey for black background */
+  color: var(--border-color); /* Crisp neutral grey for black background */
   opacity: 0.9; /* High opacity to prevent muddiness */
   gap: 4px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);

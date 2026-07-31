@@ -28,7 +28,7 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  background-color: var(--danger-color, #e53935);
+  background-color: var(--danger-color, var(--status-danger));
   color: white;
   font-size: 0.65rem;
   font-weight: 700;
@@ -79,7 +79,7 @@
 .mark-all-btn {
   background: transparent;
   border: none;
-  color: var(--brand-blue, #2196f3);
+  color: var(--brand-blue, var(--status-neutral));
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -117,7 +117,7 @@
 
 .notification-item.unread {
   background-color: var(--bg-highlight, rgba(33, 150, 243, 0.05));
-  border-left: 3px solid var(--brand-blue, #2196f3);
+  border-left: 3px solid var(--brand-blue, var(--status-neutral));
   padding-left: 13px;
 }
 

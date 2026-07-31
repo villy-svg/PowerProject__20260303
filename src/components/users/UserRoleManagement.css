@@ -126,7 +126,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #444;
+  background-color: var(--border-color);
   transition: .4s;
   border-radius: 34px;
 }
@@ -142,17 +142,17 @@
   border-radius: 50%;
 }
 input:checked+.slider {
-  background-color: #2ecc71;
+  background-color: var(--status-success);
   /* Brand Green */
 }
 input:focus+.slider {
-  box-shadow: 0 0 1px #2ecc71;
+  box-shadow: 0 0 1px var(--status-success);
 }
 input:checked+.slider:before {
   transform: translateX(22px);
 }
 input:disabled+.slider {
-  background-color: #222;
+  background-color: var(--border-color);
   cursor: not-allowed;
   opacity: 0.5;
 }

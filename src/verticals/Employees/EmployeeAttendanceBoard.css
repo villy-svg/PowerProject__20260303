@@ -78,7 +78,7 @@
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--brand-mint, #00ffcc);
+  color: var(--brand-mint, var(--brand-green));
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -182,7 +182,7 @@
   align-items: center;
   justify-content: center;
   background-color: var(--status-warning);
-  color: #fff;
+  color: var(--text-color);
   font-size: 0.6rem;
   font-weight: 800;
   height: 16px;
@@ -280,18 +280,18 @@
 }
 
 .react-datepicker {
-  background-color: var(--bg-color, #1e1e1e) !important;
-  border: 1px solid var(--border-color, #333) !important;
+  background-color: var(--bg-color, var(--border-color)) !important;
+  border: 1px solid var(--border-color, var(--border-color)) !important;
   border-radius: 12px !important;
   font-family: inherit !important;
-  color: var(--text-color, #fff) !important;
+  color: var(--text-color, var(--text-color)) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
   z-index: 4005 !important;
 }
 
 .react-datepicker__header {
-  background-color: color-mix(in srgb, var(--bg-color, #1e1e1e), transparent 20%) !important;
-  border-bottom: 1px solid var(--border-color, #333) !important;
+  background-color: color-mix(in srgb, var(--bg-color, var(--border-color)), transparent 20%) !important;
+  border-bottom: 1px solid var(--border-color, var(--border-color)) !important;
   border-top-left-radius: 12px !important;
   border-top-right-radius: 12px !important;
 }
@@ -299,20 +299,20 @@
 .react-datepicker__current-month, 
 .react-datepicker-time__header, 
 .react-datepicker-year-header {
-  color: var(--text-color, #fff) !important;
+  color: var(--text-color, var(--text-color)) !important;
 }
 
 .react-datepicker__day-name, 
 .react-datepicker__day, 
 .react-datepicker__time-name {
-  color: var(--text-color, #ccc) !important;
+  color: var(--text-color, var(--border-color)) !important;
 }
 
 .react-datepicker__day:hover, 
 .react-datepicker__month-text:hover, 
 .react-datepicker__quarter-text:hover, 
 .react-datepicker__year-text:hover {
-  background-color: var(--halo-bg, #333) !important;
+  background-color: var(--halo-bg, var(--border-color)) !important;
   border-radius: 50% !important;
 }
 
@@ -320,8 +320,8 @@
 .react-datepicker__day--in-selecting-range,
 .react-datepicker__month-text--in-selecting-range, 
 .react-datepicker__month-text--in-range {
-  background-color: color-mix(in srgb, var(--brand-mint, #00ffcc), transparent 75%) !important;
-  color: var(--text-color, #fff) !important;
+  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 75%) !important;
+  color: var(--text-color, var(--text-color)) !important;
   border-radius: 0 !important;
 }
 
@@ -330,25 +330,25 @@
 .react-datepicker__day--selecting-range-start,
 .react-datepicker__day--selected,
 .react-datepicker__month-text--selected {
-  background-color: var(--brand-mint, #00ffcc) !important;
-  color: #000 !important;
+  background-color: var(--brand-mint, var(--brand-green)) !important;
+  color: var(--bg-color) !important;
   border-radius: 50% !important;
   font-weight: bold;
 }
 
 .react-datepicker__day--keyboard-selected, 
 .react-datepicker__month-text--keyboard-selected {
-  background-color: color-mix(in srgb, var(--brand-mint, #00ffcc), transparent 70%) !important;
-  color: var(--brand-mint, #00ffcc) !important;
+  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 70%) !important;
+  color: var(--brand-mint, var(--brand-green)) !important;
   border-radius: 50% !important;
 }
 
 .react-datepicker__navigation-icon::before {
-  border-color: var(--text-color, #ccc) !important;
+  border-color: var(--text-color, var(--border-color)) !important;
 }
 
 .react-datepicker__navigation:hover *::before {
-  border-color: var(--brand-mint, #00ffcc) !important;
+  border-color: var(--brand-mint, var(--brand-green)) !important;
 }
 
 .react-datepicker__day--outside-month {

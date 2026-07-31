@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260730 Cleaning QR Generator 1.2.3"
+git commit -m "260730 Cleaning QR Generator 1.2.5"
 git push origin staging
 
 # 2. Build (on Staging)
@@ -44,8 +44,8 @@ npx supabase db push --include-all --yes
 
 #npx supabase functions deploy scraper-service
 #npx supabase functions deploy sheets-service
+#npx supabase functions deploy public-support-request --project-ref dhhbdgzutlltiojbsboi
 #npx supabase functions deploy public-support-request --project-ref eeoibqxhfkrgbylnluvk
-npx supabase functions deploy public-support-request --project-ref eeoibqxhfkrgbylnluvk
 #npx supabase db push
 #npx supabase functions deploy user-admin
 #npx supabase migration repair --status reverted 20260527123000

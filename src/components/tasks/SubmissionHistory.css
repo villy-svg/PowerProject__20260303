@@ -103,7 +103,7 @@
 /* ─── Submission Card Overrides ─────────────────────────────────────────── */
 .submission-card {
   background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-button);
   padding: clamp(12px, 2vw, 16px);
   transition: all 0.2s ease;

@@ -26,7 +26,7 @@
 }
 
 .master-dropdown option {
-  background-color: #0b1314; 
+  background-color: var(--bg-color); 
   color: var(--text-color);
   padding: 12px;
 }
@@ -49,7 +49,7 @@
   top: calc(100% + 5px);
   left: 0;
   right: 0;
-  background: #0a0a0a !important; /* Truly solid dark background to prevent bleed-through */
+  background: var(--bg-color) !important; /* Truly solid dark background to prevent bleed-through */
   border: none;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
@@ -97,7 +97,7 @@
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #000;
+  color: var(--bg-color);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
@@ -253,7 +253,7 @@
 .bd-clear-btn:hover {
   background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: var(--status-danger);
   transform: scale(1.1) rotate(90deg);
 }
 
@@ -388,7 +388,7 @@
 .bd-pill-remove:hover {
   opacity: 1;
   background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  color: var(--status-danger);
 }
 
 /* ── BaseDropdown: Custom Empty State ── */
@@ -429,7 +429,7 @@
   background: var(--brand-green);
   border: 1px solid var(--brand-green);
   border-radius: 8px;
-  color: #000 !important; /* Force high contrast black text on green button */
+  color: var(--bg-color) !important; /* Force high contrast black text on green button */
   font-weight: 700;
   font-size: 0.75rem;
   letter-spacing: 0.05em;

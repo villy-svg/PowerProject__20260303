@@ -30,18 +30,13 @@
   width: 100%;
   border-bottom: 1px solid var(--border-color);
 }
-.sub-sidebar-header h3 {
+.sub-sidebar-header .halo-button {
   margin: 0;
   padding: 8px 16px;
   font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.5px;
-  color: var(--brand-green);
   text-transform: none;
-  background: var(--halo-bg);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 80%);
-  border-radius: 8px;
-  box-shadow: 0 0 12px var(--halo-glow);
   flex: 1;
   text-align: center;
   white-space: nowrap;
@@ -49,7 +44,7 @@
   text-overflow: ellipsis;
   transition: all 0.3s ease;
 }
-.sub-sidebar-header h3.navigable-header {
+.sub-sidebar-header .halo-button.navigable-header {
   cursor: pointer;
   position: relative;
 }
@@ -58,7 +53,7 @@
   background: var(--bg-color);
   border: 1.5px solid var(--border-color);
   color: var(--text-color);
-  opacity: 0.8;
+  opacity: 1;
   border-radius: 8px;
   cursor: pointer;
   width: 32px;
@@ -86,7 +81,7 @@
   padding: 0;
   border-bottom: none;
 }
-.workspace-container.sub-sidebar-collapsed .sub-sidebar-header h3 {
+.workspace-container.sub-sidebar-collapsed .sub-sidebar-header .halo-button {
   display: none;
 }
 .workspace-container.sub-sidebar-collapsed .sub-sidebar-toggle {
@@ -211,7 +206,7 @@
 }
 .nav-arrow {
   margin-left: auto;
-  opacity: 0.6;
+  opacity: 1;
   transition: opacity 0.3s;
 }
 .sub-nav-item:hover .nav-arrow {
@@ -255,7 +250,7 @@
   padding: 4px 8px;
   border-radius: 8px;
   transition: all 0.2s;
-  opacity: 0.6;
+  opacity: 1;
 }
 .filters-action-btn:hover {
   background: var(--halo-bg);

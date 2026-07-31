@@ -16,17 +16,17 @@
    page renders correctly without importing the full app CSS tree.
    ========================================================================== */
 :root {
-  --psf-bg:            #050505;
-  --psf-panel:         #0d0d0d;
+  --psf-bg:            var(--bg-color);
+  --psf-panel:         var(--bg-color);
   --psf-border:        rgba(255, 255, 255, 0.08);
-  --psf-border-focus:  #0d9488;
-  --psf-mint:          #0d9488;
-  --psf-text:          #d4d4d8;
+  --psf-border-focus:  var(--brand-green);
+  --psf-mint:          var(--brand-green);
+  --psf-text:          var(--border-color);
   --psf-text-dim:      rgba(212, 212, 216, 0.5);
   --psf-halo-bg:       rgba(13, 148, 136, 0.05);
   --psf-halo-glow:     rgba(13, 148, 136, 0.2);
-  --psf-danger:        #f43f5e;
-  --psf-success:       #10b981;
+  --psf-danger:        var(--status-danger);
+  --psf-success:       var(--status-success);
   --psf-radius-card:   24px;
   --psf-radius-btn:    12px;
   --psf-radius-input:  8px;

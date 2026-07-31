@@ -45,7 +45,7 @@
 .selected-count {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--brand-green, #00ff9d);
+  color: var(--brand-green, var(--brand-green));
 }
 
 .dropdown-arrow {

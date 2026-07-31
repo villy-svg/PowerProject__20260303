@@ -11,7 +11,7 @@
   max-width: 400px;
   padding: 40px;
   background-color: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle); /* §12.A: Squircle standard */
   box-shadow: var(--shadow-premium);
   display: flex;
@@ -99,7 +99,7 @@
   width: 100%;
   padding: 12px;
   background-color: var(--brand-green);
-  color: #fff;
+  color: var(--text-color);
   border: none;
   border-radius: 8px;
   font-size: 16px;

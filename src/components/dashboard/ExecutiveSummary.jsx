@@ -429,7 +429,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 onClick={() => setIsSandboxOpen(true)}
                 title="Sandbox Active"
               >
-                <IconWarning size={14} style={{ color: 'var(--brand-yellow)' }} />
+                <IconWarning size={14} />
               </button>
             )}
 

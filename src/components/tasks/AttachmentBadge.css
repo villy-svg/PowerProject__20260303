@@ -135,7 +135,7 @@
 
 .attachment-lightbox-close:hover {
   background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  color: var(--text-color);
   border-color: rgba(255, 255, 255, 0.35);
 }
 
@@ -162,7 +162,7 @@
 
 .attachment-lightbox-nav:hover {
   background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  color: var(--text-color);
   border-color: rgba(255, 255, 255, 0.35);
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
 }

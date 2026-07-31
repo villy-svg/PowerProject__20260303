@@ -34,7 +34,7 @@
 .summary-card {
   border-left: 3px solid color-mix(in srgb, var(--stage-color), transparent 30%);
   background-color: var(--surface-card);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   padding: clamp(12px, 2vh, 20px) 24px;
   display: flex;
@@ -104,7 +104,7 @@
 /* BREAKDOWN LIST */
 .vertical-breakdown-list {
   background-color: var(--surface-card);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-button);
   padding: 12px 4px;
   display: flex;

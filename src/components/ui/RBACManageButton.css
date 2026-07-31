@@ -51,12 +51,12 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 220px;
-  background: var(--bg-color, #09090b);
+  background: var(--bg-color, var(--bg-color));
   border: 1px solid color-mix(in srgb, var(--brand-amber), transparent 70%);
   border-radius: 12px;
   padding: 8px;
   z-index: 1200;
-  box-shadow: 0 8px 32px color-mix(in srgb, #000, transparent 50%), 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 92%);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 92%);
   backdrop-filter: blur(12px);
   animation: rbac-dropdown-in 0.15s ease;
 }
@@ -97,7 +97,7 @@
   border-radius: 8px;
   padding: 8px 10px;
   cursor: pointer;
-  color: var(--text-color, #f4f4f5);
+  color: var(--text-color, var(--text-color));
   font-size: 0.8rem;
   font-weight: 600;
   text-align: left;

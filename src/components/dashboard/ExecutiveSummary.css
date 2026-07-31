@@ -82,7 +82,7 @@
     justify-content: center;
     background: transparent;
     border: none;
-    color: #a1a1aa; /* Crisp neutral grey for black background */
+    color: var(--border-color); /* Crisp neutral grey for black background */
     opacity: 0.9; /* High opacity to prevent muddiness */
     gap: 1px;
     cursor: pointer;
@@ -122,7 +122,7 @@
     top: -2px;
     right: -4px;
     background: var(--stage-accent); /* Mapped to individual --stage-accent */
-    color: #000;
+    color: var(--bg-color);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.5rem;
     font-weight: 800;
@@ -137,16 +137,16 @@
   }
 
   /* Extracted from inline styles */
-  .stage-red { --stage-accent: var(--brand-red, #ef4444); }
+  .stage-red { --stage-accent: var(--brand-red, var(--status-danger)); }
   .stage-green { --stage-accent: var(--brand-green); }
-  .stage-slate { --stage-accent: #94a3b8; }
-  .stage-mint { --stage-accent: var(--brand-mint, #10b981); }
-  .stage-orange { --stage-accent: var(--brand-yellow, #f59e0b); }
+  .stage-slate { --stage-accent: var(--border-color); }
+  .stage-mint { --stage-accent: var(--brand-mint, var(--status-success)); }
+  .stage-orange { --stage-accent: var(--brand-yellow, var(--status-warning)); }
 
   .request-support-plus {
     font-size: 0.9rem;
     font-weight: 800;
-    color: var(--brand-mint, #10b981);
+    color: var(--brand-mint, var(--status-success));
   }
 
   .summary-nav-label {
@@ -283,7 +283,7 @@
     border-radius: 6px !important;
     background: rgba(245, 158, 11, 0.05) !important;
     border: none !important;
-    color: #f59e0b !important;
+    color: var(--status-warning) !important;
     z-index: 2003 !important;
     box-sizing: border-box !important;
   }

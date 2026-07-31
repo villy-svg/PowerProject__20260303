@@ -61,7 +61,7 @@
    ========================================================================== */
 .cqr-card {
   background: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   padding: clamp(1.25rem, 3vw, 1.75rem);
   display: flex;
@@ -131,7 +131,7 @@
    ========================================================================== */
 .cqr-preview-card {
   background: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   padding: clamp(1.25rem, 3vw, 1.75rem);
   display: flex;
@@ -155,7 +155,7 @@
 
 /* White QR canvas background (QR codes require high contrast) */
 .cqr-canvas-wrap {
-  background: #ffffff;
+  background: var(--text-color);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 0 20px var(--halo-glow);

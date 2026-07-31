@@ -22,7 +22,7 @@
   width: 240px;
   z-index: 99999;
 
-  background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
+  background: color-mix(in srgb, var(--bg-color, var(--bg-color)), white 5%);
   border: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-radius: 12px;
   padding: 12px;
@@ -93,7 +93,7 @@
 .role-tooltip-headline {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--text-color, #f4f4f5);
+  color: var(--text-color, var(--text-color));
   line-height: 1.2;
 }
 
@@ -145,11 +145,11 @@
 }
 
 .perm-icon--yes {
-  color: var(--status-success, #10b981);
+  color: var(--status-success, var(--status-success));
 }
 
 .perm-icon--no {
-  color: var(--status-danger, #f43f5e);
+  color: var(--status-danger, var(--status-danger));
   opacity: 0.7;
 }
 
@@ -157,7 +157,7 @@
 .role-tooltip-list--cannot li {
   opacity: 0.55;
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--status-danger, #f43f5e), transparent 55%);
+  text-decoration-color: color-mix(in srgb, var(--status-danger, var(--status-danger)), transparent 55%);
   text-decoration-thickness: 1px;
 }
 
@@ -180,7 +180,7 @@
   transform: translateX(-50%) rotate(45deg);
   width: 9px;
   height: 9px;
-  background: color-mix(in srgb, var(--bg-color, #09090b), white 5%);
+  background: color-mix(in srgb, var(--bg-color, var(--bg-color)), white 5%);
   border-right: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-bottom: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
 }

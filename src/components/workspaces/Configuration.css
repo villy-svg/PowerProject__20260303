@@ -143,10 +143,10 @@
 }
 /* Destructive Tile */
 .destructive:hover {
-  border-color: #ef4444;
+  border-color: var(--status-danger);
   background: rgba(239, 68, 68, 0.05);
 }
-.destructive h4 { color: #ef4444; }
+.destructive h4 { color: var(--status-danger); }
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .config-header {

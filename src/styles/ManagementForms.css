@@ -20,7 +20,7 @@
 
 .modal-content {
   background: var(--panel-bg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   width: 100%;
   max-width: 600px;
@@ -340,9 +340,9 @@ select:-webkit-autofill:focus {
 }
 
 .status-message.error {
-  color: #ef4444;
-  border-color: color-mix(in srgb, #ef4444, transparent 65%);
-  background: color-mix(in srgb, #ef4444, transparent 92%);
+  color: var(--status-danger);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 65%);
+  background: color-mix(in srgb, var(--status-danger), transparent 92%);
 }
 
 /* ─── Shared Toggle Switch (used in RuleFormModal Active toggle) ─── */

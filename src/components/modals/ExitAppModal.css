@@ -54,7 +54,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--halo-bg);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  border: 1px solid transparent;
   box-shadow: 0 0 16px var(--halo-glow);
   display: flex;
   align-items: center;

@@ -21,7 +21,7 @@
   max-width: 760px;
   background: rgba(9, 9, 11, 0.8);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(16, 185, 129, 0.2); /* Emerald green stroke */
+  border: 1px solid transparent; /* Emerald green stroke */
   border-radius: var(--radius-button, 12px);
   padding: 12px 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(16, 185, 129, 0.1);
@@ -50,7 +50,7 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: var(--text-color, #f4f4f5);
+  color: var(--text-color, var(--text-color));
 }
 
 .sync-banner-text strong {
@@ -65,7 +65,7 @@
 
 .online-sync-banner .dismiss-banner-btn {
   font-size: 0.75rem;
-  color: var(--text-color, #f4f4f5);
+  color: var(--text-color, var(--text-color));
   opacity: 0.6;
   border-color: transparent;
   background: none;

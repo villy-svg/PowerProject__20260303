@@ -62,7 +62,7 @@
   flex: 1;
   min-width: 270px;
   background: color-mix(in srgb, var(--surface-card), transparent 60%);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   padding: 16px;
   display: flex;
@@ -143,7 +143,7 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   border-radius: var(--radius-squircle);
   background: color-mix(in srgb, var(--surface-card), transparent 50%);
   text-align: center;
@@ -306,7 +306,7 @@
     top: -2px;
     right: -4px;
     background: var(--stage-accent);
-    color: #000;
+    color: var(--bg-color);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.5rem;
     font-weight: 800;

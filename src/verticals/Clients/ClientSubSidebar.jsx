@@ -184,100 +184,11 @@ const ClientSubSidebar = ({
           )}
           </div>
 
-          {/* Nav Toggle Header */}
-          <div className="u-px-12 u-pt-16 u-pb-8 u-flex-between u-items-center u-border-b u-mb-12">
-            {permissions?.canAccessClients ? (
-              <button
-                onClick={() => setActiveVertical('CLIENTS')}
-                style={{
-                  color: activeVertical === 'CLIENTS' ? 'var(--brand-green)' : 'var(--text-color)',
-                  opacity: activeVertical === 'CLIENTS' ? 1 : 0.7,
-                  transition: 'all 0.2s ease'
-                }}
-                className="sidebar-header-nav-btn u-m-0 u-fw-500 u-text-base u-bg-transparent u-border-none u-p-0 u-cursor-pointer"
-              >
-                Clients
-              </button>
-            ) : (
-              <span className="u-fw-500 u-text-base u-text-primary u-opacity-50">Clients</span>
-            )}
-          </div>
+
         </>
       )}
 
-      {false && (
-        <>
-          <div 
-            className="filters-row-toggle" 
-            onClick={() => setShowFilters(!showFilters)}
-          >
-        <p className="u-flex-center-gap-4">FILTERS {showFilters ? <IconChevronDown size={10} /> : <IconChevronRightSingle size={10} />}</p>
-        <div className="u-flex-gap-4">
-          <button
-            onClick={(e) => { e.stopPropagation(); onReset(); }}
-            className="filters-action-btn"
-          >
-            RESET
-          </button>
-        </div>
-      </div>
 
-      {showFilters && (
-        <div className="filters-content">
-          <FilterGroup
-            label="Category"
-            options={filterOptions.vehicleCategories}
-            currentFilters={filters?.vehicle || []}
-            filterKey="vehicle"
-            displayKey="name"
-            valueKey="id"
-            isExpanded={expandedGroups.vehicle}
-            onToggle={() => toggleGroup('vehicle')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-
-          <FilterGroup
-            label="Service Category"
-            options={filterOptions.serviceCategories}
-            currentFilters={filters?.service || []}
-            filterKey="service"
-            displayKey="name"
-            valueKey="id"
-            isExpanded={expandedGroups.service}
-            onToggle={() => toggleGroup('service')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-
-          <FilterGroup
-            label="Billing Model"
-            options={filterOptions.billingModels}
-            currentFilters={filters?.billing_model || []}
-            filterKey="billing_model"
-            displayKey="name"
-            valueKey="id"
-            isExpanded={expandedGroups.billing_model}
-            onToggle={() => toggleGroup('billing_model')}
-            onBatchFilter={onBatchFilter}
-            onFilterChange={onFilterChange}
-            isMobileMenu={!!hideNavigation}
-          />
-        </div>
-      )}
-        </>
-      )}
-
-      {!hideNavigation && (
-        <div className="sub-nav-item u-mt-24 u-opacity-50">
-          <div className="sub-nav-text">
-            <p>Client Manager</p>
-            <small>Records Active</small>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

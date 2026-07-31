@@ -38,13 +38,13 @@
   font-size: 0.78rem;
   font-weight: 500;
   line-height: 1.4;
-  color: #f8fafc;
+  color: var(--text-color);
   text-align: center;
   white-space: pre-line;
 }
 
 [data-theme='light'] .tooltip-content {
-  color: #1e293b;
+  color: var(--border-color);
 }
 
 /* Tooltip Arrow */

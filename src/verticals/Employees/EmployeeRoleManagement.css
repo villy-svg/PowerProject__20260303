@@ -7,7 +7,7 @@
 }
 .hub-card .seniority-tag {
   background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  color: var(--status-neutral);
   font-size: 0.6rem;
   font-weight: 600;
   padding: 2px 6px;

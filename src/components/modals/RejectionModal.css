@@ -40,7 +40,7 @@
   transition: all 0.3s ease;
 }
 .rejection-textarea:focus {
-  border-color: var(--brand-red, #ef4444);
+  border-color: var(--brand-red, var(--status-danger));
   background: rgba(239, 68, 68, 0.05);
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
 }
@@ -62,8 +62,8 @@
   background: rgba(255, 255, 255, 0.05);
 }
 .rejection-actions .confirm-reject-btn {
-  background: var(--brand-red, #ef4444) !important;
-  border-color: var(--brand-red, #ef4444) !important;
+  background: var(--brand-red, var(--status-danger)) !important;
+  border-color: var(--brand-red, var(--status-danger)) !important;
   color: white !important;
   box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
 }
