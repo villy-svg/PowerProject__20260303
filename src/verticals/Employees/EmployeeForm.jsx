@@ -100,7 +100,8 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
 
   const handleChange = (e) => {
     if (isViewOnly) return;
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === 'ifscCode') value = value.toUpperCase();
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 

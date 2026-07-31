@@ -185,7 +185,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               <button 
                 type="button" 
                 className="halo-button" 
-                style={{ background: 'var(--success-color)', color: 'white', borderColor: 'var(--success-color)' }}
+                style={{ color: 'var(--success-color)', borderColor: 'var(--border-color)' }}
                 onClick={() => handleBankApproval('approved')}
                 disabled={updating === 'bank_update'}
               >
@@ -194,7 +194,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               <button 
                 type="button" 
                 className="halo-button secondary" 
-                style={{ color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }}
+                style={{ color: 'var(--danger-color)', borderColor: 'var(--border-color)' }}
                 onClick={() => handleBankApproval('rejected')}
                 disabled={updating === 'bank_update'}
               >

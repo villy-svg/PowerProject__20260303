@@ -15,7 +15,8 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    if (name === 'ifscCode') value = value.toUpperCase();
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
