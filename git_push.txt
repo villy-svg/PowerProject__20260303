@@ -1,6 +1,6 @@
 # 1. Commit Staging Local to Staging Server
 git add .
-git commit -m "260730 Cleaning QR Generator 2.0.1"
+git commit -m "260730 Cleaning QR Generator 2.0.2"
 git push origin staging
 
 # 2. Build (on Staging)

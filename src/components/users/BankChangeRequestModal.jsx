@@ -42,15 +42,25 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
       
       const assigneeIds = admins?.map(a => a.employee_id) || [];
       
+      const oldDetails = {
+        accountName: user.bankDetails?.accountName || '',
+        accountNumber: user.bankDetails?.accountNumber || '',
+        ifscCode: user.bankDetails?.ifscCode || '',
+        panNumber: user.bankDetails?.panNumber || '',
+      };
+
+      const newDetails = {
+        accountName: formData.accountName?.trim() ? formData.accountName.trim() : oldDetails.accountName,
+        accountNumber: formData.accountNumber?.trim() ? formData.accountNumber.trim() : oldDetails.accountNumber,
+        ifscCode: formData.ifscCode?.trim() ? formData.ifscCode.trim() : oldDetails.ifscCode,
+        panNumber: oldDetails.panNumber,
+      };
+
       const payload = {
         type: 'BANK_UPDATE',
         employeeId: user.employeeId,
-        oldDetails: {
-          accountName: user.bankDetails?.accountName || '',
-          accountNumber: user.bankDetails?.accountNumber || '',
-          ifscCode: user.bankDetails?.ifscCode || '',
-        },
-        newDetails: formData,
+        oldDetails,
+        newDetails,
         requestedBy: user.name,
       };
 

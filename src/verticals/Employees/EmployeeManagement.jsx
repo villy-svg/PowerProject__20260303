@@ -113,10 +113,10 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           };
           
           const newBank = {
-            accountNumber: formData.accountNumber || '',
-            ifscCode: formData.ifscCode || '',
-            accountName: formData.accountName || '',
-            panNumber: formData.panNumber || ''
+            accountNumber: formData.accountNumber?.trim() ? formData.accountNumber.trim() : oldBank.accountNumber,
+            ifscCode: formData.ifscCode?.trim() ? formData.ifscCode.trim() : oldBank.ifscCode,
+            accountName: formData.accountName?.trim() ? formData.accountName.trim() : oldBank.accountName,
+            panNumber: formData.panNumber?.trim() ? formData.panNumber.trim() : oldBank.panNumber
           };
           
           const bankChanged = 
