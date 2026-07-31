@@ -20,6 +20,7 @@ import { taskUtils } from '../../utils/taskUtils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 import AssigneeBadge from '../ui/AssigneeBadge';
+import AttachmentBadge from './AttachmentBadge';
 
 /**
  * TaskCard
@@ -253,6 +254,8 @@ const TaskCard = ({
           </span>
         )}
         <AssigneeBadge task={task} currentUser={currentUser} />
+        {/* Camera badge — shows when latest submission has image attachments */}
+        <AttachmentBadge task={task} />
         {children}
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconEdit, IconTrash, IconChevronDown, IconChevronRight, IconComment } from '../../components/ui/Icons';
+import { IconEdit, IconTrash, IconChevronDown, IconChevronRight, IconComment, IconUpload } from '../../components/ui/Icons';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 
 /**
@@ -10,6 +10,7 @@ const EmployeeListRow = ({
   emp,
   onEdit,
   onView,
+  onUpload,
   onDelete,
   onToggleStatus,
   permissions = {},
@@ -110,9 +111,14 @@ const EmployeeListRow = ({
       {/* 4. Controls (Actions) - Following ListViewRow North Star */}
       <div className="list-row-controls">
         {(permissions.canUpdate || permissions.canCreate) && (
-          <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit Employee Profile">
-            <IconEdit size={14} />
-          </button>
+          <>
+            <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onUpload(emp); }} title="Upload Documents">
+              <IconUpload size={14} />
+            </button>
+            <button className="card-edit-button" onClick={(e) => { e.stopPropagation(); onEdit(emp); }} title="Edit Employee Profile">
+              <IconEdit size={14} />
+            </button>
+          </>
         )}
         {permissions.canUpdate && (
           <button

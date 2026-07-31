@@ -31,6 +31,7 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { taskUtils } from '../../utils/taskUtils';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 import AssigneeBadge from '../ui/AssigneeBadge';
+import AttachmentBadge from './AttachmentBadge';
 
 const ListViewRow = ({
   task,
@@ -184,6 +185,9 @@ const ListViewRow = ({
           )}
 
           <AssigneeBadge task={task} currentUser={currentUser} className="mini" />
+
+          {/* Camera badge — shows when latest submission has image attachments */}
+          <AttachmentBadge task={task} />
 
           {TaskTileComponent && (
             <div className="list-row-vertical-meta">

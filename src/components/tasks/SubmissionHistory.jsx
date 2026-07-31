@@ -120,6 +120,11 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
         <div className="timeline-container">
           {submissions.map((submission, index) => {
             const isExpanded = expandedId === submission.id;
+            // Detect submissions that were created during task creation or editing
+            // by matching the standard comment strings set in useTaskController.js
+            const isCreationAttachment =
+              submission.comment === 'Attached photos during task creation.' ||
+              submission.comment === 'Attached photos during task edit.';
             
             return (
               <div 
@@ -141,6 +146,11 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                           <span className="submission-number-badge">
                             #{submission.submission_number}
                           </span>
+                          {isCreationAttachment && (
+                            <span className="submission-creation-label" title="These files were attached when this task was created or last edited">
+                              📎 Creation Attachments
+                            </span>
+                          )}
                           <span className="submission-submitter">
                             {getSubmitterName(submission)}
                           </span>
@@ -229,7 +239,11 @@ const SubmissionHistory = ({ taskId, permissions = {}, currentUser = {}, onStatu
                     >
                       <div className="summary-left">
                         <span className="submission-number-badge">#{submission.submission_number}</span>
-                        <span className="submission-submitter">{getSubmitterName(submission)}</span>
+                        {isCreationAttachment ? (
+                          <span className="submission-creation-label summary-creation-label">📎 Creation Attachments</span>
+                        ) : (
+                          <span className="submission-submitter">{getSubmitterName(submission)}</span>
+                        )}
                       </div>
                       <div className="summary-right">
                         <span className={`submission-status-badge minified ${submission.status}`}>

@@ -11,12 +11,16 @@ import { getEmployeeSubmissions, submitProofOfWork } from '../../services/tasks/
  * Form for adding or editing employee records.
  * Features a 4-page wizard flow with View-Only support.
  */
-const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false, allowDocumentUpload = false, disableBankDetails = false }) => {
-  const [currentPage, setCurrentPage] = useState(1);
+const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false, allowDocumentUpload = false, disableBankDetails = false, initialPage = 1 }) => {
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [roles, setRoles] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
+
+  useEffect(() => {
+    setCurrentPage(initialPage);
+  }, [initialPage, initialData.id]);
 
   // Document management state
   const [submissions, setSubmissions] = useState([]);

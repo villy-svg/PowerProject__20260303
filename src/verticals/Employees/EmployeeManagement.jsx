@@ -35,6 +35,27 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
   // Bulk Context
   const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [initialFormPage, setInitialFormPage] = useState(1);
+
+  const handleOpenAdd = () => {
+    setInitialFormPage(1);
+    ui.openAddModal();
+  };
+
+  const handleOpenEdit = (emp) => {
+    setInitialFormPage(1);
+    ui.openEditModal(emp);
+  };
+
+  const handleOpenUpload = (emp) => {
+    setInitialFormPage(4);
+    ui.openEditModal(emp);
+  };
+
+  const handleOpenView = (emp) => {
+    setInitialFormPage(1);
+    ui.openViewModal(emp);
+  };
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
@@ -250,12 +271,12 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         activeVertical={activeVertical}
         searchRecords={employees}
         recordType="Employees"
-        onSearchSelect={ui.openViewModal}
-        onSearchEdit={ui.openEditModal}
+        onSearchSelect={handleOpenView}
+        onSearchEdit={handleOpenEdit}
         rightActions={
           <>
             {permissions.canCreateEmployees && (
-              <button className="halo-button master-action-btn" onClick={ui.openAddModal}>
+              <button className="halo-button master-action-btn" onClick={handleOpenAdd}>
                 + Add Employee
               </button>
             )}
@@ -270,7 +291,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         }
         canAdd={permissions.canCreateEmployees}
         addLabel="Add Employee"
-        onAddClick={ui.openAddModal}
+        onAddClick={handleOpenAdd}
         expandedLeft={
           <>
             <div className="view-mode-toggle">
@@ -340,8 +361,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         <EmployeeTree
           employees={filteredEmployees}
           user={user}
-          onEdit={ui.openEditModal}
-          onView={ui.openViewModal}
+          onEdit={handleOpenEdit}
+          onView={handleOpenView}
           onDelete={handleDelete}
           onToggleStatus={toggleStatus}
           permissions={permissions}
@@ -380,8 +401,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                             <EmployeeCard
                               key={emp.id}
                               emp={emp}
-                              onEdit={ui.openEditModal}
-                              onView={ui.openViewModal}
+                              onEdit={handleOpenEdit}
+                              onView={handleOpenView}
+                              onUpload={handleOpenUpload}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
                               permissions={{
@@ -403,8 +425,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                             <EmployeeListRow
                               key={emp.id}
                               emp={emp}
-                              onEdit={ui.openEditModal}
-                              onView={ui.openViewModal}
+                              onEdit={handleOpenEdit}
+                              onView={handleOpenView}
+                              onUpload={handleOpenUpload}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
                               permissions={{
@@ -451,8 +474,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                       <EmployeeCard
                         key={emp.id}
                         emp={emp}
-                        onEdit={ui.openEditModal}
-                        onView={ui.openViewModal}
+                        onEdit={handleOpenEdit}
+                        onView={handleOpenView}
+                        onUpload={handleOpenUpload}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
                         permissions={permissions}
@@ -469,8 +493,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                       <EmployeeListRow
                         key={emp.id}
                         emp={emp}
-                        onEdit={ui.openEditModal}
-                        onView={ui.openViewModal}
+                        onEdit={handleOpenEdit}
+                        onView={handleOpenView}
+                        onUpload={handleOpenUpload}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
                         permissions={permissions}
@@ -520,6 +545,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         className="large-modal"
       >
         <EmployeeForm
+          initialPage={initialFormPage}
           onSubmit={handleSave}
           onCancel={ui.closeModal}
           isViewOnly={ui.isViewOnly}

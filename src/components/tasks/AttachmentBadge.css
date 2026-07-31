@@ -1,0 +1,198 @@
+/* ==========================================================================
+   AttachmentBadge.css
+   Styles for the camera badge and fullscreen lightbox slideshow.
+   Follows: UI Design System §3 (Badges), §12 (Apple Premium Standards)
+   All colors use CSS variables — zero hardcoded hex/rgb values.
+   ========================================================================== */
+
+/* ── Camera Badge ──────────────────────────────────────────────────────────── */
+.attachment-camera-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--brand-mint), transparent 82%);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 55%);
+  color: var(--brand-mint);
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.attachment-camera-badge:hover {
+  background: color-mix(in srgb, var(--brand-mint), transparent 65%);
+  border-color: var(--brand-mint);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--brand-mint), transparent 60%);
+  transform: scale(1.05);
+}
+
+.attachment-camera-badge:active {
+  transform: scale(0.97);
+}
+
+.attachment-camera-count {
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: var(--brand-mint);
+  opacity: 0.85;
+}
+
+/* ── Lightbox Overlay ──────────────────────────────────────────────────────── */
+.attachment-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: lightbox-fade-in 0.2s ease;
+}
+
+@keyframes lightbox-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Lightbox Panel ────────────────────────────────────────────────────────── */
+.attachment-lightbox-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(90vw, 900px);
+  max-height: 90vh;
+  gap: 0.75rem;
+}
+
+/* ── Main Image ────────────────────────────────────────────────────────────── */
+.attachment-lightbox-img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: lightbox-slide-in 0.2s ease;
+}
+
+@keyframes lightbox-slide-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── Counter ───────────────────────────────────────────────────────────────── */
+.attachment-lightbox-counter {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ── Caption ───────────────────────────────────────────────────────────────── */
+.attachment-lightbox-caption {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  max-width: 80%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Close Button ──────────────────────────────────────────────────────────── */
+.attachment-lightbox-close {
+  position: absolute;
+  top: -3rem;
+  right: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.attachment-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Navigation Arrows ─────────────────────────────────────────────────────── */
+.attachment-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.75);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.attachment-lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.attachment-lightbox-nav--prev {
+  left: -3.5rem;
+}
+
+.attachment-lightbox-nav--next {
+  right: -3.5rem;
+}
+
+/* ── Responsive: small screens ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .attachment-lightbox-panel {
+    width: 95vw;
+  }
+
+  .attachment-lightbox-nav--prev {
+    left: 0.25rem;
+  }
+
+  .attachment-lightbox-nav--next {
+    right: 0.25rem;
+  }
+
+  .attachment-lightbox-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+    opacity: 0.7;
+  }
+}

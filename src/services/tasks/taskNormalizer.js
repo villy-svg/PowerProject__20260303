@@ -40,7 +40,7 @@ export const TASK_SELECT = `
   hubs(id, name, hub_code, city),
   clients(id, name),
   employees(id, full_name),
-  submissions(id, status, rejection_reason, submission_number, created_at, submitted_by),
+  submissions(id, status, rejection_reason, submission_number, created_at, submitted_by, links, comment),
   children:tasks!parent_task_id(id)
 `;
 

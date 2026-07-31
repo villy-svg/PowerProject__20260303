@@ -275,3 +275,24 @@
   opacity: 0.5;
   color: var(--brand-mint);
 }
+/* ─── Creation Attachments Label ─────────────────────────────────────────── */
+.submission-creation-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 55%);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+/* Slightly smaller variant used in the collapsed summary row */
+.summary-creation-label {
+  font-size: 0.55rem;
+  padding: 1px 6px;
+}

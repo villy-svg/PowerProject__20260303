@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconEdit, IconTrash, IconChevronDown } from '../../components/ui/Icons';
+import { IconEdit, IconTrash, IconChevronDown, IconUpload } from '../../components/ui/Icons';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 
 /**
@@ -10,6 +10,7 @@ const EmployeeCard = ({
   emp,
   onEdit,
   onView,
+  onUpload,
   onDelete,
   onToggleStatus,
   permissions = {},
@@ -140,13 +141,22 @@ const EmployeeCard = ({
         
         <div className="task-management-actions">
           {(permissions.canUpdate || permissions.canCreate) && (
-            <button
-              className="action-icon-btn"
-              onClick={(e) => { e.stopPropagation(); onEdit(emp); }}
-              title="Edit Employee"
-            >
-              <IconEdit size={14} />
-            </button>
+            <>
+              <button
+                className="action-icon-btn"
+                onClick={(e) => { e.stopPropagation(); onUpload(emp); }}
+                title="Upload Documents"
+              >
+                <IconUpload size={14} />
+              </button>
+              <button
+                className="action-icon-btn"
+                onClick={(e) => { e.stopPropagation(); onEdit(emp); }}
+                title="Edit Employee"
+              >
+                <IconEdit size={14} />
+              </button>
+            </>
           )}
           {permissions.canUpdate && (
             <button
