@@ -110,7 +110,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
         await employeeService.updateEmployeeBankDetails(bankUpdatePayload.employeeId, bankUpdatePayload.newDetails);
       }
       
-      const newStage = status === 'approved' ? 'RESOLVED' : 'CANCELLED';
+      const newStage = status === 'approved' ? 'COMPLETED' : 'DEPRIORITIZED';
       await taskService.updateTaskStage(task.id, newStage, currentUser.id);
       
       alert(`Bank Update ${status === 'approved' ? 'Approved & Applied' : 'Rejected'}.`);
@@ -180,7 +180,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             </div>
           </div>
 
-          {canReview && task.stageId !== 'RESOLVED' && task.stageId !== 'CANCELLED' && (
+          {canReview && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
                 type="button" 
@@ -202,9 +202,9 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               </button>
             </div>
           )}
-          {(task.stageId === 'RESOLVED' || task.stageId === 'CANCELLED') && (
+          {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
             <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
-              This request has been {task.stageId === 'RESOLVED' ? 'Approved' : 'Rejected'}.
+              This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
             </div>
           )}
         </div>

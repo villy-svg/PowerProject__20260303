@@ -38,7 +38,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
     const boardList = [...allBoards].sort();
 
     const priorities = ['Low', 'Medium', 'High', 'Urgent'];
-    const stages = ['BACKLOG', 'TODO', 'IN_PROGRESS', 'COMPLETED', 'DEPRIORITIZED'];
+    const stages = ['BACKLOG', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'DEPRIORITIZED'];
 
     if (isTemplate) {
       return [{
@@ -87,7 +87,7 @@ const TaskCSVDownload = ({ data = [], label, filename, isTemplate = false, class
 
     return [
       { colLetter: 'B', values: ['Low', 'Medium', 'High', 'Urgent'] },
-      { colLetter: 'C', values: ['BACKLOG', 'TODO', 'IN_PROGRESS', 'COMPLETED', 'DEPRIORITIZED'] },
+      { colLetter: 'C', values: ['BACKLOG', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'DEPRIORITIZED'] },
       { colLetter: 'D', values: boardList.length > 0 ? boardList : ['Hubs', 'Hubs Daily'] },
       { colLetter: 'E', values: hubCodes },
       { colLetter: 'F', values: funcCodes },

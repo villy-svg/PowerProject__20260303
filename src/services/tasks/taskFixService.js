@@ -20,7 +20,7 @@ const CHUNK_SIZE = 100;
  *   A. Invalid vertical_id values
  *   B. Missing or malformed task_board arrays
  *   C. Missing city (derived from hub_id)
- *   D. Null stage_id (defaults to 'TODO')
+ *   D. Null stage_id (defaults to 'BACKLOG')
  *   E. Null priority (defaults to 'Medium')
  *   F. Missing hub context links in task_context_links
  *
@@ -112,8 +112,8 @@ export async function fixAllTasks() {
       if (mappedCity) { hasPatch = true; patch.city = mappedCity; }
     }
 
-    // D. Fix stage_id
-    if (!task.stage_id) { hasPatch = true; patch.stage_id = 'TODO'; }
+    // Defaulting missing stage_id to BACKLOG instead of TODO
+    if (!task.stage_id) { hasPatch = true; patch.stage_id = 'BACKLOG'; }
 
     // E. Fix priority
     if (!task.priority) { hasPatch = true; patch.priority = 'Medium'; }
