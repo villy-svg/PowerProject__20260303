@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import powerLogo from '../../assets/logo.svg';
 import './Login.css';
@@ -12,9 +12,26 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
+  // Anti-Bot Measures
+  const [honeypot, setHoneypot] = useState('');
+  const mountTime = useRef(Date.now());
+
   const handleAuthAction = async (e) => {
     e.preventDefault();
     if (!email) return;
+
+    // 1. Honeypot Check (bots fill this out)
+    if (honeypot) {
+      console.warn("Bot detected via honeypot.");
+      return;
+    }
+    
+    // 2. Time-Based Check (bots submit too fast - under 1500ms)
+    if (Date.now() - mountTime.current < 1500) {
+      console.warn("Bot detected via fast submission.");
+      return;
+    }
+
     if (isRegistering && !name) {
       setMessage({ type: 'error', text: 'Please enter your name to register.' });
       return;
@@ -168,6 +185,18 @@ const Login = () => {
                   required
                 />
               </div>
+
+              {/* Bot Trap: Rendered behind the UI so bots see it, humans don't */}
+              <input
+                type="text"
+                name="phone_number"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="phone-vh"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
             </div>
 
             <button type="submit" className="login-button" disabled={loading}>
