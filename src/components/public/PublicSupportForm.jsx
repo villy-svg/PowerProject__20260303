@@ -208,18 +208,16 @@ const PublicSupportForm = () => {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragOver(false);
-    if (file) handleFileSelect(file);
+    if (e.dataTransfer.files?.length) handleFileSelect(e.dataTransfer.files);
   }, [handleFileSelect]);
 
   const handleDragOver = useCallback((e) => { e.preventDefault(); setIsDragOver(true); }, []);
   const handleDragLeave = useCallback(() => setIsDragOver(false), []);
 
-  const handleRemoveImage = useCallback(() => {
-    setImageFile(null);
-    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
-    setImagePreviewUrl(null);
+  const handleRemoveImage = useCallback((idxToRemove) => {
+    setImageFiles(prev => prev.filter((_, idx) => idx !== idxToRemove));
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [imagePreviewUrl]);
+  }, []);
 
   // ── Submit handler ─────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
