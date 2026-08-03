@@ -178,23 +178,6 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
             </div>
           )}
 
-          {permissions?.canAccessDailyHubTasks && (
-            <div className="u-px-12 u-pb-12 u-mb-8">
-              <button
-                className="halo-button u-w-full u-p-10-12"
-                style={{ 
-                  opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7,
-                  border: activeVertical === 'daily_hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
-                  fontWeight: activeVertical === 'daily_hub_tasks' ? 500 : 400,
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                onClick={() => setActiveVertical('daily_hub_tasks')}
-              >
-                Daily Task Board
-              </button>
-            </div>
-          )}
-
           {permissions?.canAccessEscalationTasks && (
             <div className="u-px-12 u-pb-12 u-mb-8">
               <button
@@ -209,6 +192,25 @@ const HubSubSidebar = ({ permissions, activeVertical, setActiveVertical, onFilte
                 onClick={() => setActiveVertical('escalation_tasks')}
               >
                 Escalation Task Board
+              </button>
+            </div>
+          )}
+
+          <div style={{ height: '24px' }} /> {/* Spacer Gap */}
+
+          {permissions?.canAccessDailyHubTasks && (
+            <div className="u-px-12 u-pb-12 u-mb-8">
+              <button
+                className="halo-button u-w-full u-p-10-12"
+                style={{ 
+                  opacity: activeVertical === 'daily_hub_tasks' ? 1 : 0.7,
+                  border: activeVertical === 'daily_hub_tasks' ? '1px solid var(--brand-green)' : '1px solid var(--border-color)',
+                  fontWeight: activeVertical === 'daily_hub_tasks' ? 500 : 400,
+                  transition: 'all 0.2s ease-in-out'
+                }}
+                onClick={() => setActiveVertical('daily_hub_tasks')}
+              >
+                Daily Task Board
               </button>
             </div>
           )}
