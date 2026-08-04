@@ -559,7 +559,7 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                         <AssigneeSelector
                           id={`orch-assignee-${idx}`}
                           isSingle={true}
-                          limitToIds={formData.assigned_to}
+                          limitToIds={formData.assigned_to?.length > 0 ? formData.assigned_to : undefined}
                           value={item.assigned_to}
                           onChange={(val) => {
                             const next = [...orchestrationMapping];
