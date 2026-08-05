@@ -42,6 +42,11 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
       
       const assigneeIds = admins?.map(a => a.employee_id) || [];
       
+      if (assigneeIds.length === 0) {
+        setError("No Master Admins are currently available to approve this request. Please contact support.");
+        return;
+      }
+      
       const oldDetails = {
         accountName: user.bankDetails?.accountName || '',
         accountNumber: user.bankDetails?.accountNumber || '',

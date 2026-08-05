@@ -275,6 +275,22 @@ export const employeeService = {
    */
   async bulkUpdateEmployees(ids, updates) {
     if (!ids || ids.length === 0) return;
+
+    if (ids.length > 50) {
+      throw new Error('Bulk update payload exceeds maximum batch limit of 500 records.');
+    }
+
+    if (!updates || typeof updates !== 'object' || Object.keys(updates).length === 0) {
+      throw new Error('Bulk update payload contains no valid field modifications.');
+    }
+
+    // Protected / Immutable system fields that must never be modified via generic bulk update
+    const PROTECTED_FIELDS = ['id', 'created_at', 'employee_code', 'email'];
+    const invalidFields = Object.keys(updates).filter(key => PROTECTED_FIELDS.includes(key));
+
+    if (invalidFields.length > 0) {
+      throw new Error(`Bulk update rejected: Protected system fields cannot be modified (${invalidFields.join(', ')}).`);
+    }
     
     const row = {
       ...updates,

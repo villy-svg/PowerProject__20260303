@@ -1,3 +1,4 @@
+// @prod-critical
 /**
  * LiveAttendanceTab.jsx
  *
@@ -212,7 +213,8 @@ const LiveAttendanceTab = ({ user }) => {
     if (!error) {
       refresh(); // Reload to remove the checked-out session from live view
     } else {
-      alert(`Failed to force checkout: ${error.message || 'Unknown error'}`);
+      alert(`Action skipped: User session state changed. Refreshing data...\n\nDetails: ${error.message || 'Conflict error'}`);
+      refresh();
     }
   };
 

@@ -1,3 +1,4 @@
+// @prod-critical
 import { useState, useEffect, useCallback } from 'react';
 import { userService } from '../../services/auth/userService';
 import { supabase } from '../../services/core/supabaseClient';
@@ -69,6 +70,7 @@ export const useUserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState(null);
   const [status, setStatus] = useState({ type: '', text: '' });
+  const [massSyncStatus, setMassSyncStatus] = useState({ isOpen: false, results: [], isComplete: false });
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('user_mgmt_view_mode') || 'list');
 
   // Modal State
@@ -282,8 +284,7 @@ export const useUserManagement = () => {
   const handleMassSyncPermissions = async (sourceUserId, targetUserIds) => {
     if (!sourceUserId || !targetUserIds || targetUserIds.length === 0) return;
     
-    setLoading(true);
-    setStatus({ type: '', text: '' });
+    setMassSyncStatus({ isOpen: true, results: [], isComplete: false });
 
     try {
       // Find source user role from loaded profile list
@@ -304,24 +305,36 @@ export const useUserManagement = () => {
         access_level: f.access_level
       }));
 
-      // Map through all target users and fire a sync request for each
-      // The RPC 'sync_user_permissions' manages wiping and replacing existing permissions cleanly
-      await Promise.all(targetUserIds.map(tId => 
-        userService.syncPermissions({
-          userId: tId,
-          roleId: sourceUser.role_id,
-          verticalGrants: vGrants,
-          featureGrants: fGrants
-        })
-      ));
+      // Map through all target users sequentially
+      for (const tId of targetUserIds) {
+        const targetUser = users.find(u => u.id === tId);
+        const name = targetUser ? targetUser.name : tId;
+        
+        try {
+          await userService.syncPermissions({
+            userId: tId,
+            roleId: sourceUser.role_id,
+            verticalGrants: vGrants,
+            featureGrants: fGrants
+          });
+          setMassSyncStatus(prev => ({
+            ...prev,
+            results: [...prev.results, { id: tId, name, status: 'success', message: 'Synced successfully' }]
+          }));
+        } catch (err) {
+          setMassSyncStatus(prev => ({
+            ...prev,
+            results: [...prev.results, { id: tId, name, status: 'error', message: err.message }]
+          }));
+        }
+      }
 
-      setStatus({ type: 'success', text: `Permissions successfully cloned to ${targetUserIds.length} user(s).` });
       await fetchUsers(false);
     } catch (err) {
-      console.error("Mass Sync Failure:", err.message);
-      setStatus({ type: 'error', text: `Mass Sync Failed: ${err.message}` });
+      console.error("Mass Sync Setup Failure:", err.message);
+      setStatus({ type: 'error', text: `Mass Sync Setup Failed: ${err.message}` });
     } finally {
-      setLoading(false);
+      setMassSyncStatus(prev => ({ ...prev, isComplete: true }));
     }
   };
 
@@ -441,6 +454,7 @@ export const useUserManagement = () => {
 
   return {
     users, loading, viewMode, setViewMode, status, setStatus,
+    massSyncStatus, setMassSyncStatus,
     editingUser, openEditor, closeEditor, handleSyncPermissions, handleMassSyncPermissions,
     loadPresetPermissions,
     handleDeactivate, handleReactivate,

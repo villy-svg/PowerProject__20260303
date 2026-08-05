@@ -1,3 +1,4 @@
+// @prod-critical
 import React, { useState, useCallback } from 'react';
 import { STAGE_LIST } from '../../constants/stages';
 import TaskListView from './TaskListView';
@@ -121,7 +122,6 @@ const TaskController = (props) => {
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
       await updateSubmissionStatus(submissionId, 'approved');
-      await updateTaskStage(taskId, 'COMPLETED');
       if (props.refreshTasks) props.refreshTasks(false);
     } catch (err) {
       alert(`Approval failed: ${err.message}`);
@@ -136,7 +136,6 @@ const TaskController = (props) => {
   const submitRejection = async (reason) => {
     try {
       await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
-      await updateTaskStage(rejectionModalState.taskId, 'IN_PROGRESS');
       setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
       if (props.refreshTasks) props.refreshTasks(false);
     } catch (err) {

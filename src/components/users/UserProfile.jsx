@@ -1,9 +1,11 @@
+// @prod-critical
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { ROLE_LIST } from '../../constants/roles';
 import BankChangeRequestModal from './BankChangeRequestModal';
 import { useOTAContext } from '../../app/contexts/OTAContext';
+import { supabase } from '../../services/core/supabaseClient';
 import './UserProfile.css';
 
 const UserProfile = ({ 
@@ -21,6 +23,7 @@ const UserProfile = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showBankHint, setShowBankHint] = useState(false);
   const [showBankChangeModal, setShowBankChangeModal] = useState(false);
+  const [isBankUpdatePending, setIsBankUpdatePending] = useState(false);
   const dropdownRef = useRef(null);
 
   const { updateAvailable } = useOTAContext();
@@ -42,6 +45,28 @@ const UserProfile = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!user?.employeeId) return;
+
+    const checkPendingBankTask = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .select('id')
+          .eq('text', `Bank Update Request: ${user.name}`)
+          .eq('stage_id', 'REVIEW')
+          .limit(1);
+          
+        if (error) throw error;
+        setIsBankUpdatePending(data && data.length > 0);
+      } catch (err) {
+        console.error("Error checking pending bank task:", err);
+      }
+    };
+    
+    checkPendingBankTask();
+  }, [user?.employeeId, user?.name, showBankChangeModal]);
 
   useEffect(() => {
     if (window.innerWidth <= 768) {
@@ -133,11 +158,20 @@ const UserProfile = ({
 
               <div className="dropdown-section">
                 <div className="dropdown-section-header">
-                  <span>Bank Details</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>Bank Details</span>
+                    {isBankUpdatePending && (
+                      <span className="ui-badge warning" style={{ fontSize: '0.7rem', padding: '2px 6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        ⏳ Pending
+                      </span>
+                    )}
+                  </div>
                   {(user?.employeeId || user?.bankDetails) && (
                     <button 
                       className="dropdown-action-btn" 
                       onClick={() => setShowBankChangeModal(true)}
+                      disabled={isBankUpdatePending}
+                      style={{ opacity: isBankUpdatePending ? 0.5 : 1 }}
                     >
                       Update
                     </button>

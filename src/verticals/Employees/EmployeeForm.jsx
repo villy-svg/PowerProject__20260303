@@ -1,3 +1,4 @@
+// @prod-critical
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeForm.css';

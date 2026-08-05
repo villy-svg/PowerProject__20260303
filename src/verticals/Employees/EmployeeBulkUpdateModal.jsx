@@ -58,12 +58,17 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
     const updates = {};
     Object.keys(activeFields).forEach(field => {
       if (activeFields[field]) {
-        updates[field] = values[field] === 'NULL' ? null : (values[field] || null);
+        if (values[field] === 'NULL') {
+          updates[field] = null; // Explicit user selection to clear/nullify field
+        } else if (values[field] !== '' && values[field] !== null && values[field] !== undefined) {
+          updates[field] = values[field]; // Active value selected
+        }
+        // If values[field] === '' ('No Change'), omit from updates payload so existing values are preserved
       }
     });
 
     if (Object.keys(updates).length === 0) {
-      alert('Please select at least one field to update.');
+      alert('Please select at least one field to update with a valid selection.');
       return;
     }
 
