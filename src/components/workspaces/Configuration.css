@@ -1,8 +1,7 @@
 .configuration-view {
   height: calc(100vh - 100px);
   overflow-y: auto; /* Scrollbar on this edge */
-  width: 100vw; /* Force absolute full viewport width */
-  margin-left: calc(-50vw + 50%); /* Center the 100vw container if parent is constrained */
+  width: 100%; /* Respect parent bounds instead of forcing 100vw */
   display: block;
   animation: fadeIn 0.4s ease-out;
 }

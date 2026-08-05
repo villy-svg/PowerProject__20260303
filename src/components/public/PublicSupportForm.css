@@ -41,15 +41,18 @@
    Full-viewport dark canvas — renders as standalone public page
    ========================================================================== */
 .psf-page {
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--psf-bg);
   font-family: var(--psf-font);
   color: var(--psf-text);
   padding: 2rem 1rem;
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
