@@ -82,7 +82,7 @@
     justify-content: center;
     background: transparent;
     border: none;
-    color: var(--border-color); /* Crisp neutral grey for black background */
+    color: var(--color-white);
     opacity: 0.9; /* High opacity to prevent muddiness */
     gap: 1px;
     cursor: pointer;
