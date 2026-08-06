@@ -6,7 +6,7 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { getBoardLabelForVertical } from '../../constants/taskBoards';
 import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
-import { IconSearch, IconX, IconEdit } from './Icons';
+import { IconSearch, IconX, IconEdit, IconArrowRight } from './Icons';
 import './SearchBar.css';
 
 /**
@@ -256,25 +256,25 @@ function RecordResult({ rec, query, onClick, onEdit, onGoTo }) {
 
   return (
     <li className="search-result-item" role="option" onClick={onClick}>
+      {onGoTo && (
+        <button
+          className="search-result-goto-btn"
+          onClick={onGoTo}
+          title="Go to Card"
+          aria-label="Go to Card"
+        >
+          <IconArrowRight size={14} />
+        </button>
+      )}
       <div className="result-record-col">
         <span className="result-text">{highlightMatch(primaryName, query)}</span>
         {secondaryText && (
           <span className="result-sub">{highlightMatch(secondaryText, query)}</span>
         )}
       </div>
-      {(metaText || onEdit || onGoTo) && (
+      {(metaText || onEdit) && (
         <div className="result-badges">
           {metaText && <span className="result-badge">{metaText}</span>}
-          {onGoTo && (
-            <button
-              className="search-result-edit-btn"
-              onClick={onGoTo}
-              title="Go to Card"
-              aria-label="Go to Card"
-            >
-              Go to Card
-            </button>
-          )}
           {onEdit && (
             <button
               className="search-result-edit-btn"
