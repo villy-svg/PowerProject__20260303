@@ -85,6 +85,8 @@ const MobileBottomNav = ({
                 }
                 setIsSearchOpen(false);
               }}
+              onEdit={searchProps?.onEdit}
+              onGoTo={searchProps?.onGoTo}
             />
           </div>
         )}

@@ -49,6 +49,7 @@ const EmployeeListRow = ({
 
   return (
     <div
+      id={`emp-list-${emp.id}`}
       className={`list-task-row employee-list-row ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''}`}
       onClick={(e) => {
         if (e.target.closest('button') || e.target.closest('.list-row-selection')) return;

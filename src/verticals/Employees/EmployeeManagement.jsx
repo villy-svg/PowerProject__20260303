@@ -58,6 +58,23 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     ui.openViewModal(emp);
   };
 
+  const handleOpenGoTo = (emp) => {
+    if (ui.viewMode === 'tree') {
+      ui.setViewMode('grid');
+    }
+    
+    setTimeout(() => {
+      const el = document.getElementById(`emp-card-${emp.id}`) || document.getElementById(`emp-list-${emp.id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-pulse');
+        setTimeout(() => {
+          el.classList.remove('highlight-pulse');
+        }, 1500);
+      }
+    }, 100);
+  };
+
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
       fetchEmployees();
@@ -274,6 +291,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         recordType="Employees"
         onSearchSelect={handleOpenView}
         onSearchEdit={handleOpenEdit}
+        onSearchGoTo={handleOpenGoTo}
         rightActions={
           <>
             {permissions.canCreateEmployees && (

@@ -519,3 +519,9 @@
   opacity: 0.5;
   font-style: italic;
 }
+
+/* Card Search Navigation Highlight Effect */
+.highlight-pulse {
+  transition: background-color 0.5s ease;
+  background-color: var(--brand-primary-light, rgba(0, 120, 212, 0.2)) !important;
+}

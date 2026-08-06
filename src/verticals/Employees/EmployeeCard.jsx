@@ -48,6 +48,7 @@ const EmployeeCard = ({
 
   return (
     <div
+      id={`emp-card-${emp.id}`}
       className={`task-card-master employee-card ${emp.status === 'Inactive' ? 'inactive' : ''} ${isSelected ? 'selected' : ''} ${className}`}
       onDoubleClick={() => onView(emp)}
       title="Double-click to view"

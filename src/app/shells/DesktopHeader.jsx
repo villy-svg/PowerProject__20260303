@@ -44,6 +44,7 @@ const DesktopHeader = ({
   recordType,
   onSearchSelect,
   onSearchEdit,
+  onSearchGoTo,
   hideSearchBar,
 }) => {
   const hasExpandedContent = !!(expandedLeft || expandedRight);
@@ -70,6 +71,7 @@ const DesktopHeader = ({
           recordType={recordType}
           onSelect={onSearchSelect}
           onEdit={onSearchEdit}
+          onGoTo={onSearchGoTo}
         />
       )}
 

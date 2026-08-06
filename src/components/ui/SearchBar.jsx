@@ -30,7 +30,7 @@ import './SearchBar.css';
  *   recordType {string}  Optional — label for display ("Employee", "Client", etc.)
  *   onSelect   {fn}      Optional — called with the selected record when clicked
  */
-const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record', onSelect, onEdit }) => {
+const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record', onSelect, onEdit, onGoTo }) => {
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -144,6 +144,13 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
     setQuery('');
   };
 
+  const handleGoToClick = (e, item) => {
+    e.stopPropagation();
+    onGoTo?.(item);
+    setIsFocused(false);
+    setQuery('');
+  };
+
   const handleClear = () => {
     setQuery('');
     setDebouncedQuery('');
@@ -203,7 +210,7 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
               <ul className="search-results-list">
                 {searchResults.map((item, idx) => (
                   isRecordsMode
-                    ? <RecordResult key={item.id || idx} rec={item} query={debouncedQuery} onClick={() => handleResultClick(item)} onEdit={onEdit ? (e) => handleEditClick(e, item) : null} />
+                    ? <RecordResult key={item.id || idx} rec={item} query={debouncedQuery} onClick={() => handleResultClick(item)} onEdit={onEdit ? (e) => handleEditClick(e, item) : null} onGoTo={onGoTo ? (e) => handleGoToClick(e, item) : null} />
                     : <TaskResult  key={item.id}      task={item} query={debouncedQuery} onClick={() => handleResultClick(item)} />
                 ))}
               </ul>
@@ -241,7 +248,7 @@ function TaskResult({ task, query, onClick }) {
 }
 
 /* ── Record result row ───────────────────────────────────────────────────── */
-function RecordResult({ rec, query, onClick, onEdit }) {
+function RecordResult({ rec, query, onClick, onEdit, onGoTo }) {
   // Derive a display name from whichever field exists
   const primaryName = rec.full_name || rec.name || rec.company_name || '—';
   const secondaryText = rec.email || rec.emp_code || rec.badge_id || rec.phone || '';
@@ -255,9 +262,19 @@ function RecordResult({ rec, query, onClick, onEdit }) {
           <span className="result-sub">{highlightMatch(secondaryText, query)}</span>
         )}
       </div>
-      {(metaText || onEdit) && (
+      {(metaText || onEdit || onGoTo) && (
         <div className="result-badges">
           {metaText && <span className="result-badge">{metaText}</span>}
+          {onGoTo && (
+            <button
+              className="search-result-edit-btn"
+              onClick={onGoTo}
+              title="Go to Card"
+              aria-label="Go to Card"
+            >
+              Go to Card
+            </button>
+          )}
           {onEdit && (
             <button
               className="search-result-edit-btn"
