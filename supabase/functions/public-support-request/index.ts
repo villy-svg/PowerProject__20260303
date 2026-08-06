@@ -114,6 +114,12 @@ serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return new Response(
+        JSON.stringify({ success: false, error: "At least one image must be attached", code: "MISSING_IMAGE" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // -------------------------------------------------------------------------
     // 2. Verify CAPTCHA — reject invalid tokens with 403
@@ -295,8 +301,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        taskId: taskData?.id ?? null,
-        imagePath: imageStoragePath,
+        taskId: taskData?.id ?? null
       }),
       { status: 201, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

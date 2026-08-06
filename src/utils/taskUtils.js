@@ -214,5 +214,61 @@ export const taskUtils = {
     }
 
     return false;
+  },
+
+  /**
+   * Shares a task via WhatsApp or native share API.
+   *
+   * @param {Object} task - The task entity.
+   * @param {string} stageName - The resolved stage label.
+   * @param {Object} currentUser - The current logged-in user.
+   */
+  shareWhatsAppReminder(task, stageName) {
+    const taskName = task.text || 'Unknown Task';
+    
+    // Resolve assignee name
+    const assigneeName = taskUtils.getAssigneeLabel(task, null);
+    const actualName = ['Unassigned', 'None', 'Assigned'].includes(assigneeName) ? 'Team Member' : assigneeName;
+
+    const getStageEmoji = (id) => {
+      switch(id) {
+        case 'BACKLOG': return '📋';
+        case 'IN_PROGRESS': return '🚧';
+        case 'REVIEW': return '👀';
+        case 'COMPLETED': return '✅';
+        case 'DEPRIORITIZED': return '💤';
+        default: return '⚪';
+      }
+    };
+
+    const getPriorityEmoji = (p) => {
+      switch(p?.toUpperCase()) {
+        case 'CRITICAL': return '🚨';
+        case 'HIGH': return '🔴';
+        case 'MEDIUM':
+        case 'NORMAL': return '🟡';
+        case 'LOW': return '🟢';
+        default: return '⚪';
+      }
+    };
+
+    const stageEmoji = getStageEmoji(task.stageId);
+    const priorityEmoji = getPriorityEmoji(task.priority);
+    const priorityText = task.priority || 'Standard';
+    
+    const shareText = `Hi ${actualName},\n\n*Task*: ${taskName}.\n*Current Status:* ${stageEmoji} ${stageName} | ${priorityEmoji} ${priorityText}`;
+    
+    const encoded = encodeURIComponent(shareText);
+
+    if (navigator.share) {
+      navigator.share({ text: shareText }).catch(err => {
+        if (err.name !== 'AbortError') {
+          console.warn('[shareWhatsAppReminder] navigator.share error:', err);
+        }
+      });
+      return;
+    }
+
+    window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
   }
 };

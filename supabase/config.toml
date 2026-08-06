@@ -393,3 +393,5 @@ verify_jwt = false
 [functions."entity-read"]
 verify_jwt = false
 
+[functions."public-support-request"]
+verify_jwt = false

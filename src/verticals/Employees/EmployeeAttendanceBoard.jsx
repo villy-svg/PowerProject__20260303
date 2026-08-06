@@ -65,10 +65,14 @@ function getDatesFromWeekString(weekStr) {
   const dayOffset = date.getDay() <= 4 && date.getDay() !== 0 ? date.getDay() - 1 : date.getDay() + 6;
   date.setDate(date.getDate() - dayOffset + days);
   
-  const fromStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(date);
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const fromDateIST = new Date(date.getTime() + IST_OFFSET_MS);
+  const fromStr = fromDateIST.toISOString().slice(0, 10);
+  
   const toDate = new Date(date);
   toDate.setDate(toDate.getDate() + 6);
-  const toStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(toDate);
+  const toDateIST = new Date(toDate.getTime() + IST_OFFSET_MS);
+  const toStr = toDateIST.toISOString().slice(0, 10);
   
   return { from: fromStr, to: toStr };
 }
@@ -117,7 +121,7 @@ const EmployeeAttendanceBoard = ({
   const [plannerError, setPlannerError] = useState(null);
   const [plannerSuccess, setPlannerSuccess] = useState(null);
 
-  const [paintbrushStatus, setPaintbrushStatus] = useState('null');
+  const [paintbrushStatus, setPaintbrushStatus] = useState('cursor');
   const [paintbrushHubId, setPaintbrushHubId] = useState('');
   const [hubs, setHubs] = useState([]);
   const [activeCellEdit, setActiveCellEdit] = useState(null);
@@ -174,10 +178,12 @@ const EmployeeAttendanceBoard = ({
         return; // do not allow editing already marked attendance
       }
 
-      if (paintbrushStatus === 'null') {
+      if (paintbrushStatus === 'cursor') {
         setActiveCellEdit(prev => (prev?.empId === empId && prev?.date === date) ? null : { empId, date });
         return;
       }
+      
+      const applyStatus = paintbrushStatus === 'eraser' ? 'null' : paintbrushStatus;
       
       setActiveCellEdit(null);
       setPlannerError(null);
@@ -187,14 +193,14 @@ const EmployeeAttendanceBoard = ({
         const existingIdx = current.findIndex(d => d.date === date);
         if (existingIdx >= 0) {
           const existing = current[existingIdx];
-          if (existing.attendance_status === paintbrushStatus && existing.hub_id === paintbrushHubId) {
+          if (existing.attendance_status === applyStatus && existing.hub_id === paintbrushHubId) {
             return { ...prev, [empId]: current.filter((_, idx) => idx !== existingIdx) };
           }
           const newArray = [...current];
-          newArray[existingIdx] = { date, attendance_status: paintbrushStatus, hub_id: paintbrushHubId };
+          newArray[existingIdx] = { date, attendance_status: applyStatus, hub_id: paintbrushHubId };
           return { ...prev, [empId]: newArray };
         } else {
-          return { ...prev, [empId]: [...current, { date, attendance_status: paintbrushStatus, hub_id: paintbrushHubId }] };
+          return { ...prev, [empId]: [...current, { date, attendance_status: applyStatus, hub_id: paintbrushHubId }] };
         }
       });
       return;
@@ -463,7 +469,8 @@ const EmployeeAttendanceBoard = ({
                 onChange={setPaintbrushStatus}
                 className="u-w-180 u-py-4 u-pl-8 u-text-sm-85"
                 options={[
-                  { value: 'null', label: 'NULL (Not Marked)' },
+                  { value: 'cursor', label: 'Cursor (Edit Cell)' },
+                  { value: 'eraser', label: 'Eraser (Clear Cell)' },
                   { value: 'present', label: 'Present (Day)' },
                   { value: 'present-night', label: 'Present (Night)' },
                   { value: 'week-off', label: 'Week-Off' },

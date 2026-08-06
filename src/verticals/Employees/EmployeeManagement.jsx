@@ -235,7 +235,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
       const empRemarks = (tasks || []).filter(t => {
         const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
         if (!isRemark) return false;
-        const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+        const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : (t.assigned_to ? [t.assigned_to] : []);
         return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
       });
       if (!hasHighRemarks(emp, empRemarks)) return false;
@@ -252,7 +252,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
 
     if (groupBy === 'role') {
       groupName = emp.role_code || emp.role || 'Unassigned Role';
-      const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 1;
+      const seniorityNum = typeof emp.seniority_level === 'number' ? emp.seniority_level : 0;
       sortKey = `${String(seniorityNum).padStart(3, '0')}|${groupName}`;
     } else {
       groupName = emp.hub_code || emp.hub_id || 'Unassigned Hub';
@@ -436,7 +436,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               remarks={(tasks || []).filter(t => {
                                 const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                                 if (!isRemark) return false;
-                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : (t.assigned_to ? [t.assigned_to] : []);
                                 return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
                               })}
                             />
@@ -463,7 +463,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               remarks={(tasks || []).filter(t => {
                                 const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                                 if (!isRemark) return false;
-                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                                const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : (t.assigned_to ? [t.assigned_to] : []);
                                 return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
                               })}
                             />
@@ -504,7 +504,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         remarks={(tasks || []).filter(t => {
                           const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                           if (!isRemark) return false;
-                          const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                          const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : (t.assigned_to ? [t.assigned_to] : []);
                           return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
                         })}
                       />
@@ -527,7 +527,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                          remarks={(tasks || []).filter(t => {
                            const isRemark = t.verticalId === 'EMPLOYEES' || t.verticalId === 'employee_tasks' || t.verticalId === verticals.EMPLOYEES?.id;
                            if (!isRemark) return false;
-                           const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : [];
+                           const assigned = Array.isArray(t.assigned_to) ? t.assigned_to : (t.assigned_to ? [t.assigned_to] : []);
                            return assigned.includes(emp.id) || (emp.badge_id && assigned.includes(emp.badge_id));
                          })}
                        />

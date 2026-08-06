@@ -1,7 +1,7 @@
 # 1. Commit Staging Local to Staging Server
 git checkout staging
 git add .
-git commit -m "260806 Go To Card For Employee Search Bar 1.0.1"
+git commit -m "260806 Go To Card For Employee Search Bar 1.0.2"
 git push origin staging
 
 #Check Current Git Branch

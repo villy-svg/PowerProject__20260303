@@ -154,7 +154,9 @@ export async function employeeCheckIn({ shiftType, hubId, deviceId, geolocation 
     p_hub_id:       hubId,
     p_device_id:    deviceId,
     p_geolocation:  geolocation,
-  });
+  })
+    .select('*, employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )')
+    .maybeSingle();
 
   if (error) {
     console.error('[attendanceService] employeeCheckIn error:', error);
@@ -176,7 +178,9 @@ export async function employeeCheckOut({ deviceId, geolocation }) {
   const { data, error } = await supabase.rpc('rpc_employee_checkout', {
     p_device_id:    deviceId,
     p_geolocation:  geolocation,
-  });
+  })
+    .select('*, employees ( id, full_name, emp_code, hub_id, hubs ( id, name, hub_code ) )')
+    .maybeSingle();
 
   if (error) {
     console.error('[attendanceService] employeeCheckOut error:', error);
@@ -332,6 +336,13 @@ export async function fetchLiveAttendance() {
   // overtime cases (or sessions left open by mistake) which will be flagged
   // on the frontend. The JS-side filter ensures we only show records with an
   // open session.
+  // Trigger cleanup of ghost sessions older than 3 days
+  try {
+    await supabase.rpc('rpc_auto_checkout_stale_sessions');
+  } catch (e) {
+    console.warn('[attendanceService] non-fatal: failed to clean up stale sessions', e);
+  }
+
   const today = new Date();
   const threeDaysAgoMs = today.getTime() - (3 * 24 * 60 * 60 * 1000);
   // toISTDateString() is locale-independent — safe on Android 8 Chrome 64 WebView.
@@ -380,13 +391,13 @@ export async function fetchLiveAttendance() {
 // Requires admin privileges (enforced by RLS UPDATE policy).
 // ---------------------------------------------------------------------------
 export async function adminForceCheckout(recordId, currentSessions) {
-  // Find the open session to calculate the 12-hour auto-fallback
+  // Find the open session to calculate the 11-hour auto-fallback
   const openSession = currentSessions.find(s => s.logout_time === null);
   
   let forcedLogoutTimeIso = new Date().toISOString();
   if (openSession && openSession.login_time) {
     const loginTimeMs = new Date(openSession.login_time).getTime();
-    forcedLogoutTimeIso = new Date(loginTimeMs + 12 * 60 * 60 * 1000).toISOString();
+    forcedLogoutTimeIso = new Date(loginTimeMs + 11 * 60 * 60 * 1000).toISOString();
   }
   
   // Update the open session(s)
@@ -395,7 +406,7 @@ export async function adminForceCheckout(recordId, currentSessions) {
       return { 
         ...s, 
         logout_time: forcedLogoutTimeIso, 
-        logout_geolocation: { note: 'Forced by admin (auto 12-hour fallback)' } 
+        logout_geolocation: { note: 'Forced by admin (auto 11-hour fallback)' } 
       };
     }
     return s;
@@ -405,15 +416,59 @@ export async function adminForceCheckout(recordId, currentSessions) {
     .from('daily_attendances')
     .update({
       logout_time: forcedLogoutTimeIso,
-      logout_geolocation: { note: 'Forced by admin (auto 12-hour fallback)' },
+      logout_geolocation: { note: 'Forced by admin (auto 11-hour fallback)' },
       session_logs_data: updatedSessions,
       updated_at: new Date().toISOString()
     })
-    .eq('id', recordId);
+    .eq('id', recordId)
+    .select('employee_id, shift_date')
+    .single();
 
   if (error) {
     console.error('[attendanceService] adminForceCheckout error:', error);
     return { data: null, error };
   }
+
+  // Auto-allocate a "Logout Not Done" remark to the user
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('id')
+    .eq('employee_id', data.employee_id)
+    .single();
+
+  if (profileError || !profile) {
+    // Remark creation is best-effort — force checkout already succeeded.
+    console.warn('[attendanceService] adminForceCheckout: could not create remark — profile not found:', profileError);
+    return { data, error: null };
+  }
+
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !authData?.user) {
+    // Remark creation is best-effort — force checkout already succeeded.
+    console.warn('[attendanceService] adminForceCheckout: could not create remark — auth user not found:', authError);
+    return { data, error: null };
+  }
+
+  const adminId = authData.user.id;
+  
+  const shiftDateStr = data.shift_date;
+  const timeStr = new Date(forcedLogoutTimeIso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  
+  const { error: insertError } = await supabase.from('tasks').insert({
+    text: 'Logout Not Done',
+    description: `You have missed logging out from your shift on ${shiftDateStr}, ${timeStr}. Please ensure you Login/Logout on time.`,
+    vertical_id: 'EMPLOYEES',
+    stage_id: 'BACKLOG',
+    priority: 'Low',
+    assigned_to: profile.id,
+    created_by: adminId,
+    metadata: { type: 'force_end_remark' }
+  });
+
+  if (insertError) {
+    console.warn('[attendanceService] adminForceCheckout: remark task insert failed:', insertError);
+  }
+
   return { data, error: null };
 }

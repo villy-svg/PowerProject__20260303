@@ -232,6 +232,10 @@ const PublicSupportForm = () => {
       setError('Please provide a description of at least 10 characters.');
       return;
     }
+    if (imageFiles.length === 0) {
+      setError('Please attach at least one photo of the issue.');
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -384,7 +388,7 @@ const PublicSupportForm = () => {
           {/* Photo upload */}
           <div className="psf-form-group">
             <label className="psf-label">
-              Attach Photos <span style={{ opacity: 0.5, fontWeight: 400 }}>(optional)</span>
+              Attach Photos <span className="psf-required-asterisk">*</span>
             </label>
 
             {imageFiles.length > 0 && (
@@ -446,7 +450,7 @@ const PublicSupportForm = () => {
           {/* Error message */}
           {error && (
             <div className="psf-alert psf-alert--error" role="alert">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }}>
+              <svg className="psf-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />

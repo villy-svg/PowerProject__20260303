@@ -17,7 +17,7 @@ import { fetchLiveAttendance } from '../services/employees/attendanceService';
 // ---------------------------------------------------------------------------
 // Standard shift length (hours) — raises overtime flag when exceeded
 // ---------------------------------------------------------------------------
-const STANDARD_SHIFT_HOURS = 12;
+const STANDARD_SHIFT_HOURS = 11;
 
 // ---------------------------------------------------------------------------
 // Poll interval: 60 seconds

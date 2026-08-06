@@ -117,10 +117,10 @@ function getDefaultShiftType() {
 // ---------------------------------------------------------------------------
 // Constant: standard shift length in milliseconds
 // ---------------------------------------------------------------------------
-const STANDARD_SHIFT_MS = 12 * 60 * 60 * 1000; // 12 hours
+const STANDARD_SHIFT_MS = 11 * 60 * 60 * 1000; // 11 hours
 
 // ---------------------------------------------------------------------------
-// Utility: Schedule a 12-hour overtime alarm from a given login ISO timestamp.
+// Utility: Schedule an 11-hour overtime alarm from a given login ISO timestamp.
 // Uses the browser Notification API if permitted, otherwise returns a flag
 // that the UI component can use to show an in-page banner.
 //
@@ -133,7 +133,7 @@ function scheduleOvertimeAlarm(loginTimeIso, onAlarm) {
   const delayMs = alarmAtMs - Date.now();
 
   if (delayMs <= 0) {
-    // Shift already exceeded 12 hours — fire immediately
+    // Shift already exceeded 11 hours — fire immediately
     onAlarm();
     return null;
   }
@@ -154,7 +154,7 @@ function scheduleOvertimeAlarm(loginTimeIso, onAlarm) {
 // ---------------------------------------------------------------------------
 async function fireOvertimeNotification(setAlarmFired) {
   const title = '⏰ Shift Overtime Reminder';
-  const body  = 'You have been on shift for 12 hours. Please remember to end your shift!';
+  const body  = 'You have been on shift for 11 hours. Please remember to end your shift!';
 
   // Check if running inside a Capacitor native shell (Android / iOS app).
   // Dynamic import keeps @capacitor/core out of the critical web bundle path.
@@ -195,7 +195,7 @@ export function useAttendanceSelfService(userId) {
   const [error, setError] = useState(null);
   const [successData, setSuccessData] = useState(null); // Set after action → triggers receipt screen
 
-  // Alarm state: true when the in-page 12-hour banner should show (Notification API fallback)
+  // Alarm state: true when the in-page 11-hour banner should show (Notification API fallback)
   const [alarmFired, setAlarmFired] = useState(false);
   // Timer ref: holds the setTimeout ID for the overtime alarm
   const alarmTimerRef = useRef(null);
@@ -359,7 +359,7 @@ export function useAttendanceSelfService(userId) {
 
       setTodayRecord(data);
 
-      // Schedule 12-hour overtime alarm from the new session's login_time
+      // Schedule 11-hour overtime alarm from the new session's login_time
       const newSessions = data?.session_logs_data || [];
       const newOpenSession = newSessions.find(s => s.logout_time === null);
       const loginTimeForAlarm = newOpenSession?.login_time || new Date().toISOString();

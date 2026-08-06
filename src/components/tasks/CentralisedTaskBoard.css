@@ -406,3 +406,9 @@
   min-height: 0;
 }
 
+/* ==========================================================================
+   PUBLIC QR SCANNER HIGHLIGHTS
+   ========================================================================== */
+.qr-scanner-halo {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--status-danger), transparent 75%);
+}

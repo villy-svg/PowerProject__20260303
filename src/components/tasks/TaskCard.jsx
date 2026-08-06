@@ -116,62 +116,15 @@ const TaskCard = ({
   };
 
   const handleWhatsAppReminder = () => {
-    const assigneeName = taskUtils.getAssigneeLabel(task, null);
-    const actualName = ['Unassigned', 'None', 'Assigned'].includes(assigneeName) ? 'Team Member' : assigneeName;
-    const taskName = task.text || 'Unknown Task';
     const stageName = STAGE_LIST?.find(s => s.id === task.stageId)?.title || task.stageId;
-    
-    // Dynamic Emojis for Status
-    const getStageEmoji = (stageId) => {
-      switch (stageId) {
-        case 'BACKLOG': return '📋';
-        case 'IN_PROGRESS': return '🚧';
-        case 'REVIEW': return '👀';
-        case 'COMPLETED': return '✅';
-        case 'DEPRIORITIZED': return '⬇️';
-        default: return '📌';
-      }
-    };
-
-    // Dynamic Emojis for Priority
-    const getPriorityEmoji = (priority) => {
-      switch (priority?.toUpperCase()) {
-        case 'URGENT':
-        case 'CRITICAL': return '🚨';
-        case 'HIGH': return '🔴';
-        case 'MEDIUM':
-        case 'NORMAL': return '🟡';
-        case 'LOW': return '🟢';
-        default: return '⚪';
-      }
-    };
-
-    const stageEmoji = getStageEmoji(task.stageId);
-    const priorityEmoji = getPriorityEmoji(task.priority);
-    const priorityText = task.priority || 'Standard';
-    
-    const shareText = `Hi ${actualName},
-
-*Task*: ${taskName}.
-*Current Status:* ${stageEmoji} ${stageName} | ${priorityEmoji} ${priorityText}`;
-    
-    const encoded = encodeURIComponent(shareText);
-
-    if (navigator.share) {
-      navigator.share({ text: shareText }).catch(err => {
-        if (err.name !== 'AbortError') {
-          console.warn('[TaskCard] navigator.share error:', err);
-        }
-      });
-      return;
-    }
-
-    window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    taskUtils.shareWhatsAppReminder(task, stageName);
   };
+
+  const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
 
   return (
     <div
-      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      className={`task-card-master ${task.isDuplicate && task.isFirstInCluster ? 'is-duplicate-stacked' : ''} ${isSelected ? 'selected' : ''} ${isExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''} ${isQRSubmission ? 'qr-scanner-halo' : ''}`}
       {...dragProps}
       {...dropProps}
       onClick={(e) => {

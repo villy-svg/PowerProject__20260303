@@ -63,8 +63,8 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
 const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
   const { action, record, deviceId, geolocation, timestamp } = successData || {};
 
-  const [resolvedHubName, setResolvedHubName] = useState('—');
-  const [resolvedEmpName, setResolvedEmpName] = useState(user?.name || 'Employee');
+  const [resolvedHubName, setResolvedHubName] = useState(record?.employees?.hubs?.name || record?.employees?.hubs?.hub_code || '—');
+  const [resolvedEmpName, setResolvedEmpName] = useState(record?.employees?.full_name || user?.name || 'Employee');
 
   useEffect(() => {
     const fetchNames = async () => {

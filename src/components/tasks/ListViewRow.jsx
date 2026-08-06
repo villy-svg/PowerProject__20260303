@@ -24,6 +24,7 @@ import {
   IconChevronRight,
   IconCopy,
   IconCheck,
+  IconComment,
 } from '../ui/Icons';
 import { useHierarchyDnd } from '../../hooks/useHierarchyDnd';
 import { useTaskViewActions } from '../../features/task-board/hooks/useTaskViewActions';
@@ -106,6 +107,13 @@ const ListViewRow = ({
   const isRejected = task.latestSubmission?.status === 'rejected';
   const blockArrows = isRejected && permissions.level !== 'admin';
 
+  const handleWhatsAppReminder = () => {
+    const stageName = taskStage?.label || task.stageId;
+    taskUtils.shareWhatsAppReminder(task, stageName);
+  };
+
+  const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
+
   const handleTouchEnd = (e) => {
     if (e.target.closest('button') || e.target.closest('.list-row-selection') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
 
@@ -124,7 +132,7 @@ const ListViewRow = ({
 
   return (
     <div
-      className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''}`}
+      className={`list-task-row ${selectedTaskIds.includes(task.id) ? 'selected' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isDragOver ? 'drop-target' : ''} ${isQRSubmission ? 'qr-scanner-halo' : ''}`}
       {...dragProps}
       {...dropProps}
       onClick={(e) => {
@@ -340,6 +348,17 @@ const ListViewRow = ({
               title="Mark as Completed (Admin Only)"
             >
               <IconCheck size={14} />
+            </button>
+          )}
+
+          {!task.isContextOnly && task.stageId !== 'COMPLETED' && (
+            <button
+              className="card-edit-button" // reuse card button styles for now or list action styles
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              onClick={(e) => { e.stopPropagation(); handleWhatsAppReminder(); }}
+              title="Share WhatsApp Reminder"
+            >
+              <IconComment size={14} />
             </button>
           )}
 

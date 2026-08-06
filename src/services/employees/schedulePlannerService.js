@@ -295,68 +295,36 @@ export async function fetchPendingPlans() {
 // @returns {Promise<{ data: object|null, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function approvePlan({ planId, reviewedBy, entries }) {
-  // --- STEP 1: Mark plan as approved ---
-  const { error: approveError } = await supabase
-    .from('employee_schedule_plans')
-    .update({
-      plan_status: 'approved',
-      reviewed_by: reviewedBy,
-      updated_at:  new Date().toISOString(),
-    })
-    .eq('id', planId);
-
-  if (approveError) {
-    console.error('[schedulePlannerService] approvePlan update plan error:', approveError);
-    return { data: null, error: approveError };
-  }
-
-  // --- STEP 2: Upsert ONLY allowed entries into daily_attendances ---
-  // The remaining scheduled entries stay entirely in the schedule plan tables.
-  const entriesToUpsert = entries.filter(entry => 
-    AUTO_UPSERT_STATUSES.includes(entry.attendance_status)
-  );
-
-  if (entriesToUpsert.length > 0) {
-    const upsertRows = entriesToUpsert.map(entry => ({
+  // --- ATOMIC APPROVAL VIA RPC ---
+  // We use the new rpc_approve_schedule_plan to update the plan status, upsert 
+  // allowed entries, and clear ghosts all within a single Postgres transaction.
+  
+  const entriesToUpsert = entries
+    .filter(entry => AUTO_UPSERT_STATUSES.includes(entry.attendance_status))
+    .map(entry => ({
       employee_id:       entry.employee_id,
       shift_date:        entry.shift_date,
       attendance_status: entry.attendance_status,
       hub_id:            entry.hub_id,
     }));
 
-    const { error: upsertError } = await supabase.rpc('rpc_upsert_schedule_attendances', {
-      p_entries: upsertRows,
-    });
-
-    if (upsertError) {
-      console.error('[schedulePlannerService] approvePlan upsert daily_attendances error:', upsertError);
-      // NOTE: Plan is already marked approved above. Log prominently.
-      // TODO: Phase 2 — wrap in atomic RPC to prevent partial writes.
-      return { data: null, error: upsertError };
-    }
-  }
-
-  // --- STEP 3: Clear any ghost attendances for non-auto-upserted statuses ---
-  // If the manager is overriding a week-off (auto-upserted) with a present/absent (not auto-upserted),
-  // we must delete the stranded week-off from daily_attendances if they haven't checked in yet.
-  const entriesToClear = entries.filter(entry => 
-    !AUTO_UPSERT_STATUSES.includes(entry.attendance_status)
-  );
-
-  if (entriesToClear.length > 0) {
-    const clearPayload = entriesToClear.map(entry => ({
+  const entriesToClear = entries
+    .filter(entry => !AUTO_UPSERT_STATUSES.includes(entry.attendance_status))
+    .map(entry => ({
       employee_id: entry.employee_id,
       shift_date:  entry.shift_date,
     }));
 
-    const { error: clearError } = await supabase.rpc('rpc_clear_ghost_attendances', {
-      p_entries: clearPayload,
-    });
+  const { error: approveError } = await supabase.rpc('rpc_approve_schedule_plan', {
+    p_plan_id: planId,
+    p_reviewer_id: reviewedBy,
+    p_week_offs: entriesToUpsert,
+    p_non_week_offs: entriesToClear
+  });
 
-    if (clearError) {
-      console.error('[schedulePlannerService] approvePlan rpc_clear_ghost_attendances error:', clearError);
-      // Non-fatal to the approval itself, but log it.
-    }
+  if (approveError) {
+    console.error('[schedulePlannerService] approvePlan atomic RPC error:', approveError);
+    return { data: null, error: approveError };
   }
 
   return { data: { planId, approved: true, entriesCount: entries.length }, error: null };
