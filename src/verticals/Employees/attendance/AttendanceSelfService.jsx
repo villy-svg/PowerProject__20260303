@@ -145,9 +145,9 @@ const AlarmBanner = ({ onDismiss }) => (
   <div className="self-service__alarm-banner" role="alert" aria-live="assertive">
     <span className="self-service__alarm-icon">⏰</span>
     <div className="self-service__alarm-body">
-      <strong className="self-service__alarm-title">12-Hour Shift Alert</strong>
+      <strong className="self-service__alarm-title">11-Hour Shift Alert</strong>
       <p className="self-service__alarm-text">
-        You have been on shift for 12 hours. Please remember to end your shift!
+        You have been on shift for 11 hours. Please remember to end your shift!
       </p>
     </div>
     <button

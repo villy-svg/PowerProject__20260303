@@ -316,7 +316,39 @@ export async function fetchMyTodayAttendance(userId) {
     catch (e) { todayData.session_logs_data = []; }
   }
 
-  return { data: todayData ?? null, error: null };
+  if (todayData) {
+    return { data: todayData, error: null };
+  }
+
+  // -------------------------------------------------------------------------
+  // Step 2 — Query C: Fallback for inconsistent row state (B1 scenario).
+  // Finds any recent closed rows and checks session_logs_data client-side.
+  // -------------------------------------------------------------------------
+  const { data: fallbackRows } = await supabase
+    .from('daily_attendances')
+    .select(SHARED_SELECT)
+    .eq('employee_id', profile.employee_id)
+    .gte('shift_date', threeDaysAgo)
+    .not('logout_time', 'is', null)
+    .order('shift_date', { ascending: false })
+    .limit(5);
+
+  if (fallbackRows?.length > 0) {
+    const inconsistentRecord = fallbackRows.find(r => {
+      let sessions = r.session_logs_data || [];
+      if (typeof sessions === 'string') { try { sessions = JSON.parse(sessions); } catch { sessions = []; } }
+      return sessions.some(s => s.logout_time === null || s.logout_time === 'null');
+    });
+    if (inconsistentRecord) {
+      if (typeof inconsistentRecord.session_logs_data === 'string') {
+        try { inconsistentRecord.session_logs_data = JSON.parse(inconsistentRecord.session_logs_data); }
+        catch { inconsistentRecord.session_logs_data = []; }
+      }
+      return { data: inconsistentRecord, error: null };
+    }
+  }
+
+  return { data: null, error: null };
 }
 
 
@@ -397,7 +429,8 @@ export async function adminForceCheckout(recordId, currentSessions) {
   let forcedLogoutTimeIso = new Date().toISOString();
   if (openSession && openSession.login_time) {
     const loginTimeMs = new Date(openSession.login_time).getTime();
-    forcedLogoutTimeIso = new Date(loginTimeMs + 11 * 60 * 60 * 1000).toISOString();
+    const elevenHourCapMs = loginTimeMs + 11 * 60 * 60 * 1000;
+    forcedLogoutTimeIso = new Date(Math.min(elevenHourCapMs, Date.now())).toISOString();
   }
   
   // Update the open session(s)

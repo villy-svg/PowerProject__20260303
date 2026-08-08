@@ -360,8 +360,12 @@ export function useAttendanceSelfService(userId) {
       setTodayRecord(data);
 
       // Schedule 11-hour overtime alarm from the new session's login_time
-      const newSessions = data?.session_logs_data || [];
-      const newOpenSession = newSessions.find(s => s.logout_time === null);
+      const newSessionsRaw = data?.session_logs_data || [];
+      let newSessions = newSessionsRaw;
+      if (typeof newSessions === 'string') {
+        try { newSessions = JSON.parse(newSessions); } catch { newSessions = []; }
+      }
+      const newOpenSession = newSessions.find(s => s.logout_time === null || s.logout_time === 'null');
       const loginTimeForAlarm = newOpenSession?.login_time || new Date().toISOString();
       if (alarmTimerRef.current) clearTimeout(alarmTimerRef.current);
       alarmTimerRef.current = scheduleOvertimeAlarm(
