@@ -205,6 +205,30 @@ export function useAttendanceSelfService(userId) {
   const [selectedHubId, setSelectedHubId] = useState(null);
 
   // ---------------------------------------------------------------------------
+  // Utility: Retry on Supabase AbortError (Lock Stolen)
+  // ---------------------------------------------------------------------------
+  const withRetry = useCallback(async (actionFn, retries = 2) => {
+    let lastError;
+    for (let i = 0; i <= retries; i++) {
+      try {
+        return await actionFn();
+      } catch (err) {
+        lastError = err;
+        const isAbortError = err?.name === 'AbortError' || 
+                             err?.message?.includes('AbortError') || 
+                             err?.message?.includes('Lock was stolen');
+        if (isAbortError && i < retries) {
+          console.warn(`[useAttendanceSelfService] AbortError detected. Retrying... (${retries - i} left)`);
+          await new Promise(r => setTimeout(r, 800));
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError;
+  }, []);
+
+  // ---------------------------------------------------------------------------
   // Fetch today's attendance record
   // ---------------------------------------------------------------------------
   const loadTodayRecord = useCallback(async () => {
@@ -212,8 +236,11 @@ export function useAttendanceSelfService(userId) {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await fetchMyTodayAttendance(userId);
-      if (fetchError) throw fetchError;
+      const { data } = await withRetry(async () => {
+        const res = await fetchMyTodayAttendance(userId);
+        if (res.error) throw res.error;
+        return res;
+      });
       setTodayRecord(data); // null if no record exists yet
     } catch (err) {
       console.error('[useAttendanceSelfService] loadTodayRecord error:', err);
@@ -221,7 +248,7 @@ export function useAttendanceSelfService(userId) {
     } finally {
       setIsLoading(false);
     }
-  }, [userId]);
+  }, [userId, withRetry]);
 
   // Run on mount
   useEffect(() => {
@@ -348,14 +375,16 @@ export function useAttendanceSelfService(userId) {
         captureGeolocation(),
       ]);
 
-      const { data, error: checkInError } = await employeeCheckIn({
-        shiftType:   selectedShiftType,
-        hubId:       selectedHubId,
-        deviceId,
-        geolocation,
+      const { data } = await withRetry(async () => {
+        const res = await employeeCheckIn({
+          shiftType:   selectedShiftType,
+          hubId:       selectedHubId,
+          deviceId,
+          geolocation,
+        });
+        if (res.error) throw res.error;
+        return res;
       });
-
-      if (checkInError) throw checkInError;
 
       setTodayRecord(data);
 
@@ -387,7 +416,7 @@ export function useAttendanceSelfService(userId) {
     } finally {
       setIsActing(false);
     }
-  }, [selectedShiftType, selectedHubId]);
+  }, [selectedShiftType, selectedHubId, withRetry]);
 
   // ---------------------------------------------------------------------------
   // Action: End Shift (Check Out)
@@ -402,9 +431,11 @@ export function useAttendanceSelfService(userId) {
         captureGeolocation(),
       ]);
 
-      const { data, error: checkOutError } = await employeeCheckOut({ deviceId, geolocation });
-
-      if (checkOutError) throw checkOutError;
+      const { data } = await withRetry(async () => {
+        const res = await employeeCheckOut({ deviceId, geolocation });
+        if (res.error) throw res.error;
+        return res;
+      });
 
       setTodayRecord(data);
 
@@ -425,7 +456,7 @@ export function useAttendanceSelfService(userId) {
     } finally {
       setIsActing(false);
     }
-  }, []);
+  }, [withRetry]);
 
   // Clear success data (e.g., when user navigates away from receipt screen)
   const clearSuccessData = useCallback(() => setSuccessData(null), []);
@@ -452,5 +483,6 @@ export function useAttendanceSelfService(userId) {
     handleCheckIn,
     handleCheckOut,
     clearSuccessData,
+    loadTodayRecord,
   };
 }

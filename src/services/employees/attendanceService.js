@@ -258,96 +258,55 @@ export async function fetchMyTodayAttendance(userId) {
   `;
 
   // -------------------------------------------------------------------------
-  // Step 2 — Query A: Find an open (active) shift.
-  //
-  // We use .is('logout_time', null) on the top-level indexed timestamptz column.
-  // rpc_employee_checkout always writes logout_time = now() when a shift ends,
-  // so this is a guaranteed, type-safe signal that the shift is still ongoing.
-  //
-  // This completely replaces the old JSONB containment filter:
-  //   .or(`...session_logs_data.cs.[{"logout_time": null}]`)
-  // which was fragile because PostgREST URL-encodes JSON null differently
-  // from how PostgreSQL's @> operator matches it, causing silent misses.
+  // Fetch last 3 days of records (usually 3-4 rows max).
+  // This is highly robust: it avoids PostgREST JSONB encoding quirks,
+  // and completely ignores the top-level `logout_time` column which could
+  // be out of sync. If the session logs say it's open, it's open.
   // -------------------------------------------------------------------------
-  const { data: openData, error: openError } = await supabase
-    .from('daily_attendances')
-    .select(SHARED_SELECT)
-    .eq('employee_id', profile.employee_id)
-    .is('logout_time', null)
-    .gte('shift_date', threeDaysAgo)
-    .order('shift_date', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (openError) {
-    console.error('[attendanceService] fetchMyTodayAttendance (open query) error:', openError);
-    return { data: null, error: openError };
-  }
-
-  if (openData) {
-    // Defensive parse: Supabase occasionally returns JSONB as a string over
-    // some network/driver paths (e.g. Capacitor native HTTP on older devices).
-    if (typeof openData.session_logs_data === 'string') {
-      try { openData.session_logs_data = JSON.parse(openData.session_logs_data); }
-      catch (e) { openData.session_logs_data = []; }
-    }
-    return { data: openData, error: null };
-  }
-
-  // -------------------------------------------------------------------------
-  // Step 2 — Query B: No open shift found.
-  // Fall back to today's record (if any) so the UI can show a "shift complete"
-  // state rather than going blank.
-  // -------------------------------------------------------------------------
-  const { data: todayData, error: todayError } = await supabase
-    .from('daily_attendances')
-    .select(SHARED_SELECT)
-    .eq('employee_id', profile.employee_id)
-    .eq('shift_date', today)
-    .maybeSingle();
-
-  if (todayError) {
-    console.error('[attendanceService] fetchMyTodayAttendance (today query) error:', todayError);
-    return { data: null, error: todayError };
-  }
-
-  if (todayData && typeof todayData.session_logs_data === 'string') {
-    try { todayData.session_logs_data = JSON.parse(todayData.session_logs_data); }
-    catch (e) { todayData.session_logs_data = []; }
-  }
-
-  if (todayData) {
-    return { data: todayData, error: null };
-  }
-
-  // -------------------------------------------------------------------------
-  // Step 2 — Query C: Fallback for inconsistent row state (B1 scenario).
-  // Finds any recent closed rows and checks session_logs_data client-side.
-  // -------------------------------------------------------------------------
-  const { data: fallbackRows } = await supabase
+  const { data: recentRecords, error: recentError } = await supabase
     .from('daily_attendances')
     .select(SHARED_SELECT)
     .eq('employee_id', profile.employee_id)
     .gte('shift_date', threeDaysAgo)
-    .not('logout_time', 'is', null)
-    .order('shift_date', { ascending: false })
-    .limit(5);
+    .order('shift_date', { ascending: false });
 
-  if (fallbackRows?.length > 0) {
-    const inconsistentRecord = fallbackRows.find(r => {
-      let sessions = r.session_logs_data || [];
-      if (typeof sessions === 'string') { try { sessions = JSON.parse(sessions); } catch { sessions = []; } }
-      return sessions.some(s => s.logout_time === null || s.logout_time === 'null');
-    });
-    if (inconsistentRecord) {
-      if (typeof inconsistentRecord.session_logs_data === 'string') {
-        try { inconsistentRecord.session_logs_data = JSON.parse(inconsistentRecord.session_logs_data); }
-        catch { inconsistentRecord.session_logs_data = []; }
-      }
-      return { data: inconsistentRecord, error: null };
-    }
+  if (recentError) {
+    console.error('[attendanceService] fetchMyTodayAttendance error:', recentError);
+    return { data: null, error: recentError };
   }
 
+  if (!recentRecords || recentRecords.length === 0) {
+    return { data: null, error: null };
+  }
+
+  // Helper to safely parse session logs
+  const parseSessions = (record) => {
+    let sessions = record.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch (e) { sessions = []; }
+    }
+    return sessions;
+  };
+
+  // 1. Prioritize ANY record in the last 3 days that has an open session
+  const openRecord = recentRecords.find(record => {
+    const sessions = parseSessions(record);
+    return sessions.some(s => s.logout_time === null || s.logout_time === 'null');
+  });
+
+  if (openRecord) {
+    openRecord.session_logs_data = parseSessions(openRecord);
+    return { data: openRecord, error: null };
+  }
+
+  // 2. Fallback to today's completed record (if it exists)
+  const todayRecord = recentRecords.find(r => r.shift_date === today);
+  if (todayRecord) {
+    todayRecord.session_logs_data = parseSessions(todayRecord);
+    return { data: todayRecord, error: null };
+  }
+
+  // 3. No open shift, and no shift today
   return { data: null, error: null };
 }
 

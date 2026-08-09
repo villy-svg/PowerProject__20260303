@@ -93,8 +93,9 @@ const ShiftTypeIndicator = ({ value }) => (
 // ---------------------------------------------------------------------------
 const ActiveSessionCard = ({ record }) => {
   const sessions = record?.session_logs_data || [];
-  // Find the open session (the one with no logout_time)
-  const activeSession = sessions.find(s => s.logout_time === null);
+  // Find the open session (the one with no logout_time).
+  // Also handle the 'null' string case from Capacitor/Android native HTTP.
+  const activeSession = sessions.find(s => s.logout_time === null || s.logout_time === 'null');
   const loginTime = activeSession?.login_time
     ? new Date(activeSession.login_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     : '—';
@@ -104,9 +105,11 @@ const ActiveSessionCard = ({ record }) => {
   useEffect(() => {
     let isMounted = true;
     const fetchHubName = async () => {
-      if (record?.employees?.hubs?.name) {
-        if (isMounted) setHubName(record.employees.hubs.name);
-      } else if (activeSession?.hub_id) {
+      // ALWAYS prioritize the session's actual check-in hub_id.
+      // The employee profile hub (record.employees.hubs) is their DEFAULT hub
+      // (e.g. "ALL" for a master admin), NOT necessarily the hub they checked
+      // into. The session's hub_id is the only reliable source of truth.
+      if (activeSession?.hub_id) {
         const { data: hubData } = await supabase
           .from('hubs')
           .select('name')
@@ -117,6 +120,9 @@ const ActiveSessionCard = ({ record }) => {
         } else if (isMounted) {
           setHubName('Unknown Hub');
         }
+      } else if (record?.employees?.hubs?.name) {
+        // Fallback: session has no hub_id — use employee's profile hub
+        if (isMounted) setHubName(record.employees.hubs.name);
       } else {
         if (isMounted) setHubName('Unknown Hub');
       }
@@ -225,6 +231,17 @@ const CurrentAttendanceTab = ({ user }) => {
             {isActing ? 'Logging Out…' : '👋 End Shift'}
           </button>
         </>
+      ) : (error && !todayRecord) ? (
+        /* State 3: Network Error preventing load — show Retry instead of Start Shift */
+        <div className="self-service__form" style={{ textAlign: 'center', padding: '2rem' }}>
+          <button
+            className="halo-button self-service__action-btn"
+            onClick={loadTodayRecord}
+            disabled={isLoading}
+          >
+            Retry Loading Status
+          </button>
+        </div>
       ) : (
         /* State 1: No active session — show check-in form */
         <form
