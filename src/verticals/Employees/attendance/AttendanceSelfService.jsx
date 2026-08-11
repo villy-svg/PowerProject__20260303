@@ -39,10 +39,13 @@ const HubSelector = ({ selectedHubId, onSelect }) => {
 
   useEffect(() => {
     const fetchHubs = async () => {
+      // BUG-6 fix: exclude aggregate hubs (ALL, MULTI) — employees cannot
+      // physically check in at an aggregate hub.
       const { data } = await supabase
         .from('hubs')
         .select('id, name, hub_code')
         .eq('status', 'active')
+        .not('hub_code', 'in', '(ALL,MULTI)')
         .order('name');
       setHubs(data || []);
       setLoading(false);
@@ -184,6 +187,7 @@ const CurrentAttendanceTab = ({ user }) => {
     handleCheckIn,
     handleCheckOut,
     clearSuccessData,
+    loadTodayRecord, // BUG-3 fix: was missing — caused ReferenceError on Retry button
   } = useAttendanceSelfService(user?.id);
 
   // Receipt screen routing: show receipt after successful check-in/out
