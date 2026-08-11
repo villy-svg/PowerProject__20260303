@@ -5,3 +5,22 @@ git push origin main
 #npm run build
 git pull origin main 
 git checkout staging
+
+
+git add .
+git commit -m "260810 Attendance V2 - hardened RPCs, night shift < 5AM, 7 bug fixes"
+git push origin main
+
+# 1. Commit your changes to staging FIRST
+git add .
+git commit -m "260810 1.0.0 Attendance V2 - hardened RPCs, night shift < 5AM, 7 bug fixes"
+git push origin staging          # triggers DB deploy to staging (optional but recommended)
+
+# 2. Then merge to main
+git checkout main
+git merge staging
+git push origin main             # triggers DB deploy to prod
+
+# 3. Go back to staging for future work
+git pull origin main             # (optional — syncs local main with remote, harmless)
+git checkout staging
