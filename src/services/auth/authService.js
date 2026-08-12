@@ -1,3 +1,4 @@
+// @prod-critical
 /**
  * Auth Service
  * Wraps all Supabase authentication calls.

@@ -1,3 +1,4 @@
+// @prod-critical
 /**
  * AuthContext.jsx
  * Provides authentication state and identity management to the entire app.

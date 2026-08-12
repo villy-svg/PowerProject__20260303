@@ -1,3 +1,4 @@
+// @prod-critical
 import { useMemo } from 'react';
 import { getPermissionsForLevel, getMinLevel } from '../constants/roles';
  import { hierarchyService } from '../services/rules/hierarchyService';

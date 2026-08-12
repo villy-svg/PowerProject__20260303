@@ -1,3 +1,4 @@
+// @prod-critical
 /**
  * Profile Service
  * Handles all user profile and RBAC permission fetching from Supabase.

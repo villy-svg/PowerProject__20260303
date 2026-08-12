@@ -1,3 +1,4 @@
+// @prod-critical
 import { supabase } from '../core/supabaseClient';
 
 /**

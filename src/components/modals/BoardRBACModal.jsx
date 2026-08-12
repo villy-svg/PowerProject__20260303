@@ -1,3 +1,4 @@
+// @prod-critical
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { supabase } from '../../services/core/supabaseClient';

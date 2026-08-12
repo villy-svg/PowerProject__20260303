@@ -1,3 +1,4 @@
+// @prod-critical
 import React from 'react';
 import powerLogo from '../../assets/logo.svg';
 import './PendingActivation.css';

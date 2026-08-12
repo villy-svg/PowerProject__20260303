@@ -1,3 +1,4 @@
+// @prod-critical
 import React, { useState, useRef } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import powerLogo from '../../assets/logo.svg';

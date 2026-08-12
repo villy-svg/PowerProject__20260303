@@ -1,3 +1,4 @@
+// @prod-critical
 import React, { useState } from 'react';
 import BoardRBACModal from '../modals/BoardRBACModal';
 import './RBACManageButton.css';
