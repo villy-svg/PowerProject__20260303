@@ -21,7 +21,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
   const ToggleStatusBtn = ({ user }) =>
     user.is_active !== false ? (
       <button
-        className="icon-btn deactivate-btn"
+        className="icon-btn icon-btn--danger"
         onClick={() => onDeactivate && onDeactivate(user.id)}
         title="Deactivate this user — removes all access"
       >
@@ -29,7 +29,7 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
       </button>
     ) : (
       <button
-        className="icon-btn reactivate-btn"
+        className="icon-btn icon-btn--success"
         onClick={() => onReactivate && onReactivate(user.id)}
         title="Reactivate this user — restores base access only"
       >

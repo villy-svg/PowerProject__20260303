@@ -84,17 +84,17 @@ const UserEditorModal = (props) => {
             {/* 1. Scope Selection */}
             <div className="form-section">
               <label className="section-label">1. Select Access Scope</label>
-              <div className="scope-options">
+              <div className="config-options">
                 {ROLE_SCOPES.map(scope => (
                   <div 
                     key={scope.id} 
-                    className={`scope-card ${roleScope === scope.id ? 'active' : ''}`}
+                    className={`config-card ${roleScope === scope.id ? 'active' : ''}`}
                     onClick={() => setRoleScope(scope.id)}
                   >
                     <div className="radio-circle"></div>
-                    <div className="scope-info">
-                      <span className="scope-name">{scope.label}</span>
-                      <span className="scope-desc">{scope.description}</span>
+                    <div className="config-info">
+                      <span className="config-name">{scope.label}</span>
+                      <span className="config-desc">{scope.description}</span>
                     </div>
                   </div>
                 ))}
@@ -104,17 +104,17 @@ const UserEditorModal = (props) => {
             {/* 2. Capability Level Selection */}
             <div className="form-section">
               <label className="section-label">2. Select Capability Level</label>
-              <div className="level-options">
+              <div className="config-options">
                 {ROLE_LEVELS.map(level => (
                   <div 
                     key={level.id} 
-                    className={`level-card ${roleLevel === level.id ? 'active' : ''}`}
+                    className={`config-card ${roleLevel === level.id ? 'active' : ''}`}
                     onClick={() => onLevelChange(level.id)}
                   >
                     <div className="radio-circle"></div>
-                    <div className="level-info">
-                      <span className="level-name">{level.label}</span>
-                      <span className="level-desc">{level.description}</span>
+                    <div className="config-info">
+                      <span className="config-name">{level.label}</span>
+                      <span className="config-desc">{level.description}</span>
                     </div>
                   </div>
                 ))}

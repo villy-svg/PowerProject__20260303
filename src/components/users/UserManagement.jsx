@@ -58,6 +58,75 @@ const MassSyncProgressModal = ({ status, onClose }) => {
     </div>
   );
 };
+/**
+ * CATEGORY METADATA
+ * Defines display label, description, and semantic color token per lifecycle category.
+ * colorToken maps to CSS modifier classes in UserManagement.css.
+ */
+const CATEGORY_ORDER = ['unactivated', 'unlinked', 'active', 'inactive'];
+const CATEGORY_META = {
+  unactivated: {
+    label: 'Pending Activation',
+    description: 'Employee is active but user account has not yet been activated.',
+    colorToken: 'warning',
+  },
+  unlinked: {
+    label: 'Unlinked Users',
+    description: 'No employee record is linked to this account.',
+    colorToken: 'neutral',
+  },
+  active: {
+    label: 'Active Users',
+    description: 'Fully active accounts with verified employee records.',
+    colorToken: 'success',
+  },
+  inactive: {
+    label: 'Inactive Users',
+    description: 'Deactivated accounts, or accounts linked to an inactive employee.',
+    colorToken: 'danger',
+  },
+};
+
+/**
+ * UserCategorySection — Presentational component
+ * Renders a single lifecycle category block with a header and nested role sub-groups.
+ * Extracted to keep UserManagement.jsx modular (avoids God Component violation).
+ */
+const UserCategorySection = ({ categoryKey, roleGroups, viewMode, onEdit, onDeactivate, onReactivate }) => {
+  const meta = CATEGORY_META[categoryKey];
+  const totalCount = Object.values(roleGroups).reduce((sum, arr) => sum + arr.length, 0);
+
+  if (totalCount === 0) return null;
+
+  return (
+    <div className={`user-category-section user-category-section--${meta.colorToken}`}>
+      <div className="user-category-header">
+        <div className="user-category-header-left">
+          <span className="user-category-label">{meta.label}</span>
+          <span className="user-category-desc">{meta.description}</span>
+        </div>
+        <span className={`user-category-badge user-category-badge--${meta.colorToken}`}>{totalCount}</span>
+      </div>
+
+      {/* Role sub-groups within this category */}
+      {Object.entries(roleGroups).map(([roleLabel, groupUsers]) => (
+        <div key={roleLabel} className="user-role-group">
+          <div className="user-role-group-header">
+            <span className="user-role-group-label">{roleLabel}</span>
+            <span className="user-role-group-count">{groupUsers.length}</span>
+          </div>
+          <UserList
+            users={groupUsers}
+            viewMode={viewMode}
+            onEdit={onEdit}
+            onDeactivate={onDeactivate}
+            onReactivate={onReactivate}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 /**
  * UserManagement Component
@@ -106,31 +175,61 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
   const presetUsers = users.filter(u => u.email?.endsWith(PRESET_EMAIL_SUFFIX));
   const displayedUsers = profileMode === 'preset' ? presetUsers : actualUsers;
 
-  // Group displayed users by employee role name (or a fallback bucket)
-  const groupUsersByRole = (userList) => {
-    const groups = {};
-    userList.forEach(u => {
-      const emp = u.linkedEmployee;
-      // Try to get a human-readable role name from the employee record
-      let roleCode = null;
-      if (emp?.employee_roles) {
-        if (Array.isArray(emp.employee_roles)) {
-          roleCode = emp.employee_roles[0]?.role_code;
-        } else {
-          roleCode = emp.employee_roles.role_code;
-        }
-      }
-      
-      const roleLabel = roleCode
-        ? roleCode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-        : 'Unlinked / No Employee Profile';
-      if (!groups[roleLabel]) groups[roleLabel] = [];
-      groups[roleLabel].push(u);
-    });
-    return groups;
+  // ─── Categorize & Group ─────────────────────────────────────────────────
+  // Step 1: Classify each user into one of 4 lifecycle categories via a
+  // strict priority waterfall (first match wins — categories are mutually exclusive).
+  //
+  //   Unlinked    → no linkedEmployee at all (checked first to guard .status access)
+  //   Inactive    → employee exists but status = 'Inactive'
+  //   Unactivated → employee active, but user.is_active = false
+  //   Active      → employee active AND user.is_active = true
+  //
+  // Step 2: Within each category, sub-group by human-readable employee role name.
+  const getRoleLabel = (u) => {
+    const emp = u.linkedEmployee;
+    if (!emp) return 'No Employee Profile';
+    let roleCode = null;
+    if (emp.employee_roles) {
+      roleCode = Array.isArray(emp.employee_roles)
+        ? emp.employee_roles[0]?.role_code
+        : emp.employee_roles.role_code;
+    }
+    return roleCode
+      ? roleCode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : 'Unknown Role';
   };
 
-  const userGroups = groupUsersByRole(displayedUsers);
+  const categorizeAndGroup = (userList) => {
+    // Initialise all 4 buckets so they always exist in the result
+    const buckets = { unactivated: {}, unlinked: {}, active: {}, inactive: {} };
+
+    userList.forEach(u => {
+      // Waterfall — order matters
+      let category;
+      if (!u.linkedEmployee) {
+        category = 'unlinked';
+      } else if (u.linkedEmployee.status === 'Inactive') {
+        category = 'inactive';
+      } else if (u.is_active === false) {
+        category = 'unactivated';
+      } else {
+        category = 'active';
+      }
+
+      const roleLabel = getRoleLabel(u);
+      if (!buckets[category][roleLabel]) buckets[category][roleLabel] = [];
+      buckets[category][roleLabel].push(u);
+    });
+
+    return buckets;
+  };
+
+  const userCategories = categorizeAndGroup(displayedUsers);
+
+  // Is every category empty? (Used for the empty-state guard below)
+  const allEmpty = CATEGORY_ORDER.every(
+    key => Object.keys(userCategories[key]).length === 0
+  );
 
   const handleCreatePreset = async (name) => {
     setIsPresetModalOpen(false);
@@ -230,24 +329,21 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
         </div>
       )}
 
-      {/* Grouped user list */}
-      {Object.entries(userGroups).map(([roleLabel, groupUsers]) => (
-        <div key={roleLabel} className="user-role-group">
-          <div className="user-role-group-header">
-            <span className="user-role-group-label">{roleLabel}</span>
-            <span className="user-role-group-count">{groupUsers.length}</span>
-          </div>
-          <UserList
-            users={groupUsers}
-            viewMode={viewMode}
-            onEdit={openEditor}
-            onDeactivate={handleDeactivate}
-            onReactivate={handleReactivate}
-          />
-        </div>
+      {/* Lifecycle category sections — rendered in prescribed order */}
+      {CATEGORY_ORDER.map(categoryKey => (
+        <UserCategorySection
+          key={categoryKey}
+          categoryKey={categoryKey}
+          roleGroups={userCategories[categoryKey]}
+          viewMode={viewMode}
+          onEdit={openEditor}
+          onDeactivate={handleDeactivate}
+          onReactivate={handleReactivate}
+        />
       ))}
 
-      {displayedUsers.length === 0 && !loading && (
+      {/* Empty state — shown only when all category buckets are empty */}
+      {allEmpty && !loading && (
         <div className="empty-state user-management__empty-state">
           {profileMode === 'preset'
             ? 'No preset profiles yet. Click "+ Preset" to create one.'

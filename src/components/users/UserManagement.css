@@ -1,5 +1,87 @@
 /* UserManagement styles */
 @import '../../styles/DropdownSystem.css';
+/* ── Lifecycle Category Sections ─────────────────────────────── */
+
+/*
+  Each category section wraps multiple role sub-groups.
+  A left border accent (using semantic color tokens) visually separates
+  lifecycle stages without relying on background fills, per the design system's
+  Border Minimalism principle (§15.C).
+*/
+.user-category-section {
+  margin-bottom: 36px;
+}
+
+.user-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-category-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.user-category-label {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-color);
+}
+
+.user-category-desc {
+  font-size: 11px;
+  opacity: 0.45;
+  color: var(--text-color);
+}
+
+/* Count badge — semantic color per category */
+.user-category-badge {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 2px 10px;
+  min-width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Semantic color modifiers — mapped from CATEGORY_META colorToken */
+.user-category-section--warning .user-category-label { color: var(--status-warning, var(--brand-amber)); }
+.user-category-badge--warning {
+  background: color-mix(in srgb, var(--status-warning, var(--brand-amber)), transparent 85%);
+  color: var(--status-warning, var(--brand-amber));
+  border: 1px solid color-mix(in srgb, var(--status-warning, var(--brand-amber)), transparent 65%);
+}
+
+.user-category-section--neutral .user-category-label { color: var(--text-color); opacity: 0.6; }
+.user-category-badge--neutral {
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.user-category-section--success .user-category-label { color: var(--status-success, var(--badge-green-text)); }
+.user-category-badge--success {
+  background: color-mix(in srgb, var(--status-success, var(--badge-green-text)), transparent 85%);
+  color: var(--status-success, var(--badge-green-text));
+  border: 1px solid color-mix(in srgb, var(--status-success, var(--badge-green-text)), transparent 65%);
+}
+
+.user-category-section--danger .user-category-label { color: var(--status-danger, var(--badge-red-text)); }
+.user-category-badge--danger {
+  background: color-mix(in srgb, var(--status-danger, var(--badge-red-text)), transparent 85%);
+  color: var(--status-danger, var(--badge-red-text));
+  border: 1px solid color-mix(in srgb, var(--status-danger, var(--badge-red-text)), transparent 65%);
+}
 
 /* ── Role Grouping ─────────────────────────────── */
 .user-role-group {
@@ -80,9 +162,6 @@
   font-size: 13px;
   opacity: 0.5;
 }
-.role-badge.master_admin { background: color-mix(in srgb, var(--brand-amber), transparent 80%); color: var(--brand-amber); }
-.role-badge.vertical_admin { background: color-mix(in srgb, var(--brand-blue), transparent 80%); color: var(--brand-blue); }
-.role-badge.master_viewer { background: color-mix(in srgb, #9b59b2, transparent 80%); color: #9b59b2; }
 .vertical-tags {
   display: flex;
   flex-wrap: wrap;
@@ -162,26 +241,6 @@
   font-size: 14px;
   opacity: 0.8;
 }
-.form-section select {
-  padding: 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color); /* Matches modal background */
-  color: var(--text-color);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  appearance: none; /* Removes default styling */
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-}
-.form-section select option {
-  background: var(--bg-color);
-  color: var(--text-color);
-  padding: 10px;
-}
 .vertical-selection-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -238,8 +297,8 @@
   justify-content: space-between;
   align-items: center;
 }
-.status-banner.success { background: color-mix(in srgb, var(--brand-emerald), transparent 85%); color: var(--brand-emerald); }
-.status-banner.error { background: color-mix(in srgb, var(--priority-urgent), transparent 85%); color: var(--priority-urgent); }
+.status-banner.success { background: color-mix(in srgb, var(--status-success, var(--badge-green-text)), transparent 85%); color: var(--status-success, var(--badge-green-text)); }
+.status-banner.error { background: color-mix(in srgb, var(--status-danger, var(--priority-urgent)), transparent 85%); color: var(--status-danger, var(--priority-urgent)); }
 /* 2D Role Selection UI */
 .user-role-modal {
   max-width: 600px; /* Slightly wider to accommodate grid */
@@ -259,12 +318,12 @@
   margin-bottom: 12px;
   opacity: 0.6;
 }
-.scope-options, .level-options {
+.scope-options, .level-options, .config-options {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.scope-card, .level-card {
+.config-card {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -275,11 +334,11 @@
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.scope-card:hover, .level-card:hover {
+.config-card:hover {
   background: color-mix(in srgb, var(--text-color), transparent 94%);
   border-color: color-mix(in srgb, var(--text-color), transparent 70%);
 }
-.scope-card.active, .level-card.active {
+.config-card.active {
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
   border-color: var(--brand-green);
   box-shadow: 0 0 15px color-mix(in srgb, var(--brand-green), transparent 85%);
@@ -293,28 +352,26 @@
   position: relative;
   transition: all 0.2s;
 }
-.scope-card.active .radio-circle,
-.level-card.active .radio-circle {
+.config-card.active .radio-circle {
   border-color: var(--brand-green);
 }
-.scope-card.active .radio-circle::after,
-.level-card.active .radio-circle::after {
+.config-card.active .radio-circle::after {
   content: '';
   position: absolute;
   top: 3px; left: 3px; right: 3px; bottom: 3px;
   background: var(--brand-green);
   border-radius: 50%;
 }
-.scope-info, .level-info {
+.config-info {
   display: flex;
   flex-direction: column;
 }
-.scope-name, .level-name {
+.config-name {
   font-weight: 700;
   font-size: 14px;
   color: var(--text-color);
 }
-.scope-desc, .level-desc {
+.config-desc {
   font-size: 11px;
   opacity: 0.5;
   line-height: 1.3;
@@ -704,44 +761,21 @@
   gap: 6px;
 }
 
-/* Deactivate button — warning tone (muted by default to reduce cognitive load) */
-.user-row-actions .deactivate-btn,
-.user-card-actions .deactivate-btn {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
+/* Modifiers for global .icon-btn layout */
+.icon-btn--danger {
   color: var(--text-color);
   opacity: 0.6;
-  border-radius: 8px;
-  transition: all 0.2s ease;
 }
-.user-row-actions .deactivate-btn:hover,
-.user-card-actions .deactivate-btn:hover {
+.icon-btn--danger:hover {
   color: var(--badge-red-text);
   opacity: 1;
   transform: translateY(-1px);
 }
 
-/* Reactivate button — muted green tone */
-.user-row-actions .reactivate-btn,
-.user-card-actions .reactivate-btn {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
+.icon-btn--success {
   color: var(--badge-green-text);
-  border-radius: 8px;
-  transition: all 0.2s ease;
 }
-.user-row-actions .reactivate-btn:hover,
-.user-card-actions .reactivate-btn:hover {
+.icon-btn--success:hover {
   transform: translateY(-1px);
 }
 
