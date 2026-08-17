@@ -46,13 +46,13 @@ const CentralisedTaskBoard = ({
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   
-  const assignedTasks = tasks.filter(t => taskUtils.isAssignee(t, user));
+  const assignedTasks = tasks.filter(t => taskUtils.isAssignee(t, user) || taskUtils.isCreator(t, user));
   const myTasks = assignedTasks.filter(t => {
     let current = t;
     while (current.parentTask) {
       const parent = tasks.find(pt => pt.id === current.parentTask);
       if (!parent) break;
-      if (taskUtils.isAssignee(parent, user)) {
+      if (taskUtils.isAssignee(parent, user) || taskUtils.isCreator(parent, user)) {
         return false;
       }
       current = parent;

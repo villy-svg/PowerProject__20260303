@@ -4,7 +4,8 @@ import { supabase } from '../../services/core/supabaseClient';
 import './EmployeeForm.css';
 import { BasicDetailsSection, CompanyDetailsSection, BankDetailsSection } from './EmployeeFormSections';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
-import { getEmployeeSubmissions, submitProofOfWork } from '../../services/tasks/submissionService';
+import { getEmployeeSubmissions, submitProofOfWork, updateSubmissionLinks, deleteSubmission } from '../../services/tasks/submissionService';
+import { IconX } from '../../components/ui/Icons';
 
 /**
  * EmployeeForm
@@ -12,7 +13,7 @@ import { getEmployeeSubmissions, submitProofOfWork } from '../../services/tasks/
  * Form for adding or editing employee records.
  * Features a 4-page wizard flow with View-Only support.
  */
-const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false, allowDocumentUpload = false, disableBankDetails = false, initialPage = 1 }) => {
+const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnly = false, requiresBankApproval = false, allowDocumentUpload = false, disableBankDetails = false, initialPage = 1, user }) => {
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [hubs, setHubs] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -218,6 +219,27 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
     }
   };
 
+  const handleDeleteDocument = async (submissionId, linkIndex, linksCount) => {
+    if (!window.confirm("Are you sure you want to permanently delete this document?")) return;
+    try {
+      if (linksCount <= 1) {
+        // Last link — delete the whole submission row
+        await deleteSubmission(submissionId);
+      } else {
+        // More links remain — splice just this one
+        const submission = submissions.find(s => s.id === submissionId);
+        if (!submission) return;
+        const updatedLinks = submission.links.filter((_, i) => i !== linkIndex);
+        await updateSubmissionLinks(submissionId, updatedLinks);
+      }
+      // Refresh
+      const docs = await getEmployeeSubmissions(initialData.id);
+      setSubmissions(docs);
+    } catch (err) {
+      alert(`Delete failed: ${err.message}`);
+    }
+  };
+
   return (
     <form className={`employee-form multi-page-flow ${isViewOnly ? 'view-only-mode' : ''}`} onSubmit={currentPage === 4 ? handleSubmit : handleNext}>
       <div className="task-form-tabs wizard-tabs">
@@ -330,6 +352,20 @@ const EmployeeForm = ({ onSubmit, onCancel, loading, initialData = {}, isViewOnl
                           {submissions.flatMap((sub) => 
                             (sub.links || []).map((link, idx) => (
                               <div key={`${sub.id}-${idx}`} className="doc-card">
+                                {user?.roleId === 'master_admin' && (
+                                  <button
+                                    type="button"
+                                    className="delete-doc-btn"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleDeleteDocument(sub.id, idx, sub.links?.length ?? 1);
+                                    }}
+                                    title="Delete Document"
+                                    aria-label="Delete document"
+                                  >
+                                    <IconX size={12} />
+                                  </button>
+                                )}
                                 <div className="doc-preview">
                                   {link.mime_type?.startsWith('image/') ? (
                                     <img src={link.url} alt={link.file_name} className="doc-thumbnail" />

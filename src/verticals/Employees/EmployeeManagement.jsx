@@ -571,6 +571,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           requiresBankApproval={user?.roleId !== 'master_admin' && !!ui.editingItem}
           allowDocumentUpload={permissions?.canCreate || permissions?.canUpdate}
           disableBankDetails={!permissions?.canUpdate && !!ui.editingItem}
+          user={user}
           initialData={ui.editingItem ? {
             id: ui.editingItem.id,
             name: ui.editingItem.full_name,

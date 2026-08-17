@@ -239,3 +239,15 @@ export const updateSubmissionStatus = async (submissionId, newStatus, rejectionR
   if (error) throw new Error(`Status update failed: ${error.message}`);
   return data;
 };
+
+/**
+ * Deletes an entire submission row (used after last link is removed).
+ * RLS enforces admin-only access at the DB layer.
+ */
+export const deleteSubmission = async (submissionId) => {
+  const { error } = await supabase
+    .from('submissions')
+    .delete()
+    .eq('id', submissionId);
+  if (error) throw new Error(`Delete submission failed: ${error.message}`);
+};
