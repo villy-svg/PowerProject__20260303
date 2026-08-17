@@ -1,29 +1,11 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../app/contexts/AuthContext';
-import { taskService } from '../../services/tasks/taskService';
-import { employeeService } from '../../services/employees/employeeService';
-import { IconCheck, IconX } from '../../components/ui/Icons';
+import React from 'react';
 
 /**
  * EmployeeTaskTile
  * Custom metadata injected into the master TaskCard for the Employee Manager.
  */
 const EmployeeTaskTile = ({ task }) => {
-  const { user } = useAuth();
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  let payload = null;
-  if (task.description) {
-    try {
-      payload = JSON.parse(task.description);
-    } catch (e) {
-      console.error("Failed to parse task payload:", e);
-    }
-  }
-
-
-
-  if (!task.description && !task.city) return null;
+  if (!task.city && !task.function) return null;
 
   return (
     <div className="hub-tile-meta">

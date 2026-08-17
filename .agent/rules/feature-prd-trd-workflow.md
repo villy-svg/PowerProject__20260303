@@ -23,14 +23,25 @@ formalized planning phase before any feature work begins. The goal is to:
 
 You MUST activate this workflow when the user says ANY of the following (or similar):
 
+**New Feature Triggers:**
 - "Let's build X"
 - "Add a feature that does Y"
 - "I want to create Z"
-- "Refactor A to work like B"
-- "Let's overhaul / redesign / restructure..."
 - "Can we add X to the database?"
 - "Let's add a new page / board / view"
+
+**Refactor / Architectural Triggers:**
+- "Refactor A to work like B"
+- "Let's overhaul / redesign / restructure..."
 - "Can we change how X logic works?"
+- "Let's rethink the approach for..."
+
+**Amendment Triggers (for already-implemented features):**
+- "Let's update / improve / fix [a feature that already exists]"
+- "The way [existing feature] works needs to change..."
+- "Can we extend [existing feature] to also do Y?"
+- For amendments: Do NOT create a new document. Read the existing `docs/features/<feature>.md`
+  and follow the Amendment Protocol in the Feature Planning Workflow skill.
 
 You do NOT need to activate this workflow for:
 
@@ -53,10 +64,21 @@ Immediately upon receiving a qualifying request, STOP. Output this acknowledgmen
 > review and agree on. This ensures we surface all dependencies, debate the options, and
 > only build what we've explicitly agreed upon."
 
-### STEP 2: Research the Existing Codebase
+### STEP 2: Check the Feature Registry (Conflict Detection)
 
-Before writing anything, scan the relevant parts of the codebase to understand the current
-state. Do this by:
+Before researching the codebase, open `docs/features/README.md` — the Feature Registry.
+
+- Scan the Feature Index table for any `Draft`, `In Review`, or `Approved` feature that
+  touches the same Supabase tables or React components as this new request.
+- If a conflict is found, alert the user immediately and resolve sequencing before
+  continuing. See the Feature Planning Workflow skill for the exact conflict protocol.
+- If this is an amendment to an existing feature (status = `Implemented`), do NOT create
+  a new document. Find the existing `docs/features/<feature_name>.md` and follow the
+  Amendment Protocol.
+
+### STEP 3: Research the Existing Codebase
+
+Scan the relevant parts of the codebase to understand the current state. Do this by:
 
 - Reading the relevant feature directory (e.g., `src/features/<FeatureName>/`)
 - Checking the Supabase schema for related tables (reference `db_types.ts` at project root)
@@ -64,7 +86,7 @@ state. Do this by:
 - Identifying which RBAC roles and `get_user_permission_level` policies apply
 - Identifying which UI shells are involved (DesktopLayout vs MobileLayout)
 
-### STEP 3: Create the PRD/TRD Document
+### STEP 4: Create the PRD/TRD Document
 
 Create a new markdown file at: `docs/features/<feature_name>.md`
 
@@ -80,6 +102,10 @@ section (e.g., `## Update: 2026-08-12`) rather than replacing it.
 Copy the exact structure from `docs/features/_template.md` and fill in **all** sections.
 Do not skip sections. If a section is genuinely not applicable, write "N/A — [brief reason]"
 so future readers understand why it was skipped.
+
+**Immediately after creating the file,** add a row to `docs/features/README.md` (the
+Feature Registry) with the feature name, status (`Draft`), today's date, the tables and
+components you identified in your research, and your session identifier.
 
 ### STEP 4: Fill In All Phases
 
@@ -150,7 +176,7 @@ A pre-mortem. Think about what can go wrong BEFORE we build it.
     `supabase db reset` on staging, then deploy previous app version via OTA.")
   - Is the change reversible without data loss?
 
-### STEP 5: Present for Debate
+### STEP 6: Iterate Until Approved
 
 After filling in all phases, present the document to the user. State explicitly:
 
@@ -161,7 +187,7 @@ After filling in all phases, present the document to the user. State explicitly:
 Point out any open questions by listing them clearly. Do NOT ask more than 3–4 questions
 at a time. Wait for the user's response before proceeding.
 
-### STEP 6: Iterate Until Approved
+### STEP 7: Iterate Until Approved
 
 Update the document based on user feedback. Change the status at the top of the document:
 
@@ -171,13 +197,14 @@ Update the document based on user feedback. Change the status at the top of the 
 
 **You MUST NOT proceed to execution until the status is `Approved`.**
 
-### STEP 7: Execute Against the Document
+### STEP 8: Execute Against the Document
 
 Once approved:
 - Implement exactly what is described in the document. If you discover a technical blocker
   that requires deviating from the plan, STOP and update the document before continuing.
 - After execution, update the document's status to `Implemented` and add a brief
   `## Implementation Notes` section with any relevant deviations or discoveries.
+- Update `docs/features/README.md` to reflect the new `Implemented` status.
 
 ---
 
@@ -188,7 +215,10 @@ Once approved:
 - **NEVER** skip Phase 1. Hidden dependencies are the #1 cause of production regressions.
 - **NEVER** replace an existing `docs/features/` document without first reading it.
   Historical decisions must be preserved or explicitly overridden with a reason.
+- **NEVER** skip the Conflict Detection step (reading `docs/features/README.md`).
+  Two features touching the same table without coordination is a data integrity risk.
 - **ALWAYS** reference the `docs/features/_template.md` file for the canonical structure.
+- **ALWAYS** update `docs/features/README.md` when a document is created or its status changes.
 
 ---
 

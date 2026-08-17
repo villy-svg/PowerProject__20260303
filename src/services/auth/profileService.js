@@ -197,6 +197,7 @@ export const profileService = {
     return {
       id: profile.id,
       name: profile.name || 'User',
+      needsNameSetup: !profile.name, // true when registered without a name — triggers ProfileNameSetup gate
       email: profile.email,
       role: profile.role_id,
       roleId: profile.role_id,

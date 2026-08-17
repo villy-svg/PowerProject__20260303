@@ -33,63 +33,44 @@ const Login = () => {
       return;
     }
 
-    if (isRegistering && !name) {
-      setMessage({ type: 'error', text: 'Please enter your name to register.' });
-      return;
-    }
-
     setLoading(true);
     setMessage({ type: '', text: '' });
 
     if (isRegistering) {
-      // Try to sign in WITHOUT creating a user to see if they already exist
-      const { error: existingCheckError } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: false }
-      });
-
-      if (!existingCheckError) {
-        // Success! User already exists, OTP was sent for login.
-        setIsRegistering(false);
-        setMessage({ type: 'success', text: 'Account found! We sent an OTP to sign you in.' });
-        setStep(2);
-        setLoading(false);
-        return;
-      }
-
-      if (existingCheckError && !existingCheckError.message.includes('Signups not allowed')) {
-        // It's a real error (like rate limit), so show it and abort
-        setMessage({ type: 'error', text: existingCheckError.message });
-        setLoading(false);
-        return;
-      }
-
-      // User does not exist, so register them
+      // FIX: Single API call. Supabase handles existing vs new users natively (upsert).
+      // - If user is NEW: Supabase creates the account and sends an OTP.
+      // - If user ALREADY EXISTS: Supabase skips creation, ignores the `name` payload,
+      //   and sends a standard sign-in OTP. No error is thrown.
+      // This eliminates the double API call that was causing rate limit hits and
+      // inconsistent email template delivery (Confirm Signup vs Magic Link).
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true,
-          data: { name }
+          data: { name: name || '' }, // Passed for new users; silently ignored for existing ones
         }
       });
 
       if (error) {
         setMessage({ type: 'error', text: error.message });
       } else {
-        setMessage({ type: 'success', text: 'OTP sent! Please check your email to complete registration.' });
+        // FIX: Neutral success message — covers both new registrations and existing users.
+        setMessage({ type: 'success', text: 'OTP sent! Please check your email.' });
         setStep(2);
       }
     } else {
-      // Sign-in flow: prevent creating new accounts silently
+      // Sign-in flow: do not silently create new accounts
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: false }
       });
 
       if (error) {
-        // Friendly error for non-existent users trying to log in
         if (error.message.includes('Signups not allowed')) {
-          setMessage({ type: 'error', text: 'Account not found. Please switch to Register.' });
+          // FIX: Auto-switch to Register tab instead of showing a dead-end error.
+          // The name field will now appear for the user to complete their registration.
+          setIsRegistering(true);
+          setMessage({ type: 'error', text: 'Account not found. Enter your Full Name below to create an account.' });
         } else {
           setMessage({ type: 'error', text: error.message });
         }
@@ -166,13 +147,15 @@ const Login = () => {
             <div className="form-group-stack">
               {isRegistering && (
                 <div className="form-group">
-                  <label>Full Name</label>
+                  {/* FIX: 'required' removed — existing users are handled by Supabase's native upsert
+                      and should not be blocked by a name gate. Name is used for new accounts only. */}
+                  <label>Full Name {name === '' && <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(new accounts)</span>}</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Alex Rivera"
-                    required
+                    autoFocus
                   />
                 </div>
               )}

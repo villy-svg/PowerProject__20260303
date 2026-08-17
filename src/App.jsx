@@ -30,6 +30,7 @@ import { APP_VERSION } from './constants/appVersion';
 import Login from './components/auth/Login';
 import PublicSupportForm from './components/public/PublicSupportForm';
 import PendingActivation from './components/auth/PendingActivation';
+import ProfileNameSetup from './components/auth/ProfileNameSetup';
 import OnlineSyncBanner from './components/ui/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
 import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
@@ -367,6 +368,12 @@ function AppShell({ verticals, verticalList }) {
   // Security gate: Block inactive users from entering the layout or fetching any further workspace data
   if (user.isActive === false) {
     return <PendingActivation onLogout={handleLogout} />;
+  }
+
+  // Profile gate: Block users who registered without a name until they provide one.
+  // Triggered when user_profiles.name is empty (needsNameSetup: true from profileService).
+  if (user.needsNameSetup) {
+    return <ProfileNameSetup />;
   }
 
   // ─── LAYOUT SHELL SWITCHOVER ───────────────────────────────────────

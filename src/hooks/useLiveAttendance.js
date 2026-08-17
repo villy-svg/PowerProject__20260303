@@ -73,6 +73,7 @@ function groupByHub(records, allHubsMap) {
       employeeId:  record.employee_id,
       empCode:     record.employees?.emp_code || '—',
       fullName:    record.employees?.full_name || 'Unknown',
+      phone:       record.employees?.phone || null,
       shiftType:   record.shift_type,
       loginTime,
       hoursWorked,

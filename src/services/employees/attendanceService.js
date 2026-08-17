@@ -351,6 +351,7 @@ export async function fetchLiveAttendance() {
         id,
         full_name,
         emp_code,
+        phone,
         hub_id,
         hubs ( id, name, hub_code )
       )

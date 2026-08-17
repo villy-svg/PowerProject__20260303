@@ -929,6 +929,47 @@
   background: rgba(244, 63, 94, 0.2);
 }
 
+/* Phone / contact link — ghost at rest, visible on row hover */
+.live-attendance__contact-btn {
+  text-decoration: none;
+  color: inherit;
+  line-height: 1;
+  width: calc(1.4rem + 2px);
+  height: calc(1.4rem + 2px);
+  min-width: calc(1.4rem + 2px);
+  min-height: calc(1.4rem + 2px);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.25;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+}
+
+.live-attendance__contact-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.live-attendance__user-row:hover .live-attendance__contact-btn {
+  opacity: 1;
+}
+
+.live-attendance__contact-btn:hover:not(.live-attendance__contact-btn--disabled) {
+  color: var(--brand-green);
+  background: rgba(13, 148, 136, 0.1);
+  transform: scale(1.1);
+}
+
+.live-attendance__contact-btn--disabled {
+  opacity: 0.2 !important;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* --------------------------------------------------------------------------
    SECTION 11: Responsive adjustments for smaller screens
    -------------------------------------------------------------------------- */

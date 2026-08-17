@@ -27,6 +27,7 @@ All PRD/TRD documents live at:
 PowerProject/
 └── docs/
     └── features/
+        ├── README.md             ← Living feature registry & conflict detection index. ALWAYS update this.
         ├── _template.md          ← Master template. Never delete or modify.
         ├── feature_name_a.md     ← One file per feature
         └── feature_name_b.md
@@ -39,6 +40,35 @@ docs/features/<feature_name>.md
 
 If it exists, READ the full document first. Preserve all existing approved decisions.
 Add a new dated section at the bottom (`## Update: YYYY-MM-DD`) rather than overwriting.
+
+---
+
+---
+
+## PRE-STEP: Conflict Detection (MANDATORY Before Creating Any Document)
+
+Before you write a single line of the new PRD/TRD, you MUST open and read
+`docs/features/README.md`. This is the Feature Registry.
+
+**What to look for:**
+1. Scan the "Feature Index" table for any feature with status `Draft`, `In Review`,
+   or `Approved` that touches the same Supabase tables or React components as your
+   new feature.
+2. Also scan the "Deferred Features" table — the user may have already decided not to
+   build something similar. Do not re-plan a deferred feature without flagging it.
+
+**If a conflict is found:**
+- Note the conflict explicitly in Phase 1 (section 1a) of your new document.
+- Alert the user before proceeding:
+  > "⚠️ Conflict Detected: The feature '[X]' (currently '[Status]') also touches
+  > [table/component]. We need to discuss sequencing before I finalize this plan."
+- Do NOT proceed past Phase 1 until the user acknowledges and resolves the conflict.
+
+**If no conflict is found:** Proceed to create the document.
+
+**After creating the document:** Add a row to the Feature Registry in `README.md`.
+Fill in: Feature link, Status (`Draft`), today's date, tables touched, components
+touched, and your session identifier.
 
 ---
 
@@ -321,13 +351,103 @@ Write the exact steps to undo this feature if something breaks in production:
 
 Once the feature is built:
 - Update the document status to `Implemented`
-- Add an `## Implementation Notes` section at the bottom
-- Record any deviations from the plan and why they were made
-- Record any unexpected discoveries made during implementation
-- Record the final migration name (if any) for future reference
+- Update the Feature Registry in `docs/features/README.md` — change the Status column
+  to `Implemented` and update the "Last Updated" date.
+- Add an `## Implementation Notes` section at the bottom of the feature document.
+- Record any deviations from the plan and why they were made.
+- Record any unexpected discoveries made during implementation.
+- Record the final migration name (if any) for future reference.
 
 This document is now a permanent historical record. Future developers and AI models will
 read it to understand WHY a decision was made, not just what was built.
+
+---
+
+## Post-Implementation Review (Triggered 1–2 Weeks After Shipping)
+
+The planning loop is not closed until the success metrics from Phase 0 are validated.
+When the user asks about a feature that has been `Implemented` for some time, or
+explicitly asks "how did X go?", trigger a lightweight Post-Implementation Review:
+
+1. **Re-read Phase 0b (Success Metrics)** from the feature's PRD/TRD document.
+2. **Ask the user to evaluate each metric:**
+   - Did we achieve it? (Yes / Partially / No)
+   - If not — why not? Was the metric wrong, or did the implementation fall short?
+3. **Record the outcome** in a new `## Post-Implementation Review` section at the
+   bottom of the document, including the date of the review.
+4. **Log unresolved issues** as items in `docs/tech_debt_log.md` using the format
+   described in the Tech Debt Linkage section below.
+
+The review should take no more than 5–10 minutes and results in one of:
+- ✅ **Success:** Metrics met. Document is fully closed.
+- ⚠️ **Partial:** Some metrics met. Log gaps as tech debt or create a follow-up feature doc.
+- ❌ **Failure:** Metrics not met. This must trigger a new planning cycle (new `docs/features/` doc or amendment).
+
+---
+
+## Amendment Protocol (Changing an Already-Implemented Feature)
+
+When the user asks to change, improve, or fix something that already has an `Implemented`
+PRD/TRD document, follow this specific protocol — do NOT create a brand new document.
+
+**Step 1:** Read the existing `docs/features/<feature_name>.md` fully.
+
+**Step 2:** Identify what has changed. Categorize the change:
+- **Minor Amendment** — Small logic tweak, copy change with minor logic impact, single
+  component adjustment. Low risk. Can be handled as a dated update to the existing doc.
+- **Major Amendment** — Changes business rules defined in Phase 1c, touches the DB
+  schema, affects RBAC permissions, or modifies the rollout strategy. High risk. Requires
+  a full re-planning of the affected phases.
+
+**Step 3:** Add a new section to the bottom of the existing document:
+```markdown
+## Amendment: YYYY-MM-DD — [Short Description of Change]
+**Type:** Minor / Major
+**Requested Change:** [Describe what the user wants to change]
+**Reason:** [Why are we changing this from the original plan?]
+**Phases Affected:** [e.g., Phase 1c, Phase 2a, Phase 3d]
+**Updated Plan:** [Write the updated content for the affected phases]
+**Approved:** [Yes / Pending user confirmation]
+```
+
+**Step 4:** For Major Amendments, re-run the Conflict Detection step.
+For Major Amendments, do NOT write code until the user approves the amendment section.
+For Minor Amendments, you may proceed but must still document the change.
+
+**Step 5:** Update the Feature Registry in `docs/features/README.md`
+(update the "Last Updated" date).
+
+---
+
+## Tech Debt Linkage
+
+During Phase 1 research, you will sometimes discover shortcuts, known bugs, or deferred
+work in the existing codebase. When this happens:
+
+**When to log tech debt:**
+- Phase 1 research uncovers a shortcut that the new feature will depend on.
+- The chosen strategy in Phase 2 is a deliberate compromise (e.g., "we'll enforce this
+  client-side for now instead of at the DB level").
+- Post-implementation review reveals a metric that wasn't achieved.
+
+**How to log it:**
+Add an entry to `docs/tech_debt_log.md` using this format:
+
+```markdown
+### [N]. [Short Title]
+- **Location**: `path/to/file.js` (`functionName`)
+- **Issue**: [Describe the shortcut, bug, or architectural compromise.]
+- **Reason for Deferral**: [Why are we accepting this now? What would it take to fix?]
+- **Linked Feature**: [Link to the PRD/TRD doc that introduced or identified this debt]
+- **Date Logged**: [Month Year]
+```
+
+**Rules:**
+- **Never silently accept tech debt.** If you made a compromise, log it.
+- **Never fix existing tech debt entries** without explicit user approval (the existing
+  `tech_debt_log.md` rule states this — treat it as an immutable contract).
+- When a logged debt item IS resolved as part of a new feature, strike it through in
+  `tech_debt_log.md` and add a "Resolved" note with the date and feature link.
 
 ---
 
