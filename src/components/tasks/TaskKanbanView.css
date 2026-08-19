@@ -303,3 +303,51 @@
 .breadcrumb-node-btn:hover:not(.breadcrumb-node-btn--active) {
   opacity: 0.8;
 }
+
+/* ── HUB GROUPING STYLES ─────────────────────────────────────────────────── */
+
+/* Wrapper for one hub's kanban board when "Group by Hubs" is ON */
+.kanban-hub-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+}
+
+/* Hub section header bar */
+.kanban-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--halo-bg);
+  border-radius: var(--radius-squircle) var(--radius-squircle) 0 0;
+  border: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--brand-mint);
+}
+
+.kanban-hub-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-mint);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.kanban-hub-task-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Subtle pill-divider between view mode buttons and "By Hub" grouping button */
+.view-toggle-divider {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
+  border-radius: 1px;
+  flex-shrink: 0;
+  align-self: center;
+}
+

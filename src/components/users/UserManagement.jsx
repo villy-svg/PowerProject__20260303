@@ -8,56 +8,7 @@ import PresetCreationModal from './PresetCreationModal';
 import { useUserManagement } from './useUserManagement';
 import { userService } from '../../services/auth/userService';
 import './UserManagement.css';
-
-/**
- * MassSyncProgressModal
- * Displays real-time progress of sequential permission syncing.
- */
-const MassSyncProgressModal = ({ status, onClose }) => {
-  return (
-    <div className="modal-overlay u-z-999999">
-      <div className="modal-content u-max-w-600">
-        <div className="modal-header">
-          <h2>Mass Sync Progress</h2>
-          {status.isComplete && <button className="close-modal" onClick={onClose}>×</button>}
-        </div>
-        <div className="modal-content-area u-flex-col-gap-16" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          {!status.isComplete && <div className="status-message u-text-primary">Syncing in progress... Please do not close this window.</div>}
-          {status.isComplete && <div className="status-message success">Sync process complete.</div>}
-          
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {status.results.map((res, i) => (
-              <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'var(--surface-50)', borderRadius: '6px' }}>
-                {res.status === 'success' ? (
-                  <span style={{ color: 'var(--success)', fontSize: '1.2rem' }}>✅</span>
-                ) : (
-                  <span style={{ color: 'var(--error)', fontSize: '1.2rem' }}>❌</span>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontWeight: 600 }}>{res.name}</span>
-                  <span style={{ fontSize: '0.85rem', color: res.status === 'success' ? 'var(--text-secondary)' : 'var(--error)' }}>
-                    {res.message}
-                  </span>
-                </div>
-              </li>
-            ))}
-            {!status.isComplete && (
-              <li style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', opacity: 0.6 }}>
-                <span className="halo-spinner" style={{ width: '16px', height: '16px', borderTopColor: 'var(--brand-primary)', borderRightColor: 'var(--brand-primary)' }} />
-                <span>Processing next user...</span>
-              </li>
-            )}
-          </ul>
-        </div>
-        {status.isComplete && (
-          <div className="modal-footer">
-            <button className="halo-button" onClick={onClose}>Close</button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+import MassSyncProgressModal from './MassSyncProgressModal';
 /**
  * CATEGORY METADATA
  * Defines display label, description, and semantic color token per lifecycle category.

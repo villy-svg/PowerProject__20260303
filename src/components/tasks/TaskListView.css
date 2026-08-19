@@ -208,3 +208,46 @@
 .list-task-row.selected {
   background-color: color-mix(in srgb, var(--brand-green), transparent 94%);
 }
+
+/* ── HUB GROUPING STYLES ─────────────────────────────────────────────────── */
+
+/* Wrapper for one hub's stage sections when "Group by Hubs" is ON */
+.list-hub-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+}
+
+/* Hub section header: Hub Name + Task Count */
+.list-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--brand-mint);
+}
+
+.list-hub-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-mint);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.list-hub-task-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Indent the stages inside each hub section to visually nest them */
+.list-hub-content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-left: 16px;
+  border-left: 2px solid var(--border-color);
+}

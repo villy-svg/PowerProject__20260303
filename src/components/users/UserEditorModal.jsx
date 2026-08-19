@@ -58,9 +58,9 @@ const UserEditorModal = (props) => {
         </header>
         
         <form onSubmit={onSave}>
-          <div className="preset-selector-section u-px-20 u-py-16 u-border-b-light">
-            <div className="form-group u-max-w-400 u-p-0">
-              <label className="section-label u-mb-8 u-block">Load from Preset Profile (Optional)</label>
+          <div className="preset-selector-section">
+            <div className="form-group preset-selector-group">
+              <label className="section-label preset-selector-label">Load from Preset Profile (Optional)</label>
               {users && users.length > 0 ? (
                 <div className="form-input-container">
                   <select
@@ -75,7 +75,7 @@ const UserEditorModal = (props) => {
                   </select>
                 </div>
               ) : (
-                <span className="u-text-13px u-opacity-50">No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
+                <span className="preset-selector-empty">No preset profiles exist yet. Create one from the Users/Presets toggle.</span>
               )}
             </div>
           </div>
@@ -165,7 +165,6 @@ const UserEditorModal = (props) => {
                                   onClick={() => !isTooHigh && onVerticalLevelChange(v.id, lvl)}
                                   disabled={isTooHigh}
                                   title={isTooHigh ? `Locked by max capability level (${roleLevel.toUpperCase()})` : ''}
-                                  style={{ opacity: isTooHigh ? 0.3 : 1, cursor: isTooHigh ? 'not-allowed' : 'pointer' }}
                                 >
                                   {lvl.toUpperCase()}
                                 </button>
@@ -213,7 +212,6 @@ const UserEditorModal = (props) => {
                                             onClick={() => !isTooHigh && onFeatureLevelChange(v.id, feature.id, lvl)}
                                             disabled={isTooHigh}
                                             title={isTooHigh ? `Locked by vertical access level (${normalizedVLevel.toUpperCase()})` : ''}
-                                            style={{ opacity: isTooHigh ? 0.3 : 1 }}
                                           >
                                             {lvl.charAt(0).toUpperCase()}
                                           </button>

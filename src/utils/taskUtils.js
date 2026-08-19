@@ -270,5 +270,29 @@ export const taskUtils = {
     }
 
     window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
-  }
+  },
+
+  /**
+   * Resolves the Hub label for a task, walking up the parent chain if needed.
+   * Subtasks inherit their root parent's hub assignment so they are never
+   * orphaned into "Unassigned" when grouped by Hub.
+   *
+   * @param {Object} task     - The task to resolve a hub for.
+   * @param {Array}  allTasks - The FULL (unfiltered) task list for parent lookups.
+   * @returns {string} Hub code, 'MULTI', or 'Unassigned'.
+   */
+  getTaskHub(task, allTasks) {
+    // Walk up to root parent to find the authoritative hub assignment
+    let current = task;
+    while (current.isSubTask && current.parentTask) {
+      const parent = allTasks.find(p => p.id === current.parentTask);
+      if (!parent) break;
+      current = parent;
+    }
+    // Resolve hub from root
+    if (current.hubCodes && current.hubCodes.length > 1) return 'MULTI';
+    if (current.hubCodes && current.hubCodes.length === 1) return current.hubCodes[0];
+    if (current.hub_id) return 'Hub'; // Legacy fallback
+    return 'Unassigned';
+  },
 };

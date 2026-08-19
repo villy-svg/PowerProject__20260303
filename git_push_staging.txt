@@ -1,7 +1,7 @@
 # 1. Commit Staging Local to Staging Server
 git checkout staging
 git add .
-git commit -m "260817 Bug Fixes & Call Action 1.0.2"
+git commit -m "260819 Hub Wise Toggle 1.0.0"
 git push origin staging
 
 #Check Current Git Branch

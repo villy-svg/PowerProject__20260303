@@ -118,6 +118,15 @@ const TaskController = (props) => {
   // ─── Actions Dropdown Menu State (Export, Import, Template, Repair) ─────
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
 
+  // ─── Group By Hubs Toggle (Hub board only; persists across kanban/list switches) ─
+  const [groupByHubs, setGroupByHubs] = useState(false);
+
+  // ─── Wrapped setViewMode: resets groupByHubs when switching to tree ──────────
+  const handleSetViewMode = (mode) => {
+    if (mode === 'tree') setGroupByHubs(false);
+    setViewMode(mode);
+  };
+
 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
@@ -200,11 +209,24 @@ const TaskController = (props) => {
                 <button
                   key={mode}
                   className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                  onClick={() => setViewMode(mode)}
+                  onClick={() => handleSetViewMode(mode)}
                 >
                   {mode}
                 </button>
               ))}
+              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
+              {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
+                <>
+                  <span className="view-toggle-divider" aria-hidden="true" />
+                  <button
+                    className={`view-toggle-btn view-toggle-btn--group ${groupByHubs ? 'active' : ''}`}
+                    onClick={() => setGroupByHubs(!groupByHubs)}
+                    title={groupByHubs ? 'Ungroup by Hub' : 'Group by Hub'}
+                  >
+                    By Hub
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="header-filter-group">
@@ -389,6 +411,7 @@ const TaskController = (props) => {
             handleRejectClick={handleRejectClick}
             expandedTaskId={expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
+            groupByHubs={groupByHubs}
           />
         ) : viewMode === 'list' ? (
           <TaskListView
@@ -421,6 +444,8 @@ const TaskController = (props) => {
             handleRejectClick={handleRejectClick}
             expandedTaskId={expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
+            groupByHubs={groupByHubs}
+            allTasks={hierarchyFilteredTasks}
           />
         ) : (
           <TaskTreeView

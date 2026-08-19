@@ -761,21 +761,24 @@
   gap: 6px;
 }
 
-/* Modifiers for global .icon-btn layout */
-.icon-btn--danger {
+/* Modifiers for global .icon-btn — chained selectors raise specificity above
+   the .icon-btn:hover base rule in HubManagement.css, preventing the default
+   brand-green hover colour from overriding the semantic colour tokens here. */
+.icon-btn.icon-btn--danger {
   color: var(--text-color);
   opacity: 0.6;
 }
-.icon-btn--danger:hover {
+.icon-btn.icon-btn--danger:hover {
   color: var(--badge-red-text);
   opacity: 1;
   transform: translateY(-1px);
 }
 
-.icon-btn--success {
+.icon-btn.icon-btn--success {
   color: var(--badge-green-text);
 }
-.icon-btn--success:hover {
+.icon-btn.icon-btn--success:hover {
+  color: var(--badge-green-text);
   transform: translateY(-1px);
 }
 
@@ -974,4 +977,29 @@
 .dropdown-fallback-option {
   color: var(--text-color);
   background: var(--bg-color);
+}
+/* Preset Selector Modifiers */
+.preset-selector-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.preset-selector-group {
+  max-width: 400px;
+  padding: 0;
+}
+
+.preset-selector-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.preset-selector-empty {
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+.v-lvl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

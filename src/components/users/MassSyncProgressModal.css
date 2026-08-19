@@ -1,0 +1,82 @@
+/* MassSyncProgressModal.css */
+.mass-sync-modal__overlay {
+  z-index: 999999;
+}
+
+.mass-sync-modal__content {
+  max-width: 600px;
+}
+
+.mass-sync-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.mass-sync-modal__in-progress-notice {
+  color: var(--text-color);
+}
+
+.mass-sync-modal__result-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mass-sync-modal__result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-radius: 6px;
+}
+
+.mass-sync-modal__result-icon {
+  font-size: 1.2rem;
+}
+.mass-sync-modal__result-icon--success {
+  color: var(--status-success);
+}
+.mass-sync-modal__result-icon--error {
+  color: var(--status-danger);
+}
+
+.mass-sync-modal__result-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.mass-sync-modal__result-name {
+  font-weight: 600;
+}
+
+.mass-sync-modal__result-msg {
+  font-size: 0.85rem;
+}
+.mass-sync-modal__result-msg--success {
+  color: var(--text-secondary);
+}
+.mass-sync-modal__result-msg--error {
+  color: var(--status-danger);
+}
+
+.mass-sync-modal__processing-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  opacity: 0.6;
+}
+
+.mass-sync-modal__spinner {
+  width: 16px;
+  height: 16px;
+  border-top-color: var(--brand-green);
+  border-right-color: var(--brand-green);
+}

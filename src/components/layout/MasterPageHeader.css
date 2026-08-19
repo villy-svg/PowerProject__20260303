@@ -137,6 +137,14 @@
   margin-right: 4px;
 }
 
+/* Prevent view-mode-toggle + filter-group from wrapping on mid-size screens
+   (tablets 769px–1024px). The expanded-menu-row renders inline (not as a
+   mobile drawer) at these sizes, so flex-wrap must be suppressed here. */
+.expanded-menu-row .master-header-left {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
 .mobile-action-tray {
   display: none;
 }

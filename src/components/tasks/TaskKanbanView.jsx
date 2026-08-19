@@ -9,6 +9,7 @@ import {
   IconChevronRightSingle
 } from '../ui/Icons';
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
+import { taskUtils } from '../../utils/taskUtils';
 import './TaskKanbanView.css';
 
 /**
@@ -220,7 +221,8 @@ const TaskKanbanView = ({
   handleApproveSubmission,
   handleRejectClick,
   expandedTaskId,
-  setExpandedTaskId
+  setExpandedTaskId,
+  groupByHubs = false,
 }) => {
   const [activeStageId, setActiveStageId] = useState('BACKLOG');
   const [expandedParents, setExpandedParents] = useState({});
@@ -233,6 +235,117 @@ const TaskKanbanView = ({
   }, []);
 
   const visibleStages = stageList.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED');
+
+  // Pre-compute hub map once (O(n)) to avoid O(n²) double-calls in render.
+  // Uses full `tasks` prop as lookup pool so parent lookups succeed even when
+  // parents are filtered out (e.g., "My Tasks Only" is active).
+  const taskHubMap = groupByHubs
+    ? new Map(filteredTasks.map(t => [t.id, taskUtils.getTaskHub(t, tasks)]))
+    : null;
+
+  // Sorted unique hub labels when grouped. 'Unassigned' is always sorted last.
+  const uniqueHubs = groupByHubs
+    ? [...new Set(taskHubMap.values())].sort((a, b) => {
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+        if (a === 'MULTI') return -1;
+        if (b === 'MULTI') return 1;
+        return a.localeCompare(b);
+      })
+    : null;
+
+  /**
+   * Renders the kanban columns for a given subset of tasks.
+   * Extracted so it can be reused per-hub or as the full board.
+   */
+  const renderKanbanColumns = (tasksForBoard) =>
+    visibleStages.map((stage) => {
+      const isActive = activeStageId === stage.id;
+      const tasksInColumn = tasksForBoard.filter((t) => t.stageId === stage.id);
+
+      // --- HIERARCHY NESTING LOGIC (preserved exactly) ---
+      const parents = tasksInColumn.filter(t => !t.isSubTask);
+      const stageTasks = [];
+
+      parents.forEach(parent => {
+        stageTasks.push(parent);
+        if (expandedParents[parent.id]) {
+          const children = tasksInColumn.filter(t => t.parentTask === parent.id);
+          stageTasks.push(...children);
+        }
+      });
+
+      // Orphan sub-tasks (parent in a different column or missing)
+      const orphans = tasksInColumn.filter(t =>
+        t.isSubTask && !parents.some(p => p.id === t.parentTask)
+      );
+      stageTasks.push(...orphans);
+
+      stageTasks.sort((a, b) => {
+        if (b.parentTask === a.id) return -1;
+        if (a.parentTask === b.id) return 1;
+        const isReworkA = a.latestSubmission?.status === 'rejected';
+        const isReworkB = b.latestSubmission?.status === 'rejected';
+        if (isReworkA && !isReworkB) return -1;
+        if (!isReworkA && isReworkB) return 1;
+        const isReviewA = !!a.hasReviewDescendant;
+        const isReviewB = !!b.hasReviewDescendant;
+        if (isReviewA && !isReviewB) return -1;
+        if (!isReviewA && isReviewB) return 1;
+        const isDraftA = a.text?.startsWith('[DRAFT]');
+        const isDraftB = b.text?.startsWith('[DRAFT]');
+        if (isDraftA && !isDraftB) return -1;
+        if (!isDraftA && isDraftB) return 1;
+        const priorityOrder = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
+        const pA = priorityOrder[(a.priority || '').toLowerCase()] ?? 99;
+        const pB = priorityOrder[(b.priority || '').toLowerCase()] ?? 99;
+        if (pA !== pB) return pA - pB;
+        const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
+        const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
+        if (dateA !== dateB) return dateB - dateA;
+        return 0;
+      });
+
+      return (
+        <KanbanColumn
+          key={stage.id}
+          stage={stage}
+          isActive={isActive}
+          stageTasks={stageTasks}
+          selectedTaskIds={selectedTaskIds}
+          toggleStageSelection={toggleStageSelection}
+          updateTaskStage={updateTaskStage}
+          tasks={tasks}
+          permissions={permissions}
+          user={user}
+          canEditTask={canEditTask}
+          canUserUpdate={canUserUpdate}
+          canUserDelete={canUserDelete}
+          canManageHierarchy={canManageHierarchy}
+          canAddSubtask={canAddSubtask}
+          canCloneTask={canCloneTask}
+          deleteTask={deleteTask}
+          openEditModal={openEditModal}
+          onCloneTask={onCloneTask}
+          openAddSubtaskModal={openAddSubtaskModal}
+          openSubmissionModal={openSubmissionModal}
+          handleApproveSubmission={handleApproveSubmission}
+          handleRejectClick={handleRejectClick}
+          onMoveToParent={onMoveToParent}
+          onDuplicateMerge={onDuplicateMerge}
+          stageList={stageList}
+          toggleTaskSelection={toggleTaskSelection}
+          onPromote={onPromote}
+          setDrillDownId={setDrillDownId}
+          expandedParents={expandedParents}
+          expandedTaskId={expandedTaskId}
+          toggleExpanded={toggleExpanded}
+          setExpandedTaskId={setExpandedTaskId}
+          TaskTileComponent={TaskTileComponent}
+        />
+      );
+    });
+
 
   return (
     <div className="kanban-view-container">
@@ -258,117 +371,50 @@ const TaskKanbanView = ({
         </div>
       )}
 
-      <StageNavigationTray 
-        stageList={visibleStages}
-        activeStageId={activeStageId}
-        setActiveStageId={setActiveStageId}
-        filteredTasks={filteredTasks}
-      />
-
-      <div className="kanban-board">
-        {visibleStages.map((stage) => {
-          const isActive = activeStageId === stage.id;
-          const tasksInColumn = filteredTasks.filter((t) => t.stageId === stage.id);
-          
-          // --- HIERARCHY NESTING LOGIC ---
-          const parents = tasksInColumn.filter(t => !t.isSubTask);
-          const stageTasks = [];
-
-          parents.forEach(parent => {
-            stageTasks.push(parent);
-            // Insert children directly after parent (only if expanded)
-            if (expandedParents[parent.id]) {
-              const children = tasksInColumn.filter(t => t.parentTask === parent.id);
-              stageTasks.push(...children);
-            }
-          });
-
-          // Add orphan sub-tasks (parent in different column or missing)
-          const orphans = tasksInColumn.filter(t =>
-            t.isSubTask && !parents.some(p => p.id === t.parentTask)
-          );
-          stageTasks.push(...orphans);
-
-          // Standard sorting for top-level (parents + orphans)
-          stageTasks.sort((a, b) => {
-            // 0. Keep children with parents: if b is child of a, a comes first
-            if (b.parentTask === a.id) return -1;
-            if (a.parentTask === b.id) return 1;
-
-            // 1. Rework Priority (Rejected tasks always first)
-            const isReworkA = a.latestSubmission?.status === 'rejected';
-            const isReworkB = b.latestSubmission?.status === 'rejected';
-            if (isReworkA && !isReworkB) return -1;
-            if (!isReworkA && isReworkB) return 1;
-
-            // 2. Review Priority (Children in review)
-            const isReviewA = !!a.hasReviewDescendant;
-            const isReviewB = !!b.hasReviewDescendant;
-            if (isReviewA && !isReviewB) return -1;
-            if (!isReviewA && isReviewB) return 1;
-
-            // 3. Draft Priority (Starts with [DRAFT])
-            const isDraftA = a.text?.startsWith('[DRAFT]');
-            const isDraftB = b.text?.startsWith('[DRAFT]');
-            if (isDraftA && !isDraftB) return -1;
-            if (!isDraftA && isDraftB) return 1;
-
-            // 4. Standard Priority Level
-            const priorityOrder = { 'urgent': 0, 'high': 1, 'medium': 2, 'low': 3 };
-            const pA = priorityOrder[(a.priority || '').toLowerCase()] ?? 99;
-            const pB = priorityOrder[(b.priority || '').toLowerCase()] ?? 99;
-            if (pA !== pB) return pA - pB;
-
-            // 5. Fallback: Latest First (createdAt descending)
-            const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
-            const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
-            if (dateA !== dateB) return dateB - dateA;
-
-            return 0;
-          });
-
+      {groupByHubs ? (
+        /* ── Hub-Grouped Mode ─────────────────────────────────────────────
+           One kanban-hub-section per unique hub. Each section gets its own
+           StageNavigationTray so mobile badge counts reflect that hub only. */
+        uniqueHubs.map(hub => {
+          const hubTasks = filteredTasks.filter(t => taskHubMap.get(t.id) === hub);
+          if (hubTasks.length === 0) return null;
           return (
-            <KanbanColumn
-              key={stage.id}
-              stage={stage}
-              isActive={isActive}
-              stageTasks={stageTasks}
-              selectedTaskIds={selectedTaskIds}
-              toggleStageSelection={toggleStageSelection}
-              updateTaskStage={updateTaskStage}
-              tasks={tasks}
-              permissions={permissions}
-              user={user}
-              canEditTask={canEditTask}
-              canUserUpdate={canUserUpdate}
-              canUserDelete={canUserDelete}
-              canManageHierarchy={canManageHierarchy}
-              canAddSubtask={canAddSubtask}
-              canCloneTask={canCloneTask}
-              deleteTask={deleteTask}
-              openEditModal={openEditModal}
-              onCloneTask={onCloneTask}
-              openAddSubtaskModal={openAddSubtaskModal}
-              openSubmissionModal={openSubmissionModal}
-              handleApproveSubmission={handleApproveSubmission}
-              handleRejectClick={handleRejectClick}
-              onMoveToParent={onMoveToParent}
-              onDuplicateMerge={onDuplicateMerge}
-              stageList={stageList}
-              toggleTaskSelection={toggleTaskSelection}
-              onPromote={onPromote}
-              setDrillDownId={setDrillDownId}
-              expandedParents={expandedParents}
-              expandedTaskId={expandedTaskId}
-              toggleExpanded={toggleExpanded}
-              setExpandedTaskId={setExpandedTaskId}
-              TaskTileComponent={TaskTileComponent}
-            />
+            <div key={hub} className="kanban-hub-section">
+              <div className="kanban-hub-header">
+                <h3 className="kanban-hub-title">
+                  {hub === 'MULTI' ? 'Multi-Hub Tasks' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
+                </h3>
+                <span className="kanban-hub-task-count">{hubTasks.length} tasks</span>
+              </div>
+              <StageNavigationTray
+                stageList={visibleStages}
+                activeStageId={activeStageId}
+                setActiveStageId={setActiveStageId}
+                filteredTasks={hubTasks}
+              />
+              <div className="kanban-board">
+                {renderKanbanColumns(hubTasks)}
+              </div>
+            </div>
           );
-        })}
-      </div>
+        })
+      ) : (
+        /* ── Standard Mode ───────────────────────────────────────────────── */
+        <>
+          <StageNavigationTray 
+            stageList={visibleStages}
+            activeStageId={activeStageId}
+            setActiveStageId={setActiveStageId}
+            filteredTasks={filteredTasks}
+          />
+          <div className="kanban-board">
+            {renderKanbanColumns(filteredTasks)}
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
 export default TaskKanbanView;
+
