@@ -73,9 +73,9 @@ export const taskUtils = {
     const isMe = isAssignee(task, currentUser);
     const count = task.assigned_to.length;
 
-    // Rule 1: If I am an assignee, just show "You"
+    // Rule 1: If I am an assignee, just show "YOU"
     if (isMe) {
-      return 'You';
+      return 'YOU';
     }
 
     // Rule 2: If others are assigned, show senior-most based on Badge ID
@@ -93,17 +93,17 @@ export const taskUtils = {
       });
 
       const senior = sorted[0];
-      const name = senior.full_name.split(' ')[0];
+      const name = senior.full_name.split(' ')[0].substring(0, 3).toUpperCase();
       return name;
     }
 
     // Fallback if metadata isn't joined
     if (task.assigneeName) {
-      const first = task.assigneeName.split(',')[0].trim().split(' ')[0];
+      const first = task.assigneeName.split(',')[0].trim().split(' ')[0].substring(0, 3).toUpperCase();
       return first;
     }
 
-    return task.assigned_to?.length > 0 ? 'Assigned' : 'Unassigned';
+    return task.assigned_to?.length > 0 ? 'TEAM' : 'NONE';
   },
 
   /**
@@ -228,7 +228,7 @@ export const taskUtils = {
     
     // Resolve assignee name
     const assigneeName = taskUtils.getAssigneeLabel(task, null);
-    const actualName = ['Unassigned', 'None', 'Assigned'].includes(assigneeName) ? 'Team Member' : assigneeName;
+    const actualName = ['Unassigned', 'None', 'Assigned', 'TEAM', 'NONE'].includes(assigneeName) ? 'Team Member' : assigneeName;
 
     const getStageEmoji = (id) => {
       switch(id) {

@@ -117,10 +117,30 @@ For toggle/selector button groups (e.g., capability level selectors in modals):
 
 ---
 
-## 6. Typography
+## 6. Typography (UI Typography & Design Rules)
+
+### A. Core Fonts
 - **Technical Metadata**: `'JetBrains Mono', monospace` (Badges, Codes, IDs).
 - **Core Interface**: `'Inter', system-ui, sans-serif` (Body, Labels, Titles).
 - **Micro-labels**: `0.65rem`, `font-weight: 800`, `text-transform: uppercase`, `letter-spacing: 0.5px`.
+
+### B. Typography Scale (Strict Enforcement)
+Do not use arbitrary font sizes. Use predefined classes/variables:
+- **Page Headers**: `text-2xl font-bold` (Title Case)
+- **Section Headers**: `text-lg font-semibold` (Title Case)
+- **Standard Text/Inputs**: `text-sm font-normal` (Sentence case)
+- **Tags/Badges**: `text-xs font-medium tracking-wide uppercase`
+
+### C. Casing Standards
+- NEVER use ALL CAPS for headings, paragraphs, or standard labels.
+- ONLY use ALL CAPS for system tags (e.g., 'ACTIVE', 'ADMIN'), small action buttons, or table column headers.
+- Use **Title Case** for navigation items (e.g., 'User Management', 'Leave Manager').
+- Use **Sentence case** for descriptions, tooltips, and placeholder text.
+
+### D. Hierarchy
+Ensure distinct visual hierarchy:
+- A page title must always be visually heavier than a section title.
+- Diminish secondary information (like timestamps or IDs) using lighter text colors (e.g., `text-gray-400` / `var(--text-color)` with lower opacity), not just smaller text.
 
 ---
 

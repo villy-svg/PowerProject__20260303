@@ -18,7 +18,7 @@ const AssigneeBadge = ({ task, currentUser, className = '' }) => {
   const isCurrentUser = (currentUser?.employeeId && assignedTo.includes(currentUser.employeeId)) || 
                          (currentUser?.id && assignedTo.includes(currentUser.id));
                          
-  const isUnassigned = assignedTo.length === 0 || label === 'NULL';
+  const isUnassigned = assignedTo.length === 0 || label === 'NONE';
 
   let modifierClass = '';
   if (isCurrentUser) modifierClass = 'assignee-you';

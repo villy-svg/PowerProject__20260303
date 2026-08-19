@@ -157,6 +157,11 @@ export function resolvePriorityLabel(priority, verticalId) {
   if (verticalId === 'EMPLOYEES' || verticalId === 'employee_tasks') {
     return REMARK_GRADE_MAP[priority] || priority;
   }
+  const up = priority.toUpperCase();
+  if (up === 'URGENT') return 'UG';
+  if (up === 'HIGH') return 'HI';
+  if (up === 'MEDIUM' || up === 'NORMAL') return 'MM';
+  if (up === 'LOW') return 'LO';
   return priority;
 }
 
