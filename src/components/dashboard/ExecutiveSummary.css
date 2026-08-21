@@ -57,9 +57,8 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     position: relative !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-top: 0px;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
     padding-left: 0;
     padding-right: 0;
   }
@@ -171,8 +170,7 @@
   }
 
   .summary-nav-item.active .summary-icon-wrapper {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 15px -8px var(--stage-accent);
+    /* Background and halo removed per minimal cognitive clutter rules */
   }
 
   /* Animations for switching tabs */

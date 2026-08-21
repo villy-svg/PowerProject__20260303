@@ -237,6 +237,22 @@ const UserProfile = ({
                 Configuration
               </button>
 
+              <button 
+                className="dropdown-item" 
+                onClick={async () => { 
+                  closeMenu();
+                  if ('caches' in window) {
+                    try {
+                      const keys = await caches.keys();
+                      await Promise.all(keys.map(key => caches.delete(key)));
+                    } catch (e) { console.error(e); }
+                  }
+                  window.location.reload(true); 
+                }}
+              >
+                Hard Refresh
+              </button>
+
               <button className="dropdown-item" onClick={() => { onLogout(); closeMenu(); }}>
                 Log Out
               </button>

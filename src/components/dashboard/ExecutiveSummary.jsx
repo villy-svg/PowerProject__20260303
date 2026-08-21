@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { hierarchyService } from '../../services/rules/hierarchyService';
 import { useIsMobile } from '../../hooks/useIsMobile';
-import { IconEye, IconBoards, IconZap, IconBulb, IconWarning, IconClock } from '../ui/Icons';
+import { IconEye, IconBoards, IconAlertCircle, IconBulb, IconWarning, IconClock } from '../ui/Icons';
 import { taskUtils } from '../../utils/taskUtils';
 import { useMobileLongPress } from '../../app/contexts/MobileLongPressContext';
 import './ExecutiveSummary.css';
@@ -477,7 +477,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                   {...bindLongPress("Track Requests has all the requests and support tickets raised by all the members of PowerPod\n\nಪವರ್ಪಾಡ್ನ ಎಲ್ಲಾ ಸದಸ್ಯರು ಎತ್ತಿರುವ ಎಲ್ಲಾ ವಿನಂತಿಗಳು ಮತ್ತು ಬೆಂಬಲ ಟಿಕೆಟ್ಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ರಿಕ್ವೆಸ್ಟ್ಸ್ ಹೊಂದಿದೆ.")}
                 >
                   <div className="summary-icon-wrapper">
-                    <IconZap size={14} />
+                    <IconAlertCircle size={14} />
                     <span className="summary-badge-count">{escalationTasks.length}</span>
                   </div>
                   <span className="summary-nav-label">Track Requests</span>

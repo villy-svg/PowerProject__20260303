@@ -18,7 +18,7 @@ import { IconEdit, IconTrash, IconX, IconChevronDown } from '../../components/ui
 import { hasHighRemarks } from './remarkRules';
 import RBACManageButton from '../../components/ui/RBACManageButton';
 import { taskService } from '../../services/tasks/taskService';
-
+import { useIsMobile } from '../../hooks/useIsMobile';
 /**
  * EmployeeManagement
  * 
@@ -29,6 +29,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
 
   const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
+  const { isMobile } = useIsMobile();
+  const actualViewMode = isMobile ? 'grid' : ui.viewMode;
   const [pendingConflict, setPendingConflict] = useState(null); // { formData, existingRecord }
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [groupBy, setGroupBy] = useState('role');
@@ -376,7 +378,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           <h3>Personnel Database Empty</h3>
           <p>Click "+ Add Employee" to insert your first structural record.</p>
         </div>
-      ) : ui.viewMode === 'tree' ? (
+      ) : actualViewMode === 'tree' ? (
         <EmployeeTree
           employees={filteredEmployees}
           user={user}
@@ -414,9 +416,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                           {empsInGroup.every(id => ui.selectedIds.includes(id.id)) ? `Deselect ${groupBy === 'role' ? 'Role' : 'Hub'}` : `Select ${groupBy === 'role' ? 'Role' : 'Hub'}`}
                         </button>
                       </h5>
-                      <div className={ui.viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
+                      <div className={actualViewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                         {empsInGroup.map(emp => (
-                          ui.viewMode === 'grid' ? (
+                          actualViewMode === 'grid' ? (
                             <EmployeeCard
                               key={emp.id}
                               emp={emp}
@@ -487,9 +489,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
               {inactiveEmps.length === 0 ? (
                 <p className="empty-sub-state faded">No inactive records.</p>
               ) : (
-                <div className={ui.viewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
+                <div className={actualViewMode === 'grid' ? 'employee-grid' : 'responsive-table-wrapper employee-list'}>
                   {inactiveEmps.map(emp => (
-                    ui.viewMode === 'grid' ? (
+                    actualViewMode === 'grid' ? (
                       <EmployeeCard
                         key={emp.id}
                         emp={emp}

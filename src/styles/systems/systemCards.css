@@ -83,6 +83,13 @@
   display: none;
 }
 
+.task-tags-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
 /* Chrome/Safari */
 .card-task-name {
   font-size: 0.95rem;

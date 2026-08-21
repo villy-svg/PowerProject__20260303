@@ -229,7 +229,7 @@
 }
 
 .list-hub-title {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 700;
   color: var(--brand-mint);
   text-transform: uppercase;
@@ -238,7 +238,7 @@
 }
 
 .list-hub-task-count {
-  font-size: 0.72rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-secondary);
 }

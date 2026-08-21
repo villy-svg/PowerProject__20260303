@@ -186,30 +186,32 @@ const TaskCard = ({
 
       {/* Row 1: Metadata (Priority + Tags + Assignee) */}
       <div className="card-row-1">
-        {task.isContextOnly && (
-          <span className="card-priority context-viewer-badge" title="Context Only (View Only)">
-            VIEWER
-          </span>
-        )}
-        {task.parentTask && showHierarchy && (
-          <span className="subtask-tag" title="Subtask">
-            ↳ Subtask
-          </span>
-        )}
-        {task.priority && (
-          <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
-            {resolvePriorityLabel(task.priority, task.verticalId)}
-          </span>
-        )}
-        {task.isDuplicate && (
-          <span className="duplicate-badge" title={`${task.duplicateCount} identical tasks found`}>
-            Dup
-          </span>
-        )}
-        <AssigneeBadge task={task} currentUser={currentUser} />
-        {/* Camera badge — shows when latest submission has image attachments */}
-        <AttachmentBadge task={task} />
-        {children}
+        <div className="task-tags-group">
+          {task.isContextOnly && (
+            <span className="card-priority context-viewer-badge" title="Context Only (View Only)">
+              VIEWER
+            </span>
+          )}
+          {task.parentTask && showHierarchy && (
+            <span className="subtask-tag" title="Subtask">
+              ↳ Subtask
+            </span>
+          )}
+          {task.priority && (
+            <span className={`card-priority ${task.stageId === 'COMPLETED' ? 'priority-completed' : `priority-${task.priority.toLowerCase()}`}`}>
+              {resolvePriorityLabel(task.priority, task.verticalId)}
+            </span>
+          )}
+          {task.isDuplicate && (
+            <span className="duplicate-badge" title={`${task.duplicateCount} identical tasks found`}>
+              Dup
+            </span>
+          )}
+          <AssigneeBadge task={task} currentUser={currentUser} />
+          {children}
+          {/* Camera badge — shows when latest submission has image attachments */}
+          <AttachmentBadge task={task} />
+        </div>
       </div>
 
       {/* Row 2: Title */}

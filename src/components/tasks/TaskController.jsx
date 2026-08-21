@@ -127,6 +127,8 @@ const TaskController = (props) => {
     setViewMode(mode);
   };
 
+  // ─── Mobile Fallback ──────────────────────────────────────────────
+  const actualViewMode = !isDesktop ? 'kanban' : viewMode;
 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
@@ -214,8 +216,8 @@ const TaskController = (props) => {
                   {mode}
                 </button>
               ))}
-              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
-              {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
+              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view, DISABLED on mobile */}
+              {isDesktop && viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
                 <>
                   <span className="view-toggle-divider" aria-hidden="true" />
                   <button
@@ -374,7 +376,7 @@ const TaskController = (props) => {
            On desktop the sub-sidebar is an inline panel and the menu is an inline
            row — blurring the board would block access to controls. */}
       <div className={`workspace-main-view ${(!isDesktop && (isHeaderMenuOpen || isSubSidebarOpen)) ? 'is-blurred' : ''}`}>
-        {viewMode === 'kanban' ? (
+        {actualViewMode === 'kanban' ? (
           <TaskKanbanView
             tasks={hierarchyFilteredTasks}
             filteredTasks={filteredTasks}
@@ -411,9 +413,9 @@ const TaskController = (props) => {
             handleRejectClick={handleRejectClick}
             expandedTaskId={expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
-            groupByHubs={groupByHubs}
+            groupByHubs={isDesktop && groupByHubs}
           />
-        ) : viewMode === 'list' ? (
+        ) : actualViewMode === 'list' ? (
           <TaskListView
             tasks={filteredTasks}
             stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
@@ -444,7 +446,7 @@ const TaskController = (props) => {
             handleRejectClick={handleRejectClick}
             expandedTaskId={expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
-            groupByHubs={groupByHubs}
+            groupByHubs={isDesktop && groupByHubs}
             allTasks={hierarchyFilteredTasks}
           />
         ) : (

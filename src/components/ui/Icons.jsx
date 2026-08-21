@@ -23,6 +23,11 @@ const IconBase = ({ children, size = 16, strokeWidth = 1.6, className = "", styl
   </svg>
 );
 
+export const IconActivity = (props) => (
+  <IconBase {...props}>
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+  </IconBase>
+);
 export const IconEdit = (props) => (
   <IconBase {...props}>
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />

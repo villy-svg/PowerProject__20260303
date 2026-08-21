@@ -207,7 +207,7 @@
 
 @media screen and (max-width: 768px) {
   .centralised-task-view {
-    margin-top: 12px !important; /* Reduced from 32px — trays are now tighter */
+    margin-top: 0px !important; /* Reduced from 12px to 0 for flush stacked trays */
     padding-bottom: 20px;
   }
   .summary-header {
@@ -339,8 +339,7 @@
   }
 
   .centralised-stage-nav-item.active .centralised-stage-icon-wrapper {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 15px -8px var(--stage-accent);
+    /* Background and halo removed per minimal cognitive clutter rules */
   }
 
   .add-escalation-btn {

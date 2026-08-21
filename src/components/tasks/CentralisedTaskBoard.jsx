@@ -5,7 +5,7 @@ import { taskUtils } from '../../utils/taskUtils';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
 import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
-import { IconClock, IconZap, IconEye, IconCheck, IconChevronDown, IconInfo } from '../ui/Icons';
+import { IconClock, IconActivity, IconEye, IconCheck, IconChevronDown, IconInfo } from '../ui/Icons';
 import './CentralisedTaskBoard.css';
 
 /**
@@ -173,7 +173,7 @@ const CentralisedTaskBoard = ({
                   >
                     <div className="centralised-stage-icon-wrapper">
                       {stage.id === 'BACKLOG' && <IconClock size={14} />}
-                      {stage.id === 'IN_PROGRESS' && <IconZap size={14} />}
+                      {stage.id === 'IN_PROGRESS' && <IconActivity size={14} />}
                       {stage.id === 'REVIEW' && <IconEye size={14} />}
                       {stage.id === 'COMPLETED' && <IconCheck size={14} />}
                       {count > 0 && <span className="centralised-stage-badge-count">{count}</span>}
@@ -200,12 +200,6 @@ const CentralisedTaskBoard = ({
                   className="centralised-column active" 
                   style={{ '--column-accent': stage.color }}
                 >
-                  <div className="column-header">
-                    <span className="column-dot" style={{ backgroundColor: stage.color }} />
-                    <span className="column-title">{stage.label}</span>
-                    <span className="column-count">{stageTasks.length}</span>
-                  </div>
-                  
                   <div className="column-cards-container">
                     {stageTasks.length === 0 ? (
                       <div className="column-empty-state">

@@ -374,7 +374,9 @@ const TaskKanbanView = ({
       {groupByHubs ? (
         /* ── Hub-Grouped Mode ─────────────────────────────────────────────
            One kanban-hub-section per unique hub. Each section gets its own
-           StageNavigationTray so mobile badge counts reflect that hub only. */
+           StageNavigationTray for per-hub stage badge counts on desktop.
+           NOTE: groupByHubs is always false on mobile (guarded in TaskController),
+           so this branch is never entered on mobile screens. */
         uniqueHubs.map(hub => {
           const hubTasks = filteredTasks.filter(t => taskHubMap.get(t.id) === hub);
           if (hubTasks.length === 0) return null;
