@@ -10,12 +10,13 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 6px;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--brand-mint), transparent 82%);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 55%);
+  padding: 4px;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
   color: var(--brand-mint);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.18s ease;
   line-height: 1;
@@ -24,9 +25,6 @@
 }
 
 .attachment-camera-badge:hover:not(.disabled) {
-  background: color-mix(in srgb, var(--brand-mint), transparent 65%);
-  border-color: var(--brand-mint);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--brand-mint), transparent 60%);
   transform: scale(1.05);
 }
 

@@ -109,7 +109,7 @@ const AttachmentBadge = ({ task }) => {
         aria-label={imageLinks.length > 0 ? "View attached photos" : "No attached photos"}
         disabled={imageLinks.length === 0}
       >
-        <IconCamera size={15} />
+        <IconCamera size={16} strokeWidth={2.5} />
         {imageLinks.length > 1 && (
           <span className="attachment-camera-count">{imageLinks.length}</span>
         )}
