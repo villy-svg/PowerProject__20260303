@@ -7,6 +7,8 @@ import PermissionSyncModal from './PermissionSyncModal';
 import PresetCreationModal from './PresetCreationModal';
 import { useUserManagement } from './useUserManagement';
 import { userService } from '../../services/auth/userService';
+import { useLayoutShell } from '../../app/shells/useLayoutShell';
+import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
 import './UserManagement.css';
 import MassSyncProgressModal from './MassSyncProgressModal';
 /**
@@ -85,6 +87,10 @@ const UserCategorySection = ({ categoryKey, roleGroups, viewMode, onEdit, onDeac
  * - currentUser: the logged-in admin (used to gate master-admin actions)
  */
 const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => {
+  const { shellType } = useLayoutShell();
+  const { setIsMobileMenuOpen } = useAppNavigation();
+  const isMobile = shellType === 'mobile';
+
   const [isSyncModalOpen, setIsSyncModalOpen] = React.useState(false);
   const [isPresetModalOpen, setIsPresetModalOpen] = React.useState(false);
   // 'actual' shows real users; 'preset' shows dummy preset profiles
@@ -119,6 +125,8 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
     expandedFeatures,
     setExpandedFeatures
   } = useUserManagement();
+
+  const effectiveViewMode = isMobile ? 'grid' : viewMode;
 
   // Split users into actual vs preset by the fake email domain used at creation
   const PRESET_EMAIL_SUFFIX = '@preset.local';
@@ -213,8 +221,9 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
         description="Configure application roles, vertical access, and granular feature-level permissions."
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
+        hideMenuClose={isMobile}
         expandedLeft={
-          <div className="view-mode-toggle view-mode-toggle--expanded">
+          <div className={isMobile ? "user-mgmt-mobile-menu" : "view-mode-toggle view-mode-toggle--expanded"}>
             {/* Profile Mode Toggle */}
             <div className="view-toggle-group">
               <button
@@ -231,36 +240,38 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
               </button>
             </div>
 
-            <div className="header-divider"></div>
+            {!isMobile && <div className="header-divider"></div>}
 
             {/* Layout view toggle */}
-            <div className="view-toggle-group">
+            {!isMobile && (
+              <div className="view-toggle-group">
+                <button
+                  className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                  onClick={() => setViewMode('grid')}
+                >
+                  Grid
+                </button>
+                <button
+                  className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                  onClick={() => setViewMode('list')}
+                >
+                  List
+                </button>
+              </div>
+            )}
+
+            {!isMobile && (
               <button
-                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                onClick={() => setViewMode('grid')}
+                className="halo-button header-action-btn"
+                onClick={() => setIsSyncModalOpen(true)}
+                title="Clone permissions from one user to multiple others"
               >
-                Grid
+                Mass Sync
               </button>
-              <button
-                className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-              >
-                List
-              </button>
-            </div>
+            )}
 
-            <div className="header-divider"></div>
-
-            <button
-              className="halo-button header-action-btn"
-              onClick={() => setIsSyncModalOpen(true)}
-              title="Clone permissions from one user to multiple others"
-            >
-              Mass Sync
-            </button>
-
-            {/* Create Preset — master admin only */}
-            {isMasterAdmin && (
+            {/* Create Preset — master admin only (Desktop) */}
+            {!isMobile && isMasterAdmin && (
               <button
                 className="halo-button header-action-btn"
                 onClick={() => setIsPresetModalOpen(true)}
@@ -268,6 +279,32 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
               >
                 + Preset
               </button>
+            )}
+
+            {/* Mobile Actions Row */}
+            {isMobile && (
+              <div className="mobile-actions-row">
+                <button
+                  className="halo-button header-action-btn"
+                  onClick={() => setIsSyncModalOpen(true)}
+                >
+                  Mass Sync
+                </button>
+                {isMasterAdmin && (
+                  <button
+                    className="halo-button header-action-btn"
+                    onClick={() => setIsPresetModalOpen(true)}
+                  >
+                    Preset
+                  </button>
+                )}
+                <button
+                  className="halo-button header-action-btn mobile-menu-close-custom"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
             )}
           </div>
         }
@@ -286,7 +323,7 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
           key={categoryKey}
           categoryKey={categoryKey}
           roleGroups={userCategories[categoryKey]}
-          viewMode={viewMode}
+          viewMode={effectiveViewMode}
           onEdit={openEditor}
           onDeactivate={handleDeactivate}
           onReactivate={handleReactivate}

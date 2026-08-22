@@ -207,10 +207,12 @@ const TaskListView = ({
           return (
             <div key={hub} className="list-hub-group">
               <header className="list-hub-header">
-                <h3 className="list-hub-title">
-                  {hub === 'MULTI' ? 'Multi-Hub Tasks' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
-                </h3>
-                <span className="list-hub-task-count">{hubTasks.length} tasks</span>
+                <div className="list-hub-title-group">
+                  <h3 className="list-hub-title">
+                    {hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
+                  </h3>
+                  <span className="list-hub-task-count">({hubTasks.length})</span>
+                </div>
               </header>
               <div className="list-hub-content">
                 {renderStages(hubTasks)}

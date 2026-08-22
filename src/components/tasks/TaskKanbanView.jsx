@@ -383,10 +383,12 @@ const TaskKanbanView = ({
           return (
             <div key={hub} className="kanban-hub-section">
               <div className="kanban-hub-header">
-                <h3 className="kanban-hub-title">
-                  {hub === 'MULTI' ? 'Multi-Hub Tasks' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
-                </h3>
-                <span className="kanban-hub-task-count">{hubTasks.length} tasks</span>
+                <div className="kanban-hub-title-group">
+                  <h3 className="kanban-hub-title">
+                    {hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
+                  </h3>
+                  <span className="kanban-hub-task-count">({hubTasks.length})</span>
+                </div>
               </div>
               <StageNavigationTray
                 stageList={visibleStages}
