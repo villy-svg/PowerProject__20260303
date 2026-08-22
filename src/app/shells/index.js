@@ -5,6 +5,8 @@
 export { default as LayoutShell } from './LayoutShell';
 export { default as DesktopLayout } from './DesktopLayout';
 export { default as MobileLayout } from './MobileLayout';
+export { default as DesktopManagementShell } from './DesktopManagementShell';
+export { default as MobileManagementShell } from './MobileManagementShell';
 export { default as DesktopHeader } from './DesktopHeader';
 export { default as MobileHeader } from './MobileHeader';
 export { default as DesktopSidebar } from './DesktopSidebar';

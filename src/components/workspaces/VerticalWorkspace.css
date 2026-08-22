@@ -151,7 +151,7 @@
     bottom: 0; /* Full height by default (tray hidden) */
     left: 200px;
     transform: translateX(-100%);
-    box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+    box-shadow: 10px 0 30px color-mix(in srgb, var(--bg-color), transparent 50%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -180,7 +180,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   transition: all 0.3s ease;

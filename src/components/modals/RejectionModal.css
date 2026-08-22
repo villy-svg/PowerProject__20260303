@@ -42,7 +42,7 @@
 .rejection-textarea:focus {
   border-color: var(--brand-red, var(--status-danger));
   background: rgba(239, 68, 68, 0.05);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+  box-shadow: var(--shadow-halo);
 }
 .rejection-actions {
   display: flex;
@@ -59,13 +59,13 @@
 }
 .rejection-actions .cancel-btn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 .rejection-actions .confirm-reject-btn {
   background: var(--brand-red, var(--status-danger)) !important;
   border-color: var(--brand-red, var(--status-danger)) !important;
   color: white !important;
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  box-shadow: var(--shadow-halo);
 }
 .rejection-actions .confirm-reject-btn:hover {
   filter: brightness(1.1);

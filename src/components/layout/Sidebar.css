@@ -217,7 +217,7 @@
     transform: translateY(100%);
     opacity: 1 !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
     border-radius: 24px 24px 0 0;
     z-index: 3010;
     overflow-y: auto;
@@ -271,7 +271,7 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   z-index: 3000;
@@ -464,8 +464,8 @@
 }
 
 .mobile-sidebar-shell .sub-tray-option-btn.locked:hover {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 95%);
   color: rgba(255, 255, 255, 0.7);
   transform: none;
 }

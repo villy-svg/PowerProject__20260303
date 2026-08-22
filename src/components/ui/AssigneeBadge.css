@@ -3,8 +3,8 @@
 
 .assignee-you {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 80%);
   color: var(--text-color);
 }
 .assignee-none {

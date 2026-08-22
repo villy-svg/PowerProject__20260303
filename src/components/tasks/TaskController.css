@@ -92,7 +92,7 @@
   left: 0;
   width: 100vw;
   height: 100dvh;
-  background: rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(4px);
   z-index: 1000;
 }
@@ -149,8 +149,8 @@
 }
 
 .merge-option-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -182,7 +182,7 @@
   font-size: 0.6rem;
   font-weight: 500;
   padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-radius: 10px;
   text-transform: uppercase;
 }
@@ -248,7 +248,7 @@
 }
 
 .cancel-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   color: white;
   min-width: 100px;
 }
@@ -482,4 +482,4 @@
     justify-content: center !important;
     align-items: center !important;
   }
-}
+}

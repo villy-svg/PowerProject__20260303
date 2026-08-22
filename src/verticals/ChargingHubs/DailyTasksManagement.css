@@ -17,7 +17,7 @@
 }
 .template-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 .template-card.inactive {
   opacity: 0.6;
@@ -82,7 +82,7 @@
   max-width: 600px;
 }
 .icon-btn.test {
-  background: rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   color: var(--text-color);
   opacity: 0.6;
 }
@@ -101,7 +101,7 @@
   text-align: center;
 }
 .status-message.success {
-  background: rgba(16, 185, 129, 0.1);
+  background: color-mix(in srgb, var(--status-success), transparent 90%);
   color: var(--brand-green);
   border: 1px solid var(--brand-green);
 }

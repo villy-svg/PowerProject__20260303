@@ -9,7 +9,7 @@
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(0, 0, 0, 0.65);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 
@@ -36,7 +36,7 @@
   background: var(--bg-color);
   border: 1px solid transparent;
   border-radius: var(--radius-squircle, 24px);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 40px var(--halo-glow);
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 40px var(--halo-glow);
 
   animation: ota-modal-scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -87,7 +87,7 @@
 }
 
 .ota-modal__version-chip--old {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   color: var(--text-color);
   opacity: 0.6;

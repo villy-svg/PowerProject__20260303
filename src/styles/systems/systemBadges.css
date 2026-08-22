@@ -45,7 +45,7 @@
 .submission-status-badge.pending {
   background: var(--badge-amber-bg);
   color: var(--badge-amber-text);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 70%);
 }
 .submission-status-badge.approved {
   background: var(--badge-green-bg);

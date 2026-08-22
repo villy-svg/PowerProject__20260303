@@ -21,7 +21,7 @@
   color: var(--brand-green);
   margin-bottom: 1.25rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -68,7 +68,7 @@
 .employee-form .form-group input:focus,
 .employee-form .form-group select:focus {
   border-color: var(--brand-green);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-color);
   box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.2);
 }
 .employee-form .form-footer {
@@ -95,10 +95,10 @@
   width: 6px;
 }
 .modal-content-area::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
 }
 .modal-content-area::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 10px;
 }
 .employee-form .form-footer.sticky {
@@ -107,7 +107,7 @@
   background: var(--panel-bg); /* Match modal background */
   padding-bottom: 1rem;
   z-index: 10;
-  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 -10px 20px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 .employee-form .page-controls {
@@ -115,7 +115,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 1rem;
-  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-top: 1px solid var(--border-color, color-mix(in srgb, var(--text-color), transparent 90%));
   margin-top: 1rem;
 }
 .button-group {
@@ -153,14 +153,14 @@
 }
 .employee-form .halo-button.back-btn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 /* Wizard Header */
 .form-wizard-header {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   padding-bottom: 0.75rem;
   justify-content: flex-start;
 }
@@ -203,8 +203,8 @@
 .employee-form.view-only-mode .form-group input,
 .employee-form.view-only-mode .form-group select {
   cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 95%);
   color: rgba(255, 255, 255, 0.6);
 }
 .view-only-mode .optional {
@@ -284,8 +284,8 @@
 }
 
 .upload-dropzone {
-  border: 2px dashed rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed color-mix(in srgb, var(--text-color), transparent 85%);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 12px;
   padding: 2rem;
   text-align: center;
@@ -343,7 +343,7 @@
 .progress-bar-container {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-color);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -358,7 +358,7 @@
 .spinner-mini {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-top-color: var(--brand-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -379,9 +379,9 @@
   align-items: center;
   gap: 0.5rem;
   padding: 3rem 1rem;
-  background: rgba(255, 255, 255, 0.01);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   color: rgba(255, 255, 255, 0.4);
 }
 
@@ -397,8 +397,8 @@
 }
 
 .doc-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1rem;
   display: flex;
@@ -409,20 +409,20 @@
 }
 
 .doc-card:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
 
 .doc-preview {
   height: 120px;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .doc-thumbnail {
@@ -480,7 +480,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   border: none;
   border-radius: 50%;
   color: var(--text-color);
@@ -499,4 +499,4 @@
 }
 .delete-doc-btn:hover {
   background: var(--status-danger);
-}
+}

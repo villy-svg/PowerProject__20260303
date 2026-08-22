@@ -106,7 +106,7 @@ const TaskController = (props) => {
     }
   }, [props.onTrayVisibilityChange]);
 
-  // ─── Viewport Detection (guards backdrop + blur to mobile/tablet only) ────
+  // ─── Viewport Detection (guards component structures to mobile/tablet only) ────
   const { isDesktop } = useIsMobile();
 
   // ─── Header Menu State ───────────────────────────────────────────
@@ -216,12 +216,12 @@ const TaskController = (props) => {
                   {mode}
                 </button>
               ))}
-              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view, DISABLED on mobile */}
-              {isDesktop && viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
+              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
+              {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
                 <>
-                  <span className="view-toggle-divider" aria-hidden="true" />
+                  <span className="view-toggle-divider mobile-hidden" aria-hidden="true" />
                   <button
-                    className={`view-toggle-btn view-toggle-btn--group ${groupByHubs ? 'active' : ''}`}
+                    className={`view-toggle-btn view-toggle-btn--group mobile-hidden ${groupByHubs ? 'active' : ''}`}
                     onClick={() => setGroupByHubs(!groupByHubs)}
                     title={groupByHubs ? 'Ungroup by Hub' : 'Group by Hub'}
                   >
@@ -363,19 +363,16 @@ const TaskController = (props) => {
         TaskFormComponent={TaskFormComponent}
       />
 
-      {/* Backdrop only exists in the DOM on mobile/tablet (≤ 1024px).
-           On desktop the header menu is an inline row — no overlay needed. */}
-      {!isDesktop && isHeaderMenuOpen && (
+      {/* Backdrop is hidden by CSS on desktop. */}
+      {isHeaderMenuOpen && (
         <div 
           className="menu-backdrop" 
           onClick={() => setIsHeaderMenuOpen(false)} 
         />
       )}
 
-      {/* Blur is a mobile-only UX cue for when an overlay panel covers content.
-           On desktop the sub-sidebar is an inline panel and the menu is an inline
-           row — blurring the board would block access to controls. */}
-      <div className={`workspace-main-view ${(!isDesktop && (isHeaderMenuOpen || isSubSidebarOpen)) ? 'is-blurred' : ''}`}>
+      {/* Blur is neutralized by CSS on desktop. */}
+      <div className={`workspace-main-view ${(isHeaderMenuOpen || isSubSidebarOpen) ? 'is-blurred' : ''}`}>
         {actualViewMode === 'kanban' ? (
           <TaskKanbanView
             tasks={hierarchyFilteredTasks}

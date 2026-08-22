@@ -106,8 +106,8 @@
   margin-top: 12px;
   margin-bottom: 12px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle);
   box-shadow: none;
   max-height: none;
@@ -189,7 +189,7 @@
   transform: translateY(100%);
   opacity: 1 !important;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
   border-radius: 24px 24px 0 0;
   z-index: 3010;
   overflow-y: auto;
@@ -221,7 +221,7 @@
   bottom: 0;
   left: 0;
   transform: translateX(-100%);
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 10px 0 30px color-mix(in srgb, var(--bg-color), transparent 50%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -421,7 +421,7 @@
   width: 100% !important;
   margin-top: 4px !important;
   padding-top: 8px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-color);
   /* flex-shrink: 0 prevents this section from being squashed in the flex column */
   flex-shrink: 0 !important;
   /* display:block breaks out of any inherited flex context so children flow naturally */

@@ -72,7 +72,7 @@
 
 /* Each label + control pair */
 .cqr-form-group {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 14px;
@@ -80,7 +80,7 @@
 }
 
 .cqr-form-group:focus-within {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-color: var(--brand-mint);
 }
 
@@ -195,7 +195,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 8px 12px;
@@ -249,7 +249,7 @@
 .cqr-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  border: 2px solid color-mix(in srgb, var(--text-color), transparent 85%);
   border-top-color: var(--brand-mint);
   border-radius: 50%;
   animation: cqr-spin 0.8s linear infinite;

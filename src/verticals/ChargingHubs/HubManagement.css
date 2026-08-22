@@ -34,19 +34,19 @@
   width: 6px;
 }
 .hubs-grid::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 10px;
 }
 .hubs-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 10px;
 }
 .hubs-grid::-webkit-scrollbar-thumb:hover {
   background: var(--brand-green);
 }
 .hub-card {
-  background: rgba(255, 255, 255, 0.02); /* Soft glass background */
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Satin edge */
+  background: color-mix(in srgb, var(--text-color), transparent 98%); /* Soft glass background */
+  border: 1px solid var(--border-color); /* Satin edge */
   backdrop-filter: blur(var(--glass-blur, 16px)); /* Glassmorphism */
   border-radius: var(--radius-squircle, 24px); /* Squircle corner */
   padding: 16px;
@@ -60,9 +60,9 @@
 }
 .hub-card:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0, 0, 0, 0.2));
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 85%);
+  box-shadow: var(--shadow-premium, 0 12px 40px color-mix(in srgb, var(--bg-color), transparent 50%));
 }
 /* .status-badge definition merged into the one below at line 113 */
 .status-badge.active { background: transparent; color: var(--priority-low); }
@@ -172,7 +172,7 @@
   background: transparent;
 }
 .hubs-list-view::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 10px;
 }
 .hubs-list-view::-webkit-scrollbar-thumb:hover {
@@ -205,7 +205,7 @@
 }
 .management-table tr:last-child td { border-bottom: none; }
 .management-table tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
 }
 .name-cell {
   font-weight: 700;
@@ -242,7 +242,7 @@
   font-size: 1rem;
 }
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-color: var(--brand-green);
   color: var(--brand-green);
   transform: translateY(-2px);
@@ -254,7 +254,7 @@
 .code-font {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
-  background: rgba(255,255,255,0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -340,7 +340,7 @@
 
 .error-boundary-pre {
   text-align: left;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   padding: 10px;
   border-radius: 8px;
   overflow-x: auto;

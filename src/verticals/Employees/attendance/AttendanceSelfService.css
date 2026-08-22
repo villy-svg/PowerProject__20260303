@@ -142,7 +142,7 @@
 .self-service__shift-btn.active {
   /* Selected state: 2px border + subtle tint (ui-design-system §4) */
   border: 2px solid var(--brand-green);
-  background: rgba(16, 185, 129, 0.15);
+  background: color-mix(in srgb, var(--status-success), transparent 85%);
   color: var(--brand-green);
 }
 
@@ -241,7 +241,7 @@
   border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle, 24px);
   overflow: hidden;
-  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0, 0, 0, 0.4));
+  box-shadow: var(--shadow-premium, 0 12px 40px color-mix(in srgb, var(--bg-color), transparent 50%));
   flex-shrink: 0;
 }
 
@@ -417,7 +417,7 @@
 /* Selected tab — halo pattern per ui-design-system §4 */
 .self-service__tab-btn--active {
   border: 2px solid var(--brand-green);
-  background: rgba(16, 185, 129, 0.15);
+  background: color-mix(in srgb, var(--status-success), transparent 85%);
   color: var(--brand-green);
 }
 
@@ -447,8 +447,8 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: color-mix(in srgb, var(--status-warning), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 65%);
   border-radius: var(--radius-button, 12px);
   animation: alarm-slide-in 0.3s ease;
   flex-shrink: 0;
@@ -579,7 +579,7 @@
 }
 
 @keyframes live-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success), transparent 50%); }
   50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
 }
 
@@ -603,7 +603,7 @@
 
 /* Hub card */
 .live-attendance__hub-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle, 24px);
   overflow: hidden;
@@ -635,7 +635,7 @@
   min-height: 20px;
   display: inline-flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-color);
@@ -664,8 +664,8 @@
   min-height: 20px;
   display: inline-flex;
   align-items: center;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: color-mix(in srgb, var(--status-success), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 70%);
   border-radius: 4px;
   color: var(--status-success, var(--status-success));
 }
@@ -681,8 +681,8 @@
   min-height: 20px;
   display: inline-flex;
   align-items: center;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 65%);
   border-radius: 4px;
   color: var(--status-warning, var(--status-warning));
 }
@@ -700,7 +700,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 1.1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   transition: background 0.15s ease;
 }
 
@@ -714,11 +714,11 @@
 
 /* Subtle amber tint for overtime rows */
 .live-attendance__user-row--overtime {
-  background: rgba(245, 158, 11, 0.04);
+  background: color-mix(in srgb, var(--status-warning), transparent 96%);
 }
 
 .live-attendance__user-row--overtime:hover {
-  background: rgba(245, 158, 11, 0.07);
+  background: color-mix(in srgb, var(--status-warning), transparent 93%);
 }
 
 .live-attendance__user-info {
@@ -747,7 +747,7 @@
   min-height: 18px;
   display: inline-flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-color);
@@ -793,8 +793,8 @@
   min-height: 18px;
   display: inline-flex;
   align-items: center;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: color-mix(in srgb, var(--status-warning), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 60%);
   border-radius: 4px;
   color: var(--status-warning, var(--status-warning));
   animation: overtime-flash 3s ease-in-out infinite;
@@ -910,23 +910,23 @@
 }
 
 .live-attendance__force-confirm-btn {
-  background: rgba(16, 185, 129, 0.12);
+  background: color-mix(in srgb, var(--status-success), transparent 88%);
   color: var(--status-success, var(--status-success));
-  border-color: rgba(16, 185, 129, 0.35);
+  border-color: color-mix(in srgb, var(--status-success), transparent 65%);
 }
 
 .live-attendance__force-confirm-btn:hover {
-  background: rgba(16, 185, 129, 0.25);
+  background: color-mix(in srgb, var(--status-success), transparent 75%);
 }
 
 .live-attendance__force-cancel-btn {
-  background: rgba(244, 63, 94, 0.1);
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
   color: var(--status-danger, var(--status-danger));
-  border-color: rgba(244, 63, 94, 0.3);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 70%);
 }
 
 .live-attendance__force-cancel-btn:hover {
-  background: rgba(244, 63, 94, 0.2);
+  background: color-mix(in srgb, var(--status-danger), transparent 80%);
 }
 
 /* Phone / contact link — ghost at rest, visible on row hover */
@@ -960,7 +960,7 @@
 
 .live-attendance__contact-btn:hover:not(.live-attendance__contact-btn--disabled) {
   color: var(--brand-green);
-  background: rgba(13, 148, 136, 0.1);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
   transform: scale(1.1);
 }
 

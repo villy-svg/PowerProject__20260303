@@ -41,7 +41,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
-  background: rgba(0, 0, 0, 0.05);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   border-radius: 20px;
 }
 .conflict-tile {

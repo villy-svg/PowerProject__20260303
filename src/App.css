@@ -124,7 +124,7 @@
   font-size: 0.75rem;
   padding: 2px 6px;
   opacity: 0.8;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-family: var(--font-mono);
@@ -133,4 +133,4 @@
   padding: 4px 8px;
   font-size: 0.75rem;
   color: var(--brand-green);
-}
+}

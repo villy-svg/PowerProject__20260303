@@ -5,7 +5,7 @@
 
 .leave-table-wrapper {
   overflow-x: auto;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 12px;
   border: 1px solid var(--border-color);
 }
@@ -187,7 +187,7 @@
 
 .leave-list-container {
   overflow-x: auto;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 12px;
   border: 1px solid var(--border-color);
 }
@@ -208,7 +208,7 @@
 .leave-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -224,11 +224,11 @@
   width: 90%;
   max-width: 500px;
   color: var(--text-color);
-  box-shadow: var(--shadow-premium, 0 12px 40px rgba(0,0,0,0.2));
+  box-shadow: var(--shadow-premium, 0 12px 40px color-mix(in srgb, var(--bg-color), transparent 50%));
 }
 
 .leave-modal-form-group {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 14px;

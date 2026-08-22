@@ -365,7 +365,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   // Includes tasks the user is ASSIGNED to OR tasks the user CREATED,
   // so creators can always track tickets they raised regardless of assignment.
   const escalationTasks = tasks.filter(t =>
-    t.stageId !== 'COMPLETED' && (
+    ['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId) && (
       t.verticalId === 'escalation_tasks' ||
       ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') &&
        (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
@@ -373,7 +373,31 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       taskUtils.isAssignee(t, user) || isCreator(t)
     )
   );
-  const regularMyTasks = myTasks.filter(t => !escalationTasks.some(et => et.id === t.id));
+  // Pre-filter exactly as passed to CentralisedTaskBoard
+  const centralisedTasksProp = tasks.filter(t => 
+    t.stageId !== 'COMPLETED' &&
+    t.verticalId !== 'escalation_tasks' && 
+    !((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') && 
+      (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+  );
+
+  const assignedCentralisedTasks = centralisedTasksProp.filter(t => taskUtils.isAssignee(t, user) || isCreator(t));
+
+  // regularMyTasks matches exactly what CentralisedTaskBoard renders
+  const regularMyTasks = assignedCentralisedTasks.filter(t => {
+    if (!['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId)) return false;
+    
+    let current = t;
+    while (current.parentTask) {
+      const parent = centralisedTasksProp.find(pt => pt.id === current.parentTask);
+      if (!parent) break;
+      if (taskUtils.isAssignee(parent, user) || isCreator(parent)) {
+        return false;
+      }
+      current = parent;
+    }
+    return true;
+  });
   const hasEscalations = escalationTasks.length > 0;
 
   // Auto-switch away from escalations if they disappear
@@ -584,12 +608,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         <CentralisedTaskBoard
           title="Centralised Task View"
           description={"Centralized Tasks workspace has all active tasks assigned to you by your team and managers at PowerPod.\n\nಕೇಂದ್ರೀಕೃತ ಕಾರ್ಯಗಳ ಕಾರ್ಯಸ್ಥಳವು ನಿಮ್ಮ ತಂಡ ಮತ್ತು ಪವರ್ಪಾಡ್ನಲ್ಲಿ ವ್ಯವಸ್ಥಾಪಕರು ನಿಮಗೆ ನಿಯೋಜಿಸಿದ ಎಲ್ಲಾ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳನ್ನು ಹೊಂದಿದೆ."}
-          tasks={tasks.filter(t => 
-            t.stageId !== 'COMPLETED' &&
-            t.verticalId !== 'escalation_tasks' && 
-            !((t.verticalId === (verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS') || t.verticalId === 'CHARGING_HUBS') && 
-              (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
-          )}
+          tasks={centralisedTasksProp}
           user={user}
           permissions={permissions}
           verticals={verticals}

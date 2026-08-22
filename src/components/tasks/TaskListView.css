@@ -51,7 +51,7 @@
 }
 .list-task-row.drop-target {
   border: 2px dashed var(--brand-green) !important;
-  background: rgba(16, 185, 129, 0.05) !important;
+  background: color-mix(in srgb, var(--status-success), transparent 95%) !important;
   transform: translateX(8px) !important;
 }
 .tree-node-wrapper {
@@ -250,4 +250,4 @@
   gap: 32px;
   padding-left: 16px;
   border-left: 2px solid var(--border-color);
-}
+}

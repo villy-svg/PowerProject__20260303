@@ -124,7 +124,7 @@
   background-color: var(--status-neutral);
   /* Matching In Progress Blue */
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--status-neutral), transparent 20%);
   animation: pulse-blue-dot 2s infinite ease-in-out;
   flex-shrink: 0;
   display: inline-block;
@@ -134,19 +134,19 @@
   0% {
     opacity: 0.6;
     transform: scale(1);
-    box-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--status-neutral), transparent 60%);
   }
 
   50% {
     opacity: 1;
     transform: scale(1.3);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.9);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--status-neutral), transparent 10%);
   }
 
   100% {
     opacity: 0.6;
     transform: scale(1);
-    box-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--status-neutral), transparent 60%);
   }
 }
 
@@ -156,7 +156,7 @@
   background-color: var(--status-warning);
   /* Matching Review Amber/Yellow */
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--status-warning), transparent 20%);
   animation: pulse-yellow-dot 2s infinite ease-in-out;
   flex-shrink: 0;
   display: inline-block;
@@ -166,19 +166,19 @@
   0% {
     opacity: 0.6;
     transform: scale(1);
-    box-shadow: 0 0 4px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--status-warning), transparent 60%);
   }
 
   50% {
     opacity: 1;
     transform: scale(1.3);
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.9);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--status-warning), transparent 10%);
   }
 
   100% {
     opacity: 0.6;
     transform: scale(1);
-    box-shadow: 0 0 4px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 4px color-mix(in srgb, var(--status-warning), transparent 60%);
   }
 }
 
@@ -215,14 +215,12 @@
 
 /* Unified Controls Layout */
 .card-row-3 {
-  display: flex;
   align-items: center;
   justify-content: flex-start; /* Snapped Left */
   gap: 8px;
   flex-wrap: wrap; /* Allow wrapping */
   overflow-x: auto;
   scrollbar-width: none;
-  padding-top: 12px;
   border-top: none;
 }
 
@@ -280,7 +278,7 @@
   font-weight: 600;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   color: var(--text-color);
   opacity: 0.6;
   border: 1px solid var(--border-color);
@@ -320,15 +318,15 @@
 }
 
 .recursive-progress-badge {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: color-mix(in srgb, var(--status-neutral), transparent 90%);
   color: var(--status-neutral);
-  border-color: rgba(59, 130, 246, 0.2);
+  border-color: color-mix(in srgb, var(--status-neutral), transparent 80%);
 }
 
 .subtask-progress-badge:hover,
 .recursive-progress-badge:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--bg-color), transparent 50%);
   filter: brightness(1.2);
 }
 
@@ -347,7 +345,7 @@
   letter-spacing: 0.3px;
   text-transform: capitalize;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   color: var(--text-color);
   opacity: 0.7;
   border: 1px solid var(--border-color);
@@ -378,7 +376,7 @@
   border-radius: 4px;
   color: var(--text-color);
   opacity: 0.4;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
 }
 
@@ -398,7 +396,6 @@
     border-color: var(--stage-color, var(--brand-mint));
     box-shadow: 0 15px 35px var(--halo-glow);
     z-index: 10;
-    padding-bottom: 20px;
   }
 
   .task-card-master:hover .card-header-row {
@@ -480,7 +477,6 @@
     overflow-x: visible; 
     justify-content: flex-start;
     gap: 6px; 
-    padding-bottom: 8px;
   }
 
   .action-icon-btn {
@@ -506,7 +502,6 @@
 
 .mobile-description-container {
   width: 100%;
-  margin-top: 4px;
 }
 
 .read-more-btn {
@@ -538,7 +533,7 @@
   margin-top: 6px;
   font-size: 0.82rem;
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   padding: 8px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
@@ -565,7 +560,7 @@
 
 /* VIEWER badge: context-only variant of card-priority */
 .card-priority.context-viewer-badge {
-  background-color: var(--bg-elevated, rgba(255,255,255,0.05));
+  background-color: var(--bg-elevated, color-mix(in srgb, var(--text-color), transparent 95%));
   color: var(--text-secondary);
   font-size: 0.6rem;
   padding: 1px 4px;

@@ -130,7 +130,7 @@
 }
 
 .attendance-cell:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .attendance-cell__status-label {

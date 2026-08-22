@@ -145,7 +145,7 @@ const MobileSidebar = ({
                         <div className="tray-icon">
                           <IconShield size={20} />
                         </div>
-                        <span>Access</span>
+                          <span>Access</span>
                       </button>
                     )}
                   </>

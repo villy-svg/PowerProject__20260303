@@ -52,7 +52,7 @@
   background: var(--bg-color) !important; /* Truly solid dark background to prevent bleed-through */
   border: none;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
   z-index: 1000;
   max-height: 280px;
   overflow-y: auto;
@@ -63,7 +63,7 @@
 .custom-dropdown-menu.direction-up {
   top: auto;
   bottom: calc(100% + 5px);
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 -10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 .custom-dropdown-option {
@@ -73,7 +73,7 @@
   padding: 10px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .custom-dropdown-option:last-child {
@@ -81,7 +81,7 @@
 }
 
 .custom-dropdown-option:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .custom-dropdown-option.selected {
@@ -91,7 +91,7 @@
 .custom-dropdown-checkbox {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid color-mix(in srgb, var(--text-color), transparent 80%);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -113,7 +113,7 @@
 
 .custom-dropdown-text {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-color);
   font-weight: 500;
 }
 
@@ -127,11 +127,11 @@
   width: 6px;
 }
 .custom-dropdown-menu::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 10px;
 }
 .custom-dropdown-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--text-color), transparent 80%);
 }
 
 /* ─── Custom Select Component (Reusable) ─── */
@@ -238,8 +238,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   border-radius: 50%;
   width: 18px;
   height: 18px;
@@ -296,8 +296,8 @@
   margin: 8px;
   padding: 8px 12px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   border-radius: 8px;
   color: var(--brand-green);
   font-weight: 600;
@@ -330,7 +330,7 @@
   opacity: 0.6;
   cursor: default;
   user-select: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .bd-option-group:first-child .bd-option-group-header {
@@ -369,7 +369,7 @@
 }
 
 .bd-pill-remove {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border: none;
   border-radius: 50%;
   width: 14px;
@@ -403,9 +403,9 @@
 
 /* ── BaseDropdown: Footer Slot ── */
 .bd-footer-slot {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
 }

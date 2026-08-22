@@ -1,7 +1,7 @@
 .task-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -26,7 +26,7 @@
   /* Critical for flex shrinking */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--bg-color), transparent 50%);
   position: relative;
   overflow: hidden;
 }

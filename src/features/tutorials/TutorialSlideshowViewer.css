@@ -89,7 +89,7 @@
 
 /* Flow Cards */
 .tutorial-flow-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle, 24px);
   padding: 24px;
@@ -104,8 +104,8 @@
 .tutorial-flow-card:hover {
   transform: translateY(-2px);
   border-color: var(--brand-green);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 15px var(--halo-glow);
-  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px var(--halo-glow);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .flow-card-header {
@@ -164,7 +164,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   padding-top: 16px;
   margin-top: auto; /* Ensure it stays at the bottom of the card */
 }
@@ -220,7 +220,7 @@
 .tutorial-slideshow-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 9999;
@@ -240,7 +240,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 50px color-mix(in srgb, var(--bg-color), transparent 50%);
   position: relative;
 }
 
@@ -251,7 +251,7 @@
   align-items: center;
   padding: 14px 24px;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.01);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
 }
 
 .flow-category-label {
@@ -289,7 +289,7 @@
 
 .slideshow-close-btn:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   color: var(--brand-red, var(--status-danger));
 }
 
@@ -309,8 +309,8 @@
   max-height: 100%;
   display: inline-block;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 .tutorial-screenshot-img {
@@ -334,7 +334,7 @@
   position: absolute;
   border: 1px solid transparent;
   border-radius: 50%;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 15px var(--halo-glow);
+  box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px var(--halo-glow);
   transform: translate(0, 0);
   animation: pulseHighlightCircle 2s infinite ease-in-out;
   pointer-events: none;
@@ -353,22 +353,22 @@
   padding: 3px 8px;
   border-radius: 4px;
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--bg-color), transparent 50%);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 @keyframes pulseHighlightCircle {
   0% {
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 8px var(--halo-glow);
+    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 8px var(--halo-glow);
     border-color: var(--brand-green);
   }
   50% {
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 25px rgba(45, 212, 191, 0.4);
+    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 25px rgba(45, 212, 191, 0.4);
     border-color: var(--text-color);
   }
   100% {
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4), 0 0 8px var(--halo-glow);
+    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 8px var(--halo-glow);
     border-color: var(--brand-green);
   }
 }
@@ -466,7 +466,7 @@
 }
 
 .arrow-text-label {
-  background: rgba(0, 0, 0, 0.8);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   border: 1px solid var(--border-color);
   color: var(--brand-green);
   font-family: 'JetBrains Mono', monospace;
@@ -477,21 +477,21 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 /* Slideshow Modal Footer */
 .slideshow-modal-footer {
   padding: 4px 24px 4px 24px;
   border-top: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.01);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .slideshow-caption-box {
-  background: rgba(255, 255, 255, 0.01);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-left: 4px solid var(--brand-green);
   padding: 4px 12px;
   border-radius: 0 8px 8px 0;
@@ -544,7 +544,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background: color-mix(in srgb, var(--text-color), transparent 85%);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -736,7 +736,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 8px 16px color-mix(in srgb, var(--bg-color), transparent 50%));
 }
 
 .onboarding-image-container.logo-container {
@@ -840,7 +840,7 @@
 @media screen and (min-width: 769px) {
   .tutorial-slideshow-overlay.onboarding-overlay {
     padding: 24px;
-    background: rgba(0, 0, 0, 0.8);
+    background: color-mix(in srgb, var(--bg-color), transparent 50%);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
@@ -851,7 +851,7 @@
     max-height: 620px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-squircle, 24px); /* Beautiful squircle corners on desktop */
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: 0 20px 50px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 0 1px color-mix(in srgb, var(--text-color), transparent 95%);
   }
 }
 /* ==========================================================================
@@ -880,8 +880,8 @@
 .slideshow-editor__input {
   width: 100%;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 4px;
   color: var(--text-color, var(--text-color));
   font-size: 1.1rem;
@@ -898,8 +898,8 @@
 .slideshow-editor__textarea {
   width: 100%;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 4px;
   color: var(--text-color, var(--text-color));
   font-size: 0.9rem;

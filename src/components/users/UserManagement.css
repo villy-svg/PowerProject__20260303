@@ -19,8 +19,8 @@
   padding: 12px 16px;
   border-radius: 10px;
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px solid var(--border-color);
 }
 
 .user-category-header-left {
@@ -549,7 +549,7 @@
 
 /* Subtle highlight on rows with an explicit DB override */
 .feature-level-row--overridden {
-  background: rgba(245, 158, 11, 0.04);
+  background: color-mix(in srgb, var(--status-warning), transparent 96%);
   margin: 0 -8px;
   padding: 8px 8px;
   border-radius: 6px;
@@ -580,8 +580,8 @@
   min-height: 16px;
   display: inline-flex;
   align-items: center;
-  background: rgba(245, 158, 11, 0.14);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: color-mix(in srgb, var(--status-warning), transparent 86%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 60%);
   border-radius: 3px;
   color: var(--brand-amber, var(--status-warning));
   flex-shrink: 0;

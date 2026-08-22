@@ -1,0 +1,15 @@
+.mobile-management-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-light);
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.management-content-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

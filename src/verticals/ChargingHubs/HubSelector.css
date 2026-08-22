@@ -65,7 +65,7 @@
 .hub-code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   padding: 1px 4px;
   border-radius: 3px;
   width: fit-content;
@@ -74,7 +74,7 @@
 
 .hub-name {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-color);
 }
 
 .no-hubs {

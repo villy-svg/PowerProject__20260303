@@ -49,7 +49,8 @@ component already listed under a `Draft`, `In Review`, or `Approved` feature, yo
 
 | Feature | Status | Last Updated | Tables Touched | Components Touched | Owner Session |
 |---|---|---|---|---|---|
-| _(no features documented yet)_ | — | — | — | — | — |
+| [Employee Attendance Board Optimization](./employee_attendance_board_optimization.md) | Draft | 2026-08-22 | None | `EmployeeAttendanceBoard.jsx`, `AttendanceGrid.jsx`, `MasterPageHeader.jsx` | Antigravity session |
+| [Signup & Login Flow](./signup_login_flow.md) | Implemented | 2026-08-22 | `hr_employees`, etc. | `Auth` components | Unknown |
 
 ---
 

@@ -111,8 +111,6 @@ const MobileLayout = ({
              it has no content and would create blank space below the fixed brand title.
              The brand title (position:fixed) already serves as the dashboard header. */}
 
-
-
         {/* Content */}
         <main className="app-content">
           {children}

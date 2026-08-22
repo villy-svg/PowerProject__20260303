@@ -15,7 +15,7 @@
 }
 
 .data-grid__thead {
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-bottom: 2px solid var(--border-color);
 }
 
@@ -95,7 +95,7 @@
   margin-top: 2px;
   z-index: 10;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 .data-grid__tr {

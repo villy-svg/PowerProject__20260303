@@ -74,7 +74,7 @@
   backdrop-filter: blur(20px);
   animation: slideDown 0.2s ease-out;
   width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 255, 135, 0.05);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px rgba(0, 255, 135, 0.05);
 }
 
 /* ── 3. Desktop Sidebar ──────────────────────────────────────────────── */

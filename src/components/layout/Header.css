@@ -141,7 +141,7 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #f59e0b !important;
+  color: var(--status-warning) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .header-tutorial-btn {

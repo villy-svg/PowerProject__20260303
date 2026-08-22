@@ -134,7 +134,7 @@
   padding: 2px 8px;
   border-radius: 4px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   opacity: 0.6;
   margin-left: auto;
 }
@@ -163,7 +163,7 @@
 
 /* ── Rule Card ──────────────────────────────────────────────── */
 .rule-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-squircle, 24px);
   padding: 1.25rem 1.4rem;
@@ -186,7 +186,7 @@
 
 .rule-card:hover {
   border-color: color-mix(in srgb, var(--brand-green), transparent 60%);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18), 0 0 0 1px color-mix(in srgb, var(--brand-green), transparent 80%);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 0 1px color-mix(in srgb, var(--brand-green), transparent 80%);
   transform: translateY(-2px);
 }
 
@@ -222,7 +222,7 @@
   padding: 2px 7px;
   border-radius: 4px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   opacity: 0.7;
   white-space: normal;
   line-height: 1.3;

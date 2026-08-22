@@ -68,7 +68,7 @@
   --brand-red: var(--status-danger);
   --brand-amber: var(--status-warning);
   --brand-emerald: var(--status-success);
-  --color-white: var(--color-white);
+  --color-white: #ffffff;
   --text-secondary: #71717a;
   --surface-deep: #f4f4f5;
 }

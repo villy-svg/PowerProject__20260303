@@ -4,7 +4,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -98,7 +98,7 @@
 }
 
 .form-group:focus-within {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-color: var(--border-color);
 }
 
@@ -129,7 +129,7 @@
 
 .form-input-container:focus-within {
   border-color: var(--brand-green);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .form-input-container input,
@@ -330,7 +330,7 @@ select:-webkit-autofill:focus {
   font-weight: 600;
   font-family: 'Inter', system-ui, sans-serif;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .status-message.success {
@@ -386,11 +386,11 @@ select:-webkit-autofill:focus {
 
 /* Upload zone & thumbnail previews */
 .form-upload-zone {
-  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border: 2px dashed color-mix(in srgb, var(--text-color), transparent 85%);
   border-radius: 8px;
   padding: 1.5rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 6px;
@@ -399,7 +399,7 @@ select:-webkit-autofill:focus {
 .form-upload-zone:hover,
 .form-upload-zone.drag-active {
   border-color: var(--brand-green);
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
 .form-upload-zone .upload-icon {
@@ -423,7 +423,7 @@ select:-webkit-autofill:focus {
 .file-chip {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 6px;
   padding: 4px 8px;

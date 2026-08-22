@@ -10,6 +10,9 @@ import { useDuplicateDetection } from '../../hooks/useDuplicateDetection';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { IconEdit, IconTrash, IconX, IconPlus, IconChevronDown } from '../../components/ui/Icons';
 import RBACManageButton from '../../components/ui/RBACManageButton';
+import { useLayoutShell } from '../../app/shells/useLayoutShell';
+import HubManagementDesktop from './HubManagementDesktop';
+import HubManagementMobile from './HubManagementMobile';
 
 // Error boundary component
 class HubManagementErrorBoundary extends React.Component {
@@ -193,6 +196,8 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
     }
   };
 
+  const { shellType } = useLayoutShell();
+
   return (
     <>
       <MasterPageHeader
@@ -210,7 +215,6 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                 + Add New Hub
               </button>
             )}
-            {/* Master Admin: Manage RBAC for Hubs */}
             <RBACManageButton
               user={user}
               verticalId="charging_hubs"
@@ -220,22 +224,6 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
         }
         canAdd={permissions.canCreate}
         onAddClick={() => handleOpenModal()}
-        expandedLeft={
-          <div className="view-mode-toggle">
-            <button
-              className={`view-toggle-btn ${ui.viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => ui.setViewMode('grid')}
-            >
-              Grid
-            </button>
-            <button
-              className={`view-toggle-btn ${ui.viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => ui.setViewMode('list')}
-            >
-              List
-            </button>
-          </div>
-        }
         expandedRight={
           <>
             <div className="data-operations-wrapper">
@@ -252,15 +240,15 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
                 {isActionsDropdownOpen && (
                   <div className="actions-dropdown-menu">
                     <HubCSVDownload
-              className="master-action-btn"
-              data={hubs}
-              label="Export Hubs"
-              filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
-            />
-            <HubCSVDownload className="master-action-btn" label="Download Template" />
-            {permissions.canCreate && (
-              <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
-            )}
+                      className="master-action-btn"
+                      data={hubs}
+                      label="Export Hubs"
+                      filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
+                    />
+                    <HubCSVDownload className="master-action-btn" label="Download Template" />
+                    {permissions.canCreate && (
+                      <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
+                    )}
                   </div>
                 )}
               </div>
@@ -271,86 +259,22 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
 
       {loading && !ui.isAddModalOpen && <div className="loading-spinner">Loading Hubs...</div>}
 
-      {ui.viewMode === 'grid' ? (
-        <div className="hubs-grid">
-          {hubsWithDuplicateInfo.map(hub => (
-            <div key={hub.id} className={`hub-card ${hub.isDuplicate ? 'duplicate-name' : ''}`}>
-              {hub.isDuplicate && (
-                <span className="duplicate-badge">DUP</span>
-              )}
-              <div className="hub-card-top-row">
-                <h3 className="hub-code-large">{hub.hub_code || 'NO CODE'}</h3>
-                <div className={`status-badge ${hub.status?.toLowerCase()}`}>{hub.status}</div>
-              </div>
-              
-              <div className="hub-card-bottom-row">
-                <p className="hub-name-small">{hub.name}</p>
-                <span className="divider">|</span>
-                <p className="hub-city">{hub.city || 'No city set'}</p>
-                <div className="hub-actions">
-                  {permissions.canUpdate && (
-                    <button className="halo-button edit-btn" onClick={() => handleOpenModal(hub)} title="Edit Hub">
-                      <IconEdit size={16} />
-                    </button>
-                  )}
-                  {permissions.canDelete && (
-                    <button className="halo-button delete-btn" onClick={() => handleDelete(hub.id)} title="Delete Hub">
-                      <IconTrash size={16} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          {hubs.length === 0 && !loading && (
-            <div className="empty-state">
-              <p>No hubs found. Create your first charging hub to get started!</p>
-            </div>
-          )}
-        </div>
+      {shellType === 'desktop' ? (
+        <HubManagementDesktop
+          hubsWithDuplicateInfo={hubsWithDuplicateInfo}
+          loading={loading}
+          permissions={permissions}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+        />
       ) : (
-        <div className="hubs-list-view responsive-table-wrapper">
-          <table className="management-table">
-            <thead>
-              <tr>
-                <th>Hub Name</th>
-                <th>Code</th>
-                <th>City/Address</th>
-                <th>Status</th>
-                <th className="actions-col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {hubsWithDuplicateInfo.map(hub => (
-                <tr key={hub.id} className={hub.isDuplicate ? 'is-duplicate' : ''}>
-                  <td className="name-cell">
-                    {hub.name}
-                    {hub.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
-                  </td>
-                  <td><code className="code-font">{hub.hub_code || '—'}</code></td>
-                  <td>{hub.city || '—'}</td>
-                  <td>
-                    <span className={`status-pill ${hub.status}`}>{hub.status}</span>
-                  </td>
-                  <td className="actions-col">
-                    <div className="table-actions">
-                      {permissions.canUpdate && (
-                        <button className="icon-btn edit" onClick={() => handleOpenModal(hub)} title="Edit">
-                          <IconEdit size={16} />
-                        </button>
-                      )}
-                      {permissions.canDelete && (
-                        <button className="icon-btn delete" onClick={() => handleDelete(hub.id)} title="Delete">
-                          <IconTrash size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <HubManagementMobile
+          hubsWithDuplicateInfo={hubsWithDuplicateInfo}
+          loading={loading}
+          permissions={permissions}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+        />
       )}
 
       {ui.isAddModalOpen && (

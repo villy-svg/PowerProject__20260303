@@ -80,7 +80,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   cursor: pointer;
@@ -88,7 +88,7 @@
   user-select: none;
 }
 .submission-summary-row:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-color: var(--brand-mint);
 }
 .summary-left, .summary-right {
@@ -183,7 +183,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.7rem;
@@ -295,4 +295,4 @@
 .summary-creation-label {
   font-size: 0.55rem;
   padding: 1px 6px;
-}
+}

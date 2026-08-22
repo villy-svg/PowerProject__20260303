@@ -100,7 +100,7 @@
   color: var(--badge-amber-text);
 }
 .app-user-badge-mini:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-color);
   box-shadow: 0 0 10px var(--halo-glow);
 }
 
@@ -114,7 +114,7 @@
   align-items: center;
   padding: 0.5rem 0;
   margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
   font-size: 0.95rem;
   font-weight: 800;
   color: var(--brand-green);
@@ -136,7 +136,7 @@
   min-width: auto;
   height: auto;
   min-height: auto;
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-radius: 4px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -177,8 +177,8 @@
 .empty-sub-state {
   padding: 2rem;
   text-align: center;
-  background: rgba(255,255,255,0.02);
-  border: 1px dashed rgba(255,255,255,0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px dashed color-mix(in srgb, var(--text-color), transparent 95%);
   border-radius: 8px;
   font-size: 0.9rem;
   opacity: 0.5;
@@ -236,7 +236,7 @@
   content: '';
   position: absolute;
   left: 0;
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
 }
 .tree-node-wrapper::before {
   top: 0;
@@ -295,8 +295,8 @@
   overflow: hidden;
 }
 .employee-tree-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 80%);
 }
 .employee-tree-card.is-current-user {
   border: 1px solid transparent;
@@ -321,7 +321,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
   color: var(--text-color);
   font-size: 0.65rem;
@@ -362,7 +362,7 @@
   opacity: 1;
 }
 .show-others-btn {
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px dashed var(--border-color);
   color: var(--brand-green);
   padding: 6px 14px;
@@ -485,7 +485,7 @@
   align-items: center;
   gap: 12px;
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 0.8rem;
@@ -493,8 +493,8 @@
 }
 
 .remark-summary-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 85%);
 }
 
 .remark-summary-text {

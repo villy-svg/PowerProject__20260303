@@ -22,6 +22,8 @@ import React from 'react';
 import { useLayoutShell } from './useLayoutShell';
 import DesktopLayout from './DesktopLayout';
 import MobileLayout from './MobileLayout';
+import DesktopManagementShell from './DesktopManagementShell';
+import MobileManagementShell from './MobileManagementShell';
 
 const LayoutShell = ({
   // Data props (passed through to content and shells)
@@ -40,7 +42,7 @@ const LayoutShell = ({
   // Content (React children — the actual page being viewed)
   children,
 
-  // PHASE 3 SLOT — not used yet, but the interface is ready
+  // PHASE 3 SLOT
   managementShell: ManagementShellOverride,
 }) => {
   const layout = useLayoutShell();
@@ -62,14 +64,22 @@ const LayoutShell = ({
   if (layout.shellType === 'desktop') {
     return (
       <DesktopLayout {...shellProps}>
-        {children}
+        {layout.isManagementView ? (
+          <DesktopManagementShell {...shellProps}>{children}</DesktopManagementShell>
+        ) : (
+          children
+        )}
       </DesktopLayout>
     );
   }
 
   return (
     <MobileLayout {...shellProps}>
-      {children}
+      {layout.isManagementView ? (
+        <MobileManagementShell {...shellProps}>{children}</MobileManagementShell>
+      ) : (
+        children
+      )}
     </MobileLayout>
   );
 };

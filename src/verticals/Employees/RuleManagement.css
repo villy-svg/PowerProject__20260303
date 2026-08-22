@@ -45,7 +45,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   margin-bottom: 0.6rem;
-  background: rgba(255,255,255,0.02);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   transition: all 0.2s ease;
 }
 

@@ -6,7 +6,7 @@
 .master-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: color-mix(in srgb, var(--bg-color), transparent 50%);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -60,7 +60,7 @@
   border-top: 1px solid var(--border-color);
   margin-top: auto;
   flex-shrink: 0;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -10px 30px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
 @media screen and (max-width: 480px) {
