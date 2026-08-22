@@ -114,18 +114,6 @@
 }
 
 
-.user-mgmt-header {
-  margin-bottom: 32px;
-}
-.user-mgmt-header h2 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--text-color);
-}
-.user-mgmt-header p {
-  opacity: 0.6;
-}
 .user-list-wrapper {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
@@ -785,11 +773,6 @@
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
-@media screen and (max-width: 1280px) {
-  .user-mgmt-header h2 {
-    font-size: 24px;
-  }
-}
 @media screen and (max-width: 1024px) {
   .user-list-wrapper {
     overflow-x: auto;
@@ -807,12 +790,6 @@
   }
 }
 @media screen and (max-width: 768px) {
-  .user-mgmt-header {
-    margin-bottom: 24px;
-  }
-  .user-mgmt-header h2 {
-    font-size: 20px;
-  }
   .user-grid {
     grid-template-columns: 1fr;
   }
@@ -824,6 +801,25 @@
     grid-template-columns: 1fr;
     gap: 16px;
   }
+  .vertical-perm-item,
+  .feature-level-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .v-level-selector {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .v-lvl-btn {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 8px 4px;
+    min-height: 44px; /* Mobile touch target minimum rule */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .user-mgmt-mobile-menu {
@@ -834,7 +830,6 @@
   width: 100%;
 }
 .user-mgmt-mobile-menu .view-toggle-group {
-  display: flex;
   width: 100%;
 }
 .user-mgmt-mobile-menu .view-toggle-btn {

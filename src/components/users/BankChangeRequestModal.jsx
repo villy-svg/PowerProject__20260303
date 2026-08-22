@@ -26,6 +26,15 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
       setError("No employee ID associated with this user.");
       return;
     }
+
+    // Prevent users from entering bank names instead of their actual name
+    const forbiddenKeywords = ['bank', 'hdfc', 'idfc', 'sbi', 'icici', 'axis', 'kotak', 'of', 'karur', 'sahakar', 'cooperative'];
+    const forbiddenRegex = new RegExp(`\\b(${forbiddenKeywords.join('|')})\\b`, 'i');
+    
+    if (forbiddenRegex.test(formData.accountName)) {
+      alert('please put Account Holder Person Name in A/C Name');
+      return;
+    }
     
     setIsSubmitting(true);
     setError('');
