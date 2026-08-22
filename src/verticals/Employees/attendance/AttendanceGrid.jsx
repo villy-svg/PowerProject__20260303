@@ -46,7 +46,7 @@ function formatDateHeader(dateStr) {
 // ---------------------------------------------------------------------------
 // AttendanceCell — individual grid cell (sub-component)
 // ---------------------------------------------------------------------------
-const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employeeId, date }) => {
+const AttendanceCell = React.memo(({ record, onClick, isEditing, onCellChange, hubs, employeeId, date }) => {
   const status = record?.attendance_status || 'null';
   const meta = STATUS_META[status] || STATUS_META['null'];
   const hasPendingEdit = !!record?.has_pending_edit;
@@ -124,7 +124,13 @@ const AttendanceCell = ({ record, onClick, isEditing, onCellChange, hubs, employ
       )}
     </td>
   );
-};
+}, (prev, next) => {
+  return prev.isEditing === next.isEditing &&
+         prev.record?.attendance_status === next.record?.attendance_status &&
+         prev.record?.hub_id === next.record?.hub_id &&
+         prev.record?.has_pending_edit === next.record?.has_pending_edit &&
+         prev.record?.is_draft === next.record?.is_draft;
+});
 
 // ---------------------------------------------------------------------------
 // EmployeeRowHeader — left-column employee info cell (sub-component)

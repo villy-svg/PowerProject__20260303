@@ -5,6 +5,7 @@ import { VERTICAL_FEATURES } from '../../constants/verticalFeatures';
 import { LEVEL_RANKS } from './useUserManagement';
 import { IconX } from '../ui/Icons';
 import RoleTooltip from '../ui/RoleTooltip';
+import BaseDropdown from '../ui/BaseDropdown';
 
 /**
  * UserEditorModal Component
@@ -63,16 +64,16 @@ const UserEditorModal = (props) => {
               <label className="section-label preset-selector-label">Load from Preset Profile (Optional)</label>
               {users && users.length > 0 ? (
                 <div className="form-input-container">
-                  <select
+                  <BaseDropdown
                     className="master-dropdown"
-                    onChange={(e) => loadPresetPermissions(e.target.value)}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Select a preset to clone its permissions...</option>
-                    {users.map(u => (
-                      <option key={u.id} value={u.id}>{u.name}</option>
-                    ))}
-                  </select>
+                    options={users.map(u => ({ value: u.id, label: u.name }))}
+                    value=""
+                    placeholder="Select a preset to clone its permissions..."
+                    onChange={(val) => {
+                      if (val) loadPresetPermissions(val);
+                    }}
+                    searchable={true}
+                  />
                 </div>
               ) : (
                 <span className="preset-selector-empty">No preset profiles exist yet. Create one from the Users/Presets toggle.</span>

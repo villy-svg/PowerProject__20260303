@@ -293,12 +293,17 @@ const UserManagement = ({ currentUser, setActiveVertical, onShowBottomNav }) => 
         />
       ))}
 
-      {/* Empty state — shown only when all category buckets are empty */}
       {allEmpty && !loading && (
-        <div className="empty-state user-management__empty-state">
-          {profileMode === 'preset'
-            ? 'No preset profiles yet. Click "+ Preset" to create one.'
-            : 'No user profiles found.'}
+        <div className="empty-state-container">
+          <div className="empty-state-icon">👥</div>
+          <h3 className="empty-state-title">
+            {profileMode === 'preset' ? 'No Presets' : 'No Users'}
+          </h3>
+          <p className="empty-state-text">
+            {profileMode === 'preset'
+              ? 'No preset profiles yet. Click "+ Preset" to create one.'
+              : 'No user profiles found.'}
+          </p>
         </div>
       )}
 
