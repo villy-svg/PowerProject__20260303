@@ -6,6 +6,7 @@ import { LEVEL_RANKS } from './useUserManagement';
 import { IconX } from '../ui/Icons';
 import RoleTooltip from '../ui/RoleTooltip';
 import BaseDropdown from '../ui/BaseDropdown';
+import { useLayoutShell } from '../../app/shells/useLayoutShell';
 
 /**
  * UserEditorModal Component
@@ -31,6 +32,9 @@ const UserEditorModal = (props) => {
     loading
   } = props;
 
+  const { shellType } = useLayoutShell();
+  const isMobile = shellType === 'mobile';
+
   const mapVerticalLabel = (label) => {
     if (!label) return '';
     const clean = label.trim().toLowerCase();
@@ -41,6 +45,12 @@ const UserEditorModal = (props) => {
     if (clean === 'vendor manager' || clean === 'vendor') return 'Vendors';
     if (clean === 'data manager' || clean === 'data') return 'Data';
     return label;
+  };
+
+  // On mobile, show single-letter abbreviations (N/V/C/E/A) to prevent horizontal overflow
+  const formatLevelLabel = (lvl) => {
+    if (!isMobile) return lvl.toUpperCase();
+    return lvl.charAt(0).toUpperCase();
   };
 
   if (!user) return null;
@@ -167,7 +177,7 @@ const UserEditorModal = (props) => {
                                   disabled={isTooHigh}
                                   title={isTooHigh ? `Locked by max capability level (${roleLevel.toUpperCase()})` : ''}
                                 >
-                                  {lvl.toUpperCase()}
+                                  {formatLevelLabel(lvl)}
                                 </button>
                               </RoleTooltip>
                             );

@@ -248,12 +248,14 @@ export const useUserManagement = () => {
               // the vertical level. The RPC does a full wipe+replace, so omitting
               // any existing row would silently delete it — breaking any override
               // previously set via the Manage RBAC modal.
+              // NOTE: 'none' is intentionally included — the DB now stores it as an
+              // explicit deny override so the RBAC hook won't fall back to vertical level.
               if (vData.features) {
                 Object.keys(vData.features).forEach(fId => {
                   const fLvl = vData.features[fId];
-                  // Only skip truly absent/none entries to avoid writing noise rows.
-                  // We DO write rows matching the vertical level (they are explicit overrides).
-                  if (fLvl && fLvl !== 'none') {
+                  // Include 'none' explicitly — the DB stores it as an intentional
+                  // deny override. Only skip truly absent/undefined values.
+                  if (fLvl !== undefined && fLvl !== null) {
                     fGrants.push({ vertical_id: vId, feature_id: fId, access_level: fLvl });
                   }
                 });

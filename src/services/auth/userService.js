@@ -56,13 +56,16 @@ export const userService = {
    * Optionally pass isActive to also set the is_active flag atomically.
    */
   async syncPermissions({ userId, roleId, verticalGrants, featureGrants, isActive = true }) {
-    // 1. Sanitize Data (Ensure 'none' levels aren't sent)
+    // 1. Sanitize Data
+    // Vertical grants: 'none' rows are not written — a missing row already means no access.
     const vAccess = verticalGrants
       .filter(v => v.access_level !== 'none')
       .map(v => ({ vertical_id: v.vertical_id, access_level: v.access_level }));
 
+    // Feature grants: 'none' IS passed through — the RPC now stores it as an explicit deny
+    // override so the RBAC hook can distinguish "no rule" (inherit vertical) from "explicit none".
+
     const fAccess = featureGrants
-      .filter(f => f.access_level !== 'none')
       .map(f => ({ 
         vertical_id: f.vertical_id, 
         feature_id: f.feature_id, 

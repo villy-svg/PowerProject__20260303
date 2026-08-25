@@ -104,8 +104,10 @@ export const useRBAC = (user, activeVertical, verticals = {}) => {
         }
         
         // Scenario 1 & 2: Get specific feature level if it exists, otherwise fallback to vertical level.
+        // Use ?? (nullish coalesce) not || so that an explicit 'none' override stored in the DB
+        // is respected rather than being treated as falsy and falling back to the vertical level.
         // THEN cap it by the vertical level using getMinLevel (Scenario 2).
-        const rawFeatureLevel = featureLevels[featureKey] || verticalLevel;
+        const rawFeatureLevel = featureLevels[featureKey] ?? verticalLevel;
         activeFeatureLevel = getMinLevel(verticalLevel, rawFeatureLevel);
     }
     

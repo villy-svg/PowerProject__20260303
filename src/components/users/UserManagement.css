@@ -820,35 +820,35 @@
     align-items: center;
     justify-content: center;
   }
-}
+  .user-mgmt-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    width: 100%;
+  }
+  .user-mgmt-mobile-menu .view-toggle-group {
+    display: flex; /* Ensures Users/Presets buttons sit side-by-side */
+    width: 100%;
+  }
+  .user-mgmt-mobile-menu .view-toggle-btn {
+    flex: 1;
+    font-size: 0.8rem;
+    min-height: 44px; /* Mobile touch target minimum rule */
+  }
 
-.user-mgmt-mobile-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 16px;
-  width: 100%;
-}
-.user-mgmt-mobile-menu .view-toggle-group {
-  width: 100%;
-}
-.user-mgmt-mobile-menu .view-toggle-btn {
-  flex: 1;
-  font-size: 0.8rem;
-  min-height: 44px; /* Mobile touch target minimum rule */
-}
-
-.mobile-actions-row {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-  justify-content: space-between;
-}
-.mobile-actions-row .header-action-btn {
-  flex: 1;
-  padding: 0 10px; 
-  font-size: 0.8rem;
-  min-height: 44px; /* Mobile touch target minimum rule */
+  .mobile-actions-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .mobile-actions-row .header-action-btn {
+    flex: 1;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    min-height: 44px; /* Mobile touch target minimum rule */
+  }
 }
 
 /* ==========================================================================
