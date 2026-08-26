@@ -11,15 +11,22 @@
 --             appear to revert automatically.
 --
 -- Fix:
---   1. Remove the IF access_level != 'none' guard from the feature INSERT loop
+--   1. DROP the legacy 4-argument overload (uuid, text, jsonb, jsonb) first.
+--      CREATE OR REPLACE cannot remove an overload — without this DROP, both
+--      versions coexist and PostgreSQL resolves normal saves (which omit
+--      p_is_active) to the OLD broken 4-arg version, completely bypassing fix.
+--   2. Remove the IF access_level != 'none' guard from the feature INSERT loop
 --      so that 'none' rows can be persisted as explicit deny overrides.
---   2. Vertical access rows still skip 'none' — a missing vertical row already
+--   3. Vertical access rows still skip 'none' — a missing vertical row already
 --      means no access, so storing 'none' there would be pure noise.
---   3. The RBAC hook (useRBAC.js) is updated separately to use
+--   4. The RBAC hook (useRBAC.js) is updated separately to use
 --      featureLevels[key] ?? verticalLevel (nullish coalesce) instead of ||,
 --      so that an explicit 'none' stored in the DB is respected rather than
 --      being falsy-coalesced away to the vertical level.
 -- =============================================================================
+
+-- Drop the old 4-arg overload so only the new 5-arg version exists.
+DROP FUNCTION IF EXISTS public.sync_user_permissions(uuid, text, jsonb, jsonb);
 
 CREATE OR REPLACE FUNCTION public.sync_user_permissions(
     p_target_id  uuid,
@@ -105,6 +112,15 @@ BEGIN
             jsonb_build_object('role_id', p_role_id, 'is_active', p_is_active, 'v_access', p_v_access, 'f_access', p_f_access));
 END;
 $$;
+
+-- STEP 7: Evolution Log
+INSERT INTO public.database_evolution_log (migration_name, summary, affected_tables)
+VALUES (
+    '20260825000000_fix_feature_access_none_override',
+    'Updated sync_user_permissions RPC: dropped legacy 4-arg overload, allowed explicit ''none'' feature_access rows.',
+    ARRAY['feature_access']
+)
+ON CONFLICT (migration_name) DO NOTHING;
 
 -- Mandatory: force PostgREST schema cache refresh
 NOTIFY pgrst, 'reload schema';
