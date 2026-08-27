@@ -70,6 +70,9 @@
   left: auto; /* Required to override DropdownSystem.css */
   width: 260px;
   max-width: calc(100vw - 32px); /* Safety net for mobile */
+  /* max-height + overflow prevents items being cut off below viewport on small Android screens */
+  max-height: 80dvh;
+  overflow-y: auto;
   background: var(--bg-color);
   border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: 12px;
@@ -419,4 +422,32 @@
 @keyframes slide-up-fade {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bank section header row — replaces inline style={{ display: 'flex', alignItems: 'center', gap: '8px' }} */
+.bank-section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bank pending status line — shown inline below bank account fields */
+.bank-pending-status {
+  font-size: 0.72rem;
+  color: var(--status-warning);
+  font-weight: 600;
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* App version chip — shown at the very bottom of the dropdown */
+.dropdown-version {
+  padding: 6px 10px 4px;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+  user-select: none;
 }

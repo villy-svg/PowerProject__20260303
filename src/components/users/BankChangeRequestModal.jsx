@@ -4,7 +4,7 @@ import { supabase } from '../../services/core/supabaseClient';
 import { taskService } from '../../services/tasks/taskService';
 import '../../styles/ManagementForms.css';
 
-const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
+const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     accountName: user?.bankDetails?.accountName || '',
     accountNumber: user?.bankDetails?.accountNumber || '',
@@ -13,6 +13,8 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  // submitted: true once the request is successfully created — flips the modal to a success view
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -90,7 +92,8 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
         assigned_to: assigneeIds.length > 0 ? assigneeIds : null,
       });
 
-      onSuccess();
+      // Flip to success confirmation view — caller's onSuccess() is triggered when user clicks Close
+      setSubmitted(true);
     } catch (err) {
       console.error("Error submitting bank change request:", err);
       setError("Failed to submit request. Please try again.");
@@ -106,70 +109,95 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
           <h2>Request Bank Details</h2>
           <button className="close-modal" onClick={onClose}>×</button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="vertical-task-form">
+
+        {/* ── Success confirmation view ── */}
+        {submitted ? (
           <div className="modal-content-area u-flex-col-gap-16">
+            <div className="bank-modal-success-icon" aria-hidden="true">✅</div>
+            <h3 className="bank-modal-success-title">Request Submitted!</h3>
             <p className="status-message u-bg-halo u-border-none u-text-primary u-opacity-80 u-m-0">
-              Changes to your bank details require approval from a Master Admin. 
-              Once submitted, your request will be reviewed.
+              Your bank details update has been sent for Master Admin approval.
+              You'll see "Submitted for Approval" in your profile until it's reviewed.
             </p>
-
-            {error && <div className="status-message error">{error}</div>}
-
-            <div className="form-group">
-              <label>Account Name</label>
-              <div className="form-input-container">
-                <input
-                  type="text"
-                  name="accountName"
-                  value={formData.accountName}
-                  onChange={handleChange}
-                  placeholder="Name on bank account"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Account Number</label>
-              <div className="form-input-container">
-                <input
-                  type="tel"
-                  name="accountNumber"
-                  value={formData.accountNumber}
-                  onChange={handleChange}
-                  placeholder="Bank account number"
-                  inputMode="numeric"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>IFSC Code</label>
-              <div className="form-input-container">
-                <input
-                  type="text"
-                  name="ifscCode"
-                  value={formData.ifscCode}
-                  onChange={handleChange}
-                  placeholder="IFSC Code"
-                  className="u-text-upper"
-                  required
-                />
-              </div>
+            <div className="modal-footer sticky">
+              <button className="halo-button" onClick={onSuccess}>
+                Close
+              </button>
             </div>
           </div>
+        ) : (
+          /* ── Request form ── */
+          <form onSubmit={handleSubmit} className="vertical-task-form">
+            <div className="modal-content-area u-flex-col-gap-16">
+              <p className="status-message u-bg-halo u-border-none u-text-primary u-opacity-80 u-m-0">
+                Changes to your bank details require approval from a Master Admin. 
+                Once submitted, your request will be reviewed.
+              </p>
 
-          <div className="modal-footer sticky">
-            <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </button>
-            <button type="submit" className="halo-button" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
-            </button>
-          </div>
-        </form>
+              {/* Re-submission warning — shown when a pending request already exists */}
+              {isBankUpdatePending && (
+                <div className="status-message warning">
+                  ⚠️ You already have a pending request under review. Submitting again will create a new request alongside it.
+                </div>
+              )}
+
+              {error && <div className="status-message error">{error}</div>}
+
+              <div className="form-group">
+                <label>Account Name</label>
+                <div className="form-input-container">
+                  <input
+                    type="text"
+                    name="accountName"
+                    value={formData.accountName}
+                    onChange={handleChange}
+                    placeholder="Name on bank account"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Account Number</label>
+                <div className="form-input-container">
+                  <input
+                    type="tel"
+                    name="accountNumber"
+                    value={formData.accountNumber}
+                    onChange={handleChange}
+                    placeholder="Bank account number"
+                    inputMode="numeric"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>IFSC Code</label>
+                <div className="form-input-container">
+                  <input
+                    type="text"
+                    name="ifscCode"
+                    value={formData.ifscCode}
+                    onChange={handleChange}
+                    placeholder="IFSC Code"
+                    className="u-text-upper"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer sticky">
+              <button type="button" className="halo-button secondary" onClick={onClose} disabled={isSubmitting}>
+                Cancel
+              </button>
+              <button type="submit" className="halo-button" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>,
     document.body
@@ -177,3 +205,4 @@ const BankChangeRequestModal = ({ user, onClose, onSuccess }) => {
 };
 
 export default BankChangeRequestModal;
+

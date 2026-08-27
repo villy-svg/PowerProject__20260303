@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { ROLE_LIST } from '../../constants/roles';
+import { APP_VERSION } from '../../constants/appVersion';
+import { otaUpdateService } from '../../services/core/otaUpdateService';
 import BankChangeRequestModal from './BankChangeRequestModal';
 import { useOTAContext } from '../../app/contexts/OTAContext';
 import { supabase } from '../../services/core/supabaseClient';
@@ -26,7 +28,7 @@ const UserProfile = ({
   const [isBankUpdatePending, setIsBankUpdatePending] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { updateAvailable } = useOTAContext();
+  const { updateAvailable, downloadComplete, isApplying, checkForUpdate } = useOTAContext();
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -158,10 +160,10 @@ const UserProfile = ({
 
               <div className="dropdown-section">
                 <div className="dropdown-section-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="bank-section-title-row">
                     <span>Bank Details</span>
                     {isBankUpdatePending && (
-                      <span className="ui-badge warning" style={{ fontSize: '0.7rem', padding: '2px 6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span className="ui-badge warning">
                         ⏳ Pending
                       </span>
                     )}
@@ -171,7 +173,6 @@ const UserProfile = ({
                       className="dropdown-action-btn" 
                       onClick={() => setShowBankChangeModal(true)}
                       disabled={isBankUpdatePending}
-                      style={{ opacity: isBankUpdatePending ? 0.5 : 1 }}
                     >
                       Update
                     </button>
@@ -179,14 +180,20 @@ const UserProfile = ({
                 </div>
                 <div className="dropdown-static-content">
                   {user?.bankDetails ? (
-                    <div className="bank-info-grid">
-                      <span className="bank-label">A/C Name</span>
-                      <span className="bank-value">{user.bankDetails.accountName || 'N/A'}</span>
-                      <span className="bank-label">A/C No</span>
-                      <span className="bank-value">{user.bankDetails.accountNumber || 'N/A'}</span>
-                      <span className="bank-label">IFSC</span>
-                      <span className="bank-value">{user.bankDetails.ifscCode || 'N/A'}</span>
-                    </div>
+                    <>
+                      <div className="bank-info-grid">
+                        <span className="bank-label">A/C Name</span>
+                        <span className="bank-value">{user.bankDetails.accountName || 'N/A'}</span>
+                        <span className="bank-label">A/C No</span>
+                        <span className="bank-value">{user.bankDetails.accountNumber || 'N/A'}</span>
+                        <span className="bank-label">IFSC</span>
+                        <span className="bank-value">{user.bankDetails.ifscCode || 'N/A'}</span>
+                      </div>
+                      {/* Show inline pending status below account details — confirms submission to the user */}
+                      {isBankUpdatePending && (
+                        <div className="bank-pending-status">⏳ Submitted for Approval</div>
+                      )}
+                    </>
                   ) : (
                     <span className="text-muted">No linked bank account.</span>
                   )}
@@ -226,10 +233,20 @@ const UserProfile = ({
               {updateAvailable && (
                 <button
                   className="dropdown-item update-item"
-                  onClick={() => closeMenu()}
+                  onClick={() => {
+                    closeMenu();
+                    // If bundle already downloaded → restart immediately into new version
+                    if (downloadComplete) {
+                      otaUpdateService.restartNow();
+                    } else if (!isApplying) {
+                      // Bundle not yet downloading → re-trigger check
+                      checkForUpdate();
+                    }
+                    // If isApplying === true: download in progress, click is a no-op (toast is already showing)
+                  }}
                 >
                   <span className="update-dot" />
-                  Update App Available
+                  {isApplying ? 'Downloading Update…' : 'Update App Available'}
                 </button>
               )}
 
@@ -256,6 +273,9 @@ const UserProfile = ({
               <button className="dropdown-item" onClick={() => { onLogout(); closeMenu(); }}>
                 Log Out
               </button>
+
+              {/* App version — shown at the bottom so support can verify which build a user is running */}
+              <div className="dropdown-version">v{APP_VERSION}</div>
             </>
           ) : (
             <>
@@ -299,12 +319,13 @@ const UserProfile = ({
 
       {showBankChangeModal && (
         <BankChangeRequestModal 
-          user={user} 
+          user={user}
+          isBankUpdatePending={isBankUpdatePending}
           onClose={() => setShowBankChangeModal(false)}
           onSuccess={() => {
+            // Success confirmation is shown inside the modal — just close it here.
+            // No alert(), no auto-close of dropdown — user can see "Submitted for Approval" in bank section.
             setShowBankChangeModal(false);
-            closeMenu();
-            alert('Bank update request submitted successfully.');
           }}
         />
       )}
@@ -312,4 +333,4 @@ const UserProfile = ({
   );
 };
 
-export default UserProfile;
+export default UserProfile;

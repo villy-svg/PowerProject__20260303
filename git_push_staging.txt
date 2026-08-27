@@ -1,8 +1,14 @@
 # 1. Commit Staging Local to Staging Server
 git checkout staging
 git add .
-git commit -m "260825 RBAC Updates 1.0.1"
+git commit -m "260825 RBAC Updates 1.0.3"
 git push origin staging
+git checkout main
+git merge staging 
+git push origin main
+#npm run build
+git pull origin main 
+git checkout staging
 
 
 #Check Current Git Branch
