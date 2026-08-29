@@ -286,7 +286,9 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                         {isMasterAdmin ? (
                           <span className="master-admin-badge">Master Admin (All Access)</span>
                         ) : (
-                          <div className="access-selector-group">
+                          <div className={`access-selector-group${featureId ? ' compact-selector' : ''}`}>
+                            {/* compact-selector added conditionally for feature-level modals — enables single-letter button styling */}
+
                             {ACCESS_LEVELS.map(lvl => {
                               // A button is "active" if this level is the current effective level
                               const isActive = effectiveLevel === lvl;
@@ -314,7 +316,9 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                                     disabled={isSyncing}
                                     title={isInherited ? `Inherited from vertical: ${lvl}` : undefined}
                                   >
-                                    {lvl.toUpperCase()}
+                                    {/* In compact (feature-level) mode, show single letter only; vertical mode shows full word */}
+                                    {featureId ? lvl.charAt(0).toUpperCase() : lvl.toUpperCase()}
+                                    {/* inherited tag: hidden in compact mode via CSS (no room), visible in vertical mode */}
                                     {isInherited && (
                                       <span className="access-lvl-inherited-tag">inherited</span>
                                     )}
@@ -322,16 +326,29 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                                 </RoleTooltip>
                               );
                             })}
-                            {/* Reset to inherit button — only shown for feature modals with an explicit override */}
-                            {featureId && isExplicit && (
-                              <button
-                                className="access-lvl-btn access-lvl-reset"
-                                onClick={() => handleAccessChange(user.id, undefined)}
-                                disabled={isSyncing}
-                                title={`Reset to inherited vertical level${inherited ? `: ${inherited}` : ''}`}
+                            {/* I (Inherit) button — first-class option, always visible in feature-level modals.
+                                Replaces the old ↩ RESET button. Active when there is no explicit override.
+                                Clicking it clears any override and restores inheritance from the vertical. */}
+                            {featureId && (
+                              <RoleTooltip
+                                level="inherit"
+                                contextName={titleLabel}
+                                isFeature={true}
                               >
-                                ↩ RESET
-                              </button>
+                                <button
+                                  className={[
+                                    'access-lvl-btn',
+                                    'lvl-inherit',
+                                    !isExplicit              ? 'active'      : '',
+                                    !isExplicit && hasChanged ? 'has-changed' : '',
+                                  ].filter(Boolean).join(' ')}
+                                  onClick={() => handleAccessChange(user.id, undefined)}
+                                  disabled={isSyncing}
+                                  title={`Inherit from vertical${inherited ? `: ${inherited}` : ''}`}
+                                >
+                                  I
+                                </button>
+                              </RoleTooltip>
                             )}
                           </div>
                         )}

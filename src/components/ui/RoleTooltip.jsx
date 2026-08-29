@@ -21,6 +21,8 @@ const ROLE_BASE = {
   contributor: { headline: 'Read + Create',         color: 'var(--brand-emerald, #10b981)' },
   editor:      { headline: 'Read + Create + Edit',  color: 'var(--brand-amber, #f59e0b)' },
   admin:       { headline: 'Full Access',           color: 'var(--priority-urgent, #f43f5e)' },
+  // inherit: used for the I button in feature-level modals — clears any explicit override
+  inherit:     { headline: 'Inherited Access',      color: 'var(--text-color)' },
 };
 
 /* --------------------------------------------------------------------------
@@ -182,6 +184,8 @@ const GENERIC_ACCESS = {
   contributor: { can: ['View & browse all records', 'Create new entries'], cannot: ['Edit existing records', 'Delete records'], summary: 'For staff who submit new data but should not modify past entries.' },
   editor:      { can: ['View & browse all records', 'Create new entries', 'Edit & update existing records'], cannot: ['Delete records'], summary: 'For trusted members who fully manage day-to-day data.' },
   admin:       { can: ['View, create, edit, and delete all records'], cannot: [], summary: 'Full CRUD. Grant only to trusted administrators for this area.' },
+  // inherit: shown in the I button tooltip — explains that this clears the feature override
+  inherit:     { can: ['Access determined by the parent vertical permission'], cannot: [], summary: 'Removes any feature-level override. The user\'s access level reverts to whatever is set at the vertical level.' },
 };
 
 /* --------------------------------------------------------------------------

@@ -280,6 +280,11 @@
     flex: 1;
     text-align: center;
   }
+
+  /* Bug 3 fix: override mobile flex: 1 for compact buttons so 28px square sizing is preserved */
+  .compact-selector .access-lvl-btn {
+    flex: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -329,21 +334,48 @@
   line-height: 1;
 }
 
-/* Reset-to-inherit button: subtle, neutral, with a left-arrow icon */
-.access-lvl-btn.access-lvl-reset {
-  background: color-mix(in srgb, var(--text-color), transparent 97%);
-  border: 1px dashed color-mix(in srgb, var(--text-color), transparent 70%);
-  color: color-mix(in srgb, var(--text-color), transparent 40%);
-  font-size: 0.6rem;
-  font-style: normal;
-  padding: 6px 8px;
-  white-space: nowrap;
+/* --------------------------------------------------------------------------
+   I (Inherit) button — first-class option replacing ↩ RESET.
+   Neutral/muted styling; active state = dashed text-color border (inherit signal).
+   Only rendered in feature-level modals (featureId present).
+   -------------------------------------------------------------------------- */
+.access-lvl-btn.lvl-inherit {
+  color: color-mix(in srgb, var(--text-color), transparent 55%);
+  border-style: dashed;
 }
 
-.access-lvl-btn.access-lvl-reset:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--text-color), transparent 50%);
+.access-lvl-btn.lvl-inherit:hover:not(:disabled) {
   color: var(--text-color);
   background: color-mix(in srgb, var(--text-color), transparent 92%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 50%);
+}
+
+/* Active state: user is in inherited mode (no explicit override) */
+.access-lvl-btn.active.lvl-inherit {
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
+  border-color: color-mix(in srgb, var(--text-color), transparent 60%);
+  border-style: solid;
+  color: var(--text-color);
+}
+
+/* --------------------------------------------------------------------------
+   Compact selector — feature-level modals only (.compact-selector class).
+   Converts buttons to uniform square badges showing single letters (N V C E A I).
+   Scoped so vertical modals are 100% unaffected.
+   -------------------------------------------------------------------------- */
+.compact-selector .access-lvl-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+/* Hide the "inherited" sub-label inside buttons in compact mode — no room */
+.compact-selector .access-lvl-inherited-tag {
+  display: none;
 }
 
 /* --------------------------------------------------------------------------

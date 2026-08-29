@@ -1,7 +1,7 @@
 # 1. Commit Staging Local to Staging Server
 git checkout staging
 git add .
-git commit -m "260825 RBAC Updates 1.0.3"
+git commit -m "260825 RBAC Updates 1.0.4"
 git push origin staging
 git checkout main
 git merge staging 
