@@ -352,10 +352,10 @@
 
 /* Active state: user is in inherited mode (no explicit override) */
 .access-lvl-btn.active.lvl-inherit {
-  background: color-mix(in srgb, var(--text-color), transparent 90%);
-  border-color: color-mix(in srgb, var(--text-color), transparent 60%);
+  background: color-mix(in srgb, var(--brand-blue), transparent 85%);
+  border-color: var(--brand-blue);
   border-style: solid;
-  color: var(--text-color);
+  color: var(--brand-blue);
 }
 
 /* --------------------------------------------------------------------------

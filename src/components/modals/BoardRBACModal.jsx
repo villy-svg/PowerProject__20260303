@@ -294,8 +294,8 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
                               const isActive = effectiveLevel === lvl;
                               // "Inherited" label: level matches inherited AND no explicit override was set
                               const isInherited = featureId && !isExplicit && inherited === lvl && lvl !== 'none';
-                              // "Changed" indicator: this button IS the active one AND state differs from saved
-                              const isChanged = isActive && hasChanged;
+                              // "Changed" indicator: this button IS the active one AND state differs from saved AND it's an explicit override
+                              const isChanged = isActive && hasChanged && isExplicit;
 
                               return (
                                 <RoleTooltip

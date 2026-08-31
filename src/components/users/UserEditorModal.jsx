@@ -219,7 +219,7 @@ const UserEditorModal = (props) => {
                                         >
                                           <button
                                             type="button"
-                                            className={`v-lvl-btn ${fLevel === lvl ? 'active' : ''} lvl-${lvl}`}
+                                            className={`v-lvl-btn ${fLevel === lvl && hasOverride ? 'active' : ''} lvl-${lvl}`}
                                             onClick={() => !isTooHigh && onFeatureLevelChange(v.id, feature.id, lvl)}
                                             disabled={isTooHigh}
                                             title={isTooHigh ? `Locked by vertical access level (${normalizedVLevel.toUpperCase()})` : ''}
@@ -229,6 +229,21 @@ const UserEditorModal = (props) => {
                                         </RoleTooltip>
                                       );
                                     })}
+                                    {/* I (Inherit) button to clear explicit overrides */}
+                                    <RoleTooltip
+                                      level="inherit"
+                                      contextName={feature.label}
+                                      isFeature={true}
+                                    >
+                                      <button
+                                        type="button"
+                                        className={`v-lvl-btn lvl-inherit ${!hasOverride ? 'active' : ''}`}
+                                        onClick={() => onFeatureLevelChange(v.id, feature.id, undefined)}
+                                        title={`Inherit from vertical${normalizedVLevel ? `: ${normalizedVLevel}` : ''}`}
+                                      >
+                                        I
+                                      </button>
+                                    </RoleTooltip>
                                   </div>
                                 </div>
                               );

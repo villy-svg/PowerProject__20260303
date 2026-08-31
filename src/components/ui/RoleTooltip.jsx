@@ -22,7 +22,7 @@ const ROLE_BASE = {
   editor:      { headline: 'Read + Create + Edit',  color: 'var(--brand-amber, #f59e0b)' },
   admin:       { headline: 'Full Access',           color: 'var(--priority-urgent, #f43f5e)' },
   // inherit: used for the I button in feature-level modals — clears any explicit override
-  inherit:     { headline: 'Inherited Access',      color: 'var(--text-color)' },
+  inherit:     { headline: 'Inherited Access',      color: 'var(--brand-blue, #3b82f6)' },
 };
 
 /* --------------------------------------------------------------------------

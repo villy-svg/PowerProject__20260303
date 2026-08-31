@@ -413,6 +413,11 @@
   background: color-mix(in srgb, var(--text-secondary), transparent 85%);
   color: var(--text-secondary);
 }
+.v-lvl-btn.active.lvl-inherit {
+  border-color: var(--brand-blue, #3b82f6);
+  background: color-mix(in srgb, var(--brand-blue, #3b82f6), transparent 85%);
+  color: var(--brand-blue, #3b82f6);
+}
 /* Table Tags */
 .v-tag {
   display: inline-block;
