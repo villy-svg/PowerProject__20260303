@@ -360,7 +360,7 @@ export function useAttendanceSelfService(userId) {
   // ---------------------------------------------------------------------------
   // Action: Start Shift (Check In)
   // ---------------------------------------------------------------------------
-  const handleCheckIn = useCallback(async () => {
+  const handleCheckIn = useCallback(async (hubName) => {
     if (!selectedHubId) {
       setError('Please select a hub before starting your shift.');
       return;
@@ -402,13 +402,16 @@ export function useAttendanceSelfService(userId) {
         () => fireOvertimeNotification(setAlarmFired)
       );
 
-      // Pass receipt data to trigger the WhatsApp receipt screen
+      // Pass receipt data to trigger the WhatsApp receipt screen.
+      // hubName is passed in from the HubSelector via CurrentAttendanceTab so the
+      // receipt screen can show the correct hub without an async DB re-fetch.
       setSuccessData({
         action:      'checkin',
         record:      data,
         deviceId,
         geolocation,
         timestamp:   new Date().toISOString(),
+        hubName:     hubName || null,
       });
     } catch (err) {
       console.error('[useAttendanceSelfService] handleCheckIn error:', err);
@@ -443,12 +446,37 @@ export function useAttendanceSelfService(userId) {
       if (alarmTimerRef.current) clearTimeout(alarmTimerRef.current);
       setAlarmFired(false);
 
+      // Resolve the checkout hub name from the last session entry so the
+      // receipt screen can display it without an async re-fetch that could
+      // race with the useMemo that builds the WhatsApp share text.
+      // This is best-effort: if it fails, hubName falls back to null and
+      // AttendanceReceiptScreen shows '—' safely.
+      let checkoutHubName = null;
+      try {
+        let sessions = data?.session_logs_data || [];
+        if (typeof sessions === 'string') {
+          try { sessions = JSON.parse(sessions); } catch { sessions = []; }
+        }
+        const lastSession = sessions[sessions.length - 1];
+        if (lastSession?.hub_id) {
+          const { data: hubData } = await supabase
+            .from('hubs')
+            .select('name')
+            .eq('id', lastSession.hub_id)
+            .single();
+          checkoutHubName = hubData?.name || null;
+        }
+      } catch (hubErr) {
+        console.warn('[useAttendanceSelfService] Non-fatal: could not resolve checkout hub name.', hubErr);
+      }
+
       setSuccessData({
         action:      'checkout',
         record:      data,
         deviceId,
         geolocation,
         timestamp:   new Date().toISOString(),
+        hubName:     checkoutHubName,
       });
     } catch (err) {
       console.error('[useAttendanceSelfService] handleCheckOut error:', err);

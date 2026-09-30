@@ -42,7 +42,7 @@ const UserRoleManagement = ({ permissions, setPermissions, onBack, setActiveVert
         }
       />
 
-      <div className="matrix-container">
+      <div className="matrix-container responsive-table-wrapper">
         <table className="permissions-table">
           <thead>
             <tr>

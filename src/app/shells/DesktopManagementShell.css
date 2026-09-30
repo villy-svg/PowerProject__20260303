@@ -6,7 +6,9 @@
   padding: 32px;
   background-color: var(--surface-card);
   overflow-y: auto;
-  overflow-x: hidden;
+  /* overflow-x: auto — allow wide tables/grids to scroll horizontally
+     rather than being clipped at the shell boundary */
+  overflow-x: auto;
 }
 
 @media (max-width: 1280px) {

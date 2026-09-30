@@ -10,9 +10,13 @@
  * Features:
  *   - 12-hour shift alarm (via browser Notification API or in-page banner fallback).
  *   - RBACManageButton visible only to master_admin, labelled "Current Attendance".
+ *   - Mandatory "No CASH from Drivers" slide shown to ALL users on every check-in.
+ *     The slide uses TutorialSlideshowViewer (layout: 'onboarding') with a forced
+ *     10-second countdown (canSkipTutorial: false) and no Skip button (preventSkip).
  *
  * Skill compliance:
  *   hybrid-mobile-deployment §4 (Platform guards via useAttendanceSelfService hook)
+ *   ui-design-system §1  (Zero inline styles — .self-service__form--retry-center replaces former inline)
  *   ui-design-system §14B (Touch targets ≥ 44px — enforced in CSS)
  *   development-best-practices §4 (Strict modularity — sub-components extracted)
  *   safe-code-modification §2 (No inline styles)
@@ -28,12 +32,55 @@ import CustomSelect from '../../../components/ui/CustomSelect';
 import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './AttendanceSelfService.css';
 import MasterPageHeader from '../../../components/layout/MasterPageHeader';
+import TutorialSlideshowViewer from '../../../features/tutorials/TutorialSlideshowViewer';
+
+// ---------------------------------------------------------------------------
+// NO_CASH_FLOW — single-slide onboarding flow shown after every check-in.
+// Defined at module scope (static constant) so it is never re-created on
+// re-renders. Uses the existing onboarding layout and no_cash_logo.png asset.
+// permissions={{ canSkipTutorial: false }} is passed at render time so the
+// 10-second countdown is always active — master_admin included.
+// ---------------------------------------------------------------------------
+const NO_CASH_FLOW = {
+  id: 'no_cash_reminder',
+  title: 'Important Reminder',
+  category: 'Rules & Regulations',
+  layout: 'onboarding',
+  desktopSlides: [
+    {
+      image: '/logos/no_cash_logo.png',
+      fallbackImage: '/logos/no_cash_logo.png',
+      title: 'No CASH from Drivers',
+      text: 'Do NOT accept cash payments from drivers under any circumstances.\n\nAll payments must be processed through the official payment system only.',
+      annotations: []
+    }
+  ],
+  mobileSlides: [
+    {
+      image: '/logos/no_cash_logo.png',
+      fallbackImage: '/logos/no_cash_logo.png',
+      title: 'No CASH from Drivers',
+      text: 'Do NOT accept cash payments from drivers under any circumstances.\n\nAll payments must be processed through the official payment system only.',
+      annotations: []
+    }
+  ]
+};
+
+// Permissions shim passed to TutorialSlideshowViewer for the No-Cash slide.
+// canSkipTutorial: false  → activates the 10-second countdown for ALL users.
+// canManageRoles: false   → hides edit/add/delete slide controls.
+const NO_CASH_VIEWER_PERMISSIONS = { canSkipTutorial: false, canManageRoles: false };
+
 
 // ---------------------------------------------------------------------------
 // HubSelector — fetches hubs and renders a select element.
 // Extracted as a sub-component to follow single-responsibility principle.
 // ---------------------------------------------------------------------------
-const HubSelector = ({ selectedHubId, onSelect }) => {
+// onHubSelected (optional): called with (id, name) when the user picks a hub.
+// This allows the parent to track the resolved hub name for the receipt
+// screen fix — so successData.hubName is set synchronously at check-in time,
+// eliminating the useMemo race condition in AttendanceReceiptScreen.
+const HubSelector = ({ selectedHubId, onSelect, onHubSelected }) => {
   const [hubs, setHubs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +100,18 @@ const HubSelector = ({ selectedHubId, onSelect }) => {
     fetchHubs();
   }, []);
 
+  // Hub change handler: calls onSelect (id only — existing contract) and
+  // onHubSelected (id + name — new, optional) so the parent can track the
+  // human-readable hub name without a second DB round-trip.
+  const handleHubChange = (val) => {
+    const id = val || null;
+    onSelect(id);
+    if (onHubSelected) {
+      const hub = hubs.find(h => h.id === id);
+      onHubSelected(id, hub?.name || null);
+    }
+  };
+
   return (
     <div className="form-group self-service__hub-group">
       <label className="form-label" htmlFor="self-service-hub-select">SELECT HUB</label>
@@ -61,7 +120,7 @@ const HubSelector = ({ selectedHubId, onSelect }) => {
           id="self-service-hub-select"
           className="master-dropdown"
           value={selectedHubId || ''}
-          onChange={(val) => onSelect(val || null)}
+          onChange={handleHubChange}
           options={[
             { value: '', label: '— Choose your hub —' },
             ...(!loading ? hubs.map(hub => ({ value: hub.id, label: `${hub.hub_code} — ${hub.name}` })) : [])
@@ -173,6 +232,16 @@ const AlarmBanner = ({ onDismiss }) => (
 // CurrentAttendanceTab — the main check-in / check-out form area
 // ---------------------------------------------------------------------------
 const CurrentAttendanceTab = ({ user }) => {
+  // Track the selected hub's display name so it can be passed to handleCheckIn
+  // and bundled into successData — this eliminates the async hub-name race in
+  // AttendanceReceiptScreen that caused the wrong hub to appear on WhatsApp share.
+  const [selectedHubName, setSelectedHubName] = useState(null);
+
+  // No-Cash slide gate: true while the mandatory reminder is displayed after
+  // a successful check-in. The receipt is rendered underneath the overlay and
+  // becomes visible once the user dismisses the slide (after the 10s countdown).
+  const [showNoCashSlide, setShowNoCashSlide] = useState(false);
+
   const {
     todayRecord,
     hasActiveSession,
@@ -190,14 +259,48 @@ const CurrentAttendanceTab = ({ user }) => {
     loadTodayRecord, // BUG-3 fix: was missing — caused ReferenceError on Retry button
   } = useAttendanceSelfService(user?.id);
 
-  // Receipt screen routing: show receipt after successful check-in/out
+  // Intercept check-in: trigger the No-Cash slide overlay immediately after
+  // a successful check-in. The hook's successData is already set by this point,
+  // so the receipt screen is ready underneath when the slide is dismissed.
+  const handleCheckInWithSlide = async (hubName) => {
+    await handleCheckIn(hubName);
+    // Only show the slide if check-in was error-free (successData will be set
+    // by the hook; if an error occurred, successData stays null and we skip).
+    setShowNoCashSlide(true);
+  };
+
+  // Dismiss handler for the No-Cash slide.
+  // Unmounts the overlay; the receipt screen (rendered below) becomes visible.
+  const handleNoCashSlideClose = () => {
+    setShowNoCashSlide(false);
+  };
+
+  // Receipt screen routing: show receipt after successful check-in/out.
+  // The No-Cash overlay (rendered via portal-like fixed overlay) sits on top
+  // of this while showNoCashSlide is true, then reveals it on dismiss.
   if (successData) {
     return (
-      <AttendanceReceiptScreen
-        successData={successData}
-        user={user}
-        onDone={clearSuccessData}
-      />
+      <>
+        <AttendanceReceiptScreen
+          successData={successData}
+          user={user}
+          onDone={clearSuccessData}
+        />
+        {/* No-Cash mandatory slide — full-screen overlay above the receipt.
+            preventSkip=true  : hides the Skip button entirely.
+            NO_CASH_VIEWER_PERMISSIONS : forces canSkipTutorial=false for ALL
+            users (master_admin included), activating the 10-second countdown. */}
+        {showNoCashSlide && (
+          <TutorialSlideshowViewer
+            flow={NO_CASH_FLOW}
+            platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
+            onClose={handleNoCashSlideClose}
+            user={user}
+            permissions={NO_CASH_VIEWER_PERMISSIONS}
+            preventSkip={true}
+          />
+        )}
+      </>
     );
   }
 
@@ -237,7 +340,7 @@ const CurrentAttendanceTab = ({ user }) => {
         </>
       ) : (error && !todayRecord) ? (
         /* State 3: Network Error preventing load — show Retry instead of Start Shift */
-        <div className="self-service__form" style={{ textAlign: 'center', padding: '2rem' }}>
+        <div className="self-service__form self-service__form--retry-center">
           <button
             className="halo-button self-service__action-btn"
             onClick={loadTodayRecord}
@@ -250,11 +353,12 @@ const CurrentAttendanceTab = ({ user }) => {
         /* State 1: No active session — show check-in form */
         <form
           className="self-service__form"
-          onSubmit={(e) => { e.preventDefault(); handleCheckIn(); }}
+          onSubmit={(e) => { e.preventDefault(); handleCheckInWithSlide(selectedHubName); }}
         >
           <HubSelector
             selectedHubId={selectedHubId}
             onSelect={setSelectedHubId}
+            onHubSelected={(_id, name) => setSelectedHubName(name)}
           />
           <ShiftTypeIndicator
             value={selectedShiftType}
@@ -272,6 +376,7 @@ const CurrentAttendanceTab = ({ user }) => {
     </>
   );
 };
+
 
 // ---------------------------------------------------------------------------
 // TAB CONSTANTS

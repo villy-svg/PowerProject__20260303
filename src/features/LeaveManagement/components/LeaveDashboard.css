@@ -5,9 +5,16 @@
 
 .leave-table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth momentum scroll on iOS */
   background: color-mix(in srgb, var(--text-color), transparent 98%);
   border-radius: 12px;
   border: 1px solid var(--border-color);
+}
+
+/* WalletLedgerView table container — enables horizontal scroll on narrow viewports */
+.leave-list-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .leave-table {

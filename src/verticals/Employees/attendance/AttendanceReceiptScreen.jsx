@@ -5,7 +5,7 @@
  * Provides a shareable summary via WhatsApp (Web Share API with deep link fallback).
  *
  * Props:
- *   successData - { action, record, deviceId, geolocation, timestamp }
+ *   successData - { action, record, deviceId, geolocation, timestamp, hubName }
  *                 from useAttendanceSelfService
  *   user        - The logged-in user object
  *   onDone      - Function() → clears successData and returns to self-service screen
@@ -61,14 +61,20 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
 // AttendanceReceiptScreen — main export
 // ---------------------------------------------------------------------------
 const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
-  const { action, record, deviceId, geolocation, timestamp } = successData || {};
+  const { action, record, deviceId, geolocation, timestamp, hubName: successHubName } = successData || {};
 
-  const [resolvedHubName, setResolvedHubName] = useState(record?.employees?.hubs?.name || record?.employees?.hubs?.hub_code || '—');
+  // Fix A: seed from successData.hubName — the hub the employee actually checked in/out at.
+  // Previously seeded from record.employees.hubs.name which is the employee's PROFILE hub
+  // (e.g. Kadubeesanahalli for Ebinezer) and NOT the hub they selected at check-in time.
+  // The race: useMemo baked the wrong hub into shareText before the async correction landed.
+  const [resolvedHubName, setResolvedHubName] = useState(successHubName || '—');
   const [resolvedEmpName, setResolvedEmpName] = useState(record?.employees?.full_name || user?.name || 'Employee');
 
   useEffect(() => {
-    const fetchNames = async () => {
-      // 1. Resolve employee name
+    // Fix C: hub name is now pre-resolved upstream (successData.hubName) so we no longer
+    // need an async DB lookup here. Only resolve the employee name if the join didn't
+    // return it (e.g. RPC result didn't include the full employees join).
+    const fetchEmployeeName = async () => {
       if (record?.employees?.full_name) {
         setResolvedEmpName(record.employees.full_name);
       } else if (record?.employee_id) {
@@ -81,34 +87,9 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
           setResolvedEmpName(empData.full_name);
         }
       }
-
-      // 2. Resolve hub name
-      //    We use session_logs_data to find the relevant hub_id.
-      if (record?.employees?.hubs?.name) {
-        setResolvedHubName(record.employees.hubs.name);
-      } else {
-        // Find hub_id from the last session in session_logs_data
-        let sessions = record?.session_logs_data || [];
-        if (typeof sessions === 'string') {
-          try { sessions = JSON.parse(sessions); } catch (e) { sessions = []; }
-        }
-        const lastSession = sessions[sessions.length - 1];
-        const hubId = lastSession?.hub_id;
-
-        if (hubId) {
-          const { data: hubData } = await supabase
-            .from('hubs')
-            .select('name, hub_code')
-            .eq('id', hubId)
-            .single();
-          if (hubData) {
-            setResolvedHubName(hubData.name || hubData.hub_code || '—');
-          }
-        }
-      }
     };
 
-    fetchNames();
+    fetchEmployeeName();
   }, [record, user]);
 
   // ---------------------------------------------------------------------------

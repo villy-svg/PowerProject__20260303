@@ -89,6 +89,13 @@
   flex-shrink: 0;
 }
 
+/* Retry button wrapper — centres content when a network error
+   prevents the today-record from loading. Replaces former inline style. */
+.self-service__form--retry-center {
+  text-align: center;
+  padding: 2rem;
+}
+
 .self-service__hub-group,
 .self-service__shift-group {
   width: 100%;

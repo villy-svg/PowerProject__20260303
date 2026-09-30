@@ -113,7 +113,10 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto; /* Enable independent scrolling */
-  overflow-x: hidden; /* Prevent horizontal jitter */
+  /* overflow-x: auto — allow wide tables/grids to scroll horizontally.
+     Horizontal jitter is prevented by min-width: 0 on this flex child,
+     not by hiding overflow (which clips scrollable tables). */
+  overflow-x: auto;
   background-color: var(--surface-card);
   min-width: 0;
   display: flex;
