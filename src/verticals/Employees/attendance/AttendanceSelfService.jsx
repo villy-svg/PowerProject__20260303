@@ -51,7 +51,7 @@ const NO_CASH_FLOW = {
       image: '/logos/no_cash_logo.png',
       fallbackImage: '/logos/no_cash_logo.png',
       title: 'No CASH from Drivers',
-      text: 'Do NOT accept cash payments from drivers under any circumstances.\n\nAll payments must be processed through the official payment system only.',
+      text: 'Do not receive take cash/money in personal UPI. FULL salary will be confiscated, and you will be immediately dismissed from your job.\n\nವೈಯಕ್ತಿಕ ಯುಪಿಐ (UPI) ಮೂಲಕ ಹಣವನ್ನು ಸ್ವೀಕರಿಸಬೇಡಿ. ನಿಮ್ಮ ಸಂಪೂರ್ಣ ವೇತನವನ್ನು ಮುಟ್ಟುಗೋಲು ಹಾಕಿಕೊಳ್ಳಲಾಗುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮನ್ನು ತಕ್ಷಣವೇ ಕೆಲಸದಿಂದ ವಜಾಗೊಳಿಸಲಾಗುತ್ತದೆ.',
       annotations: []
     }
   ],
@@ -60,7 +60,7 @@ const NO_CASH_FLOW = {
       image: '/logos/no_cash_logo.png',
       fallbackImage: '/logos/no_cash_logo.png',
       title: 'No CASH from Drivers',
-      text: 'Do NOT accept cash payments from drivers under any circumstances.\n\nAll payments must be processed through the official payment system only.',
+      text: 'Do not receive take cash/money in personal UPI. FULL salary will be confiscated, and you will be immediately dismissed from your job.\n\nವೈಯಕ್ತಿಕ ಯುಪಿಐ (UPI) ಮೂಲಕ ಹಣವನ್ನು ಸ್ವೀಕರಿಸಬೇಡಿ. ನಿಮ್ಮ ಸಂಪೂರ್ಣ ವೇತನವನ್ನು ಮುಟ್ಟುಗೋಲು ಹಾಕಿಕೊಳ್ಳಲಾಗುತ್ತದೆ ಮತ್ತು ನಿಮ್ಮನ್ನು ತಕ್ಷಣವೇ ಕೆಲಸದಿಂದ ವಜಾಗೊಳಿಸಲಾಗುತ್ತದೆ.',
       annotations: []
     }
   ]
