@@ -57,6 +57,7 @@ const EmployeeAttendanceBoard = ({
   const canSuggestEdit = permissions?.canCreate || permissions?.canCreateEmployeeAttendanceBoard;
 
   const planner = useSchedulePlanner({ user, canApprove });
+  const { hubs } = useHubs();
 
   // --- UI View Mode State ---
   const [viewMode, setViewMode] = useState('attendance'); // 'attendance' | 'planner'
@@ -71,8 +72,8 @@ const EmployeeAttendanceBoard = ({
 
   const {
     weekString, setWeekString,
-    activePlanId,
-    employeeSelections,
+    activePlanId, setActivePlanId,
+    employeeSelections, setEmployeeSelections,
     isSubmittingPlanner,
     plannerError, setPlannerError,
     plannerSuccess, setPlannerSuccess,
@@ -285,7 +286,6 @@ const EmployeeAttendanceBoard = ({
           getCellData={getCellData}
           isLoading={viewMode === 'attendance' ? isBoardLoading : false}
           onCellClick={handleCellClick}
-          dateFilterControl={headerLeftActions}
         />
       ) : (
         <AttendanceGrid
