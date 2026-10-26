@@ -97,6 +97,10 @@ const EmployeeListRow = ({
           <span className="role-badge">{emp.role_code || 'ROLE'}</span>
           {emp.is_app_user && <span className="app-user-badge-mini">USER</span>}
           {emp.isDuplicate && <span className="duplicate-badge-mini">DUP</span>}
+          {/* Signed declaration form not yet uploaded (flag maintained by DB trigger) */}
+          {!emp.declaration_uploaded && (
+            <span className="badge-base badge-danger u-text-xs" title="Signed declaration form not uploaded">DEC NA</span>
+          )}
         </div>
 
         {/* 3. Content (Name + Details) */}

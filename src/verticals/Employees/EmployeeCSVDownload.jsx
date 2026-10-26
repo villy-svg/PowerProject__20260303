@@ -58,7 +58,8 @@ const EmployeeCSVDownload = ({ data = [], label, filename, isTemplate = false, c
         'Account Number': emp.account_number || '',
         'IFSC Code': emp.ifsc_code || '',
         'Account Name': emp.account_name || '',
-        'PAN Number': emp.pan_number || ''
+        'PAN Number': emp.pan_number || '',
+        'Declaration Uploaded': emp.declaration_uploaded ? 'Yes' : 'No'
       }));
     }
   };

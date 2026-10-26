@@ -89,8 +89,9 @@ export const updateSubmissionLinks = async (submissionId, links) => {
  * @param {string} submission.submittedBy
  * @param {string} submission.comment
  * @param {Array} submission.links - Array of link objects matching the JSONB schema
+ * @param {'general'|'declaration'} [submission.documentType='general'] - Employee document class
  */
-export const createSubmission = async ({ taskId, employeeId, submittedBy, comment, links = [] }) => {
+export const createSubmission = async ({ taskId, employeeId, submittedBy, comment, links = [], documentType = 'general' }) => {
   try {
     const result = await createEntity({
       entityType: 'proof_of_work',
@@ -100,6 +101,8 @@ export const createSubmission = async ({ taskId, employeeId, submittedBy, commen
         submitted_by: submittedBy,
         comment,
         links,
+        // Declaration vs general doc; the DB defaults to 'general' for older callers
+        document_type: documentType,
       }
     });
     
@@ -126,13 +129,19 @@ export const getSubmissionsForTask = async (taskId) => {
 
 /**
  * Fetches all submissions (documents) for a given employee.
+ * @param {string} employeeId
+ * @param {'general'|'declaration'} [documentType] - Optional filter; omitted = all (legacy behaviour)
  */
-export const getEmployeeSubmissions = async (employeeId) => {
-  const { data, error } = await supabase
+export const getEmployeeSubmissions = async (employeeId, documentType) => {
+  let query = supabase
     .from('submissions')
     .select('*, submitted_by_profile:user_profiles!submissions_submitted_by_fkey(name, email)')
     .eq('employee_id', employeeId)
     .order('submission_number', { ascending: false });
+
+  if (documentType) query = query.eq('document_type', documentType);
+
+  const { data, error } = await query;
 
   if (error) throw new Error(`Failed to fetch employee submissions: ${error.message}`);
   return data || [];
@@ -156,10 +165,11 @@ export const getEmployeeSubmissions = async (employeeId) => {
  * @param {string} params.comment
  * @param {File[]} params.files
  * @param {boolean} params.moveToReview - If true, auto-transitions task to REVIEW stage
+ * @param {'general'|'declaration'} [params.documentType='general'] - Employee document class
  * @param {Function} [params.onProgress]
  * @returns {Object} The created submission record
  */
-export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, files = [], moveToReview = false, onProgress }) => {
+export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, files = [], moveToReview = false, documentType = 'general', onProgress }) => {
   const totalSteps = files.length + 1; // uploads + DB insert
 
   // Step 1: Generate a client-side UUID as the storage folder name.
@@ -200,6 +210,7 @@ export const submitProofOfWork = async ({ taskId, employeeId, userId, comment, f
     submittedBy: userId,
     comment,
     links,
+    documentType,
   });
 
   if (onProgress) onProgress({ current: totalSteps, total: totalSteps, label: 'Done!' });

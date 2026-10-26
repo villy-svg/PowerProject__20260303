@@ -106,6 +106,10 @@ const EmployeeCard = ({
         {!emp.pan_number && (
           <span className="badge-base badge-danger u-text-xs">PAN NA</span>
         )}
+        {/* Signed declaration form not yet uploaded (flag maintained by DB trigger) */}
+        {!emp.declaration_uploaded && (
+          <span className="badge-base badge-danger u-text-xs" title="Signed declaration form not uploaded">DEC NA</span>
+        )}
       </div>
 
       {/* Row 2: Title (Name) */}

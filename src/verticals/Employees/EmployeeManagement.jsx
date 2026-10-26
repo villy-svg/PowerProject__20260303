@@ -83,6 +83,21 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     }
   }, [fetchEmployees, permissions?.canAccessEmployees]);
 
+  // Feature-level ("Employees List") effective permissions = vertical level capped by the feature override.
+  // `??` falls back to the vertical-level flag when no feature_access row exists (inherited access).
+  const canCreateEmployeesEffective = permissions?.canCreateEmployees ?? permissions?.canCreate;
+  const canUpdateEmployeesEffective = permissions?.canUpdateEmployees ?? permissions?.canUpdate;
+  const canDeleteEmployeesEffective = permissions?.canDeleteEmployees ?? permissions?.canDelete;
+
+  // Shared card/row permission override: adds feature-level canCreate/canUpdate/canDelete so
+  // actions respect both the EMPLOYEES vertical and the Employees List feature override.
+  const rowPermissions = {
+    ...permissions,
+    canCreate: canCreateEmployeesEffective,
+    canUpdate: canUpdateEmployeesEffective,
+    canDelete: canDeleteEmployeesEffective
+  };
+
 
 
   if (!permissions?.canAccessEmployees && !permissions?.scope === 'global') {
@@ -427,11 +442,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onUpload={handleOpenUpload}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
-                              permissions={{
-                                ...permissions,
-                                canUpdate: permissions.canUpdateEmployees,
-                                canDelete: permissions.canDeleteEmployees
-                              }}
+                              permissions={rowPermissions}
                               availableHubs={hubs}
                               isSelected={ui.selectedIds.includes(emp.id)}
                               onSelect={ui.handleSelectIndividual}
@@ -451,11 +462,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onUpload={handleOpenUpload}
                               onDelete={handleDelete}
                               onToggleStatus={toggleStatus}
-                              permissions={{
-                                ...permissions,
-                                canUpdate: permissions.canUpdateEmployees,
-                                canDelete: permissions.canDeleteEmployees
-                              }}
+                              permissions={rowPermissions}
                               availableHubs={hubs}
                               onUpdateHub={updateEmployeeHub}
                               isSelected={ui.selectedIds.includes(emp.id)}
@@ -500,7 +507,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         onUpload={handleOpenUpload}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
-                        permissions={permissions}
+                        permissions={rowPermissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
                         remarks={(tasks || []).filter(t => {
@@ -519,7 +526,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         onUpload={handleOpenUpload}
                         onDelete={handleDelete}
                         onToggleStatus={toggleStatus}
-                        permissions={permissions}
+                        permissions={rowPermissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
                          isSelected={ui.selectedIds.includes(emp.id)}
@@ -569,9 +576,12 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           initialPage={initialFormPage}
           onSubmit={handleSave}
           onCancel={ui.closeModal}
-          isViewOnly={ui.isViewOnly}
+          // Contributors (create-only on Employees List) may upload documents but must not edit profile tabs
+          isViewOnly={ui.isViewOnly || (!!ui.editingItem && !canUpdateEmployeesEffective)}
           requiresBankApproval={user?.roleId !== 'master_admin' && !!ui.editingItem}
-          allowDocumentUpload={permissions?.canCreate || permissions?.canUpdate}
+          allowDocumentUpload={!!(canCreateEmployeesEffective || canUpdateEmployeesEffective)}
+          // Refresh the list silently so the DEC NA badge reflects uploads/deletes immediately
+          onDocumentsChange={() => fetchEmployees(false)}
           disableBankDetails={!permissions?.canUpdate && !!ui.editingItem}
           user={user}
           initialData={ui.editingItem ? {

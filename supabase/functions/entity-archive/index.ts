@@ -315,6 +315,10 @@ async function fetchNextPage(
     .eq("storage_tier", "hot")
     .lt("created_at", cutoffDate.toISOString())
     .is("archived_at", null)
+    // Employee HR documents (incl. signed declaration forms) must stay in Supabase Storage:
+    // archiving would purge their files and break the links shown in Employee Records.
+    // NULL-safe: plain .neq() would also drop rows whose metadata has no "context" key.
+    .or("metadata->>context.is.null,metadata->>context.neq.employee_document")
     .order("id", { ascending: true })
     .limit(PAGE_SIZE);
 
