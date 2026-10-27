@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import { IconHome, IconMenu } from '../ui/Icons';
 import ConfigBottomNav from '../layout/ConfigBottomNav';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import './Configuration.css';
@@ -8,6 +7,7 @@ import './Configuration.css';
 const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActiveVertical, onShowBottomNav, verticals = {}, verticalList = [] }) => {
   const { isMobile } = useIsMobile();
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
+  const actualViewMode = isMobile ? 'grid' : viewMode;
   const [testRunning, setTestRunning] = useState(false);
   
   // Determine first available configuration section based on permissions and assignment
@@ -203,7 +203,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
   };
 
   return (
-    <div className={`configuration-view ${viewMode}-view`}>
+    <div className={`configuration-view ${actualViewMode}-view`}>
       <div className="config-inner-wrap">
         <header className="config-header">
           <div className="header-text">
@@ -211,20 +211,20 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
             <p>Manage groupings and global application settings.</p>
           </div>
           {!isMobile && (
-            <div className="view-toggle">
+            <div className="view-mode-toggle">
               <button 
-                className={viewMode === 'grid' ? 'active' : ''} 
+                className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`} 
                 onClick={() => toggleViewMode('grid')}
                 title="Grid View"
               >
-                <IconHome size={18} />
+                Grid
               </button>
               <button 
-                className={viewMode === 'horizontal' ? 'active' : ''} 
+                className={`view-toggle-btn ${viewMode === 'horizontal' ? 'active' : ''}`} 
                 onClick={() => toggleViewMode('horizontal')}
                 title="List View"
               >
-                <IconMenu size={18} />
+                List
               </button>
             </div>
           )}
@@ -292,7 +292,11 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                 <div className="config-tile non-clickable">
                   <div className="tile-info">
                     <h4>Display Preferences</h4>
-                    <p>Theme and UI scaling are managed via the header.</p>
+                    <p>
+                      {isMobile
+                        ? 'Theme and appearance settings are managed via the navigation menu drawer.'
+                        : 'Theme and UI scaling are managed via the header.'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -327,7 +331,7 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                     <div className="tile-info">
                       <h4>🛠️ Dev: Test Run</h4>
                       <p>Execute custom one-time database scripts (Master Admin only).</p>
-                      <button className="halo-button u-mt-16 u-w-full" style={{ borderColor: 'var(--brand-green)', color: 'var(--brand-green)' }} disabled={testRunning}>
+                      <button className="halo-button dev-test-run-btn u-mt-16 u-w-full" disabled={testRunning}>
                         {testRunning ? 'Running Script...' : 'Execute Test Run'}
                       </button>
                     </div>
@@ -338,6 +342,9 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                     <div className="tile-info">
                       <h4>Factory Reset Tasks</h4>
                       <p>Wipe all task data across all verticals. (Caution!)</p>
+                      <button className="halo-button destructive-action-btn u-mt-16 u-w-full">
+                        Reset All Tasks
+                      </button>
                     </div>
                   </div>
                 )}

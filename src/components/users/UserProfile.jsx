@@ -7,6 +7,8 @@ import { APP_VERSION } from '../../constants/appVersion';
 import { otaUpdateService } from '../../services/core/otaUpdateService';
 import BankChangeRequestModal from './BankChangeRequestModal';
 import { useOTAContext } from '../../app/contexts/OTAContext';
+import { useBackButtonClose } from '../../app/contexts/AppNavigationContext';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { supabase } from '../../services/core/supabaseClient';
 import './UserProfile.css';
 
@@ -28,7 +30,50 @@ const UserProfile = ({
   const [isBankUpdatePending, setIsBankUpdatePending] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { updateAvailable, downloadComplete, isApplying, checkForUpdate } = useOTAContext();
+  const {
+    updateAvailable,
+    updateVersion,
+    downloadComplete,
+    isChecking,
+    isApplying,
+    manualCheckStatus,
+    checkForUpdate,
+  } = useOTAContext() || {};
+
+  const { isMobile } = useIsMobile();
+
+  // Always show "Update App" for phone/mobile users (native APK + mobile viewport in browser/dev) or if an update was detected
+  const showUpdateButton = Boolean(Capacitor.isNativePlatform() || isMobile || updateAvailable);
+
+  const getUpdateButtonClass = () => {
+    if (updateAvailable) return 'dropdown-item update-item';
+    if (isChecking) return 'dropdown-item update-item--checking';
+    if (manualCheckStatus === 'up_to_date') return 'dropdown-item update-item--up-to-date';
+    if (manualCheckStatus === 'error') return 'dropdown-item update-item--error';
+    return 'dropdown-item update-item--idle';
+  };
+
+  const getUpdateButtonLabel = () => {
+    if (downloadComplete) {
+      return updateVersion ? `Restart to Update (v${updateVersion})` : 'Restart to Update';
+    }
+    if (isApplying) {
+      return updateVersion ? `Downloading Update (v${updateVersion})…` : 'Downloading Update…';
+    }
+    if (updateAvailable) {
+      return updateVersion ? `Update App Available (v${updateVersion})` : 'Update App Available';
+    }
+    if (isChecking) {
+      return 'Checking for Updates…';
+    }
+    if (manualCheckStatus === 'up_to_date') {
+      return `✓ App is Up to Date (v${APP_VERSION})`;
+    }
+    if (manualCheckStatus === 'error') {
+      return 'Update Check Failed — Tap to Retry';
+    }
+    return 'Update App';
+  };
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -37,6 +82,8 @@ const UserProfile = ({
       setSearchQuery('');
     }, 200);
   };
+
+  useBackButtonClose(isOpen, closeMenu);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -230,23 +277,40 @@ const UserProfile = ({
 
               <div className="dropdown-divider" />
 
-              {updateAvailable && (
+              {showUpdateButton && (
                 <button
-                  className="dropdown-item update-item"
+                  className={getUpdateButtonClass()}
+                  disabled={Boolean(isChecking || isApplying)}
                   onClick={() => {
-                    closeMenu();
-                    // If bundle already downloaded → restart immediately into new version
+                    // If bundle already downloaded → close menu and restart immediately into new version
                     if (downloadComplete) {
+                      closeMenu();
                       otaUpdateService.restartNow();
-                    } else if (!isApplying) {
-                      // Bundle not yet downloading → re-trigger check
-                      checkForUpdate();
+                    } else if (!isChecking && !isApplying && typeof checkForUpdate === 'function') {
+                      // Force an immediate check (bypasses 1-hour throttle); keep menu open for inline status
+                      checkForUpdate({ force: true });
                     }
-                    // If isApplying === true: download in progress, click is a no-op (toast is already showing)
                   }}
                 >
-                  <span className="update-dot" />
-                  {isApplying ? 'Downloading Update…' : 'Update App Available'}
+                  {updateAvailable ? (
+                    <span className="update-dot" />
+                  ) : (
+                    <svg
+                      className={`update-icon ${isChecking ? 'update-icon--spinning' : ''}`}
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+                    </svg>
+                  )}
+                  <span>{getUpdateButtonLabel()}</span>
                 </button>
               )}
 
@@ -333,4 +397,4 @@ const UserProfile = ({
   );
 };
 
-export default UserProfile;
+export default UserProfile;

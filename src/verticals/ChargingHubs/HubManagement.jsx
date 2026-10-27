@@ -395,10 +395,10 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
   );
 };
 
-// Wrap with error boundary
-const HubManagementWithErrorBoundary = ({ permissions }) => (
+// Wrap with error boundary and forward all props (user, setActiveVertical, onShowBottomNav, permissions)
+const HubManagementWithErrorBoundary = (props) => (
   <HubManagementErrorBoundary>
-    <HubManagement permissions={permissions} />
+    <HubManagement {...props} />
   </HubManagementErrorBoundary>
 );
 

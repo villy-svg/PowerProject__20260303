@@ -282,7 +282,7 @@
     gap: 1px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 32px !important; /* Override global 44px touch-target enforcement */
+    min-height: 40px !important; /* Ergonomic touch height inside 46px tray */
     min-width: 0 !important; /* Override global 44px min-width */
     border-radius: 10px;
     margin: 1px;
@@ -308,10 +308,10 @@
     background: var(--stage-accent);
     color: var(--bg-color);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.5rem;
+    font-size: 0.58rem;
     font-weight: 800;
-    min-width: 12px;
-    height: 12px;
+    min-width: 14px;
+    height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -321,15 +321,41 @@
   }
 
   .centralised-stage-nav-label {
-    font-size: 0.48rem; /* Reduced to match summary-nav-label */
+    font-size: 0.58rem; /* Legible mobile label floor matching Kanban tray */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     transition: all 0.2s ease;
     white-space: normal;
     text-align: center;
-    line-height: 1.0;
-    max-width: 72px; /* Tighter cap */
+    line-height: 1.05;
+    max-width: 76px;
+  }
+
+  /* Hide unused bulk-selection checkbox on mobile Centralised Task Board cards to avoid distraction */
+  .centralised-board .task-selection-area {
+    display: none;
+  }
+
+  .centralised-drill-breadcrumb {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  .centralised-drill-back-btn {
+    background: var(--halo-bg);
+    border: 1px solid var(--brand-green);
+    color: var(--brand-green);
+    border-radius: var(--radius-pill, 40px);
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Active State */

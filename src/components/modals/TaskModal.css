@@ -64,6 +64,16 @@
   line-height: 1.2;
 }
 
+@media screen and (max-width: 768px) {
+  .task-modal-overlay {
+    padding: 12px;
+  }
+
+  .task-modal-content {
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 24px));
+  }
+}
+
 @media screen and (max-width: 480px) {
   .task-modal-overlay {
     align-items: flex-end;
@@ -74,7 +84,7 @@
     width: 100%;
     max-width: 100%;
     height: auto;
-    max-height: 92dvh;
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 16px));
     border-radius: var(--radius-squircle) var(--radius-squircle) 0 0;
     margin: 0;
     border-bottom: none;
@@ -94,8 +104,10 @@
 
   .close-modal-btn {
     font-size: 1.5rem;
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
   }
 }
 
@@ -142,6 +154,7 @@
   display: flex;
   justify-content: flex-end;
   background: var(--surface-card);
+  flex-shrink: 0;
 }
 
 @media screen and (max-width: 480px) {
@@ -150,9 +163,10 @@
   }
 
   .task-modal-quick-actions .halo-button {
-    font-size: 0.65rem;
-    padding: 3px 8px;
-    height: 24px;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    height: 32px;
+    min-height: 32px;
     letter-spacing: 0.3px;
   }
 }

@@ -131,7 +131,7 @@ const AttendanceSuggestEditModal = ({
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       {/* Stop click propagation so clicking inside the modal doesn't close it */}
       <div
-        className="modal-body suggest-edit-modal"
+        className="modal-content modal-body suggest-edit-modal"
         onClick={(e) => e.stopPropagation()}
         aria-label="Suggest attendance edit"
       >
@@ -151,82 +151,80 @@ const AttendanceSuggestEditModal = ({
           </button>
         </div>
 
-
-
-        {/* Current Status (read-only context) */}
-        {record?.attendance_status && (
-          <div className="form-group">
-            <label className="form-label">CURRENT STATUS</label>
-            <div className="form-input-container suggest-edit-modal__current-status">
-              <span>{record.attendance_status.toUpperCase()}</span>
-            </div>
-          </div>
-        )}
-
         {/* Form */}
-        <form onSubmit={handleSubmit} className="suggest-edit-modal__form">
+        <form onSubmit={handleSubmit} className="vertical-task-form suggest-edit-modal__form">
+          <div className="modal-content-area">
+            {/* Current Status (read-only context) */}
+            {record?.attendance_status && (
+              <div className="form-group">
+                <label className="form-label">CURRENT STATUS</label>
+                <div className="form-input-container suggest-edit-modal__current-status">
+                  <span>{record.attendance_status.toUpperCase()}</span>
+                </div>
+              </div>
+            )}
 
-          {/* Suggested Status — using Master Dropdown (ui-design-system §10) */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="suggest-status-select">
-              SUGGESTED STATUS
-            </label>
-            <div className="form-input-container">
-              <CustomSelect
-                id="suggest-status-select"
-                className="master-dropdown"
-                value={suggestedStatus}
-                onChange={setSuggestedStatus}
-                options={STATUS_OPTIONS}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Shift Type (only relevant if suggesting 'present') */}
-          {suggestedStatus === 'present' && (
+            {/* Suggested Status — using Master Dropdown (ui-design-system §10) */}
             <div className="form-group">
-              <label className="form-label" htmlFor="suggest-shift-type-select">
-                SHIFT TYPE
+              <label className="form-label" htmlFor="suggest-status-select">
+                SUGGESTED STATUS
               </label>
               <div className="form-input-container">
                 <CustomSelect
-                  id="suggest-shift-type-select"
+                  id="suggest-status-select"
                   className="master-dropdown"
-                  value={suggestedShiftType}
-                  onChange={setSuggestedShiftType}
-                  options={SHIFT_TYPE_OPTIONS}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Leave Reason (only relevant if suggesting 'leave') */}
-          {suggestedStatus === 'leave' && (
-            <div className="form-group">
-              <label className="form-label" htmlFor="suggest-leave-reason">
-                REASON FOR LEAVE
-              </label>
-              <div className="form-input-container">
-                <textarea
-                  id="suggest-leave-reason"
-                  className="u-w-full u-min-h-80 u-p-12 u-rounded-12 u-border-light u-outline-none"
-                  placeholder="Enter reason for applying leave on behalf of the employee..."
-                  value={suggestedLeaveReason}
-                  onChange={(e) => setSuggestedLeaveReason(e.target.value)}
+                  value={suggestedStatus}
+                  onChange={setSuggestedStatus}
+                  options={STATUS_OPTIONS}
                   required
                 />
               </div>
             </div>
-          )}
 
+            {/* Shift Type (only relevant if suggesting 'present') */}
+            {suggestedStatus === 'present' && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="suggest-shift-type-select">
+                  SHIFT TYPE
+                </label>
+                <div className="form-input-container">
+                  <CustomSelect
+                    id="suggest-shift-type-select"
+                    className="master-dropdown"
+                    value={suggestedShiftType}
+                    onChange={setSuggestedShiftType}
+                    options={SHIFT_TYPE_OPTIONS}
+                  />
+                </div>
+              </div>
+            )}
 
-          {/* Error display */}
-          {submitError && (
-            <div className="suggest-edit-modal__error">
-              <p>⚠ {submitError}</p>
-            </div>
-          )}
+            {/* Leave Reason (only relevant if suggesting 'leave') */}
+            {suggestedStatus === 'leave' && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="suggest-leave-reason">
+                  REASON FOR LEAVE
+                </label>
+                <div className="form-input-container">
+                  <textarea
+                    id="suggest-leave-reason"
+                    className="u-w-full u-min-h-80 u-p-12 u-rounded-12 u-border-light u-outline-none"
+                    placeholder="Enter reason for applying leave on behalf of the employee..."
+                    value={suggestedLeaveReason}
+                    onChange={(e) => setSuggestedLeaveReason(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Error display */}
+            {submitError && (
+              <div className="suggest-edit-modal__error">
+                <p>⚠ {submitError}</p>
+              </div>
+            )}
+          </div>
 
           {/* Footer Actions */}
           <div className="modal-footer">

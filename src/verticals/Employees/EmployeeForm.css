@@ -7,6 +7,11 @@
 }
 
 .employee-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   padding: 0 24px;
 }
 
@@ -80,10 +85,14 @@
 
 /* Modal Scroll Container Hardening */
 .modal-content-area {
-  max-height: 60vh; /* Responsive height */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   overflow-y: auto;
   padding-right: 8px; /* Room for scrollbar */
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .form-content-area {
@@ -103,9 +112,12 @@
 }
 .employee-form .form-footer.sticky {
   position: sticky;
-  bottom: -1rem; /* Adjust for padding */
+  bottom: 0; /* Keep footer flush inside flex modal body */
+  flex-shrink: 0;
+  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   background: var(--panel-bg); /* Match modal background */
-  padding-bottom: 1rem;
+  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
+  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   z-index: 10;
   box-shadow: 0 -10px 20px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
@@ -224,14 +236,14 @@
 /* Responsive Overrides */
 @media screen and (max-width: 768px) {
   .modal-content-area {
-    max-height: 70vh;
+    max-height: none;
   }
   
   .form-wizard-header {
     gap: 0.75rem;
     overflow-x: auto;
     white-space: nowrap;
-    padding-bottom: 1rem;
+    padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   }
   
   .step {

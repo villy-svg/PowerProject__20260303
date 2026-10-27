@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { useBackButtonClose } from '../../app/contexts/AppNavigationContext';
 import './TaskModal.css';
 
 /**
@@ -8,6 +9,9 @@ import './TaskModal.css';
  * Rendered via a React Portal at document.body to prevent nested event conflicts.
  */
 const TaskModal = ({ isOpen, onClose, title, children, className = '' }) => {
+  // Register with Android hardware back button stack when open
+  useBackButtonClose(isOpen, onClose);
+
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(

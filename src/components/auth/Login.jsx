@@ -149,23 +149,28 @@ const Login = () => {
                 <div className="form-group">
                   {/* FIX: 'required' removed — existing users are handled by Supabase's native upsert
                       and should not be blocked by a name gate. Name is used for new accounts only. */}
-                  <label>Full Name {name === '' && <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>(new accounts)</span>}</label>
+                  <label htmlFor="login-full-name">Full Name {name === '' && <span className="login-label-hint">(new accounts)</span>}</label>
                   <input
+                    id="login-full-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Alex Rivera"
+                    autoComplete="name"
                     autoFocus
                   />
                 </div>
               )}
               <div className="form-group">
-                <label>Email Address</label>
+                <label htmlFor="login-email">Email Address</label>
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
+                  autoComplete="email"
+                  inputMode="email"
                   required
                 />
               </div>
@@ -192,9 +197,13 @@ const Login = () => {
             <h2>Verify OTP</h2>
             <p className="login-subtitle">Enter the code sent to {email}.</p>
             <div className="form-group">
-              <label>Security Code</label>
+              <label htmlFor="login-otp-code">Security Code</label>
               <input
+                id="login-otp-code"
                 type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]*"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder="12345678"

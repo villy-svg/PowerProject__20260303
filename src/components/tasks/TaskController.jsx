@@ -206,30 +206,33 @@ const TaskController = (props) => {
         onTrayVisibilityChange={handleTrayVisibilityChange}
         expandedLeft={
           <>
-            <div className="view-mode-toggle">
-              {['kanban', 'list', 'tree'].map((mode) => (
-                <button
-                  key={mode}
-                  className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                  onClick={() => handleSetViewMode(mode)}
-                >
-                  {mode}
-                </button>
-              ))}
-              {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
-              {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
-                <>
-                  <span className="view-toggle-divider mobile-hidden" aria-hidden="true" />
+            {/* Hide view-mode toggles on mobile since mobile intentionally locks to Kanban */}
+            {isDesktop && (
+              <div className="view-mode-toggle">
+                {['kanban', 'list', 'tree'].map((mode) => (
                   <button
-                    className={`view-toggle-btn view-toggle-btn--group mobile-hidden ${groupByHubs ? 'active' : ''}`}
-                    onClick={() => setGroupByHubs(!groupByHubs)}
-                    title={groupByHubs ? 'Ungroup by Hub' : 'Group by Hub'}
+                    key={mode}
+                    className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
+                    onClick={() => handleSetViewMode(mode)}
                   >
-                    By Hub
+                    {mode}
                   </button>
-                </>
-              )}
-            </div>
+                ))}
+                {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
+                {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
+                  <>
+                    <span className="view-toggle-divider mobile-hidden" aria-hidden="true" />
+                    <button
+                      className={`view-toggle-btn view-toggle-btn--group mobile-hidden ${groupByHubs ? 'active' : ''}`}
+                      onClick={() => setGroupByHubs(!groupByHubs)}
+                      title={groupByHubs ? 'Ungroup by Hub' : 'Group by Hub'}
+                    >
+                      By Hub
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="header-filter-group">
               <button

@@ -344,7 +344,7 @@
   .expanded-menu-row {
     padding: calc(var(--safe-top, 0px) + 8px) 8px 12px 8px !important;
     gap: 6px !important;
-    max-height: 95vh !important;
+    max-height: 95dvh !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
@@ -462,20 +462,42 @@
  * --visual-viewport-height: the actual visible viewport height (set via JS hook)
  */
 
-/* Shrink modal/sheet content to the visual viewport so it scrolls instead of
-   overflowing behind the keyboard */
-body[data-keyboard="open"] .modal-overlay {
+/* Align overlays to top so the modal stays in the visible upper viewport */
+body[data-keyboard="open"] .modal-overlay,
+body[data-keyboard="open"] .task-modal-overlay,
+body[data-keyboard="open"] .master-modal-overlay,
+body[data-keyboard="open"] .edit-modal-overlay,
+body[data-keyboard="open"] .leave-modal-overlay,
+body[data-keyboard="open"] .board-rbac-overlay,
+body[data-keyboard="open"] .sandbox-modal-overlay {
   align-items: flex-start;
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
 }
 
+/* Cap outer modal containers to the visual viewport height so the modal
+   never extends behind the software keyboard */
 body[data-keyboard="open"] .modal-content,
-body[data-keyboard="open"] .modal-content-area,
+body[data-keyboard="open"] .task-modal-content,
+body[data-keyboard="open"] .master-modal-content,
+body[data-keyboard="open"] .edit-modal,
+body[data-keyboard="open"] .leave-modal-body,
+body[data-keyboard="open"] .board-rbac-modal,
+body[data-keyboard="open"] .sandbox-modal-card,
+body[data-keyboard="open"] .suggest-edit-modal,
 body[data-keyboard="open"] .task-form-sheet,
 body[data-keyboard="open"] .form-sheet {
-  max-height: calc(var(--visual-viewport-height, 100dvh) - 16px) !important;
+  max-height: calc(var(--visual-viewport-height, 100dvh) - max(16px, env(safe-area-inset-top, 0px))) !important;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Let inner scroll areas flex within the capped modal so the footer remains visible */
+body[data-keyboard="open"] .modal-content-area,
+body[data-keyboard="open"] .master-modal-scroll-area {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Bring fixed submit/action buttons above the keyboard */

@@ -5,8 +5,12 @@
 .attendance-mobile-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 1rem calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
 .attendance-mobile-list__selector {

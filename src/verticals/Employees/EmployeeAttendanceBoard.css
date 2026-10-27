@@ -263,10 +263,19 @@
   margin-bottom: 0.5rem;
 }
 
+.approval-page-container {
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media screen and (max-width: 768px) {
   .attendance-board__left-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .approval-page-container {
+    padding-bottom: calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
   }
 }
 

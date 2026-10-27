@@ -7,6 +7,7 @@ import { sortUsers } from '../users/useUserManagement';
 import { ROLE_LEVELS } from '../../constants/roles';
 import { IconX } from '../ui/Icons';
 import RoleTooltip from '../ui/RoleTooltip';
+import { useBackButtonClose } from '../../app/contexts/AppNavigationContext';
 import './BoardRBACModal.css';
 
 const ACCESS_LEVELS = ['none', 'viewer', 'contributor', 'editor', 'admin'];
@@ -30,6 +31,7 @@ const ACCESS_LEVELS = ['none', 'viewer', 'contributor', 'editor', 'admin'];
  *      level. Choosing the inherited level explicitly deletes any override (resets to inherit).
  */
 const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) => {
+  useBackButtonClose(isOpen, onClose);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 

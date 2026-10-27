@@ -76,104 +76,106 @@ const EmployeeBulkUpdateModal = ({ selectedCount, onUpdate, loading }) => {
   };
 
   return (
-    <form className="bulk-update-form u-p-16" onSubmit={handleSubmit}>
-      <p className="u-m-0 u-mb-24 u-opacity-70 u-text-sm">
-        You are updating <strong>{selectedCount}</strong> employees. Select the fields you wish to modify:
-      </p>
+    <form className="bulk-update-form vertical-task-form" onSubmit={handleSubmit}>
+      <div className="modal-content-area">
+        <p className="u-m-0 u-mb-24 u-opacity-70 u-text-sm">
+          You are updating <strong>{selectedCount}</strong> employees. Select the fields you wish to modify:
+        </p>
 
-      <div className="form-grid u-flex-wrap-gap-24">
-        {/* Hub */}
-        <div className="bulk-field-row">
-          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('hub_id')}>
-            <div className={`selection-checkbox ${activeFields.hub_id ? 'checked' : ''}`}>
-              {activeFields.hub_id && '✓'}
+        <div className="form-grid u-flex-wrap-gap-24">
+          {/* Hub */}
+          <div className="bulk-field-row">
+            <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('hub_id')}>
+              <div className={`selection-checkbox ${activeFields.hub_id ? 'checked' : ''}`}>
+                {activeFields.hub_id && '✓'}
+              </div>
+            </div>
+            <div className={`form-group bulk-form-group ${!activeFields.hub_id ? 'disabled' : ''}`}>
+              <label>Primary Hub</label>
+              <CustomSelect 
+                className="master-dropdown"
+                value={values.hub_id} 
+                onChange={(val) => handleValueChange('hub_id', val)}
+                disabled={!activeFields.hub_id}
+                options={[
+                  { value: '', label: 'No Change' },
+                  { value: 'NULL', label: 'NONE (ALL)' },
+                  ...hubs.map(h => ({ value: h.id, label: h.hub_code }))
+                ]}
+              />
             </div>
           </div>
-          <div className={`form-group bulk-form-group ${!activeFields.hub_id ? 'disabled' : ''}`}>
-            <label>Primary Hub</label>
-            <CustomSelect 
-              className="master-dropdown"
-              value={values.hub_id} 
-              onChange={(val) => handleValueChange('hub_id', val)}
-              disabled={!activeFields.hub_id}
-              options={[
-                { value: '', label: 'No Change' },
-                { value: 'NULL', label: 'NONE (ALL)' },
-                ...hubs.map(h => ({ value: h.id, label: h.hub_code }))
-              ]}
-            />
-          </div>
-        </div>
 
-        {/* Role */}
-        <div className="bulk-field-row">
-          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('role_id')}>
-            <div className={`selection-checkbox ${activeFields.role_id ? 'checked' : ''}`}>
-              {activeFields.role_id && '✓'}
+          {/* Role */}
+          <div className="bulk-field-row">
+            <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('role_id')}>
+              <div className={`selection-checkbox ${activeFields.role_id ? 'checked' : ''}`}>
+                {activeFields.role_id && '✓'}
+              </div>
+            </div>
+            <div className={`form-group bulk-form-group ${!activeFields.role_id ? 'disabled' : ''}`}>
+              <label>Role</label>
+              <CustomSelect 
+                className="master-dropdown"
+                value={values.role_id} 
+                onChange={(val) => handleValueChange('role_id', val)}
+                disabled={!activeFields.role_id}
+                options={[
+                  { value: '', label: 'No Change' },
+                  ...roles.map(r => ({ value: r.id, label: `${r.role_code ? `[${r.role_code}] ` : ''}${r.name}` }))
+                ]}
+              />
             </div>
           </div>
-          <div className={`form-group bulk-form-group ${!activeFields.role_id ? 'disabled' : ''}`}>
-            <label>Role</label>
-            <CustomSelect 
-              className="master-dropdown"
-              value={values.role_id} 
-              onChange={(val) => handleValueChange('role_id', val)}
-              disabled={!activeFields.role_id}
-              options={[
-                { value: '', label: 'No Change' },
-                ...roles.map(r => ({ value: r.id, label: `${r.role_code ? `[${r.role_code}] ` : ''}${r.name}` }))
-              ]}
-            />
-          </div>
-        </div>
 
-        {/* Department */}
-        <div className="bulk-field-row">
-          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('department_id')}>
-            <div className={`selection-checkbox ${activeFields.department_id ? 'checked' : ''}`}>
-              {activeFields.department_id && '✓'}
+          {/* Department */}
+          <div className="bulk-field-row">
+            <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('department_id')}>
+              <div className={`selection-checkbox ${activeFields.department_id ? 'checked' : ''}`}>
+                {activeFields.department_id && '✓'}
+              </div>
+            </div>
+            <div className={`form-group bulk-form-group ${!activeFields.department_id ? 'disabled' : ''}`}>
+              <label>Department</label>
+              <CustomSelect 
+                className="master-dropdown"
+                value={values.department_id} 
+                onChange={(val) => handleValueChange('department_id', val)}
+                disabled={!activeFields.department_id}
+                options={[
+                  { value: '', label: 'No Change' },
+                  ...departments.map(d => ({ value: d.id, label: `${d.dept_code ? `[${d.dept_code}] ` : ''}${d.name}` }))
+                ]}
+              />
             </div>
           </div>
-          <div className={`form-group bulk-form-group ${!activeFields.department_id ? 'disabled' : ''}`}>
-            <label>Department</label>
-            <CustomSelect 
-              className="master-dropdown"
-              value={values.department_id} 
-              onChange={(val) => handleValueChange('department_id', val)}
-              disabled={!activeFields.department_id}
-              options={[
-                { value: '', label: 'No Change' },
-                ...departments.map(d => ({ value: d.id, label: `${d.dept_code ? `[${d.dept_code}] ` : ''}${d.name}` }))
-              ]}
-            />
-          </div>
-        </div>
 
-        {/* Manager */}
-        <div className="bulk-field-row">
-          <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('manager_id')}>
-            <div className={`selection-checkbox ${activeFields.manager_id ? 'checked' : ''}`}>
-              {activeFields.manager_id && '✓'}
+          {/* Manager */}
+          <div className="bulk-field-row">
+            <div className="selection-area bulk-selection-container" onClick={() => handleFieldToggle('manager_id')}>
+              <div className={`selection-checkbox ${activeFields.manager_id ? 'checked' : ''}`}>
+                {activeFields.manager_id && '✓'}
+              </div>
             </div>
-          </div>
-          <div className={`form-group bulk-form-group ${!activeFields.manager_id ? 'disabled' : ''}`}>
-            <label>Reporting Manager</label>
-            <CustomSelect 
-              className="master-dropdown"
-              value={values.manager_id} 
-              onChange={(val) => handleValueChange('manager_id', val)}
-              disabled={!activeFields.manager_id}
-              options={[
-                { value: '', label: 'No Change' },
-                { value: 'NULL', label: 'NONE (Clear Manager)' },
-                ...employees.map(e => ({ value: e.id, label: e.full_name }))
-              ]}
-            />
+            <div className={`form-group bulk-form-group ${!activeFields.manager_id ? 'disabled' : ''}`}>
+              <label>Reporting Manager</label>
+              <CustomSelect 
+                className="master-dropdown"
+                value={values.manager_id} 
+                onChange={(val) => handleValueChange('manager_id', val)}
+                disabled={!activeFields.manager_id}
+                options={[
+                  { value: '', label: 'No Change' },
+                  { value: 'NULL', label: 'NONE (Clear Manager)' },
+                  ...employees.map(e => ({ value: e.id, label: e.full_name }))
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="form-footer u-mt-32 u-border-t-light u-pt-24">
+      <div className="form-footer">
         <button type="submit" className="halo-button save-btn u-w-full" disabled={loading}>
           {loading ? 'Processing Bulk Update...' : `Apply Changes to ${selectedCount} Employees`}
         </button>

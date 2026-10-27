@@ -34,11 +34,12 @@ function getCurrentEnvironment() {
 
 /**
  * Checks GitHub Releases API for a newer version
- * @returns {Promise<{hasUpdate: boolean, version?: string, downloadUrl?: string}>}
+ * @returns {Promise<{hasUpdate: boolean, version?: string, downloadUrl?: string, error?: boolean}>}
  */
-async function checkForUpdate() {
-  // Platform guard — no-op on web
-  if (!Capacitor.isNativePlatform()) {
+async function checkForUpdate(options = {}) {
+  const allowWebCheck = Boolean(options && options.allowWebCheck === true);
+  // Platform guard — no-op on web unless explicitly triggered by manual user check
+  if (!Capacitor.isNativePlatform() && !allowWebCheck) {
     return { hasUpdate: false };
   }
 
@@ -58,7 +59,7 @@ async function checkForUpdate() {
 
     if (!response.ok) {
       console.warn(`[OTA] GitHub API returned ${response.status}`);
-      return { hasUpdate: false };
+      return { hasUpdate: false, error: true };
     }
 
     const releases = await response.json();
@@ -107,7 +108,7 @@ async function checkForUpdate() {
     return { hasUpdate: false };
   } catch (error) {
     console.error('[OTA] Update check failed:', error);
-    return { hasUpdate: false };
+    return { hasUpdate: false, error: true };
   }
 }
 

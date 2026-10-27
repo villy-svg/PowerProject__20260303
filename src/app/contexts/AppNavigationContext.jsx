@@ -85,6 +85,19 @@ export function AppNavigationProvider({ verticals = {}, children }) {
   const [searchProps, setSearchPropsRaw] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // ──LIFO Back-Button Interceptor Stack (for modals, dropdowns & overlays) ──
+  const backInterceptorsRef = useRef([]);
+
+  const registerBackInterceptor = useCallback((id, onBack) => {
+    backInterceptorsRef.current = [
+      ...backInterceptorsRef.current.filter(item => item.id !== id),
+      { id, onBack },
+    ];
+    return () => {
+      backInterceptorsRef.current = backInterceptorsRef.current.filter(item => item.id !== id);
+    };
+  }, []);
+
   // Memoized setter that shallow-compares properties to prevent infinite loops
   const setSearchProps = useCallback((newProps) => {
     setSearchPropsRaw((prev) => {
@@ -170,7 +183,20 @@ export function AppNavigationProvider({ verticals = {}, children }) {
    */
   const backHandlerRef = useRef();
   backHandlerRef.current = useCallback(() => {
+    // Priority -1: dismiss top-most open modal / dropdown interceptor first
+    if (backInterceptorsRef.current.length > 0) {
+      const topInterceptor = backInterceptorsRef.current[backInterceptorsRef.current.length - 1];
+      if (typeof topInterceptor?.onBack === 'function') {
+        topInterceptor.onBack();
+        return;
+      }
+    }
+
     // Priority 0: dismiss any open overlay first — no vertical navigation
+    if (isSearchOpen) {
+      setIsSearchOpen(false);
+      return;
+    }
     if (isSidebarOpen) {
       setIsSidebarOpen(false);
       return;
@@ -207,7 +233,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     // Step 3: Dashboard → show Exit App confirmation modal
     setShowExitModal(true);
   }, [
-    isSidebarOpen, isMobileMenuOpen, isMobileBoardSubTrayOpen, isMobileAddTrayOpen,
+    isSearchOpen, isSidebarOpen, isMobileMenuOpen, isMobileBoardSubTrayOpen, isMobileAddTrayOpen,
     showBottomNavOverlay, activeVertical, setActiveVertical,
   ]);
 
@@ -255,6 +281,7 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     setSearchProps,
     isSearchOpen,
     setIsSearchOpen,
+    registerBackInterceptor,
   };
 
   return (
@@ -274,4 +301,23 @@ export function useAppNavigation() {
     throw new Error('[useAppNavigation] Must be used inside <AppNavigationProvider>.');
   }
   return ctx;
+}
+
+/**
+ * useBackButtonClose — Registers an open modal/dropdown with the Android hardware
+ * back-button stack so pressing Back closes the modal before navigating away.
+ * Safe to call even outside AppNavigationProvider (no-op fallback).
+ */
+export function useBackButtonClose(isOpen, onClose) {
+  const ctx = useContext(AppNavigationContext);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const idRef = useRef(`back_${Math.random().toString(36).slice(2, 9)}`);
+
+  useEffect(() => {
+    if (!isOpen || !ctx?.registerBackInterceptor) return undefined;
+    return ctx.registerBackInterceptor(idRef.current, () => {
+      onCloseRef.current?.();
+    });
+  }, [isOpen, ctx]);
 }

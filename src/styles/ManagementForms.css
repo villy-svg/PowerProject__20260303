@@ -26,6 +26,7 @@
   max-width: 600px;
   max-height: 90dvh;
   /* Safety cap */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-premium);
@@ -42,6 +43,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -224,7 +226,9 @@ select:-webkit-autofill:focus {
 
 .modal-content-area {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 24px 32px;
   position: relative;
   z-index: 10; /* Keep content (and dropdowns) above prediction box */
@@ -235,6 +239,22 @@ select:-webkit-autofill:focus {
   flex: 1;
   padding: 14px;
   font-size: 1rem;
+}
+
+/* Mobile & Tablet Adaptations (<= 768px) */
+@media screen and (max-width: 768px) {
+  .modal-overlay {
+    padding: 16px 12px;
+  }
+
+  .modal-content {
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 24px));
+  }
+
+  .form-footer,
+  .modal-footer {
+    padding: 12px 16px max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  }
 }
 
 /* Mobile Adaptations (Phone <= 480px) as per Design System */
@@ -248,7 +268,7 @@ select:-webkit-autofill:focus {
     width: 100%;
     max-width: 100%;
     height: auto;
-    max-height: 92dvh;
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 16px));
     border-radius: var(--radius-squircle) var(--radius-squircle) 0 0;
     margin: 0;
     border-bottom: none;
@@ -275,14 +295,14 @@ select:-webkit-autofill:focus {
   }
 
   .form-group {
-    gap: 2px;
+    gap: 4px;
   }
 
   .form-group label {
-    font-size: 0.52rem;
-    letter-spacing: 0.1px;
+    font-size: 0.75rem; /* Readable 10.5px floor on mobile instead of 5.6px-7.3px */
+    letter-spacing: 0.2px;
     margin-bottom: 0;
-    opacity: 0.8;
+    opacity: 0.85;
   }
 
   .vertical-task-form input[type="text"],
@@ -291,14 +311,13 @@ select:-webkit-autofill:focus {
   .hub-modal input[type="text"],
   .hub-modal select,
   .hub-modal textarea {
-    padding: 6px 12px;
-    font-size: 0.9rem !important;
-    /* Slightly smaller font */
+    padding: 8px 12px;
+    font-size: 0.95rem !important;
   }
 
   .form-footer,
   .modal-footer {
-    padding: 10px 16px;
+    padding: 10px 16px max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
   }
 
   .form-footer .halo-button,
@@ -310,14 +329,14 @@ select:-webkit-autofill:focus {
 
 @media screen and (max-width: 380px) {
   .form-group label {
-    font-size: 0.46rem;
-    letter-spacing: 0px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1px;
   }
 }
 
 @media screen and (max-width: 320px) {
   .form-group label {
-    font-size: 0.4rem;
+    font-size: 0.70rem;
     letter-spacing: 0px;
   }
 }

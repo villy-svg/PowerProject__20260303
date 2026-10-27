@@ -158,12 +158,12 @@
 /* Compact Mobile Breaks */
 @media screen and (max-width: 480px) {
   .nav-item { margin: 1px; }
-  .nav-label { font-size: 0.6rem; }
+  .nav-label { font-size: 0.62rem; }
   .nav-item .icon-wrapper { padding: 6px; }
 }
 
 @media screen and (max-width: 340px) {
-  .nav-label { font-size: 0.52rem; }
+  .nav-label { font-size: 0.58rem; }
   .nav-item .icon-wrapper .standard-icon {
     width: 18px !important;
     height: 18px !important;

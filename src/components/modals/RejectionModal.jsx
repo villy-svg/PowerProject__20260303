@@ -22,19 +22,21 @@ const RejectionModal = ({ isOpen, onClose, onSubmit, task }) => {
       className="medium-modal"
     >
       <form onSubmit={handleSubmit} className="rejection-form">
-        <div className="form-group">
-          <label>Rejection Reason *</label>
-          <p className="rejection-feedback-hint">
-            Please provide specific feedback for the field worker on what needs to be fixed or redone.
-          </p>
-          <textarea
-            className="rejection-textarea"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="e.g., The photo of the equipment is blurry. Please retake it."
-            required
-            rows={4}
-          />
+        <div className="modal-content-area">
+          <div className="form-group">
+            <label>Rejection Reason *</label>
+            <p className="rejection-feedback-hint">
+              Please provide specific feedback for the field worker on what needs to be fixed or redone.
+            </p>
+            <textarea
+              className="rejection-textarea"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g., The photo of the equipment is blurry. Please retake it."
+              required
+              rows={4}
+            />
+          </div>
         </div>
 
         <div className="rejection-actions">

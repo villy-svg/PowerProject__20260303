@@ -1,7 +1,7 @@
 # 1. Commit Staging Local to Staging Server
 git checkout staging
 git add .
-git commit -m "261025 Document Upload Tab 1.0.1"
+git commit -m "261025 Document Upload Tab 1.0.2"
 git push origin staging
 git checkout main
 git merge staging 

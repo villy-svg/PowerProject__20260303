@@ -21,11 +21,14 @@
     <link rel="manifest" href="/manifest.json">
     <script>
       (function() {
-        const theme = localStorage.getItem('theme') || 'dark';
+        // Sync with useTheme.js storage key ('power_project_theme') and data-theme attribute
+        const theme = localStorage.getItem('power_project_theme') || localStorage.getItem('theme') || 'dark';
         document.documentElement.className = theme;
+        document.documentElement.setAttribute('data-theme', theme);
         
         // Fix PWA bottom gap by syncing theme-color with the active theme
         const metaThemeColor = document.createElement('meta');
+        metaThemeColor.id = 'meta-theme-color';
         metaThemeColor.name = 'theme-color';
         metaThemeColor.content = theme === 'dark' ? '#050505' : '#fcfcfd';
         document.head.appendChild(metaThemeColor);

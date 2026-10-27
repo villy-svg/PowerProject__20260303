@@ -25,14 +25,16 @@ export const useVisualViewport = () => {
     const vv = window.visualViewport;
     if (!vv) return;
 
-    // Cache the full window height at mount time.
-    // We consider the keyboard "open" when the visual viewport is less than
-    // 75% of the window height — a threshold that survives URL bar hide/show.
-    const fullWindowHeight = window.innerHeight;
+    // Track the baseline un-shrunk window height dynamically so orientation changes,
+    // split-screen resizing, or navigation bar mode changes don't leave a stale height.
+    let fullWindowHeight = Math.max(window.innerHeight, Math.round(vv.height));
     const KEYBOARD_THRESHOLD = 0.75;
 
     const applyViewportVars = () => {
       const vvHeight = Math.round(vv.height);
+      if (vvHeight > fullWindowHeight) {
+        fullWindowHeight = vvHeight;
+      }
       const keyboardHeight = Math.max(0, fullWindowHeight - vvHeight);
       const isKeyboardOpen = vvHeight < fullWindowHeight * KEYBOARD_THRESHOLD;
 
@@ -44,15 +46,24 @@ export const useVisualViewport = () => {
       document.body.dataset.keyboard = isKeyboardOpen ? 'open' : 'closed';
     };
 
+    const handleOrientationChange = () => {
+      setTimeout(() => {
+        fullWindowHeight = Math.max(window.innerHeight, Math.round(vv.height));
+        applyViewportVars();
+      }, 150);
+    };
+
     // Run once on mount to initialize values.
     applyViewportVars();
 
     vv.addEventListener('resize', applyViewportVars);
     vv.addEventListener('scroll', applyViewportVars);
+    window.addEventListener('orientationchange', handleOrientationChange);
 
     return () => {
       vv.removeEventListener('resize', applyViewportVars);
       vv.removeEventListener('scroll', applyViewportVars);
+      window.removeEventListener('orientationchange', handleOrientationChange);
       // Clean up CSS vars and body attribute on unmount.
       document.documentElement.style.removeProperty('--visual-viewport-height');
       document.documentElement.style.removeProperty('--keyboard-height');

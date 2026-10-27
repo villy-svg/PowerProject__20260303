@@ -45,9 +45,10 @@ const CentralisedTaskBoard = ({
 }) => {
   const [activeBoardStageId, setActiveBoardStageId] = useState('BACKLOG');
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [drillDownId, setDrillDownId] = useState(null);
   
   const assignedTasks = tasks.filter(t => taskUtils.isAssignee(t, user) || taskUtils.isCreator(t, user));
-  const myTasks = assignedTasks.filter(t => {
+  const rootMyTasks = assignedTasks.filter(t => {
     let current = t;
     while (current.parentTask) {
       const parent = tasks.find(pt => pt.id === current.parentTask);
@@ -59,9 +60,13 @@ const CentralisedTaskBoard = ({
     }
     return true;
   });
+  const drillParentTask = drillDownId ? tasks.find(t => t.id === drillDownId) : null;
+  const myTasks = (isMobile && drillDownId && drillParentTask)
+    ? tasks.filter(t => t.parentTask === drillDownId)
+    : rootMyTasks;
   const boardStages = STAGE_LIST.filter(s => s.id !== 'DEPRIORITIZED');
 
-  if (myTasks.length === 0) {
+  if (rootMyTasks.length === 0) {
     return (
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
@@ -188,6 +193,17 @@ const CentralisedTaskBoard = ({
 
         {isMobile ? (
           <div className="centralised-board">
+            {drillDownId && drillParentTask && (
+              <div className="centralised-drill-breadcrumb">
+                <button
+                  type="button"
+                  className="centralised-drill-back-btn"
+                  onClick={() => setDrillDownId(drillParentTask.parentTask || null)}
+                >
+                  ← Back to {drillParentTask.text}
+                </button>
+              </div>
+            )}
             {boardStages.map(stage => {
               const stageTasks = myTasks.filter(t => t.stageId === stage.id);
               const isColumnActive = activeBoardStageId === stage.id;
@@ -239,7 +255,7 @@ const CentralisedTaskBoard = ({
                               currentUser={user}
                               tasks={tasks}
                               onPromote={handleMoveToParent}
-                              onDrillDown={() => {}}
+                              onDrillDown={(id) => setDrillDownId(id)}
                               showHierarchy={permissions.canViewKanbanHierarchy !== false}
                               permissions={permissions}
                               isExpanded={expandedTaskId === task.id}

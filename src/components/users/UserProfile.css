@@ -451,3 +451,49 @@
   text-align: center;
   user-select: none;
 }
+
+
+/* Manual OTA Update states in UserProfile dropdown */
+.dropdown-item.update-item--idle,
+.dropdown-item.update-item--checking,
+.dropdown-item.update-item--up-to-date,
+.dropdown-item.update-item--error {
+  gap: 8px;
+}
+
+.dropdown-item.update-item--checking {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.dropdown-item.update-item--up-to-date {
+  color: var(--status-success);
+}
+
+.dropdown-item.update-item--up-to-date:hover {
+  background: color-mix(in srgb, var(--status-success), transparent 90%);
+  color: var(--status-success);
+}
+
+.dropdown-item.update-item--error {
+  color: var(--status-danger);
+}
+
+.dropdown-item.update-item--error:hover {
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
+  color: var(--status-danger);
+}
+
+.update-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.update-icon--spinning {
+  animation: ota-spin 1s linear infinite;
+}
+
+@keyframes ota-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

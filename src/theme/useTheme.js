@@ -10,6 +10,11 @@ export function useTheme() {
     const theme = darkMode ? 'dark' : 'light';
     localStorage.setItem('power_project_theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.className = theme;
+    const metaThemeColor = document.getElementById('meta-theme-color') || document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', darkMode ? '#050505' : '#fcfcfd');
+    }
   }, [darkMode]);
 
   const toggleTheme = () => {

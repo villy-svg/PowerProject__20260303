@@ -23,6 +23,7 @@
   width: 100%;
   max-width: 650px;
   max-height: 90dvh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-premium);
@@ -42,7 +43,9 @@
 
 .master-modal-scroll-area {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 1.5rem clamp(1.5rem, 5vw, 2.5rem); /* Reduced top/bottom padding */
   display: flex;
   flex-direction: column;
@@ -63,6 +66,20 @@
   box-shadow: 0 -10px 30px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
+@media screen and (max-width: 768px) {
+  .master-modal-overlay {
+    padding: 16px 12px;
+  }
+
+  .master-modal-content {
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 24px));
+  }
+
+  .master-modal-footer {
+    padding-bottom: max(0.75rem, calc(0.65rem + env(safe-area-inset-bottom, 0px)));
+  }
+}
+
 @media screen and (max-width: 480px) {
   .master-modal-overlay {
     align-items: flex-end;
@@ -71,7 +88,7 @@
 
   .master-modal-content {
     max-width: 100%;
-    max-height: 92dvh;
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 16px));
     border-radius: var(--radius-squircle) var(--radius-squircle) 0 0;
     margin: 0;
     border-bottom: none;
@@ -82,7 +99,7 @@
   .master-modal-footer {
     flex-direction: column;
     align-items: stretch;
-    padding: 1rem 1.5rem;
+    padding: 1rem 1.5rem max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
     gap: 10px;
   }
 
@@ -95,4 +112,3 @@
 .master-modal-footer button {
   min-width: 100px;
 }
-

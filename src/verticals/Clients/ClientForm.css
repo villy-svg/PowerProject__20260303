@@ -1,6 +1,32 @@
 /* ClientForm.css */
 /* Extracted from inline styles */
 @import '../../styles/DropdownSystem.css';
+.client-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 24px;
+}
+.client-form .modal-content-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 8px 0 0;
+}
+.client-form .form-footer.sticky {
+  position: sticky;
+  bottom: 0;
+  flex-shrink: 0;
+  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
+}
+@media screen and (max-width: 480px) {
+  .client-form {
+    padding: 0 16px;
+  }
+}
 .client-form-container {
   display: flex;
   flex-direction: column;

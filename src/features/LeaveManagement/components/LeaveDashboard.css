@@ -93,12 +93,21 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 .leave-dashboard-content-area {
   padding: clamp(1rem, 3vw, 2rem);
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media screen and (max-width: 768px) {
+  .leave-dashboard-content-area {
+    padding-bottom: calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  }
 }
 
 .leave-dashboard-toggles-container {
@@ -220,6 +229,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
   z-index: 9999;
 }
 
@@ -230,8 +241,29 @@
   padding: 24px;
   width: 90%;
   max-width: 500px;
+  max-height: min(90dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 24px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   color: var(--text-color);
   box-shadow: var(--shadow-premium, 0 12px 40px color-mix(in srgb, var(--bg-color), transparent 50%));
+}
+
+@media screen and (max-width: 480px) {
+  .leave-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .leave-modal-body {
+    width: 100%;
+    max-width: 100%;
+    max-height: min(92dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 16px));
+    border-radius: var(--radius-squircle, 24px) var(--radius-squircle, 24px) 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    padding: 18px 16px max(18px, calc(14px + env(safe-area-inset-bottom, 0px)));
+  }
 }
 
 .leave-modal-form-group {
@@ -270,4 +302,3 @@
   font-size: 0.95rem;
   outline: none;
 }
-

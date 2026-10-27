@@ -15,6 +15,7 @@ import ConflictModal from '../../components/modals/ConflictModal';
 import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import RBACManageButton from '../../components/ui/RBACManageButton';
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 /**
  * ClientManagement
@@ -26,6 +27,9 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
   const { clients, categories, billingModels, loading, fetchClients, addClient, updateClient, toggleStatus, deleteClient } = useClients();
 
   const ui = useManagementUI({ storageKey: 'powerpod_client_view' });
+  const { isMobile } = useIsMobile();
+  // Lock phone viewports to card grid to match EmployeeManagement and UserManagement
+  const actualViewMode = isMobile ? 'grid' : ui.viewMode;
   const [pendingConflict, setPendingConflict] = useState(null);
   const isScrollVisible = useScrollDirection(10, 100);
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
@@ -182,18 +186,21 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
         onAddClick={ui.openAddModal}
         expandedLeft={
           <>
-            <div className="view-mode-toggle">
-              {['grid', 'list'].map(mode => (
-                <button
-                  key={mode}
-                  className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
-                  onClick={() => ui.setViewMode(mode)}
-                  title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
-                >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
-            </div>
+            {/* Hide view-mode toggle on mobile since mobile intentionally locks to Card Grid */}
+            {!isMobile && (
+              <div className="view-mode-toggle">
+                {['grid', 'list'].map(mode => (
+                  <button
+                    key={mode}
+                    className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
+                    onClick={() => ui.setViewMode(mode)}
+                    title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
+                  >
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <button
               className={`halo-button toggle-depri-btn ${!ui.showInactive ? 'active' : ''}`}
@@ -259,7 +266,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                       <h5 className="client-management__section-header">
                         {billingModelName} <span className="u-opacity-50 u-text-xs u-ml-6">({clientsInModel.length})</span>
                       </h5>
-                      <div className={ui.viewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
+                      <div className={actualViewMode === 'grid' ? 'client-grid' : 'responsive-table-wrapper client-list'}>
                         {clientsInModel.map(client => {
                           const props = {
                             client,
@@ -274,7 +281,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                               canDelete: permissions.canDeleteClients
                             }
                           };
-                          return ui.viewMode === 'grid'
+                          return actualViewMode === 'grid'
                             ? <ClientCard key={client.id} {...props} />
                             : <ClientListRow 
                                 key={client.id} 
@@ -300,7 +307,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
               {inactiveClients.length === 0 ? (
                 <p className="client-empty-sub-state u-opacity-30">No inactive records.</p>
               ) : (
-                <div className={ui.viewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
+                <div className={actualViewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
                   {inactiveClients.map(client => {
                     const props = {
                       client,
@@ -315,7 +322,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
                         canDelete: permissions.canDeleteClients
                       }
                     };
-                    return ui.viewMode === 'grid'
+                    return actualViewMode === 'grid'
                       ? <ClientCard key={client.id} {...props} />
                       : <ClientListRow 
                           key={client.id} 

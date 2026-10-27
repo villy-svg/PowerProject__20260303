@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { leaveService } from '../services/leaveService';
+import { useBackButtonClose } from '../../../app/contexts/AppNavigationContext';
 
 /**
  * Modal to submit a new leave request.
  * Contains logic to calculate days and handle the 2-day advance notice rule.
  */
 export const LeaveApplicationModal = ({ isOpen, onClose, onSubmit, maxBalance = {}, employeeId }) => {
+  useBackButtonClose(isOpen, onClose);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [reason, setReason] = useState('');

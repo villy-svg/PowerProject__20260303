@@ -4,7 +4,10 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0;
 }
 .rejection-form .form-group {
   display: flex;
@@ -48,9 +51,16 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 1rem;
-  padding-top: 1.5rem;
+  margin-top: 0;
+  padding: 16px 24px max(16px, calc(12px + env(safe-area-inset-bottom, 0px)));
   border-top: 1px solid var(--border-color);
+  background: var(--surface-card);
+  flex-shrink: 0;
+}
+@media screen and (max-width: 480px) {
+  .rejection-actions {
+    padding: 10px 16px max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
+  }
 }
 .rejection-actions .cancel-btn {
   background: transparent;

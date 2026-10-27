@@ -25,6 +25,7 @@ import {
 } from '../ui/Icons';
 import './BottomNav.css'; // Shared BottomNav styles — same visual system as MobileBottomNav
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
+import { useScrollDirection } from '../../hooks/useScrollDirection';
 
 /**
  * Section jump targets — must match the `id` anchors in Configuration.jsx.
@@ -46,6 +47,8 @@ const ConfigBottomNav = ({
   verticals = {} 
 }) => {
   const { showBottomNavOverlay, setShowBottomNavOverlay } = useAppNavigation();
+  const isScrollVisible = useScrollDirection(10, 100);
+  const isHidden = !isScrollVisible && !showBottomNavOverlay;
 
   // Filter tabs based on vertical permissions
   const filteredTabs = CONFIG_TABS.filter(tab => {
@@ -74,7 +77,10 @@ const ConfigBottomNav = ({
   };
 
   return (
-    <nav className="bottom-nav config-bottom-nav" aria-label="Configuration Sections">
+    <nav
+      className={`bottom-nav config-bottom-nav ${isHidden ? 'bottom-nav-hidden' : ''}`}
+      aria-label="Configuration Sections"
+    >
       <div className="bottom-nav-container">
         {filteredTabs.map((tab) => {
           const isActive = tab.id === 'switch'
@@ -90,7 +96,7 @@ const ConfigBottomNav = ({
               aria-label={tab.label}
             >
               <div className="icon-wrapper">
-                <tab.Icon size={24} strokeWidth={isActive ? 2.2 : 1.8} />
+                <tab.Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
               </div>
               <span className="nav-label">{tab.label}</span>
             </button>

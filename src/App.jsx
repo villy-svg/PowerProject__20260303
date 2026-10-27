@@ -17,6 +17,7 @@ import { MobileLongPressProvider } from './app/contexts/MobileLongPressContext';
 import { useRBAC } from './hooks/useRBAC';
 import { useOTAUpdate } from './hooks/useOTAUpdate';
 import { usePushNotifications } from './hooks/usePushNotifications';
+import { useVisualViewport } from './hooks/useVisualViewport';
 
 // Shell components
 import LayoutShell from './app/shells/LayoutShell';
@@ -441,6 +442,7 @@ function AppShell({ verticals, verticalList }) {
 
 function App() {
   const { darkMode } = useTheme();
+  useVisualViewport();
   const {
     isAppInitializing, setIsAppInitializing,
     session, setSession,

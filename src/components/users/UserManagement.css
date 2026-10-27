@@ -177,7 +177,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  z-index: var(--z-modal, 5000); /* Elevate above mobile bottom action tray (4001) */
 }
 .edit-modal {
   background: var(--bg-color);
@@ -187,7 +187,8 @@
   border-radius: 16px;
   border: 1px solid var(--border-color);
   box-shadow: 0 20px 40px color-mix(in srgb, var(--bg-color), transparent 60%);
-  max-height: 90vh;
+  max-height: min(90dvh, calc(var(--visual-viewport-height, 100dvh) - env(safe-area-inset-top, 0px) - 24px));
+  -webkit-overflow-scrolling: touch;
   overflow-y: auto;
 }
 .modal-header {
@@ -800,7 +801,11 @@
   }
   .edit-modal {
     padding: 20px;
+    padding: 20px 20px max(20px, calc(16px + env(safe-area-inset-bottom, 0px)));
     width: 95%;
+  }
+  .sync-modal-content {
+    min-height: 0;
   }
   .role-config-grid {
     grid-template-columns: 1fr;

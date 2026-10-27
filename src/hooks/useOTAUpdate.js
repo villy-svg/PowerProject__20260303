@@ -6,6 +6,10 @@
  *  2. isApplying       — Bundle is downloading in the background.
  *  3. downloadComplete — Bundle downloaded & applied. Show restart modal.
  *
+ * Also supports manual "Update App" checks from UserProfile via
+ * `checkForUpdate({ force: true })`, which bypasses the 1-hour throttle
+ * and sets `manualCheckStatus` ('idle' | 'up_to_date' | 'error').
+ *
  * CRITICAL: All operations are no-ops on web platform.
  *
  * Skill compliance:
@@ -14,12 +18,13 @@
  * - Hybrid Mobile: Platform guarded via Capacitor.isNativePlatform()
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { otaUpdateService } from '../services/core/otaUpdateService';
 import { OTA_CONFIG } from '../constants/appVersion';
 
 const LAST_CHECK_KEY = 'ota_last_check_timestamp';
+const MANUAL_STATUS_RESET_MS = 3500;
 
 export function useOTAUpdate() {
   // updateAvailable: true once we confirm GitHub has a newer version
@@ -36,6 +41,21 @@ export function useOTAUpdate() {
   const [downloadComplete, setDownloadComplete] = useState(false);
   // showRestartModal: user-controlled visibility of the restart prompt
   const [showRestartModal, setShowRestartModal] = useState(false);
+  // manualCheckStatus: feedback for manual "Update App" taps ('idle' | 'up_to_date' | 'error')
+  const [manualCheckStatus, setManualCheckStatus] = useState('idle');
+
+  // Refs prevent stale closures & race conditions if user taps rapidly
+  const inFlightRef = useRef(false);
+  const statusTimerRef = useRef(null);
+
+  // Clear feedback timer on unmount
+  useEffect(() => {
+    return () => {
+      if (statusTimerRef.current) {
+        clearTimeout(statusTimerRef.current);
+      }
+    };
+  }, []);
 
   // Notify plugin on mount that the current bundle is working.
   // If a bad bundle was applied last time, this confirms the rollback succeeded.
@@ -53,33 +73,57 @@ export function useOTAUpdate() {
     init();
   }, []);
 
-  // Check for updates (throttled by OTA_CONFIG.checkIntervalMs)
-  const checkForUpdate = useCallback(async () => {
-    if (!Capacitor.isNativePlatform()) return;
+  // Check for updates (throttled by OTA_CONFIG.checkIntervalMs unless force: true is passed)
+  const checkForUpdate = useCallback(async (options = {}) => {
+    const isForced = Boolean(options && options.force === true);
+    if (!Capacitor.isNativePlatform() && !isForced) return;
+    if (inFlightRef.current) return;
 
-    // Throttle: Don't check more often than the configured interval (default: 1 hr)
-    try {
-      const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
-      if (lastCheck) {
-        const elapsed = Date.now() - parseInt(lastCheck, 10);
-        if (elapsed < OTA_CONFIG.checkIntervalMs) {
-          console.log('[useOTAUpdate] Skipping check — within throttle interval');
-          return;
+    // Throttle automatic checks: Don't check more often than the configured interval (default: 1 hr).
+    // Manual checks (force: true) bypass this throttle so users can pull updates on demand.
+    if (!isForced) {
+      try {
+        const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
+        if (lastCheck) {
+          const elapsed = Date.now() - parseInt(lastCheck, 10);
+          if (elapsed < OTA_CONFIG.checkIntervalMs) {
+            console.log('[useOTAUpdate] Skipping check — within throttle interval');
+            return;
+          }
         }
+      } catch (e) {
+        // localStorage may not be available — proceed with check
       }
-    } catch (e) {
-      // localStorage may not be available — proceed with check
     }
 
+    if (statusTimerRef.current) {
+      clearTimeout(statusTimerRef.current);
+      statusTimerRef.current = null;
+    }
+    setManualCheckStatus('idle');
+    inFlightRef.current = true;
     setIsChecking(true);
+
     try {
-      const result = await otaUpdateService.checkForUpdate();
+      const result = await otaUpdateService.checkForUpdate({ allowWebCheck: isForced });
 
       if (result.hasUpdate) {
+        if (!Capacitor.isNativePlatform()) {
+          // On web/dev mobile viewport: clear caches and reload into latest web assets
+          if ('caches' in window) {
+            try {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(key => caches.delete(key)));
+            } catch (e) { console.error(e); }
+          }
+          window.location.reload(true);
+          return;
+        }
         // Stage 1: Update detected — show the toast immediately
         setUpdateAvailable(true);
         setUpdateDetected(true);
         setUpdateVersion(result.version);
+        setIsChecking(false);
 
         // Stage 2: Apply in the background (download is silent, user keeps working)
         setIsApplying(true);
@@ -92,19 +136,35 @@ export function useOTAUpdate() {
           setShowRestartModal(true);
           setUpdateDetected(false);
         }
+      } else if (isForced) {
+        // Provide explicit visual feedback in UserProfile when user manually checks
+        const nextStatus = result.error ? 'error' : 'up_to_date';
+        setManualCheckStatus(nextStatus);
+        statusTimerRef.current = setTimeout(() => {
+          setManualCheckStatus('idle');
+        }, MANUAL_STATUS_RESET_MS);
       }
 
-      // Record the timestamp of this successful check
-      try {
-        localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
-      } catch (e) {
-        // Ignore localStorage errors
+      // Record the timestamp of this successful check (only if not an API/network error)
+      if (!result.error) {
+        try {
+          localStorage.setItem(LAST_CHECK_KEY, Date.now().toString());
+        } catch (e) {
+          // Ignore localStorage errors
+        }
       }
     } catch (error) {
       console.error('[useOTAUpdate] Check failed:', error);
       setIsApplying(false);
+      if (isForced) {
+        setManualCheckStatus('error');
+        statusTimerRef.current = setTimeout(() => {
+          setManualCheckStatus('idle');
+        }, MANUAL_STATUS_RESET_MS);
+      }
     } finally {
       setIsChecking(false);
+      inFlightRef.current = false;
     }
   }, []);
 
@@ -112,7 +172,9 @@ export function useOTAUpdate() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    const timer = setTimeout(checkForUpdate, 3000);
+    const timer = setTimeout(() => {
+      checkForUpdate({ force: false });
+    }, 3000);
     return () => clearTimeout(timer);
   }, [checkForUpdate]);
 
@@ -134,6 +196,7 @@ export function useOTAUpdate() {
     isApplying,
     downloadComplete,
     showRestartModal,
+    manualCheckStatus,
     checkForUpdate,
     dismissUpdateToast,
     dismissRestartModal,

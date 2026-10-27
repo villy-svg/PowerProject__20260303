@@ -330,18 +330,21 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         onAddClick={handleOpenAdd}
         expandedLeft={
           <>
-            <div className="view-mode-toggle">
-              {['grid', 'list', 'tree'].map(mode => (
-                <button
-                  key={mode}
-                  className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
-                  onClick={() => ui.setViewMode(mode)}
-                  title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
-                >
-                  {mode === 'tree' ? 'Hierarchy' : mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
-            </div>
+            {/* Hide view-mode toggle on mobile since mobile intentionally locks to Card Grid */}
+            {!isMobile && (
+              <div className="view-mode-toggle">
+                {['grid', 'list', 'tree'].map(mode => (
+                  <button
+                    key={mode}
+                    className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
+                    onClick={() => ui.setViewMode(mode)}
+                    title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
+                  >
+                    {mode === 'tree' ? 'Hierarchy' : mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <button
               className={`halo-button secondary toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}

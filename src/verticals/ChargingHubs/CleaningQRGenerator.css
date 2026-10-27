@@ -10,10 +10,11 @@
    OUTER WRAPPERS
    ========================================================================== */
 .cqr-page {
-  height: calc(100vh - 100px);
+  height: calc(100dvh - 100px);
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   align-items: center; /* centers the 700px wrapper */
@@ -265,7 +266,7 @@
    ========================================================================== */
 @media screen and (max-width: 768px) {
   .cqr-wrapper {
-    padding: 1rem;
+    padding: 1rem 1rem calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
   }
 
   .cqr-actions {

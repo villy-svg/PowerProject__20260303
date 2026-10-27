@@ -164,7 +164,8 @@
 }
 
 .setup-error {
-  color: var(--priority-high, #ef4444);
+  /* Phase 1 CSS Audit Fix: Replaced deprecated #ef4444 fallback with var(--status-danger) per UI Design System §7 */
+  color: var(--priority-high, var(--status-danger));
   font-size: 13px;
   margin: 0;
 }

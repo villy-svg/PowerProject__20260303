@@ -42,7 +42,7 @@
   --priority-high: var(--status-warning);
   --priority-medium: var(--status-neutral);
   --priority-low: var(--status-success);
-  /* Z-Index Hierarchy */
+  /* Z-Index Hierarchy (Modals & Toasts elevated above mobile trays 4000-4005) */
   --z-base: 0;
   --z-card-base: 1;
   --z-card-content: 10;
@@ -51,8 +51,8 @@
   --z-toolbar: 100;
   --z-sticky: 200;
   --z-header: 2001;
-  --z-modal: 3000;
-  --z-toast: 4000;
+  --z-modal: 5000;
+  --z-toast: 6000;
   /* Badge System Colors (Tokenized) */
   --badge-teal-bg: rgba(45, 212, 191, 0.1);
   --badge-teal-text: #2dd4bf;
@@ -62,24 +62,28 @@
   --badge-green-text: #34d399;
   --badge-amber-bg: rgba(245, 158, 11, 0.1);
   --badge-amber-text: #f59e0b;
-  --badge-red-bg: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
+  /* Phase 1 CSS Audit Fix: Valid percentage required for color-mix() */
+  --badge-red-bg: color-mix(in srgb, var(--priority-urgent), transparent 90%);
   --badge-red-text: var(--priority-urgent);
   /* Semantic Status Colors (aliases for explicit intent) */
   --brand-red: var(--status-danger);
+  --brand-crimson: var(--status-danger);
   --brand-amber: var(--status-warning);
   --brand-emerald: var(--status-success);
   --color-white: #ffffff;
   --text-secondary: #71717a;
+  --text-tertiary: #a1a1aa;
   --surface-deep: #f4f4f5;
 }
 [data-theme='dark'] {
   --bg-color: #050505;        /* Midnight Black */
   --text-color: #d4d4d8;      /* Neutral Zinc-300 (Softer than white) */
   --text-secondary: #71717a;  /* Neutral Zinc-500 (Muted) */
+  --text-tertiary: #a1a1aa;   /* Neutral Zinc-400 */
   --brand-mint: #0d9488;      /* Muted Teal-600 */
   --brand-blue: #3b82f6;      
   --brand-green: var(--brand-mint);
-  --border-color: rgba(255, 255, 255, 0.04); /* Subtler satin edges */
+  --border-color: rgba(255, 255, 255, 0.10); /* Crisp satin edges for outdoor/OLED visibility */
   --panel-bg: #060606;        /* Deeper Midnight */
   --surface-card: #020202;    /* Near Absolute Black */
 
@@ -336,25 +340,25 @@
   box-sizing: border-box;
 }
 
-/* Badge Semantic Variants */
+/* Badge Semantic Variants (Phase 1 CSS Audit Fix: Valid % units in color-mix) */
 .badge-success {
   color: var(--priority-low);
-  background: color-mix(in srgb, var(--priority-low), transparent 0.1);
-  border-color: color-mix(in srgb, var(--priority-low), transparent 0.2);
+  background: color-mix(in srgb, var(--priority-low), transparent 90%);
+  border-color: color-mix(in srgb, var(--priority-low), transparent 80%);
   opacity: 1;
 }
 
 .badge-warning {
   color: var(--priority-medium);
-  background: color-mix(in srgb, var(--priority-medium), transparent 0.1);
-  border-color: color-mix(in srgb, var(--priority-medium), transparent 0.2);
+  background: color-mix(in srgb, var(--priority-medium), transparent 90%);
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 80%);
   opacity: 1;
 }
 
 .badge-danger {
   color: var(--priority-urgent);
-  background: color-mix(in srgb, var(--priority-urgent), transparent 0.15);
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 85%);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%);
   opacity: 1;
 }
 
@@ -372,23 +376,23 @@
 /* Priority Color Methods */
 .priority-low { 
   color: var(--priority-low); 
-  background: color-mix(in srgb, var(--priority-low), transparent 0.1); 
-  border-color: color-mix(in srgb, var(--priority-low), transparent 0.2); 
+  background: color-mix(in srgb, var(--priority-low), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-low), transparent 80%); 
 }
 .priority-medium { 
   color: var(--priority-medium); 
-  background: color-mix(in srgb, var(--priority-medium), transparent 0.1); 
-  border-color: color-mix(in srgb, var(--priority-medium), transparent 0.2); 
+  background: color-mix(in srgb, var(--priority-medium), transparent 90%); 
+  border-color: color-mix(in srgb, var(--priority-medium), transparent 80%); 
 }
 .priority-high { 
   color: var(--priority-high); 
-  background: color-mix(in srgb, var(--priority-high), transparent 0.15); 
-  border-color: color-mix(in srgb, var(--priority-high), transparent 0.3); 
+  background: color-mix(in srgb, var(--priority-high), transparent 85%); 
+  border-color: color-mix(in srgb, var(--priority-high), transparent 70%); 
 }
 .priority-urgent { 
   color: var(--priority-urgent); 
-  background: color-mix(in srgb, var(--priority-urgent), transparent 0.15); 
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3); 
+  background: color-mix(in srgb, var(--priority-urgent), transparent 85%); 
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%); 
 }
 .priority-completed { 
   color: var(--brand-mint); 
@@ -494,8 +498,8 @@
 
 .bulk-btn.delete:hover {
   color: var(--priority-urgent);
-  background: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 0.3);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
+  border-color: color-mix(in srgb, var(--priority-urgent), transparent 70%);
 }
 
 .bulk-btn.cancel {
@@ -514,7 +518,7 @@
    ========================================================================== */
 
 /* ─── Management Action Icons (Universal) ─── */
-.action-icon-btn,
+/* Phase 1 CSS Audit Fix: Removed duplicate .action-icon-btn declaration */
 .card-nav-button,
 .card-edit-button,
 .card-clone-button,
@@ -538,7 +542,6 @@
   font-size: 1.1rem;
 }
 
-.action-icon-btn:hover,
 .card-edit-button:hover,
 .card-clone-button:hover,
 .card-nav-button:hover {
@@ -549,12 +552,12 @@
 
 .card-mark-completed-button:hover {
   color: var(--priority-low); /* Semantic success green on hover */
-  background: color-mix(in srgb, var(--priority-low), transparent 0.1);
+  background: color-mix(in srgb, var(--priority-low), transparent 90%);
   transform: translateY(-1px);
 }
 
 .card-delete-button:hover {
-  background: color-mix(in srgb, var(--priority-urgent), transparent 0.1);
+  background: color-mix(in srgb, var(--priority-urgent), transparent 90%);
   color: var(--priority-urgent);
 }
 
@@ -1005,16 +1008,21 @@ body[data-keyboard="open"] .task-form-actions {
 
 /* ── Typography ── */
 .u-fw-400 { font-weight: 400; }
+.u-fw-500 { font-weight: 500; }
 .u-fw-600 { font-weight: 600; }
 .u-fw-700 { font-weight: 700; }
 .u-fw-800 { font-weight: 800; }
 .u-fw-900 { font-weight: 900; }
 
-.u-text-xs     { font-size: 0.65rem; }  /* Micro labels */
-.u-text-sm-75  { font-size: 0.75rem; }
-.u-text-sm     { font-size: 0.85rem; }
-.u-text-base   { font-size: 0.95rem; }
-.u-text-lg     { font-size: 1.05rem; }
+/* Phase 1 CSS Audit Fix: Consolidated canonical utility font sizes (preserving active cascade) */
+.u-text-0-65rem { font-size: 0.65rem; }  /* Micro labels */
+.u-text-0-7rem  { font-size: 0.7rem; }
+.u-text-xs      { font-size: 0.75rem; }
+.u-text-sm-75   { font-size: 0.75rem; }
+.u-text-sm      { font-size: 0.85rem; }
+.u-text-base    { font-size: 1rem; }
+.u-text-lg      { font-size: 1.05rem; }
+.u-text-1-1em   { font-size: 1.1em; }
 
 .u-text-center { text-align: center; }
 
@@ -1173,10 +1181,9 @@ body[data-keyboard="open"] .task-form-actions {
   cursor: pointer;
 }
 
-/* ── More Padding/Margin Utilities ── */
+/* ── More Padding/Margin Utilities (Phase 1 CSS Audit Fix: Deduplicated repeated .u-* rules) ── */
 .u-w-14 { width: 14px; }
 .u-w-16 { width: 16px; }
-.u-w-full { width: 100%; }
 .u-h-14 { height: 14px; }
 .u-h-16 { height: 16px; }
 .u-h-36 { height: 36px; }
@@ -1187,19 +1194,10 @@ body[data-keyboard="open"] .task-form-actions {
 .u-max-w-200 { max-width: 200px; }
 
 /* ── Spacing ── */
-.u-m-0 { margin: 0; }
 .u-m-x-auto { margin-left: auto; margin-right: auto; }
-.u-mt-8 { margin-top: 8px; }
 .u-mt-12 { margin-top: 12px; }
-.u-mt-24 { margin-top: 24px; }
 .u-mt-32 { margin-top: 32px; }
-.u-mt-1rem { margin-top: 1rem; }
 .u-mt-3rem { margin-top: 3rem; }
-.u-mb-4 { margin-bottom: 4px; }
-.u-mb-8 { margin-bottom: 8px; }
-.u-mb-12 { margin-bottom: 12px; }
-.u-mb-16 { margin-bottom: 16px; }
-.u-mr-4 { margin-right: 4px; }
 .u-ml-6 { margin-left: 6px; }
 
 .u-p-0 { padding: 0; }
@@ -1217,43 +1215,22 @@ body[data-keyboard="open"] .task-form-actions {
 
 /* ── Typography & Colors ── */
 .u-text-upper { text-transform: uppercase; }
-.u-text-0-65rem { font-size: 0.65rem; }
-.u-text-0-7rem { font-size: 0.7rem; }
-.u-text-xs { font-size: 0.75rem; }
-.u-text-sm { font-size: 0.85rem; }
-.u-text-base { font-size: 1rem; }
-.u-text-1-1em { font-size: 1.1em; }
-.u-text-brand-green { color: var(--brand-green); }
-.u-text-danger { color: #ef4444; }
+/* Phase 1 CSS Audit Fix: Replaced deprecated #ef4444 with var(--status-danger) per UI Design System §7 */
+.u-text-danger { color: var(--status-danger); }
 .u-text-primary { color: var(--text-color); }
 .u-text-tertiary { color: rgba(113, 113, 122, 0.7); }
 .u-text-right { text-align: right; }
 .u-text-left { text-align: left; }
-.u-text-center { text-align: center; }
 .u-line-height-16 { line-height: 1.6; }
 .u-font-mono { font-family: 'JetBrains Mono', monospace; }
-.u-fw-400 { font-weight: 400; }
-.u-fw-500 { font-weight: 500; }
-.u-fw-600 { font-weight: 600; }
-.u-fw-800 { font-weight: 800; }
-.u-fw-900 { font-weight: 900; }
 
 /* ── Flexbox ── */
-.u-flex-center { display: flex; align-items: center; justify-content: center; }
-.u-flex-between { display: flex; align-items: center; justify-content: space-between; }
-.u-flex-center-gap-4 { display: flex; align-items: center; gap: 4px; }
 .u-flex-center-gap-8 { display: flex; align-items: center; gap: 8px; }
-.u-flex-center-gap-10 { display: flex; align-items: center; gap: 10px; }
-.u-flex-gap-4 { display: flex; gap: 4px; }
-.u-flex-gap-12 { display: flex; gap: 12px; }
-.u-flex-col-gap-8 { display: flex; flex-direction: column; gap: 8px; }
 .u-inline-flex-center-gap-6 { display: inline-flex; align-items: center; gap: 6px; }
 .u-flex-wrap-gap-16 { flex-wrap: wrap; gap: 16px; }
 .u-items-center { align-items: center; }
-.u-flex-1 { flex: 1; }
 .u-flex-1-280 { flex: 1 1 280px; }
 .u-flex-end-gap-10 { display: flex; justify-content: flex-end; gap: 10px; }
-.u-flex-end-gap-12 { display: flex; justify-content: flex-end; gap: 12px; }
 
 /* ── Borders & Backgrounds ── */
 .u-bg-card { background: rgba(255, 255, 255, 0.02); }

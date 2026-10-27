@@ -1,12 +1,10 @@
 .configuration-view {
-  height: calc(100vh - 100px);
-  overflow-y: auto; /* Scrollbar on this edge */
   width: 100%; /* Respect parent bounds instead of forcing 100vw */
   display: block;
   animation: fadeIn 0.4s ease-out;
 }
 .config-inner-wrap {
-  padding: 32px;
+  padding: 0;
   max-width: 1200px;
   margin: 0 auto; /* CENTER the content */
   display: flex;
@@ -21,19 +19,22 @@
   padding-bottom: 16px;
 }
 .header-text h2 {
-  font-size: 1.8rem;
+  font-size: 1.85rem;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   color: var(--brand-green);
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
 }
 .header-text p {
-  font-size: 1rem;
-  opacity: 0.7;
+  font-size: 0.95rem;
+  color: var(--text-color);
+  opacity: 0.65;
   margin-bottom: 0;
   line-height: 1.5;
 }
-/* View Toggle */
+/* View Toggle (legacy selector preserved for backwards compatibility) */
 .view-toggle {
   display: flex;
   background: var(--bg-color);
@@ -55,8 +56,8 @@
   opacity: 0.5;
 }
 .view-toggle button.active {
-  background: var(--primary-color);
-  color: white;
+  background: var(--brand-green);
+  color: var(--color-white);
   opacity: 1;
 }
 /* Grouping */
@@ -65,24 +66,25 @@
 }
 .group-label {
   font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-color);
-  opacity: 0.4;
+  opacity: 0.55;
   margin-bottom: 16px;
-  border-left: 2px solid var(--border-color);
+  border-left: 2px solid var(--brand-green);
   padding-left: 12px;
 }
 .master-label {
-  color: #a855f7;
+  color: var(--brand-blue);
   opacity: 1;
-  border-left-color: #a855f7;
+  border-left-color: var(--brand-blue);
 }
 /* Grid Layout */
 .grid-view .config-items-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
 }
 /* Horizontal Layout */
 .horizontal-view .config-items-container {
@@ -91,28 +93,32 @@
   gap: 12px;
 }
 .config-tile {
-  background: var(--panel-bg);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  backdrop-filter: blur(var(--glass-blur, 16px));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
+  border-radius: var(--radius-squircle, 24px);
   padding: 20px;
   display: flex;
-  align-items: center;
-  gap: 20px;
+  align-items: stretch;
+  gap: 16px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .config-tile:hover {
-  border-color: var(--primary-color);
-  background: color-mix(in srgb, var(--primary-color), transparent 95%);
-  transform: translateX(4px);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 50%);
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-premium);
 }
 .config-tile.non-clickable {
   cursor: default;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 .config-tile.non-clickable:hover {
   transform: none;
   border-color: var(--border-color);
+  box-shadow: none;
 }
 .tile-icon {
   width: 44px;
@@ -132,30 +138,89 @@
   flex-direction: column;
 }
 .tile-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 1rem;
+  margin: 0 0 6px 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-green);
 }
 .tile-info p {
   margin: 0;
   font-size: 0.85rem;
-  opacity: 0.6;
+  line-height: 1.45;
+  color: var(--text-color);
+  opacity: 0.65;
+  flex: 1;
+}
+/* Dev & Destructive Action Buttons */
+.dev-test-run-btn {
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+}
+.destructive-action-btn {
+  border-color: color-mix(in srgb, var(--status-danger), transparent 60%);
+  color: var(--status-danger);
+}
+.destructive-action-btn:hover {
+  background: color-mix(in srgb, var(--status-danger), transparent 88%);
+  border-color: var(--status-danger);
+  color: var(--status-danger);
 }
 /* Destructive Tile */
 .destructive:hover {
   border-color: var(--status-danger);
-  background: rgba(239, 68, 68, 0.05);
+  background: color-mix(in srgb, var(--status-danger), transparent 95%);
 }
-.destructive h4 { color: var(--status-danger); }
-/* Responsive adjustments */
-@media (max-width: 768px) {
+.destructive h4 {
+  color: var(--status-danger);
+}
+/* Responsive adjustments — matches MasterPageHeader & MobileLayout conventions */
+@media (max-width: 1024px) {
   .config-header {
     flex-direction: column;
-    gap: 20px;
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: 0;
+    margin-bottom: 16px;
+    border-bottom: none;
+    gap: 12px;
+  }
+  .header-text {
+    width: 100%;
+  }
+  .header-text h2 {
+    font-size: 1.25rem;
+    text-align: center;
+    width: 100%;
+    opacity: 0.9;
+    text-shadow: 0 0 20px var(--halo-glow);
+    margin-bottom: 0;
+  }
+  .header-text p {
+    display: none; /* Hidden on mobile per adaptive-ui-strategy §6 */
   }
   .config-inner-wrap {
-    padding-bottom: 88px; /* Prevent content hiding behind fixed bottom nav */
+    padding: 0 0 calc(88px + var(--safe-bottom, 0px)) 0; /* Prevent content hiding behind fixed bottom nav */
   }
-  .configuration-view .view-toggle {
+  .configuration-view .view-toggle,
+  .configuration-view .view-mode-toggle {
     display: none;
+  }
+  .config-group {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-view .config-items-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .config-tile {
+    padding: 16px;
+  }
+  .config-tile:hover {
+    transform: none;
   }
 }

@@ -86,7 +86,7 @@
     gap: 1px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 32px !important; /* Override global 44px touch-target enforcement */
+    min-height: 40px !important; /* Ergonomic touch height inside 46px tray */
     min-width: 0 !important; /* Override global 44px min-width */
     border-radius: 10px;
     margin: 1px;
@@ -123,10 +123,10 @@
     background: var(--stage-accent); /* Mapped to individual --stage-accent */
     color: var(--bg-color);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.5rem;
+    font-size: 0.58rem;
     font-weight: 800;
-    min-width: 12px;
-    height: 12px;
+    min-width: 14px;
+    height: 14px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -138,7 +138,7 @@
   /* Extracted from inline styles */
   .stage-red { --stage-accent: var(--brand-red, var(--status-danger)); }
   .stage-green { --stage-accent: var(--brand-green); }
-  .stage-slate { --stage-accent: var(--border-color); }
+  .stage-slate { --stage-accent: var(--brand-blue, var(--status-neutral)); } /* Visible active state in dark mode */
   .stage-mint { --stage-accent: var(--brand-mint, var(--status-success)); }
   .stage-orange { --stage-accent: var(--brand-yellow, var(--status-warning)); }
 
@@ -149,15 +149,15 @@
   }
 
   .summary-nav-label {
-    font-size: 0.48rem; /* Reduced for compact dual-tray layout */
+    font-size: 0.58rem; /* Readable mobile label floor without crowding */
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.2px;
     transition: all 0.2s ease;
     white-space: normal; /* Wrap words into 2 rows */
     text-align: center;
-    line-height: 1.0;
-    max-width: 72px; /* Tighter cap to prevent overflow */
+    line-height: 1.05;
+    max-width: 76px;
   }
 
   /* Active Switcher State (Kanban Stage switcher styling compliance) */

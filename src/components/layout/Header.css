@@ -125,6 +125,7 @@
 .theme-toggle-btn:hover {
   background-color: var(--border-color);
 }
+/* Phase 1 CSS Audit Fix: Removed duplicate shadowed .app-header .header-sandbox-btn block */
 .app-header .header-sandbox-btn {
   margin-right: 24px;
   font-size: 0.8rem;
@@ -163,24 +164,6 @@
   background: var(--halo-bg);
   box-shadow: 0 0 15px var(--halo-glow);
   opacity: 1;
-}
-.app-header .header-sandbox-btn {
-  color: var(--brand-amber);
-  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
-  background: color-mix(in srgb, var(--brand-amber), transparent 95%);
-  box-shadow: 0 0 5px color-mix(in srgb, var(--brand-amber), transparent 90%);
-  font-weight: 800;
-  margin-right: 24px;
-  font-size: 0.8rem;
-  padding: 0 16px;
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 /* ==========================================================================
    RESPONSIVE DESIGN (HEADER)
