@@ -193,7 +193,7 @@ const AttendanceBoardHeader = ({
       )}
       <RBACManageButton 
         user={user} 
-        verticalId="employees" 
+        verticalId="EMPLOYEES" 
         featureId="canAccessEmployeeAttendanceBoard" 
         label="Attendance Board" 
       />

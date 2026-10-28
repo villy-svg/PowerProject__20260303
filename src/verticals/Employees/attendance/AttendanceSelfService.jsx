@@ -469,7 +469,7 @@ const AttendanceSelfService = ({
         rightActions={
           <RBACManageButton
             user={user}
-            verticalId="employees"
+            verticalId="EMPLOYEES"
             featureId="canAccessAttendanceSelfService"
             label="Current Attendance"
           />

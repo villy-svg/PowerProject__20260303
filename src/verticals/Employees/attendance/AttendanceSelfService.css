@@ -362,15 +362,17 @@
     padding: 1rem;
     justify-content: flex-start;
     padding-top: 2rem;
+    flex: 1 0 auto;
+    overflow: visible;
     /* Make the page scrollable on phones: .app-content is overflow:hidden
        ("children handle scrolling"), so without this the receipt card and
        the "Share to WhatsApp" button get clipped on short screens.
        min-height:0 lets this flex child shrink to the viewport. */
     min-height: 0;
-    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    -webkit-overflow-scrolling: touch;
+
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   .receipt__container {

@@ -113,13 +113,14 @@ export const profileService = {
     // 3. Build vertical permissions map: { [vertical_id]: { level, features: {} } }
     const vPermsMap = {};
     (vAccess || []).forEach(v => {
-      vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+      const vid = (v.vertical_id || '').toUpperCase();
+      if (vid) vPermsMap[vid] = { level: v.access_level, features: {} };
     });
 
     // 4. Add feature-level access into the vertical map
     (fAccess || []).forEach(f => {
-      if (vPermsMap[f.vertical_id]) {
-        vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+      if (vPermsMap[(f.vertical_id || '').toUpperCase()]) {
+        vPermsMap[(f.vertical_id || '').toUpperCase()].features[f.feature_id] = f.access_level;
       }
     });
 
@@ -207,7 +208,7 @@ export const profileService = {
       seniority: seniority,
       reporteeUserIds: reporteeUserIds,
       reporteeEmployeeIds: reporteeEmployeeIds,
-      assignedVerticals: (vAccess || []).map(v => v.vertical_id),
+      assignedVerticals: Array.from(new Set((vAccess || []).map(v => (v.vertical_id || '').toUpperCase()).filter(Boolean))),
       verticalPermissions: vPermsMap,
       baseCapabilities: rolePerms?.permissions || {},
       bankDetails: employeeData ? {

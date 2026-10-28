@@ -95,7 +95,8 @@ export const useUserManagement = () => {
         const uAccess = (vAccess || []).filter(va => va.user_id === u.id);
         const vPerms = {};
         uAccess.forEach(va => {
-            vPerms[va.vertical_id] = { level: va.access_level };
+            const vid = (va.vertical_id || '').toUpperCase();
+            if (vid) vPerms[vid] = { level: va.access_level };
         });
 
         let linkedEmployee = u.linkedEmployee;
@@ -157,7 +158,8 @@ export const useUserManagement = () => {
 
       const vPermsMap = {};
       (perms.verticals || []).forEach(v => {
-        vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+        const vid = (v.vertical_id || '').toUpperCase();
+        if (vid) vPermsMap[vid] = { level: v.access_level, features: {} };
       });
 
       // Re-hydrate ALL explicit feature_access rows from the DB.
@@ -165,8 +167,8 @@ export const useUserManagement = () => {
       // must survive a subsequent User Management save — we preserve it by loading
       // it into editVerticalPermissions so handleSyncPermissions re-emits it.
       (perms.features || []).forEach(f => {
-        if (vPermsMap[f.vertical_id]) {
-          vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+        if (vPermsMap[(f.vertical_id || '').toUpperCase()]) {
+          vPermsMap[(f.vertical_id || '').toUpperCase()].features[f.feature_id] = f.access_level;
         }
       });
 
@@ -202,12 +204,13 @@ export const useUserManagement = () => {
 
       const vPermsMap = {};
       (perms.verticals || []).forEach(v => {
-        vPermsMap[v.vertical_id] = { level: v.access_level, features: {} };
+        const vid = (v.vertical_id || '').toUpperCase();
+        if (vid) vPermsMap[vid] = { level: v.access_level, features: {} };
       });
 
       (perms.features || []).forEach(f => {
-        if (vPermsMap[f.vertical_id]) {
-          vPermsMap[f.vertical_id].features[f.feature_id] = f.access_level;
+        if (vPermsMap[(f.vertical_id || '').toUpperCase()]) {
+          vPermsMap[(f.vertical_id || '').toUpperCase()].features[f.feature_id] = f.access_level;
         }
       });
 

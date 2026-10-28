@@ -97,7 +97,7 @@ export const LeaveDashboard = ({
       )}
       <RBACManageButton
         user={user}
-        verticalId="employees"
+        verticalId="EMPLOYEES"
         featureId="canAccessEmployeeLeaveWallet"
         label="Leave Manager"
       />

@@ -41,6 +41,9 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
   // Vertical-level access (only populated when featureId is set — used for inheritance display)
   const [inheritedMap, setInheritedMap] = useState({}); // userId -> inherited vertical level | undefined
 
+  const normalizedVerticalId = (verticalId || '').toUpperCase();
+  const lowerVerticalId = (verticalId || '').toLowerCase();
+  const verticalIdVariants = Array.from(new Set([lowerVerticalId, normalizedVerticalId].filter(Boolean)));
   const [originalAccessMap, setOriginalAccessMap] = useState({});
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -80,12 +83,12 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
           supabase
             .from('feature_access')
             .select('user_id, access_level')
-            .eq('vertical_id', verticalId)
+            .in('vertical_id', verticalIdVariants)
             .eq('feature_id', featureId),
           supabase
             .from('vertical_access')
             .select('user_id, access_level')
-            .eq('vertical_id', verticalId),
+            .in('vertical_id', verticalIdVariants),
         ]);
         explicitAccessData = featureResult.data || [];
         verticalAccessData = verticalResult.data || [];
@@ -94,7 +97,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
         const { data } = await supabase
           .from('vertical_access')
           .select('user_id, access_level')
-          .eq('vertical_id', verticalId);
+          .in('vertical_id', verticalIdVariants);
         explicitAccessData = data || [];
       }
 
@@ -179,7 +182,8 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
               const { error } = await supabase
                 .from('feature_access')
                 .delete()
-                .match({ user_id: userId, vertical_id: verticalId, feature_id: featureId });
+                .in('vertical_id', verticalIdVariants)
+                .match({ user_id: userId, feature_id: featureId });
               if (error) errors.push(`Delete failed for ${userId}: ${error.message}`);
             }
           } else {
@@ -189,7 +193,7 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
             const { error } = await supabase
               .from('feature_access')
               .upsert(
-                { user_id: userId, vertical_id: verticalId, feature_id: featureId, access_level: newExplicit },
+                { user_id: userId, vertical_id: normalizedVerticalId, feature_id: featureId, access_level: newExplicit },
                 { onConflict: 'user_id,vertical_id,feature_id' }
               );
             if (error) errors.push(`Upsert failed for ${userId}: ${error.message}`);
@@ -201,14 +205,15 @@ const BoardRBACModal = ({ isOpen, onClose, verticalId, featureId, titleLabel }) 
               const { error } = await supabase
                 .from('vertical_access')
                 .delete()
-                .match({ user_id: userId, vertical_id: verticalId });
+                .in('vertical_id', verticalIdVariants)
+                .match({ user_id: userId });
               if (error) errors.push(`Delete failed for ${userId}: ${error.message}`);
             }
           } else {
             const { error } = await supabase
               .from('vertical_access')
               .upsert(
-                { user_id: userId, vertical_id: verticalId, access_level: newExplicit },
+                { user_id: userId, vertical_id: normalizedVerticalId, access_level: newExplicit },
                 { onConflict: 'user_id,vertical_id' }
               );
             if (error) errors.push(`Upsert failed for ${userId}: ${error.message}`);

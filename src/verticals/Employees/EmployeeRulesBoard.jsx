@@ -218,7 +218,7 @@ const EmployeeRulesBoard = ({
           /* Master Admin: Manage RBAC for Rules Board */
           <RBACManageButton 
             user={user} 
-            verticalId="employees" 
+            verticalId="EMPLOYEES" 
             featureId="canAccessEmployeeRulesBoard" 
             label="Rules & Regulations" 
           />

@@ -5,6 +5,8 @@
   animation: fadeIn 0.4s ease-out;
   background-color: var(--surface-card);
   padding: clamp(20px, 5vw, 40px);
+  flex: 1;
+  min-height: 0;
   border-radius: 0;
   height: 100%;
   overflow-y: auto;
@@ -26,6 +28,9 @@
 @media screen and (max-width: 768px) {
   .home-summary-view {
     padding-top: 0px !important; /* Set padding-top to 0px to draw switcher tray tight to the header when not scrolled */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ==========================================================================

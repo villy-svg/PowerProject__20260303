@@ -111,6 +111,27 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Foreground Permission Sync ────────────────────────────────────────────
+  // Re-fetch user profile (and RBAC permissions) when the app returns to the
+  // foreground so admin permission updates take effect without re-login.
+  const lastProfileRefreshRef = useRef(0);
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'hidden') return;
+      const now = Date.now();
+      if (now - lastProfileRefreshRef.current < 15000) return;
+      lastProfileRefreshRef.current = now;
+      fetchUserProfile(session.user.id);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+    };
+  }, [session?.user?.id, fetchUserProfile]);
+
   // ── Impersonation User List ───────────────────────────────────────────────
   // Only loaded for master_admin users. Provides the dropdown options.
   useEffect(() => {
