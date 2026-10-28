@@ -10,6 +10,11 @@
   border-radius: 0;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  max-height: 100%;
+  /* Desktop/tablet bottom padding intentionally unchanged; mobile adds its own in the 768px block below. */
 }
 
 /* ==========================================================================

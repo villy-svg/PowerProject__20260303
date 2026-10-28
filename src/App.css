@@ -40,6 +40,7 @@
   flex-direction: column;
   overflow: hidden; /* Children handle scrolling */
   padding-top: 0;
+  min-height: 0; /* Flexbox safety: allow children to scroll */
 }
 /* 3.1 STANDARDIZED MANAGEMENT LAYOUT */
 .management-view-container {
