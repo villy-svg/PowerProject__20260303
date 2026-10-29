@@ -115,3 +115,128 @@ Using headless Chrome with real touch-drag (Puppeteer `touchscreen`), plus a man
 5. Update default `activeView`, the two auto-switch effects, and the scroll-reset effect.
 6. Verify touch scroll + desktop + non-admin regression.
 7. Build, report, **do not push**.
+
+
+---
+
+# Future Implementation — Remarks Manager List Mode Grouped by Employee (Subtask-Style Hierarchy)
+
+> Status: PLAN ONLY. No code has been edited.
+> Created: 2026-10-29
+
+## 1. Request Summary
+
+In the **Remarks Manager (`employee_tasks` / `EMPLOYEES`) list view**, replace the default stage-based grouping with an **Employee hierarchy grouping** structured similarly to how tasks display nested subtasks in the list view:
+
+1. **Top-Level (Parent Rows)**: Grouped by **Employee**.
+2. **Order of Employee Rows**: Ranked by the **Highest Level Remark** assigned to that employee (highest severity first).
+   - *Example*:
+     - Villy has 1 × Level 2 and 1 × Level 0.
+     - Lokesh has 1 × Level 1.
+     - Display order: **Villy**, then **Lokesh** (since Level 2 > Level 1).
+3. **Employee Row Summary Badges / Breakdown**:
+   - In each employee's parent row / summary, display count indicators for:
+     - `#special condition remarks` in **Red**
+     - `#level 2` in **Orange**
+     - `#level 1` in **Blue**
+     - `#level 0` in **Green**
+4. **Nested Child Rows**:
+   - Under each employee's parent row, expand/collapse to reveal their respective remarks formatted like the existing list rows (`ListViewRow`).
+   - Grouping/nesting uses the same expander arrow, indentation, and collapsible behavior as subtasks (`hierarchyUtils` & `tree-expander`).
+
+---
+
+## 2. Technical Architecture & Component Mapping
+
+### Key Files & Touchpoints
+
+1. **`src/components/tasks/TaskListView.jsx`**
+   - Currently groups tasks strictly by `stageList.map(stage => ...)` or optionally by `groupByHubs`.
+   - Uses `hierarchyUtils.sortByHierarchy(rawStageTasks, 'id', 'parentTask')` to calculate row nesting depth (`depth * 24px`) and tracks expanded nodes in `expandedIds` Set.
+   - Requires support for an alternate group mode (e.g., `groupMode = 'employee'` or vertical-specific tree builder).
+
+2. **`src/components/tasks/ListViewRow.jsx`**
+   - Renders individual task rows with expander arrow (`.tree-expander`), badges (`AssigneeBadge`, priority badges, custom vertical tiles), and stage transition buttons.
+   - For remarks, row color badges or borders will reflect the remark grade:
+     - Urgent / Special Conditions (`priority-urgent`) → Red
+     - High / Level 2 (`priority-high`) → Orange
+     - Medium / Level 1 (`priority-medium`) → Blue
+     - Low / Level 0 (`priority-low`) → Green
+
+3. **`src/verticals/Employees/remarksMapping.js`**
+   - Canonical mapping for grades:
+     - `Low` ↔ `Level 0`
+     - `Medium` ↔ `Level 1`
+     - `High` ↔ `Level 2`
+     - `Urgent` ↔ `Special Conditions`
+   - Needs helper functions:
+     - Rank weights: `Urgent: 4`, `High: 3`, `Medium: 2`, `Low: 1`, `None: 0`.
+     - Color tokens matching Design System variables.
+     - Function to calculate highest remark grade and breakdown counts per employee.
+
+4. **`src/registry/verticalRegistry.js`**
+   - Configure vertical flags or list mode resolver for `employee_tasks` / `EMPLOYEES` to signal employee-first grouping rather than stage-first grouping.
+
+---
+
+## 3. Implementation Steps (Plan Only)
+
+### Step 1: Centralized Helpers in `remarksMapping.js`
+- Define rank weights and grade counters:
+  ```javascript
+  export const REMARK_GRADE_RANK = {
+    Urgent: 4, // Special Conditions
+    High: 3,   // Level 2
+    Medium: 2, // Level 1
+    Low: 1,    // Level 0
+  };
+
+  export const calculateEmployeeRemarkMetrics = (tasks) => {
+    // Computes highest severity rank and counts for Special Conditions, Level 2, Level 1, Level 0
+  };
+  ```
+
+### Step 2: Virtual Parent Row Generator in `TaskListView.jsx`
+- For employee grouping mode:
+  1. Scan all remarks and associate them with their assigned employee(s) via `task.assigned_to`.
+  2. Synthesize virtual parent rows for each employee:
+     `{ id: 'emp:<employeeId>', isEmployeeGroup: true, text: employeeName, depth: 0, metrics: { ... } }`
+  3. Sort employee parent rows:
+     - Primary: Highest remark level descending (Special Conditions → Level 2 → Level 1 → Level 0).
+     - Secondary: Alphabetical employee name.
+     - Tertiary: Unassigned group placed at the end.
+  4. Attach top-level remarks as children of their employee row (`parentTask = 'emp:<employeeId>'`), with `depth = 1`.
+  5. Existing remark subtasks remain nested under their respective parent remark at `depth = 2`.
+
+### Step 3: Expand/Collapse & Subtask Parity
+- Leverage existing `expandedIds` set and `toggleExpand` logic:
+  - Employee virtual rows toggle `expandedIds` just like subtask parent rows.
+  - Default state: expanded so all employees and remarks are immediately visible.
+  - The tree expander icon (`hierarchy-arrow`) rotates on toggle.
+
+### Step 4: Row Presentation & Color Coding
+- **Employee Header / Parent Row**:
+  - Displays employee name and photo / avatar.
+  - Summary count badges with tokenized styling:
+    - Special Conditions count badge (Red)
+    - Level 2 count badge (Orange)
+    - Level 1 count badge (Blue)
+    - Level 0 count badge (Green)
+- **Nested Remark Rows (`ListViewRow`)**:
+  - Render existing task controls (assignee, attachments, status/stage chip, quick edit).
+  - Apply grade accent border or pill based on `task.priority` using design system CSS classes (`.remark-grade-urgent`, `.remark-grade-high`, `.remark-grade-medium`, `.remark-grade-low`).
+
+### Step 5: Registry & Controller Wiring
+- Pass `groupMode = 'employee'` to `CentralisedTaskBoard` / `TaskController` when `activeVertical === 'employee_tasks'`.
+- Preserve standard stage grouping for all other verticals (Projects, Finance, etc.).
+
+---
+
+## 4. Open Design Decisions Before Execution
+
+1. **Multi-Assignee Remarks**:
+   - If a remark is assigned to multiple employees, should it appear under *each* assigned employee, or only under the *senior-most* employee? (Recommendation: show under each employee for complete employee-centric views).
+2. **Stage Context Visibility**:
+   - Because stage headers are replaced by employee parent rows, remark rows should prominently display a compact stage chip (e.g., "In Progress", "Completed", "Review") so stage progression remains obvious.
+3. **Bulk Actions**:
+   - When checking the checkbox on an employee parent row, determine whether it selects all child remarks for that employee.
