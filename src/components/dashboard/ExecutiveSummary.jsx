@@ -24,6 +24,8 @@ import { useRBAC } from '../../hooks/useRBAC';
 import { useAuth } from '../../app/contexts/AuthContext';
 import UserProfile from '../users/UserProfile';
 import { AttendanceSelfServiceContent } from '../../verticals/Employees/attendance/AttendanceSelfService';
+import LiveAttendanceTab from '../../verticals/Employees/attendance/LiveAttendanceTab';
+import { MASTER_ADMIN_MOBILE_LIVE_ATTENDANCE_HOME } from '../../constants/homeFeatureFlags';
 
 /**
  * ExecutiveSummary Component
@@ -39,8 +41,15 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     (user?.seniority && user.seniority > MANAGER_SENIORITY_THRESHOLD) || 
     user?.roleId === 'master_admin';
 
+  // Single switch (see constants/homeFeatureFlags.js): Master Admin on phone gets
+  // the trimmed tray (Track Requests, Request Support, Live Attendance).
+  const isMasterAdminMobileHome =
+    MASTER_ADMIN_MOBILE_LIVE_ATTENDANCE_HOME && isMobile && user?.roleId === 'master_admin';
+
   const [activeView, setActiveView] = useState(
-    user?.roleId === 'master_admin' ? 'centralised_task_view' : 'attendance_self_service'
+    user?.roleId === 'master_admin'
+      ? (isMasterAdminMobileHome ? 'live_attendance' : 'centralised_task_view')
+      : 'attendance_self_service'
   );
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const {
@@ -403,9 +412,17 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   // Auto-switch away from escalations if they disappear
   React.useEffect(() => {
     if (!hasEscalations && activeView === 'escalations' && showCentralisedTasks) {
-      setActiveView('centralised_task_view');
+      setActiveView(isMasterAdminMobileHome ? 'live_attendance' : 'centralised_task_view');
     }
-  }, [hasEscalations, activeView, showCentralisedTasks]);
+  }, [hasEscalations, activeView, showCentralisedTasks, isMasterAdminMobileHome]);
+
+  // If the trimmed phone tray becomes active (e.g. viewport resize) while a hidden
+  // view is selected, move to Live Attendance so the user never lands on a hidden view.
+  React.useEffect(() => {
+    if (isMasterAdminMobileHome && (activeView === 'centralised_task_view' || activeView === 'executive_summary')) {
+      setActiveView('live_attendance');
+    }
+  }, [isMasterAdminMobileHome, activeView]);
 
   // Adjust active view if centralised tasks are hidden
   React.useEffect(() => {
@@ -521,8 +538,21 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
                 </button>
               )}
 
+              {/* 3b. Live Attendance (Master Admin phone tray only — see homeFeatureFlags.js) */}
+              {isMasterAdminMobileHome && (
+                <button
+                  className={`summary-nav-item stage-orange ${activeView === 'live_attendance' ? 'active' : ''}`}
+                  onClick={() => setActiveView('live_attendance')}
+                >
+                  <div className="summary-icon-wrapper">
+                    <IconClock size={14} />
+                  </div>
+                  <span className="summary-nav-label">Live Attendance</span>
+                </button>
+              )}
+
               {/* 4. Centralised Tasks */}
-              {showCentralisedTasks && (
+              {showCentralisedTasks && !isMasterAdminMobileHome && (
                 <button
                   className={`summary-nav-item stage-green ${activeView === 'centralised_task_view' ? 'active' : ''}`}
                   onClick={() => setActiveView('centralised_task_view')}
@@ -539,7 +569,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
               )}
 
               {/* 5. Executive Summary (hidden for non-SM roles) */}
-              {isSMRole && (
+              {isSMRole && !isMasterAdminMobileHome && (
                 <button
                   className={`summary-nav-item stage-slate ${activeView === 'executive_summary' ? 'active' : ''}`}
                   onClick={() => setActiveView('executive_summary')}
@@ -645,6 +675,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           loading={loading}
           isMobile={isMobile}
         />
+      )}
+
+      {/* 3a. Live Attendance Section (Master Admin phone only — see homeFeatureFlags.js) */}
+      {isMasterAdminMobileHome && activeView === 'live_attendance' && (
+        <LiveAttendanceTab user={user} />
       )}
 
       {/* 3. Attendance Self Service Section */}
