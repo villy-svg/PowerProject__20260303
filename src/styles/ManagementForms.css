@@ -255,6 +255,13 @@ select:-webkit-autofill:focus {
   .modal-footer {
     padding: 12px 16px max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
   }
+
+  .form-input-container input,
+  .form-input-container textarea,
+  .form-input-container select,
+  .form-input-container .master-dropdown {
+    font-size: 16px !important; /* Prevents iOS WebKit auto-zoom on focus */
+  }
 }
 
 /* Mobile Adaptations (Phone <= 480px) as per Design System */
@@ -312,7 +319,7 @@ select:-webkit-autofill:focus {
   .hub-modal select,
   .hub-modal textarea {
     padding: 8px 12px;
-    font-size: 0.95rem !important;
+    font-size: 16px !important; /* Prevents iOS WebKit (Chrome/Safari) auto-zoom on focus */
   }
 
   .form-footer,

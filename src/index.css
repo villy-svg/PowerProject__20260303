@@ -68,6 +68,16 @@ button {
   font-family: inherit;
 }
 
+/* Prevent iOS WebKit (Safari & Chrome on iPhone) from auto-zooming on input focus
+   by enforcing a minimum 16px font-size across all form controls on mobile viewports. */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* ==========================================================================
    DESKTOP HEADER TOOLTIP STYLES
    ========================================================================== */
