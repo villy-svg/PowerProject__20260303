@@ -10,6 +10,7 @@ import {
 } from '../ui/Icons';
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
 import { taskUtils } from '../../utils/taskUtils';
+import { groupRemarksByEmployee } from '../../verticals/Employees/remarksBoard';
 import './TaskKanbanView.css';
 
 /**
@@ -223,8 +224,10 @@ const TaskKanbanView = ({
   expandedTaskId,
   setExpandedTaskId,
   groupByHubs = false,
+  groupByEmployee = false,
+  employeeStatusMap = {},
 }) => {
-  const [activeStageId, setActiveStageId] = useState('BACKLOG');
+  const [activeStageId, setActiveStageId] = useState(stageList.some(s => s.id === 'BACKLOG') ? 'BACKLOG' : stageList[0]?.id);
   const [expandedParents, setExpandedParents] = useState({});
 
   const toggleExpanded = useCallback((parentId) => {
@@ -371,7 +374,42 @@ const TaskKanbanView = ({
         </div>
       )}
 
-      {groupByHubs ? (
+      {groupByEmployee ? (
+        /* ── Employee-Grouped Mode (Remarks Manager) ──────────────────────
+           Active employees first, inactive employees below a divider. */
+        (() => {
+          const groups = groupRemarksByEmployee(filteredTasks, employeeStatusMap);
+          const firstInactiveIdx = groups.findIndex(g => !g.isActive);
+          return groups.map((group, idx) => (
+            <React.Fragment key={group.key}>
+              {idx === firstInactiveIdx && (
+                <div className="kanban-hub-header">
+                  <h3 className="kanban-hub-title">Inactive Employees</h3>
+                </div>
+              )}
+              <div className="kanban-hub-section" style={group.isActive ? undefined : { opacity: 0.7 }}>
+                <div className="kanban-hub-header">
+                  <div className="kanban-hub-title-group">
+                    <h3 className="kanban-hub-title">
+                      {group.label}{!group.isActive ? ' (Inactive)' : ''}
+                    </h3>
+                    <span className="kanban-hub-task-count">({group.tasks.length})</span>
+                  </div>
+                </div>
+                <StageNavigationTray
+                  stageList={visibleStages}
+                  activeStageId={activeStageId}
+                  setActiveStageId={setActiveStageId}
+                  filteredTasks={group.tasks}
+                />
+                <div className="kanban-board">
+                  {renderKanbanColumns(group.tasks)}
+                </div>
+              </div>
+            </React.Fragment>
+          ));
+        })()
+      ) : groupByHubs ? (
         /* ── Hub-Grouped Mode ─────────────────────────────────────────────
            One kanban-hub-section per unique hub. Each section gets its own
            StageNavigationTray for per-hub stage badge counts on desktop.

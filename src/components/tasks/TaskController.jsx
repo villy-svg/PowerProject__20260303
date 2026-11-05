@@ -1,6 +1,7 @@
 // @prod-critical
 import React, { useState, useCallback } from 'react';
 import { STAGE_LIST } from '../../constants/stages';
+import { taskUtils } from '../../utils/taskUtils';
 import TaskListView from './TaskListView';
 import TaskKanbanView from './TaskKanbanView';
 import WorkspaceModals from '../modals/WorkspaceModals';
@@ -17,6 +18,8 @@ import { HUB_VIEWS, resolveAddButtonLabel } from '../../registry/verticalRegistr
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { IconChevronDown, IconChevronRightSingle } from '../ui/Icons';
 import RBACManageButton from '../ui/RBACManageButton';
+import { REMARK_COLUMNS, REMARKS_VERTICAL_ID, normalizeRemarkGrade } from '../../verticals/Employees/remarksBoard';
+import { useEmployeeStatusMap } from '../../verticals/Employees/useEmployeeStatusMap';
 
 
 
@@ -127,6 +130,20 @@ const TaskController = (props) => {
     setViewMode(mode);
   };
 
+  // ─── Remarks Manager: kanban columns = remark grade, grouped by employee ─────
+  const isRemarksBoard = activeVertical === REMARKS_VERTICAL_ID;
+  const employeeStatusMap = useEmployeeStatusMap(isRemarksBoard);
+  const withGradeStage = (list) => (list || []).map(t => ({ ...t, stageId: normalizeRemarkGrade(t.priority) }));
+  const handleGradeChange = (taskId, grade) => {
+    const original = (tasks || []).find(t => t.id === taskId);
+    if (!original || original.isContextOnly) return;
+    if (!taskUtils.canUserMoveTask(original, grade, permissions, user)) {
+      alert('You do not have permission to change the grade of this remark.');
+      return;
+    }
+    props.updateTask?.({ ...original, priority: grade });
+  };
+
   // ─── Mobile Fallback ──────────────────────────────────────────────
   const actualViewMode = !isDesktop ? 'kanban' : viewMode;
 
@@ -235,13 +252,13 @@ const TaskController = (props) => {
             )}
 
             <div className="header-filter-group">
-              <button
+              {!isRemarksBoard && <button
                 className={`halo-button toggle-depri-btn ${showDeprioritized ? 'active' : ''}`}
                 onClick={() => setShowDeprioritized(!showDeprioritized)}
                 title={showDeprioritized ? "Hide Deferred" : "Show Deferred"}
               >
                 Defer
-              </button>
+              </button>}
 
               <button
                 className={`halo-button toggle-depri-btn ${showMyTasksOnly ? 'active' : ''}`}
@@ -378,10 +395,12 @@ const TaskController = (props) => {
       <div className={`workspace-main-view ${(isHeaderMenuOpen || isSubSidebarOpen) ? 'is-blurred' : ''}`}>
         {actualViewMode === 'kanban' ? (
           <TaskKanbanView
-            tasks={hierarchyFilteredTasks}
-            filteredTasks={filteredTasks}
-            stageList={STAGE_LIST}
-            showDeprioritized={showDeprioritized}
+            tasks={isRemarksBoard ? withGradeStage(hierarchyFilteredTasks) : hierarchyFilteredTasks}
+            filteredTasks={isRemarksBoard ? withGradeStage(filteredTasks) : filteredTasks}
+            stageList={isRemarksBoard ? REMARK_COLUMNS : STAGE_LIST}
+            showDeprioritized={isRemarksBoard ? true : showDeprioritized}
+            groupByEmployee={isRemarksBoard}
+            employeeStatusMap={employeeStatusMap}
             permissions={permissions}
             user={props.user}
             drillDownId={drillDownId}
@@ -398,7 +417,7 @@ const TaskController = (props) => {
             canManageHierarchy={canManageHierarchy}
             canAddSubtask={canAddSubtask}
             canCloneTask={canCloneTask}
-            updateTaskStage={handleUIMoveTask}
+            updateTaskStage={isRemarksBoard ? handleGradeChange : handleUIMoveTask}
 
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
