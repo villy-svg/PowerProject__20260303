@@ -31,12 +31,29 @@ export const useVisualViewport = () => {
     const KEYBOARD_THRESHOLD = 0.75;
 
     const applyViewportVars = () => {
+      // Strictly scope soft-keyboard viewport adaptations to mobile viewports (<= 768px)
+      // to guarantee zero impact on desktop window resizing.
+      if (window.innerWidth > 768) {
+        document.documentElement.style.removeProperty('--visual-viewport-height');
+        document.documentElement.style.removeProperty('--keyboard-height');
+        document.body.dataset.keyboard = 'closed';
+        return;
+      }
+
       const vvHeight = Math.round(vv.height);
-      if (vvHeight > fullWindowHeight) {
+      const isUnzoomed = !vv.scale || vv.scale <= 1.01;
+      if (isUnzoomed && vvHeight > fullWindowHeight) {
         fullWindowHeight = vvHeight;
       }
       const keyboardHeight = Math.max(0, fullWindowHeight - vvHeight);
       const isKeyboardOpen = vvHeight < fullWindowHeight * KEYBOARD_THRESHOLD;
+
+      // Prevent iOS WebKit (Safari & Chrome on iPhone) from scrolling the layout
+      // viewport upward when focusing an input, which otherwise pushes #root off-screen
+      // and exposes a black gap above the keyboard.
+      if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+      }
 
       // Write CSS custom properties so declarative CSS rules can respond.
       document.documentElement.style.setProperty('--visual-viewport-height', `${vvHeight}px`);

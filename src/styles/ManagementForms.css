@@ -259,7 +259,13 @@ select:-webkit-autofill:focus {
   .form-input-container input,
   .form-input-container textarea,
   .form-input-container select,
-  .form-input-container .master-dropdown {
+  .form-input-container .master-dropdown,
+  .form-input-container .assignee-selector-trigger,
+  .form-input-container .hub-selector-trigger,
+  .form-input-container .task-hierarchy-trigger,
+  .form-input-container .custom-select-trigger,
+  .form-input-container .bd-trigger,
+  .form-input-container .custom-select-search-input {
     font-size: 16px !important; /* Prevents iOS WebKit auto-zoom on focus */
   }
 }

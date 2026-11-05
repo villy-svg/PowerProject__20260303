@@ -447,3 +447,19 @@
   border-color: color-mix(in srgb, var(--brand-green), transparent 15%);
   box-shadow: 0 0 12px rgba(var(--brand-green-rgb, 0, 180, 160), 0.15);
 }
+
+/* ── Mobile & Soft-Keyboard Adaptations ── */
+@media screen and (max-width: 768px) {
+  .master-dropdown,
+  .custom-select-trigger,
+  .bd-trigger,
+  .custom-select-search-input {
+    font-size: 16px !important; /* Prevents iOS WebKit auto-zoom when tapping/searching dropdowns */
+  }
+
+  body[data-keyboard="open"] .custom-dropdown-menu,
+  body[data-keyboard="open"] .actions-dropdown-menu,
+  body[data-keyboard="open"] .user-dropdown-menu {
+    max-height: min(200px, calc(var(--visual-viewport-height, 100dvh) - 140px)) !important;
+  }
+}

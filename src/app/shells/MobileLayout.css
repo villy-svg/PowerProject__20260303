@@ -514,11 +514,25 @@ body[data-keyboard="open"] .form-submit-row {
   border-top: 1px solid var(--border-color);
 }
 
+/* Hide fixed bottom action tray when soft keyboard is open so it doesn't cover content */
+body[data-keyboard="open"] .mobile-layout .mobile-action-tray {
+  transform: translateY(110%);
+  pointer-events: none;
+}
+
 /* Workspace bottom padding increases so the last focusable field
-   doesn't hide behind the keyboard when the user tabs through a form */
-body[data-keyboard="open"] .mobile-layout .workspace-content {
-  padding-bottom: calc(var(--keyboard-height, 0px) + 16px);
+   doesn't hide behind the keyboard when the user tabs through a form.
+   Note: Since body[data-keyboard="open"] #root already shrinks to --visual-viewport-height,
+   collapse the bottom nav/tray reserve padding instead of adding --keyboard-height again
+   (which would double-subtract the keyboard height and crush 100%-height boards to 0px). */
+body[data-keyboard="open"] .mobile-layout .workspace-content,
+body[data-keyboard="open"] .mobile-layout[data-has-search="true"] .workspace-content {
+  padding-bottom: 12px !important;
   transition: padding-bottom 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body[data-keyboard="open"] .mobile-layout[data-has-search="true"] .app-content {
+  padding-bottom: 0;
 }
 
 /* ── 10. Search Adaptation in Mobile Shell ───────────────────────────── */

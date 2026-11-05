@@ -13,6 +13,10 @@
   padding: 1rem 1rem calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
+body[data-keyboard="open"] .attendance-mobile-list {
+  padding-bottom: 12px;
+}
+
 .attendance-mobile-list__selector {
   display: flex;
   flex-direction: column;

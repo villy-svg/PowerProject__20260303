@@ -118,9 +118,13 @@ const BaseDropdown = ({
 
   useEffect(() => {
     if (isOpen && searchable && inputRef.current) {
-      inputRef.current.focus();
+      // On mobile, avoid auto-popping the software keyboard for small option lists (<= 5 items),
+      // and pass preventScroll: true so iOS WebKit does not pan the layout viewport on focus.
+      if (!isMobile || options.length > 5) {
+        inputRef.current.focus({ preventScroll: true });
+      }
     }
-  }, [isOpen, searchable]);
+  }, [isOpen, searchable, isMobile, options.length]);
 
   useEffect(() => {
     if (!isOpen) {
