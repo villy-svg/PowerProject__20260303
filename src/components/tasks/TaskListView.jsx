@@ -1,6 +1,7 @@
 import React from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { taskUtils } from '../../utils/taskUtils';
+import { groupRemarksByEmployee } from '../../verticals/Employees/remarksBoard';
 import ListViewRow from './ListViewRow';
 import './TaskListView.css';
 
@@ -35,6 +36,8 @@ const TaskListView = ({
   expandedTaskId,
   setExpandedTaskId,
   groupByHubs = false,
+  groupByEmployee = false,
+  employeeStatusMap = {},
   allTasks,          // Full unfiltered task list for parent lookups in hub resolution
 }) => {
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
@@ -198,7 +201,47 @@ const TaskListView = ({
 
   return (
     <div className="task-list-view">
-      {groupByHubs ? (
+      {groupByEmployee ? (
+        /* ── Employee-Grouped Mode (Remarks Manager) ──────────────────────
+           Active employees first, inactive employees below a divider,
+           grouped inside by Remark Grade stages. */
+        (() => {
+          const groups = groupRemarksByEmployee(tasks, employeeStatusMap);
+          const firstInactiveIdx = groups.findIndex(g => !g.isActive && !g.isUnassigned);
+          return groups.map((group, idx) => (
+            <React.Fragment key={group.key}>
+              {idx === firstInactiveIdx && (
+                <header className="list-hub-header">
+                  <h3 className="list-hub-title">Inactive Employees</h3>
+                </header>
+              )}
+              <div className={`list-hub-group ${group.isActive ? '' : 'list-hub-group--inactive'}`}>
+                <header className="list-hub-header">
+                  <div className="list-hub-title-group">
+                    <h3 className="list-hub-title">
+                      {group.label}{!group.isActive && !group.isUnassigned ? ' (Inactive)' : ''}
+                    </h3>
+                    <span className="list-hub-task-count">({group.tasks.length})</span>
+                  </div>
+                  <div className="remark-grade-tags-row">
+                    {group.gradeCounts.map((grade) => (
+                      <span
+                        key={grade.id}
+                        className={`card-priority ${grade.badgeClass} remark-grade-count-tag`}
+                      >
+                        {grade.label}: {grade.count}
+                      </span>
+                    ))}
+                  </div>
+                </header>
+                <div className="list-hub-content">
+                  {renderStages(group.tasks)}
+                </div>
+              </div>
+            </React.Fragment>
+          ));
+        })()
+      ) : groupByHubs ? (
         /* ── Hub-Grouped Mode ────────────────────────────────────────────
            Hub Header → Stage Header → Tasks (3-level hierarchy) */
         uniqueHubs.map(hub => {

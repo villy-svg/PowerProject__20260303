@@ -260,7 +260,7 @@ const TaskCard = ({
           <>
             <button
               className="action-icon-btn"
-              onClick={() => tva.handleMove(task, 'left')}
+              onClick={(e) => { e.stopPropagation(); tva.handleMove(task, 'left', leftStageId); }}
               disabled={!canMoveLeft}
               title="Move Back"
             >
@@ -268,7 +268,7 @@ const TaskCard = ({
             </button>
             <button
               className="action-icon-btn"
-              onClick={() => tva.handleMove(task, 'right')}
+              onClick={(e) => { e.stopPropagation(); tva.handleMove(task, 'right', rightStageId); }}
               disabled={!canMoveRight || task.stageId === 'COMPLETED' || blockArrows}
               title={blockArrows ? "Rework Required before moving" : task.stageId === 'COMPLETED' ? "Task is Completed" : "Move Forward"}
             >

@@ -10,11 +10,28 @@ export const REMARKS_VERTICAL_ID = 'employee_tasks';
 
 // Left → right order. `id` is the stored priority value.
 export const REMARK_COLUMNS = [
-  { id: 'Urgent', label: REMARK_GRADE_MAP.Urgent, color: '#ef4444' },
-  { id: 'High', label: REMARK_GRADE_MAP.High, color: '#f97316' },
-  { id: 'Medium', label: REMARK_GRADE_MAP.Medium, color: '#f59e0b' },
-  { id: 'Low', label: REMARK_GRADE_MAP.Low, color: '#10b981' },
+  { id: 'Urgent', label: REMARK_GRADE_MAP.Urgent, color: '#f43f5e', badgeClass: 'priority-urgent' },
+  { id: 'High', label: REMARK_GRADE_MAP.High, color: '#f59e0b', badgeClass: 'priority-high' },
+  { id: 'Medium', label: REMARK_GRADE_MAP.Medium, color: '#3b82f6', badgeClass: 'priority-medium' },
+  { id: 'Low', label: REMARK_GRADE_MAP.Low, color: '#10b981', badgeClass: 'priority-low' },
 ];
+
+/**
+ * Counts how many remarks fall into each REMARK_COLUMNS grade.
+ * Returns only columns with count > 0 when `nonZeroOnly` is true.
+ */
+export const getRemarkGradeCounts = (tasks = [], nonZeroOnly = true) => {
+  const counts = { Urgent: 0, High: 0, Medium: 0, Low: 0 };
+  (tasks || []).forEach((t) => {
+    const grade = normalizeRemarkGrade(t?.priority);
+    counts[grade] = (counts[grade] || 0) + 1;
+  });
+  const list = REMARK_COLUMNS.map((col) => ({
+    ...col,
+    count: counts[col.id] || 0,
+  }));
+  return nonZeroOnly ? list.filter((item) => item.count > 0) : list;
+};
 
 /** Normalises any stored priority (case/numeric) into a REMARK_COLUMNS id. */
 export const normalizeRemarkGrade = (priority) => {
@@ -39,29 +56,46 @@ export const getRemarkEmployeeName = (task, statusMap = {}) => {
 
 /**
  * Builds ordered employee groups: active (A→Z), unassigned, then inactive (A→Z).
- * @returns {Array<{key:string,label:string,isActive:boolean,tasks:Array}>}
+ * @param {Array} tasks - Filtered remarks/tasks
+ * @param {Object} statusMap - Map of { [employeeId]: { name, isActive } }
+ * @param {Object} options - { activeNamedOnly: boolean }
+ * @returns {Array<{key:string,label:string,isActive:boolean,isUnassigned:boolean,tasks:Array,gradeCounts:Array}>}
  */
-export const groupRemarksByEmployee = (tasks, statusMap = {}) => {
+export const groupRemarksByEmployee = (tasks = [], statusMap = {}, options = {}) => {
+  const { activeNamedOnly = false } = options;
   const groups = new Map();
   tasks.forEach((t) => {
     const key = getRemarkEmployeeId(t) || 'unassigned';
     if (!groups.has(key)) {
       const info = statusMap[key];
+      const isUnassigned = key === 'unassigned';
+      // Unknown status (not yet loaded) is treated as active unless it is unassigned.
+      const isActive = isUnassigned ? false : (info ? info.isActive : true);
       groups.set(key, {
         key,
         label: getRemarkEmployeeName(t, statusMap),
-        // Unknown status (not yet loaded) is treated as active.
-        isActive: key === 'unassigned' ? true : (info ? info.isActive : true),
-        isUnassigned: key === 'unassigned',
+        isActive,
+        isUnassigned,
         tasks: [],
       });
     }
     groups.get(key).tasks.push(t);
   });
 
-  return [...groups.values()].sort((a, b) => {
-    if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-    if (a.isUnassigned !== b.isUnassigned) return a.isUnassigned ? 1 : -1;
-    return a.label.localeCompare(b.label);
-  });
+  const sorted = [...groups.values()]
+    .map((g) => ({
+      ...g,
+      gradeCounts: getRemarkGradeCounts(g.tasks, true),
+    }))
+    .filter((g) => g.tasks.length > 0)
+    .sort((a, b) => {
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+      if (a.isUnassigned !== b.isUnassigned) return a.isUnassigned ? 1 : -1;
+      return a.label.localeCompare(b.label);
+    });
+
+  if (activeNamedOnly) {
+    return sorted.filter((g) => g.isActive && !g.isUnassigned);
+  }
+  return sorted;
 };

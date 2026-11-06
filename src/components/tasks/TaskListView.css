@@ -259,3 +259,12 @@
   padding-left: 16px;
   border-left: 2px solid var(--border-color);
 }
+
+.list-hub-group--inactive {
+  opacity: 0.7;
+}
+
+.list-hub-header {
+  flex-wrap: wrap;
+  gap: 12px;
+}

@@ -6,6 +6,7 @@ import {
   IconEye, 
   IconCheck, 
   IconArchive,
+  IconChevronDown,
   IconChevronRightSingle
 } from '../ui/Icons';
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
@@ -229,6 +230,14 @@ const TaskKanbanView = ({
 }) => {
   const [activeStageId, setActiveStageId] = useState(stageList.some(s => s.id === 'BACKLOG') ? 'BACKLOG' : stageList[0]?.id);
   const [expandedParents, setExpandedParents] = useState({});
+  const [expandedEmployees, setExpandedEmployees] = useState({});
+
+  const toggleEmployeeRow = useCallback((empKey) => {
+    setExpandedEmployees(prev => ({
+      ...prev,
+      [empKey]: !prev[empKey],
+    }));
+  }, []);
 
   const toggleExpanded = useCallback((parentId) => {
     setExpandedParents(prev => ({
@@ -376,38 +385,65 @@ const TaskKanbanView = ({
 
       {groupByEmployee ? (
         /* ── Employee-Grouped Mode (Remarks Manager) ──────────────────────
-           Active employees first, inactive employees below a divider. */
+           By default ONLY shows active employees who have remarks, rendered
+           as collapsible rows with colored remark grade tags. */
         (() => {
-          const groups = groupRemarksByEmployee(filteredTasks, employeeStatusMap);
-          const firstInactiveIdx = groups.findIndex(g => !g.isActive);
-          return groups.map((group, idx) => (
-            <React.Fragment key={group.key}>
-              {idx === firstInactiveIdx && (
-                <div className="kanban-hub-header">
-                  <h3 className="kanban-hub-title">Inactive Employees</h3>
-                </div>
-              )}
-              <div className="kanban-hub-section" style={group.isActive ? undefined : { opacity: 0.7 }}>
-                <div className="kanban-hub-header">
+          const groups = groupRemarksByEmployee(filteredTasks, employeeStatusMap, { activeNamedOnly: true });
+          return groups.map((group) => {
+            const isExpanded = !!expandedEmployees[group.key];
+            return (
+              <div
+                key={group.key}
+                className={`kanban-hub-section kanban-employee-section ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+              >
+                <div
+                  className="kanban-hub-header kanban-employee-row"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleEmployeeRow(group.key)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleEmployeeRow(group.key);
+                    }
+                  }}
+                >
                   <div className="kanban-hub-title-group">
+                    <span className="kanban-employee-chevron">
+                      {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRightSingle size={14} />}
+                    </span>
                     <h3 className="kanban-hub-title">
-                      {group.label}{!group.isActive ? ' (Inactive)' : ''}
+                      {group.label}
                     </h3>
                     <span className="kanban-hub-task-count">({group.tasks.length})</span>
                   </div>
+                  <div className="remark-grade-tags-row">
+                    {group.gradeCounts.map((grade) => (
+                      <span
+                        key={grade.id}
+                        className={`card-priority ${grade.badgeClass} remark-grade-count-tag`}
+                      >
+                        {grade.label}: {grade.count}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <StageNavigationTray
-                  stageList={visibleStages}
-                  activeStageId={activeStageId}
-                  setActiveStageId={setActiveStageId}
-                  filteredTasks={group.tasks}
-                />
-                <div className="kanban-board">
-                  {renderKanbanColumns(group.tasks)}
-                </div>
+                {isExpanded && (
+                  <>
+                    <StageNavigationTray
+                      stageList={visibleStages}
+                      activeStageId={activeStageId}
+                      setActiveStageId={setActiveStageId}
+                      filteredTasks={group.tasks}
+                    />
+                    <div className="kanban-board">
+                      {renderKanbanColumns(group.tasks)}
+                    </div>
+                  </>
+                )}
               </div>
-            </React.Fragment>
-          ));
+            );
+          });
         })()
       ) : groupByHubs ? (
         /* ── Hub-Grouped Mode ─────────────────────────────────────────────

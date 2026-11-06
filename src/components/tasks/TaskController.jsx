@@ -436,8 +436,8 @@ const TaskController = (props) => {
           />
         ) : actualViewMode === 'list' ? (
           <TaskListView
-            tasks={filteredTasks}
-            stageList={STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
+            tasks={isRemarksBoard ? withGradeStage(filteredTasks) : filteredTasks}
+            stageList={isRemarksBoard ? REMARK_COLUMNS : STAGE_LIST.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED')}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
             canEditTask={canEditTask}
@@ -446,7 +446,7 @@ const TaskController = (props) => {
             canCloneTask={canCloneTask}
             canDelete={canUserDelete}
 
-            updateTaskStage={handleUIMoveTask}
+            updateTaskStage={isRemarksBoard ? handleGradeChange : handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             onCloneTask={handleCloneTask}
@@ -466,11 +466,13 @@ const TaskController = (props) => {
             expandedTaskId={expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
             groupByHubs={isDesktop && groupByHubs}
-            allTasks={hierarchyFilteredTasks}
+            allTasks={isRemarksBoard ? withGradeStage(hierarchyFilteredTasks) : hierarchyFilteredTasks}
+            groupByEmployee={isRemarksBoard}
+            employeeStatusMap={employeeStatusMap}
           />
         ) : (
           <TaskTreeView
-            tasks={filteredTasks}
+            tasks={isRemarksBoard ? withGradeStage(filteredTasks) : filteredTasks}
             activeVertical={rootVerticalId || activeVertical}
             canUpdate={canUserUpdate}
             canEditTask={canEditTask}
@@ -479,7 +481,7 @@ const TaskController = (props) => {
             canCloneTask={canCloneTask}
             canDelete={canUserDelete}
 
-            updateTaskStage={handleUIMoveTask}
+            updateTaskStage={isRemarksBoard ? handleGradeChange : handleUIMoveTask}
             deleteTask={handleInternalDelete}
             openEditModal={openEditModal}
             onCloneTask={handleCloneTask}

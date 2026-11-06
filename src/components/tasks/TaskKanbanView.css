@@ -357,3 +357,45 @@
   align-self: center;
 }
 
+
+/* ── EMPLOYEE REMARKS COLLAPSIBLE ROW & GRADE TAGS ───────────────────────── */
+
+.kanban-employee-section.is-collapsed {
+  margin-bottom: 12px;
+}
+
+.kanban-employee-section.is-expanded {
+  margin-bottom: 32px;
+}
+
+.kanban-employee-row {
+  cursor: pointer;
+  user-select: none;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.kanban-employee-section.is-collapsed .kanban-employee-row {
+  margin-bottom: 0;
+}
+
+.kanban-employee-row:hover {
+  background: var(--halo-bg);
+}
+
+.kanban-employee-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-mint);
+  transition: transform 0.2s ease;
+}
+
+.remark-grade-tags-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
