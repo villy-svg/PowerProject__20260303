@@ -11,57 +11,38 @@ export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
 
 /* ─── Parse Rule into Slides/Tutorial Pages ───────────────────── */
+// Stop automatic bullet/number page-splitting: only split pages on explicit ---PAGE_BREAK--- delimiter added manually by user.
 export const parseRuleSlides = (title, content = '') => {
   const trimmedContent = content.replace(/^\s*\n+|\n+\s*$/g, '');
-  const lines = trimmedContent.split('\n').map(l => l.trim());
-  const introLines = [];
-  const bullets = []; // Array of { title: string | null, text: string }
 
-  lines.forEach(line => {
-    const isBullet = /^[•\*\-\u2022]/.test(line) || /^\d+[\.\)]/.test(line);
-    if (isBullet) {
-      let cleaned = line.replace(/^[•\*\-\u2022\s\d+\.\)]+/, '').trim();
-      let bulletTitle = null;
-      if (cleaned.startsWith('### ')) {
-        bulletTitle = cleaned.substring(4).trim();
-        cleaned = '';
+  if (!trimmedContent.includes('---PAGE_BREAK---')) {
+    return [
+      {
+        title: title,
+        text: trimmedContent,
+        isIntro: true
       }
-      bullets.push({ title: bulletTitle, text: cleaned });
-    } else {
-      if (bullets.length === 0) {
-        introLines.push(line);
-      } else {
-        let lastBullet = bullets[bullets.length - 1];
-        if (lastBullet.text === '') {
-          lastBullet.text = line;
-        } else {
-          lastBullet.text += '\n' + line;
-        }
-      }
-    }
-  });
-
-  const slides = [];
-  const introText = introLines.join('\n').trim();
-
-  // Only create a dedicated Intro Slide if there is actual intro text OR no bullet points exist
-  if (introText || bullets.length === 0) {
-    slides.push({
-      title: title,
-      text: introText,
-      isIntro: true
-    });
+    ];
   }
 
-  bullets.forEach((bullet, index) => {
-    slides.push({
-      title: bullet.title || `Point ${index + 1} of ${bullets.length}`,
-      text: bullet.text,
-      isIntro: false
-    });
-  });
+  const rawPages = trimmedContent.split(/\n?---PAGE_BREAK---\n?/);
+  return rawPages.map((pageContent, index) => {
+    const trimmedPage = pageContent.replace(/^\s*\n+|\n+\s*$/g, '');
+    const lines = trimmedPage.split('\n');
+    let slideTitle = index === 0 ? title : `Page ${index + 1}`;
+    let slideText = trimmedPage;
 
-  return slides;
+    if (lines[0]?.trim().startsWith('### ')) {
+      slideTitle = lines[0].trim().substring(4).trim() || slideTitle;
+      slideText = lines.slice(1).join('\n').replace(/^\s*\n+|\n+\s*$/g, '');
+    }
+
+    return {
+      title: slideTitle,
+      text: slideText,
+      isIntro: index === 0
+    };
+  });
 };
 
 const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {

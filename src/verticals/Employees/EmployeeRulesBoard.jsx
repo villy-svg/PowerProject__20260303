@@ -7,7 +7,8 @@ import RBACManageButton from '../../components/ui/RBACManageButton';
 /* ─── Static Rule Tile Component ────────────────────────────── */
 const RuleCard = ({ rule }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const content = rule.content || '';
+  // Format explicit tutorial page breaks cleanly for static rule card view
+  const content = (rule.content || '').replace(/\n?---PAGE_BREAK---\n?/g, '\n\n').replace(/^### /gm, '');
   const isLongContent = content.length > 200;
 
   return (

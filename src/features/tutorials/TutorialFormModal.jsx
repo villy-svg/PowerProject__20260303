@@ -219,12 +219,12 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
             {/* Initial Slide Content (Only for new rules/tutorials) */}
             {!isEditing && (
               <div className="form-group">
-                <label>Slide Content (Press Enter for new line; use 1., 2. or • to start a new page)</label>
+                <label>Slide Content (Page 1)</label>
                 <div className="form-input-container">
                   <textarea
                     value={form.content}
                     onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-                    placeholder="Write slide content here. Press Enter for a new line on the same page.&#10;To create multiple pages, start a line with 1., 2., or •"
+                    placeholder="Write the slide content here. Everything entered here stays on Page 1. You can manually add more pages later using the + button in the tutorial viewer."
                     rows={5}
                     required
                   />

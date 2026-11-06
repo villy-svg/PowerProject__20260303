@@ -106,14 +106,16 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
           newTitle = slidesToSave[0].title || flow.title;
           newContent = slidesToSave[0].text || '';
         } else {
+          // Persist manually added pages using an explicit ---PAGE_BREAK--- delimiter so bullet/number lists inside a page never auto-split
+          newTitle = slidesToSave[0].title || flow.title;
           newContent = slidesToSave.map((s, idx) => {
-            const defaultTitle = `Point ${idx + 1} of ${slidesToSave.length}`;
-            const isCustomTitle = s.title && s.title !== defaultTitle;
-            if (isCustomTitle) {
-              return `${idx + 1}. ### ${s.title}\n${s.text || ''}`;
+            const slideTitle = (s.title || '').trim();
+            const slideText = s.text || '';
+            if (idx > 0 && slideTitle) {
+              return `### ${slideTitle}\n${slideText}`;
             }
-            return `${idx + 1}. ${s.text || ''}`;
-          }).join('\n');
+            return slideText;
+          }).join('\n---PAGE_BREAK---\n');
         }
 
         await updateRule(ruleId, {
