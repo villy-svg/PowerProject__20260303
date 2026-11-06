@@ -30,16 +30,16 @@ jobs:
         run: |
           echo "🚀 Starting optimized Supabase deployment..."
           
-          # Link to project FIRST
+          # Link to project FIRST (Supabase CLI v3+ ignores --password on link)
           echo "📡 Linking to Supabase project..."
-          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}" --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
+          supabase link --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}"
           
-          # Repair failed/renamed migration history
+          # Repair failed/renamed migration history (--remote targets the linked project in CLI v3+)
           echo "🛠️ Repairing migration history..."
-          supabase migration repair --project-ref "${{ secrets.SUPABASE_PROJECT_ID }}" --status reverted 20260315000000 || echo "Repair not needed or already done"
+          supabase migration repair --remote --password "${{ secrets.SUPABASE_DB_PASSWORD }}" --status reverted 20260315000000 || echo "Repair not needed or already done"
           
-          # Deploy all missing migrations directly (avoids slow db pull)
+          # Deploy all missing migrations directly (--remote required in CLI v3+ as default is now local)
           echo "📤 Pushing local migrations to remote..."
-          supabase db push --yes --include-all
+          supabase db push --remote --password "${{ secrets.SUPABASE_DB_PASSWORD }}" --yes --include-all
           
           echo "🎉 Deployment completed successfully!"

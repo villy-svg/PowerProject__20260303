@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - 'public/**'
+      - 'index.html'
       - 'package.json'
       - 'vite.config.*'
       - '.github/workflows/gh-pages.yml'
@@ -48,4 +49,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
-          keep_files: true
+          keep_files: false
+          exclude_assets: '.github,staging,CNAME'
