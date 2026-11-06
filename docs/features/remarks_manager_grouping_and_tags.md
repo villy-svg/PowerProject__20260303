@@ -225,3 +225,13 @@ We have two minor UX choices to align on:
   1. Kanban Mode defaults to collapsed rows showing only active employees with remarks, expanding their 4-column board on click.
   2. Colored grade tags (`Special Conditions`, `Level 2`, `Level 1`, `Level 0`) render only for levels where count > 0.
   3. List Mode groups by Employee first (with the same colored grade count tags) and by Remark Grade Stage (`Special Conditions`, `Level 2`, `Level 1`, `Level 0`) inside each employee, and passes `leftStageId`/`rightStageId` to `tva.handleMove` so arrow buttons in both List and Kanban views change remark grades.
+
+
+## Amendment: 2026-11-06 — Compact Numeric Tags & 'By Hub' Mode Parity
+**Type:** Minor Amendment
+**Requested Change:**
+1. In Remarks Manager, the colored grade tags on each employee row do not need the text prefix (`Level 1`, etc.) — display only the count with the semantic priority color coding (`title` attribute preserves tooltip label).
+2. In Hub Task Manager's `'By Hub'` mode (`groupByHubs`), make each Hub row behave identically: collapsed by default in Kanban View (click to expand/collapse that Hub's board) and displaying the color-coded count tags for Urgent / High / Medium / Low tasks present in that Hub across both Kanban and List views.
+3. Position the colored count tags immediately after the employee/hub name and total count (`(n)`) inside the title group rather than pushed to the far right end.
+**Phases Affected:** Phase 2a, Phase 2b
+**Approved:** Yes (User-requested in session)

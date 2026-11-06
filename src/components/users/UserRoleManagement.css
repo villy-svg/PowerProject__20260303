@@ -2,9 +2,7 @@
 .header-nav {
   margin-bottom: 1rem;
 }
-.back-link-btn {
-  margin-bottom: 24px;
-}
+/* .back-link-btn inherits sizing and alignment from .master-header-actions-row .halo-button */
 .back-link-btn:hover {
   background: var(--border-color);
 }

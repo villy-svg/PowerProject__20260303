@@ -99,16 +99,22 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     try {
       if (flow.id.startsWith('rule_')) {
         const ruleId = flow.id.replace('rule_', '');
-        const newTitle = slidesToSave[0].title;
-        const introText = slidesToSave[0].text;
-        const bulletContent = slidesToSave.slice(1).map((s, idx) => {
-          const isCustomTitle = s.title && s.title !== `Point ${idx + 1} of ${slidesToSave.length - 1}`;
-          if (isCustomTitle) {
-            return `${idx + 1}. ### ${s.title}\n${s.text}`;
-          }
-          return `${idx + 1}. ${s.text}`;
-        }).join('\n');
-        const newContent = [introText, bulletContent].filter(Boolean).join('\n');
+        let newTitle = flow.title;
+        let newContent = '';
+
+        if (slidesToSave.length === 1) {
+          newTitle = slidesToSave[0].title || flow.title;
+          newContent = slidesToSave[0].text || '';
+        } else {
+          newContent = slidesToSave.map((s, idx) => {
+            const defaultTitle = `Point ${idx + 1} of ${slidesToSave.length}`;
+            const isCustomTitle = s.title && s.title !== defaultTitle;
+            if (isCustomTitle) {
+              return `${idx + 1}. ### ${s.title}\n${s.text || ''}`;
+            }
+            return `${idx + 1}. ${s.text || ''}`;
+          }).join('\n');
+        }
 
         await updateRule(ruleId, {
           title: newTitle,
@@ -180,18 +186,27 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
         <button 
           className="halo-button secondary btn-icon" 
           onClick={handleAddSlide} 
-          title="Add Slide"
-          aria-label="Add Slide"
+          title="Add Page"
+          aria-label="Add Page"
         >
           <IconPlus size={16} />
         </button>
         <button 
           className="halo-button secondary btn-icon" 
           onClick={() => setIsEditing(true)} 
-          title="Edit Slide"
-          aria-label="Edit Slide"
+          title="Edit Page"
+          aria-label="Edit Page"
         >
           <IconEdit size={16} />
+        </button>
+        <button 
+          className="halo-button danger btn-icon" 
+          onClick={handleDeleteSlide} 
+          disabled={saving || editableSlides.length <= 1} 
+          title="Delete Page"
+          aria-label="Delete Page"
+        >
+          <IconTrash size={16} />
         </button>
       </div>
     );
@@ -241,7 +256,8 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                 <textarea 
                   value={editText} 
                   onChange={e => setEditText(e.target.value)} 
-                  placeholder="Slide Content Text"
+                  onKeyDown={e => e.stopPropagation()}
+                  placeholder="Slide Content Text (Press Enter for a new line)"
                   rows={4}
                   className="slideshow-editor__textarea"
                 />
@@ -419,7 +435,8 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                 <textarea 
                   value={editText} 
                   onChange={e => setEditText(e.target.value)} 
-                  placeholder="Slide Caption Text"
+                  onKeyDown={e => e.stopPropagation()}
+                  placeholder="Slide Caption Text (Press Enter for a new line)"
                   rows={2}
                   className="slideshow-editor__textarea slideshow-editor__textarea--sm"
                 />

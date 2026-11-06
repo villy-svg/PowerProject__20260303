@@ -5,24 +5,22 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Core RBAC Button ────────────────────────────────────────────── */
-.rbac-manage-btn {
-  /* Inherit .halo-button base, add a subtle amber security tint */
-  border: none !important;
-  color: var(--brand-amber) !important;
-  background: color-mix(in srgb, var(--brand-amber), transparent 94%) !important;
-  box-shadow: 0 0 4px color-mix(in srgb, var(--brand-amber), transparent 88%) !important;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  font-size: 0.7rem;
-  font-weight: 600 !important;
+/* Inherits size, font, height, padding, and border geometry from .halo-button
+   and .master-header-actions-row .halo-button; overrides only semantic amber theme */
+.halo-button.rbac-manage-btn,
+.master-header-actions-row .halo-button.rbac-manage-btn {
+  color: var(--brand-amber);
+  background: color-mix(in srgb, var(--brand-amber), transparent 94%);
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--brand-amber), transparent 88%);
 }
 
-.rbac-manage-btn:hover {
-  background: color-mix(in srgb, var(--brand-amber), transparent 88%) !important;
-  border: none !important;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
+.halo-button.rbac-manage-btn:hover:not(:disabled),
+.master-header-actions-row .halo-button.rbac-manage-btn:hover:not(:disabled) {
+  color: var(--brand-amber);
+  background: color-mix(in srgb, var(--brand-amber), transparent 85%);
+  border-color: var(--brand-amber);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--brand-amber), transparent 80%);
 }
 
 /* ── Chevron indicator for dropdown group mode ──────────────────── */
@@ -119,13 +117,8 @@
   flex: 1;
 }
 
-/* ── Mobile: full-width button ─────────────────────────────────── */
+/* ── Mobile: dropdown positioning ─────────────────────────────── */
 @media screen and (max-width: 768px) {
-  .rbac-manage-btn {
-    font-size: 0.65rem;
-    padding: 6px 10px;
-  }
-
   .rbac-dropdown-menu {
     right: 0;
     left: auto;

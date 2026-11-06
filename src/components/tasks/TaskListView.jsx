@@ -1,7 +1,7 @@
 import React from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { taskUtils } from '../../utils/taskUtils';
-import { groupRemarksByEmployee } from '../../verticals/Employees/remarksBoard';
+import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
 import ListViewRow from './ListViewRow';
 import './TaskListView.css';
 
@@ -51,8 +51,6 @@ const TaskListView = ({
     else newExpanded.add(id);
     setExpandedIds(newExpanded);
   };
-
-  const priorityOrder = { 'Urgent': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
 
   /**
    * Renders the stage sections for a given subset of tasks.
@@ -199,6 +197,37 @@ const TaskListView = ({
       })
     : null;
 
+  /**
+   * Shared group section renderer used by both Employee-Grouped (Remarks Manager)
+   * and Hub-Grouped ('By Hub') List modes.
+   */
+  const renderListGroupSection = ({ groupKey, title, groupTasks, badgeCounts, isInactive = false, useIdAsTooltip = false }) => (
+    <div key={groupKey} className={`list-hub-group${isInactive ? ' list-hub-group--inactive' : ''}`}>
+      <header className="list-hub-header">
+        <div className="list-hub-title-group">
+          <h3 className="list-hub-title">{title}</h3>
+          <div className="remark-grade-tags-row">
+            <span className="card-priority list-hub-task-count" title="Total">
+              {groupTasks.length}
+            </span>
+            {badgeCounts.map((badge) => (
+              <span
+                key={badge.id}
+                className={`card-priority ${badge.badgeClass}`}
+                title={useIdAsTooltip ? badge.id : badge.label}
+              >
+                {badge.count}
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
+      <div className="list-hub-content">
+        {renderStages(groupTasks)}
+      </div>
+    </div>
+  );
+
   return (
     <div className="task-list-view">
       {groupByEmployee ? (
@@ -215,53 +244,29 @@ const TaskListView = ({
                   <h3 className="list-hub-title">Inactive Employees</h3>
                 </header>
               )}
-              <div className={`list-hub-group ${group.isActive ? '' : 'list-hub-group--inactive'}`}>
-                <header className="list-hub-header">
-                  <div className="list-hub-title-group">
-                    <h3 className="list-hub-title">
-                      {group.label}{!group.isActive && !group.isUnassigned ? ' (Inactive)' : ''}
-                    </h3>
-                    <span className="list-hub-task-count">({group.tasks.length})</span>
-                  </div>
-                  <div className="remark-grade-tags-row">
-                    {group.gradeCounts.map((grade) => (
-                      <span
-                        key={grade.id}
-                        className={`card-priority ${grade.badgeClass}`}
-                      >
-                        {grade.label}: {grade.count}
-                      </span>
-                    ))}
-                  </div>
-                </header>
-                <div className="list-hub-content">
-                  {renderStages(group.tasks)}
-                </div>
-              </div>
+              {renderListGroupSection({
+                groupKey: group.key,
+                title: `${group.label}${!group.isActive && !group.isUnassigned ? ' (Inactive)' : ''}`,
+                groupTasks: group.tasks,
+                badgeCounts: group.gradeCounts,
+                isInactive: !group.isActive,
+              })}
             </React.Fragment>
           ));
         })()
       ) : groupByHubs ? (
         /* ── Hub-Grouped Mode ────────────────────────────────────────────
            Hub Header → Stage Header → Tasks (3-level hierarchy) */
-        uniqueHubs.map(hub => {
-          const hubTasks = tasks.filter(t => taskHubMap.get(t.id) === hub);
+        uniqueHubs.map((hub) => {
+          const hubTasks = tasks.filter((t) => taskHubMap.get(t.id) === hub);
           if (hubTasks.length === 0) return null;
-          return (
-            <div key={hub} className="list-hub-group">
-              <header className="list-hub-header">
-                <div className="list-hub-title-group">
-                  <h3 className="list-hub-title">
-                    {hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
-                  </h3>
-                  <span className="list-hub-task-count">({hubTasks.length})</span>
-                </div>
-              </header>
-              <div className="list-hub-content">
-                {renderStages(hubTasks)}
-              </div>
-            </div>
-          );
+          return renderListGroupSection({
+            groupKey: hub,
+            title: hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub,
+            groupTasks: hubTasks,
+            badgeCounts: getRemarkGradeCounts(hubTasks, true),
+            useIdAsTooltip: true,
+          });
         })
       ) : (
         /* ── Standard Mode ───────────────────────────────────────────────── */
@@ -271,4 +276,4 @@ const TaskListView = ({
   );
 };
 
-export default TaskListView;
+export default TaskListView;

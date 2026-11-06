@@ -3,10 +3,10 @@ import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
-import { fetchRules } from '../../services/employees/rulesService';
+import { fetchRules, deleteRule } from '../../services/employees/rulesService';
 import { getRuleLogo } from './logoConfig';
 import { useQuery } from '@tanstack/react-query';
-import { IconEdit, IconPlus } from '../../components/ui/Icons';
+import { IconEdit, IconPlus, IconTrash } from '../../components/ui/Icons';
 export { TUTORIAL_FLOWS };
 import './TutorialSlideshowViewer.css';
 
@@ -42,12 +42,16 @@ export const parseRuleSlides = (title, content = '') => {
   });
 
   const slides = [];
-  
-  slides.push({
-    title: title,
-    text: introLines.join('\n'),
-    isIntro: true
-  });
+  const introText = introLines.join('\n').trim();
+
+  // Only create a dedicated Intro Slide if there is actual intro text OR no bullet points exist
+  if (introText || bullets.length === 0) {
+    slides.push({
+      title: title,
+      text: introText,
+      isIntro: true
+    });
+  }
 
   bullets.forEach((bullet, index) => {
     slides.push({
@@ -57,23 +61,6 @@ export const parseRuleSlides = (title, content = '') => {
     });
   });
 
-  if (slides.length === 1 && content && introLines.join('\n') !== content) {
-    const paragraphs = content.split('\n\n').map(p => p.trim()).filter(Boolean);
-    if (paragraphs.length > 1) {
-      paragraphs.forEach((p, idx) => {
-        if (idx === 0) {
-          slides[0].text = p;
-        } else {
-          slides.push({
-            title: `Detail ${idx + 1}`,
-            text: p,
-            isIntro: false
-          });
-        }
-      });
-    }
-  }
-
   return slides;
 };
 
@@ -82,6 +69,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   const [activeFlow, setActiveFlow] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingFlow, setEditingFlow] = useState(null);
+  const [deletedTick, setDeletedTick] = useState(0); // re-evaluates locally-deleted static tutorials
   const [playAllQueue, setPlayAllQueue] = useState([]);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(-1);
 
@@ -126,6 +114,26 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   }, [refetchRulesData]);
 
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
+
+  // Master-admin only: delete a tutorial.
+  // DB-backed tutorials (rule_*) are deleted from employee_rules;
+  // built-in static tutorials are hidden via a local-storage marker.
+  const handleDeleteTutorial = async (flow) => {
+    if (!isMasterAdmin) return;
+    if (!window.confirm(`Delete the tutorial "${flow.title}"? This cannot be undone.`)) return;
+    try {
+      if (String(flow.id).startsWith('rule_')) {
+        await deleteRule(String(flow.id).replace(/^rule_/, ''));
+        refetchRulesData();
+      } else {
+        localStorage.setItem(`powerpod_tutorial_deleted_${flow.id}`, '1');
+        setDeletedTick(t => t + 1);
+      }
+    } catch (e) {
+      console.error('[TutorialHub] Delete failed:', e);
+      alert('Failed to delete tutorial.');
+    }
+  };
 
   const handlePlayAll = (categoryName) => {
     const categoryFlows = allFlows.filter(f => f.category === categoryName);
@@ -215,9 +223,9 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
       return flow;
     };
 
-    const overriddenStaticFlows = TUTORIAL_FLOWS.map(applyOverrides);
+    const overriddenStaticFlows = TUTORIAL_FLOWS.filter(f => !localStorage.getItem(`powerpod_tutorial_deleted_${f.id}`)).map(applyOverrides);
     return [...overriddenStaticFlows, ...ruleFlows];
-  }, [ruleFlows]);
+  }, [ruleFlows, deletedTick]);
 
   // Sync activeFlow reference if ruleFlows gets reloaded
   useEffect(() => {
@@ -300,28 +308,39 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
                   <div className="flow-card-header">
                     <span 
                       className="access-level-badge"
-                      style={{ 
-                        backgroundColor: flow.badgeColor,
-                        color: flow.badgeText,
-                        border: `1px solid ${flow.badgeText}33`
-                      }}
                     >
                       {flow.accessLevel} Scope
                     </span>
-                    {isMasterAdmin && (
-                      <button
-                        className="halo-button secondary btn-icon edit-tutorial-info-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingFlow(flow);
-                          setIsFormOpen(true);
-                        }}
-                        title="Edit Title / Description"
-                      >
-                        <IconEdit size={12} />
-                      </button>
-                    )}
-                    <span className="flow-indicator-icon">▶</span>
+                    <div className="flow-card-actions">
+                      {isMasterAdmin && (
+                        <button
+                          className="halo-button secondary btn-icon edit-tutorial-info-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingFlow(flow);
+                            setIsFormOpen(true);
+                          }}
+                          title="Edit Title / Description"
+                          aria-label="Edit Title / Description"
+                        >
+                          <IconEdit size={12} />
+                        </button>
+                      )}
+                      {isMasterAdmin && (
+                        <button
+                          className="halo-button danger btn-icon delete-tutorial-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTutorial(flow);
+                          }}
+                          title="Delete Tutorial"
+                          aria-label="Delete Tutorial"
+                        >
+                          <IconTrash size={12} />
+                        </button>
+                      )}
+                      <span className="flow-indicator-icon">▶</span>
+                    </div>
                   </div>
                   <h4 className="flow-card-title">{flow.title}</h4>
                   <p className="flow-card-description">{flow.description}</p>

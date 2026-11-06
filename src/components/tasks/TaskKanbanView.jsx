@@ -11,7 +11,7 @@ import {
 } from '../ui/Icons';
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
 import { taskUtils } from '../../utils/taskUtils';
-import { groupRemarksByEmployee } from '../../verticals/Employees/remarksBoard';
+import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
 import './TaskKanbanView.css';
 
 /**
@@ -358,6 +358,66 @@ const TaskKanbanView = ({
       );
     });
 
+  /**
+   * Shared collapsible row renderer used by both Employee-Grouped (Remarks Manager)
+   * and Hub-Grouped ('By Hub') Kanban modes.
+   */
+  const renderCollapsibleSection = ({ rowKey, title, rowTasks, badgeCounts, useIdAsTooltip = false }) => {
+    const isExpanded = !!expandedEmployees[rowKey];
+    return (
+      <div
+        key={rowKey}
+        className={`kanban-hub-section ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
+      >
+        <div
+          className="kanban-hub-header"
+          role="button"
+          tabIndex={0}
+          onClick={() => toggleEmployeeRow(rowKey)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleEmployeeRow(rowKey);
+            }
+          }}
+        >
+          <div className="kanban-hub-title-group">
+            <span className="kanban-employee-chevron">
+              {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRightSingle size={14} />}
+            </span>
+            <h3 className="kanban-hub-title">{title}</h3>
+            <div className="remark-grade-tags-row">
+              <span className="card-priority kanban-hub-task-count" title="Total">
+                {rowTasks.length}
+              </span>
+              {badgeCounts.map((badge) => (
+                <span
+                  key={badge.id}
+                  className={`card-priority ${badge.badgeClass}`}
+                  title={useIdAsTooltip ? badge.id : badge.label}
+                >
+                  {badge.count}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        {isExpanded && (
+          <>
+            <StageNavigationTray
+              stageList={visibleStages}
+              activeStageId={activeStageId}
+              setActiveStageId={setActiveStageId}
+              filteredTasks={rowTasks}
+            />
+            <div className="kanban-board">
+              {renderKanbanColumns(rowTasks)}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="kanban-view-container">
@@ -387,94 +447,30 @@ const TaskKanbanView = ({
         /* ── Employee-Grouped Mode (Remarks Manager) ──────────────────────
            By default ONLY shows active employees who have remarks, rendered
            as collapsible rows with colored remark grade tags. */
-        (() => {
-          const groups = groupRemarksByEmployee(filteredTasks, employeeStatusMap, { activeNamedOnly: true });
-          return groups.map((group) => {
-            const isExpanded = !!expandedEmployees[group.key];
-            return (
-              <div
-                key={group.key}
-                className={`kanban-hub-section kanban-employee-section ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}
-              >
-                <div
-                  className="kanban-hub-header kanban-employee-row"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => toggleEmployeeRow(group.key)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      toggleEmployeeRow(group.key);
-                    }
-                  }}
-                >
-                  <div className="kanban-hub-title-group">
-                    <span className="kanban-employee-chevron">
-                      {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRightSingle size={14} />}
-                    </span>
-                    <h3 className="kanban-hub-title">
-                      {group.label}
-                    </h3>
-                    <span className="kanban-hub-task-count">({group.tasks.length})</span>
-                  </div>
-                  <div className="remark-grade-tags-row">
-                    {group.gradeCounts.map((grade) => (
-                      <span
-                        key={grade.id}
-                        className={`card-priority ${grade.badgeClass}`}
-                      >
-                        {grade.label}: {grade.count}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                {isExpanded && (
-                  <>
-                    <StageNavigationTray
-                      stageList={visibleStages}
-                      activeStageId={activeStageId}
-                      setActiveStageId={setActiveStageId}
-                      filteredTasks={group.tasks}
-                    />
-                    <div className="kanban-board">
-                      {renderKanbanColumns(group.tasks)}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          });
-        })()
+        groupRemarksByEmployee(filteredTasks, employeeStatusMap, { activeNamedOnly: true }).map((group) =>
+          renderCollapsibleSection({
+            rowKey: group.key,
+            title: group.label,
+            rowTasks: group.tasks,
+            badgeCounts: group.gradeCounts,
+          })
+        )
       ) : groupByHubs ? (
         /* ── Hub-Grouped Mode ─────────────────────────────────────────────
-           One kanban-hub-section per unique hub. Each section gets its own
-           StageNavigationTray for per-hub stage badge counts on desktop.
+           One collapsible kanban-hub-section per unique hub, with colored
+           priority count tags (Urgent, High, Medium, Low).
            NOTE: groupByHubs is always false on mobile (guarded in TaskController),
            so this branch is never entered on mobile screens. */
-        uniqueHubs.map(hub => {
-          const hubTasks = filteredTasks.filter(t => taskHubMap.get(t.id) === hub);
+        uniqueHubs.map((hub) => {
+          const hubTasks = filteredTasks.filter((t) => taskHubMap.get(t.id) === hub);
           if (hubTasks.length === 0) return null;
-          return (
-            <div key={hub} className="kanban-hub-section">
-              <div className="kanban-hub-header">
-                <div className="kanban-hub-title-group">
-                  <h3 className="kanban-hub-title">
-                    {hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub}
-                  </h3>
-                  <span className="kanban-hub-task-count">({hubTasks.length})</span>
-                </div>
-              </div>
-              <StageNavigationTray
-                stageList={visibleStages}
-                activeStageId={activeStageId}
-                setActiveStageId={setActiveStageId}
-                filteredTasks={hubTasks}
-              />
-              <div className="kanban-board">
-                {renderKanbanColumns(hubTasks)}
-              </div>
-            </div>
-          );
+          return renderCollapsibleSection({
+            rowKey: hub,
+            title: hub === 'MULTI' ? 'Multi-Hub' : hub === 'Unassigned' ? 'No Hub Assigned' : hub,
+            rowTasks: hubTasks,
+            badgeCounts: getRemarkGradeCounts(hubTasks, true),
+            useIdAsTooltip: true,
+          });
         })
       ) : (
         /* ── Standard Mode ───────────────────────────────────────────────── */
@@ -495,4 +491,3 @@ const TaskKanbanView = ({
 };
 
 export default TaskKanbanView;
-

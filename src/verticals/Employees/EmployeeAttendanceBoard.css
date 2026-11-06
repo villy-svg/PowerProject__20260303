@@ -171,11 +171,8 @@
   background: transparent;
 }
 
-.attendance-board__wrapper .halo-button.attendance-board__approval-btn,
-.attendance-board__wrapper .halo-button.master-action-btn {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
+/* Header action buttons (.attendance-board__approval-btn and .master-action-btn)
+   inherit uniform typography and sizing from .master-header-actions-row .halo-button */
 
 .attendance-board__pending-badge {
   display: inline-flex;

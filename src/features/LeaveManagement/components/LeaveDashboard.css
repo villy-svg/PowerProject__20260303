@@ -118,9 +118,7 @@
   width: 100%;
 }
 
-.apply-leave-btn {
-  padding: 8px 20px;
-}
+/* .apply-leave-btn inherits sizing from .master-header-actions-row .halo-button */
 
 .leave-loading-state {
   padding: clamp(1rem, 3vw, 2.5rem);
@@ -214,8 +212,8 @@
   opacity: 0.45;
 }
 
-/* master-action-btn: prominent CTA button in leave balance banner */
-.master-action-btn {
+/* Scoped to .leave-balance-banner so it does not override .master-action-btn in page headers */
+.leave-balance-banner .master-action-btn {
   padding: 12px 28px;
   font-size: 0.95rem;
 }

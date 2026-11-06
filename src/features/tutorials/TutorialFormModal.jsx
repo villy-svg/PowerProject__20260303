@@ -48,7 +48,7 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
           description: '',
           category_id: '',
           new_category_name: '',
-          content: '1. First step text here.',
+          content: '',
         });
       }
       setStatus({ type: '', text: '' });
@@ -140,7 +140,7 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content hub-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+      <div className="modal-content hub-modal tutorial-form-modal" onClick={e => e.stopPropagation()}>
         <header className="modal-header">
           <h2>{isEditing ? `Edit Tutorial: ${editingItem.title}` : 'Create New Tutorial'}</h2>
           <button className="close-modal" onClick={onClose}>&times;</button>
@@ -219,12 +219,12 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
             {/* Initial Slide Content (Only for new rules/tutorials) */}
             {!isEditing && (
               <div className="form-group">
-                <label>Initial Slide Content (Rules Format)</label>
+                <label>Slide Content (Press Enter for new line; use 1., 2. or • to start a new page)</label>
                 <div className="form-input-container">
                   <textarea
                     value={form.content}
                     onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-                    placeholder="Write the initial slide texts here. E.g.:&#10;Welcome to this system onboarding.&#10;1. This is the first slide point.&#10;2. This is the second slide point."
+                    placeholder="Write slide content here. Press Enter for a new line on the same page.&#10;To create multiple pages, start a line with 1., 2., or •"
                     rows={5}
                     required
                   />

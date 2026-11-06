@@ -49,16 +49,11 @@
 .platform-toggle-btn.active {
   background: color-mix(in srgb, var(--brand-green) 15%, transparent);
   border: 1px solid var(--brand-green);
-  color: var(--brand-green) !important;
+  color: var(--brand-green);
   opacity: 1;
 }
 
-.header-back-dashboard-btn {
-  font-size: 0.8rem;
-  padding: 8px 16px;
-  height: auto;
-  min-height: 44px;
-}
+/* .header-back-dashboard-btn inherits uniform typography and sizing from .master-header-actions-row .halo-button */
 
 /* Categories Grid Layout */
 .tutorial-categories-grid {
@@ -115,6 +110,12 @@
   margin-bottom: 14px;
 }
 
+.flow-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .access-level-badge {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 800;
@@ -126,6 +127,9 @@
   min-height: 20px;
   display: inline-flex;
   align-items: center;
+  background: var(--badge-green-bg);
+  color: var(--status-success);
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 75%);
 }
 
 .flow-indicator-icon {
@@ -169,8 +173,8 @@
   margin-top: auto; /* Ensure it stays at the bottom of the card */
 }
 
-.flow-version-btn {
-  display: flex !important;
+.halo-button.flow-version-btn {
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -178,7 +182,7 @@
   min-height: 48px;
   gap: 3px;
   cursor: pointer;
-  pointer-events: auto !important; /* Enable mouse/touch interactions explicitly */
+  pointer-events: auto;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: var(--radius-button, 12px);
   width: 100%;
@@ -203,11 +207,11 @@
 }
 
 /* Active version highlight matching the current platform selection */
-.flow-version-btn.active-version {
-  border-color: var(--brand-green) !important;
-  background: var(--halo-bg) !important;
-  box-shadow: 0 0 12px var(--halo-glow) !important;
-  opacity: 1 !important;
+.halo-button.flow-version-btn.active-version {
+  border-color: var(--brand-green);
+  background: var(--halo-bg);
+  box-shadow: 0 0 12px var(--halo-glow);
+  opacity: 1;
 }
 
 .flow-version-btn.active-version .version-btn-subtitle {
@@ -512,7 +516,7 @@
   align-items: center;
 }
 
-.slideshow-control-btn {
+.halo-button.slideshow-control-btn {
   font-size: 0.7rem;
   font-weight: 700;
   padding: 6px 12px;
@@ -521,8 +525,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: none !important;
-  box-shadow: none !important;
+  border: none;
+  box-shadow: none;
 }
 
 .slideshow-control-btn.disabled {
@@ -799,23 +803,25 @@
   box-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
 }
 
-.onboarding-next-btn {
+.halo-button.onboarding-next-btn {
   --stage-accent: var(--brand-green);
   width: 100%;
-  padding: 12px !important; /* Shrunk vertical padding of next button */
-  font-size: 1rem !important;
-  border-radius: 12px !important;
-  background: var(--brand-green) !important;
-  color: var(--bg-color) !important;
-  font-weight: 800 !important;
-  border: none !important;
-  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.2) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: var(--radius-button, 12px);
+  background: var(--halo-bg);
+  color: var(--brand-green);
+  font-weight: 800;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
+  box-shadow: 0 8px 24px var(--halo-glow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.onboarding-next-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 12px 32px rgba(45, 212, 191, 0.35) !important;
+.halo-button.onboarding-next-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  border-color: var(--brand-green);
+  box-shadow: 0 12px 32px var(--halo-glow);
 }
 
 @media screen and (max-height: 700px) {
@@ -946,6 +952,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Tutorial Creation / Edit Modal Sizing (replaces inline style) */
+.modal-content.tutorial-form-modal {
+  max-width: 580px;
 }
 
 

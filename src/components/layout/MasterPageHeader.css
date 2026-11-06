@@ -87,26 +87,48 @@
   font-size: 0.7rem;
   transition: transform 0.2s;
   color: var(--brand-green);
+  display: inline-flex;
+  align-items: center;
 }
 
 .menu-trigger-btn.active .menu-icon {
   transform: rotate(0);
 }
 
-.menu-trigger-btn.active {
-  color: var(--text-color) !important;
-  opacity: 1 !important;
+.halo-button.menu-trigger-btn.active {
+  color: var(--text-color);
+  opacity: 1;
   border: 1px solid transparent;
-  background: var(--halo-bg) !important;
-  box-shadow: 0 0 3px var(--halo-glow) !important;
+  background: var(--halo-bg);
+  box-shadow: 0 0 3px var(--halo-glow);
 }
 
-.menu-trigger-btn.active:hover {
+.halo-button.menu-trigger-btn.active:hover {
   color: var(--text-color);
 }
 
-/* Ensure halo buttons have consistent vertical alignment */
-.master-header-actions-row .halo-button,
+/* Single source of truth for all top-level header row buttons (MENU, + Add <Entity>, Manage RBAC, etc.) */
+.master-header-actions-row .halo-button {
+  height: 36px;
+  min-height: 36px;
+  min-width: 100px;
+  padding: 0 16px;
+  gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  font-family: var(--font-main);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  border-radius: var(--radius-button);
+}
+
+/* Ensure halo buttons inside the expanded menu row maintain consistent vertical alignment */
 .expanded-menu-row .halo-button {
   padding: 8px 16px;
   display: inline-flex;
@@ -589,7 +611,7 @@ body.no-scroll {
 
 /* Ensure inner input tags or other elements are hidden or styled correctly */
 .expanded-actions-list .halo-button input[type="file"] {
-  display: none !important;
+  display: none;
 }
 
 /* Custom Actions Dropdown System — mirrors .filters-row-toggle aesthetic */
@@ -655,7 +677,6 @@ body.no-scroll {
   width: 100%;
   display: flex;
   flex-direction: column;
-  flex-direction: column;
 }
 
 .actions-dropdown-menu .csv-import-wrapper:last-child {
@@ -675,13 +696,13 @@ body.no-scroll {
 
 /* Special danger styling for Clear Board only */
 .actions-dropdown-menu .clear-board-btn {
-  color: rgba(239, 68, 68, 0.6);
+  color: color-mix(in srgb, var(--status-danger), transparent 40%);
   border-color: transparent;
 }
 
 .actions-dropdown-menu .clear-board-btn:hover {
-  background: rgba(239, 68, 68, 0.06);
-  color: rgba(239, 68, 68, 0.9);
+  background: color-mix(in srgb, var(--status-danger), transparent 94%);
+  color: color-mix(in srgb, var(--status-danger), transparent 10%);
 }
 
 /* On mobile/tablet, flow inline (relative) inside the menu but retain solid panel aesthetics and colors */
@@ -723,9 +744,9 @@ body.no-scroll {
     padding: 14px 18px;
   }
   .actions-dropdown-menu .clear-board-btn {
-    color: rgba(239, 68, 68, 0.6);
+    color: color-mix(in srgb, var(--status-danger), transparent 40%);
   }
   .actions-dropdown-menu .clear-board-btn:hover {
-    color: rgba(239, 68, 68, 0.9);
+    color: color-mix(in srgb, var(--status-danger), transparent 10%);
   }
 }

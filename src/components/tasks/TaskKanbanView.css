@@ -278,46 +278,38 @@
 
 /* ── HUB & EMPLOYEE GROUPING STYLES ──────────────────────────────────────── */
 
-/* Wrapper for one hub's kanban board when "Group by Hubs" is ON */
+/* Wrapper for one hub/employee's collapsible kanban board */
 .kanban-hub-section {
   display: flex;
   flex-direction: column;
-  margin-bottom: 40px;
+  margin-bottom: 12px;
 }
 
-/* Hub / Employee section header bar */
+.kanban-hub-section.is-expanded {
+  margin-bottom: 32px;
+}
+
+/* Collapsible Hub / Employee section header bar */
 .kanban-hub-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 8px 16px 12px 16px;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.kanban-hub-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.kanban-hub-section.is-collapsed .kanban-hub-header {
+  margin-bottom: 0;
 }
 
-.kanban-hub-title {
-  font-size: var(--font-base);
-  font-weight: 700;
+.kanban-hub-header:hover {
+  background: var(--halo-bg);
+}
+
+.kanban-employee-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--brand-mint);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0;
-}
-
-.kanban-hub-task-count {
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--text-secondary);
 }
 
 /* Subtle pill-divider between view mode buttons and "By Hub" grouping button */
@@ -329,43 +321,4 @@
   border-radius: 1px;
   flex-shrink: 0;
   align-self: center;
-}
-
-/* ── EMPLOYEE REMARKS COLLAPSIBLE ROW & GRADE TAGS ───────────────────────── */
-
-.kanban-employee-section.is-collapsed {
-  margin-bottom: 12px;
-}
-
-.kanban-employee-section.is-expanded {
-  margin-bottom: 32px;
-}
-
-.kanban-employee-row {
-  cursor: pointer;
-  user-select: none;
-  border-radius: 8px;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.kanban-employee-section.is-collapsed .kanban-employee-row {
-  margin-bottom: 0;
-}
-
-.kanban-employee-row:hover {
-  background: var(--halo-bg);
-}
-
-.kanban-employee-chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand-mint);
-}
-
-.remark-grade-tags-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
 }

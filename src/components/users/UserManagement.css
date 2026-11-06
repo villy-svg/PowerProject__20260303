@@ -628,7 +628,8 @@
 }
 .user-card-id .user-email {
   font-size: 13px;
-  opacity: 0.4;
+  opacity: 0.8;
+  word-break: break-all;
   margin-top: 2px;
 }
 .user-card-body label {
