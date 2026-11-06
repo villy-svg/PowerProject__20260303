@@ -124,7 +124,7 @@ const TaskListView = ({
               </button>
             )}
           </div>
-          <span className="task-count-badge" style={{ backgroundColor: `${stage.color}22`, color: stage.color }}>
+          <span className="task-count-badge" style={{ backgroundColor: `color-mix(in srgb, ${stage.color}, transparent 87%)`, color: stage.color }}>
             {stageTasks.length}
           </span>
         </header>
@@ -227,7 +227,7 @@ const TaskListView = ({
                     {group.gradeCounts.map((grade) => (
                       <span
                         key={grade.id}
-                        className={`card-priority ${grade.badgeClass} remark-grade-count-tag`}
+                        className={`card-priority ${grade.badgeClass}`}
                       >
                         {grade.label}: {grade.count}
                       </span>

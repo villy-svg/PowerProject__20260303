@@ -128,7 +128,8 @@
   gap: 8px;
 }
 
-.stage-label-text {
+.stage-label-text,
+.task-count-badge {
   font-weight: 700;
 }
 
@@ -142,10 +143,6 @@
   padding: 0 8px;
   height: 100%;
   opacity: 0.8;
-}
-
-.task-count-badge {
-  font-weight: 700;
 }
 
 .hierarchy-arrow {
@@ -209,20 +206,26 @@
   background-color: color-mix(in srgb, var(--brand-green), transparent 94%);
 }
 
-/* ── HUB GROUPING STYLES ─────────────────────────────────────────────────── */
+/* ── HUB & EMPLOYEE GROUPING STYLES ──────────────────────────────────────── */
 
-/* Wrapper for one hub's stage sections when "Group by Hubs" is ON */
+/* Wrapper for one hub/employee's stage sections */
 .list-hub-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 40px;
 }
 
-/* Hub section header: Hub Name + Task Count */
+.list-hub-group--inactive {
+  opacity: 0.7;
+}
+
+/* Hub / Employee section header: Name + Task Count + Optional Tags */
 .list-hub-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
   padding: 8px 16px 12px 16px;
   background: transparent;
   border: none;
@@ -251,20 +254,11 @@
   color: var(--text-secondary);
 }
 
-/* Indent the stages inside each hub section to visually nest them */
+/* Indent the stages inside each hub/employee section to visually nest them */
 .list-hub-content {
   display: flex;
   flex-direction: column;
   gap: 32px;
   padding-left: 16px;
   border-left: 2px solid var(--border-color);
-}
-
-.list-hub-group--inactive {
-  opacity: 0.7;
-}
-
-.list-hub-header {
-  flex-wrap: wrap;
-  gap: 12px;
 }

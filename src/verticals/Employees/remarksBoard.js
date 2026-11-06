@@ -10,10 +10,10 @@ export const REMARKS_VERTICAL_ID = 'employee_tasks';
 
 // Left → right order. `id` is the stored priority value.
 export const REMARK_COLUMNS = [
-  { id: 'Urgent', label: REMARK_GRADE_MAP.Urgent, color: '#f43f5e', badgeClass: 'priority-urgent' },
-  { id: 'High', label: REMARK_GRADE_MAP.High, color: '#f59e0b', badgeClass: 'priority-high' },
-  { id: 'Medium', label: REMARK_GRADE_MAP.Medium, color: '#3b82f6', badgeClass: 'priority-medium' },
-  { id: 'Low', label: REMARK_GRADE_MAP.Low, color: '#10b981', badgeClass: 'priority-low' },
+  { id: 'Urgent', label: REMARK_GRADE_MAP.Urgent, color: 'var(--priority-urgent)', badgeClass: 'priority-urgent' },
+  { id: 'High', label: REMARK_GRADE_MAP.High, color: 'var(--priority-high)', badgeClass: 'priority-high' },
+  { id: 'Medium', label: REMARK_GRADE_MAP.Medium, color: 'var(--priority-medium)', badgeClass: 'priority-medium' },
+  { id: 'Low', label: REMARK_GRADE_MAP.Low, color: 'var(--priority-low)', badgeClass: 'priority-low' },
 ];
 
 /**

@@ -68,8 +68,8 @@ const KanbanColumn = ({
       className={`kanban-stage-halo ${isActive ? 'active' : ''} ${isDragOver ? 'drag-over' : ''}`}
       style={{
         borderTop: `4px solid ${stage.color}`,
-        borderColor: `${stage.color}44`,
-        backgroundColor: `${stage.color}08`
+        borderColor: `color-mix(in srgb, ${stage.color}, transparent 73%)`,
+        backgroundColor: `color-mix(in srgb, ${stage.color}, transparent 97%)`
       }}
       {...dropProps}
     >
@@ -87,7 +87,7 @@ const KanbanColumn = ({
         </div>
         <span
           className="task-count-badge"
-          style={{ backgroundColor: `${stage.color}22`, color: stage.color }}
+          style={{ backgroundColor: `color-mix(in srgb, ${stage.color}, transparent 87%)`, color: stage.color }}
         >
           {stageTasks.length}
         </span>
@@ -421,7 +421,7 @@ const TaskKanbanView = ({
                     {group.gradeCounts.map((grade) => (
                       <span
                         key={grade.id}
-                        className={`card-priority ${grade.badgeClass} remark-grade-count-tag`}
+                        className={`card-priority ${grade.badgeClass}`}
                       >
                         {grade.label}: {grade.count}
                       </span>
