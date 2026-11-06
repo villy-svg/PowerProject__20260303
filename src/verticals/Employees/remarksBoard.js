@@ -55,7 +55,9 @@ export const getRemarkEmployeeName = (task, statusMap = {}) => {
 };
 
 /**
- * Builds ordered employee groups: active (A→Z), unassigned, then inactive (A→Z).
+ * Builds ordered employee groups: active first, unassigned, then inactive.
+ * Within each section, employees are ordered by highest remark grade counts
+ * (Special Conditions → Level 2 → Level 1 → Level 0), then A→Z.
  * @param {Array} tasks - Filtered remarks/tasks
  * @param {Object} statusMap - Map of { [employeeId]: { name, isActive } }
  * @param {Object} options - { activeNamedOnly: boolean }
@@ -83,14 +85,30 @@ export const groupRemarksByEmployee = (tasks = [], statusMap = {}, options = {})
   });
 
   const sorted = [...groups.values()]
-    .map((g) => ({
-      ...g,
-      gradeCounts: getRemarkGradeCounts(g.tasks, true),
-    }))
+    .map((g) => {
+      const fullGradeCounts = getRemarkGradeCounts(g.tasks, false);
+      const countsById = fullGradeCounts.reduce((acc, item) => {
+        acc[item.id] = item.count;
+        return acc;
+      }, {});
+      return {
+        ...g,
+        gradeCounts: fullGradeCounts.filter((item) => item.count > 0),
+        countsById,
+      };
+    })
     .filter((g) => g.tasks.length > 0)
     .sort((a, b) => {
       if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
       if (a.isUnassigned !== b.isUnassigned) return a.isUnassigned ? 1 : -1;
+
+      // Order by highest remark severity count first:
+      // Urgent (Special Conditions) → High (Level 2) → Medium (Level 1) → Low (Level 0)
+      for (const col of REMARK_COLUMNS) {
+        const diff = (b.countsById[col.id] || 0) - (a.countsById[col.id] || 0);
+        if (diff !== 0) return diff;
+      }
+
       return a.label.localeCompare(b.label);
     });
 
