@@ -10,6 +10,7 @@ import {
   IconChevronRightSingle
 } from '../ui/Icons';
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
+import { useLayoutShell } from '../../app/shells/useLayoutShell';
 import { taskUtils } from '../../utils/taskUtils';
 import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
 import './TaskKanbanView.css';
@@ -228,6 +229,7 @@ const TaskKanbanView = ({
   groupByEmployee = false,
   employeeStatusMap = {},
 }) => {
+  const { isMobile } = useLayoutShell();
   const [activeStageId, setActiveStageId] = useState(stageList.some(s => s.id === 'BACKLOG') ? 'BACKLOG' : stageList[0]?.id);
   const [expandedParents, setExpandedParents] = useState({});
   const [expandedEmployees, setExpandedEmployees] = useState({});
@@ -269,8 +271,10 @@ const TaskKanbanView = ({
   /**
    * Renders the kanban columns for a given subset of tasks.
    * Extracted so it can be reused per-hub or as the full board.
+   * When `hideEmptyStages` is true (mobile employee remarks stack), stages with 0 remarks
+   * are omitted from the DOM so empty categories never render on mobile.
    */
-  const renderKanbanColumns = (tasksForBoard) =>
+  const renderKanbanColumns = (tasksForBoard, { hideEmptyStages = false } = {}) =>
     visibleStages.map((stage) => {
       const isActive = activeStageId === stage.id;
       const tasksInColumn = tasksForBoard.filter((t) => t.stageId === stage.id);
@@ -292,6 +296,11 @@ const TaskKanbanView = ({
         t.isSubTask && !parents.some(p => p.id === t.parentTask)
       );
       stageTasks.push(...orphans);
+
+      // Adaptive UI (§3.A/§3.B): Do not mount empty remark categories in the DOM on mobile
+      if (hideEmptyStages && stageTasks.length === 0) {
+        return null;
+      }
 
       stageTasks.sort((a, b) => {
         if (b.parentTask === a.id) return -1;
@@ -404,14 +413,18 @@ const TaskKanbanView = ({
         </div>
         {isExpanded && (
           <>
-            <StageNavigationTray
-              stageList={visibleStages}
-              activeStageId={activeStageId}
-              setActiveStageId={setActiveStageId}
-              filteredTasks={rowTasks}
-            />
-            <div className="kanban-board">
-              {renderKanbanColumns(rowTasks)}
+            {/* Option A (Mobile Remarks Manager): Omit StageNavigationTray when grouped by employee
+                so remarks render in a unified vertical stack ordered by severity without empty category tabs. */}
+            {!groupByEmployee && (
+              <StageNavigationTray
+                stageList={visibleStages}
+                activeStageId={activeStageId}
+                setActiveStageId={setActiveStageId}
+                filteredTasks={rowTasks}
+              />
+            )}
+            <div className={`kanban-board ${groupByEmployee ? 'kanban-employee-board' : ''}`}>
+              {renderKanbanColumns(rowTasks, { hideEmptyStages: groupByEmployee && isMobile })}
             </div>
           </>
         )}

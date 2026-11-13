@@ -136,30 +136,55 @@
   }
 
   .kanban-board {
-    overflow-x: hidden !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    gap: 0 !important;
+    overflow-x: hidden;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 0;
   }
 
   .kanban-stage-halo {
-    display: none !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    margin: 0 !important;
-    padding: 12px 0 16px 0 !important;
+    display: none;
+    width: 100%;
+    min-width: 100%;
+    margin: 0;
+    padding: 12px 0 16px 0;
     background: transparent !important;
     border: none !important;
   }
 
   .kanban-stage-halo.active {
-    display: flex !important;
+    display: flex;
     animation: stageFadeSlideIn 0.3s ease forwards;
   }
 
-  /* Hide stage headers on mobile since the tray provides the label */
-  .kanban-stage-halo.active .stage-header {
+  /* Hide stage headers on mobile since the tray or card grade badge provides the label */
+  .kanban-stage-halo .stage-header {
     display: none;
+  }
+
+  /* Ensure 44px minimum touch target on collapsible headers (§14.B) */
+  .kanban-hub-header {
+    min-height: 44px;
+  }
+
+  /* ── Employee Remarks Mobile Unified Stack (Option A) ───────────────────
+     Empty categories are unmounted via useLayoutShell(); non-empty categories
+     stack vertically in severity order with uniform 12px card spacing. */
+  .kanban-board.kanban-employee-board {
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 4px;
+    padding-bottom: 16px;
+  }
+
+  .kanban-board.kanban-employee-board > .kanban-stage-halo {
+    display: flex;
+    padding: 0;
+    animation: stageFadeSlideIn 0.3s ease forwards;
+  }
+
+  .kanban-board.kanban-employee-board .task-drop-zone {
+    min-height: 0;
   }
 }
 

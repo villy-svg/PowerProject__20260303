@@ -3,7 +3,7 @@
 **Status:** `Implemented`
 
 **Date Created:** 2026-11-06
-**Last Updated:** 2026-11-06
+**Last Updated:** 2026-11-13
 **Author / AI Session:** Antigravity session, Nov 2026
 
 ---
@@ -14,6 +14,7 @@
 |---|---|---|
 | 2026-11-06 | Draft | Initial document created for List View parity & Kanban collapsible employee rows with grade tags |
 | 2026-11-06 | Implemented | Approved options implemented: collapsed active-employee rows by default in Kanban with non-zero colored grade tags, and Employee -> Grade Stage grouping in List Mode |
+| 2026-11-13 | Implemented | Minor Amendment: Mobile (`≤ 768px`) Remarks Manager unified vertical stack (Option A) omitting empty remark categories and `StageNavigationTray` |
 
 ---
 
@@ -235,3 +236,18 @@ We have two minor UX choices to align on:
 3. Position the colored count tags immediately after the employee/hub name and total count (`(n)`) inside the title group rather than pushed to the far right end.
 **Phases Affected:** Phase 2a, Phase 2b
 **Approved:** Yes (User-requested in session)
+
+
+## Amendment: 2026-11-13 — Mobile Unified Vertical Stack (Option A) & Non-Zero Category Filtering
+**Type:** Minor Amendment
+**Requested Change:**
+1. In the phone/mobile view (`≤ 768px`) of the Remarks Manager (`employee_tasks`), do NOT display all 4 remark categories when an employee does not have remarks in a category.
+2. Replace the per-employee 4-tab `StageNavigationTray` on mobile with a **Unified Vertical Stack (Option A)** so that expanding an employee immediately renders all of their remarks in severity order (`Special Conditions` → `Level 2` → `Level 1` → `Level 0`) without empty category tabs or blank default views.
+**Reason:**
+Most employees only have 1–4 remarks total. Rendering a 4-tab `StageNavigationTray` inside each expanded employee row on mobile showed empty categories, defaulted to `Special Conditions` (causing a blank view if the employee only had lower-grade remarks), and forced double-navigation. Every `TaskCard` already displays its semantic grade badge (`resolvePriorityLabel`) and left-border accent color.
+**Phases Affected:** Phase 2a, Phase 2b, Phase 3d
+**Updated Plan:**
+- Use `useLayoutShell()` (`isMobile`) in `TaskKanbanView.jsx` to omit empty remark stage columns (`stageTasks.length === 0`) from the DOM when `groupByEmployee && isMobile` is true (`Adaptive UI Strategy` §3.A/§3.B and `Shell Architecture System` §5C).
+- Omit `StageNavigationTray` inside `renderCollapsibleSection` when `groupByEmployee` is true.
+- Scope mobile CSS in `TaskKanbanView.css` under `@media screen and (max-width: 768px)` using `.kanban-board:not(.kanban-employee-board)` so standard Kanban boards preserve their exact existing `!important` rules, while `.kanban-board.kanban-employee-board` stacks non-empty categories vertically with a uniform `12px` gap and `min-height: 44px` on `.kanban-hub-header`.
+**Approved:** Yes (Option A explicitly approved by user)
