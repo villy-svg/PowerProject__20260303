@@ -20,6 +20,7 @@ import { IconChevronDown, IconChevronRightSingle } from '../ui/Icons';
 import RBACManageButton from '../ui/RBACManageButton';
 import { REMARK_COLUMNS, REMARKS_VERTICAL_ID, normalizeRemarkGrade } from '../../verticals/Employees/remarksBoard';
 import { useEmployeeStatusMap } from '../../verticals/Employees/useEmployeeStatusMap';
+import { BoardViewToggle, BoardFilterPill, BoardFilterGroup, DataOperationsDropdown } from '../ui/board-menu';
 
 
 
@@ -176,7 +177,7 @@ const TaskController = (props) => {
     `canAccess${activeVertical.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}`) : null;
 
   return (
-    <div className="task-controller">
+    <div className="task-controller" data-board={activeVertical || 'default'}>
       <MasterPageHeader
         title={boardLabel || `${(label === 'Hubs' || label === 'Hub' || label === 'Hubs List') ? 'Hub Task Board' : (label === 'Clients' || label === 'Client') ? 'Client Task Board' : label === 'Daily Task Board' ? 'Daily Task Board' : (label || 'Hub') + ' Task Board'}`}
         description="Unified workspace for overseeing charging hub maintenance, infrastructure upgrades, and operational tasks."
@@ -225,129 +226,116 @@ const TaskController = (props) => {
           <>
             {/* Hide view-mode toggles on mobile since mobile intentionally locks to Kanban */}
             {isDesktop && (
-              <div className="view-mode-toggle">
-                {['kanban', 'list', 'tree'].map((mode) => (
-                  <button
-                    key={mode}
-                    className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                    onClick={() => handleSetViewMode(mode)}
-                  >
-                    {mode}
-                  </button>
-                ))}
-                {/* Hub grouping toggle — only visible on Hub boards, hidden in tree view */}
-                {viewMode !== 'tree' && (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
-                  <>
-                    <span className="view-toggle-divider mobile-hidden" aria-hidden="true" />
+              <BoardViewToggle
+                options={['kanban', 'list', 'tree']}
+                value={viewMode}
+                onChange={handleSetViewMode}
+                addon={
+                  /* Hub grouping toggle — only visible on Hub boards, hidden in tree view */
+                  viewMode !== 'tree' &&
+                  (activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) ? (
                     <button
-                      className={`view-toggle-btn view-toggle-btn--group mobile-hidden ${groupByHubs ? 'active' : ''}`}
+                      type="button"
+                      aria-pressed={groupByHubs}
+                      className={`board-view-toggle__btn view-toggle-btn view-toggle-btn--group mobile-hidden ${groupByHubs ? 'active' : ''}`}
                       onClick={() => setGroupByHubs(!groupByHubs)}
                       title={groupByHubs ? 'Ungroup by Hub' : 'Group by Hub'}
                     >
                       By Hub
                     </button>
-                  </>
-                )}
-              </div>
+                  ) : null
+                }
+              />
             )}
 
-            <div className="header-filter-group">
-              {!isRemarksBoard && <button
-                className={`halo-button toggle-depri-btn ${showDeprioritized ? 'active' : ''}`}
-                onClick={() => setShowDeprioritized(!showDeprioritized)}
-                title={showDeprioritized ? "Hide Deferred" : "Show Deferred"}
-              >
-                Defer
-              </button>}
+            <BoardFilterGroup ariaLabel="Task filters">
+              {!isRemarksBoard && (
+                <BoardFilterPill
+                  active={showDeprioritized}
+                  onClick={() => setShowDeprioritized(!showDeprioritized)}
+                  title={showDeprioritized ? "Hide Deferred" : "Show Deferred"}
+                >
+                  Defer
+                </BoardFilterPill>
+              )}
 
-              <button
-                className={`halo-button toggle-depri-btn ${showMyTasksOnly ? 'active' : ''}`}
+              <BoardFilterPill
+                active={showMyTasksOnly}
                 onClick={() => setShowMyTasksOnly(!showMyTasksOnly)}
                 title={showMyTasksOnly ? "Show All Tasks" : "Filter: My Tasks Only"}
               >
                 My Tasks
-              </button>
+              </BoardFilterPill>
 
-              <button
-                className={`halo-button toggle-depri-btn ${showReworkOnly ? 'active' : ''}`}
+              <BoardFilterPill
+                active={showReworkOnly}
                 onClick={() => setShowReworkOnly(!showReworkOnly)}
                 title={showReworkOnly ? "Show All Tasks" : "Filter: Rework Required Only"}
               >
                 Rework
-              </button>
-            </div>
+              </BoardFilterPill>
+            </BoardFilterGroup>
           </>
         }
         expandedRight={
           <>
             {(activeVertical === verticals?.CHARGING_HUBS?.id || HUB_VIEWS.includes(activeVertical)) && (
-              <div className="data-operations-wrapper">
-                <div className="actions-dropdown-container">
-                  <div
-                    className="filters-row-toggle"
-                    onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
+              <DataOperationsDropdown
+                isOpen={isActionsDropdownOpen}
+                onToggle={setIsActionsDropdownOpen}
+              >
+                {permissions.roleId === 'master_admin' && (
+                  <button
+                    type="button"
+                    className="halo-button clear-board-btn master-action-btn"
+                    onClick={() => {
+                      handleClearBoard();
+                      setIsActionsDropdownOpen(false);
+                    }}
+                    disabled={saving}
+                    title="Move all active tasks to Deferred"
                   >
-                    <p className="u-uppercase">Data Operations</p>
-                    <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
-                      <IconChevronDown size={10} />
-                    </span>
-                  </div>
-                  {isActionsDropdownOpen && (
-                    <div className="actions-dropdown-menu">
-                      {permissions.roleId === 'master_admin' && (
-                        <button
-                          className="halo-button clear-board-btn master-action-btn"
-                          onClick={() => {
-                            handleClearBoard();
-                            setIsActionsDropdownOpen(false);
-                          }}
-                          disabled={saving}
-                          title="Move all active tasks to Deferred"
-                        >
-                          Clear Board
-                        </button>
-                      )}
-                      <TaskCSVDownload 
-                        className="master-action-btn" 
-                        data={filteredTasks} 
-                        label="Export Tasks" 
-                      />
-                      <TaskCSVDownload 
-                        className="master-action-btn" 
-                        isTemplate 
-                        label="Download Template" 
-                      />
-                      <TaskCSVImport 
-                        className="master-action-btn" 
-                        verticalId={activeVertical} 
-                        onImportComplete={() => {
-                          refreshTasks(false);
-                          setIsActionsDropdownOpen(false);
-                        }} 
-                        label="Import Tasks"
-                      />
-                      <FixTasksButton 
-                        className="master-action-btn" 
-                        permissions={permissions} 
-                        refreshTasks={(b) => {
-                          refreshTasks(b);
-                          setIsActionsDropdownOpen(false);
-                        }} 
-                        label="Fix Tasks"
-                      />
-                      <ArchiveTasksButton 
-                        className="master-action-btn" 
-                        permissions={permissions} 
-                        refreshTasks={(b) => {
-                          refreshTasks(b);
-                          setIsActionsDropdownOpen(false);
-                        }} 
-                        label="Archive Old Tasks"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+                    Clear Board
+                  </button>
+                )}
+                <TaskCSVDownload 
+                  className="master-action-btn" 
+                  data={filteredTasks} 
+                  label="Export Tasks" 
+                />
+                <TaskCSVDownload 
+                  className="master-action-btn" 
+                  isTemplate 
+                  label="Download Template" 
+                />
+                <TaskCSVImport 
+                  className="master-action-btn" 
+                  verticalId={activeVertical} 
+                  onImportComplete={() => {
+                    refreshTasks(false);
+                    setIsActionsDropdownOpen(false);
+                  }} 
+                  label="Import Tasks"
+                />
+                <FixTasksButton 
+                  className="master-action-btn" 
+                  permissions={permissions} 
+                  refreshTasks={(b) => {
+                    refreshTasks(b);
+                    setIsActionsDropdownOpen(false);
+                  }} 
+                  label="Fix Tasks"
+                />
+                <ArchiveTasksButton 
+                  className="master-action-btn" 
+                  permissions={permissions} 
+                  refreshTasks={(b) => {
+                    refreshTasks(b);
+                    setIsActionsDropdownOpen(false);
+                  }} 
+                  label="Archive Old Tasks"
+                />
+              </DataOperationsDropdown>
             )}
           </>
         }

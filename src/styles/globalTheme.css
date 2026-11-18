@@ -2,6 +2,7 @@
 @import "./systems/systemLists.css";
 @import "./systems/systemCards.css";
 @import "./systems/systemBadges.css";
+@import "../components/ui/board-menu/BoardMenu.css";
 
 /* ==========================================================================
    1. THEME VARIABLES (Centralized Source of Truth)
@@ -29,6 +30,15 @@
   --glass-blur: 15px;
   --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.1);
   --shadow-halo: 0 0 15px var(--halo-glow);
+  /* Board Menu Control Tokens (Single Source of Truth for Row 4 Expanded Menu) */
+  --menu-control-height: 36px;
+  --menu-control-font-size: 0.75rem;
+  --menu-control-font-weight: 700;
+  --menu-control-letter-spacing: 0.5px;
+  --menu-control-padding-x: 14px;
+  --menu-control-radius: var(--radius-button);
+  --menu-segment-height: 28px;
+  --menu-segment-radius: 8px;
   /* Halo Glow System */
   --halo-glow: color-mix(in srgb, var(--brand-mint), transparent 80%);
   --halo-bg: color-mix(in srgb, var(--brand-mint), transparent 95%);
@@ -255,37 +265,7 @@
   letter-spacing: 0.5px;
   line-height: 1;
 }
-/* View Toggles (Master Header System Standard) */
-.view-mode-toggle {
-  display: flex;
-  background: var(--halo-bg); /* Standardized */
-  border-radius: 10px;
-  padding: 4px;
-  gap: 8px; /* Standardized */
-  border: 1px solid var(--border-color);
-}
-.view-toggle-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-color);
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  opacity: 1;
-}
-.view-toggle-btn:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.05);
-}
-.view-toggle-btn.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
-  color: var(--brand-mint);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 70%);
-  opacity: 1;
-}
+/* .view-mode-toggle and .view-toggle-btn — canonical in src/components/ui/board-menu/BoardMenu.css (imported above) */
 /* .status-pill — canonical in systemBadges.css (imported above) */
 /* Common Empty State */
 .empty-state-container {
@@ -633,6 +613,8 @@
     --radius-button: 10px;
     --glass-blur: 14px;
     --shadow-premium: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --menu-control-height: 42px;
+    --menu-segment-height: 34px;
   }
   /* Scale down halo buttons for touch */
   .halo-button {
@@ -645,12 +627,6 @@
     padding: 10px 16px;
     font-size: 0.7rem;
     min-height: 44px;
-  }
-  /* View toggles — larger touch targets */
-  .view-toggle-btn {
-    padding: 8px 14px;
-    font-size: 0.75rem;
-    min-height: 38px;
   }
   /* Empty states — less padding on mobile */
   .empty-state-container {
@@ -732,15 +708,6 @@
     font-size: 0.65rem;
     width: 100%;
     min-height: 44px;
-  }
-  .view-mode-toggle {
-    gap: 4px;
-    padding: 3px;
-  }
-  .view-toggle-btn {
-    padding: 6px 10px;
-    font-size: 0.7rem;
-    min-height: 36px;
   }
   .empty-state-container {
     padding: 2rem 1rem;

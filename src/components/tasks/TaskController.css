@@ -11,47 +11,19 @@
   flex-direction: column;
 }
 
-.toggle-depri-btn {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  opacity: 0.7;
-}
-
-.halo-button.toggle-depri-btn.active {
-  background: rgba(0, 255, 133, 0.15);
-  color: var(--brand-mint);
-  border: 1px solid var(--brand-mint);
-  opacity: 1;
-}
-
-.header-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.view-toggle-btn {
-  text-transform: capitalize;
-  font-weight: 400;
-}
-
-.view-toggle-btn.active {
-  font-weight: 600;
-}
-
+/* Board Menu Filter Pills, View Toggles & Data Operations are canonically styled in src/components/ui/board-menu/BoardMenu.css */
 .clear-board-btn {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
   padding: 6px 14px;
-  border-color: rgba(239, 68, 68, 0.2);
-  color: rgba(239, 68, 68, 0.6);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 80%);
+  color: color-mix(in srgb, var(--status-danger), transparent 35%);
 }
 
 .clear-board-btn:hover {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.5);
-  color: rgba(239, 68, 68, 0.9);
+  background: color-mix(in srgb, var(--status-danger), transparent 92%);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 50%);
+  color: var(--status-danger);
 }
 
 .stage-header {
@@ -161,7 +133,7 @@
 
 .merge-option-card:hover {
   border-color: var(--brand-green);
-  background: rgba(0, 255, 102, 0.02);
+  background: var(--halo-bg);
 }
 
 .merge-header {
@@ -195,7 +167,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   margin-bottom: 8px;
-  color: white;
+  color: var(--text-color);
 }
 
 .merge-meta {
@@ -240,7 +212,7 @@
 }
 
 .halo-button.confirm-btn {
-  background: rgba(0, 255, 133, 0.1);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
   color: var(--brand-mint);
   border: 1px solid var(--brand-mint);
   font-weight: 700;
@@ -249,7 +221,7 @@
 
 .cancel-btn {
   background: color-mix(in srgb, var(--text-color), transparent 95%);
-  color: white;
+  color: var(--text-color);
   min-width: 100px;
 }
 
@@ -262,91 +234,9 @@
 }
 
 @media screen and (max-width: 768px) {
-  .view-mode-toggle {
+  .clear-board-btn,
+  .master-action-btn,
+  .csv-import-wrapper {
     width: 100%;
-    display: flex;
-    gap: 4px;
-  }
-
-  .view-mode-toggle .view-toggle-btn {
-    flex: 1;
-    text-align: center;
-    padding: 8px 4px;
-    min-width: unset;
-  }
-
-  .header-filter-group {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-  }
-
-  .header-filter-group .toggle-depri-btn {
-    flex: 1;
-    text-align: center;
-    padding: 8px 2px;
-    font-size: 0.7rem;
-    min-width: unset;
-    white-space: nowrap;
-  }
-
-  .clear-board-btn, .master-action-btn, .csv-import-wrapper {
-    width: 100%;
-  }
-}
-
-/* .data-operations-wrapper and .actions-dropdown-* styles are centrally managed in MasterPageHeader.css */
-
-/* Automatically flatten actions dropdown inside mobile bottom actions sheet for perfect integration */
-.expanded-actions-list .data-operations-wrapper {
-  display: block;
-  width: 100%;
-}
-
-.expanded-actions-list .actions-dropdown-container {
-  display: block;
-  width: 100%;
-}
-
-.expanded-actions-list .filters-row-toggle {
-  display: none; /* Hide trigger in bottom drawer actions list */
-}
-
-.expanded-actions-list .actions-dropdown-menu {
-  display: flex; /* Force inline list rendering */
-  position: relative;
-  top: auto;
-  right: auto;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  margin-top: 0;
-  width: 100%;
-  backdrop-filter: none;
-}
-
-/* Ultra-compact screen refinements (320px / iPhone SE) */
-@media screen and (max-width: 360px) {
-  .view-mode-toggle,
-  .header-filter-group {
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    width: 100% !important;
-    gap: 4px !important;
-  }
-
-  .view-mode-toggle .view-toggle-btn,
-  .header-filter-group .toggle-depri-btn {
-    flex: 1 !important;
-    width: auto !important;
-    min-height: 38px !important;
-    font-size: 0.65rem !important;
-    padding: 6px 2px !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
   }
 }

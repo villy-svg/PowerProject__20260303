@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSubmissionsForTask, updateSubmissionStatus } from '../../services/tasks/submissionService';
 import { employeeService } from '../../services/employees/employeeService';
+import {
+  REQUEST_TYPES,
+  canReviewEmployeeRequests,
+  approveBankUpdateRequest,
+  approveDeactivationRequest,
+  rejectEmployeeRequest,
+} from '../../services/employees/employeeRequestService';
 import { taskService } from '../../services/tasks/taskService';
 import RejectionModal from '../modals/RejectionModal';
 import { IconDatabase, IconFile, IconCheck, IconX } from '../ui/Icons';
@@ -89,29 +96,43 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
     return profile.name || profile.email || 'Unknown';
   };
 
-  // Don't render if no submissions and not loading (and not a bank update)
+  // Don't render if no submissions and not loading (and not an employee approval request)
   let bankUpdatePayload = null;
-  if (task?.description && task.description.includes('"BANK_UPDATE"')) {
-    try {
-      const parsed = JSON.parse(task.description);
-      if (parsed.type === 'BANK_UPDATE') {
-        bankUpdatePayload = parsed;
+  let deactivationPayload = null;
+  if (task?.description) {
+    if (task.description.includes('"BANK_UPDATE"') || task.description.includes('"EMPLOYEE_DEACTIVATION"')) {
+      try {
+        const parsed = JSON.parse(task.description);
+        if (parsed.type === REQUEST_TYPES.BANK_UPDATE) {
+          bankUpdatePayload = parsed;
+        } else if (parsed.type === REQUEST_TYPES.DEACTIVATION) {
+          deactivationPayload = parsed;
+        }
+      } catch (e) {
+        // Not JSON
       }
-    } catch (e) {
-      // Not JSON
     }
   }
+
+  // Master Admin, Master Editor, or Employees-vertical Editor/Admin can approve/reject employee requests.
+  // Non-master requesters cannot self-approve their own request.
+  const canReviewEmployeeReq = canReviewEmployeeRequests(currentUser) && (
+    currentUser?.roleId === 'master_admin' ||
+    (
+      task?.created_by !== currentUser?.id &&
+      (bankUpdatePayload?.requestedBy || deactivationPayload?.requestedBy) !== currentUser?.id
+    )
+  );
 
   const handleBankApproval = async (status) => {
     if (!bankUpdatePayload) return;
     setUpdating('bank_update');
     try {
       if (status === 'approved') {
-        await employeeService.updateEmployeeBankDetails(bankUpdatePayload.employeeId, bankUpdatePayload.newDetails);
+        await approveBankUpdateRequest(task.id);
+      } else {
+        await rejectEmployeeRequest(task.id);
       }
-      
-      const newStage = status === 'approved' ? 'COMPLETED' : 'DEPRIORITIZED';
-      await taskService.updateTaskStage(task.id, newStage, currentUser.id);
       
       alert(`Bank Update ${status === 'approved' ? 'Approved & Applied' : 'Rejected'}.`);
       if (onStatusUpdate) onStatusUpdate(); // close modal/refresh
@@ -122,7 +143,27 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
     }
   };
 
-  if (!loading && submissions.length === 0 && !bankUpdatePayload) {
+  const handleDeactivationApproval = async (status) => {
+    if (!deactivationPayload) return;
+    setUpdating('deactivation');
+    try {
+      if (status === 'approved') {
+        await approveDeactivationRequest(task.id);
+      } else {
+        // Reject does nothing to the employee record — only moves the request task out of REVIEW.
+        await rejectEmployeeRequest(task.id);
+      }
+
+      alert(`Deactivation Request ${status === 'approved' ? 'Approved & Employee Marked Inactive' : 'Rejected'}.`);
+      if (onStatusUpdate) onStatusUpdate();
+    } catch (err) {
+      alert(`Action failed: ${err.message}`);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  if (!loading && submissions.length === 0 && !bankUpdatePayload && !deactivationPayload) {
     return (
       <div className="submission-history">
         <div className="submission-history-header">
@@ -180,7 +221,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             </div>
           </div>
 
-          {canReview && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
+          {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
                 type="button" 
@@ -199,6 +240,46 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
                 disabled={updating === 'bank_update'}
               >
                 {updating === 'bank_update' ? 'Processing...' : <><IconX size={14} className="u-mr-4" /> Reject</>}
+              </button>
+            </div>
+          )}
+          {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
+            <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+              This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
+            </div>
+          )}
+        </div>
+      )}
+
+      {deactivationPayload && (
+        <div className="bank-update-review-card u-mb-16" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--surface-color)' }}>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>
+            👤 Employee Deactivation Request
+          </h4>
+          <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            <strong>{deactivationPayload.requestedByName || 'An editor'}</strong> requested to mark{' '}
+            <strong>{deactivationPayload.employeeName}</strong> as <strong>Inactive</strong>.
+          </p>
+
+          {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                className="halo-button"
+                style={{ color: 'var(--success-color)', borderColor: 'var(--border-color)' }}
+                onClick={() => handleDeactivationApproval('approved')}
+                disabled={updating === 'deactivation'}
+              >
+                {updating === 'deactivation' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve & Mark Inactive</>}
+              </button>
+              <button
+                type="button"
+                className="halo-button secondary"
+                style={{ color: 'var(--danger-color)', borderColor: 'var(--border-color)' }}
+                onClick={() => handleDeactivationApproval('rejected')}
+                disabled={updating === 'deactivation'}
+              >
+                {updating === 'deactivation' ? 'Processing...' : <><IconX size={14} className="u-mr-4" /> Reject</>}
               </button>
             </div>
           )}

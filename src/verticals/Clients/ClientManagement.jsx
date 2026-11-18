@@ -16,6 +16,7 @@ import { useManagementUI } from '../../hooks/useManagementUI';
 import { matchesCriteria } from '../../utils/matchingAlgorithms';
 import RBACManageButton from '../../components/ui/RBACManageButton';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { BoardViewToggle, BoardFilterPill, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 /**
  * ClientManagement
@@ -188,57 +189,41 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
           <>
             {/* Hide view-mode toggle on mobile since mobile intentionally locks to Card Grid */}
             {!isMobile && (
-              <div className="view-mode-toggle">
-                {['grid', 'list'].map(mode => (
-                  <button
-                    key={mode}
-                    className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
-                    onClick={() => ui.setViewMode(mode)}
-                    title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
-                  >
-                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <BoardViewToggle
+                options={[
+                  { value: 'grid', label: 'Grid', title: 'Grid View' },
+                  { value: 'list', label: 'List', title: 'List View' },
+                ]}
+                value={ui.viewMode}
+                onChange={ui.setViewMode}
+              />
             )}
 
-            <button
-              className={`halo-button toggle-depri-btn ${!ui.showInactive ? 'active' : ''}`}
+            <BoardFilterPill
+              active={!ui.showInactive}
+              variant="strikethrough"
               onClick={() => ui.setShowInactive(!ui.showInactive)}
               title={ui.showInactive ? 'Hide Inactive' : 'Show Inactive'}
-              style={{ fontWeight: 600, textDecoration: ui.showInactive ? 'none' : 'line-through' }}
+              icon={<IconChevronDown size={14} className="u-opacity-80" />}
             >
-              <IconChevronDown size={14} className="u-mr-4 u-opacity-80" />
               INACTIVE
-            </button>
+            </BoardFilterPill>
           </>
         }
         expandedRight={
-          <div className="data-operations-wrapper">
-            <div className="actions-dropdown-container">
-              <div
-                className="filters-row-toggle"
-                onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-              >
-                <p className="u-text-upper">Data Operations</p>
-                <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
-                  <IconChevronDown size={10} />
-                </span>
-              </div>
-              {isActionsDropdownOpen && (
-                <div className="actions-dropdown-menu">
-                  <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
-                  <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
-                  {permissions.canCreateClients && (
-                    <ClientCSVImport label="Import Clients" onImportComplete={() => {
-                      fetchClients();
-                      setIsActionsDropdownOpen(false);
-                    }} className="master-action-btn" />
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <ClientCSVDownload data={clients} label="Export Clients" className="master-action-btn" />
+            <ClientCSVDownload isTemplate label="Download Template" className="master-action-btn" />
+            {permissions.canCreateClients && (
+              <ClientCSVImport label="Import Clients" onImportComplete={() => {
+                fetchClients();
+                setIsActionsDropdownOpen(false);
+              }} className="master-action-btn" />
+            )}
+          </DataOperationsDropdown>
         }
       />
 

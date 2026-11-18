@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { STAGE_LIST } from '../../constants/stages';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { taskUtils } from '../../utils/taskUtils';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
 import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
@@ -47,13 +48,19 @@ const CentralisedTaskBoard = ({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [drillDownId, setDrillDownId] = useState(null);
   
-  const assignedTasks = tasks.filter(t => taskUtils.isAssignee(t, user) || taskUtils.isCreator(t, user));
+  const isEmployeeReqReviewer = canReviewEmployeeRequests(user);
+  const isVisibleToUser = (t) =>
+    taskUtils.isAssignee(t, user) ||
+    taskUtils.isCreator(t, user) ||
+    (isEmployeeReqReviewer && isEmployeeApprovalTask(t));
+
+  const assignedTasks = tasks.filter(isVisibleToUser);
   const rootMyTasks = assignedTasks.filter(t => {
     let current = t;
     while (current.parentTask) {
       const parent = tasks.find(pt => pt.id === current.parentTask);
       if (!parent) break;
-      if (taskUtils.isAssignee(parent, user) || taskUtils.isCreator(parent, user)) {
+      if (isVisibleToUser(parent)) {
         return false;
       }
       current = parent;

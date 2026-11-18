@@ -1,0 +1,455 @@
+/* ==========================================================================
+   BOARD MENU PRIMITIVES (BoardViewToggle, BoardFilterPill, DataOperationsDropdown)
+   Single source of truth for Row 4 (.expanded-menu-row) controls across all boards.
+   Supports board-specific customization via CSS variables & scoped modifier classes
+   without global specificity collisions.
+   ========================================================================== */
+
+/* ── 1. Segmented View Switcher (BoardViewToggle) ────────────────────────── */
+.board-view-toggle,
+.view-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  padding: 3px;
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+.board-view-toggle__btn,
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--menu-segment-height, 28px);
+  min-height: var(--menu-segment-height, 28px);
+  min-inline-size: 24px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--menu-segment-radius, 8px);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0.75;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+@media (hover: hover) {
+  .board-view-toggle__btn:hover,
+  .view-toggle-btn:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--text-color), transparent 94%);
+  }
+}
+
+.board-view-toggle__btn:focus-visible,
+.view-toggle-btn:focus-visible {
+  outline: 2px solid var(--brand-mint);
+  outline-offset: 2px;
+}
+
+/* Style toggled state from both [aria-pressed="true"] and .active so visual & accessible state stay locked */
+.board-view-toggle__btn[aria-pressed="true"],
+.board-view-toggle__btn.active,
+.view-toggle-btn[aria-pressed="true"],
+.view-toggle-btn.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 65%);
+  font-weight: var(--menu-control-font-weight, 700);
+  opacity: 1;
+}
+
+/* Vertical separator inside segmented toggle group (e.g. before "By Hub") */
+.view-toggle-divider {
+  display: inline-block;
+  width: 0;
+  height: 16px;
+  border-inline-start: 1px solid var(--border-color);
+  margin: 0 2px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── 2. Quick Filter Pills (BoardFilterPill & BoardFilterGroup) ─────────── */
+.board-filter-group,
+.header-filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.board-filter-pill,
+.expanded-menu-row .halo-button.toggle-depri-btn,
+.halo-button.toggle-depri-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  min-width: unset;
+  min-inline-size: 24px;
+  padding: 0 var(--menu-control-padding-x, 14px);
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0.8;
+  box-sizing: border-box;
+  box-shadow: 0 0 3px var(--halo-glow);
+  backdrop-filter: blur(var(--glass-blur));
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (hover: hover) {
+  .board-filter-pill:hover,
+  .expanded-menu-row .halo-button.toggle-depri-btn:hover,
+  .halo-button.toggle-depri-btn:hover {
+    opacity: 1;
+    color: var(--brand-mint);
+    background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+    border-color: var(--brand-mint);
+    border-width: 1px;
+    box-shadow: 0 0 12px var(--halo-glow);
+    transform: none;
+  }
+}
+
+.board-filter-pill:focus-visible,
+.halo-button.toggle-depri-btn:focus-visible {
+  outline: 2px solid var(--brand-mint);
+  outline-offset: 2px;
+}
+
+.board-filter-pill[aria-pressed="true"],
+.board-filter-pill.active,
+.expanded-menu-row .halo-button.toggle-depri-btn[aria-pressed="true"],
+.expanded-menu-row .halo-button.toggle-depri-btn.active,
+.halo-button.toggle-depri-btn[aria-pressed="true"],
+.halo-button.toggle-depri-btn.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+  border: 1px solid var(--brand-mint);
+  opacity: 1;
+  box-shadow: 0 0 14px var(--halo-glow);
+}
+
+/* Optional board-specific semantic variants for filter pills */
+.board-filter-pill--warning[aria-pressed="true"],
+.board-filter-pill--warning.active {
+  background: color-mix(in srgb, var(--status-warning), transparent 85%);
+  color: var(--status-warning);
+  border-color: var(--status-warning);
+}
+
+.board-filter-pill--danger[aria-pressed="true"],
+.board-filter-pill--danger.active {
+  background: color-mix(in srgb, var(--status-danger), transparent 85%);
+  color: var(--status-danger);
+  border-color: var(--status-danger);
+}
+
+.board-filter-pill--strikethrough:not([aria-pressed="true"]):not(.active) {
+  text-decoration: line-through;
+}
+
+/* ── 3. Data Operations Dropdown (DataOperationsDropdown) ────────────────── */
+.data-operations-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.actions-dropdown-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Trigger button — unified to match 36px height & 0.75rem typography of left menu controls */
+.data-ops-trigger,
+.actions-dropdown-container .filters-row-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  padding: 0 var(--menu-control-padding-x, 14px);
+  margin: 0;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  color: var(--text-color);
+  font-family: var(--font-main);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  box-shadow: 0 0 3px var(--halo-glow);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.data-ops-trigger p,
+.data-ops-trigger__label,
+.actions-dropdown-container .filters-row-toggle p {
+  margin: 0;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  color: inherit;
+  line-height: 1;
+}
+
+@media (hover: hover) {
+  .data-ops-trigger:hover,
+  .actions-dropdown-container .filters-row-toggle:hover {
+    background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+    border-color: var(--brand-mint);
+    color: var(--brand-mint);
+    box-shadow: 0 0 12px var(--halo-glow);
+  }
+}
+
+.data-ops-trigger[aria-expanded="true"],
+.data-ops-trigger.is-open {
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  border-color: var(--brand-mint);
+  color: var(--brand-mint);
+}
+
+.data-ops-trigger:focus-visible {
+  outline: 2px solid var(--brand-mint);
+  outline-offset: 2px;
+}
+
+.data-ops-chevron,
+.actions-dropdown-container .dropdown-icon,
+.actions-dropdown-container .dropdown-chevron-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  color: currentColor;
+}
+
+.data-ops-chevron.is-open,
+.data-ops-trigger[aria-expanded="true"] .data-ops-chevron,
+.actions-dropdown-container .dropdown-icon.open {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* Dropdown menu container: hidden when closed via .is-closed so DOM stays mounted for mobile Quick Actions sheet.
+   Scoped under .actions-dropdown-container (specificity 0,2,0) so it wins over DropdownSystem.css (.actions-dropdown-menu)
+   regardless of stylesheet injection order. */
+.actions-dropdown-container .actions-dropdown-menu,
+.actions-dropdown-menu {
+  left: auto;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.actions-dropdown-container .actions-dropdown-menu.is-closed,
+.actions-dropdown-menu.is-closed {
+  display: none;
+}
+
+/* Each action item inside the dropdown — flat row aesthetic without outer halo glow */
+.actions-dropdown-menu .master-action-btn,
+.actions-dropdown-menu .halo-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--brand-green);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-align: left;
+  box-shadow: none;
+  backdrop-filter: none;
+  white-space: nowrap;
+}
+
+.actions-dropdown-menu .csv-import-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.actions-dropdown-menu .csv-import-wrapper:last-child,
+.actions-dropdown-menu .master-action-btn:last-child,
+.actions-dropdown-menu .halo-button:last-child {
+  border-bottom: none;
+}
+
+/* Neutralize .halo-button hover border-width & outer glow when rendered as flat rows inside dropdown */
+.actions-dropdown-menu .master-action-btn:hover,
+.actions-dropdown-menu .halo-button:hover {
+  background: var(--halo-bg);
+  border: none;
+  border-width: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Special semantic danger styling for Clear Board inside dropdown */
+.actions-dropdown-menu .clear-board-btn {
+  color: color-mix(in srgb, var(--status-danger), transparent 40%);
+  border-color: transparent;
+}
+
+.actions-dropdown-menu .clear-board-btn:hover {
+  background: color-mix(in srgb, var(--status-danger), transparent 94%);
+  color: color-mix(in srgb, var(--status-danger), transparent 10%);
+}
+
+/* Inside Mobile Quick Actions Sheet (.expanded-actions-list), always flatten and show menu items */
+.expanded-actions-list .data-operations-wrapper,
+.expanded-actions-list .actions-dropdown-container {
+  display: block;
+  width: 100%;
+}
+
+.expanded-actions-list .data-ops-trigger,
+.expanded-actions-list .filters-row-toggle {
+  display: none;
+}
+
+.expanded-actions-list .actions-dropdown-menu,
+.expanded-actions-list .actions-dropdown-menu.is-closed {
+  display: flex;
+  position: relative;
+  top: auto;
+  right: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 0;
+  width: 100%;
+  backdrop-filter: none;
+}
+
+/* ── 4. Mobile & Tablet Responsive Alignment (≤1024px & ≤768px) ──────────── */
+@media screen and (max-width: 1024px) {
+  .data-operations-wrapper {
+    margin-top: 8px;
+  }
+
+  .data-ops-trigger,
+  .actions-dropdown-container .filters-row-toggle {
+    height: 42px;
+    min-height: 42px;
+    padding: 0 14px;
+    box-sizing: border-box;
+  }
+
+  /* Scoped under .actions-dropdown-container to override DropdownSystem.css (position: absolute) on mobile/tablet
+     so the Data Operations menu expands inline inside the menu card and never slips behind the Kanban stage bar. */
+  .actions-dropdown-container .actions-dropdown-menu,
+  .actions-dropdown-menu {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    width: 100%;
+    max-height: none;
+    margin-top: 8px;
+    padding: 0;
+  }
+
+  .actions-dropdown-menu .master-action-btn,
+  .actions-dropdown-menu .halo-button {
+    color: var(--brand-green);
+    font-size: var(--menu-control-font-size, 0.75rem);
+    padding: 14px 18px;
+  }
+
+  .actions-dropdown-menu .clear-board-btn {
+    color: color-mix(in srgb, var(--status-danger), transparent 40%);
+  }
+
+  .actions-dropdown-menu .clear-board-btn:hover {
+    color: color-mix(in srgb, var(--status-danger), transparent 10%);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .board-view-toggle,
+  .view-mode-toggle {
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .board-view-toggle__btn,
+  .view-mode-toggle .view-toggle-btn {
+    flex: 1;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 8px;
+    text-align: center;
+  }
+
+  .board-filter-group,
+  .header-filter-group {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .board-filter-group .board-filter-pill,
+  .header-filter-group .toggle-depri-btn {
+    flex: 1;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 8px;
+    text-align: center;
+  }
+}

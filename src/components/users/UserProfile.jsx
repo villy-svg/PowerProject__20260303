@@ -102,13 +102,15 @@ const UserProfile = ({
       try {
         const { data, error } = await supabase
           .from('tasks')
-          .select('id')
-          .eq('text', `Bank Update Request: ${user.name}`)
-          .eq('stage_id', 'REVIEW')
-          .limit(1);
+          .select('id, stage_id')
+          .ilike('description', '%"type":"BANK_UPDATE"%')
+          .ilike('description', `%"employeeId":"${user.employeeId}"%`);
           
         if (error) throw error;
-        setIsBankUpdatePending(data && data.length > 0);
+        const hasOpen = (data || []).some(
+          t => t.stage_id && !['COMPLETED', 'DEPRIORITIZED'].includes(t.stage_id)
+        );
+        setIsBankUpdatePending(hasOpen);
       } catch (err) {
         console.error("Error checking pending bank task:", err);
       }

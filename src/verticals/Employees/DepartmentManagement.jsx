@@ -6,6 +6,7 @@ import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
 import DepartmentCSVDownload from './DepartmentCSVDownload';
 import DepartmentCSVImport from './DepartmentCSVImport';
+import { BoardViewToggle, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [departments, setDepartments] = useState([]);
@@ -122,46 +123,26 @@ const DepartmentManagement = ({ permissions = {}, setActiveVertical, onShowBotto
         addLabel="New Department"
         onAddClick={() => handleOpenModal()}
         expandedLeft={
-          <div className="view-mode-toggle">
-            <button 
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              Grid
-            </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              List
-            </button>
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
         }
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="u-uppercase">Data Operations</p>
-                  <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
-                    <IconChevronDown size={10} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <DepartmentCSVDownload className="master-action-btn" data={departments} label="Export Departments" />
             <DepartmentCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <DepartmentCSVImport className="master-action-btn" label="Import Departments" onImportComplete={() => fetchDepartments(true)} />
             )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          </DataOperationsDropdown>
         }
       />
 

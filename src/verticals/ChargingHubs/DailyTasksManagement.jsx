@@ -9,6 +9,7 @@ import { useManagementUI } from '../../hooks/useManagementUI';
 import { taskUtils } from '../../utils/taskUtils';
 import './DailyTasksManagement.css';
 import CustomSelect from '../../components/ui/CustomSelect';
+import { BoardViewToggle } from '../../components/ui/board-menu';
 
 const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) => {
   const ui = useManagementUI({
@@ -190,20 +191,14 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
           </>
         }
         expandedLeft={
-          <div className="view-mode-toggle">
-            <button
-              className={`view-toggle-btn ${ui.viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => ui.setViewMode('grid')}
-            >
-              Grid
-            </button>
-            <button
-              className={`view-toggle-btn ${ui.viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => ui.setViewMode('list')}
-            >
-              List
-            </button>
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={ui.viewMode}
+            onChange={ui.setViewMode}
+          />
         }
       />
 

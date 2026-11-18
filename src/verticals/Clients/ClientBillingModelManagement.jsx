@@ -6,6 +6,7 @@ import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
 import ClientBillingModelCSVDownload from './ClientBillingModelCSVDownload';
 import ClientBillingModelCSVImport from './ClientBillingModelCSVImport';
+import { BoardViewToggle, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 /**
  * ClientBillingModelManagement
@@ -92,43 +93,26 @@ const ClientBillingModelManagement = ({ user = {}, permissions = {}, setActiveVe
           )
         }
         expandedLeft={
-          <div className="view-mode-toggle">
-            {['grid', 'list'].map(mode => (
-              <button
-                key={mode}
-                className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                onClick={() => setViewMode(mode)}
-              >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
-              </button>
-            ))}
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
         }
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="u-text-upper">Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
-                    <IconChevronDown size={10} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <ClientBillingModelCSVDownload className="master-action-btn" data={models} label="Export Models" />
             <ClientBillingModelCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <ClientBillingModelCSVImport className="master-action-btn" label="Import Models" onImportComplete={fetchModels} />
             )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          </DataOperationsDropdown>
         }
       />
 

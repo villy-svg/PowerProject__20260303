@@ -274,6 +274,11 @@ export const employeeService = {
    * @param {Object} updates - Object containing fields to update.
    */
   async bulkUpdateEmployees(ids, updates) {
+    // TEMPORARILY DISABLED: bulk employee updates are switched off (UI hidden in EmployeeManagement).
+    // Remove this guard together with BULK_UPDATE_ENABLED to re-enable.
+    throw new Error('Bulk update of employees is temporarily disabled.');
+
+    // eslint-disable-next-line no-unreachable
     if (!ids || ids.length === 0) return;
 
     if (ids.length > 50) {

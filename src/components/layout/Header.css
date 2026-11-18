@@ -28,9 +28,12 @@
 .logo-button {
   position: fixed;
   left: 2.5rem;
-  top: 25px; /* (90px - 40px) / 2 */
+  /* Dynamically center 40px logo inside .app-header's clamp(60px, 8vh, 90px) height */
+  top: calc((clamp(60px, 8vh, 90px) - 40px) / 2);
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   z-index: calc(var(--z-header) + 10);
   background: transparent;
   border: none;

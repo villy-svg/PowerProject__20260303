@@ -16,9 +16,9 @@ git branch --show-current
 
 #Check Current Supabase Link : staging : eeoibqxhfkrgbylnluvk | prod : dhhbdgzutlltiojbsboi
 npx supabase link --project-ref dhhbdgzutlltiojbsboi
-npx supabase db push --include-all --yes
+npx supabase db push --linked --include-all --yes
 npx supabase link --project-ref eeoibqxhfkrgbylnluvk
-npx supabase db push --include-all --yes
+npx supabase db push --linked --include-all --yes
 #npx supabase functions deploy user-admin
 #npx supabase migration repair --status reverted 20260709000001
 #npx supabase migration repair --status reverted 20260706182000

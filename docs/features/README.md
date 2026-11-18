@@ -54,6 +54,7 @@ component already listed under a `Draft`, `In Review`, or `Approved` feature, yo
 | [Employee Declaration Form & DEC NA Tag](./employee_declaration_form.md) | Implemented | 2026-10-23 | `submissions`, `submissions_backup`, `employees` | `EmployeeForm.jsx`, `EmployeeDocumentSection.jsx`, `EmployeeCard.jsx`, `EmployeeListRow.jsx`, `EmployeeManagement.jsx`, `EmployeeCSVDownload.jsx`, `submissionService.js`, `entity-archive/index.ts` | Antigravity session |
 | [Mobile Profile "Update App" Button](./ota_manual_update_trigger.md) | Implemented | 2026-10-27 | None | `UserProfile.jsx`, `UserProfile.css`, `OTAContext.jsx`, `useOTAUpdate.js`, `otaUpdateService.js` | Antigravity session |
 | [Remarks Manager Grouping, Collapsible Rows & Grade Tags](./remarks_manager_grouping_and_tags.md) | Implemented | 2026-11-13 | None | `TaskController.jsx`, `TaskKanbanView.jsx`, `TaskListView.jsx`, `ListViewRow.jsx`, `TaskCard.jsx`, `remarksBoard.js` | Antigravity session |
+| [Board Menu Control Standardization & Modularization](./board_menu_standardization.md) | Implemented | 2026-11-18 | None | `src/components/ui/board-menu/*`, `TaskController.jsx`, `HubManagement.jsx`, `HubFunctionManagement.jsx`, `DailyTasksManagement.jsx`, `MasterPageHeader.css`, `globalTheme.css` | Antigravity session |
 
 ---
 

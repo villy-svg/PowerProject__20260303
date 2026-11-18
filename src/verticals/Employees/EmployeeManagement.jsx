@@ -19,6 +19,15 @@ import { hasHighRemarks } from './remarkRules';
 import RBACManageButton from '../../components/ui/RBACManageButton';
 import { taskService } from '../../services/tasks/taskService';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import { BoardViewToggle, BoardFilterPill, DataOperationsDropdown } from '../../components/ui/board-menu';
+import {
+  createBankUpdateRequest,
+  createDeactivationRequest,
+} from '../../services/employees/employeeRequestService';
+
+// Bulk update is temporarily disabled. Flip to true to restore the bulk action bar.
+const BULK_UPDATE_ENABLED = false;
+
 /**
  * EmployeeManagement
  * 
@@ -138,6 +147,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
     try {
       if (ui.editingItem) {
         let finalFormData = { ...formData };
+        // Bank-change approval request to raise AFTER the employee record is saved successfully.
+        let bankRequestToCreate = null;
         
         if (user?.roleId !== 'master_admin') {
           const oldBank = {
@@ -166,36 +177,26 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
             finalFormData.accountName = ui.editingItem.account_name;
             finalFormData.panNumber = ui.editingItem.pan_number;
             
-            const reviewPayload = {
-              type: 'BANK_UPDATE',
-              employeeId: ui.editingItem.id,
-              employeeName: ui.editingItem.full_name,
-              oldDetails: oldBank,
-              newDetails: newBank,
-              requestedBy: user?.id,
-              requestedByName: user?.name || user?.email || 'User'
-            };
-            
-            const masterAdmins = employees.filter(emp => emp.role_id === 'master_admin');
-            const assigneeIds = masterAdmins.map(admin => admin.id);
-            
-            await taskService.addTask({
-              verticalId: 'HUBS',
-              stageId: 'REVIEW',
-              priority: 'High',
-              task_board: ['Escalations'],
-              function: 'EMP',
-              assigned_to: assigneeIds.length > 0 ? assigneeIds : null,
-              text: `Bank Details Update: ${ui.editingItem.full_name}`,
-              description: JSON.stringify(reviewPayload),
-              hub_id: ui.editingItem.hub_id === 'ALL' ? null : ui.editingItem.hub_id
-            }, user?.id);
-            
-            alert("Other changes saved. Bank details update has been sent to Master Admin for approval.");
+            bankRequestToCreate = newBank;
           }
         }
         
+        // Save the employee FIRST so we never queue an approval for (or announce) a save that failed.
         await updateEmployee(ui.editingItem.id, finalFormData);
+
+        if (bankRequestToCreate) {
+          try {
+            const res = await createBankUpdateRequest(ui.editingItem.id, bankRequestToCreate);
+            if (res?.status === 'duplicate') {
+              alert("Other changes saved. A bank details update request for this employee is already pending approval, so no new request was created.");
+            } else {
+              alert("Other changes saved. Bank details update has been sent for approval.");
+            }
+          } catch (reqErr) {
+            console.error('EmployeeManagement: Bank request failed:', reqErr);
+            alert(`Other changes saved, but the bank details approval request could NOT be submitted: ${reqErr.message}`);
+          }
+        }
       } else {
         await addEmployee(formData);
       }
@@ -205,6 +206,40 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
       alert(`Operation failed: ${err.message}`);
     } finally {
       ui.setIsSaving(false);
+    }
+  };
+
+  /**
+   * Status toggle gate.
+   * - Master Admin: immediate toggle (unchanged behaviour).
+   * - Reactivation by anyone: immediate toggle (unchanged behaviour).
+   * - Deactivation by a non-master: raises an approval request instead of changing the record.
+   */
+  const handleToggleStatus = async (id, currentStatus) => {
+    const isMaster = user?.roleId === 'master_admin';
+    if (isMaster || currentStatus !== 'Active') {
+      try {
+        await toggleStatus(id, currentStatus);
+      } catch (err) {
+        alert(`Status change failed: ${err.message}`);
+      }
+      return;
+    }
+
+    const emp = employees.find(e => e.id === id);
+    if (!emp) return;
+    if (!window.confirm(`Request deactivation of ${emp.full_name}? This will be sent for approval and the employee stays Active until approved.`)) return;
+
+    try {
+      const result = await createDeactivationRequest(emp, user);
+      if (result.status === 'duplicate') {
+        alert(`A deactivation request for ${emp.full_name} is already pending approval.`);
+      } else {
+        alert(`Deactivation request for ${emp.full_name} has been submitted for approval.`);
+      }
+    } catch (err) {
+      console.error('EmployeeManagement: Deactivation request failed:', err);
+      alert(`Could not submit deactivation request: ${err.message}`);
     }
   };
 
@@ -332,59 +367,45 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           <>
             {/* Hide view-mode toggle on mobile since mobile intentionally locks to Card Grid */}
             {!isMobile && (
-              <div className="view-mode-toggle">
-                {['grid', 'list', 'tree'].map(mode => (
-                  <button
-                    key={mode}
-                    className={`view-toggle-btn ${ui.viewMode === mode ? 'active' : ''}`}
-                    onClick={() => ui.setViewMode(mode)}
-                    title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
-                  >
-                    {mode === 'tree' ? 'Hierarchy' : mode.charAt(0).toUpperCase() + mode.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <BoardViewToggle
+                options={[
+                  { value: 'grid', label: 'Grid', title: 'Grid View' },
+                  { value: 'list', label: 'List', title: 'List View' },
+                  { value: 'tree', label: 'Hierarchy', title: 'Tree View' },
+                ]}
+                value={ui.viewMode}
+                onChange={ui.setViewMode}
+              />
             )}
 
-            <button
-              className={`halo-button secondary toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}
+            <BoardFilterPill
+              active={ui.showInactive}
+              className={`secondary toggle-inactive-btn ${ui.showInactive ? '' : 'hidden'}`}
               onClick={() => ui.setShowInactive(!ui.showInactive)}
               title={ui.showInactive ? "Hide Inactive" : "Show Inactive"}
+              icon={<IconChevronDown size={14} className="u-opacity-80" />}
             >
-              <IconChevronDown size={14} className="u-mr-4 u-opacity-80" />
               INACTIVE
-            </button>
+            </BoardFilterPill>
           </>
         }
         expandedRight={
-          <div className="data-operations-wrapper">
-            <div className="actions-dropdown-container">
-              <div
-                className="filters-row-toggle"
-                onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-              >
-                <p className="u-uppercase">Data Operations</p>
-                <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
-                  <IconChevronDown size={10} />
-                </span>
-              </div>
-              {isActionsDropdownOpen && (
-                <div className="actions-dropdown-menu">
-                  <div className="master-action-btn u-px-12 u-py-8 u-cursor-pointer" onClick={() => { setGroupBy(groupBy === 'role' ? 'hub' : 'role'); setIsActionsDropdownOpen(false); }}>
-                    Group By: <strong>{groupBy === 'role' ? 'Role' : 'Hub'}</strong>
-                  </div>
-                  <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
-                  <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
-                  {permissions.canCreateEmployees && (
-                    <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={() => {
-                      fetchEmployees();
-                      setIsActionsDropdownOpen(false);
-                    }} />
-                  )}
-                </div>
-              )}
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <div className="master-action-btn u-px-12 u-py-8 u-cursor-pointer" onClick={() => { setGroupBy(groupBy === 'role' ? 'hub' : 'role'); setIsActionsDropdownOpen(false); }}>
+              Group By: <strong>{groupBy === 'role' ? 'Role' : 'Hub'}</strong>
             </div>
-          </div>
+            <EmployeeCSVDownload className="master-action-btn" data={employees} label="Export Team" />
+            <EmployeeCSVDownload className="master-action-btn" isTemplate label="Download Template" />
+            {permissions.canCreateEmployees && (
+              <EmployeeCSVImport className="master-action-btn" label="Import Team" onImportComplete={() => {
+                fetchEmployees();
+                setIsActionsDropdownOpen(false);
+              }} />
+            )}
+          </DataOperationsDropdown>
         }
       />
 
@@ -403,7 +424,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           onEdit={handleOpenEdit}
           onView={handleOpenView}
           onDelete={handleDelete}
-          onToggleStatus={toggleStatus}
+          onToggleStatus={handleToggleStatus}
           permissions={permissions}
           availableHubs={hubs}
           onUpdateHub={updateEmployeeHub}
@@ -444,7 +465,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onView={handleOpenView}
                               onUpload={handleOpenUpload}
                               onDelete={handleDelete}
-                              onToggleStatus={toggleStatus}
+                              onToggleStatus={handleToggleStatus}
                               permissions={rowPermissions}
                               availableHubs={hubs}
                               isSelected={ui.selectedIds.includes(emp.id)}
@@ -464,7 +485,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                               onView={handleOpenView}
                               onUpload={handleOpenUpload}
                               onDelete={handleDelete}
-                              onToggleStatus={toggleStatus}
+                              onToggleStatus={handleToggleStatus}
                               permissions={rowPermissions}
                               availableHubs={hubs}
                               onUpdateHub={updateEmployeeHub}
@@ -509,7 +530,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         onView={handleOpenView}
                         onUpload={handleOpenUpload}
                         onDelete={handleDelete}
-                        onToggleStatus={toggleStatus}
+                        onToggleStatus={handleToggleStatus}
                         permissions={rowPermissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
@@ -528,7 +549,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
                         onView={handleOpenView}
                         onUpload={handleOpenUpload}
                         onDelete={handleDelete}
-                        onToggleStatus={toggleStatus}
+                        onToggleStatus={handleToggleStatus}
                         permissions={rowPermissions}
                         availableHubs={hubs}
                         onUpdateHub={updateEmployeeHub}
@@ -552,7 +573,8 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         </div>
       )}
 
-      {/* Floating Bulk Action Bar */}
+      {/* Floating Bulk Action Bar (disabled while BULK_UPDATE_ENABLED is false) */}
+      {BULK_UPDATE_ENABLED && (
       <div className={`bulk-action-bar ${ui.selectedIds.length === 0 ? 'bulk-hidden' : ''} ${!ui.isTrayVisible ? 'tray-hidden' : ''}`}>
         <div className="bulk-info">
           {ui.selectedIds.length} Selected
@@ -568,6 +590,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
           </button>
         </div>
       </div>
+      )}
 
       <TaskModal
         isOpen={ui.isAddModalOpen}

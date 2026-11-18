@@ -221,27 +221,33 @@
   display: flex !important;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
-  background: var(--bg-elevated);
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  padding: 0 var(--menu-control-padding-x, 14px);
+  background: var(--halo-bg);
   border: 1px solid var(--border-color);
-  border-bottom: 2px solid var(--border-color);
   cursor: pointer;
   width: 100%;
   transition: all 0.2s ease;
   user-select: none;
-  border-radius: var(--radius-button);
-  margin-bottom: 4px;
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  margin-bottom: 0;
+  box-sizing: border-box;
   -webkit-tap-highlight-color: transparent; /* Fixes square flicker on touch/mobile */
 }
 .filters-row-toggle:hover {
-  background: var(--halo-bg);
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+  border-color: var(--brand-mint);
+  color: var(--brand-mint);
 }
 .filters-row-toggle p {
   margin: 0;
-  font-weight: 800;
-  font-size: 0.8rem;
-  color: var(--text-color);
-  letter-spacing: 1px;
+  font-weight: var(--menu-control-font-weight, 700);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  color: inherit;
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  line-height: 1;
 }
 .filters-action-btn {
   background: none;

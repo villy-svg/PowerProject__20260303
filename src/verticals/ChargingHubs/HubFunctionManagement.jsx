@@ -5,6 +5,7 @@ import FunctionCSVDownload from './FunctionCSVDownload';
 import FunctionCSVImport from './FunctionCSVImport';
 import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
+import { BoardViewToggle, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [functions, setFunctions] = useState([]);
@@ -117,37 +118,21 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
           )
         }
         expandedLeft={
-          <div className="view-mode-toggle">
-            <button 
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              Grid
-            </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              List
-            </button>
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
         }
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="u-text-upper">Data Operations</p>
-                  <span className={`dropdown-icon ${isActionsDropdownOpen ? 'open' : ''}`}>
-                    <IconChevronDown size={10} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <FunctionCSVDownload 
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <FunctionCSVDownload 
               className="halo-button master-action-btn" 
               data={functions} 
               label="Export Functions" 
@@ -157,11 +142,7 @@ const HubFunctionManagement = ({ user = {}, permissions = {}, setActiveVertical,
             {permissions.canCreate && (
               <FunctionCSVImport className="master-action-btn" label="Import Functions" onImportComplete={fetchFunctions} />
             )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          </DataOperationsDropdown>
         }
       />
 

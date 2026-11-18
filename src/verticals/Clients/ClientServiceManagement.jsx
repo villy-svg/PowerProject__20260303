@@ -8,6 +8,7 @@ import { IconChevronDown } from '../../components/ui/Icons';
 // Imported under neutral local names to make the intent clear and avoid misleading file references.
 import CSVDownload from './ClientCategoryCSVDownload';
 import CSVImport from './ClientCategoryCSVImport';
+import { BoardViewToggle, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 /**
  * ClientServiceManagement
@@ -95,34 +96,21 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
           )
         }
         expandedLeft={
-          <div className="view-mode-toggle">
-            {['grid', 'list'].map(mode => (
-              <button
-                key={mode}
-                className={`view-toggle-btn ${viewMode === mode ? 'active' : ''}`}
-                onClick={() => setViewMode(mode)}
-              >
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
-              </button>
-            ))}
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
         }
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="u-text-upper">Data Operations</p>
-                  <span style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none', opacity: 0.5, transition: 'transform 0.2s ease', display: 'flex', alignItems: 'center' }}>
-                    <IconChevronDown size={10} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <CSVDownload
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <CSVDownload
               className="master-action-btn"
               data={categories}
               label="Export Services"
@@ -148,11 +136,7 @@ const ClientServiceManagement = ({ user = {}, permissions = {}, setActiveVertica
                 requiredFields={['service_name']}
               />
             )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          </DataOperationsDropdown>
         }
       />
 

@@ -104,7 +104,8 @@
   top: auto;
   left: auto;
   right: auto;
-  z-index: 10;
+  /* Elevate above Kanban mobile stage navigation tray (z-index: 50) so open menus never render behind it */
+  z-index: var(--z-sticky, 200);
   margin-top: 12px;
   margin-bottom: 12px;
   padding: 16px;
@@ -428,6 +429,11 @@
   flex-shrink: 0 !important;
   /* display:block breaks out of any inherited flex context so children flow naturally */
   display: block !important;
+}
+
+/* Hide the top divider when the vertical sub-sidebar renders no filter groups on mobile */
+.mobile-menu-sidebar-filters:has(.sub-sidebar-body:empty) {
+  display: none !important;
 }
 
 /* Ensure the sub-sidebar-body within the mobile expanded menu has natural height and flows correctly without collapsing.

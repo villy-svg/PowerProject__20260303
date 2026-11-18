@@ -337,13 +337,4 @@
   color: var(--brand-mint);
 }
 
-/* Subtle pill-divider between view mode buttons and "By Hub" grouping button */
-.view-toggle-divider {
-  display: inline-block;
-  width: 1px;
-  height: 16px;
-  background: var(--border-color);
-  border-radius: 1px;
-  flex-shrink: 0;
-  align-self: center;
-}
+/* .view-toggle-divider — canonical in src/components/ui/board-menu/BoardMenu.css */

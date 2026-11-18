@@ -10,6 +10,7 @@ import './ExecutiveSummary.css';
 import ExecutiveMetricsSection from './ExecutiveMetricsSection';
 import CentralisedTaskBoard from '../tasks/CentralisedTaskBoard';
 import HomeEscalationsBoard from './HomeEscalationsBoard';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import WorkspaceModals from '../modals/WorkspaceModals';
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
 import powerLogo from '../../assets/logo.svg';
@@ -370,16 +371,19 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     (t.created_by && t.created_by === user?.id) ||
     (t.createdBy && t.createdBy === user?.id);
 
+  const isEmployeeReqReviewer = canReviewEmployeeRequests(user);
+
   // escalationTasks: tasks shown in Track Requests panel.
-  // Includes tasks the user is ASSIGNED to OR tasks the user CREATED,
-  // so creators can always track tickets they raised regardless of assignment.
+  // Includes tasks the user is ASSIGNED to, tasks the user CREATED,
+  // or employee approval requests (BANK_UPDATE / EMPLOYEE_DEACTIVATION) when the
+  // user is an authorized approver (Master Admin / Employees Editor).
   const escalationTasks = tasks.filter(t =>
     ['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId) && (
       t.verticalId === 'escalation_tasks' ||
       ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') &&
        (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
     ) && (
-      taskUtils.isAssignee(t, user) || isCreator(t)
+      taskUtils.isAssignee(t, user) || isCreator(t) || (isEmployeeReqReviewer && isEmployeeApprovalTask(t))
     )
   );
   // Pre-filter exactly as passed to CentralisedTaskBoard

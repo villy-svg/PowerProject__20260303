@@ -7,6 +7,7 @@ import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { IconChevronDown } from '../../components/ui/Icons';
 import EmployeeRoleCSVDownload from './EmployeeRoleCSVDownload';
 import EmployeeRoleCSVImport from './EmployeeRoleCSVImport';
+import { BoardViewToggle, DataOperationsDropdown } from '../../components/ui/board-menu';
 
 const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBottomNav }) => {
   const [roles, setRoles] = useState([]);
@@ -123,46 +124,26 @@ const EmployeeRoleManagement = ({ permissions = {}, setActiveVertical, onShowBot
         addLabel="New Role"
         onAddClick={() => handleOpenModal()}
         expandedLeft={
-          <div className="view-mode-toggle">
-            <button 
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-            >
-              Grid
-            </button>
-            <button 
-              className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
-            >
-              List
-            </button>
-          </div>
+          <BoardViewToggle
+            options={[
+              { value: 'grid', label: 'Grid' },
+              { value: 'list', label: 'List' },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
+          />
         }
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="u-uppercase">Data Operations</p>
-                  <span className="dropdown-chevron-icon" style={{ transform: isActionsDropdownOpen ? 'rotate(180deg)' : 'none' }}>
-                    <IconChevronDown size={10} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <EmployeeRoleCSVDownload className="master-action-btn" data={roles} label="Export Roles" />
             <EmployeeRoleCSVDownload className="master-action-btn" isTemplate label="Download Template" />
             {permissions.canCreate && (
               <EmployeeRoleCSVImport className="master-action-btn" label="Import Roles" onImportComplete={() => fetchRoles(true)} />
             )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          </DataOperationsDropdown>
         }
       />
 

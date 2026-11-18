@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { supabase } from '../../services/core/supabaseClient';
-import { taskService } from '../../services/tasks/taskService';
+import {
+  createBankUpdateRequest,
+} from '../../services/employees/employeeRequestService';
 import '../../styles/ManagementForms.css';
 
 const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess }) => {
@@ -42,22 +44,6 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
     setError('');
     
     try {
-      // Find all master_admin employees to assign the task to
-      const { data: admins, error: adminsError } = await supabase
-        .from('user_profiles')
-        .select('employee_id')
-        .eq('role_id', 'master_admin')
-        .not('employee_id', 'is', null);
-        
-      if (adminsError) throw adminsError;
-      
-      const assigneeIds = admins?.map(a => a.employee_id) || [];
-      
-      if (assigneeIds.length === 0) {
-        setError("No Master Admins are currently available to approve this request. Please contact support.");
-        return;
-      }
-      
       const oldDetails = {
         accountName: user.bankDetails?.accountName || '',
         accountNumber: user.bankDetails?.accountNumber || '',
@@ -72,31 +58,17 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
         panNumber: oldDetails.panNumber,
       };
 
-      const payload = {
-        type: 'BANK_UPDATE',
-        employeeId: user.employeeId,
-        oldDetails,
-        newDetails,
-        requestedBy: user.name,
-      };
-
-      // Create a BANK_UPDATE task on the Escalations board
-      await taskService.addTask({
-        text: `Bank Update Request: ${user.name}`,
-        verticalId: 'HUBS',
-        stageId: 'REVIEW',
-        priority: 'High',
-        task_board: ['Escalations'],
-        function: 'EMP',
-        description: JSON.stringify(payload),
-        assigned_to: assigneeIds.length > 0 ? assigneeIds : null,
-      });
+      const res = await createBankUpdateRequest(user.employeeId, newDetails);
+      if (res?.status === 'duplicate') {
+        setError("A bank details update request is already pending approval.");
+        return;
+      }
 
       // Flip to success confirmation view — caller's onSuccess() is triggered when user clicks Close
       setSubmitted(true);
     } catch (err) {
       console.error("Error submitting bank change request:", err);
-      setError("Failed to submit request. Please try again.");
+      setError(err.message || "Failed to submit request. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

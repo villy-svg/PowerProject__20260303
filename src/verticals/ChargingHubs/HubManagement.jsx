@@ -13,6 +13,7 @@ import RBACManageButton from '../../components/ui/RBACManageButton';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
 import HubManagementDesktop from './HubManagementDesktop';
 import HubManagementMobile from './HubManagementMobile';
+import { DataOperationsDropdown } from '../../components/ui/board-menu';
 
 // Error boundary component
 class HubManagementErrorBoundary extends React.Component {
@@ -225,35 +226,21 @@ const HubManagement = ({ user = {}, permissions = {}, isSubSidebarOpen, setIsSub
         canAdd={permissions.canCreate}
         onAddClick={() => handleOpenModal()}
         expandedRight={
-          <>
-            <div className="data-operations-wrapper">
-              <div className="actions-dropdown-container">
-                <div
-                  className="filters-row-toggle"
-                  onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}
-                >
-                  <p className="data-operations-label">Data Operations</p>
-                  <span className={`dropdown-icon ${isActionsDropdownOpen ? 'open' : ''}`}>
-                    <IconChevronDown size={16} />
-                  </span>
-                </div>
-                {isActionsDropdownOpen && (
-                  <div className="actions-dropdown-menu">
-                    <HubCSVDownload
-                      className="master-action-btn"
-                      data={hubs}
-                      label="Export Hubs"
-                      filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
-                    />
-                    <HubCSVDownload className="master-action-btn" label="Download Template" />
-                    {permissions.canCreate && (
-                      <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
+          <DataOperationsDropdown
+            isOpen={isActionsDropdownOpen}
+            onToggle={setIsActionsDropdownOpen}
+          >
+            <HubCSVDownload
+              className="master-action-btn"
+              data={hubs}
+              label="Export Hubs"
+              filename={`charging_hubs_export_${new Date().toISOString().split('T')[0]}.xlsx`}
+            />
+            <HubCSVDownload className="master-action-btn" label="Download Template" />
+            {permissions.canCreate && (
+              <HubCSVImport className="master-action-btn" label="Import Hubs" onImportComplete={fetchHubs} />
+            )}
+          </DataOperationsDropdown>
         }
       />
 
