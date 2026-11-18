@@ -19,6 +19,11 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { taskUtils } from '../../utils/taskUtils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
+import {
+  canReviewEmployeeRequests,
+  isEmployeeApprovalTask,
+  formatEmployeeApprovalSummary,
+} from '../../services/employees/employeeRequestService';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -121,6 +126,9 @@ const TaskCard = ({
   };
 
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
+  const isEmpApproval = isEmployeeApprovalTask(task);
+  const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
+  const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   return (
     <div
@@ -246,8 +254,8 @@ const TaskCard = ({
             
             {showDetails && (
               <div className="task-detailed-description">
-                <div className="task-detailed-description-title">Detailed Description</div>
-                <p>{task.description}</p>
+                <div className="task-detailed-description-title">{isEmpApproval ? 'Approval Request Summary' : 'Detailed Description'}</div>
+                <p>{isEmpApproval ? formatEmployeeApprovalSummary(task) : task.description}</p>
               </div>
             )}
           </div>
@@ -400,14 +408,14 @@ const TaskCard = ({
       </div>
 
       {/* Row 4: Approval Actions (Dedicated row for Review stage) */}
-      {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+      {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval) && (
         <div className="card-row-approval">
           <button
             className="halo-button btn-review-submissions"
             onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-            title="Review Submissions"
+            title={isEmpApproval ? "Review Approval Request" : "Review Submissions"}
           >
-            Check Submissions
+            {isEmpApproval ? 'Review Request' : 'Check Submissions'}
           </button>
         </div>
       )}

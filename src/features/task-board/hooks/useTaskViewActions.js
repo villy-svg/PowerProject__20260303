@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { taskUtils } from '../../../utils/taskUtils';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../../services/employees/employeeRequestService';
 
 /**
  * useTaskViewActions
@@ -71,10 +72,12 @@ export const useTaskViewActions = ({
   // ─── 4. Permission Fetchers ───────────────────────────────────────────
   const getTaskPermissions = useCallback((task) => {
     if (!task) return { canUpdate: false, canDelete: false };
+    const isCreator = (task.createdBy || task.created_by) === currentUser?.id;
+    const isEmpReqApprover = isEmployeeApprovalTask(task) && canReviewEmployeeRequests(currentUser);
     
     return {
-      canUpdate: permissions.canUpdate || (task.created_by === currentUser.id && permissions.level === 'contributor'),
-      canDelete: permissions.canDelete || (task.created_by === currentUser.id && permissions.level === 'contributor'),
+      canUpdate: permissions.canUpdate || (isCreator && permissions.level === 'contributor') || isEmpReqApprover,
+      canDelete: permissions.canDelete || (isCreator && permissions.level === 'contributor'),
       canMove: (target) => taskUtils.canUserMoveTask(task, target, permissions, currentUser)
     };
   }, [permissions, currentUser]);

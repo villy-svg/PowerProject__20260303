@@ -101,7 +101,8 @@
   font-size: 0.55rem;
 }
 /* ─── Submission Card Overrides ─────────────────────────────────────────── */
-.submission-card {
+.submission-card,
+.employee-request-review-card {
   background: var(--halo-bg);
   border: 1px solid transparent;
   border-radius: var(--radius-button);
@@ -109,13 +110,14 @@
   transition: all 0.2s ease;
   box-shadow: var(--shadow-premium);
 }
-.submission-card-header {
-  cursor: pointer;
+.employee-request-review-card {
+  margin-bottom: 1rem;
 }
 .submission-card:hover {
   border-color: color-mix(in srgb, var(--brand-mint), transparent 50%);
 }
 .submission-card-header {
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -295,4 +297,77 @@
 .summary-creation-label {
   font-size: 0.55rem;
   padding: 1px 6px;
+}
+
+/* ─── Employee Approval Review Cards (Bank Update & Deactivation) ────────── */
+.employee-request-review-title {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.employee-request-review-subtitle {
+  margin: 0 0 14px 0;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.employee-request-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.employee-request-details-box {
+  padding: 12px;
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.employee-request-details-box--requested {
+  border-color: var(--status-neutral);
+  background: color-mix(in srgb, var(--status-neutral), transparent 93%);
+}
+
+.employee-request-details-header {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+
+.employee-request-details-header--requested {
+  color: var(--status-neutral);
+  opacity: 1;
+}
+
+.employee-request-details-list {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  word-break: break-word;
+}
+
+.employee-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media screen and (max-width: 480px) {
+  .employee-request-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-request-actions {
+    flex-direction: column;
+  }
 }

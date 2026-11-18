@@ -132,6 +132,10 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     if (!task) return false;
     if (task.isContextOnly) return false;
 
+    if (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(user)) {
+      return true;
+    }
+
     const { canUserUpdate } = getTaskCRUD(task);
     if (canUserUpdate) return true;
 
@@ -305,8 +309,11 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
       await updateSubmissionStatus(submissionId, 'approved');
-      await updateTaskStage(taskId, 'COMPLETED');
-      if (fetchTasks) fetchTasks(false);
+      if (updateTaskStage) {
+        await updateTaskStage(taskId, 'COMPLETED');
+      } else if (fetchTasks) {
+        await fetchTasks(false);
+      }
     } catch (err) {
       alert(`Approval failed: ${err.message}`);
     }
@@ -314,10 +321,14 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   const submitRejection = async (reason) => {
     try {
+      const targetTaskId = rejectionModalState.taskId;
       await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
-      await updateTaskStage(rejectionModalState.taskId, 'IN_PROGRESS');
       setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
-      if (fetchTasks) fetchTasks(false);
+      if (updateTaskStage && targetTaskId) {
+        await updateTaskStage(targetTaskId, 'IN_PROGRESS');
+      } else if (fetchTasks) {
+        await fetchTasks(false);
+      }
     } catch (err) {
       alert(`Rejection failed: ${err.message}`);
     }

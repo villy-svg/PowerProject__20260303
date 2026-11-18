@@ -1,4 +1,5 @@
 import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../employees/employeeRequestService';
 
 /**
  * Hierarchy Service
@@ -56,9 +57,11 @@ export const hierarchyService = {
       // if (!employeeId) return []; 
       
       const reporteeUserIds = user.reporteeUserIds || [];
+      const isEmpReqReviewer = canReviewEmployeeRequests(user);
       const taskMap = new Map((tasks || []).map(t => [t.id, t]));
 
       const directMatches = (tasks || []).filter(task => {
+        if (isEmpReqReviewer && isEmployeeApprovalTask(task)) return true;
         const creatorId = task.createdBy || task.created_by;
         const assignees = Array.isArray(task.assigned_to) ? task.assigned_to : (task.assigned_to ? [task.assigned_to] : []);
         const employeeIdLink = task.employee_id; // legacy field fallback

@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { MANAGER_SENIORITY_THRESHOLD } from '../../../constants/roles';
 import { taskUtils } from '../../../utils/taskUtils';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../../services/employees/employeeRequestService';
 
 /**
  * useTaskPermissions Hook
@@ -59,6 +60,10 @@ export const useTaskPermissions = ({
     if (!task) return false;
     if (task.isContextOnly) return false;
 
+    if (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(user)) {
+      return true;
+    }
+
     // Admin / Editor
     if (canUserUpdate) return true;
 
@@ -74,7 +79,7 @@ export const useTaskPermissions = ({
     }
 
     return false;
-  }, [canUserUpdate, user.id, user.employeeId, permissions.level]);
+  }, [canUserUpdate, user, permissions.level]);
 
   // 6. Subtask Creation Capability
   // Context-aware delegation: allows assignees (not just managers) to add child tasks.

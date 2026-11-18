@@ -285,22 +285,6 @@
     color: var(--brand-mint);
   }
 
-  /* Ultra-compact screen refinements (320px / iPhone SE) */
-  @media screen and (max-width: 360px) {
-    .expanded-menu-row {
-      padding: calc(var(--safe-top, 0px) + 16px) 12px 24px 12px;
-      gap: 12px;
-      max-height: 90vh;
-    }
-
-    .master-header-left,
-    .master-header-right {
-      gap: 12px;
-    }
-
-
-  }
-
   .master-page-header {
     padding-top: 12px;
     margin-bottom: 16px;
@@ -628,9 +612,3 @@ body.no-scroll {
 }
 
 /* .data-operations-wrapper, .actions-dropdown-*, and .data-ops-* styles are canonically managed in src/components/ui/board-menu/BoardMenu.css */
-@media (max-width: 1024px) {
-  .mobile-menu-sidebar-filters {
-    margin-top: 4px;
-    padding-top: 8px;
-  }
-}

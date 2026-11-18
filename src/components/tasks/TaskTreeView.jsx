@@ -17,6 +17,7 @@ import { useTaskViewActions } from '../../features/task-board/hooks/useTaskViewA
 import { hierarchyService } from '../../services/rules/hierarchyService';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { taskUtils } from '../../utils/taskUtils';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import { TASK_STAGES, STAGE_LIST } from '../../constants/stages';
 import './TaskListView.css'; // Reusing some list styles for consistency
@@ -354,14 +355,17 @@ const TaskTreeView = ({
               )}
 
             {/* MANAGER APPROVE / REJECT */}
-            {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+            {!task.isContextOnly && task.stageId === 'REVIEW' && (
+              (['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending') ||
+              (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(currentUser))
+            ) && (
               <>
                 <button
                   className="halo-button btn-review-submissions u-ml-4"
                   onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                  title="Review Submissions"
+                  title={isEmployeeApprovalTask(task) ? "Review Approval Request" : "Review Submissions"}
                 >
-                  Check Submissions
+                  {isEmployeeApprovalTask(task) ? 'Review Request' : 'Check Submissions'}
                 </button>
               </>
             )}

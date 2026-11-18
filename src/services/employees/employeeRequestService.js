@@ -43,6 +43,43 @@ export const isEmployeeApprovalTask = (task) => {
 };
 
 /**
+ * Safely parses the JSON payload of an employee approval task (BANK_UPDATE or EMPLOYEE_DEACTIVATION).
+ * Returns null if the task is not a valid employee approval request.
+ * @param {Object} task
+ * @returns {Object|null}
+ */
+export const parseEmployeeApprovalPayload = (task) => {
+  if (!isEmployeeApprovalTask(task)) return null;
+  try {
+    const parsed = JSON.parse(task.description);
+    if (parsed && (parsed.type === REQUEST_TYPES.BANK_UPDATE || parsed.type === REQUEST_TYPES.DEACTIVATION)) {
+      return parsed;
+    }
+  } catch (e) {
+    // Not valid JSON
+  }
+  return null;
+};
+
+/**
+ * Returns a clean, human-readable summary string for an employee approval task's description.
+ * Used by mobile task cards ("Read More") so raw JSON is never displayed to users.
+ * @param {Object} task
+ * @returns {string}
+ */
+export const formatEmployeeApprovalSummary = (task) => {
+  const payload = parseEmployeeApprovalPayload(task);
+  if (!payload) return task?.description || '';
+  if (payload.type === REQUEST_TYPES.DEACTIVATION) {
+    return `${payload.requestedByName || 'An editor'} requested to mark ${payload.employeeName || 'this employee'} as Inactive. Open History to approve or reject.`;
+  }
+  if (payload.type === REQUEST_TYPES.BANK_UPDATE) {
+    return `${payload.employeeName || 'Employee'} requested a bank details update (A/C: ${payload.newDetails?.accountNumber || 'N/A'}, IFSC: ${payload.newDetails?.ifscCode || 'N/A'}). Open History to approve or reject.`;
+  }
+  return task?.description || '';
+};
+
+/**
  * Raise a deactivation approval task for an employee via the server-side RPC
  * (authorizes caller, deduplicates open requests, snapshots employee row, and
  * assigns all active Master Admins/Editors + Employees Editors/Admins).

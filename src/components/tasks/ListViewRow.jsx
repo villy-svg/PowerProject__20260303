@@ -31,6 +31,7 @@ import { useTaskViewActions } from '../../features/task-board/hooks/useTaskViewA
 import { hierarchyService } from '../../services/rules/hierarchyService';
 import { taskUtils } from '../../utils/taskUtils';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -113,6 +114,9 @@ const ListViewRow = ({
   };
 
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
+  const isEmpApproval = isEmployeeApprovalTask(task);
+  const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
+  const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   const handleTouchEnd = (e) => {
     if (e.target.closest('button') || e.target.closest('.list-row-selection') || e.target.closest('.tree-expander') || e.target.closest('.list-hierarchy-badges')) return;
@@ -319,14 +323,14 @@ const ListViewRow = ({
             )}
 
           {/* MANAGER APPROVE / REJECT */}
-          {!task.isContextOnly && task.stageId === 'REVIEW' && ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending' && (
+          {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval) && (
             <>
               <button
                 className="halo-button btn-review-submissions review-action-btn"
                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                title="Review Submissions"
+                title={isEmpApproval ? "Review Approval Request" : "Review Submissions"}
               >
-                Check Submissions
+                {isEmpApproval ? 'Review Request' : 'Check Submissions'}
               </button>
             </>
           )}

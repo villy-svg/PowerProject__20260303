@@ -40,7 +40,9 @@ const EmployeeRemarkForm = ({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState(() =>
+    initialData?.id && initialData?.stageId === 'REVIEW' ? 'history' : 'details'
+  );
   const [submissionCount, setSubmissionCount] = useState(0);
 
   const isEditMode = !!initialData?.id;

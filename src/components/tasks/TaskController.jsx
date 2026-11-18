@@ -151,22 +151,35 @@ const TaskController = (props) => {
   const handleApproveSubmission = async (taskId, submissionId) => {
     try {
       await updateSubmissionStatus(submissionId, 'approved');
-      if (props.refreshTasks) props.refreshTasks(false);
+      if (updateTaskStage) {
+        await updateTaskStage(taskId, 'COMPLETED');
+      } else if (props.refreshTasks) {
+        await props.refreshTasks(false);
+      }
     } catch (err) {
       alert(`Approval failed: ${err.message}`);
     }
   };
 
-  const handleRejectClick = (task) => {
-    if (!task.latestSubmission) return;
-    setRejectionModalState({ isOpen: true, taskId: task.id, submissionId: task.latestSubmission.id, taskText: task.text });
+  const handleRejectClick = (taskOrId, submissionIdArg, taskTextArg) => {
+    if (taskOrId && typeof taskOrId === 'object') {
+      if (!taskOrId.latestSubmission) return;
+      setRejectionModalState({ isOpen: true, taskId: taskOrId.id, submissionId: taskOrId.latestSubmission.id, taskText: taskOrId.text });
+    } else if (taskOrId && submissionIdArg) {
+      setRejectionModalState({ isOpen: true, taskId: taskOrId, submissionId: submissionIdArg, taskText: taskTextArg || '' });
+    }
   };
 
   const submitRejection = async (reason) => {
     try {
+      const targetTaskId = rejectionModalState.taskId;
       await updateSubmissionStatus(rejectionModalState.submissionId, 'rejected', reason);
       setRejectionModalState({ isOpen: false, taskId: null, submissionId: null, taskText: '' });
-      if (props.refreshTasks) props.refreshTasks(false);
+      if (updateTaskStage && targetTaskId) {
+        await updateTaskStage(targetTaskId, 'IN_PROGRESS');
+      } else if (props.refreshTasks) {
+        await props.refreshTasks(false);
+      }
     } catch (err) {
       alert(`Rejection failed: ${err.message}`);
     }

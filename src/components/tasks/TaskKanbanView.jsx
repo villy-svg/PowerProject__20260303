@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import { 
   IconClock, 
@@ -12,6 +12,7 @@ import {
 import { useKanbanDnd } from '../../hooks/useKanbanDnd';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
 import { taskUtils } from '../../utils/taskUtils';
+import { isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
 import './TaskKanbanView.css';
 
@@ -249,6 +250,24 @@ const TaskKanbanView = ({
   }, []);
 
   const visibleStages = stageList.filter(s => showDeprioritized || s.id !== 'DEPRIORITIZED');
+
+  // On mobile, if the current stage column is empty while other stages have tasks,
+  // auto-switch to REVIEW (when employee approval tasks exist) or the first non-empty stage.
+  useEffect(() => {
+    if (!isMobile || groupByEmployee || !filteredTasks || filteredTasks.length === 0) return;
+    const currentCount = filteredTasks.filter(t => t.stageId === activeStageId).length;
+    if (currentCount === 0) {
+      const hasReviewApproval = filteredTasks.some(t => t.stageId === 'REVIEW' && isEmployeeApprovalTask(t));
+      if (hasReviewApproval && visibleStages.some(s => s.id === 'REVIEW')) {
+        setActiveStageId('REVIEW');
+        return;
+      }
+      const firstNonEmpty = visibleStages.find(s => filteredTasks.some(t => t.stageId === s.id));
+      if (firstNonEmpty) {
+        setActiveStageId(firstNonEmpty.id);
+      }
+    }
+  }, [isMobile, groupByEmployee, filteredTasks, activeStageId, visibleStages]);
 
   // Pre-compute hub map once (O(n)) to avoid O(n²) double-calls in render.
   // Uses full `tasks` prop as lookup pool so parent lookups succeed even when

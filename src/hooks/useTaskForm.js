@@ -8,13 +8,14 @@ import { useState, useCallback, useMemo } from 'react';
 export const useTaskForm = (initialData = {}) => {
   const safeInitial = useMemo(() => {
     const data = initialData || {};
+    const deducedCity = data.city || data.hubData?.[0]?.city || '';
     return {
       text: data.text || '',
       priority: data.priority || 'Medium',
       description: data.description || '',
       assigned_to: Array.isArray(data.assigned_to) ? data.assigned_to : (data.assigned_to ? [data.assigned_to] : []),
       parentTask: data.parentTask || '',
-      city: data.city || '',
+      city: deducedCity,
       hub_ids: Array.isArray(data.hub_ids) ? data.hub_ids : (data.hub_id ? [data.hub_id] : []),
       function: data.function || '',
       assigned_client_id: data.assigned_client_id || '',

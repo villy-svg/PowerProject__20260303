@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { STAGE_LIST } from '../../constants/stages';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { taskUtils } from '../../utils/taskUtils';
@@ -72,6 +72,25 @@ const CentralisedTaskBoard = ({
     ? tasks.filter(t => t.parentTask === drillDownId)
     : rootMyTasks;
   const boardStages = STAGE_LIST.filter(s => s.id !== 'DEPRIORITIZED');
+
+  // On mobile, if the currently selected stage column has 0 tasks while other stages have tasks,
+  // auto-switch to the most relevant non-empty stage (prioritizing REVIEW when pending employee
+  // approval requests exist) so mobile approvers never land on an empty BACKLOG screen.
+  useEffect(() => {
+    if (!isMobile || myTasks.length === 0) return;
+    const currentStageCount = myTasks.filter(t => t.stageId === activeBoardStageId).length;
+    if (currentStageCount === 0) {
+      const hasReviewApproval = myTasks.some(t => t.stageId === 'REVIEW' && isEmployeeApprovalTask(t));
+      if (hasReviewApproval) {
+        setActiveBoardStageId('REVIEW');
+        return;
+      }
+      const firstNonEmptyStage = boardStages.find(s => myTasks.some(t => t.stageId === s.id));
+      if (firstNonEmptyStage) {
+        setActiveBoardStageId(firstNonEmptyStage.id);
+      }
+    }
+  }, [isMobile, myTasks, activeBoardStageId, boardStages]);
 
   if (rootMyTasks.length === 0) {
     return (

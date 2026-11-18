@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { getSubmissionsForTask, updateSubmissionStatus } from '../../services/tasks/submissionService';
 import { employeeService } from '../../services/employees/employeeService';
 import {
@@ -9,6 +9,7 @@ import {
   rejectEmployeeRequest,
 } from '../../services/employees/employeeRequestService';
 import { taskService } from '../../services/tasks/taskService';
+import { useAuth } from '../../app/contexts/AuthContext';
 import RejectionModal from '../modals/RejectionModal';
 import { IconDatabase, IconFile, IconCheck, IconX } from '../ui/Icons';
 import './SubmissionHistory.css';
@@ -32,6 +33,8 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null); // tracks which submission is being updated
   const [rejectionSubmission, setRejectionSubmission] = useState(null); // tracks it for the modal
+  const inFlightRef = useRef(false); // Synchronous guard against rapid double-taps on mobile
+  const { fetchUserProfile, realUser, impersonatedUser, handleImpersonate } = useAuth() || {};
 
   const canReview = permissions.canUpdate || ['editor', 'admin'].includes(permissions.level);
 
@@ -63,6 +66,8 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
   };
 
   const handleStatusUpdate = async (submissionId, newStatus, reason = null) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setUpdating(submissionId);
     try {
       const updated = await updateSubmissionStatus(submissionId, newStatus, reason);
@@ -70,10 +75,11 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
         prev.map(s => s.id === submissionId ? { ...s, status: updated.status, rejection_reason: updated.rejection_reason } : s)
       );
       setRejectionSubmission(null);
-      if (onStatusUpdate) onStatusUpdate(submissionId, newStatus);
+      if (onStatusUpdate) await onStatusUpdate(submissionId, newStatus);
     } catch (err) {
       alert(`Failed to ${newStatus}: ${err.message}`);
     } finally {
+      inFlightRef.current = false;
       setUpdating(null);
     }
   };
@@ -116,16 +122,32 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
 
   // Master Admin, Master Editor, or Employees-vertical Editor/Admin can approve/reject employee requests.
   // Non-master requesters cannot self-approve their own request.
+  const taskCreatorId = task?.createdBy || task?.created_by;
   const canReviewEmployeeReq = canReviewEmployeeRequests(currentUser) && (
     currentUser?.roleId === 'master_admin' ||
     (
-      task?.created_by !== currentUser?.id &&
+      taskCreatorId !== currentUser?.id &&
       (bankUpdatePayload?.requestedBy || deactivationPayload?.requestedBy) !== currentUser?.id
     )
   );
 
+  const refreshActiveAuthProfile = async () => {
+    try {
+      if (impersonatedUser?.id && typeof handleImpersonate === 'function') {
+        await handleImpersonate(impersonatedUser.id);
+      } else if (realUser?.id && typeof fetchUserProfile === 'function') {
+        await fetchUserProfile(realUser.id);
+      } else if (currentUser?.id && typeof fetchUserProfile === 'function') {
+        await fetchUserProfile(currentUser.id);
+      }
+    } catch (e) {
+      console.warn('[SubmissionHistory] Profile refresh after approval skipped:', e);
+    }
+  };
+
   const handleBankApproval = async (status) => {
-    if (!bankUpdatePayload) return;
+    if (!bankUpdatePayload || inFlightRef.current) return;
+    inFlightRef.current = true;
     setUpdating('bank_update');
     try {
       if (status === 'approved') {
@@ -133,18 +155,21 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       } else {
         await rejectEmployeeRequest(task.id);
       }
-      
+
+      await refreshActiveAuthProfile();
       alert(`Bank Update ${status === 'approved' ? 'Approved & Applied' : 'Rejected'}.`);
-      if (onStatusUpdate) onStatusUpdate(); // close modal/refresh
+      if (onStatusUpdate) await onStatusUpdate(); // close modal/refresh
     } catch (err) {
       alert(`Action failed: ${err.message}`);
     } finally {
+      inFlightRef.current = false;
       setUpdating(null);
     }
   };
 
   const handleDeactivationApproval = async (status) => {
-    if (!deactivationPayload) return;
+    if (!deactivationPayload || inFlightRef.current) return;
+    inFlightRef.current = true;
     setUpdating('deactivation');
     try {
       if (status === 'approved') {
@@ -154,11 +179,13 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
         await rejectEmployeeRequest(task.id);
       }
 
+      await refreshActiveAuthProfile();
       alert(`Deactivation Request ${status === 'approved' ? 'Approved & Employee Marked Inactive' : 'Rejected'}.`);
-      if (onStatusUpdate) onStatusUpdate();
+      if (onStatusUpdate) await onStatusUpdate();
     } catch (err) {
       alert(`Action failed: ${err.message}`);
     } finally {
+      inFlightRef.current = false;
       setUpdating(null);
     }
   };
@@ -192,41 +219,40 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       </div>
 
       {bankUpdatePayload && (
-        <div className="bank-update-review-card u-mb-16" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--surface-color)' }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>
+        <div className="bank-update-review-card employee-request-review-card">
+          <h4 className="employee-request-review-title">
             🏦 Bank Details Update Request
           </h4>
-          <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          <p className="employee-request-review-subtitle">
             <strong>{bankUpdatePayload.employeeName}</strong> requested an update to their bank details.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 'bold' }}>Current Details</div>
-              <div style={{ fontSize: '0.85rem' }}>
-                <div><strong>A/C Name:</strong> {bankUpdatePayload.oldDetails.accountName || 'N/A'}</div>
-                <div><strong>A/C Number:</strong> {bankUpdatePayload.oldDetails.accountNumber || 'N/A'}</div>
-                <div><strong>IFSC:</strong> {bankUpdatePayload.oldDetails.ifscCode || 'N/A'}</div>
-                <div><strong>PAN:</strong> {bankUpdatePayload.oldDetails.panNumber || 'N/A'}</div>
+          <div className="employee-request-details-grid">
+            <div className="employee-request-details-box">
+              <div className="employee-request-details-header">Current Details</div>
+              <div className="employee-request-details-list">
+                <div><strong>A/C Name:</strong> {bankUpdatePayload.oldDetails?.accountName || 'N/A'}</div>
+                <div><strong>A/C Number:</strong> {bankUpdatePayload.oldDetails?.accountNumber || 'N/A'}</div>
+                <div><strong>IFSC:</strong> {bankUpdatePayload.oldDetails?.ifscCode || 'N/A'}</div>
+                <div><strong>PAN:</strong> {bankUpdatePayload.oldDetails?.panNumber || 'N/A'}</div>
               </div>
             </div>
-            <div style={{ padding: '12px', background: 'var(--bg-secondary)', borderRadius: '6px', border: '1px solid var(--brand-blue)' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--brand-blue)', marginBottom: '8px', fontWeight: 'bold' }}>Requested Details</div>
-              <div style={{ fontSize: '0.85rem' }}>
-                <div><strong>A/C Name:</strong> {bankUpdatePayload.newDetails.accountName || 'N/A'}</div>
-                <div><strong>A/C Number:</strong> {bankUpdatePayload.newDetails.accountNumber || 'N/A'}</div>
-                <div><strong>IFSC:</strong> {bankUpdatePayload.newDetails.ifscCode || 'N/A'}</div>
-                <div><strong>PAN:</strong> {bankUpdatePayload.newDetails.panNumber || 'N/A'}</div>
+            <div className="employee-request-details-box employee-request-details-box--requested">
+              <div className="employee-request-details-header employee-request-details-header--requested">Requested Details</div>
+              <div className="employee-request-details-list">
+                <div><strong>A/C Name:</strong> {bankUpdatePayload.newDetails?.accountName || 'N/A'}</div>
+                <div><strong>A/C Number:</strong> {bankUpdatePayload.newDetails?.accountNumber || 'N/A'}</div>
+                <div><strong>IFSC:</strong> {bankUpdatePayload.newDetails?.ifscCode || 'N/A'}</div>
+                <div><strong>PAN:</strong> {bankUpdatePayload.newDetails?.panNumber || 'N/A'}</div>
               </div>
             </div>
           </div>
 
           {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div className="employee-request-actions">
               <button 
                 type="button" 
                 className="halo-button" 
-                style={{ color: 'var(--success-color)', borderColor: 'var(--border-color)' }}
                 onClick={() => handleBankApproval('approved')}
                 disabled={updating === 'bank_update'}
               >
@@ -234,8 +260,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               </button>
               <button 
                 type="button" 
-                className="halo-button secondary" 
-                style={{ color: 'var(--danger-color)', borderColor: 'var(--border-color)' }}
+                className="halo-button danger" 
                 onClick={() => handleBankApproval('rejected')}
                 disabled={updating === 'bank_update'}
               >
@@ -244,7 +269,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             </div>
           )}
           {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
-            <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+            <div className="status-message u-mt-8">
               This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
             </div>
           )}
@@ -252,21 +277,20 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       )}
 
       {deactivationPayload && (
-        <div className="bank-update-review-card u-mb-16" style={{ padding: '16px', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--surface-color)' }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'var(--text-primary)' }}>
+        <div className="bank-update-review-card employee-request-review-card">
+          <h4 className="employee-request-review-title">
             👤 Employee Deactivation Request
           </h4>
-          <p style={{ margin: '0 0 16px 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          <p className="employee-request-review-subtitle">
             <strong>{deactivationPayload.requestedByName || 'An editor'}</strong> requested to mark{' '}
             <strong>{deactivationPayload.employeeName}</strong> as <strong>Inactive</strong>.
           </p>
 
           {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div className="employee-request-actions">
               <button
                 type="button"
                 className="halo-button"
-                style={{ color: 'var(--success-color)', borderColor: 'var(--border-color)' }}
                 onClick={() => handleDeactivationApproval('approved')}
                 disabled={updating === 'deactivation'}
               >
@@ -274,8 +298,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               </button>
               <button
                 type="button"
-                className="halo-button secondary"
-                style={{ color: 'var(--danger-color)', borderColor: 'var(--border-color)' }}
+                className="halo-button danger"
                 onClick={() => handleDeactivationApproval('rejected')}
                 disabled={updating === 'deactivation'}
               >
@@ -284,7 +307,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             </div>
           )}
           {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
-            <div style={{ padding: '8px 12px', background: 'var(--bg-secondary)', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+            <div className="status-message u-mt-8">
               This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
             </div>
           )}

@@ -24,6 +24,7 @@ import {
   createBankUpdateRequest,
   createDeactivationRequest,
 } from '../../services/employees/employeeRequestService';
+import { useTaskBoard } from '../../app/contexts/TaskBoardContext';
 
 // Bulk update is temporarily disabled. Flip to true to restore the bulk action bar.
 const BULK_UPDATE_ENABLED = false;
@@ -36,6 +37,7 @@ const BULK_UPDATE_ENABLED = false;
  */
 const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen, SidebarComponent, onFilterChange, onReset, onBatchFilter, verticals, activeVertical }) => {
   const { employees, hubs, loading, fetchEmployees, addEmployee, updateEmployee, updateEmployeeHub, toggleStatus, deleteEmployee, bulkUpdateEmployees } = useEmployees();
+  const { fetchTasks } = useTaskBoard();
 
   const ui = useManagementUI({ storageKey: 'powerpod_employee_view' });
   const { isMobile } = useIsMobile();
@@ -88,9 +90,9 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
 
   useEffect(() => {
     if (permissions?.canAccessEmployees) {
-      fetchEmployees();
+      fetchEmployees(employees.length === 0);
     }
-  }, [fetchEmployees, permissions?.canAccessEmployees]);
+  }, [fetchEmployees, permissions?.canAccessEmployees, tasks]);
 
   // Feature-level ("Employees List") effective permissions = vertical level capped by the feature override.
   // `??` falls back to the vertical-level flag when no feature_access row exists (inherited access).
@@ -187,6 +189,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
         if (bankRequestToCreate) {
           try {
             const res = await createBankUpdateRequest(ui.editingItem.id, bankRequestToCreate);
+            if (fetchTasks) fetchTasks(false);
             if (res?.status === 'duplicate') {
               alert("Other changes saved. A bank details update request for this employee is already pending approval, so no new request was created.");
             } else {
@@ -232,6 +235,7 @@ const EmployeeManagement = ({ user, permissions, filters, tasks, setActiveVertic
 
     try {
       const result = await createDeactivationRequest(emp, user);
+      if (fetchTasks) fetchTasks(false);
       if (result.status === 'duplicate') {
         alert(`A deactivation request for ${emp.full_name} is already pending approval.`);
       } else {

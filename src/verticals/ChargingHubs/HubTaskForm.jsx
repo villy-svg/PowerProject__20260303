@@ -9,6 +9,7 @@ import { useAssignees } from '../../hooks/useAssignees';
 import { IconUpload } from '../../components/ui/Icons';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { orchestrationService } from '../../services/tasks/orchestrationService';
+import { isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import CustomSelect from '../../components/ui/CustomSelect';
 import AnonToggle from '../../components/ui/AnonToggle';
 import './HubTaskForm.css';
@@ -31,11 +32,23 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     setOrchestrationMapping
   } = useTaskForm(initialData);
 
-  const [activeTab, setActiveTab] = useState('details');
+  const isEmployeeApproval = isEmployeeApprovalTask(initialData);
+  const [activeTab, setActiveTab] = useState(() =>
+    initialData?.id && (isEmployeeApproval || initialData?.stageId === 'REVIEW')
+      ? 'history'
+      : 'details'
+  );
   const [submissionCount, setSubmissionCount] = useState(0);
   const [hubs, setHubs] = useState([]);
   const [functions, setFunctions] = useState([]);
   const { assignees: allEmployees } = useAssignees(true);
+
+  // Sync activeTab if initialData changes while mounted
+  useEffect(() => {
+    if (initialData?.id && (isEmployeeApprovalTask(initialData) || initialData?.stageId === 'REVIEW')) {
+      setActiveTab('history');
+    }
+  }, [initialData?.id, initialData?.stageId, initialData?.description]);
 
   // Initial photo upload capability for new tasks and escalations
   const [files, setFiles] = useState([]);
@@ -73,13 +86,17 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
   };
 
   // --- Auto-Save Draft Logic ---
-  const stateRef = React.useRef({ formData, orchestrationMapping, isDirty, hubs, allEmployees });
+  // Only auto-save as [DRAFT] for NEW unsaved tasks (!initialData?.id).
+  // Never auto-save on unmount when viewing/editing an existing task, otherwise
+  // closing the modal after an approval RPC (e.g. EMPLOYEE_DEACTIVATION or BANK_UPDATE)
+  // will overwrite the approved task back to stage_id = 'REVIEW' with a '[DRAFT]' prefix.
+  const stateRef = React.useRef({ formData, orchestrationMapping, isDirty, hubs, allEmployees, existingId: initialData?.id });
   const onSubmitRef = React.useRef(onSubmit);
   const isSubmitted = React.useRef(false);
 
   React.useEffect(() => {
-    stateRef.current = { formData, orchestrationMapping, isDirty, hubs, allEmployees };
-  }, [formData, orchestrationMapping, isDirty, hubs, allEmployees]);
+    stateRef.current = { formData, orchestrationMapping, isDirty, hubs, allEmployees, existingId: initialData?.id };
+  }, [formData, orchestrationMapping, isDirty, hubs, allEmployees, initialData?.id]);
 
   React.useEffect(() => {
     onSubmitRef.current = onSubmit;
@@ -87,9 +104,9 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
   React.useEffect(() => {
     return () => {
-      const { formData: latestData, orchestrationMapping: latestMapping, isDirty: latestDirty, hubs: latestHubs, allEmployees: latestEmployees } = stateRef.current;
+      const { formData: latestData, orchestrationMapping: latestMapping, isDirty: latestDirty, hubs: latestHubs, allEmployees: latestEmployees, existingId } = stateRef.current;
 
-      if (latestDirty && !isSubmitted.current && latestData.text) {
+      if (!existingId && latestDirty && !isSubmitted.current && latestData.text) {
         const draftText = latestData.text.startsWith('[DRAFT]') 
           ? latestData.text 
           : `[DRAFT] ${latestData.text}`;
@@ -159,16 +176,18 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
     }
   }, [formData.city, hubs.length]);
 
-  // AUTO-DEDUCE CITY ON LOAD: For subtasks where hub_ids are pre-set
+  // AUTO-DEDUCE CITY ON LOAD: For new subtasks where hub_ids are pre-set from parent
+  // Skip mutating formData for existing tasks (initialData?.id) so opening an existing task
+  // without a stored city does not falsely mark the form as dirty.
   useEffect(() => {
-    if (!formData.city && formData.hub_ids?.length > 0 && hubs.length > 0) {
+    if (!initialData?.id && !formData.city && formData.hub_ids?.length > 0 && hubs.length > 0) {
       const firstHubId = formData.hub_ids[0];
       const hub = hubs.find(h => h.id === firstHubId);
       if (hub?.city) {
         updateField('city', hub.city);
       }
     }
-  }, [formData.hub_ids, hubs.length]);
+  }, [initialData?.id, formData.city, formData.hub_ids, hubs]);
 
   // --- UI Logic ---
   const uniqueCities = [...new Set(hubs.map(h => h.city))].filter(Boolean).sort();
@@ -300,8 +319,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
         {initialData?.id && (
           <div className="task-form-tabs">
             <button type="button" className={`task-form-tab ${activeTab === 'details' ? 'active' : ''}`} onClick={() => setActiveTab('details')}>📝 Details</button>
-            <button type="button" className={`task-form-tab ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>📋 History {submissionCount > 0 && <span className="tab-count">{submissionCount}</span>}</button>
-            {onUploadProof && (
+            <button type="button" className={`task-form-tab ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>📋 History {(submissionCount > 0 || isEmployeeApproval) && <span className="tab-count">{submissionCount + (isEmployeeApproval ? 1 : 0)}</span>}</button>
+            {onUploadProof && !isEmployeeApproval && (
               <button type="button" className="halo-button proof-btn-inline" onClick={onUploadProof} title="Upload Proof of Work">
                 <IconUpload size={12} /> <span>Proof</span>
               </button>

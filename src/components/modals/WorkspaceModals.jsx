@@ -3,6 +3,7 @@ import TaskActionModals from './TaskActionModals';
 import SubmissionModal from './SubmissionModal';
 import RejectionModal from './RejectionModal';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
+import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 
 /**
  * WorkspaceModals Component
@@ -47,7 +48,9 @@ const WorkspaceModals = ({
   const resolvedTaskFormComponent = TaskFormComponent || (editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null);
   const resolvedPermissions = resolvedActiveVertical === 'escalation_tasks'
     ? { ...permissions, canCreate: true, canUpdate: true, level: 'admin', canCreateEscalationTasks: true }
-    : permissions;
+    : (isEmployeeApprovalTask(editingTask) && canReviewEmployeeRequests(user))
+      ? { ...permissions, canUpdate: true }
+      : permissions;
 
   return (
     <>
@@ -69,15 +72,23 @@ const WorkspaceModals = ({
         executeMerge={executeMerge}
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
-        onSubmissionReview={(subId, status) => {
-          if (status === 'rejected' && editingTask) {
-            updateTaskStage(editingTask.id, 'IN_PROGRESS');
-          } else if (status === 'approved' && editingTask) {
-            updateTaskStage(editingTask.id, 'COMPLETED');
-          }
+        onSubmissionReview={async (subId, status) => {
+          const targetTaskId = editingTask?.id;
           setIsModalOpen(false);
           setEditingTask(null);
-          if (fetchTasks) fetchTasks(false);
+          try {
+            if (status === 'rejected' && targetTaskId) {
+              await updateTaskStage(targetTaskId, 'IN_PROGRESS');
+            } else if (status === 'approved' && targetTaskId) {
+              await updateTaskStage(targetTaskId, 'COMPLETED');
+            } else if (fetchTasks) {
+              // Employee approval RPCs (bank/deactivation) update stage_id server-side and call onStatusUpdate() with no arguments
+              await fetchTasks(false);
+            }
+          } catch (err) {
+            console.error('[WorkspaceModals] Failed to update task stage after submission review:', err);
+            if (fetchTasks) fetchTasks(false);
+          }
         }}
         openSubmissionModal={openSubmissionModal}
       />
@@ -87,11 +98,22 @@ const WorkspaceModals = ({
         onClose={closeSubmissionModal}
         task={submissionTask}
         user={user}
-        onSubmitSuccess={(result) => {
-          const taskId = submissionTask.id;
+        onSubmitSuccess={async (result, movedToReview) => {
+          const taskId = submissionTask?.id;
           closeSubmissionModal();
-          updateTaskStage(taskId, 'REVIEW');
-          if (fetchTasks) fetchTasks(false);
+          try {
+            // Only move stage to REVIEW when the user clicked "Submit for Review" (movedToReview === true).
+            // submitProofOfWork already best-effort updates stage in DB when moveToReview is true,
+            // and updateTaskStage updates local state + reconciles via fetchTasks(false).
+            if (movedToReview && taskId) {
+              await updateTaskStage(taskId, 'REVIEW');
+            } else if (fetchTasks) {
+              await fetchTasks(false);
+            }
+          } catch (err) {
+            console.error('[WorkspaceModals] Failed to reconcile after submission:', err);
+            if (fetchTasks) fetchTasks(false);
+          }
         }}
       />
 

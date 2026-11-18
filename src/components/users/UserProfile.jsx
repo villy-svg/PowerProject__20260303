@@ -8,6 +8,7 @@ import { otaUpdateService } from '../../services/core/otaUpdateService';
 import BankChangeRequestModal from './BankChangeRequestModal';
 import { useOTAContext } from '../../app/contexts/OTAContext';
 import { useBackButtonClose } from '../../app/contexts/AppNavigationContext';
+import { useTaskBoard } from '../../app/contexts/TaskBoardContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { supabase } from '../../services/core/supabaseClient';
 import './UserProfile.css';
@@ -41,6 +42,7 @@ const UserProfile = ({
   } = useOTAContext() || {};
 
   const { isMobile } = useIsMobile();
+  const { tasks, fetchTasks } = useTaskBoard() || {};
 
   // Always show "Update App" for phone/mobile users (native APK + mobile viewport in browser/dev) or if an update was detected
   const showUpdateButton = Boolean(Capacitor.isNativePlatform() || isMobile || updateAvailable);
@@ -117,7 +119,7 @@ const UserProfile = ({
     };
     
     checkPendingBankTask();
-  }, [user?.employeeId, user?.name, showBankChangeModal]);
+  }, [user?.employeeId, user?.name, showBankChangeModal, isOpen, tasks]);
 
   useEffect(() => {
     if (window.innerWidth <= 768) {
@@ -392,6 +394,7 @@ const UserProfile = ({
             // Success confirmation is shown inside the modal — just close it here.
             // No alert(), no auto-close of dropdown — user can see "Submitted for Approval" in bank section.
             setShowBankChangeModal(false);
+            if (fetchTasks) fetchTasks(false);
           }}
         />
       )}
