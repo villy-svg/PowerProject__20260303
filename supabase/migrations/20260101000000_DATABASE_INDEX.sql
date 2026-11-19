@@ -29,7 +29,9 @@
 | Entity Type | Name | Primary Migration | Last Modified By |
 | :--- | :--- | :--- | :--- |
 | Table | public.security_audit_logs | 20260421110000 | 20260429220000 |
-| Table | public.tasks_history | 20260429220000 | 20260429220000 |
+| Table | public.tasks_history | 20260429220000 | 20261119133000 |
+| Index | idx_tasks_history_task_id_changed_at | 20261119133000 | 20261119133000 |
+| RPC | public.get_task_activity_timeline | 20261119133000 | 20261119133000 |
 | Trigger | public.log_task_history | 20260429220000 | 20260429220000 |
 | Trigger | public.protect_task_columns | 20260423102600 | 20260430103000 |
 
@@ -69,7 +71,8 @@
 | 20260523160000 | Employee/User Sync | Deactivation logic, employee-user account linking. |
 | 20260523170000 | RLS Recursion Fix | Fixed user_profiles RLS infinite recursion bug. |
 | 20260527120000 | Push Notifications | fcm_tokens + notifications tables, RLS, send-push Edge Function. |
-| 20260527123000 | Push Triggers | **[LATEST]** DB webhooks, pg_net, generic invoker, tasks trigger, pg_cron. |
+| 20260527123000 | Push Triggers | DB webhooks, pg_net, generic invoker, tasks trigger, pg_cron. |
+| 20261119133000 | Task Activity Timeline | **[LATEST]** Composite index on tasks_history + scoped `get_task_activity_timeline` RPC. |
 
 =========================================================================
 */
