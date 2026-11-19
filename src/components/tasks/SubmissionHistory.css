@@ -1,17 +1,18 @@
 /* ==========================================================================
-   SubmissionHistory.css — Manager Review Component (Halo/Glassmorphism)
-   Follows: UI Design System §3 (Badges), §12 (Apple Premium Standards)
+   SubmissionHistory.css — Unified Task & Submission History Timeline
+   Follows: UI Design System §3 (Badges), §4 (Selected State), §12 (Apple Standards), §14 (Mobile)
    ========================================================================== */
-/* ─── Container ─────────────────────────────────────────────────────────── */
-.submission-history {
-  padding-top: 0;
-}
+
+/* ─── Header & Filter Bar ───────────────────────────────────────────────── */
 .submission-history-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
   margin-bottom: 1rem;
 }
+
 .submission-history-title {
   font-weight: 800;
   font-size: 0.8rem;
@@ -22,28 +23,108 @@
   align-items: center;
   gap: 0.5rem;
 }
-.submission-count-badge {
+
+.submission-count-badge,
+.submission-number-badge {
   background: color-mix(in srgb, var(--brand-mint), transparent 85%);
   color: var(--brand-mint);
   border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 60%);
   padding: 2px 8px;
   border-radius: 20px;
-  font-size: 0.65rem;
   font-weight: 800;
 }
-/* ─── Timeline Layout ──────────────────────────────────────────────────── */
+
+.submission-count-badge { font-size: 0.65rem; }
+.submission-number-badge { font-size: 0.6rem; }
+
+.timeline-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.timeline-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 28px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.timeline-filter-pill:hover {
+  border-color: color-mix(in srgb, var(--brand-mint), transparent 45%);
+  color: var(--text-color);
+}
+
+/* Selected state — Halo pattern (UI Design System §4) */
+.timeline-filter-pill.active {
+  border: 2px solid var(--brand-mint);
+  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  color: var(--brand-mint);
+}
+
+.timeline-filter-pill:focus-visible,
+.submission-summary-row:focus-visible,
+.submission-card-header:focus-visible,
+.history-event-row--expandable:focus-visible {
+  outline: 2px solid var(--brand-mint);
+  outline-offset: 2px;
+}
+
+/* ─── Timeline Layout & Date Dividers ───────────────────────────────────── */
 .timeline-container {
   display: flex;
   flex-direction: column;
   padding-left: 10px;
   position: relative;
 }
+
+.timeline-date-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-date-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.25rem 0 0.75rem -10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+}
+
+.timeline-date-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--border-color), transparent 35%);
+}
+
 .submission-item {
   display: flex;
   gap: 1.5rem;
   position: relative;
   min-height: 40px;
 }
+
+.history-item {
+  min-height: 32px;
+}
+
 .timeline-marker {
   display: flex;
   flex-direction: column;
@@ -52,71 +133,256 @@
   flex-shrink: 0;
   padding-top: 6px;
 }
+
+.history-item .timeline-marker {
+  padding-top: 10px;
+}
+
 .status-node {
+  --node-tone: var(--border-color);
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--border-color);
+  background: var(--node-tone);
   z-index: 2;
   border: 2px solid var(--bg-color);
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
-.status-node.pending { background: var(--priority-medium); box-shadow: 0 0 8px var(--priority-medium); }
-.status-node.approved { background: var(--brand-green); box-shadow: 0 0 8px var(--brand-green); }
-.status-node.rejected { background: var(--priority-urgent); box-shadow: 0 0 8px var(--priority-urgent); }
+
+.status-node.pending { --node-tone: var(--priority-medium); box-shadow: 0 0 8px var(--node-tone); }
+.status-node.approved { --node-tone: var(--brand-green); box-shadow: 0 0 8px var(--node-tone); }
+.status-node.rejected { --node-tone: var(--priority-urgent); box-shadow: 0 0 8px var(--node-tone); }
+
+/* Subtler 8px dot centered in the same 12px .timeline-marker rail */
+.history-node {
+  --history-tone: var(--text-secondary);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--history-tone), transparent 20%);
+  border: 2px solid var(--bg-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--history-tone), transparent 55%);
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.history-node--created { --history-tone: var(--brand-mint); }
+.history-node--stage { --history-tone: var(--status-neutral); }
+.history-node--link { --history-tone: var(--brand-green); }
+.history-node--edit { --history-tone: var(--text-secondary); }
+.history-node--delete { --history-tone: var(--status-danger); }
+
 .timeline-line {
   width: 2px;
   flex: 1;
   background: color-mix(in srgb, var(--brand-mint), transparent 85%);
   margin: 4px 0;
 }
+
 .submission-content {
   flex: 1;
+  min-width: 0;
   padding-bottom: 1.5rem;
 }
-/* ─── Collapsed Summary Row ────────────────────────────────────────────── */
+
+.history-content {
+  padding-bottom: 0.75rem;
+}
+
+/* ─── History Event Row & Diff Drawer (Runbook 3) ───────────────────────── */
+.history-event-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  min-height: 30px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.history-event-row--expandable {
+  cursor: pointer;
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border-color: color-mix(in srgb, var(--border-color), transparent 35%);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.history-event-row--expandable:hover,
+.history-event-row--expandable.is-expanded {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: color-mix(in srgb, var(--brand-mint), transparent 55%);
+}
+
+.history-event-main {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 200px;
+  overflow-wrap: anywhere;
+}
+
+.history-actor {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.history-summary {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.history-event-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.history-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.history-chevron.is-expanded {
+  transform: rotate(90deg);
+  color: var(--brand-mint);
+}
+
+.history-event-diff {
+  margin-top: 0.4rem;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
+  border: 1px solid color-mix(in srgb, var(--border-color), transparent 25%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.history-diff-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 130px) minmax(0, 1fr);
+  gap: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  align-items: baseline;
+}
+
+.history-diff-field {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+
+.history-diff-values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.history-diff-old {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.history-diff-arrow {
+  color: var(--brand-mint);
+  font-weight: 700;
+}
+
+.history-diff-new {
+  color: var(--text-color);
+  font-weight: 600;
+  white-space: pre-wrap;
+}
+
+/* ─── Collapsed Submission Summary Row ──────────────────────────────────── */
 .submission-summary-row {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   padding: 8px 16px;
   background: color-mix(in srgb, var(--text-color), transparent 98%);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   user-select: none;
 }
+
 .submission-summary-row:hover {
   background: color-mix(in srgb, var(--text-color), transparent 95%);
   border-color: var(--brand-mint);
 }
-.summary-left, .summary-right {
+
+.summary-left,
+.summary-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
 }
+
 .submission-status-badge.minified {
   padding: 1px 6px;
   font-size: 0.55rem;
 }
-/* ─── Submission Card Overrides ─────────────────────────────────────────── */
+
+/* ─── Submission & Employee Request Cards ───────────────────────────────── */
 .submission-card,
 .employee-request-review-card {
   background: var(--halo-bg);
   border: 1px solid transparent;
   border-radius: var(--radius-button);
   padding: clamp(12px, 2vw, 16px);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
   box-shadow: var(--shadow-premium);
 }
+
 .employee-request-review-card {
   margin-bottom: 1rem;
 }
+
 .submission-card:hover {
   border-color: color-mix(in srgb, var(--brand-mint), transparent 50%);
 }
+
 .submission-card-header {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -125,32 +391,29 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .submission-card-meta {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  min-width: 0;
 }
-.submission-number-badge {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
-  color: var(--brand-mint);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 60%);
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 0.6rem;
-  font-weight: 800;
-}
+
 .submission-submitter {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-color);
 }
+
 .submission-timestamp {
   font-size: 0.65rem;
-  opacity: 0.5;
+  opacity: 0.55;
   font-weight: 500;
+  white-space: nowrap;
 }
-/* ─── Submission Comment ────────────────────────────────────────────────── */
+
+/* ─── Submission Comment & Attachments ──────────────────────────────────── */
 .submission-comment-text {
   font-size: 0.85rem;
   line-height: 1.6;
@@ -158,14 +421,16 @@
   opacity: 0.85;
   margin-bottom: 0.75rem;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
-/* ─── Attachment Thumbnails ─────────────────────────────────────────────── */
+
 .submission-attachments {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
+
 .submission-attachment-thumb {
   width: 64px;
   height: 64px;
@@ -173,13 +438,15 @@
   object-fit: cover;
   border: 1px solid var(--border-color);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .submission-attachment-thumb:hover {
   transform: scale(1.1);
   border-color: var(--brand-mint);
   box-shadow: 0 0 10px var(--halo-glow);
 }
+
 .submission-attachment-file {
   display: flex;
   align-items: center;
@@ -191,14 +458,15 @@
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--brand-mint);
-  cursor: pointer;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
+
 .submission-attachment-file:hover {
   background: var(--halo-bg);
   border-color: var(--brand-mint);
 }
+
 /* ─── Submission Actions (Approve/Reject) ───────────────────────────────── */
 .submission-card-actions {
   display: flex;
@@ -207,10 +475,13 @@
   padding-top: 0.5rem;
   border-top: 1px dashed var(--border-color);
 }
+
 .submission-approve-btn,
 .submission-reject-btn {
+  --btn-tone: var(--brand-green);
   background: transparent;
-  border: 1px solid var(--border-color);
+  color: var(--btn-tone);
+  border: 1px solid color-mix(in srgb, var(--btn-tone), transparent 60%);
   padding: 4px 12px;
   border-radius: var(--radius-button);
   font-size: 0.7rem;
@@ -218,66 +489,54 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
   font-family: inherit;
 }
-.submission-approve-btn {
-  color: var(--brand-green);
-  border-color: color-mix(in srgb, var(--brand-green), transparent 60%);
-}
-.submission-approve-btn:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 85%);
-  border-color: var(--brand-green);
-}
-.submission-reject-btn {
-  color: var(--priority-urgent);
-  border-color: color-mix(in srgb, var(--priority-urgent), transparent 60%);
-}
+
+.submission-reject-btn { --btn-tone: var(--priority-urgent); }
+
+.submission-approve-btn:hover,
 .submission-reject-btn:hover {
-  background: color-mix(in srgb, var(--priority-urgent), transparent 85%);
-  border-color: var(--priority-urgent);
+  background: color-mix(in srgb, var(--btn-tone), transparent 85%);
+  border-color: var(--btn-tone);
 }
-/* ─── Status Badges (Reused from SubmissionModal.css) ───────────────────── */
+
+/* ─── Status Badges ─────────────────────────────────────────────────────── */
 .submission-history .submission-status-badge {
+  --badge-tone: var(--text-secondary);
   padding: 3px 8px;
   border-radius: 20px;
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--badge-tone);
+  background: color-mix(in srgb, var(--badge-tone), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--badge-tone), transparent 60%);
 }
-.submission-history .submission-status-badge.pending {
-  color: var(--priority-medium);
-  background: color-mix(in srgb, var(--priority-medium), transparent 88%);
-  border: 1px solid color-mix(in srgb, var(--priority-medium), transparent 60%);
-}
-.submission-history .submission-status-badge.approved {
-  color: var(--brand-green);
-  background: color-mix(in srgb, var(--brand-green), transparent 88%);
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
-}
-.submission-history .submission-status-badge.rejected {
-  color: var(--priority-urgent);
-  background: color-mix(in srgb, var(--priority-urgent), transparent 88%);
-  border: 1px solid color-mix(in srgb, var(--priority-urgent), transparent 60%);
-}
-/* ─── Empty State ───────────────────────────────────────────────────────── */
+
+.submission-history .submission-status-badge.pending { --badge-tone: var(--priority-medium); }
+.submission-history .submission-status-badge.approved { --badge-tone: var(--brand-green); }
+.submission-history .submission-status-badge.rejected { --badge-tone: var(--priority-urgent); }
+
+/* ─── Empty & Loading States ────────────────────────────────────────────── */
 .submission-empty-state {
   text-align: center;
   padding: 1.5rem;
   font-size: 0.8rem;
-  opacity: 0.4;
+  opacity: 0.55;
   font-weight: 600;
 }
-/* ─── Loading ───────────────────────────────────────────────────────────── */
+
 .submission-loading {
   text-align: center;
   padding: 1rem;
   font-size: 0.8rem;
-  opacity: 0.5;
+  opacity: 0.6;
   color: var(--brand-mint);
 }
-/* ─── Creation Attachments Label ─────────────────────────────────────────── */
+
+/* ─── Creation Attachments Label ────────────────────────────────────────── */
 .submission-creation-label {
   display: inline-flex;
   align-items: center;
@@ -293,13 +552,13 @@
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
-/* Slightly smaller variant used in the collapsed summary row */
+
 .summary-creation-label {
   font-size: 0.55rem;
   padding: 1px 6px;
 }
 
-/* ─── Employee Approval Review Cards (Bank Update & Deactivation) ────────── */
+/* ─── Employee Approval Review Cards (Bank Update & Deactivation) ───────── */
 .employee-request-review-title {
   margin: 0 0 8px 0;
   font-size: 0.95rem;
@@ -353,13 +612,48 @@
   font-size: 0.82rem;
   line-height: 1.5;
   color: var(--text-color);
-  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .employee-request-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* ─── Mobile Viewport Adaptations (Zero Desktop Impact) ─────────────────── */
+@media screen and (max-width: 640px) {
+  .submission-item {
+    gap: 0.9rem;
+  }
+
+  .history-event-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-event-main {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .history-event-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .history-diff-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .timeline-filter-pill,
+  .history-event-row--expandable,
+  .submission-summary-row,
+  .submission-approve-btn,
+  .submission-reject-btn {
+    min-height: 44px;
+  }
 }
 
 @media screen and (max-width: 480px) {

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { getSubmissionsForTask, updateSubmissionStatus } from '../../services/tasks/submissionService';
-import { employeeService } from '../../services/employees/employeeService';
 import {
   REQUEST_TYPES,
   canReviewEmployeeRequests,
@@ -8,84 +7,138 @@ import {
   approveDeactivationRequest,
   rejectEmployeeRequest,
 } from '../../services/employees/employeeRequestService';
-import { taskService } from '../../services/tasks/taskService';
 import { useAuth } from '../../app/contexts/AuthContext';
 import RejectionModal from '../modals/RejectionModal';
-import { IconDatabase, IconFile, IconCheck, IconX } from '../ui/Icons';
+import { IconDatabase, IconCheck, IconX } from '../ui/Icons';
+import {
+  getTaskHistory,
+  mergeUnifiedTimeline,
+  groupTimelineByDate,
+  createEmptyLookupMaps,
+  TaskHistoryEventRow,
+  SubmissionTimelineRow,
+} from '../../features/task-history';
 import './SubmissionHistory.css';
 
 /**
  * SubmissionHistory
- * Displays all proof-of-work submissions for a task.
- * Managers (editor+) can approve/reject pending submissions inline.
+ * Displays the unified, newest-first Task & Submission History timeline for a task.
+ * Combines proof-of-work submissions (`public.submissions`) with task audit events
+ * (`public.tasks_history`), gracefully degrading to submissions-only if the history
+ * RPC is unavailable. Managers (editor+) can approve/reject pending submissions inline.
  *
  * Props:
- * Props:
- * - taskId (string): The task ID to fetch submissions for
+ * - taskId (string): The task ID to fetch submissions & history for
  * - task (object): The task object itself
  * - permissions (object): Current user's permissions ({ canUpdate, level })
- * - currentUser (object): Current user ({ id })
+ * - currentUser (object): Current user ({ id, roleId })
  * - onStatusUpdate (fn): Optional callback after a successful status change (submissionId, newStatus)
+ * - onCountLoad (fn): Optional callback receiving proof-of-work submission count
  */
 const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, onStatusUpdate, onCountLoad }) => {
   const [submissions, setSubmissions] = useState([]);
+  const [historyRows, setHistoryRows] = useState([]);
+  const [lookupMaps, setLookupMaps] = useState(() => createEmptyLookupMaps());
+  const [historyDegraded, setHistoryDegraded] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'submissions' | 'changes'
   const [expandedId, setExpandedId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(null); // tracks which submission is being updated
-  const [rejectionSubmission, setRejectionSubmission] = useState(null); // tracks it for the modal
+  const [updating, setUpdating] = useState(null);
+  const [rejectionSubmission, setRejectionSubmission] = useState(null);
+
   const inFlightRef = useRef(false); // Synchronous guard against rapid double-taps on mobile
+  const isMountedRef = useRef(true);
+  const fetchSeqRef = useRef(0);
+  const autoExpandedTaskRef = useRef(null);
+  const taskRef = useRef(task);
+  const onCountLoadRef = useRef(onCountLoad);
+
+  taskRef.current = task;
+  onCountLoadRef.current = onCountLoad;
+
   const { fetchUserProfile, realUser, impersonatedUser, handleImpersonate } = useAuth() || {};
-
   const canReview = permissions.canUpdate || ['editor', 'admin'].includes(permissions.level);
+  const taskUpdatedAt = task?.updated_at || task?.updatedAt || null;
 
-  const fetchSubmissions = useCallback(async () => {
-    if (!taskId) return;
-    setLoading(true);
-    try {
-      const data = await getSubmissionsForTask(taskId);
-      setSubmissions(data);
-      // Auto-expand the newest submission if exists
-      if (data.length > 0 && !expandedId) {
-        setExpandedId(data[0].id);
-      }
-      if (onCountLoad) onCountLoad(data.length);
-    } catch (err) {
-      console.error('Failed to load submissions:', err);
-    } finally {
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Reset UI state cleanly when switching between tasks in the same modal
+  useEffect(() => {
+    setExpandedId(null);
+    setActiveFilter('all');
+    autoExpandedTaskRef.current = null;
+  }, [taskId]);
+
+  const fetchTimeline = useCallback(async ({ signal = null, silent = false } = {}) => {
+    if (!taskId) {
       setLoading(false);
+      return;
+    }
+
+    const seq = ++fetchSeqRef.current;
+    if (!silent) setLoading(true);
+
+    try {
+      const [subResult, histResult] = await Promise.allSettled([
+        getSubmissionsForTask(taskId),
+        getTaskHistory(taskId, { task: taskRef.current, signal }),
+      ]);
+
+      if (!isMountedRef.current || signal?.aborted || seq !== fetchSeqRef.current) return;
+
+      if (subResult.status === 'fulfilled') {
+        const subData = Array.isArray(subResult.value) ? subResult.value : [];
+        setSubmissions(subData);
+        if (onCountLoadRef.current) onCountLoadRef.current(subData.length);
+
+        // Auto-expand the newest submission once per taskId; history rows stay collapsed
+        if (subData.length > 0 && autoExpandedTaskRef.current !== taskId) {
+          setExpandedId(`sub_${subData[0].id}`);
+          autoExpandedTaskRef.current = taskId;
+        }
+      } else {
+        console.error('Failed to load submissions:', subResult.reason);
+      }
+
+      if (histResult.status === 'fulfilled' && histResult.value) {
+        setHistoryRows(Array.isArray(histResult.value.rows) ? histResult.value.rows : []);
+        setLookupMaps(histResult.value.lookupMaps || createEmptyLookupMaps());
+        setHistoryDegraded(Boolean(histResult.value.degraded));
+      } else {
+        if (histResult.status === 'rejected') {
+          console.warn('[SubmissionHistory] History fetch degraded to submissions-only:', histResult.reason);
+        }
+        setHistoryRows([]);
+        setLookupMaps(createEmptyLookupMaps());
+        setHistoryDegraded(true);
+      }
+    } catch (err) {
+      console.error('Failed to load task timeline:', err);
+    } finally {
+      if (isMountedRef.current && seq === fetchSeqRef.current && !silent) {
+        setLoading(false);
+      }
     }
   }, [taskId]);
 
   useEffect(() => {
-    fetchSubmissions();
-  }, [fetchSubmissions]);
+    const controller = new AbortController();
+    fetchTimeline({ signal: controller.signal });
+    return () => controller.abort();
+  }, [fetchTimeline, taskUpdatedAt]);
 
-  // Handle accordion toggle
-  const toggleExpand = (id) => {
-    setExpandedId(prev => prev === id ? null : id);
-  };
+  const toggleExpand = useCallback((id) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
 
-  const handleStatusUpdate = async (submissionId, newStatus, reason = null) => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    setUpdating(submissionId);
-    try {
-      const updated = await updateSubmissionStatus(submissionId, newStatus, reason);
-      setSubmissions(prev =>
-        prev.map(s => s.id === submissionId ? { ...s, status: updated.status, rejection_reason: updated.rejection_reason } : s)
-      );
-      setRejectionSubmission(null);
-      if (onStatusUpdate) await onStatusUpdate(submissionId, newStatus);
-    } catch (err) {
-      alert(`Failed to ${newStatus}: ${err.message}`);
-    } finally {
-      inFlightRef.current = false;
-      setUpdating(null);
-    }
-  };
-
-  const formatDate = (dateStr) => {
+  const formatDate = useCallback((dateStr) => {
     const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '';
     return d.toLocaleDateString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -93,32 +146,57 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
+  }, []);
 
-  const getSubmitterName = (submission) => {
-    const profile = submission.submitted_by_profile;
+  const getSubmitterName = useCallback((submission) => {
+    const profile = submission?.submitted_by_profile;
     if (!profile) return 'Unknown';
-    if (submission.submitted_by === currentUser.id) return 'YOU';
+    if (submission.submitted_by === currentUser?.id) return 'YOU';
     return profile.name || profile.email || 'Unknown';
-  };
+  }, [currentUser?.id]);
 
-  // Don't render if no submissions and not loading (and not an employee approval request)
-  let bankUpdatePayload = null;
-  let deactivationPayload = null;
-  if (task?.description) {
-    if (task.description.includes('"BANK_UPDATE"') || task.description.includes('"EMPLOYEE_DEACTIVATION"')) {
+  // Unified timeline assembly & filtering
+  const unifiedTimeline = useMemo(
+    () => mergeUnifiedTimeline({ submissions, historyRows, lookupMaps, task, currentUser }),
+    [submissions, historyRows, lookupMaps, task, currentUser]
+  );
+
+  const changeCount = useMemo(
+    () => unifiedTimeline.filter((item) => item.kind === 'history').length,
+    [unifiedTimeline]
+  );
+
+  const filteredTimeline = useMemo(() => {
+    if (activeFilter === 'submissions') {
+      return unifiedTimeline.filter((item) => item.kind === 'submission');
+    }
+    if (activeFilter === 'changes') {
+      return unifiedTimeline.filter((item) => item.kind === 'history');
+    }
+    return unifiedTimeline;
+  }, [unifiedTimeline, activeFilter]);
+
+  const groupedTimeline = useMemo(
+    () => groupTimelineByDate(filteredTimeline),
+    [filteredTimeline]
+  );
+
+  // Parse structured employee approval requests (Bank Update / Deactivation)
+  const { bankUpdatePayload, deactivationPayload } = useMemo(() => {
+    let bank = null;
+    let deactivation = null;
+    const desc = task?.description;
+    if (desc && (desc.includes('"BANK_UPDATE"') || desc.includes('"EMPLOYEE_DEACTIVATION"'))) {
       try {
-        const parsed = JSON.parse(task.description);
-        if (parsed.type === REQUEST_TYPES.BANK_UPDATE) {
-          bankUpdatePayload = parsed;
-        } else if (parsed.type === REQUEST_TYPES.DEACTIVATION) {
-          deactivationPayload = parsed;
-        }
-      } catch (e) {
-        // Not JSON
+        const parsed = JSON.parse(desc);
+        if (parsed.type === REQUEST_TYPES.BANK_UPDATE) bank = parsed;
+        else if (parsed.type === REQUEST_TYPES.DEACTIVATION) deactivation = parsed;
+      } catch {
+        // Not valid JSON
       }
     }
-  }
+    return { bankUpdatePayload: bank, deactivationPayload: deactivation };
+  }, [task?.description]);
 
   // Master Admin, Master Editor, or Employees-vertical Editor/Admin can approve/reject employee requests.
   // Non-master requesters cannot self-approve their own request.
@@ -145,6 +223,31 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
     }
   };
 
+  const handleStatusUpdate = async (submissionId, newStatus, reason = null) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    setUpdating(submissionId);
+    try {
+      const updated = await updateSubmissionStatus(submissionId, newStatus, reason);
+      setSubmissions((prev) =>
+        prev.map((s) =>
+          s.id === submissionId
+            ? { ...s, status: updated.status, rejection_reason: updated.rejection_reason }
+            : s
+        )
+      );
+      setRejectionSubmission(null);
+      if (onStatusUpdate) await onStatusUpdate(submissionId, newStatus);
+      // Re-fetch so stage transition triggered by review appears immediately at top
+      if (isMountedRef.current) await fetchTimeline({ silent: true });
+    } catch (err) {
+      alert(`Failed to ${newStatus}: ${err.message}`);
+    } finally {
+      inFlightRef.current = false;
+      if (isMountedRef.current) setUpdating(null);
+    }
+  };
+
   const handleBankApproval = async (status) => {
     if (!bankUpdatePayload || inFlightRef.current) return;
     inFlightRef.current = true;
@@ -158,12 +261,13 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
 
       await refreshActiveAuthProfile();
       alert(`Bank Update ${status === 'approved' ? 'Approved & Applied' : 'Rejected'}.`);
-      if (onStatusUpdate) await onStatusUpdate(); // close modal/refresh
+      if (onStatusUpdate) await onStatusUpdate();
+      if (isMountedRef.current) await fetchTimeline({ silent: true });
     } catch (err) {
       alert(`Action failed: ${err.message}`);
     } finally {
       inFlightRef.current = false;
-      setUpdating(null);
+      if (isMountedRef.current) setUpdating(null);
     }
   };
 
@@ -182,25 +286,29 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       await refreshActiveAuthProfile();
       alert(`Deactivation Request ${status === 'approved' ? 'Approved & Employee Marked Inactive' : 'Rejected'}.`);
       if (onStatusUpdate) await onStatusUpdate();
+      if (isMountedRef.current) await fetchTimeline({ silent: true });
     } catch (err) {
       alert(`Action failed: ${err.message}`);
     } finally {
       inFlightRef.current = false;
-      setUpdating(null);
+      if (isMountedRef.current) setUpdating(null);
     }
   };
 
-  if (!loading && submissions.length === 0 && !bankUpdatePayload && !deactivationPayload) {
+  const isTaskResolved = task?.stageId === 'COMPLETED' || task?.stageId === 'DEPRIORITIZED';
+  const showFilterBar = unifiedTimeline.length > 0 && !historyDegraded;
+
+  if (!loading && unifiedTimeline.length === 0 && !bankUpdatePayload && !deactivationPayload) {
     return (
       <div className="submission-history">
         <div className="submission-history-header">
           <span className="submission-history-title">
             <IconDatabase size={18} className="u-mr-8" />
-            Submission History
+            Task &amp; Submission History
           </span>
         </div>
         <div className="submission-empty-state">
-          No proof-of-work submissions yet.
+          No activity or submissions yet.
         </div>
       </div>
     );
@@ -211,11 +319,40 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       <div className="submission-history-header">
         <span className="submission-history-title">
           <IconDatabase size={18} className="u-mr-8" />
-          Submission History
-          {submissions.length > 0 && (
-            <span className="submission-count-badge">{submissions.length}</span>
+          Task &amp; Submission History
+          {unifiedTimeline.length > 0 && (
+            <span className="submission-count-badge">{unifiedTimeline.length}</span>
           )}
         </span>
+
+        {showFilterBar && (
+          <div className="timeline-filter-bar" role="group" aria-label="Filter timeline">
+            <button
+              type="button"
+              className={`timeline-filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
+              aria-pressed={activeFilter === 'all'}
+              onClick={() => setActiveFilter('all')}
+            >
+              All ({unifiedTimeline.length})
+            </button>
+            <button
+              type="button"
+              className={`timeline-filter-pill ${activeFilter === 'submissions' ? 'active' : ''}`}
+              aria-pressed={activeFilter === 'submissions'}
+              onClick={() => setActiveFilter('submissions')}
+            >
+              Submissions ({submissions.length})
+            </button>
+            <button
+              type="button"
+              className={`timeline-filter-pill ${activeFilter === 'changes' ? 'active' : ''}`}
+              aria-pressed={activeFilter === 'changes'}
+              onClick={() => setActiveFilter('changes')}
+            >
+              Changes ({changeCount})
+            </button>
+          </div>
+        )}
       </div>
 
       {bankUpdatePayload && (
@@ -248,19 +385,19 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             </div>
           </div>
 
-          {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
+          {canReviewEmployeeReq && !isTaskResolved && (
             <div className="employee-request-actions">
-              <button 
-                type="button" 
-                className="halo-button" 
+              <button
+                type="button"
+                className="halo-button"
                 onClick={() => handleBankApproval('approved')}
                 disabled={updating === 'bank_update'}
               >
-                {updating === 'bank_update' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve & Update Employee</>}
+                {updating === 'bank_update' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve &amp; Update Employee</>}
               </button>
-              <button 
-                type="button" 
-                className="halo-button danger" 
+              <button
+                type="button"
+                className="halo-button danger"
                 onClick={() => handleBankApproval('rejected')}
                 disabled={updating === 'bank_update'}
               >
@@ -268,7 +405,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               </button>
             </div>
           )}
-          {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
+          {isTaskResolved && (
             <div className="status-message u-mt-8">
               This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
             </div>
@@ -286,7 +423,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
             <strong>{deactivationPayload.employeeName}</strong> as <strong>Inactive</strong>.
           </p>
 
-          {canReviewEmployeeReq && task.stageId !== 'COMPLETED' && task.stageId !== 'DEPRIORITIZED' && (
+          {canReviewEmployeeReq && !isTaskResolved && (
             <div className="employee-request-actions">
               <button
                 type="button"
@@ -294,7 +431,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
                 onClick={() => handleDeactivationApproval('approved')}
                 disabled={updating === 'deactivation'}
               >
-                {updating === 'deactivation' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve & Mark Inactive</>}
+                {updating === 'deactivation' ? 'Processing...' : <><IconCheck size={14} className="u-mr-4" /> Approve &amp; Mark Inactive</>}
               </button>
               <button
                 type="button"
@@ -306,7 +443,7 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
               </button>
             </div>
           )}
-          {(task.stageId === 'COMPLETED' || task.stageId === 'DEPRIORITIZED') && (
+          {isTaskResolved && (
             <div className="status-message u-mt-8">
               This request has been {task.stageId === 'COMPLETED' ? 'Approved' : 'Rejected'}.
             </div>
@@ -315,148 +452,51 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
       )}
 
       {loading ? (
-        <div className="submission-loading">Loading submissions...</div>
+        <div className="submission-loading">Loading activity &amp; submissions...</div>
+      ) : filteredTimeline.length === 0 ? (
+        <div className="submission-empty-state">
+          {activeFilter === 'submissions'
+            ? 'No proof-of-work submissions yet.'
+            : 'No task changes recorded yet.'}
+        </div>
       ) : (
         <div className="timeline-container">
-          {submissions.map((submission, index) => {
-            const isExpanded = expandedId === submission.id;
-            // Detect submissions that were created during task creation or editing
-            // by matching the standard comment strings set in useTaskController.js
-            const isCreationAttachment =
-              submission.comment === 'Attached photos during task creation.' ||
-              submission.comment === 'Attached photos during task edit.';
-            
-            return (
-              <div 
-                className={`submission-item ${isExpanded ? 'expanded' : 'collapsed'}`} 
-                key={submission.id}
-              >
-                {/* Timeline node & line */}
-                <div className="timeline-marker">
-                  <div className={`status-node ${submission.status}`}></div>
-                  {index < submissions.length - 1 && <div className="timeline-line"></div>}
-                </div>
+          {groupedTimeline.map((group) => (
+            <div className="timeline-date-group" key={group.dateKey}>
+              <div className="timeline-date-divider">{group.label}</div>
+              {group.items.map((item, idx) => {
+                const isLastInGroup = idx === group.items.length - 1;
+                if (item.kind === 'history') {
+                  return (
+                    <TaskHistoryEventRow
+                      key={item.id}
+                      item={item}
+                      isExpanded={expandedId === item.id}
+                      onToggle={() => toggleExpand(item.id)}
+                      isLast={isLastInGroup}
+                      formatDate={formatDate}
+                    />
+                  );
+                }
 
-                <div className="submission-content">
-                  {isExpanded ? (
-                    <div className="submission-card fade-in">
-                      {/* Header: number + submitter + timestamp + status */}
-                      <div className="submission-card-header" onClick={() => toggleExpand(submission.id)}>
-                        <div className="submission-card-meta">
-                          <span className="submission-number-badge">
-                            #{submission.submission_number}
-                          </span>
-                          {isCreationAttachment && (
-                            <span className="submission-creation-label" title="These files were attached when this task was created or last edited">
-                              📎 Creation Attachments
-                            </span>
-                          )}
-                          <span className="submission-submitter">
-                            {getSubmitterName(submission)}
-                          </span>
-                          <span className="submission-timestamp">
-                            {formatDate(submission.created_at)}
-                          </span>
-                        </div>
-                        <span className={`submission-status-badge ${submission.status}`}>
-                          {submission.status}
-                        </span>
-                      </div>
-
-                      {/* Comment */}
-                      {submission.comment && (
-                        <p className="submission-comment-text">{submission.comment}</p>
-                      )}
-
-                      {/* Attachments */}
-                      {submission.links && submission.links.length > 0 && (
-                        <div className="submission-attachments">
-                          {submission.links.map((link, idx) => {
-                            const isImage = link.mime_type?.startsWith('image/');
-                            if (isImage) {
-                              return (
-                                <a
-                                  key={idx}
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  title={link.file_name}
-                                >
-                                  <img
-                                    className="submission-attachment-thumb"
-                                    src={link.url}
-                                    alt={link.file_name}
-                                  />
-                                </a>
-                              );
-                            }
-                            return (
-                              <a
-                                key={idx}
-                                className="submission-attachment-file"
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={link.file_name}
-                              >
-                                <IconFile size={16} className="u-mr-6" />
-                                {link.file_name}
-                              </a>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Approve / Reject actions (editor+ only, pending only) */}
-                      {canReview && submission.status === 'pending' && (
-                        <div className="submission-card-actions">
-                          <button
-                            type="button"
-                            className="submission-approve-btn"
-                            onClick={() => handleStatusUpdate(submission.id, 'approved')}
-                            disabled={updating === submission.id}
-                          >
-                            {updating === submission.id ? '...' : <><IconCheck size={14} className="u-mr-4" /> Approve</>}
-                          </button>
-                          <button
-                            type="button"
-                            className="submission-reject-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setRejectionSubmission(submission);
-                            }}
-                            disabled={updating === submission.id}
-                          >
-                            {updating === submission.id ? '...' : <><IconX size={14} className="u-mr-4" /> Reject</>}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div 
-                      className="submission-summary-row" 
-                      onClick={() => toggleExpand(submission.id)}
-                    >
-                      <div className="summary-left">
-                        <span className="submission-number-badge">#{submission.submission_number}</span>
-                        {isCreationAttachment ? (
-                          <span className="submission-creation-label summary-creation-label">📎 Creation Attachments</span>
-                        ) : (
-                          <span className="submission-submitter">{getSubmitterName(submission)}</span>
-                        )}
-                      </div>
-                      <div className="summary-right">
-                        <span className={`submission-status-badge minified ${submission.status}`}>
-                          {submission.status}
-                        </span>
-                        <span className="submission-timestamp">{formatDate(submission.created_at)}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                return (
+                  <SubmissionTimelineRow
+                    key={item.id}
+                    submission={item.data}
+                    isExpanded={expandedId === item.id}
+                    onToggle={() => toggleExpand(item.id)}
+                    isLast={isLastInGroup}
+                    canReview={canReview}
+                    updating={updating}
+                    onApprove={(submissionId) => handleStatusUpdate(submissionId, 'approved')}
+                    onRequestReject={(submission) => setRejectionSubmission(submission)}
+                    submitterName={getSubmitterName(item.data)}
+                    formatDate={formatDate}
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
       )}
 

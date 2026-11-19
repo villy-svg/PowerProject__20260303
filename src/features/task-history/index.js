@@ -18,3 +18,5 @@ export {
   resolveEntityNames,
   clearTaskHistoryCache,
 } from './services/taskHistoryService';
+export { default as TaskHistoryEventRow } from './components/TaskHistoryEventRow';
+export { default as SubmissionTimelineRow } from './components/SubmissionTimelineRow';
