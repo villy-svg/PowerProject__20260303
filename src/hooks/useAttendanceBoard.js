@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   fetchAttendanceForDateRange,
   fetchEmployeesForAttendance,
+  fetchAllEmployeesForAttendanceSearch,
 } from '../services/employees/attendanceService';
 import { fetchApprovedSchedulesForDateRange } from '../services/employees/schedulePlannerService';
 import { fetchPendingRequests } from '../services/employees/editRequestService';
@@ -91,6 +92,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
 
   // Data state
   const [employees, setEmployees] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [scheduledRecords, setScheduledRecords] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -156,6 +158,37 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     fetchBoardData();
   }, [fetchBoardData]);
 
+  // Fetch unpaginated active employee list once per user session for board-wide search
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadSearchEmployees = async () => {
+      try {
+        const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
+        const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
+        const filters = {};
+
+        if (isRestricted && user?.employeeId) {
+          filters.employeeId = user.employeeId;
+        }
+
+        const { data, error: searchErr } = await fetchAllEmployeesForAttendanceSearch(filters);
+        if (searchErr) {
+          console.warn('[useAttendanceBoard] Could not fetch employee search list:', searchErr);
+          return;
+        }
+        if (!isCancelled) {
+          setAllEmployees(data || []);
+        }
+      } catch (err) {
+        console.error('[useAttendanceBoard] loadSearchEmployees error:', err);
+      }
+    };
+
+    loadSearchEmployees();
+    return () => { isCancelled = true; };
+  }, [user]);
+
   // ---------------------------------------------------------------------------
   // Derived: Build the grid cell maps for fast O(1) lookup in the UI
   // ---------------------------------------------------------------------------
@@ -217,6 +250,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   return {
     // Data
     employees,
+    allEmployees,
     dateRange,
     pendingRequests,
     

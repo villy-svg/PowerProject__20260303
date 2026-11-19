@@ -238,7 +238,7 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
                     </tr>
                   )}
                   {groupEmployees.map(employee => (
-                    <tr key={employee.id} className="attendance-grid__row">
+                    <tr key={employee.id} id={`attendance-row-${employee.id}`} className="attendance-grid__row">
                       <EmployeeRowHeader employee={employee} />
                       {dateRange.map(date => (
                         <AttendanceCell

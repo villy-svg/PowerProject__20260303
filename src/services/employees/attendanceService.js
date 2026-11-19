@@ -136,6 +136,49 @@ export async function fetchEmployeesForAttendance(filters = {}, page = 1, pageSi
 }
 
 // ---------------------------------------------------------------------------
+// MANAGER BOARD SEARCH: Fetch all active employees (unpaginated) for search
+//
+// Returns the same lightweight shape as fetchEmployeesForAttendance so a
+// searched employee from any page can be rendered directly in the grid or
+// mobile list without extra lookups. Respects the same RBAC/seniority filters.
+//
+// @param {object} filters - { hubIds?: [], employeeId?: string }
+// @returns {Promise<{ data: Array, error: object|null }>}
+// ---------------------------------------------------------------------------
+export async function fetchAllEmployeesForAttendanceSearch(filters = {}) {
+  let query = supabase
+    .from('employees')
+    .select(`
+      id,
+      full_name,
+      emp_code,
+      status,
+      hub_id,
+      hubs ( id, name, hub_code ),
+      departments ( id, name, dept_code )
+    `)
+    .eq('status', 'Active')
+    .order('full_name', { ascending: true });
+
+  if (filters.hubIds && filters.hubIds.length > 0) {
+    query = query.in('hub_id', filters.hubIds);
+  }
+
+  if (filters.employeeId) {
+    query = query.eq('id', filters.employeeId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('[attendanceService] fetchAllEmployeesForAttendanceSearch error:', error);
+    return { data: null, error };
+  }
+
+  return { data: data || [], error: null };
+}
+
+// ---------------------------------------------------------------------------
 // EMPLOYEE SELF-SERVICE: Check In (Start Shift)
 //
 // Calls the `rpc_employee_checkin` database function (SECURITY DEFINER).

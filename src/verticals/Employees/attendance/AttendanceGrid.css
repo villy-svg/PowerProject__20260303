@@ -100,14 +100,14 @@
   z-index: 1;
 }
 
-.attendance-grid__corner-cell {
+.attendance-grid__table th.attendance-grid__corner-cell {
   position: sticky;
   top: -1px;
   left: -1px;
   z-index: 4;
   background-color: var(--bg-color);
-  text-align: left !important;
-  padding-left: 1rem !important;
+  text-align: left;
+  padding-left: 1rem;
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -121,12 +121,12 @@
    Cell States
    ========================================================================== */
 
-.attendance-cell {
+.attendance-grid__table td.attendance-cell {
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 90px;
   position: relative;
-  padding: 0 !important; /* Let the flex container fill the height/width */
+  padding: 0; /* Let the flex container fill the height/width */
 }
 
 .attendance-cell:hover {

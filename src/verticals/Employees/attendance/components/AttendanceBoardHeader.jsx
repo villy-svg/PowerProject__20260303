@@ -5,7 +5,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import AttendanceLegend from '../AttendanceLegend';
 import RBACManageButton from '../../../../components/ui/RBACManageButton';
-import '../../EmployeeAttendanceBoard.css';
 
 const CustomDateInput = React.forwardRef(({ value, onClick, className, placeholder }, ref) => {
   const formattedValue = value ? value.replace(' - ', '  to  ') : '';
@@ -37,7 +36,9 @@ const AttendanceBoardHeader = ({
   paintbrushStatus, setPaintbrushStatus, paintbrushHubId, setPaintbrushHubId,
   handleSaveDraft, handleSubmitForApproval,
   // Data
-  hubs, canApprove, canSuggestEdit
+  hubs, canApprove, canSuggestEdit,
+  // Employee Search (records-mode SearchBar)
+  searchRecords, recordType, onSearchSelect
 }) => {
 
   const headerLeftActions = (
@@ -106,7 +107,7 @@ const AttendanceBoardHeader = ({
               <CustomSelect
                 value={paintbrushStatus}
                 onChange={setPaintbrushStatus}
-                className="u-w-180 u-py-4 u-pl-8 u-text-sm-85"
+                className="attendance-board__planner-select--status"
                 options={[
                   { value: 'cursor', label: 'Cursor (Edit Cell)' },
                   { value: 'eraser', label: 'Eraser (Clear Cell)' },
@@ -123,7 +124,7 @@ const AttendanceBoardHeader = ({
                 <CustomSelect
                   value={paintbrushHubId}
                   onChange={setPaintbrushHubId}
-                  className="u-w-130 u-py-4 u-pl-8 u-text-sm-85"
+                  className="attendance-board__planner-select--hub"
                   options={[
                     { value: '', label: 'No Hub' },
                     ...hubs.map(h => ({ value: h.id, label: h.hub_code || h.name }))
@@ -200,55 +201,54 @@ const AttendanceBoardHeader = ({
     </>
   );
 
+  /* Scoped BEM layout for Row 4 expanded menu: controls row above, legend row cleanly separated below */
   const headerExpandedLeft = (viewMode === 'pending-requests' || viewMode === 'pending-plans') ? null : (
-    <div className="u-flex-wrap-gap-24 u-items-center u-w-full">
-      {canSuggestEdit && (
-        <div className="view-mode-toggle">
-          <button
-            className={`view-toggle-btn ${viewMode === 'attendance' ? 'active' : ''}`}
-            onClick={() => { setViewMode('attendance'); setIsMenuOpen(false); }}
-          >
-            Attendance Board
-          </button>
-          <button
-            className={`view-toggle-btn ${viewMode === 'planner' ? 'active' : ''}`}
-            onClick={() => { setViewMode('planner'); setIsMenuOpen(false); }}
-          >
-            Schedule Planner
-          </button>
-        </div>
-      )}
+    <div className="attendance-board__menu-content">
+      <div className="attendance-board__menu-controls">
+        {canSuggestEdit && (
+          <div className="view-mode-toggle">
+            <button
+              className={`view-toggle-btn ${viewMode === 'attendance' ? 'active' : ''}`}
+              onClick={() => { setViewMode('attendance'); setIsMenuOpen(false); }}
+            >
+              Attendance Board
+            </button>
+            <button
+              className={`view-toggle-btn ${viewMode === 'planner' ? 'active' : ''}`}
+              onClick={() => { setViewMode('planner'); setIsMenuOpen(false); }}
+            >
+              Schedule Planner
+            </button>
+          </div>
+        )}
 
-      {/* Date Filter & Pagination */}
-      <div className="u-flex-gap-16 u-items-center">
+        {/* Date Filter & Pagination */}
         {viewMode === 'attendance' ? (
-          <>
-            <div className="u-flex-gap-8 u-items-center u-ml-12">
-              <button 
-                className="halo-button btn-xs u-min-h-auto" 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                ◀ Prev
-              </button>
-              <span className="u-text-xs u-fw-800 u-text-secondary">
-                PAGE {page}
-              </span>
-              <button 
-                className="halo-button btn-xs u-min-h-auto" 
-                onClick={() => setPage(p => p + 1)}
-                disabled={!hasMore}
-              >
-                Next ▶
-              </button>
-            </div>
-          </>
+          <div className="attendance-board__pagination">
+            <button
+              className="halo-button"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              ◀ Prev
+            </button>
+            <span className="attendance-board__page-label">
+              PAGE {page}
+            </span>
+            <button
+              className="halo-button"
+              onClick={() => setPage(p => p + 1)}
+              disabled={!hasMore}
+            >
+              Next ▶
+            </button>
+          </div>
         ) : (
           <div className="attendance-board__date-range">
             <span className="attendance-board__date-label">Week:</span>
-            <input 
-              type="week" 
-              value={weekString} 
+            <input
+              type="week"
+              value={weekString}
               onChange={e => {
                 setWeekString(e.target.value);
                 setEmployeeSelections({});
@@ -259,26 +259,26 @@ const AttendanceBoardHeader = ({
             />
           </div>
         )}
+
+        {canSuggestEdit && planner.myPlans.length > 0 && (
+          <button
+            className="halo-button master-action-btn u-flex-center-gap-8"
+            onClick={() => {
+              setShowMyPlans(true);
+              setIsMenuOpen(false);
+            }}
+          >
+            My Plans History
+            <span className="attendance-board__pending-badge u-m-0">
+              {planner.myPlans.length}
+            </span>
+          </button>
+        )}
       </div>
 
-      <div className="u-flex u-w-full u-items-center">
+      <div className="attendance-board__menu-legend">
         <AttendanceLegend />
       </div>
-
-      {canSuggestEdit && planner.myPlans.length > 0 && (
-        <button 
-          className="halo-button master-action-btn u-flex-center-gap-8"
-          onClick={() => {
-            setShowMyPlans(true);
-            setIsMenuOpen(false);
-          }}
-        >
-          My Plans History
-          <span className="attendance-board__pending-badge u-m-0">
-            {planner.myPlans.length}
-          </span>
-        </button>
-      )}
     </div>
   );
 
@@ -317,6 +317,10 @@ const AttendanceBoardHeader = ({
       expandedLeft={headerExpandedLeft}
       isMenuOpen={isMenuOpen}
       setIsMenuOpen={setIsMenuOpen}
+      searchRecords={searchRecords}
+      recordType={recordType}
+      onSearchSelect={onSearchSelect}
+      hideSearchBar={viewMode === 'pending-requests' || viewMode === 'pending-plans'}
     />
   );
 };

@@ -18,8 +18,25 @@ function formatDate(dateStr) {
   return date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
-const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, onCellClick, dateFilterControl }) => {
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+const AttendanceMobileList = ({
+  employees,
+  dateRange,
+  getCellData,
+  isLoading,
+  onCellClick,
+  dateFilterControl,
+  selectedEmployeeId: controlledSelectedEmployeeId,
+  onSelectEmployee,
+}) => {
+  // Controlled when parent drives selection (e.g. from SearchBar), uncontrolled as fallback
+  const [internalSelectedEmployeeId, setInternalSelectedEmployeeId] = useState('');
+  const selectedEmployeeId = controlledSelectedEmployeeId !== undefined
+    ? controlledSelectedEmployeeId
+    : internalSelectedEmployeeId;
+  const handleSelectEmployee = (val) => {
+    setInternalSelectedEmployeeId(val);
+    if (onSelectEmployee) onSelectEmployee(val);
+  };
 
   if (isLoading) {
     return (
@@ -111,7 +128,7 @@ const AttendanceMobileList = ({ employees, dateRange, getCellData, isLoading, on
               label: `${emp.full_name} ${emp.emp_code ? `(${emp.emp_code})` : ''}`
             }))}
             value={selectedEmployee?.id || ''}
-            onChange={(val) => setSelectedEmployeeId(val)}
+            onChange={(val) => handleSelectEmployee(val)}
             mode="single"
             searchable={true}
             searchPlaceholder="Search employee..."

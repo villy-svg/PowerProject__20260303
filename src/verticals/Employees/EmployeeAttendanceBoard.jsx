@@ -45,7 +45,7 @@ const EmployeeAttendanceBoard = ({
   activeVertical,
 }) => {
   const {
-    employees, dateRange: attendanceDateRange, startDate, setStartDate,
+    employees, allEmployees, dateRange: attendanceDateRange, startDate, setStartDate,
     endDate, setEndDate, pendingRequests, isLoading: isBoardLoading,
     error, refreshBoard, getCellData: getLiveCellData,
     page, setPage, hasMore
@@ -62,6 +62,48 @@ const EmployeeAttendanceBoard = ({
   // --- UI View Mode State ---
   const [viewMode, setViewMode] = useState('attendance'); // 'attendance' | 'planner'
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // --- Employee Search Filter State ---
+  const [searchedEmployee, setSearchedEmployee] = useState(null);
+
+  // Normalize active employees for records-mode SearchBar (searchable by name, emp_code, dept_code, hub_code)
+  const searchRecords = useMemo(() => {
+    const source = allEmployees.length > 0 ? allEmployees : employees;
+    return source.map(emp => ({
+      ...emp,
+      dept_code: emp.departments?.dept_code || '',
+      hub_code: emp.hubs?.hub_code || '',
+    }));
+  }, [allEmployees, employees]);
+
+  // Filter grid to the searched employee on desktop; on mobile ensure the selected employee is present in the list
+  const displayedEmployees = useMemo(() => {
+    if (!searchedEmployee) return employees;
+    if (shellType === 'mobile') {
+      const alreadyInPage = employees.some(e => e.id === searchedEmployee.id);
+      return alreadyInPage ? employees : [searchedEmployee, ...employees];
+    }
+    return [searchedEmployee];
+  }, [employees, searchedEmployee, shellType]);
+
+  const handleSearchSelect = useCallback((emp) => {
+    if (!emp) return;
+    setSearchedEmployee(emp);
+  }, []);
+
+  const handleMobileSelectEmployee = useCallback((empId) => {
+    if (!empId) {
+      setSearchedEmployee(null);
+      return;
+    }
+    const found = allEmployees.find(e => e.id === empId) || employees.find(e => e.id === empId);
+    if (found) setSearchedEmployee(found);
+  }, [allEmployees, employees]);
+
+  const handleSetPage = useCallback((updater) => {
+    setSearchedEmployee(null);
+    setPage(updater);
+  }, [setPage]);
 
   // --- Drawers & Modals & Views ---
   const [selectedCell, setSelectedCell] = useState(null);
@@ -122,7 +164,7 @@ const EmployeeAttendanceBoard = ({
 
     // Normal Attendance Mode
     const record = getCellData(empId, date);
-    const emp = employees.find(e => e.id === empId);
+    const emp = displayedEmployees.find(e => e.id === empId) || allEmployees.find(e => e.id === empId);
     const employeeName = emp?.full_name || emp?.name || 'Unknown Employee';
     setSelectedCell({ employeeId: empId, date, record, employeeName });
     if (canApprove && record.has_pending_edit) {
@@ -130,7 +172,7 @@ const EmployeeAttendanceBoard = ({
     } else if (canSuggestEdit) {
       // Just open suggest edit modal, don't change viewMode
     }
-  }, [viewMode, getCellData, canApprove, canSuggestEdit, draftHandleCellClick, employees]);
+  }, [viewMode, getCellData, canApprove, canSuggestEdit, draftHandleCellClick, displayedEmployees, allEmployees]);
 
   const handleCellChange = useCallback((empId, date, newStatus, newHubId) => {
     draftHandleCellChange(empId, date, newStatus, newHubId);
@@ -210,7 +252,7 @@ const EmployeeAttendanceBoard = ({
         handleRangeChange={handleRangeChange}
         handleApplyDates={handleApplyDates}
         page={page}
-        setPage={setPage}
+        setPage={handleSetPage}
         hasMore={hasMore}
         isBoardLoading={isBoardLoading}
         refreshBoard={refreshBoard}
@@ -232,7 +274,32 @@ const EmployeeAttendanceBoard = ({
         hubs={hubs}
         canApprove={canApprove}
         canSuggestEdit={canSuggestEdit}
+        searchRecords={searchRecords}
+        recordType="Employee"
+        onSearchSelect={handleSearchSelect}
       />
+
+      {/* Active Employee Search Filter Bar (Desktop) */}
+      {shellType !== 'mobile' && searchedEmployee && (viewMode === 'attendance' || viewMode === 'planner') && (
+        <div className="attendance-board__search-filter-bar">
+          <span className="attendance-board__search-filter-label">
+            Showing employee:
+          </span>
+          <span className="attendance-board__search-filter-chip">
+            {searchedEmployee.full_name}
+            {searchedEmployee.emp_code && (
+              <span className="attendance-board__search-filter-code">{searchedEmployee.emp_code}</span>
+            )}
+          </span>
+          <button
+            type="button"
+            className="halo-button attendance-board__search-filter-clear"
+            onClick={() => setSearchedEmployee(null)}
+          >
+            ✕ Show All
+          </button>
+        </div>
+      )}
 
       {/* Notifications */}
       {/* Error state */}
@@ -281,15 +348,17 @@ const EmployeeAttendanceBoard = ({
         />
       ) : shellType === 'mobile' ? (
         <AttendanceMobileList
-          employees={employees}
+          employees={displayedEmployees}
           dateRange={activeDateRange}
           getCellData={getCellData}
           isLoading={viewMode === 'attendance' ? isBoardLoading : false}
           onCellClick={handleCellClick}
+          selectedEmployeeId={searchedEmployee?.id || ''}
+          onSelectEmployee={handleMobileSelectEmployee}
         />
       ) : (
         <AttendanceGrid
-          employees={employees}
+          employees={displayedEmployees}
           dateRange={activeDateRange}
           getCellData={getCellData}
           isLoading={viewMode === 'attendance' ? isBoardLoading : false}

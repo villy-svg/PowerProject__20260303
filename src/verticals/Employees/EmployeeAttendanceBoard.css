@@ -66,12 +66,6 @@
   opacity: 1;
 }
 
-.attendance-board__date-separator {
-  opacity: 0.3;
-  font-size: 0.85rem;
-  margin: 0 0.15rem;
-}
-
 .attendance-board__go-btn {
   padding: 0.2rem 0.6rem;
   display: flex;
@@ -91,73 +85,65 @@
 }
 
 .attendance-board__go-btn:hover {
-  background: transparent;
   opacity: 1;
   transform: translateY(-1px);
 }
 
-/* Dropdown Menu */
-.attendance-board__menu-container {
-  position: relative;
-}
-
-.attendance-board__menu-dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-button, 12px);
-  padding: 0.5rem;
-  min-width: 200px;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--bg-color), transparent 50%);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.attendance-board__menu-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.attendance-board__menu-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  opacity: 0.5;
-  padding: 0.25rem 0.5rem;
-  margin-top: 0.25rem;
-}
-
-.attendance-board__menu-item {
+/* Planner Header Group (Week Picker + Paintbrush Controls) */
+.attendance-board__planner-header-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: background 0.2s ease;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.attendance-board__menu-item:hover {
-  background: var(--halo-bg);
+.attendance-board__planner-select--status {
+  width: 180px;
 }
 
-.attendance-board__menu-item input[type="radio"],
-.attendance-board__menu-item input[type="checkbox"] {
-  cursor: pointer;
-  accent-color: var(--brand-green);
+.attendance-board__planner-select--hub {
+  width: 130px;
 }
 
-.attendance-board__menu-divider {
-  height: 1px;
-  background: var(--border-color);
-  margin: 0.25rem 0;
+/* Expanded Menu Content (Row 4 inside MasterHeaderMenu)
+   Replaces dead legacy dropdown CSS and missing utility classes */
+.attendance-board__menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.attendance-board__menu-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.attendance-board__pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attendance-board__page-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.65;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+.attendance-board__menu-legend {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
 }
 
 .attendance-board__approval-btn {
@@ -215,6 +201,57 @@
   opacity: 0.9;
 }
 
+/* Active Employee Search Filter Bar */
+.attendance-board__search-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 0.5rem clamp(1rem, 2vw, 1.5rem);
+  margin: 0 0 0.5rem;
+  background: var(--halo-bg);
+  border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
+}
+
+.attendance-board__search-filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color);
+  opacity: 0.65;
+}
+
+.attendance-board__search-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--brand-green);
+}
+
+.attendance-board__search-filter-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1px 8px;
+  min-height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.75;
+  display: inline-flex;
+  align-items: center;
+}
+
+.attendance-board__search-filter-clear {
+  margin-left: auto;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.7rem;
+}
+
 /* Errors & Feedback */
 .attendance-board__error,
 .attendance-board__planner-msg {
@@ -227,7 +264,8 @@
   font-size: 0.875rem;
 }
 
-.attendance-board__error {
+.attendance-board__error,
+.attendance-board__planner-msg--error {
   background: color-mix(in srgb, var(--status-danger), transparent 85%);
   border: 1px solid color-mix(in srgb, var(--status-danger), transparent 50%);
   color: var(--status-danger);
@@ -239,12 +277,6 @@
   color: var(--status-success);
 }
 
-.attendance-board__planner-msg--error {
-  background: color-mix(in srgb, var(--status-danger), transparent 85%);
-  border: 1px solid color-mix(in srgb, var(--status-danger), transparent 50%);
-  color: var(--status-danger);
-}
-
 .attendance-board__no-access {
   display: flex;
   align-items: center;
@@ -254,12 +286,6 @@
   opacity: 0.7;
 }
 
-.attendance-board__legend-wrapper {
-  padding: 0 1.5rem;
-  flex-shrink: 0;
-  margin-bottom: 0.5rem;
-}
-
 .approval-page-container {
   min-height: 0;
   -webkit-overflow-scrolling: touch;
@@ -267,6 +293,11 @@
 
 @media screen and (max-width: 768px) {
   .attendance-board__left-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .attendance-board__pagination {
     width: 100%;
     justify-content: space-between;
   }
@@ -286,18 +317,17 @@
 }
 
 .react-datepicker {
-  background-color: var(--bg-color, var(--border-color)) !important;
-  border: 1px solid var(--border-color, var(--border-color)) !important;
+  background-color: var(--bg-color) !important;
+  border: 1px solid var(--border-color) !important;
   border-radius: 12px !important;
   font-family: inherit !important;
-  color: var(--text-color, var(--text-color)) !important;
+  color: var(--text-color) !important;
   box-shadow: 0 8px 24px color-mix(in srgb, var(--bg-color), transparent 50%) !important;
-  z-index: 4005 !important;
 }
 
 .react-datepicker__header {
-  background-color: color-mix(in srgb, var(--bg-color, var(--border-color)), transparent 20%) !important;
-  border-bottom: 1px solid var(--border-color, var(--border-color)) !important;
+  background-color: color-mix(in srgb, var(--bg-color), transparent 20%) !important;
+  border-bottom: 1px solid var(--border-color) !important;
   border-top-left-radius: 12px !important;
   border-top-right-radius: 12px !important;
 }
@@ -305,20 +335,20 @@
 .react-datepicker__current-month, 
 .react-datepicker-time__header, 
 .react-datepicker-year-header {
-  color: var(--text-color, var(--text-color)) !important;
+  color: var(--text-color) !important;
 }
 
 .react-datepicker__day-name, 
 .react-datepicker__day, 
 .react-datepicker__time-name {
-  color: var(--text-color, var(--border-color)) !important;
+  color: var(--text-color) !important;
 }
 
 .react-datepicker__day:hover, 
 .react-datepicker__month-text:hover, 
 .react-datepicker__quarter-text:hover, 
 .react-datepicker__year-text:hover {
-  background-color: var(--halo-bg, var(--border-color)) !important;
+  background-color: var(--halo-bg) !important;
   border-radius: 50% !important;
 }
 
@@ -327,7 +357,7 @@
 .react-datepicker__month-text--in-selecting-range, 
 .react-datepicker__month-text--in-range {
   background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 75%) !important;
-  color: var(--text-color, var(--text-color)) !important;
+  color: var(--text-color) !important;
   border-radius: 0 !important;
 }
 
@@ -350,7 +380,7 @@
 }
 
 .react-datepicker__navigation-icon::before {
-  border-color: var(--text-color, var(--border-color)) !important;
+  border-color: var(--text-color) !important;
 }
 
 .react-datepicker__navigation:hover *::before {

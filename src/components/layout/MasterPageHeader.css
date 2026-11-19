@@ -27,8 +27,7 @@
   max-width: 100%;
 }
 
-.master-header-actions-row,
-.expanded-menu-row {
+.master-header-actions-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,7 +36,14 @@
   width: 100%;
 }
 
+/* Consolidated single declaration for Row 4 expanded menu (deduplicated + tokenized glow) */
 .expanded-menu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;  /* Center-align columns horizontally on desktop */
+  flex-wrap: nowrap;
+  gap: 24px;
+  width: 100%;
   padding: 12px 16px;
   background: transparent;
   /* Seamlessly inherits the parent background color */
@@ -51,11 +57,7 @@
   left: auto;
   /* Elevate above board stage navigation trays (z: 50), sticky grid headers (z: 11), and board toolbars (z: 100) */
   z-index: var(--z-sticky, 200);
-  width: 100%;
-  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px rgba(0, 255, 135, 0.05);
-  display: flex;
-  align-items: center;  /* Center-align columns horizontally on desktop */
-  gap: 24px;
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px color-mix(in srgb, var(--brand-green), transparent 95%);
 }
 
 .mobile-menu-header {
@@ -151,11 +153,13 @@
 
 
 
-/* In the expanded-menu-row, the left side takes remaining space, 
-   while the right side matches a fixed dropdown width for elegance. */
+/* In the expanded-menu-row, the left side takes remaining space without wrapping on mid-size screens
+   (tablets 769px–1024px where the menu renders inline), while the right side matches a fixed dropdown width. */
 .expanded-menu-row .master-header-left {
   flex: 1;
   min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .expanded-menu-row .master-header-right {
@@ -169,14 +173,6 @@
 /* Specific fix for view-mode-toggle positioning */
 .master-header-left .view-mode-toggle {
   margin-right: 4px;
-}
-
-/* Prevent view-mode-toggle + filter-group from wrapping on mid-size screens
-   (tablets 769px–1024px). The expanded-menu-row renders inline (not as a
-   mobile drawer) at these sizes, so flex-wrap must be suppressed here. */
-.expanded-menu-row .master-header-left {
-  flex-wrap: nowrap;
-  overflow: hidden;
 }
 
 .mobile-action-tray {

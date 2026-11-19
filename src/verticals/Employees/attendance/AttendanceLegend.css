@@ -1,33 +1,28 @@
 /* AttendanceLegend.css */
 
+/* Single wrapping flex row so legend items flow cleanly on desktop without forced 2-row stacking */
 .attendance-legend {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  width: 100%;
-}
-
-.attendance-legend__row {
-  display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 8px;
   width: 100%;
 }
 
 .attendance-legend__item {
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 6px 12px;
-  border-radius: var(--radius-button, 6px);
-  border: 1px solid var(--border-color);
+  padding: 5px 10px;
+  border-radius: var(--radius-button, 8px);
+  border: 1px solid color-mix(in srgb, var(--border-color), transparent 35%);
+  background: transparent;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .attendance-legend__label {
@@ -35,31 +30,28 @@
 }
 
 .attendance-legend__icon {
-  opacity: 1 !important;
+  opacity: 1;
+  flex-shrink: 0;
 }
 
 .attendance-legend__item--present,
-.attendance-legend__item--present-night { 
-  background: transparent;
-  color: var(--status-success, var(--status-success));
+.attendance-legend__item--present-night {
+  color: var(--status-success);
 }
-.attendance-legend__item--week-off { 
-  background: transparent;
+
+.attendance-legend__item--week-off,
+.attendance-legend__item--leave {
   color: var(--status-info, var(--status-neutral));
 }
-.attendance-legend__item--leave { 
-  background: transparent;
-  color: var(--status-info, var(--status-neutral));
-}
+
 .attendance-legend__item--absent,
 .attendance-legend__item--no-show,
-.attendance-legend__item--no-call-no-show { 
-  background: transparent;
-  color: var(--status-danger, var(--status-danger));
+.attendance-legend__item--no-call-no-show {
+  color: var(--status-danger);
 }
-.attendance-legend__item--pending { 
-  background: transparent;
-  color: var(--status-warning, var(--status-warning));
+
+.attendance-legend__item--pending {
+  color: var(--status-warning);
 }
 
 .attendance-legend__icon-pending {
@@ -69,9 +61,7 @@
 
 @media screen and (max-width: 768px) {
   .attendance-legend {
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    margin-bottom: 0.5rem;
+    gap: 6px;
   }
 
   .attendance-legend__item {

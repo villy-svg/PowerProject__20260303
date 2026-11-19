@@ -59,7 +59,9 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
   }, []);
 
   // ── Detect mode ───────────────────────────────────────────────────────────
-  const isRecordsMode = Array.isArray(records) && records.length > 0;
+  // Treat any passed records array (even while empty/loading) as records mode
+  // so record-scoped views never fall back to task search.
+  const isRecordsMode = Array.isArray(records);
 
   // ── Records search ────────────────────────────────────────────────────────
   const recordResults = useMemo(() => {
@@ -78,7 +80,8 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
           (rec.company_name|| '').toLowerCase().includes(lowerQ) ||
           (rec.contact_name|| '').toLowerCase().includes(lowerQ) ||
           (rec.role_code   || '').toLowerCase().includes(lowerQ) ||
-          (rec.dept_code   || '').toLowerCase().includes(lowerQ)
+          (rec.dept_code   || '').toLowerCase().includes(lowerQ) ||
+          (rec.hub_code    || '').toLowerCase().includes(lowerQ)
         );
       })
       .slice(0, 12);
@@ -252,7 +255,7 @@ function RecordResult({ rec, query, onClick, onEdit, onGoTo }) {
   // Derive a display name from whichever field exists
   const primaryName = rec.full_name || rec.name || rec.company_name || '—';
   const secondaryText = rec.email || rec.emp_code || rec.badge_id || rec.phone || '';
-  const metaText = rec.role_code || rec.dept_code || rec.status || '';
+  const metaText = rec.role_code || rec.dept_code || rec.hub_code || rec.status || '';
 
   return (
     <li className="search-result-item" role="option" onClick={onClick}>
