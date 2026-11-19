@@ -1,6 +1,6 @@
 /* ==========================================================================
    BOTTOM NAV — Mobile Primary Navigation Tray
-   MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below
+   Hidden on desktop via DesktopLayout.css (.desktop-layout .bottom-nav).
    ========================================================================== */
 .bottom-nav {
   position: fixed;
@@ -8,7 +8,7 @@
   left: 0;
   right: 0;
   z-index: 2005;
-  display: none;
+  display: block;
   background: color-mix(in srgb, var(--bg-color), transparent 5%);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -63,7 +63,7 @@
   height: 60px;
   padding-bottom: 0; /* Reset for pill mode */
   border-radius: 20px;
-  background: rgba(15, 15, 15, 0.85);
+  background: color-mix(in srgb, var(--bg-color), transparent 15%);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
@@ -79,16 +79,6 @@
 
 .bottom-nav.overlay-mode .nav-item .icon-wrapper {
   padding: 6px;
-}
-
-/* Hide on Desktop */
-@media screen and (min-width: 769px) {
-  .bottom-nav { display: none !important; }
-}
-
-/* Show on Mobile */
-@media screen and (max-width: 768px) {
-  .bottom-nav { display: block; }
 }
 
 /* --- CONTAINER & ITEMS --- */
@@ -131,12 +121,6 @@
   transition: all 0.3s ease;
 }
 
-.nav-item .nav-icon {
-  width: 20px;
-  height: 20px;
-  stroke-width: 1.8;
-}
-
 .nav-label {
   font-size: var(--font-xs);
   font-weight: 700;
@@ -168,11 +152,6 @@
     width: 18px !important;
     height: 18px !important;
   }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 /* --- CONFIG BOTTOM NAV LAYER --- */

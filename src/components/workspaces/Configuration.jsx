@@ -10,14 +10,14 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
   const actualViewMode = isMobile ? 'grid' : viewMode;
   const [testRunning, setTestRunning] = useState(false);
   
-  // Determine first available configuration section based on permissions and assignment
+  // Determine first available configuration section based on permissions, assignment, and lock state
   const getFirstAvailableSection = () => {
     if (!permissions || !permissions.scope) return 'hubs';
-    const hasHubs = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id);
+    const hasHubs = !verticals.CHARGING_HUBS?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id));
     if (hasHubs) return 'hubs';
-    const hasTeam = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id);
+    const hasTeam = !verticals.EMPLOYEES?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id));
     if (hasTeam) return 'team';
-    const hasClients = permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id);
+    const hasClients = !verticals.CLIENTS?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id));
     if (hasClients) return 'clients';
     return 'general';
   };
@@ -235,6 +235,9 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
           {verticalList.map(vertical => {
             const items = verticalConfigs[vertical.id] || [];
             if (items.length === 0) return null;
+
+            // Hide configuration tiles for locked verticals
+            if (vertical.locked) return null;
 
             // Filter items based on whether user has access to this specific vertical (if scope is assigned)
             const hasVerticalAccess = permissions.scope === 'global' || user.assignedVerticals?.includes(vertical.id);

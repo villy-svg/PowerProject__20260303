@@ -239,6 +239,8 @@ const UserProfile = ({
                         <span className="bank-value">{user.bankDetails.accountNumber || 'N/A'}</span>
                         <span className="bank-label">IFSC</span>
                         <span className="bank-value">{user.bankDetails.ifscCode || 'N/A'}</span>
+                        <span className="bank-label">PAN</span>
+                        <span className="bank-value">{user.bankDetails.panNumber || 'N/A'}</span>
                       </div>
                       {/* Show inline pending status below account details — confirms submission to the user */}
                       {isBankUpdatePending && (

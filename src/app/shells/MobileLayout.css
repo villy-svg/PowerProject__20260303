@@ -138,16 +138,6 @@
   align-items: center;
 }
 
-@keyframes slidePaneDown {
-  from {
-    transform: translateY(-100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
-}
-
 .mobile-layout .mobile-menu-header,
 .mobile-header-shell .mobile-menu-header {
   display: flex;
@@ -179,43 +169,7 @@
   width: 100%;
 }
 
-/* ── 3. Mobile Sidebar (Sub-Bottom Tray) ─────────────────────────────── */
-.mobile-layout .sidebar {
-  position: fixed;
-  top: auto;
-  bottom: 0;
-  left: 0;
-  height: auto;
-  max-height: 85dvh;
-  width: 100vw;
-  max-width: 100%;
-  transform: translateY(100%);
-  opacity: 1 !important;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 -10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
-  border-radius: 24px 24px 0 0;
-  z-index: 3010;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.mobile-layout .sidebar .sidebar-content-wrapper {
-  width: 100%;
-  height: auto;
-  min-height: 40dvh;
-}
-
-.mobile-layout .sidebar.open {
-  transform: translateY(0);
-}
-
-.mobile-layout .sidebar:not(.open) {
-  width: 100vw;
-  max-width: 100%;
-  transform: translateY(100%);
-}
-
-/* ── 4. Mobile Sub-Sidebar ───────────────────────────────────────────── */
+/* ── 3. Mobile Sub-Sidebar ───────────────────────────────────────────── */
 .mobile-layout .sub-sidebar {
   width: 240px;
   position: fixed;
@@ -325,23 +279,6 @@
   opacity: 1 !important;
 }
 
-.mobile-layout .mobile-logo-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  position: absolute;
-  left: 1rem;
-  top: calc(10px + var(--safe-top, 0px));
-  z-index: 3011;
-  transition: transform 0.2s ease;
-  padding: 0;
-  width: 44px;
-  height: 44px;
-}
-
 /* ── 7. Ultra-Compact Viewport (≤360px, iPhone SE) ───────────────────── */
 @media screen and (max-width: 360px) {
   .expanded-menu-row {
@@ -402,12 +339,6 @@
   }
 }
 
-@media screen and (max-width: 480px) {
-  .mobile-layout .sidebar {
-    width: 100%;
-  }
-}
-
 .mobile-menu-sidebar-filters {
   width: 100% !important;
   margin-top: 4px !important;
@@ -438,17 +369,7 @@
   width: 100% !important;
 }
 
-/* ── 8. Dashboard Search Bar ─────────────────────────────────────────── */
-/* Clears the fixed brand-title-centered overlay (position:fixed, ~30-45px tall)
-   with a small top offset. No app-header is rendered on mobile dashboard,
-   so this value only needs to be slightly larger than the title's fixed height. */
-.mobile-dashboard-search {
-  padding: 55px 1rem 0.25rem;
-  width: 100%;
-  flex-shrink: 0;
-}
-
-/* ── 9. Soft Keyboard Adaptation ─────────────────────────────────────── */
+/* ── 8. Soft Keyboard Adaptation ─────────────────────────────────────── */
 /*
  * When the soft keyboard is open (detected by useVisualViewport hook),
  * body receives data-keyboard="open". These rules adapt the layout

@@ -33,14 +33,14 @@
 }
 
 .user-name {
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   font-weight: 600;
   font-size: 0.85rem;
   white-space: nowrap;
 }
 
 .user-role {
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--text-color), transparent 50%);
   font-size: 0.7rem;
   font-weight: 500;
   margin-top: 2px;
@@ -51,7 +51,7 @@
   width: 32px;
   height: 32px;
   background-color: transparent; 
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -91,19 +91,6 @@
   padding: 10px 8px;
 }
 
-.dropdown-user-avatar {
-  width: 36px;
-  height: 36px;
-  background: var(--brand-green, var(--status-success));
-  color: var(--bg-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-}
-
 .dropdown-user-details {
   display: flex;
   flex-direction: column;
@@ -116,7 +103,7 @@
 }
 
 .dropdown-user-role {
-  color: rgba(255, 255, 255, 0.5);
+  color: color-mix(in srgb, var(--text-color), transparent 50%);
   font-size: 0.75rem;
 }
 
@@ -146,7 +133,7 @@
   align-items: center;
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text-color), transparent 60%);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -154,7 +141,7 @@
 .dropdown-action-btn {
   background: none;
   border: none;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   font-size: 0.7rem;
   font-weight: 500;
   cursor: pointer;
@@ -169,7 +156,7 @@
 
 .dropdown-static-content {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: color-mix(in srgb, var(--text-color), transparent 20%);
 }
 
 .bank-info-grid {
@@ -180,7 +167,7 @@
 }
 
 .bank-label {
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text-color), transparent 60%);
   font-size: 0.75rem;
 }
 
@@ -191,7 +178,7 @@
 }
 
 .text-muted {
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text-color), transparent 60%);
   font-size: 0.8rem;
 }
 
@@ -222,16 +209,14 @@
 }
 
 .dropdown-item.destructive:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: color-mix(in srgb, var(--status-danger), transparent 85%);
   color: var(--status-danger);
 }
 
-.dropdown-item.nav-item {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+.user-dropdown-menu .dropdown-item.nav-item {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
 .dropdown-item.nav-item span {
@@ -244,8 +229,7 @@
 }
 
 .dropdown-item.update-item {
-  color: var(--status-warning, var(--status-warning));
-  gap: 8px;
+  color: var(--status-warning);
 }
 
 .dropdown-item.update-item:hover {
@@ -255,7 +239,7 @@
 .update-dot {
   width: 8px;
   height: 8px;
-  background: var(--status-warning, var(--status-warning));
+  background: var(--status-warning);
   border-radius: 50%;
   animation: pulse-dot 2s infinite;
 }
@@ -281,7 +265,7 @@
   gap: 4px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: color-mix(in srgb, var(--text-color), transparent 40%);
   font-size: 0.8rem;
   cursor: pointer;
   padding: 4px 8px;
@@ -316,7 +300,7 @@
 }
 
 .dropdown-search-box input:focus {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: color-mix(in srgb, var(--text-color), transparent 70%);
 }
 
 .dropdown-scroll-list {
@@ -353,13 +337,13 @@
 
 .user-select-info .user-role-sub {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text-color), transparent 60%);
 }
 
 .empty-search {
   padding: 16px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
+  color: color-mix(in srgb, var(--text-color), transparent 60%);
   font-size: 0.8rem;
 }
 
@@ -444,7 +428,7 @@
 .dropdown-version {
   padding: 6px 10px 4px;
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.25);
+  color: color-mix(in srgb, var(--text-color), transparent 75%);
   font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -454,6 +438,7 @@
 
 
 /* Manual OTA Update states in UserProfile dropdown */
+.dropdown-item.update-item,
 .dropdown-item.update-item--idle,
 .dropdown-item.update-item--checking,
 .dropdown-item.update-item--up-to-date,

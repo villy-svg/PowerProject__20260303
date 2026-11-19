@@ -1,5 +1,4 @@
-/* 1. Sidebar Container */
-/* MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below */
+/* 1. Sidebar Container (Desktop inline panel) */
 .sidebar {
   position: relative;
   height: 100dvh;
@@ -46,20 +45,6 @@
   align-items: center; 
   justify-content: flex-start;
   margin-bottom: 20px; 
-}
-.sidebar-logo-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  line-height: 0;
-  transition: opacity 0.2s ease;
-}
-.sidebar-logo-btn:hover {
-  opacity: 0.7;
 }
 /* 6. Navigation Styling */
 .sidebar-nav ul {
@@ -192,143 +177,13 @@
 .sidebar-bottom-section .nav-divider {
   margin-bottom: 15px;
 }
-/* 8. Mobile Responsiveness
-   - ≤768px: Sidebar becomes an off-canvas overlay drawer.
-   - ≥769px: Sidebar is a normal in-flow panel (desktop/large tablet).
-   --------------------------------------------------------
-   Z-INDEX HIERARCHY (must not change these values):
-     Sidebar drawer:  3010  (topmost)
-     Dark overlay:    3000  (covers header + logo + title beneath it)
-     Header bar:      2001  (--z-header)
-     Logo button:     2011  (calc(--z-header + 10))
-     Brand title:     2021  (calc(--z-header + 20))
-   -------------------------------------------------------- */
-@media screen and (max-width: 768px) {
-  /* Sidebar becomes a fixed bottom tray */
-  .sidebar {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    height: auto;
-    max-height: 85dvh;
-    width: 100vw;
-    max-width: 100%;
-    transform: translateY(100%);
-    opacity: 1 !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 -10px 40px color-mix(in srgb, var(--bg-color), transparent 50%);
-    border-radius: 24px 24px 0 0;
-    z-index: 3010;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .sidebar .sidebar-content-wrapper {
-    width: 100%;
-    height: auto;
-    min-height: 40dvh;
-  }
-  .sidebar.open {
-    transform: translateY(0);
-  }
-  .sidebar:not(.open) {
-    width: 100vw;
-    max-width: 100%;
-    transform: translateY(100%);
-  }
-  .mobile-logo-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    position: absolute;
-    left: 1rem;
-    top: calc(10px + var(--safe-top, 0px));
-    z-index: 3011;
-    transition: transform 0.2s ease;
-    padding: 0;
-    width: 44px;
-    height: 44px;
-  }
-  .mobile-logo-btn .logo-svg {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-  }
-  .mobile-logo-btn:hover {
-    transform: scale(1.05);
-  }
-}
-@media screen and (min-width: 769px) {
-  .mobile-logo-btn {
-    display: none;
-  }
-}
-/* Dark overlay — ONLY shown on mobile (≤768px) when drawer is active */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: color-mix(in srgb, var(--bg-color), transparent 50%);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  z-index: 3000;
-}
-@media screen and (max-width: 768px) {
-  .sidebar-overlay.active {
-    display: block;
-  }
-}
 
-/* ── Tray Grid Layout (App Drawer Style) ── */
+/* 8. Mobile Tray Grid Layout (App Drawer Style for MobileSidebar.jsx) */
 .mobile-layout .tray-layout {
   padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-}
-
-.tray-drag-handle {
-  width: 40px;
-  height: 4px;
-  background-color: var(--border-color);
-  border-radius: 4px;
-  margin: 12px auto 0 auto;
-}
-
-.tray-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tray-header h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.close-tray-btn {
-  background: transparent;
-  border: none;
-  color: var(--brand-mint, var(--brand-green));
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 4px 8px;
-  cursor: pointer;
-}
-
-.tray-scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
 
 .tray-section {
@@ -412,12 +267,6 @@
   color: var(--brand-mint, var(--brand-green));
 }
 
-.tray-card.small .tray-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-}
-
 .tray-card span {
   font-size: 0.7rem;
   font-weight: 500;
@@ -456,16 +305,4 @@
   gap: 16px;
   overflow-y: auto;
   padding-bottom: 8px;
-}
-
-.mobile-sidebar-shell .sub-tray-option-btn.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.mobile-sidebar-shell .sub-tray-option-btn.locked:hover {
-  background: color-mix(in srgb, var(--text-color), transparent 98%);
-  border-color: color-mix(in srgb, var(--text-color), transparent 95%);
-  color: rgba(255, 255, 255, 0.7);
-  transform: none;
 }

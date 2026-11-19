@@ -50,18 +50,18 @@ const ConfigBottomNav = ({
   const isScrollVisible = useScrollDirection(10, 100);
   const isHidden = !isScrollVisible && !showBottomNavOverlay;
 
-  // Filter tabs based on vertical permissions
+  // Filter tabs based on vertical permissions and lock state
   const filteredTabs = CONFIG_TABS.filter(tab => {
     if (tab.id === 'switch') return true;
     if (tab.id === 'general') return true;
     if (tab.id === 'hubs') {
-      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id);
+      return !verticals.CHARGING_HUBS?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CHARGING_HUBS?.id));
     }
     if (tab.id === 'team') {
-      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id);
+      return !verticals.EMPLOYEES?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.EMPLOYEES?.id));
     }
     if (tab.id === 'clients') {
-      return permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id);
+      return !verticals.CLIENTS?.locked && (permissions.scope === 'global' || user.assignedVerticals?.includes(verticals.CLIENTS?.id));
     }
     return false;
   });

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { supabase } from '../../services/core/supabaseClient';
 import {
   createBankUpdateRequest,
 } from '../../services/employees/employeeRequestService';
@@ -11,6 +10,7 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
     accountName: user?.bankDetails?.accountName || '',
     accountNumber: user?.bankDetails?.accountNumber || '',
     ifscCode: user?.bankDetails?.ifscCode || '',
+    panNumber: user?.bankDetails?.panNumber || '',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +20,9 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
 
   const handleChange = (e) => {
     let { name, value } = e.target;
+    // Normalize IFSC and PAN to uppercase; strip spaces from PAN so pasted values stay canonical
     if (name === 'ifscCode') value = value.toUpperCase();
+    if (name === 'panNumber') value = value.replace(/\s+/g, '').toUpperCase();
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -40,24 +42,46 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
       return;
     }
     
+    const oldDetails = {
+      accountName: user.bankDetails?.accountName || '',
+      accountNumber: user.bankDetails?.accountNumber || '',
+      ifscCode: user.bankDetails?.ifscCode || '',
+      panNumber: user.bankDetails?.panNumber || '',
+    };
+
+    const trimmedPan = formData.panNumber?.replace(/\s+/g, '').trim().toUpperCase() || '';
+
+    const newDetails = {
+      accountName: formData.accountName?.trim() ? formData.accountName.trim() : oldDetails.accountName,
+      accountNumber: formData.accountNumber?.trim() ? formData.accountNumber.trim() : oldDetails.accountNumber,
+      ifscCode: formData.ifscCode?.trim() ? formData.ifscCode.trim().toUpperCase() : oldDetails.ifscCode,
+      // Mirror RPC fallback: blank input preserves existing PAN instead of accidentally wiping it
+      panNumber: trimmedPan ? trimmedPan : oldDetails.panNumber,
+    };
+
+    // Validate Indian PAN format (5 letters + 4 digits + 1 letter) when a new/updated PAN is entered
+    const panChanged = newDetails.panNumber !== (oldDetails.panNumber || '').trim().toUpperCase();
+    if (trimmedPan && panChanged && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(trimmedPan)) {
+      setError('Invalid PAN format. Expected 10 characters (e.g. ABCDE1234F).');
+      return;
+    }
+
+    // Prevent submitting a no-op approval request when none of the 4 fields actually changed
+    const hasChanges =
+      newDetails.accountName !== oldDetails.accountName ||
+      newDetails.accountNumber !== oldDetails.accountNumber ||
+      newDetails.ifscCode !== (oldDetails.ifscCode || '').trim().toUpperCase() ||
+      panChanged;
+
+    if (!hasChanges) {
+      setError('No changes detected in your bank details.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
     
     try {
-      const oldDetails = {
-        accountName: user.bankDetails?.accountName || '',
-        accountNumber: user.bankDetails?.accountNumber || '',
-        ifscCode: user.bankDetails?.ifscCode || '',
-        panNumber: user.bankDetails?.panNumber || '',
-      };
-
-      const newDetails = {
-        accountName: formData.accountName?.trim() ? formData.accountName.trim() : oldDetails.accountName,
-        accountNumber: formData.accountNumber?.trim() ? formData.accountNumber.trim() : oldDetails.accountNumber,
-        ifscCode: formData.ifscCode?.trim() ? formData.ifscCode.trim() : oldDetails.ifscCode,
-        panNumber: oldDetails.panNumber,
-      };
-
       const res = await createBankUpdateRequest(user.employeeId, newDetails);
       if (res?.status === 'duplicate') {
         setError("A bank details update request is already pending approval.");
@@ -155,6 +179,23 @@ const BankChangeRequestModal = ({ user, isBankUpdatePending, onClose, onSuccess 
                     placeholder="IFSC Code"
                     className="u-text-upper"
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>PAN Number <span className="optional">(Optional)</span></label>
+                <div className="form-input-container">
+                  <input
+                    type="text"
+                    name="panNumber"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    placeholder="e.g. ABCDE1234F"
+                    maxLength={10}
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    className="u-text-upper"
                   />
                 </div>
               </div>

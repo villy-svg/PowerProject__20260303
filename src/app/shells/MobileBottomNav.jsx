@@ -49,8 +49,10 @@ const MobileBottomNav = ({
   const hasSearch = !searchProps?.hideSearchBar;
   const isBottomNavExpanded = hasSearch && isSearchOpen;
 
-  const isAssigned = (vId) => {
-    if (!vId) return true; // Dashboard is always assigned
+  // Exclude locked verticals and unassigned verticals from the persistent bottom nav
+  const isAvailable = (vId) => {
+    if (!vId) return true; // Dashboard is always available
+    if (verticals?.[vId]?.locked) return false;
     return user?.assignedVerticals?.includes(vId) || permissions?.scope === 'global';
   };
 
@@ -59,7 +61,7 @@ const MobileBottomNav = ({
     { id: verticals.CHARGING_HUBS?.id || 'CHARGING_HUBS', label: 'Hubs', Icon: IconHubs },
     { id: verticals.EMPLOYEES?.id || 'EMPLOYEES', label: 'Team', Icon: IconPeople },
     { id: verticals.CLIENTS?.id || 'CLIENTS', label: 'Clients', Icon: IconDatabase },
-  ].filter(item => isAssigned(item.id));
+  ].filter(item => isAvailable(item.id));
 
   // Phase 3 Architecture: MobileBottomNav is the primary navigation on the dashboard.
   // Inside verticals, it is replaced by the mobile-action-tray (MasterPageHeader).

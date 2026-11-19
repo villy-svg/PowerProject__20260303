@@ -47,11 +47,6 @@
 
 /* ── 2. Desktop Header ───────────────────────────────────────────────── */
 /* The desktop header is always visible — no scroll-aware hiding */
-.desktop-header-shell {
-  /* Inherits from .master-page-header base styles */
-  /* No sticky behavior, no transform animations */
-}
-
 .desktop-header-shell .header-row-2 {
   /* Description is always visible on desktop */
   display: block;
@@ -75,19 +70,10 @@
   backdrop-filter: blur(20px);
   animation: slideDown 0.2s ease-out;
   width: 100%;
-  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px rgba(0, 255, 135, 0.05);
+  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px color-mix(in srgb, var(--brand-green), transparent 95%);
 }
 
-/* ── 3. Desktop Sidebar ──────────────────────────────────────────────── */
-/* Sidebar is an inline flex panel on desktop — never fixed/overlay */
-.desktop-layout .sidebar {
-  position: relative;
-  height: 100dvh;
-  z-index: 1005;
-  /* No fixed positioning, no translateX */
-}
-
-/* ── 4. Desktop Workspace ────────────────────────────────────────────── */
+/* ── 3. Desktop Workspace ────────────────────────────────────────────── */
 /* Sub-sidebar is inline on desktop — no backdrop needed */
 .desktop-layout .sidebar-backdrop,
 .desktop-layout .menu-backdrop {

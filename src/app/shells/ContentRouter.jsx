@@ -44,7 +44,12 @@ import { useTaskBoard } from '../contexts/TaskBoardContext';
 import { useAuth } from '../contexts/AuthContext';
 
 // Registry
-import { resolveVerticalComponents, resolveVerticalLabels, resolveHeaderClickTarget } from '../../registry/verticalRegistry';
+import {
+  resolveVerticalComponents,
+  resolveVerticalLabels,
+  resolveHeaderClickTarget,
+  resolveVerticalRootId,
+} from '../../registry/verticalRegistry';
 
 const ContentRouter = ({
   verticals,
@@ -79,7 +84,24 @@ const ContentRouter = ({
   // Helper for BottomNav overlay toggle
   const onShowBottomNav = () => setShowBottomNavOverlay(prev => !prev);
 
-  if (!activeVertical) {
+  // Guard against direct or stale navigation into any locked vertical or its sub-routes
+  const resolvedRootId = activeVertical ? resolveVerticalRootId(activeVertical, verticals) : null;
+  const isClientMgmtRoute =
+    activeVertical === 'client_category_management' ||
+    activeVertical === 'client_service_management' ||
+    activeVertical === 'client_billing_model_management';
+  const isLockedRoute = Boolean(
+    (resolvedRootId && verticals?.[resolvedRootId]?.locked) ||
+    (isClientMgmtRoute && verticals?.CLIENTS?.locked)
+  );
+
+  React.useEffect(() => {
+    if (isLockedRoute) {
+      setActiveVertical(null);
+    }
+  }, [isLockedRoute, setActiveVertical]);
+
+  if (!activeVertical || isLockedRoute) {
     return (
       <ExecutiveSummary
         tasks={tasks}

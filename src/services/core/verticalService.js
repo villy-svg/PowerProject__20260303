@@ -5,6 +5,32 @@
  * Canonical location: src/services/core/verticalService.js
  */
 import { supabase } from './supabaseClient';
+import { isVerticalForceLocked } from '../../constants/verticals';
+
+/**
+ * Applies frontend lock overrides to a vertical payload (fresh or cached)
+ * so UI-locked verticals remain locked regardless of DB or localStorage state.
+ */
+const applyLockOverrides = (result) => {
+  if (!result || !Array.isArray(result.list)) return result;
+
+  const list = result.list.map(v => ({
+    ...v,
+    locked: !!v.locked || isVerticalForceLocked(v.id),
+  }));
+
+  const map = {};
+  list.forEach(v => {
+    const existing = result.map?.[v.id] || {};
+    map[v.id] = {
+      ...existing,
+      ...v,
+      locked: !!v.locked,
+    };
+  });
+
+  return { list, map };
+};
 
 export const verticalService = {
   /**
@@ -20,7 +46,7 @@ export const verticalService = {
         const cached = localStorage.getItem('power_project_cache_verticals');
         if (cached) {
           console.warn('PowerProject: Using cached vertical configurations.');
-          return JSON.parse(cached);
+          return applyLockOverrides(JSON.parse(cached));
         }
       }
 
@@ -34,10 +60,11 @@ export const verticalService = {
       // Convert array to a lookup object indexed by ID (matches frontend VERTICALS constant)
       const verticalMap = {};
       (data || []).forEach(v => {
+        const isLocked = !!v.locked || isVerticalForceLocked(v.id);
         verticalMap[v.id] = {
           id: v.id,
           label: v.label,
-          locked: !!v.locked,
+          locked: isLocked,
           order: v.order
         };
       });
@@ -46,7 +73,7 @@ export const verticalService = {
         list: (data || []).map(v => ({
           id: v.id,
           label: v.label,
-          locked: !!v.locked
+          locked: !!v.locked || isVerticalForceLocked(v.id)
         })),
         map: verticalMap
       };
@@ -61,7 +88,7 @@ export const verticalService = {
       console.error('VerticalService Error:', err);
       // Fallback to cache on any error if we have it
       const cached = localStorage.getItem('power_project_cache_verticals');
-      if (cached) return JSON.parse(cached);
+      if (cached) return applyLockOverrides(JSON.parse(cached));
       throw err;
     }
   }

@@ -74,7 +74,9 @@ export const formatEmployeeApprovalSummary = (task) => {
     return `${payload.requestedByName || 'An editor'} requested to mark ${payload.employeeName || 'this employee'} as Inactive. Open History to approve or reject.`;
   }
   if (payload.type === REQUEST_TYPES.BANK_UPDATE) {
-    return `${payload.employeeName || 'Employee'} requested a bank details update (A/C: ${payload.newDetails?.accountNumber || 'N/A'}, IFSC: ${payload.newDetails?.ifscCode || 'N/A'}). Open History to approve or reject.`;
+    // Include PAN in mobile task summaries when present so PAN-only updates are clear to approvers
+    const panPart = payload.newDetails?.panNumber ? `, PAN: ${payload.newDetails.panNumber}` : '';
+    return `${payload.employeeName || 'Employee'} requested a bank details update (A/C: ${payload.newDetails?.accountNumber || 'N/A'}, IFSC: ${payload.newDetails?.ifscCode || 'N/A'}${panPart}). Open History to approve or reject.`;
   }
   return task?.description || '';
 };
