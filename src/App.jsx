@@ -34,9 +34,10 @@ import PendingActivation from './components/auth/PendingActivation';
 import ProfileNameSetup from './components/auth/ProfileNameSetup';
 import OnlineSyncBanner from './components/ui/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
-import { TUTORIAL_FLOWS, parseRuleSlides } from './features/tutorials/TutorialHub';
+import { TUTORIAL_FLOWS } from './features/tutorials/TutorialHub';
+import { buildRuleFlow } from './features/tutorials/tutorialUtils';
 import { fetchRules } from './services/employees/rulesService';
-import { getRuleLogo, LOGO_KEYWORD_MAPPINGS } from './features/tutorials/logoConfig';
+import { LOGO_KEYWORD_MAPPINGS } from './features/tutorials/logoConfig';
 import OTAUpdateToast from './components/ota/OTAUpdateToast';
 import OTARestartModal from './components/ota/OTARestartModal';
 import { otaUpdateService } from './services/core/otaUpdateService';
@@ -233,30 +234,7 @@ function AppShell({ verticals, verticalList }) {
             }
 
             specialRules.forEach(rule => {
-              const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
-              const flowSlides = parsedSlides.map((slide, idx) => {
-                const imgPath = getRuleLogo(rule.title, idx);
-                return {
-                  image: imgPath,
-                  fallbackImage: imgPath,
-                  title: slide.isIntro ? rule.title : slide.title,
-                  text: slide.text,
-                  annotations: []
-                };
-              });
-
-              queue.push({
-                id: `rule_${rule.id}`,
-                title: rule.title,
-                category: rule.category?.name || 'Rules & Regulations',
-                description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
-                accessLevel: 'All Users',
-                badgeColor: 'rgba(16, 185, 129, 0.1)',
-                badgeText: '#10b981',
-                layout: 'onboarding',
-                desktopSlides: flowSlides,
-                mobileSlides: flowSlides
-              });
+              queue.push(buildRuleFlow(rule));
             });
 
             if (queue.length > 0) {

@@ -55,6 +55,7 @@ component already listed under a `Draft`, `In Review`, or `Approved` feature, yo
 | [Mobile Profile "Update App" Button](./ota_manual_update_trigger.md) | Implemented | 2026-10-27 | None | `UserProfile.jsx`, `UserProfile.css`, `OTAContext.jsx`, `useOTAUpdate.js`, `otaUpdateService.js` | Antigravity session |
 | [Remarks Manager Grouping, Collapsible Rows & Grade Tags](./remarks_manager_grouping_and_tags.md) | Implemented | 2026-11-13 | None | `TaskController.jsx`, `TaskKanbanView.jsx`, `TaskListView.jsx`, `ListViewRow.jsx`, `TaskCard.jsx`, `remarksBoard.js` | Antigravity session |
 | [Board Menu Control Standardization & Modularization](./board_menu_standardization.md) | Implemented | 2026-11-18 | None | `src/components/ui/board-menu/*`, `TaskController.jsx`, `HubManagement.jsx`, `HubFunctionManagement.jsx`, `DailyTasksManagement.jsx`, `MasterPageHeader.css`, `globalTheme.css` | Antigravity session |
+| [Tutorial Rich Text Formatting, Alignment & Associated CSS Audit](./tutorial_text_alignment_and_css_audit.md) | Implemented | 2026-11-19 | `employee_rules` (existing `metadata` JSONB) | `TutorialSlideshowViewer.jsx`, `TutorialFormModal.jsx`, `TutorialHub.jsx`, `TutorialSlideshowViewer.css`, `EmployeeRulesBoard.jsx`, `Icons.jsx`, `App.jsx` | Antigravity session |
 
 ---
 

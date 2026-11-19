@@ -4,46 +4,11 @@ import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
 import { fetchRules, deleteRule } from '../../services/employees/rulesService';
-import { getRuleLogo } from './logoConfig';
+import { buildRuleFlow, parseRuleSlides } from './tutorialUtils';
 import { useQuery } from '@tanstack/react-query';
 import { IconEdit, IconPlus, IconTrash } from '../../components/ui/Icons';
-export { TUTORIAL_FLOWS };
+export { TUTORIAL_FLOWS, parseRuleSlides };
 import './TutorialSlideshowViewer.css';
-
-/* ─── Parse Rule into Slides/Tutorial Pages ───────────────────── */
-// Stop automatic bullet/number page-splitting: only split pages on explicit ---PAGE_BREAK--- delimiter added manually by user.
-export const parseRuleSlides = (title, content = '') => {
-  const trimmedContent = content.replace(/^\s*\n+|\n+\s*$/g, '');
-
-  if (!trimmedContent.includes('---PAGE_BREAK---')) {
-    return [
-      {
-        title: title,
-        text: trimmedContent,
-        isIntro: true
-      }
-    ];
-  }
-
-  const rawPages = trimmedContent.split(/\n?---PAGE_BREAK---\n?/);
-  return rawPages.map((pageContent, index) => {
-    const trimmedPage = pageContent.replace(/^\s*\n+|\n+\s*$/g, '');
-    const lines = trimmedPage.split('\n');
-    let slideTitle = index === 0 ? title : `Page ${index + 1}`;
-    let slideText = trimmedPage;
-
-    if (lines[0]?.trim().startsWith('### ')) {
-      slideTitle = lines[0].trim().substring(4).trim() || slideTitle;
-      slideText = lines.slice(1).join('\n').replace(/^\s*\n+|\n+\s*$/g, '');
-    }
-
-    return {
-      title: slideTitle,
-      text: slideText,
-      isIntro: index === 0
-    };
-  });
-};
 
 const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
   const [platform, setPlatform] = useState('desktop'); // 'desktop' | 'mobile'
@@ -59,36 +24,8 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
     queryFn: () => fetchRules({ activeOnly: true }),
   });
 
-  const ruleFlows = useMemo(() => {
-    return rulesData.map(rule => {
-      const parsedSlides = parseRuleSlides(rule.title, rule.content || '');
-      const flowSlides = parsedSlides.map((slide, idx) => {
-        const imgPath = getRuleLogo(rule.title, idx);
-        return {
-          image: imgPath,
-          fallbackImage: imgPath,
-          title: slide.isIntro ? rule.title : slide.title,
-          text: slide.text,
-          annotations: []
-        };
-      });
-
-      return {
-        id: `rule_${rule.id}`,
-        title: rule.title,
-        category: rule.category?.name || 'Rules & Regulations',
-        category_id: rule.category_id,
-        content: rule.content,
-        description: rule.impact || `Interactive guidelines detailing ${rule.title}.`,
-        accessLevel: 'All Users',
-        badgeColor: 'rgba(16, 185, 129, 0.1)',
-        badgeText: '#10b981',
-        layout: 'onboarding',
-        desktopSlides: flowSlides,
-        mobileSlides: flowSlides
-      };
-    });
-  }, [rulesData]);
+  // Use shared buildRuleFlow helper so metadata & per-slide textAlign stay in sync with App.jsx
+  const ruleFlows = useMemo(() => rulesData.map(buildRuleFlow), [rulesData]);
 
   const loadRules = useCallback(() => {
     refetchRulesData();

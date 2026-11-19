@@ -65,7 +65,6 @@
 }
 
 .category-section-title {
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: clamp(1.1rem, 2.5vw, 1.3rem);
   font-weight: 800;
   color: var(--text-color);
@@ -146,7 +145,6 @@
 }
 
 .flow-card-title {
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-color);
@@ -189,7 +187,6 @@
 }
 
 .version-btn-title {
-  font-family: 'Inter', system-ui, sans-serif;
   font-weight: 800;
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -269,7 +266,6 @@
 
 .slideshow-flow-title {
   margin: 2px 0 0 0;
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 1.02rem;
   font-weight: 800;
   color: var(--text-color);
@@ -368,7 +364,7 @@
     border-color: var(--brand-green);
   }
   50% {
-    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 25px rgba(45, 212, 191, 0.4);
+    box-shadow: 0 0 0 9999px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 25px color-mix(in srgb, var(--brand-green), transparent 60%);
     border-color: var(--text-color);
   }
   100% {
@@ -377,15 +373,15 @@
   }
 }
 
-/* Annotation Thought/Speech Bubbles */
+/* Annotation Thought/Speech Bubbles — uses CSS variables for Light & Dark theme parity */
 .annotation-thought-bubble {
   position: absolute;
-  background: rgba(18, 18, 20, 0.85);
-  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--bg-color), transparent 12%);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 12px 16px;
   width: 240px;
-  box-shadow: var(--shadow-premium), 0 0 10px rgba(45, 212, 191, 0.1);
+  box-shadow: var(--shadow-premium), 0 0 10px var(--halo-glow);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   pointer-events: none;
@@ -406,7 +402,6 @@
 }
 
 .thought-bubble-text {
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.8rem;
   line-height: 1.45;
   color: var(--text-color);
@@ -422,7 +417,7 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid rgba(18, 18, 20, 0.85);
+  border-top: 8px solid color-mix(in srgb, var(--bg-color), transparent 12%);
 }
 
 /* Adjust pointer and pulse styles for bottom-aligned thought bubbles */
@@ -431,7 +426,7 @@
   bottom: auto;
   top: -8px;
   border-top: none;
-  border-bottom: 8px solid rgba(18, 18, 20, 0.85);
+  border-bottom: 8px solid color-mix(in srgb, var(--bg-color), transparent 12%);
 }
 
 .annotation-thought-bubble.align-bottom-right .thought-bubble-pulse,
@@ -503,10 +498,10 @@
 
 .slideshow-caption-text {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.84rem;
   line-height: 1.45;
   color: var(--text-color);
+  width: 100%;
 }
 
 /* Slideshow Navigation Controls */
@@ -535,10 +530,6 @@
   pointer-events: none;
 }
 
-.next-action-btn {
-  --stage-accent: var(--brand-green);
-}
-
 .slideshow-step-dots {
   display: flex;
   gap: 8px;
@@ -554,7 +545,7 @@
 }
 
 .step-dot-indicator:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: color-mix(in srgb, var(--text-color), transparent 60%);
 }
 
 .step-dot-indicator.active {
@@ -699,7 +690,6 @@
   border: none;
   color: var(--text-color);
   opacity: 0.5;
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -749,13 +739,7 @@
   margin-bottom: 8px;
 }
 
-.onboarding-image.logo-image {
-  max-width: 100%;
-  max-height: 100%;
-}
-
 .onboarding-title {
-  font-family: 'Inter', system-ui, sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-color);
@@ -764,14 +748,15 @@
   flex-shrink: 0;
 }
 
+/* Body text spans full width so u-text-left / u-text-center / u-text-right align cleanly inside flex-centered parent */
 .onboarding-text {
+  width: 100%;
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--text-color);
-  opacity: 0.65;
+  opacity: 0.72;
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
 
 .onboarding-footer {
@@ -800,45 +785,32 @@
   background: var(--brand-green);
   border-radius: 4px;
   transform: none;
-  box-shadow: 0 0 12px rgba(45, 212, 191, 0.4);
+  box-shadow: 0 0 12px var(--halo-glow);
 }
 
+/* Inherits base .halo-button colors, border, font-weight, and hover glow from globalTheme.css */
 .halo-button.onboarding-next-btn {
-  --stage-accent: var(--brand-green);
   width: 100%;
   padding: 12px;
   font-size: 1rem;
-  border-radius: var(--radius-button, 12px);
-  background: var(--halo-bg);
-  color: var(--brand-green);
-  font-weight: 800;
-  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 60%);
   box-shadow: 0 8px 24px var(--halo-glow);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.halo-button.onboarding-next-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  background: color-mix(in srgb, var(--brand-green), transparent 85%);
-  border-color: var(--brand-green);
-  box-shadow: 0 12px 32px var(--halo-glow);
 }
 
 @media screen and (max-height: 700px) {
   .onboarding-image-container {
-    max-width: 200px;
-    margin-bottom: 20px;
+    max-width: 120px;
+    height: 90px;
+    margin-bottom: 8px;
   }
   .onboarding-title {
-    font-size: 1.3rem;
-    margin-bottom: 12px;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
   }
   .onboarding-text {
-    font-size: 0.85rem;
+    font-size: 0.84rem;
   }
   .onboarding-footer {
-    gap: 20px;
-    padding-top: 16px;
+    gap: 10px;
   }
 }
 
@@ -882,37 +854,35 @@
   gap: 0.5rem;
 }
 
-/* Editor text input */
-.slideshow-editor__input {
-  width: 100%;
-  padding: 0.5rem;
-  background: color-mix(in srgb, var(--text-color), transparent 95%);
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  border-radius: 4px;
-  color: var(--text-color, var(--text-color));
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-/* Smaller editor input variant used in the modal footer */
-.slideshow-editor__input--sm {
-  font-size: 0.95rem;
-  padding: 0.4rem;
-}
-
-/* Editor textarea */
+/* Shared editor text input & textarea base styles (deduplicated) */
+.slideshow-editor__input,
 .slideshow-editor__textarea {
   width: 100%;
   padding: 0.5rem;
   background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  border-radius: 4px;
-  color: var(--text-color, var(--text-color));
+  border-radius: 6px;
+  color: var(--text-color);
+  font-family: inherit;
+}
+
+.slideshow-editor__input {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.slideshow-editor__textarea {
   font-size: 0.9rem;
+  line-height: 1.5;
   resize: vertical;
 }
 
-/* Smaller editor textarea variant used in the modal footer */
+/* Smaller editor variants used in the modal footer */
+.slideshow-editor__input--sm {
+  font-size: 0.95rem;
+  padding: 0.4rem;
+}
+
 .slideshow-editor__textarea--sm {
   font-size: 0.85rem;
   padding: 0.4rem;
@@ -922,7 +892,7 @@
 .slideshow-editor__label {
   margin: 0 0 4px 0;
   font-size: 0.95rem;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
 }
 
 /* foreignObject overlay layer for SVG arrows */
@@ -942,21 +912,129 @@
   gap: 6px;
 }
 
-/* Icon-only square button (32x32) for edit controls */
-.halo-button.btn-icon {
-  padding: 0.35rem 0.5rem;
-  font-size: 0.8rem;
-  min-width: auto;
-  height: 32px;
-  width: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Tutorial Creation / Edit Modal Sizing (replaces inline style) */
 .modal-content.tutorial-form-modal {
   max-width: 580px;
+}
+
+/* ==========================================================================
+   MODULAR SLIDE TEXT FORMATTING & ALIGNMENT TOOLBAR
+   Shared by TutorialSlideshowViewer (edit mode) & TutorialFormModal (create)
+   ========================================================================== */
+.slide-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.slide-text-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.slide-text-toolbar__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.slide-text-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-color);
+  opacity: 0.72;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slide-text-toolbar__btn:hover:not(:disabled) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+}
+
+/* Design System §4: Halo active state (2px border + subtle tint, no solid fill) */
+.slide-text-toolbar__btn.active {
+  border: 2px solid var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+  opacity: 1;
+}
+
+.slide-text-toolbar__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.slide-text-toolbar__btn--bold { font-weight: 900; }
+.slide-text-toolbar__btn--italic { font-style: italic; font-family: Georgia, serif; }
+.slide-text-toolbar__btn--underline { text-decoration: underline; }
+.slide-text-toolbar__btn--strike { text-decoration: line-through; }
+
+.slide-text-toolbar__btn--preview {
+  margin-left: auto;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Live formatted preview box inside edit / create modes */
+.slide-text-preview {
+  width: 100%;
+  min-height: 92px;
+  padding: 0.65rem 0.75rem;
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.slide-text-preview--sm {
+  min-height: 54px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.84rem;
+}
+
+/* Inline formatted text semantic spans */
+.formatted-text__bold { font-weight: 800; color: var(--text-color); }
+.formatted-text__italic { font-style: italic; }
+.formatted-text__underline { text-decoration: underline; text-underline-offset: 2px; }
+.formatted-text__strike { text-decoration: line-through; opacity: 0.75; }
+
+/* Mobile touch target compliance (Design System §14B: >=44px touch targets, zero desktop impact) */
+@media screen and (max-width: 768px) {
+  .slide-text-toolbar__btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .slideshow-editor__input,
+  .slideshow-editor__textarea {
+    font-size: 16px; /* Prevents iOS Safari auto-zoom (§14B) */
+  }
 }
 
 

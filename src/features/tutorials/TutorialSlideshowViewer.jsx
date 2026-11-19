@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IconX, IconChevronLeft, IconChevronRight, IconPlus, IconEdit, IconTrash } from '../../components/ui/Icons';
 import { updateRule } from '../../services/employees/rulesService';
+import FormattedText from './FormattedText';
+import SlideTextToolbar from './SlideTextToolbar';
+import { normalizeTextAlign, getTextAlignClass, handleFormattingKeyDown } from './tutorialUtils';
 import './TutorialSlideshowViewer.css';
 
 const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, onUpdate, preventSkip = false, onlyFirstSlide = false }) => {
+  const defaultAlign = flow.layout === 'onboarding' ? 'center' : 'left';
   const [slideIndex, setSlideIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
+  const [editAlign, setEditAlign] = useState(defaultAlign);
+  const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [slideTimeRemaining, setSlideTimeRemaining] = useState(0);
+  const textareaRef = useRef(null);
 
   const baseSlides = platform === 'desktop' ? flow.desktopSlides : flow.mobileSlides;
   const [editableSlides, setEditableSlides] = useState(
@@ -31,22 +38,24 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     if (currentSlide) {
       setEditTitle(currentSlide.title || '');
       setEditText(currentSlide.text || currentSlide.caption || '');
+      setEditAlign(normalizeTextAlign(currentSlide.textAlign, defaultAlign));
+      setShowPreview(false);
     }
-  }, [slideIndex, currentSlide, isEditing]);
-
-  if (!currentSlide) return null;
+  }, [slideIndex, currentSlide, isEditing, defaultAlign]);
 
   const canSkipTutorial = permissions?.canSkipTutorial;
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
 
   useEffect(() => {
-    if (canSkipTutorial) return;
+    if (!currentSlide || canSkipTutorial) return;
     setSlideTimeRemaining(10);
     const interval = setInterval(() => {
       setSlideTimeRemaining(prev => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(interval);
-  }, [slideIndex, canSkipTutorial]);
+  }, [slideIndex, canSkipTutorial, currentSlide]);
+
+  if (!currentSlide) return null;
 
   const handleNext = () => {
     if (slideIndex < editableSlides.length - 1) {
@@ -68,6 +77,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     const newSlide = {
       title: 'New Slide',
       text: '',
+      textAlign: defaultAlign,
       image: '/powerpod-logo.svg',
       fallbackImage: '/powerpod-logo.svg',
       annotations: []
@@ -118,9 +128,17 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
           }).join('\n---PAGE_BREAK---\n');
         }
 
+        // Persist per-slide text alignment in existing employee_rules.metadata JSONB (zero migration, zero OTA breakage)
+        const slideAlignments = slidesToSave.map((s) => normalizeTextAlign(s.textAlign, defaultAlign));
+        const nextMetadata = {
+          ...(flow.metadata && typeof flow.metadata === 'object' ? flow.metadata : {}),
+          slideAlignments
+        };
+
         await updateRule(ruleId, {
           title: newTitle,
-          content: newContent
+          content: newContent,
+          metadata: nextMetadata
         });
       } else {
         // For static tutorials, save the entire array to allow length modification
@@ -144,7 +162,8 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
     updatedSlides[slideIndex] = {
       ...updatedSlides[slideIndex],
       title: editTitle,
-      text: editText
+      text: editText,
+      textAlign: normalizeTextAlign(editAlign, defaultAlign)
     };
     setEditableSlides(updatedSlides);
     saveModifications(updatedSlides);
@@ -255,19 +274,37 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   placeholder="Slide Title"
                   className="slideshow-editor__input"
                 />
-                <textarea 
-                  value={editText} 
-                  onChange={e => setEditText(e.target.value)} 
-                  onKeyDown={e => e.stopPropagation()}
-                  placeholder="Slide Content Text (Press Enter for a new line)"
-                  rows={4}
-                  className="slideshow-editor__textarea"
+                <SlideTextToolbar
+                  textareaRef={textareaRef}
+                  value={editText}
+                  onChange={setEditText}
+                  textAlign={editAlign}
+                  onAlignChange={setEditAlign}
+                  showPreview={showPreview}
+                  onTogglePreview={() => setShowPreview(p => !p)}
                 />
+                {showPreview ? (
+                  <div className={`slide-text-preview ${getTextAlignClass(editAlign, defaultAlign)}`}>
+                    <FormattedText text={editText || 'Nothing to preview yet.'} />
+                  </div>
+                ) : (
+                  <textarea 
+                    ref={textareaRef}
+                    value={editText} 
+                    onChange={e => setEditText(e.target.value)} 
+                    onKeyDown={e => handleFormattingKeyDown(e, { value: editText, onChange: setEditText, textareaRef })}
+                    placeholder="Slide Content Text (Press Enter for a new line)"
+                    rows={4}
+                    className={`slideshow-editor__textarea ${getTextAlignClass(editAlign, defaultAlign)}`}
+                  />
+                )}
               </div>
             ) : (
               <>
                 <h2 className="onboarding-title">{currentSlide.title}</h2>
-                <p className="onboarding-text u-whitespace-prewrap">{currentSlide.text}</p>
+                <p className={`onboarding-text ${getTextAlignClass(currentSlide.textAlign, defaultAlign)}`}>
+                  <FormattedText text={currentSlide.text} />
+                </p>
               </>
             )}
             {renderEditControls()}
@@ -434,19 +471,37 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   placeholder="Slide Title"
                   className="slideshow-editor__input slideshow-editor__input--sm"
                 />
-                <textarea 
-                  value={editText} 
-                  onChange={e => setEditText(e.target.value)} 
-                  onKeyDown={e => e.stopPropagation()}
-                  placeholder="Slide Caption Text (Press Enter for a new line)"
-                  rows={2}
-                  className="slideshow-editor__textarea slideshow-editor__textarea--sm"
+                <SlideTextToolbar
+                  textareaRef={textareaRef}
+                  value={editText}
+                  onChange={setEditText}
+                  textAlign={editAlign}
+                  onAlignChange={setEditAlign}
+                  showPreview={showPreview}
+                  onTogglePreview={() => setShowPreview(p => !p)}
                 />
+                {showPreview ? (
+                  <div className={`slide-text-preview slide-text-preview--sm ${getTextAlignClass(editAlign, defaultAlign)}`}>
+                    <FormattedText text={editText || 'Nothing to preview yet.'} />
+                  </div>
+                ) : (
+                  <textarea 
+                    ref={textareaRef}
+                    value={editText} 
+                    onChange={e => setEditText(e.target.value)} 
+                    onKeyDown={e => handleFormattingKeyDown(e, { value: editText, onChange: setEditText, textareaRef })}
+                    placeholder="Slide Caption Text (Press Enter for a new line)"
+                    rows={2}
+                    className={`slideshow-editor__textarea slideshow-editor__textarea--sm ${getTextAlignClass(editAlign, defaultAlign)}`}
+                  />
+                )}
               </div>
             ) : (
               <>
                 <h4 className="slideshow-editor__label">{currentSlide.title}</h4>
-                <p className="slideshow-caption-text u-whitespace-prewrap">{currentSlide.text || currentSlide.caption}</p>
+                <p className={`slideshow-caption-text u-whitespace-prewrap ${getTextAlignClass(currentSlide.textAlign, defaultAlign)}`}>
+                  <FormattedText text={currentSlide.text || currentSlide.caption} />
+                </p>
               </>
             )}
             {renderEditControls()}

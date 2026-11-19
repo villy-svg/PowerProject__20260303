@@ -341,3 +341,50 @@ export const IconCoffee = (props) => (
     <line x1="14" y1="1" x2="14" y2="4" />
   </IconBase>
 );
+
+// Text alignment & list icons for modular rich-text editing toolbars
+export const IconAlignLeft = (props) => (
+  <IconBase {...props}>
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="12" x2="15" y2="12" />
+    <line x1="3" y1="18" x2="18" y2="18" />
+  </IconBase>
+);
+
+export const IconAlignCenter = (props) => (
+  <IconBase {...props}>
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="6" y1="12" x2="18" y2="12" />
+    <line x1="4" y1="18" x2="20" y2="18" />
+  </IconBase>
+);
+
+export const IconAlignRight = (props) => (
+  <IconBase {...props}>
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="9" y1="12" x2="21" y2="12" />
+    <line x1="6" y1="18" x2="21" y2="18" />
+  </IconBase>
+);
+
+export const IconList = (props) => (
+  <IconBase {...props}>
+    <line x1="8" y1="6" x2="21" y2="6" />
+    <line x1="8" y1="12" x2="21" y2="12" />
+    <line x1="8" y1="18" x2="21" y2="18" />
+    <line x1="3" y1="6" x2="3.01" y2="6" />
+    <line x1="3" y1="12" x2="3.01" y2="12" />
+    <line x1="3" y1="18" x2="3.01" y2="18" />
+  </IconBase>
+);
+
+export const IconListOrdered = (props) => (
+  <IconBase {...props}>
+    <line x1="10" y1="6" x2="21" y2="6" />
+    <line x1="10" y1="12" x2="21" y2="12" />
+    <line x1="10" y1="18" x2="21" y2="18" />
+    <path d="M4 6h1v4" />
+    <path d="M4 10h2" />
+    <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+  </IconBase>
+);

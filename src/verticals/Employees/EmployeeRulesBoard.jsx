@@ -3,6 +3,7 @@ import MasterPageHeader from '../../components/layout/MasterPageHeader';
 import { fetchCategories, fetchSubCategories, fetchRules } from '../../services/employees/rulesService';
 import './EmployeeRulesBoard.css';
 import RBACManageButton from '../../components/ui/RBACManageButton';
+import FormattedText from '../../features/tutorials/FormattedText';
 
 /* ─── Static Rule Tile Component ────────────────────────────── */
 const RuleCard = ({ rule }) => {
@@ -29,7 +30,7 @@ const RuleCard = ({ rule }) => {
       </div>
 
       <div className={`rule-card-content ${!isExpanded && isLongContent ? 'collapsed' : ''}`}>
-        {content}
+        <FormattedText text={content} />
       </div>
 
       {isLongContent && (

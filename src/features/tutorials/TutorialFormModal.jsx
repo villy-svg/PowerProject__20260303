@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createRule, updateRule, createCategory, fetchCategories } from '../../services/employees/rulesService';
 import StatusMsg from '../../components/ui/StatusMsg';
+import FormattedText from './FormattedText';
+import SlideTextToolbar from './SlideTextToolbar';
+import { normalizeTextAlign, getTextAlignClass, handleFormattingKeyDown } from './tutorialUtils';
 import '../../styles/ManagementForms.css';
 
 const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
@@ -11,9 +14,12 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
     category_id: '',
     new_category_name: '',
     content: '',
+    text_align: 'center',
   });
+  const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ type: '', text: '' });
+  const contentTextareaRef = useRef(null);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -40,6 +46,7 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
           category_id: isRule ? (editingItem.category_id || '') : '',
           new_category_name: !isRule ? (editingItem.category || '') : '',
           content: isRule ? (editingItem.content || '') : '',
+          text_align: normalizeTextAlign(editingItem.metadata?.slideAlignments?.[0], 'center'),
         });
       } else {
         // Creating a new tutorial (which will be a dynamic rule under the hood)
@@ -49,8 +56,10 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
           category_id: '',
           new_category_name: '',
           content: '',
+          text_align: 'center',
         });
       }
+      setShowPreview(false);
       setStatus({ type: '', text: '' });
     }
   }, [editingItem, isOpen]);
@@ -106,7 +115,10 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
           content: form.content || '',
           category_id: finalCategoryId,
           is_active: true,
-          created_by: user?.id || null
+          created_by: user?.id || null,
+          metadata: {
+            slideAlignments: [normalizeTextAlign(form.text_align, 'center')]
+          }
         };
 
         if (isEditing) {
@@ -220,15 +232,39 @@ const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
             {!isEditing && (
               <div className="form-group">
                 <label>Slide Content (Page 1)</label>
-                <div className="form-input-container">
-                  <textarea
-                    value={form.content}
-                    onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-                    placeholder="Write the slide content here. Everything entered here stays on Page 1. You can manually add more pages later using the + button in the tutorial viewer."
-                    rows={5}
-                    required
-                  />
-                </div>
+                <SlideTextToolbar
+                  textareaRef={contentTextareaRef}
+                  value={form.content}
+                  onChange={(nextVal) => setForm(p => ({ ...p, content: nextVal }))}
+                  textAlign={form.text_align}
+                  onAlignChange={(nextAlign) => setForm(p => ({ ...p, text_align: nextAlign }))}
+                  showPreview={showPreview}
+                  onTogglePreview={() => setShowPreview(p => !p)}
+                />
+                {showPreview ? (
+                  <div className={`slide-text-preview ${getTextAlignClass(form.text_align, 'center')}`}>
+                    <FormattedText text={form.content || 'Nothing to preview yet.'} />
+                  </div>
+                ) : (
+                  <div className="form-input-container">
+                    <textarea
+                      ref={contentTextareaRef}
+                      value={form.content}
+                      onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
+                      onKeyDown={e =>
+                        handleFormattingKeyDown(e, {
+                          value: form.content,
+                          onChange: (nextVal) => setForm(p => ({ ...p, content: nextVal })),
+                          textareaRef: contentTextareaRef
+                        })
+                      }
+                      className={getTextAlignClass(form.text_align, 'center')}
+                      placeholder="Write the slide content here. Everything entered here stays on Page 1. You can manually add more pages later using the + button in the tutorial viewer."
+                      rows={5}
+                      required
+                    />
+                  </div>
+                )}
               </div>
             )}
 
