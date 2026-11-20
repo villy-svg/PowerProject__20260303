@@ -241,7 +241,7 @@ const MobileHeader = ({
                 setIsMobileAddTrayOpen(false);
               }}
             >
-              <span className="option-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 600 }}>
+              <span className="option-label">
                 <IconPlus size={16} />
                 {addLabel || 'Create New Task'}
               </span>
@@ -291,7 +291,6 @@ const MobileHeader = ({
               if (nextState) setIsMenuOpen(false);
             }}
             title="Select Board"
-            style={{ opacity: boards.length > 0 ? 1 : 0.4 }}
           >
             <div className="icon-wrapper">
               <IconBoards size={16} strokeWidth={isBoardSubTrayOpen ? 2.2 : 1.8} />
@@ -311,7 +310,6 @@ const MobileHeader = ({
               if (nextMenuState && onSidebarToggle) onSidebarToggle(false);
             }}
             title="Toggle Filters"
-            style={{ opacity: hasExpandedContent ? 1 : 0.4 }}
           >
             <div className="icon-wrapper">
               <IconFilter size={16} strokeWidth={isMenuOpen ? 2.2 : 1.8} />
@@ -330,7 +328,6 @@ const MobileHeader = ({
               setIsMenuOpen(false);
             }}
             title="Add / Actions"
-            style={{ opacity: canAdd ? 1 : 0.4 }}
           >
             <div className="icon-wrapper">
               <IconPlus size={16} strokeWidth={(isTaskModalOpen || isMobileAddTrayOpen) ? 2.2 : 1.8} />

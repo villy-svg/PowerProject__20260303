@@ -346,6 +346,11 @@
     color: var(--brand-mint);
   }
 
+  /* Disabled tray actions (replaces inline opacity styles in MobileHeader.jsx) */
+  .mobile-action-tray .nav-item.mobile-tray-btn.disabled {
+    opacity: 0.4;
+  }
+
   .mobile-action-tray .nav-item.active .icon-wrapper {
     background: var(--halo-bg);
     box-shadow: 0 0 10px var(--halo-glow);
@@ -489,6 +494,14 @@ body.no-scroll {
 }
 
 .sub-tray-option-btn.active {
+  font-weight: 600;
+}
+
+/* Primary quick-action button label (replaces inline flex styles in MobileHeader.jsx) */
+.sub-tray-option-btn.primary-action-btn .option-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 600;
 }
 

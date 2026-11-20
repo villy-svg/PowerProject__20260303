@@ -155,6 +155,33 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
 
   const categories = useMemo(() => Array.from(new Set(allFlows.map(f => f.category))), [allFlows]);
 
+  // Normalize tutorial flows for records-mode SearchBar (matches title, description, category, and slide content)
+  const tutorialSearchRecords = useMemo(() => {
+    return allFlows.map(flow => {
+      const slides = [...(flow.desktopSlides || []), ...(flow.mobileSlides || [])];
+      const slideText = slides
+        .map(s => `${s.title || ''} ${s.text || ''} ${s.caption || ''}`)
+        .join(' ');
+      return {
+        ...flow,
+        search_text: slideText,
+      };
+    });
+  }, [allFlows]);
+
+  const handleSearchSelect = useCallback((record) => {
+    if (!record) return;
+    const matchedFlow = allFlows.find(f => f.id === record.id) || record;
+    setActiveFlow(matchedFlow);
+  }, [allFlows]);
+
+  const handleSearchEdit = useCallback((record) => {
+    if (!record || !isMasterAdmin) return;
+    const matchedFlow = allFlows.find(f => f.id === record.id) || record;
+    setEditingFlow(matchedFlow);
+    setIsFormOpen(true);
+  }, [allFlows, isMasterAdmin]);
+
   return (
     <div className="management-view-container tutorial-hub-page">
       <MasterPageHeader
@@ -162,6 +189,10 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
         description="Explore step-by-step interactive slideshows detailing standard user tasks and manager normalisation flows."
         setActiveVertical={setActiveVertical}
         onShowBottomNav={onShowBottomNav}
+        searchRecords={tutorialSearchRecords}
+        recordType="Tutorial"
+        onSearchSelect={handleSearchSelect}
+        onSearchEdit={isMasterAdmin ? handleSearchEdit : undefined}
         expandedLeft={
           <div className="platform-toggle-container">
             <div className="platform-toggle-label">Target Environment:</div>

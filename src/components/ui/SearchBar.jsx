@@ -69,10 +69,14 @@ const SearchBar = ({ context = 'dashboard', records = null, recordType = 'Record
     const lowerQ = debouncedQuery.toLowerCase();
     return records
       .filter(rec => {
-        // Try common identifier fields across verticals
+        // Try common identifier fields across verticals (including tutorials: title, description, category, slide text)
         return (
           (rec.full_name   || '').toLowerCase().includes(lowerQ) ||
           (rec.name        || '').toLowerCase().includes(lowerQ) ||
+          (rec.title       || '').toLowerCase().includes(lowerQ) ||
+          (rec.description || '').toLowerCase().includes(lowerQ) ||
+          (rec.category    || '').toLowerCase().includes(lowerQ) ||
+          (rec.search_text || '').toLowerCase().includes(lowerQ) ||
           (rec.email       || '').toLowerCase().includes(lowerQ) ||
           (rec.emp_code    || '').toLowerCase().includes(lowerQ) ||
           (rec.badge_id    || '').toLowerCase().includes(lowerQ) ||
@@ -252,10 +256,10 @@ function TaskResult({ task, query, onClick }) {
 
 /* ── Record result row ───────────────────────────────────────────────────── */
 function RecordResult({ rec, query, onClick, onEdit, onGoTo }) {
-  // Derive a display name from whichever field exists
-  const primaryName = rec.full_name || rec.name || rec.company_name || '—';
-  const secondaryText = rec.email || rec.emp_code || rec.badge_id || rec.phone || '';
-  const metaText = rec.role_code || rec.dept_code || rec.hub_code || rec.status || '';
+  // Derive a display name from whichever field exists (supports tutorials via title/description/category)
+  const primaryName = rec.full_name || rec.name || rec.title || rec.company_name || '—';
+  const secondaryText = rec.email || rec.emp_code || rec.badge_id || rec.phone || rec.description || '';
+  const metaText = rec.role_code || rec.dept_code || rec.hub_code || rec.category || rec.status || '';
 
   return (
     <li className="search-result-item" role="option" onClick={onClick}>

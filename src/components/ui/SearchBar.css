@@ -112,7 +112,7 @@
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-color, var(--bg-color));
+  background: var(--bg-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-button, 12px);
   box-shadow: var(--shadow-premium, 0 12px 40px color-mix(in srgb, var(--bg-color), transparent 50%));
@@ -156,23 +156,26 @@
   padding: 0.55rem 0.875rem;
   cursor: pointer;
   transition: background 0.15s ease;
-  border-radius: 0;
 }
 
 .search-result-item:hover {
   background: color-mix(in srgb, var(--brand-green), transparent 92%);
 }
 
-/* ── Result title text ───────────────────────────────────── */
+/* ── Result title & subtitle text ────────────────────────── */
+.result-text,
+.result-sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .result-text {
   flex: 1;
   min-width: 0;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   line-height: 1.3;
 }
 
@@ -189,9 +192,6 @@
   font-size: 0.72rem;
   color: var(--text-color);
   opacity: 0.45;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -240,10 +240,10 @@
 .result-badge.stage-deprioritized{ color: var(--text-color); opacity: 0.35; }
 
 /* Priority variants */
-.result-badge.pri-urgent { color: var(--brand-red); background: color-mix(in srgb, var(--brand-red), transparent 90%);   border-color: color-mix(in srgb, var(--brand-red), transparent 80%); }
-.result-badge.pri-high   { color: var(--brand-amber); background: color-mix(in srgb, var(--brand-amber), transparent 90%);  border-color: color-mix(in srgb, var(--brand-amber), transparent 80%); }
-.result-badge.pri-medium { color: var(--brand-amber); background: color-mix(in srgb, var(--brand-amber), transparent 90%);   border-color: color-mix(in srgb, var(--brand-amber), transparent 80%); }
-.result-badge.pri-low    { color: var(--brand-emerald); background: color-mix(in srgb, var(--brand-emerald), transparent 90%);   border-color: color-mix(in srgb, var(--brand-emerald), transparent 80%); }
+.result-badge.pri-urgent { color: var(--brand-red); background: color-mix(in srgb, var(--brand-red), transparent 90%); border-color: color-mix(in srgb, var(--brand-red), transparent 80%); }
+.result-badge.pri-high,
+.result-badge.pri-medium { color: var(--brand-amber); background: color-mix(in srgb, var(--brand-amber), transparent 90%); border-color: color-mix(in srgb, var(--brand-amber), transparent 80%); }
+.result-badge.pri-low    { color: var(--brand-emerald); background: color-mix(in srgb, var(--brand-emerald), transparent 90%); border-color: color-mix(in srgb, var(--brand-emerald), transparent 80%); }
 
 /* ── No results ──────────────────────────────────────────── */
 .search-no-results {
@@ -255,22 +255,26 @@
   font-style: italic;
 }
 
-/* ── Search result edit button ───────────────────────────── */
-.search-result-edit-btn {
+/* ── Search result icon action buttons (edit & goto) ─────── */
+.search-result-edit-btn,
+.search-result-goto-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 24px;
-  margin-left: 4px;
   padding: 0;
   background: none;
   border: none;
   border-radius: 4px;
   color: var(--text-color);
-  opacity: 0.4;
   cursor: pointer;
   transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.search-result-edit-btn {
+  margin-left: 4px;
+  opacity: 0.4;
 }
 
 .search-result-edit-btn:hover {
@@ -279,22 +283,9 @@
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
 }
 
-/* ── Search result goto button ───────────────────────────── */
 .search-result-goto-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
   margin-right: 8px;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  color: var(--text-color);
   opacity: 0.6;
-  cursor: pointer;
-  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .search-result-goto-btn:hover {
@@ -304,7 +295,7 @@
 
 /* ── Mobile touch targets ────────────────────────────────── */
 @media screen and (max-width: 768px) {
-  /* Dashboard: wrapper .mobile-dashboard-search controls position; override inner margins */
+  /* Dashboard: mobile bottom nav wrapper controls position; override inner margins */
   .search-bar-root.dashboard-ctx {
     max-width: 100%;
     margin: 0;
