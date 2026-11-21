@@ -6,6 +6,9 @@ import SlideTextToolbar from './SlideTextToolbar';
 import { normalizeTextAlign, getTextAlignClass, handleFormattingKeyDown } from './tutorialUtils';
 import './TutorialSlideshowViewer.css';
 
+// Mandatory per-slide wait duration (seconds) when canSkipTutorial is false
+const COMPULSORY_SLIDE_WAIT_SECONDS = 5;
+
 const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, onUpdate, preventSkip = false, onlyFirstSlide = false }) => {
   const defaultAlign = flow.layout === 'onboarding' ? 'center' : 'left';
   const [slideIndex, setSlideIndex] = useState(0);
@@ -48,7 +51,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
 
   useEffect(() => {
     if (!currentSlide || canSkipTutorial) return;
-    setSlideTimeRemaining(10);
+    setSlideTimeRemaining(COMPULSORY_SLIDE_WAIT_SECONDS);
     const interval = setInterval(() => {
       setSlideTimeRemaining(prev => Math.max(0, prev - 1));
     }, 1000);
@@ -60,7 +63,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const handleNext = () => {
     if (slideIndex < editableSlides.length - 1) {
       setSlideIndex(slideIndex + 1);
-      if (!canSkipTutorial) setSlideTimeRemaining(10);
+      if (!canSkipTutorial) setSlideTimeRemaining(COMPULSORY_SLIDE_WAIT_SECONDS);
     } else {
       onClose(true); // Completed
     }
@@ -69,7 +72,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
   const handlePrev = () => {
     if (slideIndex > 0) {
       setSlideIndex(slideIndex - 1);
-      if (!canSkipTutorial) setSlideTimeRemaining(10);
+      if (!canSkipTutorial) setSlideTimeRemaining(COMPULSORY_SLIDE_WAIT_SECONDS);
     }
   };
 
@@ -319,7 +322,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   onClick={() => {
                     if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
                     setSlideIndex(idx);
-                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(10);
+                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(COMPULSORY_SLIDE_WAIT_SECONDS);
                   }}
                 />
               ))}
@@ -526,7 +529,7 @@ const TutorialSlideshowViewer = ({ flow, platform, onClose, user, permissions, o
                   onClick={() => {
                     if (!canSkipTutorial && idx > slideIndex && slideTimeRemaining > 0) return;
                     setSlideIndex(idx);
-                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(10);
+                    if (!canSkipTutorial && idx !== slideIndex) setSlideTimeRemaining(COMPULSORY_SLIDE_WAIT_SECONDS);
                   }}
                 />
               ))}
