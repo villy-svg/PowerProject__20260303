@@ -44,9 +44,8 @@ function toISTDateString(date) {
 // @returns {Promise<{ data: Array, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchAttendanceForDateRange(startDate, endDate) {
-  // Trimmed select: omits unused heavy JSONB columns (login_geolocation,
-  // logout_geolocation, session_logs_data) and redundant employee/hub joins
-  // since the board already fetches employees separately.
+  // Selects session_logs_data only to extract lightweight worked_hub_ids[],
+  // then omits the raw geolocation JSONB from returned records to keep React state lean.
   const { data, error } = await supabase
     .from('daily_attendances')
     .select(`
@@ -58,6 +57,7 @@ export async function fetchAttendanceForDateRange(startDate, endDate) {
       first_login_time,
       logout_time,
       updated_at,
+      session_logs_data,
       attendance_edit_requests (
         id,
         request_status
@@ -72,15 +72,56 @@ export async function fetchAttendanceForDateRange(startDate, endDate) {
     return { data: null, error };
   }
 
-  // Annotate each record with `has_pending_edit` for the UI badge indicator
-  const annotated = (data || []).map(record => ({
-    ...record,
-    has_pending_edit: (record.attendance_edit_requests || []).some(
-      req => req.request_status === 'pending'
-    ),
-  }));
+  // Annotate each record with `has_pending_edit` and deduplicated `worked_hub_ids`
+  const annotated = (data || []).map((record) => {
+    const { session_logs_data: rawSessions, ...rest } = record;
+    let sessions = rawSessions || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch { sessions = []; }
+    }
+
+    const seenHubs = new Set();
+    const workedHubIds = [];
+    if (Array.isArray(sessions)) {
+      sessions.forEach((s) => {
+        if (s?.hub_id) {
+          const idStr = String(s.hub_id);
+          if (!seenHubs.has(idStr)) {
+            seenHubs.add(idStr);
+            workedHubIds.push(idStr);
+          }
+        }
+      });
+    }
+
+    return {
+      ...rest,
+      worked_hub_ids: workedHubIds,
+      has_pending_edit: (record.attendance_edit_requests || []).some(
+        (req) => req.request_status === 'pending'
+      ),
+    };
+  });
 
   return { data: annotated, error: null };
+}
+
+// ---------------------------------------------------------------------------
+// MANAGER BOARD: Lightweight hubs lookup (id -> hub_code, name, city)
+// Used to resolve non-native / multi-hub shift badges even for hubs with zero
+// natively assigned employees.
+// ---------------------------------------------------------------------------
+export async function fetchAllHubsLookup() {
+  const { data, error } = await supabase
+    .from('hubs')
+    .select('id, name, hub_code, city');
+
+  if (error) {
+    console.error('[attendanceService] fetchAllHubsLookup error:', error);
+    return { data: null, error };
+  }
+
+  return { data: data || [], error: null };
 }
 
 // Dead code removed (2026-11-20): fetchEmployeesForAttendance() was superseded by

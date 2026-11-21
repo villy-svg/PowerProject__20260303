@@ -6,6 +6,7 @@ import {
   formatAttendanceStatusLabel,
 } from './utils/attendanceStatusMeta';
 import { toISTDateString } from './utils/attendanceDateUtils';
+import { resolveNonNativeShiftHub } from './utils/attendanceHubUtils';
 
 function formatFullDate(dateStr) {
   const date = new Date(dateStr + 'T00:00:00');
@@ -55,6 +56,7 @@ const AttendanceMobileList = ({
   employees,
   dateRange,
   getCellData,
+  hubMap,
   isLoading,
   onCellClick,
   selectedEmployeeId: controlledSelectedEmployeeId,
@@ -290,6 +292,9 @@ const AttendanceMobileList = ({
                 const readableLabel = formatAttendanceStatusLabel(status, shiftType);
                 const loginStr = formatTimeShort(record?.first_login_time);
                 const logoutStr = formatTimeShort(record?.logout_time);
+                const shiftHubBadge = resolveNonNativeShiftHub(record, emp, hubMap, {
+                  preferCityMulti: false,
+                });
 
                 return (
                   <div
@@ -326,6 +331,16 @@ const AttendanceMobileList = ({
                         <span>{readableLabel}</span>
                       </span>
                       <div className="attendance-list-item__sub-actions">
+                        {shiftHubBadge && (
+                          <span
+                            className={`attendance-list-item__shift-hub-badge ${
+                              shiftHubBadge.isMulti ? 'attendance-list-item__shift-hub-badge--multi' : ''
+                            }`}
+                            title={shiftHubBadge.tooltip}
+                          >
+                            {shiftHubBadge.code}
+                          </span>
+                        )}
                         {hasPendingEdit && (
                           <span className="attendance-list-item__pending-badge">⚠ Pending</span>
                         )}
@@ -398,6 +413,9 @@ const AttendanceMobileList = ({
               const readableLabel = formatAttendanceStatusLabel(status, shiftType);
               const loginStr = formatTimeShort(record?.first_login_time);
               const logoutStr = formatTimeShort(record?.logout_time);
+              const shiftHubBadge = resolveNonNativeShiftHub(record, selectedEmployee, hubMap, {
+                preferCityMulti: false,
+              });
 
               return (
                 <div
@@ -427,8 +445,22 @@ const AttendanceMobileList = ({
                       {renderStatusIcon(status, shiftType)}
                       <span>{readableLabel}</span>
                     </span>
-                    {hasPendingEdit && (
-                      <span className="attendance-list-item__pending-badge">⚠ Pending</span>
+                    {(shiftHubBadge || hasPendingEdit) && (
+                      <div className="attendance-list-item__sub-actions">
+                        {shiftHubBadge && (
+                          <span
+                            className={`attendance-list-item__shift-hub-badge ${
+                              shiftHubBadge.isMulti ? 'attendance-list-item__shift-hub-badge--multi' : ''
+                            }`}
+                            title={shiftHubBadge.tooltip}
+                          >
+                            {shiftHubBadge.code}
+                          </span>
+                        )}
+                        {hasPendingEdit && (
+                          <span className="attendance-list-item__pending-badge">⚠ Pending</span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -15,6 +15,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   fetchAttendanceForDateRange,
   fetchAllEmployeesForAttendanceSearch,
+  fetchAllHubsLookup,
 } from '../services/employees/attendanceService';
 import { fetchApprovedSchedulesForDateRange } from '../services/employees/schedulePlannerService';
 import { fetchPendingRequests } from '../services/employees/editRequestService';
@@ -37,9 +38,19 @@ export function useAttendanceBoard(user, defaultStatus = null) {
 
   // Data state
   const [allEmployees, setAllEmployees] = useState([]);
+  const [hubsLookup, setHubsLookup] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [scheduledRecords, setScheduledRecords] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
+
+  // Derived: O(1) hub lookup map for resolving non-native & multi-hub shift badges
+  const hubMap = useMemo(() => {
+    const map = new Map();
+    (hubsLookup || []).forEach((h) => {
+      if (h?.id) map.set(String(h.id), h);
+    });
+    return map;
+  }, [hubsLookup]);
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
@@ -68,9 +79,16 @@ export function useAttendanceBoard(user, defaultStatus = null) {
       filters.employeeId = user.employeeId;
     }
 
-    const { data, error: empErr } = await fetchAllEmployeesForAttendanceSearch(filters);
-    if (empErr) throw empErr;
-    setAllEmployees(data || []);
+    const [empRes, hubsRes] = await Promise.all([
+      fetchAllEmployeesForAttendanceSearch(filters),
+      fetchAllHubsLookup(),
+    ]);
+    if (empRes.error) throw empRes.error;
+    setAllEmployees(empRes.data || []);
+    // Hubs lookup failure is non-fatal — board still renders without non-native badges
+    if (!hubsRes.error) {
+      setHubsLookup(hubsRes.data || []);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -190,6 +208,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     // Data
     employees,
     allEmployees,
+    hubMap,
     dateRange,
     pendingRequests,
 

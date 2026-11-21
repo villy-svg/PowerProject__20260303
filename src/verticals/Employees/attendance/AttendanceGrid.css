@@ -172,6 +172,38 @@
   letter-spacing: 0.4px;
 }
 
+/* Stacked icon + micro-badge when shift was done in a non-native or multi-hub */
+.attendance-cell__status-label--with-hub {
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px 2px;
+}
+
+.attendance-cell__hub-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.54rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+  max-width: 100%;
+  white-space: nowrap;
+  background-color: color-mix(in srgb, var(--status-warning), transparent 82%);
+  color: var(--status-warning);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 55%);
+}
+
+.attendance-cell__hub-badge--multi {
+  background-color: color-mix(in srgb, var(--status-neutral), transparent 80%);
+  color: var(--status-neutral);
+  border-color: color-mix(in srgb, var(--status-neutral), transparent 50%);
+}
+
 .attendance-cell--null .attendance-cell__status-label {
   color: var(--text-secondary);
   opacity: 0.35;

@@ -24,6 +24,7 @@ import {
   formatAttendanceStatusLabel,
 } from './utils/attendanceStatusMeta';
 import { toISTDateString } from './utils/attendanceDateUtils';
+import { resolveNonNativeShiftHub } from './utils/attendanceHubUtils';
 import './AttendanceGrid.css';
 
 // ---------------------------------------------------------------------------
@@ -34,8 +35,11 @@ function formatDateHeader(dateStr) {
   return date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' });
 }
 
-function formatHoverTooltip(record, status, shiftType) {
+function formatHoverTooltip(record, status, shiftType, shiftHubBadge) {
   const parts = [formatAttendanceStatusLabel(status, shiftType)];
+  if (shiftHubBadge?.tooltip) {
+    parts.push(shiftHubBadge.tooltip);
+  }
   if (record?.first_login_time) {
     parts.push(`In: ${new Date(record.first_login_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`);
   }
@@ -53,7 +57,7 @@ function formatHoverTooltip(record, status, shiftType) {
 // TODO(future-rebuild): Inline cell <select> editing (isEditing/onCellChange/hubs)
 // was stripped when bulk Schedule Planner was parked. Restore when rebuilding bulk planner.
 // ---------------------------------------------------------------------------
-const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
+const AttendanceCell = React.memo(({ record, onClick, isToday, shiftHubBadge }) => {
   const status = record?.attendance_status || 'null';
   const meta = ATTENDANCE_STATUS_META[status] || ATTENDANCE_STATUS_META['null'];
   const hasPendingEdit = !!record?.has_pending_edit;
@@ -83,11 +87,18 @@ const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-      title={formatHoverTooltip(record, status, shiftType)}
-      aria-label={`Status: ${meta.label}${hasPendingEdit ? ', has pending edit' : ''}`}
+      title={formatHoverTooltip(record, status, shiftType, shiftHubBadge)}
+      aria-label={`Status: ${meta.label}${shiftHubBadge ? `, ${shiftHubBadge.tooltip}` : ''}${hasPendingEdit ? ', has pending edit' : ''}`}
     >
-      <span className="attendance-cell__status-label u-flex-center">
+      <span className={`attendance-cell__status-label u-flex-center ${shiftHubBadge ? 'attendance-cell__status-label--with-hub' : ''}`}>
         {icon}
+        {shiftHubBadge && (
+          <span
+            className={`attendance-cell__hub-badge ${shiftHubBadge.isMulti ? 'attendance-cell__hub-badge--multi' : ''}`}
+          >
+            {shiftHubBadge.code}
+          </span>
+        )}
       </span>
       {/* Pending edit indicator badge */}
       {hasPendingEdit && (
@@ -97,6 +108,8 @@ const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
   );
 }, (prev, next) => {
   return prev.isToday === next.isToday &&
+         prev.shiftHubBadge?.code === next.shiftHubBadge?.code &&
+         prev.shiftHubBadge?.tooltip === next.shiftHubBadge?.tooltip &&
          prev.record?.attendance_status === next.record?.attendance_status &&
          prev.record?.shift_type === next.record?.shift_type &&
          prev.record?.first_login_time === next.record?.first_login_time &&
@@ -158,7 +171,7 @@ const SkeletonRow = ({ colCount }) => (
 // ---------------------------------------------------------------------------
 // AttendanceGrid — main export
 // ---------------------------------------------------------------------------
-const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, groupByHub = false }) => {
+const AttendanceGrid = ({ employees, dateRange, getCellData, hubMap, isLoading, onCellClick, groupByHub = false }) => {
   const todayStr = useMemo(() => toISTDateString(new Date()), []);
   const groupedEmployees = useMemo(() => {
     if (!groupByHub || !employees) return { 'All Employees': employees || [] };
@@ -248,14 +261,21 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
                   {groupEmployees.map(employee => (
                     <tr key={employee.id} id={`attendance-row-${employee.id}`} className="attendance-grid__row">
                       <EmployeeRowCells employee={employee} />
-                      {dateRange.map(date => (
-                        <AttendanceCell
-                          key={`${employee.id}_${date}`}
-                          record={getCellData(employee.id, date)}
-                          onClick={() => onCellClick(employee.id, date)}
-                          isToday={date === todayStr}
-                        />
-                      ))}
+                      {dateRange.map(date => {
+                        const cellRecord = getCellData(employee.id, date);
+                        const shiftHubBadge = resolveNonNativeShiftHub(cellRecord, employee, hubMap, {
+                          preferCityMulti: true,
+                        });
+                        return (
+                          <AttendanceCell
+                            key={`${employee.id}_${date}`}
+                            record={cellRecord}
+                            shiftHubBadge={shiftHubBadge}
+                            onClick={() => onCellClick(employee.id, date)}
+                            isToday={date === todayStr}
+                          />
+                        );
+                      })}
                     </tr>
                   ))}
                 </React.Fragment>

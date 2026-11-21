@@ -49,7 +49,7 @@ const EmployeeAttendanceBoard = ({
   activeVertical,
 }) => {
   const {
-    employees, allEmployees, dateRange, startDate, setStartDate,
+    employees, allEmployees, hubMap, dateRange, startDate, setStartDate,
     endDate, setEndDate, pendingRequests, isLoading: isBoardLoading,
     error, refreshBoard, getCellData,
     page, setPage, hasMore
@@ -356,6 +356,7 @@ const EmployeeAttendanceBoard = ({
           employees={displayedEmployees}
           dateRange={dateRange}
           getCellData={getCellData}
+          hubMap={hubMap}
           isLoading={isBoardLoading}
           onCellClick={handleCellClick}
           selectedEmployeeId={searchedEmployee?.id || ''}
@@ -366,6 +367,7 @@ const EmployeeAttendanceBoard = ({
           employees={displayedEmployees}
           dateRange={dateRange}
           getCellData={getCellData}
+          hubMap={hubMap}
           isLoading={isBoardLoading}
           onCellClick={handleCellClick}
           groupByHub={groupByHub && !searchedEmployee}

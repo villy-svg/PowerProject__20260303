@@ -55,19 +55,24 @@ body[data-keyboard="open"] .attendance-mobile-list {
   color: var(--brand-green);
 }
 
-/* Horizontal Day Strip (By Day mode) */
-.attendance-day-strip {
+/* Horizontal Day Strip & Summary Filter Pills — shared scrollbar-hidden horizontal scrollers */
+.attendance-day-strip,
+.attendance-summary-pills {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
   flex-shrink: 0;
+  overflow-x: auto;
   padding: 2px 0;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.attendance-day-strip::-webkit-scrollbar {
+.attendance-day-strip::-webkit-scrollbar,
+.attendance-summary-pills::-webkit-scrollbar {
   display: none;
+}
+
+.attendance-day-strip {
+  gap: 6px;
 }
 
 .attendance-day-pill {
@@ -134,19 +139,9 @@ body[data-keyboard="open"] .attendance-mobile-list {
 
 /* Summary / Filter Pills */
 .attendance-summary-pills {
-  display: flex;
   align-items: center;
-  flex-shrink: 0;
-  overflow-x: auto;
   gap: 0.45rem;
-  padding: 2px 0;
   margin: 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.attendance-summary-pills::-webkit-scrollbar {
-  display: none;
 }
 
 .attendance-summary-pill {
@@ -247,15 +242,29 @@ body[data-keyboard="open"] .attendance-mobile-list {
   gap: 5px;
 }
 
-.attendance-list-item__badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 1px 6px;
+/* Shared micro-badge typography & geometry (ui-design-system §3) */
+.attendance-list-item__badge,
+.attendance-list-item__today-tag,
+.attendance-list-item__pending-badge,
+.attendance-list-item__shift-hub-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 2px 6px;
   border-radius: 4px;
+  white-space: nowrap;
+}
+
+.attendance-list-item__badge {
   background: color-mix(in srgb, var(--text-color), transparent 90%);
   color: var(--text-color);
   opacity: 0.85;
-  text-transform: uppercase;
 }
 
 .attendance-list-item__badge--hub {
@@ -278,11 +287,6 @@ body[data-keyboard="open"] .attendance-mobile-list {
 }
 
 .attendance-list-item__today-tag {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 4px;
   background: color-mix(in srgb, var(--brand-green), transparent 82%);
   color: var(--brand-green);
 }
@@ -326,10 +330,19 @@ body[data-keyboard="open"] .attendance-mobile-list {
 }
 
 .attendance-list-item__pending-badge {
-  font-size: 0.62rem;
-  font-weight: 800;
   color: var(--status-warning);
   background: color-mix(in srgb, var(--status-warning), transparent 85%);
-  padding: 2px 6px;
-  border-radius: 4px;
+}
+
+/* Non-native / multi-hub shift badge on mobile roll-call & timeline cards */
+.attendance-list-item__shift-hub-badge {
+  color: var(--status-warning);
+  background: color-mix(in srgb, var(--status-warning), transparent 84%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 55%);
+}
+
+.attendance-list-item__shift-hub-badge--multi {
+  color: var(--status-neutral);
+  background: color-mix(in srgb, var(--status-neutral), transparent 82%);
+  border-color: color-mix(in srgb, var(--status-neutral), transparent 50%);
 }
