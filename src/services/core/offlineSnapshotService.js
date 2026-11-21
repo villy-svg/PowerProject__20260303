@@ -12,9 +12,11 @@
  *    and the user's session on the live site is unaffected.
  */
 import { supabase } from './supabaseClient';
+import { profileService } from '../auth/profileService';
 import { normalizeTask, TASK_SELECT } from '../tasks/taskNormalizer';
 import { isVerticalForceLocked } from '../../constants/verticals';
 
+const USER_PROFILE_CACHE_KEY = 'power_project_user';
 const TASK_CACHE_VERSION = '5';
 const TASK_CACHE_KEY = 'powerpod_tasks_v5';
 const TASK_CACHE_VERSION_KEY = 'powerpod_tasks_version';
@@ -124,8 +126,13 @@ export async function syncLiveSnapshotToOfflineCache({ email = '', otp = '' } = 
   }
 
   try {
-    // 2. Run read-only SELECT queries in parallel
-    const [tasksRes, verticalsRes, categoriesRes, subCategoriesRes, rulesRes] = await Promise.all([
+    // 2. Run read-only SELECT queries in parallel (including the user's real profile so
+    //    user.id & employeeId match live tasks in Track Requests / My Tasks).
+    const [profileData, tasksRes, verticalsRes, categoriesRes, subCategoriesRes, rulesRes] = await Promise.all([
+      profileService.fetchUserProfile(activeSession.user.id).catch((err) => {
+        console.warn('[offlineSnapshotService] Profile snapshot skipped:', err);
+        return null;
+      }),
       supabase.from('tasks').select(TASK_SELECT),
       supabase.from('verticals').select('*').order('order', { ascending: true }),
       supabase.from('rule_categories').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true }),
@@ -135,6 +142,11 @@ export async function syncLiveSnapshotToOfflineCache({ email = '', otp = '' } = 
 
     if (tasksRes.error) throw tasksRes.error;
     if (verticalsRes.error) throw verticalsRes.error;
+
+    // 2b. Persist real user profile so offline bypass uses the user's real IDs & RBAC
+    if (profileData) {
+      localStorage.setItem(USER_PROFILE_CACHE_KEY, JSON.stringify(profileData));
+    }
 
     // 3. Persist normalized tasks
     const normalizedTasks = (tasksRes.data || []).map(normalizeTask);
