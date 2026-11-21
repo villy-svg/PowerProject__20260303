@@ -316,10 +316,17 @@ select:-webkit-autofill:focus {
     opacity: 0.85;
   }
 
+  /* Keep all input types uniform on phones; font-size 16px prevents iOS WebKit auto-zoom */
   .vertical-task-form input[type="text"],
+  .vertical-task-form input[type="url"],
+  .vertical-task-form input[type="date"],
+  .vertical-task-form input[type="number"],
   .vertical-task-form select,
   .vertical-task-form textarea,
   .hub-modal input[type="text"],
+  .hub-modal input[type="url"],
+  .hub-modal input[type="date"],
+  .hub-modal input[type="number"],
   .hub-modal select,
   .hub-modal textarea {
     padding: 8px 12px;

@@ -1,0 +1,267 @@
+/* ==========================================================================
+   TUTORIAL HUB STYLES
+   Scoped to TutorialHub.jsx (page layout, category grids, flow cards, startup toggles)
+   ========================================================================== */
+
+.tutorial-hub-page {
+  --tutorial-scrim: color-mix(in srgb, var(--bg-color), transparent 50%);
+  --tutorial-surface-subtle: color-mix(in srgb, var(--text-color), transparent 98%);
+  --tutorial-surface-hover: color-mix(in srgb, var(--text-color), transparent 95%);
+  animation: fadeIn 0.4s ease-out;
+  padding: clamp(16px, 4vw, 32px);
+}
+
+/* Target Environment Toggle (reuses canonical .board-view-toggle / .view-toggle-btn from BoardMenu.css) */
+.platform-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.platform-toggle-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+}
+
+/* .header-back-dashboard-btn inherits uniform typography and sizing from .master-header-actions-row .halo-button */
+
+/* Categories Grid Layout */
+.tutorial-categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 24px;
+  padding-bottom: 40px;
+}
+
+.category-section-title {
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0 0 16px 0;
+  border-left: 3px solid var(--brand-green);
+  padding-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-flows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* Flow Cards */
+.tutorial-flow-card {
+  background: var(--tutorial-surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Design System §15B: border cue without stacking competing halo glow */
+.tutorial-flow-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-green);
+  box-shadow: 0 12px 30px var(--tutorial-scrim);
+  background: var(--tutorial-surface-hover);
+}
+
+.flow-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.flow-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.access-level-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--badge-green-bg);
+  color: var(--status-success);
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 75%);
+}
+
+.flow-indicator-icon {
+  font-size: 0.75rem;
+  opacity: 0.3;
+  color: var(--text-color);
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.tutorial-flow-card:hover .flow-indicator-icon {
+  opacity: 1;
+  color: var(--brand-green);
+  transform: scale(1.1);
+}
+
+.flow-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.flow-card-description {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  opacity: 0.55;
+  margin: 0 0 20px 0;
+  flex: 1;
+  white-space: pre-wrap;
+}
+
+/* Master Admin per-tutorial startup mode selector (reuses canonical .board-view-toggle / .view-toggle-btn) */
+.flow-card-startup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+  margin-bottom: 14px;
+  border-top: 1px solid var(--tutorial-surface-hover);
+  cursor: default;
+}
+
+.flow-card-startup-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-color);
+  opacity: 0.65;
+}
+
+.flow-card-startup-row .view-toggle-btn {
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.flow-card-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--tutorial-surface-hover);
+  padding-top: 16px;
+  margin-top: auto; /* Ensure it stays at the bottom of the card */
+}
+
+.halo-button.flow-version-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  min-height: 48px;
+  gap: 3px;
+  cursor: pointer;
+  transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--radius-button, 12px);
+  width: 100%;
+}
+
+.version-btn-title {
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.version-btn-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+/* Active version highlight matching the current platform selection */
+.halo-button.flow-version-btn.active-version {
+  border-color: var(--brand-green);
+  background: var(--halo-bg);
+  box-shadow: 0 0 12px var(--halo-glow);
+  opacity: 1;
+}
+
+.flow-version-btn.active-version .version-btn-subtitle {
+  opacity: 0.9;
+}
+
+/* Play All button — small inline size */
+.play-all-btn {
+  min-width: auto;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVENESS (Zero desktop impact)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  .tutorial-categories-grid {
+    gap: 20px;
+  }
+  .category-flows-grid {
+    grid-template-columns: 1fr; /* Full width list on mobile */
+  }
+  /* Mobile touch target compliance (Design System §14B: >=44px touch targets) */
+  .flow-card-startup-row .board-view-toggle {
+    height: auto; /* Allows 44px mobile touch targets without overflowing 36px desktop container */
+  }
+  .flow-card-startup-row .view-toggle-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .flow-card-footer {
+    gap: 8px;
+    padding-top: 12px;
+  }
+  /* Match .halo-button.flow-version-btn specificity so mobile overrides apply cleanly */
+  .halo-button.flow-version-btn {
+    padding: 6px 8px;
+    min-height: 44px;
+    gap: 2px;
+  }
+  .version-btn-title {
+    font-size: 0.64rem;
+  }
+  .version-btn-subtitle {
+    font-size: 0.55rem;
+  }
+}

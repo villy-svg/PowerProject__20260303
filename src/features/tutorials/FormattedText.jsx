@@ -1,4 +1,5 @@
 import React from 'react';
+import './SlideTextToolbar.css';
 
 /**
  * Pure, XSS-safe inline Markdown-lite renderer for tutorial & rule text.

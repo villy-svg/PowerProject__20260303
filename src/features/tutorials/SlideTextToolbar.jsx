@@ -8,6 +8,7 @@ import {
   IconEye
 } from '../../components/ui/Icons';
 import { normalizeTextAlign, applyWrapFormat, applyLinePrefix } from './tutorialUtils';
+import './SlideTextToolbar.css';
 
 /**
  * Modular, reusable formatting + alignment toolbar shared by

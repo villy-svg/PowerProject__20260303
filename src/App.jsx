@@ -38,8 +38,8 @@ import { TUTORIAL_FLOWS } from './features/tutorials/TutorialHub';
 import { buildRuleFlow } from './features/tutorials/tutorialUtils';
 import { fetchRules } from './services/employees/rulesService';
 import {
-  DEFAULT_STARTUP_TUTORIALS_CONFIG,
   fetchStartupTutorialsConfig,
+  resolveEffectiveTutorialStartupMode,
 } from './services/core/systemSettingsService';
 import { LOGO_KEYWORD_MAPPINGS } from './features/tutorials/logoConfig';
 import OTAUpdateToast from './components/ota/OTAUpdateToast';
@@ -129,8 +129,6 @@ function AppShell({ verticals, verticalList }) {
   // Onboarding Slideshow Autoplay State (Queue-based sequential player)
   const [tutorialQueue, setTutorialQueue] = useState([]);
   const [currentTutorialIndex, setCurrentTutorialIndex] = useState(-1);
-  // Global startup tutorial mode controlled by Master Admin (Option A: mutually exclusive)
-  const [startupTutorialsConfig, setStartupTutorialsConfig] = useState(DEFAULT_STARTUP_TUTORIALS_CONFIG);
 
   const rawOnboardingFlow = TUTORIAL_FLOWS.find(f => f.layout === 'onboarding');
   const onboardingFlow = React.useMemo(() => {
@@ -225,29 +223,27 @@ function AppShell({ verticals, verticalList }) {
           try {
             // Evaluate global Master Admin startup tutorial toggles before queueing
             const config = await fetchStartupTutorialsConfig();
-            setStartupTutorialsConfig(config);
             if (!config.compulsory_show && !config.skippable_show) {
               return;
             }
 
-            // Load rules to check for special condition tutorials
+            // Load all active rules so per-tutorial startup overrides apply to any tutorial
             const rulesData = await fetchRules({ activeOnly: true });
-            const specialRules = rulesData.filter(rule => {
-              const catName = rule.category?.name?.toLowerCase() || '';
-              const title = rule.title?.toLowerCase() || '';
-              const matchesKeyword = LOGO_KEYWORD_MAPPINGS.some(mapping =>
-                mapping.keywords.some(kw => title.includes(kw))
-              );
-              return catName.includes('special') || matchesKeyword;
-            });
 
             const queue = [];
             if (onboardingFlow) {
-              queue.push(onboardingFlow);
+              const introMode = resolveEffectiveTutorialStartupMode(onboardingFlow.id, config);
+              if (introMode !== 'off') {
+                queue.push({ ...onboardingFlow, _startupMode: introMode });
+              }
             }
 
-            specialRules.forEach(rule => {
-              queue.push(buildRuleFlow(rule));
+            rulesData.forEach(rule => {
+              const ruleFlow = buildRuleFlow(rule);
+              const ruleMode = resolveEffectiveTutorialStartupMode(ruleFlow.id, config, rule);
+              if (ruleMode !== 'off') {
+                queue.push({ ...ruleFlow, _startupMode: ruleMode });
+              }
             });
 
             if (queue.length > 0) {
@@ -257,7 +253,7 @@ function AppShell({ verticals, verticalList }) {
           } catch (err) {
             console.error('Error loading onboarding rules:', err);
             if (onboardingFlow) {
-              setTutorialQueue([onboardingFlow]);
+              setTutorialQueue([{ ...onboardingFlow, _startupMode: 'skippable' }]);
               setCurrentTutorialIndex(0);
             }
           }
@@ -269,13 +265,12 @@ function AppShell({ verticals, verticalList }) {
 
   const handleCloseTutorial = (completed = false) => {
     const activeTutorial = tutorialQueue[currentTutorialIndex];
-    const isSpecial = activeTutorial && activeTutorial.id !== 'customer_support';
     const isMasterAdmin = user?.roleId === 'master_admin';
-    const isCompulsoryMode = startupTutorialsConfig.compulsory_show;
+    const isCompulsoryTutorial = activeTutorial?._startupMode === 'compulsory';
 
-    // Enforcement: do not allow skip unless completed, master admin, or skippable mode
-    if (!completed && !isMasterAdmin && isSpecial && isCompulsoryMode) {
-      alert("You must complete this special conditions tutorial. Skipping is not allowed.");
+    // Enforcement: do not allow skip unless completed, master admin, or tutorial is skippable
+    if (!completed && !isMasterAdmin && isCompulsoryTutorial) {
+      alert("You must complete this compulsory tutorial. Skipping is not allowed.");
       return;
     }
 
@@ -404,13 +399,12 @@ function AppShell({ verticals, verticalList }) {
             onClose={handleCloseTutorial}
             user={user}
             permissions={
-              !startupTutorialsConfig.compulsory_show && startupTutorialsConfig.skippable_show
+              tutorialQueue[currentTutorialIndex]._startupMode === 'skippable'
                 ? { ...currentUserPermissions, canSkipTutorial: true }
                 : currentUserPermissions
             }
             preventSkip={
-              startupTutorialsConfig.compulsory_show &&
-              tutorialQueue[currentTutorialIndex].id !== 'customer_support' &&
+              tutorialQueue[currentTutorialIndex]._startupMode === 'compulsory' &&
               user?.roleId !== 'master_admin'
             }
             onlyFirstSlide={true}

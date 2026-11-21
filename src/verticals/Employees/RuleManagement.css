@@ -1,3 +1,50 @@
+/* ============================================================
+   RuleManagement.css
+   Lean, deduplicated styles for Rule Management (Rules,
+   Categories, Sub-Categories) and rule form modal helpers.
+   Desktop-first; all mobile rules scoped inside <= 768px / 480px.
+   Base .rule-badge & .rule-badge.date-badge come from
+   ./EmployeeRulesBoard.css (same vertical, single source of truth).
+   ============================================================ */
+
+/* ── Scrollable Main Content Region ─────────────────────────── */
+.rule-mgmt-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+/* ── Shared Surface & Utility Groupings ─────────────────────── */
+.rule-item-row,
+.rule-category-card,
+.rule-subcat-table-wrap {
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+}
+
+.rule-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rule-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.rule-category-order,
+.rule-subcat-order-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Tabs ───────────────────────────────────────────────────── */
 .rule-mgmt-tabs {
   display: flex;
   gap: 0.5rem;
@@ -21,6 +68,8 @@
   font-family: inherit;
   position: relative;
   top: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rule-mgmt-tab:hover { opacity: 0.75; }
@@ -31,68 +80,21 @@
   border-bottom-color: var(--brand-green);
 }
 
-.rule-mgmt-content {
-  padding: clamp(1rem, 3vw, 1.5rem);
-}
-
-/* ── Rule Item Row (for rules table) */
-.rule-item-row {
+/* ── Filter Toolbar ─────────────────────────────────────────── */
+.rule-filter-toolbar {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  margin-bottom: 0.6rem;
-  background: color-mix(in srgb, var(--text-color), transparent 98%);
-  transition: all 0.2s ease;
-}
-
-.rule-item-row:hover {
-  border-color: color-mix(in srgb, var(--brand-green), transparent 70%);
-}
-
-.rule-item-row.inactive-rule {
-  opacity: 0.45;
-}
-
-.rule-item-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.rule-item-title {
-  font-size: 0.88rem;
-  font-weight: 700;
-  margin: 0 0 0.3rem 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rule-item-meta {
-  display: flex;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.rule-item-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-/* ── Toggle (.rule-toggle) and form feedback (.status-message) styles
-   are defined in ManagementForms.css and shared across all modals. */
-
-/* ── Category filter for rules tab */
 .rule-cat-filter {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.4rem;
-  margin-bottom: 1rem;
 }
 
 .rule-cat-filter-btn {
@@ -109,6 +111,8 @@
   opacity: 0.55;
   transition: all 0.2s ease;
   font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .rule-cat-filter-btn:hover { opacity: 0.85; }
@@ -120,18 +124,373 @@
   background: color-mix(in srgb, var(--brand-green), transparent 90%);
 }
 
-@media screen and (max-width: 768px) {
-  .rule-mgmt-tabs { gap: 0; }
-  .rule-mgmt-tab { padding: 0.5rem 0.75rem; font-size: 0.72rem; }
+.rule-inactive-toggle-btn {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.85rem;
+  flex-shrink: 0;
 }
 
-/* ── Empty state for tab panels */
+/* ── Rules Tab Rows ─────────────────────────────────────────── */
+.rule-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.rule-item-row:hover {
+  border-color: color-mix(in srgb, var(--brand-green), transparent 70%);
+}
+
+.rule-item-row.inactive-rule { opacity: 0.45; }
+
+.rule-item-toggle-wrap {
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.rule-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-item-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Management-only .rule-badge variants */
+.rule-badge.impact-badge {
+  color: var(--status-danger);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 75%);
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
+  opacity: 1;
+  white-space: pre-wrap;
+}
+
+.rule-badge.drive-badge {
+  color: var(--brand-green);
+  opacity: 1;
+}
+
+/* ── Unified Edit / Delete Action Buttons ───────────────────── */
+.rule-action-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.rule-action-btn:hover {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: var(--brand-green);
+  color: var(--brand-green);
+  transform: translateY(-1px);
+}
+
+.rule-action-btn.delete:hover {
+  border-color: var(--status-danger);
+  color: var(--status-danger);
+}
+
+/* ── Categories Tab Grid & Cards ────────────────────────────── */
+.rule-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.rule-category-card {
+  border-radius: var(--radius-squircle, 24px);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.rule-category-card:hover {
+  border-color: color-mix(in srgb, var(--brand-green), transparent 65%);
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+}
+
+.rule-category-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.rule-category-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.rule-category-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-color);
+}
+
+.rule-category-desc {
+  font-size: 0.8rem;
+  opacity: 0.65;
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.rule-category-order {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  margin: 0.25rem 0 0 0;
+}
+
+/* ── Sub-Categories Desktop Table ───────────────────────────── */
+.rule-subcat-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-squircle, 24px);
+}
+
+.rule-subcat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.rule-subcat-table th {
+  text-align: left;
+  padding: 0.9rem 1.15rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.7;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.rule-subcat-table td {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.rule-subcat-table tr:last-child td { border-bottom: none; }
+
+.rule-subcat-table tr:hover {
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
+}
+
+.rule-subcat-name {
+  font-weight: 700;
+  color: var(--brand-green);
+}
+
+.rule-subcat-order-code {
+  font-size: 0.78rem;
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rule-subcat-actions-col { text-align: right; }
+
+/* ── Empty & Error Panels ───────────────────────────────────── */
 .rule-empty-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  padding: 3rem 1.5rem;
   text-align: center;
-  opacity: 0.5;
+  opacity: 0.55;
   font-size: 0.88rem;
+}
+
+.rule-empty-panel.is-error {
+  color: var(--status-danger);
+  opacity: 1;
+}
+
+/* ── Rule Modal Semantic Helpers ────────────────────────────── */
+.modal-content.rule-modal-wide { max-width: 680px; }
+
+.rule-discard-draft-btn {
+  background: transparent;
+  border: none;
+  color: var(--status-danger);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  padding: 4px 6px;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.form-group.rule-active-toggle-group {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.form-group.rule-active-toggle-group label { margin: 0; }
+
+/* ============================================================
+   MOBILE ADAPTATIONS (<= 768px & <= 480px)
+   Zero impact on desktop (> 768px).
+   ============================================================ */
+@media screen and (max-width: 768px) {
+  .rule-mgmt-content {
+    padding: 0.75rem 0.5rem calc(88px + var(--safe-bottom, 0px)) 0.5rem;
+  }
+
+  /* Shared horizontal scroll strips with hidden scrollbars */
+  .rule-mgmt-tabs,
+  .rule-cat-filter {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .rule-mgmt-tabs::-webkit-scrollbar,
+  .rule-cat-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rule-mgmt-tabs {
+    gap: 0;
+    margin-bottom: 1rem;
+  }
+
+  .rule-mgmt-tab {
+    padding: 0.5rem 0.85rem;
+    min-height: 44px;
+    font-size: 0.74rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .rule-filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .rule-cat-filter {
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    width: 100%;
+  }
+
+  .rule-cat-filter-btn {
+    min-height: 36px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .rule-inactive-toggle-btn {
+    align-self: flex-start;
+    min-height: 40px;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .rule-categories-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Adaptive mobile Sub-Categories card list */
+  .rule-subcat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .rule-subcat-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--text-color), transparent 98%);
+  }
+
+  .rule-subcat-card-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .rule-subcat-card-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--brand-green);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .rule-action-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.15rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .modal-content.rule-modal-wide { max-width: 100%; }
+
+  /* Stack rule row on phones so titles never crush to 2 words */
+  .rule-item-row {
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.85rem;
+  }
+
+  .rule-item-info { width: 100%; }
+
+  .rule-item-title {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+    font-size: 0.92rem;
+  }
+
+  .rule-item-actions {
+    width: 100%;
+    padding-top: 0.45rem;
+    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 40%);
+  }
+
+  .rule-item-toggle-wrap { padding-top: 0; }
 }

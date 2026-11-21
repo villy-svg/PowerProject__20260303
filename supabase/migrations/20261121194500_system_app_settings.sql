@@ -50,8 +50,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.system_app_settings TO authentica
 INSERT INTO public.system_app_settings (setting_key, setting_value, description)
 VALUES (
   'startup_tutorials_mode',
-  '{"compulsory_show": true, "skippable_show": false}'::jsonb,
-  'Controls whether startup tutorials auto-play in compulsory mode, skippable mode, or not at all.'
+  '{"compulsory_show": true, "skippable_show": false, "per_tutorial": {}}'::jsonb,
+  'Controls global and per-tutorial startup autoplay modes (compulsory, skippable, or off).'
 )
 ON CONFLICT (setting_key) DO NOTHING;
 

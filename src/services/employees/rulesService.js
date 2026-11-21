@@ -3,7 +3,7 @@
  *
  * Service layer for Employee Rules & Regulations.
  * Abstracts all Supabase queries away from UI components.
- * Supports VITE_OFFLINE_BYPASS local caching.
+ * Delegates VITE_OFFLINE_BYPASS local caching to rulesOfflineBypass.js.
  *
  * Tables:
  *   rule_categories       — Top-level groupings (e.g. "Safety", "HR Policy")
@@ -12,30 +12,22 @@
  */
 
 import { supabase } from '../core/supabaseClient';
-
-const BYPASS_KEY_CATEGORIES = 'powerpod_rule_categories_offline';
-const BYPASS_KEY_SUB_CATEGORIES = 'powerpod_rule_sub_categories_offline';
-const BYPASS_KEY_RULES = 'powerpod_employee_rules_offline';
-
-function isBypassEnabled() {
-  return import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
-}
-
-function getLocalData(key, fallback = []) {
-  const cached = localStorage.getItem(key);
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch (e) {
-      console.error(`[rulesService] Error parsing cache for key "${key}":`, e);
-    }
-  }
-  return fallback;
-}
-
-function saveLocalData(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
+import {
+  isRulesBypassEnabled,
+  bypassFetchCategories,
+  bypassCreateCategory,
+  bypassUpdateCategory,
+  bypassDeleteCategory,
+  bypassFetchSubCategories,
+  bypassCreateSubCategory,
+  bypassUpdateSubCategory,
+  bypassDeleteSubCategory,
+  bypassFetchRules,
+  bypassCreateRule,
+  bypassUpdateRule,
+  bypassDeleteRule,
+  bypassToggleRuleActive,
+} from './rulesOfflineBypass';
 
 // ─── CATEGORIES ────────────────────────────────────────────────────────────────
 
@@ -43,18 +35,7 @@ function saveLocalData(key, data) {
  * Fetch all rule categories ordered by sort_order, then name.
  */
 export async function fetchCategories() {
-  if (isBypassEnabled()) {
-    let localCats = getLocalData(BYPASS_KEY_CATEGORIES, null);
-    if (!localCats) {
-      localCats = [
-        { id: 'cat-safety', name: 'Safety & Security', icon: '🛡️', sort_order: 1, description: 'Rules concerning safety protocol, emergency layouts, and gear usage.' },
-        { id: 'cat-conduct', name: 'Code of Conduct', icon: '🤝', sort_order: 2, description: 'Professional guidelines, client communication rules, and ethical standards.' },
-        { id: 'cat-ops', name: 'Operational Standards', icon: '⚙️', sort_order: 3, description: 'Daily shift workflows, checklists, and facility maintenance rules.' }
-      ];
-      saveLocalData(BYPASS_KEY_CATEGORIES, localCats);
-    }
-    return localCats.sort((a, b) => (a.sort_order - b.sort_order) || a.name.localeCompare(b.name));
-  }
+  if (isRulesBypassEnabled()) return bypassFetchCategories();
 
   const { data, error } = await supabase
     .from('rule_categories')
@@ -71,12 +52,7 @@ export async function fetchCategories() {
  * @param {{ name: string, icon?: string, description?: string, sort_order?: number }} data
  */
 export async function createCategory(data) {
-  if (isBypassEnabled()) {
-    const cats = getLocalData(BYPASS_KEY_CATEGORIES);
-    const newCat = { ...data, id: `cat-${Date.now()}`, sort_order: Number(data.sort_order || 0), updated_at: new Date().toISOString() };
-    saveLocalData(BYPASS_KEY_CATEGORIES, [...cats, newCat]);
-    return newCat;
-  }
+  if (isRulesBypassEnabled()) return bypassCreateCategory(data);
 
   const { data: created, error } = await supabase
     .from('rule_categories')
@@ -94,19 +70,7 @@ export async function createCategory(data) {
  * @param {object} data
  */
 export async function updateCategory(id, data) {
-  if (isBypassEnabled()) {
-    const cats = getLocalData(BYPASS_KEY_CATEGORIES);
-    let updatedItem = null;
-    const nextCats = cats.map(cat => {
-      if (cat.id === id) {
-        updatedItem = { ...cat, ...data, updated_at: new Date().toISOString() };
-        return updatedItem;
-      }
-      return cat;
-    });
-    saveLocalData(BYPASS_KEY_CATEGORIES, nextCats);
-    return updatedItem;
-  }
+  if (isRulesBypassEnabled()) return bypassUpdateCategory(id, data);
 
   const { data: updated, error } = await supabase
     .from('rule_categories')
@@ -124,19 +88,7 @@ export async function updateCategory(id, data) {
  * @param {string} id
  */
 export async function deleteCategory(id) {
-  if (isBypassEnabled()) {
-    const cats = getLocalData(BYPASS_KEY_CATEGORIES);
-    saveLocalData(BYPASS_KEY_CATEGORIES, cats.filter(cat => cat.id !== id));
-    
-    // Cascade to subcategories
-    const subs = getLocalData(BYPASS_KEY_SUB_CATEGORIES);
-    saveLocalData(BYPASS_KEY_SUB_CATEGORIES, subs.filter(sub => sub.category_id !== id));
-
-    // Cascade to rules
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    saveLocalData(BYPASS_KEY_RULES, rules.filter(r => r.category_id !== id));
-    return;
-  }
+  if (isRulesBypassEnabled()) return bypassDeleteCategory(id);
 
   const { error } = await supabase
     .from('rule_categories')
@@ -153,20 +105,7 @@ export async function deleteCategory(id) {
  * @param {string|null} categoryId
  */
 export async function fetchSubCategories(categoryId = null) {
-  if (isBypassEnabled()) {
-    let localSubs = getLocalData(BYPASS_KEY_SUB_CATEGORIES, null);
-    if (!localSubs) {
-      localSubs = [
-        { id: 'sub-ppe', category_id: 'cat-safety', name: 'PPE Requirements', sort_order: 1 },
-        { id: 'sub-fire', category_id: 'cat-safety', name: 'Fire Safety Protocols', sort_order: 2 },
-        { id: 'sub-attendance', category_id: 'cat-conduct', name: 'Attendance & Punctuality', sort_order: 1 },
-        { id: 'sub-harassment', category_id: 'cat-conduct', name: 'Anti-Harassment', sort_order: 2 }
-      ];
-      saveLocalData(BYPASS_KEY_SUB_CATEGORIES, localSubs);
-    }
-    const filtered = categoryId ? localSubs.filter(s => s.category_id === categoryId) : localSubs;
-    return filtered.sort((a, b) => (a.sort_order - b.sort_order) || a.name.localeCompare(b.name));
-  }
+  if (isRulesBypassEnabled()) return bypassFetchSubCategories(categoryId);
 
   let query = supabase
     .from('rule_sub_categories')
@@ -188,12 +127,7 @@ export async function fetchSubCategories(categoryId = null) {
  * @param {{ category_id: string, name: string, sort_order?: number }} data
  */
 export async function createSubCategory(data) {
-  if (isBypassEnabled()) {
-    const subs = getLocalData(BYPASS_KEY_SUB_CATEGORIES);
-    const newSub = { ...data, id: `sub-${Date.now()}`, sort_order: Number(data.sort_order || 0), updated_at: new Date().toISOString() };
-    saveLocalData(BYPASS_KEY_SUB_CATEGORIES, [...subs, newSub]);
-    return newSub;
-  }
+  if (isRulesBypassEnabled()) return bypassCreateSubCategory(data);
 
   const { data: created, error } = await supabase
     .from('rule_sub_categories')
@@ -211,19 +145,7 @@ export async function createSubCategory(data) {
  * @param {object} data
  */
 export async function updateSubCategory(id, data) {
-  if (isBypassEnabled()) {
-    const subs = getLocalData(BYPASS_KEY_SUB_CATEGORIES);
-    let updatedItem = null;
-    const nextSubs = subs.map(sub => {
-      if (sub.id === id) {
-        updatedItem = { ...sub, ...data, updated_at: new Date().toISOString() };
-        return updatedItem;
-      }
-      return sub;
-    });
-    saveLocalData(BYPASS_KEY_SUB_CATEGORIES, nextSubs);
-    return updatedItem;
-  }
+  if (isRulesBypassEnabled()) return bypassUpdateSubCategory(id, data);
 
   const { data: updated, error } = await supabase
     .from('rule_sub_categories')
@@ -241,15 +163,7 @@ export async function updateSubCategory(id, data) {
  * @param {string} id
  */
 export async function deleteSubCategory(id) {
-  if (isBypassEnabled()) {
-    const subs = getLocalData(BYPASS_KEY_SUB_CATEGORIES);
-    saveLocalData(BYPASS_KEY_SUB_CATEGORIES, subs.filter(sub => sub.id !== id));
-
-    // Nullify sub_category_id links in rules
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    saveLocalData(BYPASS_KEY_RULES, rules.map(r => r.sub_category_id === id ? { ...r, sub_category_id: null } : r));
-    return;
-  }
+  if (isRulesBypassEnabled()) return bypassDeleteSubCategory(id);
 
   const { error } = await supabase
     .from('rule_sub_categories')
@@ -266,118 +180,7 @@ export async function deleteSubCategory(id) {
  * @param {{ categoryId?: string, activeOnly?: boolean }} options
  */
 export async function fetchRules({ categoryId = null, activeOnly = true } = {}) {
-  if (isBypassEnabled()) {
-    let localRules = getLocalData(BYPASS_KEY_RULES, null);
-    if (!localRules) {
-      localRules = [
-        {
-          id: 'rule-ppe-1',
-          category_id: 'cat-safety',
-          sub_category_id: 'sub-ppe',
-          title: 'Mandatory Helmet Usage',
-          content: 'All operators must wear safety helmets inside active maintenance bays at all times.',
-          drive_url: 'https://drive.google.com',
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 1,
-          impact: 'High'
-        },
-        {
-          id: 'rule-fire-1',
-          category_id: 'cat-safety',
-          sub_category_id: 'sub-fire',
-          title: 'Fire Extinguisher Checks',
-          content: 'Monthly check of fire extinguisher inspection labels is required for all fire wardens.',
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 2,
-          impact: 'High'
-        },
-        {
-          id: 'rule-customer-vehicle',
-          category_id: 'cat-conduct',
-          sub_category_id: null,
-          title: 'No Using Customer Vehicle/Material',
-          content: `1. Do not use customer vehicles/materials.
-2. ಗ್ರಾಹಕರ ವಾಹನಗಳು/ವಸ್ತುಗಳನ್ನು ಬಳಸಬೇಡಿ
-3. Impact: Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost
-4. ಪ್ರಭಾವ: ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ದಂಡ: ರೂ. 5,000/- | ವಾಹನದ ಸಂಪೂರ್ಣ ದುರಸ್ಥಿ ವೆಚ್ಚವನ್ನು ಪಾವತಿಸಿ`,
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 3,
-          impact: 'Termination | Fine : Rs. 5,000/- | Pay Full Vehicle Repair Cost'
-        },
-        {
-          id: 'rule-no-fighting',
-          category_id: 'cat-conduct',
-          sub_category_id: null,
-          title: 'No Fighting or Physical Violence',
-          content: `1. Do not engage in physical fights or violence at the workplace.
-2. ಕೆಲಸದ ಸ್ಥಳದಲ್ಲಿ ದೈಹಿಕ ಜಗಳಗಳು ಅಥವಾ ಹಿಂಸಾಚಾರದಲ್ಲಿ ತೊಡಗಬೇಡಿ.
-3. Impact: Immediate Termination & Legal Action.
-4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಜಾ ಮತ್ತು ಕಾನೂನು ಕ್ರಮ.`,
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 4,
-          impact: 'Immediate Termination & Legal Action'
-        },
-        {
-          id: 'rule-no-drinking',
-          category_id: 'cat-conduct',
-          sub_category_id: null,
-          title: 'No Drinking / Alcohol',
-          content: `1. No drinking or consumption of alcohol while on duty or on client premises.
-2. ಕರ್ತವ್ಯದ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಕ್ಲೈಂಟ್ ಆವರಣದಲ್ಲಿ ಮದ್ಯಪಾನ ಮಾಡುವುದನ್ನು ನಿಷೇಧಿಸಲಾಗಿದೆ.
-3. Impact: Immediate Termination | Fine: Rs. 10,000/-
-4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ದಂಡ: ರೂ. 10,000/-`,
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 4,
-          impact: 'Immediate Termination | Fine: Rs. 10,000/-'
-        },
-        {
-          id: 'rule-no-drugs',
-          category_id: 'cat-conduct',
-          sub_category_id: null,
-          title: 'No Customer Vehicle Access Under Influence of Drugs',
-          content: `1. Do not access or operate any customer vehicles under the influence of drugs or intoxicating substances.
-2. ಮಾದಕ ದ್ರವ್ಯಗಳು ಅಥವಾ ಅಮಲು ಪದಾರ್ಥಗಳ ಪ್ರಭಾವದ ಅಡಿಯಲ್ಲಿ ಯಾವುದೇ ಗ್ರಾಹಕರ ವಾಹನಗಳನ್ನು ಪ್ರವೇಶಿಸಬೇಡಿ ಅಥವಾ ಚಲಾಯಿಸಬೇಡಿ.
-3. Impact: Immediate Termination | Criminal Prosecution | Fine: Rs. 20,000/-
-4. ಪ್ರಭಾವ: ತಕ್ಷಣದ ಉದ್ಯೋಗ ವಿಲೋಪನೆ | ಕ್ರಿಮಿನಲ್ ಮೊಕದ್ದಮೆ | ದಂಡ: ರೂ. 20,000/-`,
-          effective_date: new Date().toISOString().split('T')[0],
-          is_active: true,
-          sort_order: 5,
-          impact: 'Immediate Termination | Criminal Prosecution | Fine: Rs. 20,000/-'
-        }
-      ];
-      saveLocalData(BYPASS_KEY_RULES, localRules);
-    }
-
-    const cats = getLocalData(BYPASS_KEY_CATEGORIES, []);
-    const subs = getLocalData(BYPASS_KEY_SUB_CATEGORIES, []);
-
-    // Filter rules
-    let filtered = localRules;
-    if (activeOnly) {
-      filtered = filtered.filter(r => r.is_active);
-    }
-    if (categoryId) {
-      filtered = filtered.filter(r => r.category_id === categoryId);
-    }
-
-    // Join operations simulated locally
-    const joined = filtered.map(rule => {
-      const catObj = cats.find(c => c.id === rule.category_id);
-      const subObj = subs.find(s => s.id === rule.sub_category_id);
-      return {
-        ...rule,
-        category: catObj ? { id: catObj.id, name: catObj.name, icon: catObj.icon } : null,
-        sub_category: subObj ? { id: subObj.id, name: subObj.name } : null
-      };
-    });
-
-    return joined.sort((a, b) => (a.sort_order - b.sort_order) || a.created_at?.localeCompare(b.created_at || ''));
-  }
+  if (isRulesBypassEnabled()) return bypassFetchRules({ categoryId, activeOnly });
 
   let query = supabase
     .from('employee_rules')
@@ -403,25 +206,9 @@ export async function fetchRules({ categoryId = null, activeOnly = true } = {}) 
 
 /**
  * Create a new rule.
- * @param {{
- *   category_id: string,
- *   sub_category_id?: string,
- *   title: string,
- *   content?: string,
- *   drive_url?: string,
- *   effective_date?: string,
- *   is_active?: boolean,
- *   sort_order?: number,
- *   created_by?: string
- * }} data
  */
 export async function createRule(data) {
-  if (isBypassEnabled()) {
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    const newRule = { ...data, id: `rule-${Date.now()}`, sort_order: Number(data.sort_order || 0), is_active: data.is_active !== false, updated_at: new Date().toISOString(), created_at: new Date().toISOString() };
-    saveLocalData(BYPASS_KEY_RULES, [...rules, newRule]);
-    return newRule;
-  }
+  if (isRulesBypassEnabled()) return bypassCreateRule(data);
 
   const { data: created, error } = await supabase
     .from('employee_rules')
@@ -439,19 +226,7 @@ export async function createRule(data) {
  * @param {object} data
  */
 export async function updateRule(id, data) {
-  if (isBypassEnabled()) {
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    let updatedItem = null;
-    const nextRules = rules.map(rule => {
-      if (rule.id === id) {
-        updatedItem = { ...rule, ...data, updated_at: new Date().toISOString() };
-        return updatedItem;
-      }
-      return rule;
-    });
-    saveLocalData(BYPASS_KEY_RULES, nextRules);
-    return updatedItem;
-  }
+  if (isRulesBypassEnabled()) return bypassUpdateRule(id, data);
 
   const { data: updated, error } = await supabase
     .from('employee_rules')
@@ -469,11 +244,7 @@ export async function updateRule(id, data) {
  * @param {string} id
  */
 export async function deleteRule(id) {
-  if (isBypassEnabled()) {
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    saveLocalData(BYPASS_KEY_RULES, rules.filter(rule => rule.id !== id));
-    return;
-  }
+  if (isRulesBypassEnabled()) return bypassDeleteRule(id);
 
   const { error } = await supabase
     .from('employee_rules')
@@ -489,11 +260,7 @@ export async function deleteRule(id) {
  * @param {boolean} isActive
  */
 export async function toggleRuleActive(id, isActive) {
-  if (isBypassEnabled()) {
-    const rules = getLocalData(BYPASS_KEY_RULES);
-    saveLocalData(BYPASS_KEY_RULES, rules.map(rule => rule.id === id ? { ...rule, is_active: isActive, updated_at: new Date().toISOString() } : rule));
-    return;
-  }
+  if (isRulesBypassEnabled()) return bypassToggleRuleActive(id, isActive);
 
   const { error } = await supabase
     .from('employee_rules')

@@ -4,11 +4,17 @@ import TutorialSlideshowViewer from './TutorialSlideshowViewer';
 import TutorialFormModal from './TutorialFormModal';
 import { TUTORIAL_FLOWS } from './flows';
 import { fetchRules, deleteRule } from '../../services/employees/rulesService';
+import {
+  DEFAULT_STARTUP_TUTORIALS_CONFIG,
+  fetchStartupTutorialsConfig,
+  getConfiguredTutorialMode,
+  updateStartupTutorialsConfig,
+} from '../../services/core/systemSettingsService';
 import { buildRuleFlow, parseRuleSlides } from './tutorialUtils';
 import { useQuery } from '@tanstack/react-query';
 import { IconEdit, IconPlus, IconTrash } from '../../components/ui/Icons';
 export { TUTORIAL_FLOWS, parseRuleSlides };
-import './TutorialSlideshowViewer.css';
+import './TutorialHub.css';
 
 const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) => {
   const [platform, setPlatform] = useState('desktop'); // 'desktop' | 'mobile'
@@ -18,11 +24,22 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   const [deletedTick, setDeletedTick] = useState(0); // re-evaluates locally-deleted static tutorials
   const [playAllQueue, setPlayAllQueue] = useState([]);
   const [currentPlayIndex, setCurrentPlayIndex] = useState(-1);
+  const [startupConfig, setStartupConfig] = useState(DEFAULT_STARTUP_TUTORIALS_CONFIG);
+  const [startupConfigSavingId, setStartupConfigSavingId] = useState(null);
 
   const { data: rulesData = [], refetch: refetchRulesData } = useQuery({
     queryKey: ['employee_rules', { activeOnly: true }],
     queryFn: () => fetchRules({ activeOnly: true }),
   });
+
+  // Lookup map from flow.id ('rule_<id>') to raw DB rule for default startup mode resolution
+  const ruleByFlowId = useMemo(() => {
+    const map = {};
+    rulesData.forEach((rule) => {
+      map[`rule_${rule.id}`] = rule;
+    });
+    return map;
+  }, [rulesData]);
 
   // Use shared buildRuleFlow helper so metadata & per-slide textAlign stay in sync with App.jsx
   const ruleFlows = useMemo(() => rulesData.map(buildRuleFlow), [rulesData]);
@@ -32,6 +49,47 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
   }, [refetchRulesData]);
 
   const isMasterAdmin = user?.roleId === 'master_admin' || permissions?.canManageRoles;
+  // RLS on system_app_settings strictly requires role_id = 'master_admin'
+  const isStrictMasterAdmin = user?.roleId === 'master_admin';
+
+  useEffect(() => {
+    if (!isStrictMasterAdmin) return;
+    let cancelled = false;
+    fetchStartupTutorialsConfig().then((cfg) => {
+      if (!cancelled) setStartupConfig(cfg);
+    });
+    return () => { cancelled = true; };
+  }, [isStrictMasterAdmin]);
+
+  const handleSetTutorialStartupMode = async (e, flowId, nextMode) => {
+    e.stopPropagation();
+    if (!isStrictMasterAdmin || startupConfigSavingId) return;
+
+    const currentMode = getConfiguredTutorialMode(flowId, startupConfig, ruleByFlowId[flowId]);
+    if (currentMode === nextMode) return;
+
+    const prevConfig = startupConfig;
+    const nextConfig = {
+      ...prevConfig,
+      per_tutorial: {
+        ...(prevConfig.per_tutorial || {}),
+        [flowId]: nextMode,
+      },
+    };
+
+    setStartupConfig(nextConfig);
+    setStartupConfigSavingId(flowId);
+    try {
+      const saved = await updateStartupTutorialsConfig(nextConfig, user?.id);
+      setStartupConfig(saved);
+    } catch (err) {
+      console.error('[TutorialHub] Failed to save per-tutorial startup mode:', err);
+      setStartupConfig(prevConfig);
+      alert(`Failed to update startup mode: ${err.message || err}`);
+    } finally {
+      setStartupConfigSavingId(null);
+    }
+  };
 
   // Master-admin only: delete a tutorial.
   // DB-backed tutorials (rule_*) are deleted from employee_rules;
@@ -196,15 +254,19 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
         expandedLeft={
           <div className="platform-toggle-container">
             <div className="platform-toggle-label">Target Environment:</div>
-            <div className="platform-selector-group">
+            <div className="board-view-toggle" role="group" aria-label="Target Environment">
               <button 
-                className={`platform-toggle-btn ${platform === 'desktop' ? 'active' : ''}`}
+                type="button"
+                className={`view-toggle-btn ${platform === 'desktop' ? 'active' : ''}`}
+                aria-pressed={platform === 'desktop'}
                 onClick={() => setPlatform('desktop')}
               >
                 Desktop View
               </button>
               <button 
-                className={`platform-toggle-btn ${platform === 'mobile' ? 'active' : ''}`}
+                type="button"
+                className={`view-toggle-btn ${platform === 'mobile' ? 'active' : ''}`}
+                aria-pressed={platform === 'mobile'}
                 onClick={() => setPlatform('mobile')}
               >
                 Mobile View
@@ -293,6 +355,52 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
                   </div>
                   <h4 className="flow-card-title">{flow.title}</h4>
                   <p className="flow-card-description">{flow.description}</p>
+                  {isStrictMasterAdmin && (() => {
+                    const configuredMode = getConfiguredTutorialMode(flow.id, startupConfig, ruleByFlowId[flow.id]);
+                    const isGlobalOff = !startupConfig.compulsory_show && !startupConfig.skippable_show;
+                    const isGlobalSkippable = !startupConfig.compulsory_show && startupConfig.skippable_show;
+                    const labelSuffix = isGlobalOff
+                      ? ' (Global Off)'
+                      : (isGlobalSkippable && configuredMode === 'compulsory' ? ' (Global Skippable)' : '');
+
+                    return (
+                      <div
+                        className="flow-card-startup-row"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <span className="flow-card-startup-label">Startup{labelSuffix}</span>
+                        <div className="board-view-toggle" role="group" aria-label={`Startup mode for ${flow.title}`}>
+                          <button
+                            type="button"
+                            className={`view-toggle-btn ${configuredMode === 'off' ? 'active' : ''}`}
+                            aria-pressed={configuredMode === 'off'}
+                            disabled={startupConfigSavingId === flow.id}
+                            onClick={(e) => handleSetTutorialStartupMode(e, flow.id, 'off')}
+                          >
+                            Off
+                          </button>
+                          <button
+                            type="button"
+                            className={`view-toggle-btn ${configuredMode === 'skippable' ? 'active' : ''}`}
+                            aria-pressed={configuredMode === 'skippable'}
+                            disabled={startupConfigSavingId === flow.id}
+                            onClick={(e) => handleSetTutorialStartupMode(e, flow.id, 'skippable')}
+                          >
+                            Skip
+                          </button>
+                          <button
+                            type="button"
+                            className={`view-toggle-btn ${configuredMode === 'compulsory' ? 'active' : ''}`}
+                            aria-pressed={configuredMode === 'compulsory'}
+                            disabled={startupConfigSavingId === flow.id}
+                            onClick={(e) => handleSetTutorialStartupMode(e, flow.id, 'compulsory')}
+                          >
+                            Compulsory
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="flow-card-footer">
                     <button 
                       className={`halo-button flow-version-btn ${platform === 'desktop' ? 'active-version' : ''}`}

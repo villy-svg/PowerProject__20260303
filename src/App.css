@@ -46,6 +46,7 @@
 .management-view-container {
   width: 100%;
   flex: 1;
+  min-height: 0; /* Allow flex children (e.g. .rule-mgmt-content) to scroll inside overflow:hidden shells */
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.4s ease-out;

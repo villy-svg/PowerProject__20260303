@@ -63,10 +63,12 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
     const prevConfig = startupTutorialsConfig;
     const nextConfig = field === 'compulsory_show'
       ? {
+          ...prevConfig,
           compulsory_show: nextValue,
           skippable_show: nextValue ? false : prevConfig.skippable_show,
         }
       : {
+          ...prevConfig,
           compulsory_show: nextValue ? false : prevConfig.compulsory_show,
           skippable_show: nextValue,
         };
@@ -442,6 +444,13 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                           </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        className="halo-button u-mt-16 u-w-full"
+                        onClick={() => setActiveVertical('tutorial')}
+                      >
+                        Configure Per Tutorial
+                      </button>
                     </div>
                   </div>
                 )}

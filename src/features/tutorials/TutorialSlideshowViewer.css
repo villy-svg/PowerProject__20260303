@@ -1,249 +1,15 @@
 /* ==========================================================================
-   TUTORIAL HUB & SLIDESHOW VIEWER STYLES
+   TUTORIAL SLIDESHOW VIEWER STYLES
+   Scoped to TutorialSlideshowViewer.jsx (modal, annotations, onboarding, slide editor)
+   Hub styles live in TutorialHub.css; formatting toolbar styles live in SlideTextToolbar.css
    ========================================================================== */
 
 /* Scoped surface/scrim tokens to deduplicate repeated color-mix() expressions */
-.tutorial-hub-page,
 .tutorial-slideshow-overlay {
   --tutorial-scrim: color-mix(in srgb, var(--bg-color), transparent 50%);
   --tutorial-surface-subtle: color-mix(in srgb, var(--text-color), transparent 98%);
   --tutorial-surface-hover: color-mix(in srgb, var(--text-color), transparent 95%);
   --tutorial-bubble-bg: color-mix(in srgb, var(--bg-color), transparent 12%);
-}
-
-/* Tutorial Hub Page Container */
-.tutorial-hub-page {
-  animation: fadeIn 0.4s ease-out;
-  padding: clamp(16px, 4vw, 32px);
-}
-
-/* Target Environment Toggle */
-.platform-toggle-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.platform-toggle-label {
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
-}
-
-/* Option A — Border XOR Fill: container has light satin border & NO fill; active segment has fill & NO border */
-.platform-selector-group {
-  display: inline-flex;
-  align-items: center;
-  height: var(--menu-control-height, 36px);
-  min-height: var(--menu-control-height, 36px);
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  border-radius: var(--radius-button, 12px);
-  padding: 3px;
-  gap: 4px;
-  box-sizing: border-box;
-}
-
-.platform-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--menu-segment-height, 28px);
-  min-height: var(--menu-segment-height, 28px);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--menu-segment-radius, 8px);
-  padding: 0 12px;
-  font-size: var(--menu-control-font-size, 0.75rem);
-  font-weight: var(--menu-control-font-weight, 700);
-  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
-  text-transform: uppercase;
-  line-height: 1;
-  color: var(--text-color);
-  opacity: 0.75;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
-}
-
-.platform-toggle-btn:hover {
-  opacity: 1;
-  background: color-mix(in srgb, var(--text-color), transparent 94%);
-}
-
-.platform-toggle-btn.active {
-  background: color-mix(in srgb, var(--brand-green), transparent 88%);
-  border: 1px solid transparent;
-  color: var(--brand-green);
-  opacity: 1;
-}
-
-/* .header-back-dashboard-btn inherits uniform typography and sizing from .master-header-actions-row .halo-button */
-
-/* Categories Grid Layout */
-.tutorial-categories-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  margin-top: 24px;
-  padding-bottom: 40px;
-}
-
-.category-section-title {
-  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-  font-weight: 800;
-  color: var(--text-color);
-  margin: 0 0 16px 0;
-  border-left: 3px solid var(--brand-green);
-  padding-left: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.category-flows-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-}
-
-/* Flow Cards */
-.tutorial-flow-card {
-  background: var(--tutorial-surface-subtle);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-squircle, 24px);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.tutorial-flow-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--brand-green);
-  box-shadow: 0 12px 30px var(--tutorial-scrim), 0 0 15px var(--halo-glow);
-  background: var(--tutorial-surface-hover);
-}
-
-.flow-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.flow-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.access-level-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 0.65rem;
-  padding: 2px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-height: 20px;
-  display: inline-flex;
-  align-items: center;
-  background: var(--badge-green-bg);
-  color: var(--status-success);
-  border: 1px solid color-mix(in srgb, var(--status-success), transparent 75%);
-}
-
-.flow-indicator-icon {
-  font-size: 0.75rem;
-  opacity: 0.3;
-  color: var(--text-color);
-  transition: all 0.2s ease;
-}
-
-.tutorial-flow-card:hover .flow-indicator-icon {
-  opacity: 1;
-  color: var(--brand-green);
-  transform: scale(1.1);
-}
-
-.flow-card-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-color);
-  margin: 0 0 10px 0;
-  line-height: 1.3;
-}
-
-.flow-card-description {
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: var(--text-color);
-  opacity: 0.55;
-  margin: 0 0 20px 0;
-  flex: 1;
-  white-space: pre-wrap;
-}
-
-.flow-card-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  border-top: 1px solid var(--tutorial-surface-hover);
-  padding-top: 16px;
-  margin-top: auto; /* Ensure it stays at the bottom of the card */
-}
-
-.halo-button.flow-version-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  min-height: 48px;
-  gap: 3px;
-  cursor: pointer;
-  transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: var(--radius-button, 12px);
-  width: 100%;
-}
-
-.version-btn-title {
-  font-weight: 800;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
-}
-
-.version-btn-subtitle {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.62rem;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  line-height: 1;
-}
-
-/* Active version highlight matching the current platform selection */
-.halo-button.flow-version-btn.active-version {
-  border-color: var(--brand-green);
-  background: var(--halo-bg);
-  box-shadow: 0 0 12px var(--halo-glow);
-  opacity: 1;
-}
-
-.flow-version-btn.active-version .version-btn-subtitle {
-  opacity: 0.9;
-}
-
-/* ==========================================================================
-   TUTORIAL SLIDESHOW MODAL OVERLAY
-   ========================================================================== */
-.tutorial-slideshow-overlay {
   position: fixed;
   inset: 0;
   background: var(--tutorial-scrim);
@@ -304,7 +70,7 @@
   cursor: pointer;
   padding: 6px;
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,7 +81,7 @@
 .slideshow-close-btn:hover {
   opacity: 1;
   background: var(--tutorial-surface-hover);
-  color: var(--brand-red, var(--status-danger));
+  color: var(--status-danger);
 }
 
 .slideshow-content-body {
@@ -561,7 +327,7 @@
   border-radius: 50%;
   background: color-mix(in srgb, var(--text-color), transparent 85%);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .step-dot-indicator:hover {
@@ -609,15 +375,20 @@
   padding: 0;
 }
 
-.onboarding-header {
+/* Shared onboarding edge chrome (deduplicated) */
+.onboarding-header,
+.onboarding-footer {
   position: absolute;
-  top: 24px; /* Native top spacing */
   left: 24px;
   right: 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   z-index: 10;
+}
+
+.onboarding-header {
+  top: 24px; /* Native top spacing */
+  justify-content: space-between;
 }
 
 /* Shared onboarding header controls (deduplicated) */
@@ -715,15 +486,9 @@
 }
 
 .onboarding-footer {
-  position: absolute;
   bottom: 24px; /* Sits at native bottom margin */
-  left: 24px;
-  right: 24px;
-  display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 12px;
-  z-index: 10;
 }
 
 .onboarding-dots {
@@ -736,8 +501,7 @@
 }
 
 .onboarding-dots .step-dot-indicator.active {
-  width: 24px; /* elongated dot for active */
-  background: var(--brand-green);
+  width: 24px; /* elongated dot for active (inherits background from .step-dot-indicator.active) */
   border-radius: 4px;
   transform: none;
   box-shadow: 0 0 12px var(--halo-glow);
@@ -773,9 +537,7 @@
 @media screen and (min-width: 769px) {
   .tutorial-slideshow-overlay.onboarding-overlay {
     padding: 24px;
-    background: var(--tutorial-scrim);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: var(--tutorial-scrim); /* inherits backdrop-filter from .tutorial-slideshow-overlay */
   }
 
   .slideshow-onboarding-card {
@@ -856,140 +618,10 @@
   pointer-events: none;
 }
 
-/* Play All button — small inline size */
-.play-all-btn {
-  min-width: auto;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Tutorial Creation / Edit Modal Sizing (replaces inline style) */
-.modal-content.tutorial-form-modal {
-  max-width: 580px;
-}
-
-/* ==========================================================================
-   MODULAR SLIDE TEXT FORMATTING & ALIGNMENT TOOLBAR
-   Shared by TutorialSlideshowViewer (edit mode) & TutorialFormModal (create)
-   ========================================================================== */
-.slide-text-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-button, 12px);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.slide-text-toolbar__group {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.slide-text-toolbar__divider {
-  width: 1px;
-  height: 18px;
-  background: var(--border-color);
-  margin: 0 4px;
-  flex-shrink: 0;
-}
-
-.slide-text-toolbar__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: var(--text-color);
-  opacity: 0.72;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.slide-text-toolbar__btn:hover:not(:disabled) {
-  opacity: 1;
-  background: color-mix(in srgb, var(--text-color), transparent 92%);
-}
-
-/* Design System §4: Halo active state (2px border + subtle tint, no solid fill) */
-.slide-text-toolbar__btn.active {
-  border: 2px solid var(--brand-green);
-  background: color-mix(in srgb, var(--brand-green), transparent 85%);
-  color: var(--brand-green);
-  opacity: 1;
-}
-
-.slide-text-toolbar__btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.slide-text-toolbar__btn--bold { font-weight: 900; }
-.slide-text-toolbar__btn--italic { font-style: italic; font-family: Georgia, serif; }
-.slide-text-toolbar__btn--underline { text-decoration: underline; }
-.slide-text-toolbar__btn--strike { text-decoration: line-through; }
-
-.slide-text-toolbar__btn--preview {
-  margin-left: auto;
-  padding: 0 10px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-/* Live formatted preview box inside edit / create modes */
-.slide-text-preview {
-  width: 100%;
-  min-height: 92px;
-  padding: 0.65rem 0.75rem;
-  background: color-mix(in srgb, var(--text-color), transparent 96%);
-  border: 1px dashed var(--border-color);
-  border-radius: 8px;
-  color: var(--text-color);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  box-sizing: border-box;
-}
-
-.slide-text-preview--sm {
-  min-height: 54px;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.84rem;
-}
-
-/* Inline formatted text semantic spans */
-.formatted-text__bold { font-weight: 800; color: var(--text-color); }
-.formatted-text__italic { font-style: italic; }
-.formatted-text__underline { text-decoration: underline; text-underline-offset: 2px; }
-.formatted-text__strike { text-decoration: line-through; opacity: 0.75; }
-
 /* ==========================================================================
    MOBILE & TABLET RESPONSIVENESS (Consolidated at end to win cascade cleanly)
    ========================================================================== */
 @media screen and (max-width: 768px) {
-  .tutorial-categories-grid {
-    gap: 20px;
-  }
-  .category-flows-grid {
-    grid-template-columns: 1fr; /* Full width list on mobile */
-  }
   .tutorial-slideshow-overlay {
     padding: 10px;
   }
@@ -1023,33 +655,13 @@
   /* Mobile touch target compliance (Design System §14B: >=44px touch targets, zero desktop impact) */
   .slideshow-close-btn,
   .onboarding-back-btn,
-  .onboarding-skip-btn,
-  .slide-text-toolbar__btn {
+  .onboarding-skip-btn {
     min-width: 44px;
     min-height: 44px;
   }
   .slideshow-editor__input,
   .slideshow-editor__textarea {
     font-size: 16px; /* Prevents iOS Safari auto-zoom (§14B) */
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .flow-card-footer {
-    gap: 8px;
-    padding-top: 12px;
-  }
-  /* Match .halo-button.flow-version-btn specificity so mobile overrides apply cleanly */
-  .halo-button.flow-version-btn {
-    padding: 6px 8px;
-    min-height: 44px;
-    gap: 2px;
-  }
-  .version-btn-title {
-    font-size: 0.64rem;
-  }
-  .version-btn-subtitle {
-    font-size: 0.55rem;
   }
 }
 

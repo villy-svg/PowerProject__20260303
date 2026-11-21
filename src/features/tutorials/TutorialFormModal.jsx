@@ -5,6 +5,7 @@ import FormattedText from './FormattedText';
 import SlideTextToolbar from './SlideTextToolbar';
 import { normalizeTextAlign, getTextAlignClass, handleFormattingKeyDown } from './tutorialUtils';
 import '../../styles/ManagementForms.css';
+import './SlideTextToolbar.css';
 
 const TutorialFormModal = ({ isOpen, onClose, editingItem, user, onSave }) => {
   const [categories, setCategories] = useState([]);

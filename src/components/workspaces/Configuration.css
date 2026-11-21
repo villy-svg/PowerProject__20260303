@@ -18,7 +18,7 @@
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 16px;
 }
-.header-text h2 {
+.configuration-view .header-text h2 {
   font-size: 1.85rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -27,7 +27,7 @@
   margin: 0 0 8px 0;
   line-height: 1.2;
 }
-.header-text p {
+.configuration-view .header-text p {
   font-size: 0.95rem;
   color: var(--text-color);
   opacity: 0.65;
@@ -156,12 +156,12 @@
   border-color: var(--status-danger);
   color: var(--status-danger);
 }
-/* Destructive Tile */
-.destructive:hover {
+/* Destructive Tile (scoped to .config-tile to prevent global leakage) */
+.config-tile.destructive:hover {
   border-color: var(--status-danger);
   background: color-mix(in srgb, var(--status-danger), transparent 95%);
 }
-.destructive h4 {
+.config-tile.destructive h4 {
   color: var(--status-danger);
 }
 /* Responsive adjustments — matches MasterPageHeader & MobileLayout conventions */
@@ -175,10 +175,10 @@
     border-bottom: none;
     gap: 12px;
   }
-  .header-text {
+  .configuration-view .header-text {
     width: 100%;
   }
-  .header-text h2 {
+  .configuration-view .header-text h2 {
     font-size: 1.25rem;
     text-align: center;
     width: 100%;
@@ -186,7 +186,7 @@
     text-shadow: 0 0 20px var(--halo-glow);
     margin-bottom: 0;
   }
-  .header-text p {
+  .configuration-view .header-text p {
     display: none; /* Hidden on mobile per adaptive-ui-strategy §6 */
   }
   .config-inner-wrap {
@@ -210,6 +210,9 @@
   }
   .config-tile:hover {
     transform: none;
+  }
+  .config-toggle-row .board-view-toggle {
+    height: auto; /* Allows 44px mobile touch targets without overflowing 36px desktop container */
   }
   .config-toggle-row .view-toggle-btn {
     min-width: 44px;

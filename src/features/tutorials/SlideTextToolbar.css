@@ -1,0 +1,121 @@
+/* ==========================================================================
+   MODULAR SLIDE TEXT FORMATTING & ALIGNMENT TOOLBAR + FORMATTED TEXT
+   Shared by SlideTextToolbar, FormattedText, TutorialFormModal & TutorialSlideshowViewer
+   ========================================================================== */
+
+/* Tutorial Creation / Edit Modal Sizing */
+.modal-content.tutorial-form-modal {
+  max-width: 580px;
+}
+
+.slide-text-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--halo-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.slide-text-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.slide-text-toolbar__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.slide-text-toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-color);
+  opacity: 0.72;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.slide-text-toolbar__btn:hover:not(:disabled) {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+}
+
+/* Design System §4: Halo active state (2px border + subtle tint, no solid fill) */
+.slide-text-toolbar__btn.active {
+  border: 2px solid var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+  opacity: 1;
+}
+
+.slide-text-toolbar__btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.slide-text-toolbar__btn--bold { font-weight: 900; }
+.slide-text-toolbar__btn--italic { font-style: italic; font-family: Georgia, serif; }
+.slide-text-toolbar__btn--underline { text-decoration: underline; }
+.slide-text-toolbar__btn--strike { text-decoration: line-through; }
+
+.slide-text-toolbar__btn--preview {
+  margin-left: auto;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Live formatted preview box inside edit / create modes */
+.slide-text-preview {
+  width: 100%;
+  min-height: 92px;
+  padding: 0.65rem 0.75rem;
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  box-sizing: border-box;
+}
+
+.slide-text-preview--sm {
+  min-height: 54px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.84rem;
+}
+
+/* Inline formatted text semantic spans */
+.formatted-text__bold { font-weight: 800; color: var(--text-color); }
+.formatted-text__italic { font-style: italic; }
+.formatted-text__underline { text-decoration: underline; text-underline-offset: 2px; }
+.formatted-text__strike { text-decoration: line-through; opacity: 0.75; }
+
+/* Mobile touch target compliance (Design System §14B: >=44px touch targets, zero desktop impact) */
+@media screen and (max-width: 768px) {
+  .slide-text-toolbar__btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
