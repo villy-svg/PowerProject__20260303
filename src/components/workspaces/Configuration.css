@@ -34,32 +34,6 @@
   margin-bottom: 0;
   line-height: 1.5;
 }
-/* View Toggle (legacy selector preserved for backwards compatibility) */
-.view-toggle {
-  display: flex;
-  background: var(--bg-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 4px;
-}
-.view-toggle button {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-color);
-  font-size: 1.2rem;
-  transition: all 0.2s;
-  opacity: 0.5;
-}
-.view-toggle button.active {
-  background: var(--brand-green);
-  color: var(--color-white);
-  opacity: 1;
-}
 /* Grouping */
 .config-group {
   margin-bottom: 48px;
@@ -153,11 +127,26 @@
   opacity: 0.65;
   flex: 1;
 }
-/* Dev & Destructive Action Buttons */
-.dev-test-run-btn {
-  border-color: var(--brand-green);
-  color: var(--brand-green);
+/* Master Admin Inline Toggle Rows (reuses canonical .board-view-toggle / .view-toggle-btn) */
+.config-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
 }
+.config-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.config-toggle-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.85;
+}
+/* Destructive Action Buttons */
 .destructive-action-btn {
   border-color: color-mix(in srgb, var(--status-danger), transparent 60%);
   color: var(--status-danger);
@@ -203,7 +192,6 @@
   .config-inner-wrap {
     padding: 0 0 calc(88px + var(--safe-bottom, 0px)) 0; /* Prevent content hiding behind fixed bottom nav */
   }
-  .configuration-view .view-toggle,
   .configuration-view .view-mode-toggle {
     display: none;
   }
@@ -222,5 +210,9 @@
   }
   .config-tile:hover {
     transform: none;
+  }
+  .config-toggle-row .view-toggle-btn {
+    min-width: 44px;
+    min-height: 44px;
   }
 }

@@ -1,0 +1,213 @@
+name: Unmarked Attendance Cron
+
+on:
+  schedule:
+    # 09:00 AM IST daily (03:30 UTC)
+    # Sweeps logical_today - 2 (e.g., Wednesday 09:00 AM IST sweeps Monday,
+    # 4 hours after Tuesday's 05:00 AM IST night-shift cutoff closed — giving
+    # Day, Evening, and Night shifts a full 24h window to self-mark Week-Offs first).
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Supabase environment'
+        required: true
+        type: choice
+        default: staging
+        options:
+          - staging
+          - production
+      target_date:
+        description: 'Optional YYYY-MM-DD (leave blank for default full-cycle T-2 IST)'
+        required: false
+        type: string
+        default: ''
+      hub_ids:
+        description: 'Optional comma-separated Hub UUIDs (leave blank for all hubs)'
+        required: false
+        type: string
+        default: ''
+      dry_run:
+        description: 'Preview eligible employees without creating tasks'
+        required: true
+        type: boolean
+        default: true
+      max_tasks_per_run:
+        description: 'Circuit breaker cap (aborts with 0 inserts if eligible count exceeds this)'
+        required: false
+        type: string
+        default: '50'
+
+jobs:
+  unmarked-attendance-staging:
+    name: "Unmarked Attendance: Staging"
+    # Staging scheduled cron is opt-in (set repo var UNMARKED_ATTENDANCE_STAGING_ENABLED=true to enable).
+    # Manual workflow_dispatch for staging always works.
+    if: >-
+      (github.event_name == 'schedule' && vars.UNMARKED_ATTENDANCE_STAGING_ENABLED == 'true') ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Staging Generator
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_URL: ${{ secrets.SUPABASE_STAGING_URL }}
+          SERVICE_KEY: ${{ secrets.SUPABASE_STAGING_SERVICE_ROLE_KEY }}
+          INPUT_TARGET_DATE: ${{ inputs.target_date }}
+          INPUT_HUB_IDS: ${{ inputs.hub_ids }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_MAX_TASKS: ${{ inputs.max_tasks_per_run }}
+          VAR_HUB_IDS: ${{ vars.UNMARKED_ATTENDANCE_STAGING_HUB_IDS }}
+        run: |
+          if [ -z "$BASE_URL" ] || [ -z "$SERVICE_KEY" ]; then
+            echo "ERROR: Missing SUPABASE_STAGING_URL or SUPABASE_STAGING_SERVICE_ROLE_KEY."
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TARGET_DATE="$INPUT_TARGET_DATE"
+            HUB_IDS_CSV="$INPUT_HUB_IDS"
+            DRY_RUN="${INPUT_DRY_RUN:-true}"
+            MAX_TASKS="$(echo "${INPUT_MAX_TASKS:-50}" | xargs)"
+            [ -z "$MAX_TASKS" ] && MAX_TASKS="50"
+          else
+            TARGET_DATE=""
+            HUB_IDS_CSV="$VAR_HUB_IDS"
+            DRY_RUN="false"
+            MAX_TASKS="50"
+          fi
+
+          if ! [[ "$MAX_TASKS" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: max_tasks_per_run must be a non-negative integer, got: '$MAX_TASKS'"
+            exit 1
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg target_date "$TARGET_DATE" \
+            --arg hub_ids_csv "$HUB_IDS_CSV" \
+            --argjson dry_run "$DRY_RUN" \
+            --argjson max_tasks "$MAX_TASKS" \
+            '{
+              p_target_date: (if ($target_date | length) > 0 then $target_date else null end),
+              p_hub_ids: (
+                if ($hub_ids_csv | length) > 0 then
+                  ($hub_ids_csv | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0)))
+                else
+                  null
+                end
+              ),
+              p_dry_run: $dry_run,
+              p_max_tasks_per_run: $max_tasks,
+              p_max_open_per_employee: 3
+            }')
+
+          echo "Staging Payload: $PAYLOAD"
+
+          HTTP_STATUS=$(curl -s -o /tmp/unmarked_staging.json -w "%{http_code}" \
+            -X POST "${BASE_URL}/rest/v1/rpc/rpc_generate_unmarked_attendance_tasks" \
+            -H "apikey: ${SERVICE_KEY}" \
+            -H "Authorization: Bearer ${SERVICE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            --max-time 55)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          cat /tmp/unmarked_staging.json | jq . || cat /tmp/unmarked_staging.json
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "ERROR: Staging generator failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+          STATUS=$(jq -r '.status // "unknown"' /tmp/unmarked_staging.json)
+          if [ "$STATUS" = "aborted_circuit_breaker" ]; then
+            echo "ERROR: Circuit breaker tripped on Staging! Inspect eligible_count before re-running."
+            exit 1
+          fi
+
+  unmarked-attendance-production:
+    name: "Unmarked Attendance: Production"
+    # Production runs automatically unless repo var UNMARKED_ATTENDANCE_PROD_DISABLED=true.
+    if: >-
+      (github.event_name == 'schedule' && vars.UNMARKED_ATTENDANCE_PROD_DISABLED != 'true') ||
+      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Production Generator
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_URL: ${{ secrets.SUPABASE_URL }}
+          SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          INPUT_TARGET_DATE: ${{ inputs.target_date }}
+          INPUT_HUB_IDS: ${{ inputs.hub_ids }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_MAX_TASKS: ${{ inputs.max_tasks_per_run }}
+          VAR_HUB_IDS: ${{ vars.UNMARKED_ATTENDANCE_PROD_HUB_IDS }}
+        run: |
+          if [ -z "$BASE_URL" ] || [ -z "$SERVICE_KEY" ]; then
+            echo "ERROR: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY."
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            TARGET_DATE="$INPUT_TARGET_DATE"
+            HUB_IDS_CSV="$INPUT_HUB_IDS"
+            DRY_RUN="${INPUT_DRY_RUN:-true}"
+            MAX_TASKS="$(echo "${INPUT_MAX_TASKS:-50}" | xargs)"
+            [ -z "$MAX_TASKS" ] && MAX_TASKS="50"
+          else
+            TARGET_DATE=""
+            HUB_IDS_CSV="$VAR_HUB_IDS"
+            DRY_RUN="false"
+            MAX_TASKS="50"
+          fi
+
+          if ! [[ "$MAX_TASKS" =~ ^[0-9]+$ ]]; then
+            echo "ERROR: max_tasks_per_run must be a non-negative integer, got: '$MAX_TASKS'"
+            exit 1
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg target_date "$TARGET_DATE" \
+            --arg hub_ids_csv "$HUB_IDS_CSV" \
+            --argjson dry_run "$DRY_RUN" \
+            --argjson max_tasks "$MAX_TASKS" \
+            '{
+              p_target_date: (if ($target_date | length) > 0 then $target_date else null end),
+              p_hub_ids: (
+                if ($hub_ids_csv | length) > 0 then
+                  ($hub_ids_csv | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0)))
+                else
+                  null
+                end
+              ),
+              p_dry_run: $dry_run,
+              p_max_tasks_per_run: $max_tasks,
+              p_max_open_per_employee: 3
+            }')
+
+          echo "Production Payload: $PAYLOAD"
+
+          HTTP_STATUS=$(curl -s -o /tmp/unmarked_prod.json -w "%{http_code}" \
+            -X POST "${BASE_URL}/rest/v1/rpc/rpc_generate_unmarked_attendance_tasks" \
+            -H "apikey: ${SERVICE_KEY}" \
+            -H "Authorization: Bearer ${SERVICE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            --max-time 55)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          cat /tmp/unmarked_prod.json | jq . || cat /tmp/unmarked_prod.json
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "ERROR: Production generator failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+          STATUS=$(jq -r '.status // "unknown"' /tmp/unmarked_prod.json)
+          if [ "$STATUS" = "aborted_circuit_breaker" ]; then
+            echo "ERROR: Circuit breaker tripped on Production! Inspect eligible_count before re-running."
+            exit 1
+          fi

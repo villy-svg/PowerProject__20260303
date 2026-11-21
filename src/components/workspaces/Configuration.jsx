@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
+import {
+  DEFAULT_STARTUP_TUTORIALS_CONFIG,
+  fetchStartupTutorialsConfig,
+  updateStartupTutorialsConfig,
+} from '../../services/core/systemSettingsService';
 import ConfigBottomNav from '../layout/ConfigBottomNav';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import './Configuration.css';
@@ -9,6 +14,9 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('config_view_mode') || 'grid');
   const actualViewMode = isMobile ? 'grid' : viewMode;
   const [testRunning, setTestRunning] = useState(false);
+  const [startupTutorialsConfig, setStartupTutorialsConfig] = useState(DEFAULT_STARTUP_TUTORIALS_CONFIG);
+  const [startupTutorialsLoading, setStartupTutorialsLoading] = useState(false);
+  const [startupTutorialsSaving, setStartupTutorialsSaving] = useState(false);
   
   // Determine first available configuration section based on permissions, assignment, and lock state
   const getFirstAvailableSection = () => {
@@ -31,6 +39,58 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
   useEffect(() => {
     setActiveSection(getFirstAvailableSection());
   }, [permissions.scope, user.assignedVerticals, verticals]);
+
+  // Load global startup tutorial toggles for Master Admin
+  useEffect(() => {
+    if (user?.roleId !== 'master_admin') return;
+    let cancelled = false;
+    const loadStartupConfig = async () => {
+      setStartupTutorialsLoading(true);
+      const config = await fetchStartupTutorialsConfig();
+      if (!cancelled) {
+        setStartupTutorialsConfig(config);
+        setStartupTutorialsLoading(false);
+      }
+    };
+    loadStartupConfig();
+    return () => { cancelled = true; };
+  }, [user?.roleId]);
+
+  // Option A (mutually exclusive): enabling one startup tutorial mode turns the other off
+  const handleToggleStartupTutorialMode = async (field, nextValue) => {
+    if (user?.roleId !== 'master_admin' || startupTutorialsSaving) return;
+
+    const prevConfig = startupTutorialsConfig;
+    const nextConfig = field === 'compulsory_show'
+      ? {
+          compulsory_show: nextValue,
+          skippable_show: nextValue ? false : prevConfig.skippable_show,
+        }
+      : {
+          compulsory_show: nextValue ? false : prevConfig.compulsory_show,
+          skippable_show: nextValue,
+        };
+
+    if (
+      nextConfig.compulsory_show === prevConfig.compulsory_show &&
+      nextConfig.skippable_show === prevConfig.skippable_show
+    ) {
+      return;
+    }
+
+    setStartupTutorialsConfig(nextConfig);
+    setStartupTutorialsSaving(true);
+    try {
+      const saved = await updateStartupTutorialsConfig(nextConfig, user?.id);
+      setStartupTutorialsConfig(saved);
+    } catch (err) {
+      console.error('[Configuration] Failed to update startup tutorial setting:', err);
+      setStartupTutorialsConfig(prevConfig);
+      alert(`Failed to save startup tutorial setting: ${err.message || err}`);
+    } finally {
+      setStartupTutorialsSaving(false);
+    }
+  };
 
   const toggleViewMode = (mode) => {
     setViewMode(mode);
@@ -330,11 +390,67 @@ const Configuration = ({ tasks, setTasks, user = {}, permissions = {}, setActive
                   </div>
                 </div>
                 {user?.roleId === 'master_admin' && (
+                  <div className="config-tile non-clickable">
+                    <div className="tile-info">
+                      <h4>Startup Tutorials</h4>
+                      <p>Control whether startup tutorials auto-play as compulsory, skippable, or off for users.</p>
+                      <div className="config-toggle-list">
+                        <div className="config-toggle-row">
+                          <span className="config-toggle-label">Compulsory Show</span>
+                          <div className="board-view-toggle" role="group" aria-label="Compulsory Show">
+                            <button
+                              type="button"
+                              className={`view-toggle-btn ${startupTutorialsConfig.compulsory_show ? 'active' : ''}`}
+                              aria-pressed={startupTutorialsConfig.compulsory_show}
+                              disabled={startupTutorialsLoading || startupTutorialsSaving}
+                              onClick={() => handleToggleStartupTutorialMode('compulsory_show', true)}
+                            >
+                              On
+                            </button>
+                            <button
+                              type="button"
+                              className={`view-toggle-btn ${!startupTutorialsConfig.compulsory_show ? 'active' : ''}`}
+                              aria-pressed={!startupTutorialsConfig.compulsory_show}
+                              disabled={startupTutorialsLoading || startupTutorialsSaving}
+                              onClick={() => handleToggleStartupTutorialMode('compulsory_show', false)}
+                            >
+                              Off
+                            </button>
+                          </div>
+                        </div>
+                        <div className="config-toggle-row">
+                          <span className="config-toggle-label">Skippable Show</span>
+                          <div className="board-view-toggle" role="group" aria-label="Skippable Show">
+                            <button
+                              type="button"
+                              className={`view-toggle-btn ${startupTutorialsConfig.skippable_show ? 'active' : ''}`}
+                              aria-pressed={startupTutorialsConfig.skippable_show}
+                              disabled={startupTutorialsLoading || startupTutorialsSaving}
+                              onClick={() => handleToggleStartupTutorialMode('skippable_show', true)}
+                            >
+                              On
+                            </button>
+                            <button
+                              type="button"
+                              className={`view-toggle-btn ${!startupTutorialsConfig.skippable_show ? 'active' : ''}`}
+                              aria-pressed={!startupTutorialsConfig.skippable_show}
+                              disabled={startupTutorialsLoading || startupTutorialsSaving}
+                              onClick={() => handleToggleStartupTutorialMode('skippable_show', false)}
+                            >
+                              Off
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {user?.roleId === 'master_admin' && (
                   <div className="config-tile" onClick={handleTestRun}>
                     <div className="tile-info">
                       <h4>🛠️ Dev: Test Run</h4>
                       <p>Execute custom one-time database scripts (Master Admin only).</p>
-                      <button className="halo-button dev-test-run-btn u-mt-16 u-w-full" disabled={testRunning}>
+                      <button className="halo-button u-mt-16 u-w-full" disabled={testRunning}>
                         {testRunning ? 'Running Script...' : 'Execute Test Run'}
                       </button>
                     </div>

@@ -11,10 +11,10 @@
 
 | Time (IST) | Event | Owner |
 |---|---|---|
-| **05:00 AM** | Night-shift rollback cutoff closes for `yesterday` | `rpc_employee_checkin` |
-| **06:00 AM – 11:30 AM** | Returning employees open Current Attendance → see *"Was yesterday your Week-Off?"* prompt. Non-consecutive WO auto-saves (`self_weekoff`); **consecutive WO** escalates to Task Board | Employees (Self-Service) |
-| **12:00 PM** | Automated cron runs `rpc_generate_unmarked_attendance_tasks` for remaining unresolved gaps | GitHub Actions (`unmarked-attendance-cron.yml`) |
-| **12:05 PM+** | Reporting Managers resolve `BACKLOG` tasks (Unmarked Attendance + Consecutive WO Escalations) from 5 non-present options | Reporting Managers (Maker) |
+| **05:00 AM** | Night-shift rollback cutoff closes for the previous logical shift day (`T - 1`) | `rpc_employee_checkin` |
+| **06:00 AM – 04:59 AM (+1d)** | Returning Day, Evening, and Night shift employees open Current Attendance → see *"Was yesterday (`T - 1`) your Week-Off?"* prompt. Non-consecutive WO auto-saves (`self_weekoff`); **consecutive WO** escalates to Task Board | Employees (Self-Service) |
+| **09:00 AM** | Automated cron runs `rpc_generate_unmarked_attendance_tasks` for **`T - 2`** (e.g., Wednesday 09:00 AM sweeps Monday, after all Tuesday Day/Evening/Night shifts closed at 05:00 AM). Sends at most **1 consolidated summary push** per manager | GitHub Actions (`unmarked-attendance-cron.yml`) |
+| **09:05 AM+** | Reporting Managers open a clean morning `BACKLOG` (Unmarked Attendance for `T - 2` + any Consecutive WO Escalations) and pick from 5 non-present options | Reporting Managers (Maker) |
 | **Same Day** | Submitted choices move to `REVIEW` for 1st upward `Editor+` Manager | Editor+ Managers (Checker) |
 | **On Approval** | `daily_attendances` written with `marked_by` + `approved_by` + `marked_source`, task moves to `COMPLETED` | System (Atomic RPC) |
 
