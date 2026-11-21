@@ -148,6 +148,7 @@
     min-width: 100%;
     margin: 0;
     padding: 12px 0 16px 0;
+    /* !important required to override inline JS stage.color background/border set in TaskKanbanView.jsx */
     background: transparent !important;
     border: none !important;
   }
@@ -198,8 +199,8 @@
     letter-spacing: 0;
   }
   .stage-nav-item .stage-icon-wrapper .standard-icon {
-    width: 18px !important;
-    height: 18px !important;
+    width: 18px;
+    height: 18px;
   }
   .stage-nav-item .stage-icon-wrapper {
     padding: 6px;
@@ -221,8 +222,8 @@
     font-size: 0.52rem;
   }
   .stage-nav-item .stage-icon-wrapper .standard-icon {
-    width: 16px !important;
-    height: 16px !important;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -230,6 +231,7 @@
 .kanban-stage-halo.drag-over {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px color-mix(in srgb, var(--bg-color), transparent 50%);
+  /* !important required to override inline JS stage.color border set in TaskKanbanView.jsx */
   border: 1px dashed color-mix(in srgb, var(--text-color), transparent 75%) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

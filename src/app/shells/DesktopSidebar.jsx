@@ -18,21 +18,36 @@
  */
 
 import React, { useState } from 'react';
-import { IconChevronDown, IconChevronRight, IconLock, IconShield } from '../../components/ui/Icons';
+import {
+  IconChevronDown,
+  IconChevronRight,
+  IconHome,
+  IconLock,
+  IconSettings,
+  IconShield,
+} from '../../components/ui/Icons';
 import powerLogo from '../../assets/logo.svg';
 import BoardRBACModal from '../../components/modals/BoardRBACModal';
+import { getIconForVertical } from '../../constants/verticalIcons';
+import { resolveVerticalRootId } from '../../registry/verticalRegistry';
 import '../../components/layout/Sidebar.css';
 
 const DesktopSidebar = ({
   isOpen,
+  mode,
   activeVertical,
   setActiveVertical,
   user,
   permissions = {},
+  verticals = {},
   verticalList = [],
 }) => {
   const [expandedVerticals, setExpandedVerticals] = useState([]);
   const [rbacModalVertical, setRbacModalVertical] = useState(null);
+
+  const effectiveMode = mode || (isOpen ? 'expanded' : 'collapsed');
+  const isRail = effectiveMode === 'rail';
+  const activeRootId = activeVertical ? resolveVerticalRootId(activeVertical, verticals) : null;
 
   const toggleVertical = (e, vId) => {
     e.stopPropagation();
@@ -54,7 +69,7 @@ const DesktopSidebar = ({
   const showUserMgmt = permissions?.scope === 'global' && permissions?.canManageRoles;
 
   return (
-    <aside className={`sidebar desktop-sidebar-shell ${isOpen ? 'open' : ''}`}>
+    <aside className={`sidebar desktop-sidebar-shell ${effectiveMode !== 'collapsed' ? 'open' : ''} ${isRail ? 'rail' : ''}`}>
       <div className="sidebar-content-wrapper">
         <div className="sidebar-top-section">
           <div className="sidebar-header">
@@ -63,13 +78,17 @@ const DesktopSidebar = ({
             </div>
           </div>
 
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" aria-label="Main navigation">
             <ul>
               <li
-                className={activeVertical === null ? 'active' : ''}
+                className={`nav-parent-item ${activeVertical === null ? 'active' : ''}`}
                 onClick={() => setActiveVertical(null)}
+                title="Dashboard"
               >
-                Dashboard
+                <span className="sidebar-nav-leading">
+                  <IconHome className="sidebar-nav-icon" size={16} />
+                  <span className="v-label-text">Dashboard</span>
+                </span>
               </li>
 
               <hr className="nav-divider" />
@@ -82,32 +101,41 @@ const DesktopSidebar = ({
                 filteredVerticals.map((vertical) => {
                   const isAssigned = user?.assignedVerticals?.includes(vertical.id) || permissions?.scope === 'global';
                   const isLocked = vertical.locked || !isAssigned;
-                  const isExpanded = expandedVerticals.includes(vertical.id);
+                  const isExpanded = !isRail && expandedVerticals.includes(vertical.id);
                   const canManage = permissions?.canAccessConfig;
+                  const VerticalIcon = getIconForVertical(vertical.id);
+                  const isVerticalActive = activeVertical === vertical.id || (isRail && activeRootId === vertical.id);
 
                   return (
                     <React.Fragment key={vertical.id}>
                       <li
-                        className={`${activeVertical === vertical.id ? 'active' : ''} ${isLocked ? 'locked' : ''} nav-parent-item`}
+                        className={`${isVerticalActive ? 'active' : ''} ${isLocked ? 'locked' : ''} nav-parent-item`}
                         onClick={() => !isLocked && setActiveVertical(vertical.id)}
-                        title={isLocked ? "Coming Soon / No Access" : ""}
+                        title={isLocked ? `${vertical.label} (Coming Soon / No Access)` : vertical.label}
                       >
-                        <span className="v-label-text">{vertical.label}</span>
-                        <div className="v-actions-wrapper">
-                          {isLocked && <IconLock className="lock-icon" size={14} />}
-                          {!isLocked && canManage && verticalList.length > 0 && 
-                            (vertical.id === 'CHARGING_HUBS' || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
-                            <button
-                              className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}
-                              onClick={(e) => toggleVertical(e, vertical.id)}
-                            >
-                              {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
-                            </button>
-                          )}
-                        </div>
+                        <span className="sidebar-nav-leading">
+                          <VerticalIcon className="sidebar-nav-icon" size={16} />
+                          <span className="v-label-text">{vertical.label}</span>
+                        </span>
+                        {!isRail && (
+                          <div className="v-actions-wrapper">
+                            {isLocked && <IconLock className="lock-icon" size={14} />}
+                            {!isLocked && canManage && verticalList.length > 0 && 
+                              (vertical.id === 'CHARGING_HUBS' || vertical.id === 'CLIENTS' || vertical.id === 'EMPLOYEES') && (
+                              <button
+                                type="button"
+                                className={`v-toggle-btn ${isExpanded ? 'active' : ''}`}
+                                onClick={(e) => toggleVertical(e, vertical.id)}
+                                aria-label={`Toggle ${vertical.label} sub-navigation`}
+                              >
+                                {isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </li>
 
-                      {!isLocked && isExpanded && canManage && (
+                      {!isRail && !isLocked && isExpanded && canManage && (
                         <ul className="sub-nav-list">
                           {vertical.id === 'CHARGING_HUBS' && (
                             <>
@@ -169,17 +197,25 @@ const DesktopSidebar = ({
                   <hr className="nav-divider" />
                   {showUserMgmt && (
                     <li
-                      className={activeVertical === 'user_management' ? 'active' : ''}
+                      className={`nav-parent-item ${activeVertical === 'user_management' ? 'active' : ''}`}
                       onClick={() => setActiveVertical('user_management')}
+                      title="User Management"
                     >
-                      User Management
+                      <span className="sidebar-nav-leading">
+                        <IconShield className="sidebar-nav-icon" size={16} />
+                        <span className="v-label-text">User Management</span>
+                      </span>
                     </li>
                   )}
                   <li
-                    className={activeVertical === 'configuration' ? 'active' : ''}
+                    className={`nav-parent-item ${activeVertical === 'configuration' ? 'active' : ''}`}
                     onClick={() => setActiveVertical('configuration')}
+                    title="Configuration"
                   >
-                    Configuration
+                    <span className="sidebar-nav-leading">
+                      <IconSettings className="sidebar-nav-icon" size={16} />
+                      <span className="v-label-text">Configuration</span>
+                    </span>
                   </li>
                 </>
               )}

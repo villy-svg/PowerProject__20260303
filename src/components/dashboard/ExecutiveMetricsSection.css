@@ -6,19 +6,19 @@
   border-left: 4px solid var(--brand-mint);
   padding-left: 15px;
 }
-.summary-header h2 {
-  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
-  font-weight: 800 !important; /* Bold, premium weight */
-  letter-spacing: -0.5px !important; /* Premium tighter tracking */
-  text-transform: uppercase !important; /* Preserve styling convention */
+.home-summary-view .summary-header h2 {
+  font-size: 1.25rem; /* Matches vertical header on mobile */
+  font-weight: 800; /* Bold, premium weight */
+  letter-spacing: -0.5px; /* Premium tighter tracking */
+  text-transform: uppercase; /* Preserve styling convention */
   color: var(--text-color);
   opacity: 0.9;
   margin: 0;
 }
 
 @media screen and (min-width: 769px) {
-  .summary-header h2 {
-    font-size: 1.4rem !important; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
+  .home-summary-view .summary-header h2 {
+    font-size: 1.4rem; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
   }
 }
 .summary-grid {
@@ -32,7 +32,6 @@
   gap: 10px;
 }
 .summary-card {
-  border-left: 3px solid color-mix(in srgb, var(--stage-color), transparent 30%);
   background-color: var(--surface-card);
   border: 1px solid transparent;
   border-radius: var(--radius-squircle);
@@ -74,8 +73,8 @@
   width: 100%;
 }
 
-.is-tappable {
-  cursor: pointer !important;
+.summary-card.is-tappable {
+  cursor: pointer;
   user-select: none;
 }
 
@@ -169,14 +168,11 @@
   }
 }
 @media screen and (max-width: 768px) {
-  .executive-summary-section {
-    margin-top: 32px !important; /* Matches vertical spacing below switcher tray */
+  .home-summary-view .executive-summary-section {
+    margin-top: 32px; /* Matches vertical spacing below switcher tray */
   }
-  .summary-header {
-    margin-bottom: 8px !important;
-  }
-  .summary-header h2 {
-    /* Inherits expanded clamp font-size from baseline */
+  .home-summary-view .summary-header {
+    margin-bottom: 8px;
   }
   .summary-grid {
     grid-template-columns: 1fr;
@@ -192,6 +188,7 @@
   }
   .summary-label {
     text-align: left;
+    font-size: 0.75rem;
   }
   .summary-column-group.is-mobile {
     gap: 8px;
@@ -210,8 +207,5 @@
   }
   .summary-count {
     font-size: 1.8rem;
-  }
-  .summary-label {
-    font-size: 0.75rem;
   }
 }

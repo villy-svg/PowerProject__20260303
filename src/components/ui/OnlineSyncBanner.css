@@ -15,18 +15,61 @@
 .online-sync-banner {
   pointer-events: auto; /* Active cursor events on the banner itself */
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   width: 100%;
-  max-width: 760px;
-  background: rgba(9, 9, 11, 0.8);
+  max-width: 780px;
+  background: color-mix(in srgb, var(--bg-color), transparent 15%);
   backdrop-filter: blur(16px);
-  border: 1px solid transparent; /* Emerald green stroke */
   border-radius: var(--radius-button, 12px);
   padding: 12px 20px;
-  box-shadow: var(--shadow-premium);
+  box-shadow: var(--shadow-premium); /* Elevation via shadow only per §15.B (no border + shadow conflict) */
   animation: slideDownIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 10px;
+}
+
+.sync-banner-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 16px;
+}
+
+.sync-banner-auth-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
+}
+
+.sync-banner-input {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--halo-bg);
+  color: var(--text-color);
+  font-size: 0.85rem;
+}
+
+.sync-banner-input:focus {
+  outline: none;
+  border-color: var(--brand-green);
+}
+
+.sync-banner-feedback {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.sync-banner-feedback--status {
+  color: var(--status-success);
+}
+
+.sync-banner-feedback--error {
+  color: var(--status-danger);
 }
 
 .sync-banner-left {
@@ -35,14 +78,14 @@
   gap: 12px;
 }
 
-/* Pulsing Online Dot */
+/* Online indicator dot */
 .online-indicator-dot {
+  flex-shrink: 0;
   width: 10px;
   height: 10px;
-  background-color: var(--brand-emerald);
+  background-color: var(--status-success);
   border-radius: 50%;
-  display: inline-block;
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-emerald), transparent 30%);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success), transparent 30%);
   animation: pulseGreen 2s infinite;
 }
 
@@ -50,11 +93,11 @@
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
 }
 
 .sync-banner-text strong {
-  color: var(--brand-emerald);
+  color: var(--status-success);
 }
 
 .sync-banner-right {
@@ -65,7 +108,7 @@
 
 .online-sync-banner .dismiss-banner-btn {
   font-size: 0.75rem;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   opacity: 0.6;
   border-color: transparent;
   background: none;
@@ -77,22 +120,16 @@
   opacity: 1;
 }
 
-.online-sync-banner .reconnect-sync-btn {
+.online-sync-banner .reconnect-sync-btn,
+.online-sync-banner .reconnect-sync-btn:hover {
   font-size: 0.75rem;
-  color: var(--brand-emerald);
+  color: var(--status-success);
   border-color: transparent;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
   padding: 0 16px;
   height: 32px;
-}
-
-.online-sync-banner .reconnect-sync-btn:hover {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
 }
 
 /* Animations */
@@ -110,14 +147,14 @@
 @keyframes pulseGreen {
   0% {
     transform: scale(0.95);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-emerald), transparent 30%);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success), transparent 30%);
   }
-  
+
   70% {
     transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 6px transparent;
   }
-  
+
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 transparent;
@@ -127,10 +164,20 @@
 /* Mobile responsive scaling */
 @media screen and (max-width: 640px) {
   .online-sync-banner {
-    flex-direction: column;
-    align-items: stretch;
     padding: 14px;
     gap: 12px;
+  }
+
+  .sync-banner-row,
+  .sync-banner-auth-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .sync-banner-input {
+    min-height: 44px;
+    font-size: 16px;
   }
 
   .sync-banner-right {

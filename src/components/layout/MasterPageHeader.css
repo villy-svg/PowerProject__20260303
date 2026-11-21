@@ -1,29 +1,30 @@
-/* MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below */
+/* Desktop & shared header styles — Mobile layout rules canonically owned by src/app/shells/MobileLayout.css (Phase 6A) */
 .master-page-header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
+/* Design System §6.B/C: Title Case headings (no ALL CAPS) with crisp fluid scale */
 .master-page-header .header-row-1 h1 {
   margin: 0;
-  font-size: 1.85rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: clamp(1.35rem, 2vw, 1.65rem);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -0.02em;
   color: var(--brand-green);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .master-page-header .header-row-2 p {
   margin: 0;
   color: var(--text-color);
-  opacity: 0.65;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  opacity: 0.6;
+  font-size: 0.9rem;
+  line-height: 1.45;
   max-width: 100%;
 }
 
@@ -31,46 +32,40 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   flex-wrap: nowrap;
   width: 100%;
 }
 
-/* Consolidated single declaration for Row 4 expanded menu (deduplicated + tokenized glow) */
+/* Consolidated single declaration for Row 4 expanded menu — tonal surface + satin hairline, no heavy shadow */
 .expanded-menu-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;  /* Center-align columns horizontally on desktop */
+  align-items: center;
   flex-wrap: nowrap;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
-  padding: 12px 16px;
-  background: transparent;
-  /* Seamlessly inherits the parent background color */
-  border: 1px solid transparent;
-  border-radius: 16px;
-  backdrop-filter: blur(20px);
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 93%);
+  border-radius: 14px;
   animation: slideDown 0.2s ease-out;
   position: relative;
-  margin-top: 16px;
-  top: auto;
-  left: auto;
+  margin-top: 10px;
   /* Elevate above board stage navigation trays (z: 50), sticky grid headers (z: 11), and board toolbars (z: 100) */
   z-index: var(--z-sticky, 200);
-  box-shadow: 0 10px 40px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 15px color-mix(in srgb, var(--brand-green), transparent 95%);
+  box-shadow: none;
 }
 
 .mobile-menu-header {
   display: none;
 }
 
-
-
 .master-header-left,
 .master-header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -83,22 +78,17 @@
   gap: 8px;
   min-width: 100px;
   color: var(--text-color);
-  opacity: 1;
+  opacity: 0.8;
 }
 
 .menu-trigger-btn .menu-icon {
   font-size: 0.7rem;
-  transition: transform 0.2s;
   color: var(--brand-green);
   display: inline-flex;
   align-items: center;
 }
 
-.menu-trigger-btn.active .menu-icon {
-  transform: rotate(0);
-}
-
-/* Unified Option A (Border XOR Fill): active MENU uses subtle fill with no border */
+/* Unified Option A (Border XOR Fill): active/hovered MENU uses subtle neutral fill with no border */
 .master-header-actions-row .halo-button.menu-trigger-btn:hover,
 .master-header-actions-row .halo-button.menu-trigger-btn.active {
   color: var(--text-color);
@@ -106,50 +96,14 @@
   border-color: transparent;
   background: color-mix(in srgb, var(--text-color), transparent 92%);
   box-shadow: none;
+  transform: none;
 }
 
-/* Single source of truth for all top-level header row buttons (MENU, + Add <Entity>, Approvals, Manage RBAC, etc.)
-   Option A — Border XOR Fill:
-   - Rest: light satin border ONLY, no background fill, no glow
-   - Hover / Active: subtle tinted fill ONLY, no border (transparent 1px prevents layout shift) */
-.master-header-actions-row .halo-button {
-  height: 36px;
-  min-height: 36px;
-  min-width: 100px;
-  padding: 0 16px;
-  gap: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  box-sizing: border-box;
-  font-family: var(--font-main);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  line-height: 1;
-  text-transform: uppercase;
-  border-radius: var(--radius-button);
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-.master-header-actions-row .halo-button:hover:not(:disabled),
-.master-header-actions-row .halo-button.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
-  border: 1px solid transparent;
-  box-shadow: 0 0 14px var(--halo-glow);
-  transform: translateY(-1px);
-}
-
-/* Single source of truth for all halo buttons inside the Row 4 expanded menu (Border XOR Fill) */
+/* Shared base for Row 3 & Row 4 header halo buttons (Option A — Border XOR Fill) */
+.master-header-actions-row .halo-button,
 .expanded-menu-row .halo-button {
   height: var(--menu-control-height, 36px);
   min-height: var(--menu-control-height, 36px);
-  min-width: unset;
-  padding: 0 var(--menu-control-padding-x, 14px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -168,6 +122,19 @@
   backdrop-filter: none;
 }
 
+.master-header-actions-row .halo-button {
+  min-width: 100px;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.expanded-menu-row .halo-button {
+  min-width: unset;
+  padding: 0 var(--menu-control-padding-x, 14px);
+}
+
+.master-header-actions-row .halo-button:hover:not(:disabled),
+.master-header-actions-row .halo-button.active,
 .expanded-menu-row .halo-button:hover:not(:disabled),
 .expanded-menu-row .halo-button.active {
   background: color-mix(in srgb, var(--brand-mint), transparent 88%);
@@ -176,10 +143,7 @@
   transform: none;
 }
 
-
-
-/* In the expanded-menu-row, the left side takes remaining space without wrapping on mid-size screens
-   (tablets 769px–1024px where the menu renders inline), while the right side matches a fixed dropdown width. */
+/* Row 4 expanded menu columns: left takes remaining space; right fits its content cleanly */
 .expanded-menu-row .master-header-left {
   flex: 1;
   min-width: 0;
@@ -189,10 +153,9 @@
 
 .expanded-menu-row .master-header-right {
   flex: 0 0 auto;
-  min-width: 220px;
-  max-width: 300px;
+  min-width: 0;
   flex-direction: column;
-  align-items: stretch;
+  align-items: flex-end;
 }
 
 /* Specific fix for view-mode-toggle positioning */
@@ -204,187 +167,7 @@
   display: none;
 }
 
-@media (max-width: 1024px) {
-  .master-page-header .header-row-1 h1 {
-    font-size: 1.25rem;
-    text-align: center;
-    width: 100%;
-    opacity: 0.9;
-    text-shadow: 0 0 20px var(--halo-glow);
-  }
-
-  .master-page-header .header-row-2 {
-    display: none;
-  }
-
-  .master-header-actions-row {
-    display: none;
-  }
-
-  .expanded-menu-row {
-    right: auto;
-    /* Elevate above Kanban mobile stage navigation tray (z-index: 50) so open menus never render behind it */
-    z-index: var(--z-sticky, 200);
-    margin-top: 12px;
-    margin-bottom: 12px;
-    padding: 16px;
-    background: color-mix(in srgb, var(--text-color), transparent 98%);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-squircle);
-    box-shadow: none;
-    max-height: none;
-    overflow: visible;
-    -webkit-overflow-scrolling: auto;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    animation: none;
-    backdrop-filter: none;
-    transform: none;
-    will-change: auto;
-    backface-visibility: visible;
-  }
-
-  .mobile-menu-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    width: 100%;
-    margin-bottom: 12px;
-  }
-
-  .master-page-header.header-hidden {
-    transform: translateY(-110%);
-    opacity: 0;
-    pointer-events: none;
-    z-index: 2000;
-    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.4s ease;
-  }
-
-  .expanded-menu-row .master-header-left,
-  .expanded-menu-row .master-header-right {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    max-width: none;
-    gap: 16px;
-    flex-shrink: 0; /* Prevent flex children from shrinking/collapsing inside scrolling mobile menu overlay */
-  }
-
-  .master-header-left .view-mode-toggle {
-    margin-right: 0;
-    width: 100%;
-  }
-
-  /* Force white text color for all menu/filter buttons inside the mobile layout header overlay */
-  .expanded-menu-row .view-toggle-btn,
-  .expanded-menu-row .toggle-depri-btn,
-  .expanded-menu-row .clear-board-btn,
-  .expanded-menu-row .halo-button,
-  .expanded-menu-row .master-action-btn {
-    color: var(--text-color);
-  }
-
-  /* Force green text color for whichever is active/selected */
-  .expanded-menu-row .view-toggle-btn.active,
-  .expanded-menu-row .toggle-depri-btn.active {
-    color: var(--brand-mint);
-  }
-
-  .master-page-header {
-    padding-top: 12px;
-    margin-bottom: 16px;
-  }
-
-  .master-page-header.is-sticky {
-    position: sticky;
-    top: 0;
-    z-index: 2000;
-    background: var(--bg-color);
-    margin-bottom: 0px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  /* Mobile Action Tray */
-  .mobile-action-tray {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding-bottom: calc(100px + var(--safe-bottom, 0px));
-    margin-bottom: -100px;
-    background: color-mix(in srgb, var(--bg-color), transparent 10%);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border-top: 1px solid var(--border-color);
-    border-radius: 20px 20px 0 0;
-    z-index: 4001;
-    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-    box-shadow: 0 -6px 24px color-mix(in srgb, var(--bg-color), transparent 50%);
-  }
-
-  .mobile-action-tray-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 64px;
-    padding: 0 8px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .mobile-action-tray.tray-hidden {
-    transform: translateY(110%);
-    transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
-  }
-
-  .mobile-action-tray .nav-item {
-    border: none;
-    box-sizing: border-box;
-    background: transparent;
-    color: var(--text-color);
-    opacity: 0.6;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .mobile-action-tray .nav-item.active {
-    border: none;
-    background: transparent;
-    opacity: 1;
-    color: var(--brand-mint);
-  }
-
-  /* Disabled tray actions (replaces inline opacity styles in MobileHeader.jsx) */
-  .mobile-action-tray .nav-item.mobile-tray-btn.disabled {
-    opacity: 0.4;
-  }
-
-  .mobile-action-tray .nav-item.active .icon-wrapper {
-    background: var(--halo-bg);
-    box-shadow: 0 0 10px var(--halo-glow);
-    border-radius: 50%;
-  }
-
-  /* Ultra-Compact Viewport Refinements (iPhone SE, small screens) */
-  @media screen and (max-width: 360px) {
-    .mobile-action-tray-container {
-      padding: 0 0.5rem;
-    }
-  }
-
-  @media screen and (max-width: 330px) {
-    .mobile-action-tray-container {
-      padding: 0 0.25rem;
-    }
-
-    .mobile-action-tray .nav-item .standard-icon {
-      width: 18px !important;
-      height: 18px !important;
-    }
-  }
-}
+/* Legacy @media (max-width: 1024px) mobile header & .mobile-action-tray rules moved to src/app/shells/MobileLayout.css (Phase 6A) */
 
 /* Scroll Lock Utility */
 body.no-scroll {

@@ -18,14 +18,12 @@
 import React, { useState } from 'react';
 import DesktopSidebar from './DesktopSidebar';
 import UserProfile from '../../components/users/UserProfile';
-import CustomSelect from '../../components/ui/CustomSelect';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import powerLogo from '../../assets/logo.svg';
-import SearchBar from '../../components/ui/SearchBar';
 import NotificationBell from '../../components/ui/NotificationBell';
 import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
-import { IconBulb, IconWarning, IconAlertCircle } from '../../components/ui/Icons';
+import { IconBulb, IconWarning } from '../../components/ui/Icons';
 import './DesktopLayout.css';
 
 const DesktopLayout = ({
@@ -45,29 +43,64 @@ const DesktopLayout = ({
   const {
     activeVertical, setActiveVertical,
     isSidebarOpen, setIsSidebarOpen,
+    isSubSidebarOpen, setIsSubSidebarOpen,
   } = useAppNavigation();
 
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
   const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
+  // Smart Coupled Navigation Rail:
+  // When a vertical workspace has an open sub-sidebar, auto-collapse the main sidebar
+  // to a 58px icon rail so both panels never crowd the viewport simultaneously.
+  const hasSubSidebar = Boolean(layout?.isTaskBoard);
+  const sidebarMode = hasSubSidebar
+    ? (isSubSidebarOpen ? 'rail' : (isSidebarOpen ? 'expanded' : 'collapsed'))
+    : (isSidebarOpen ? 'expanded' : 'collapsed');
+
+  const handleLogoToggle = () => {
+    if (!hasSubSidebar) {
+      setIsSidebarOpen(!isSidebarOpen);
+      return;
+    }
+    if (sidebarMode === 'rail') {
+      // Expand main sidebar and auto-collapse sub-sidebar
+      setIsSubSidebarOpen(false);
+      setIsSidebarOpen(true);
+    } else if (sidebarMode === 'expanded') {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  };
+
   return (
-    <div className="desktop-layout" data-shell="desktop" data-theme={darkMode ? 'dark' : 'light'}>
+    <div
+      className="desktop-layout"
+      data-shell="desktop"
+      data-sidebar-mode={sidebarMode}
+      data-theme={darkMode ? 'dark' : 'light'}
+    >
       {/* Logo Button */}
       <button
+        type="button"
         className="logo-button"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        onClick={handleLogoToggle}
+        title={sidebarMode === 'expanded' ? 'Collapse sidebar' : 'Expand sidebar'}
+        aria-label={sidebarMode === 'expanded' ? 'Collapse sidebar' : 'Expand sidebar'}
       >
         <img src={powerLogo} alt="Logo" className="logo-svg" />
       </button>
 
-      {/* Sidebar — inline panel on desktop */}
+      {/* Sidebar — inline panel or 58px icon rail on desktop */}
       <DesktopSidebar
-        isOpen={isSidebarOpen}
+        isOpen={sidebarMode !== 'collapsed'}
+        mode={sidebarMode}
         onClose={() => setIsSidebarOpen(false)}
         activeVertical={activeVertical}
         setActiveVertical={setActiveVertical}
         user={user}
         permissions={permissions}
+        verticals={verticals}
         verticalList={verticalList}
       />
 

@@ -73,10 +73,10 @@
   align-items: center;
   justify-content: center;
 }
-.list-task-row.drop-target {
-  border: 2px dashed var(--brand-green) !important;
-  background: color-mix(in srgb, var(--status-success), transparent 95%) !important;
-  transform: translateX(8px) !important;
+.task-list-view .list-task-row.drop-target {
+  border: 2px dashed var(--brand-green);
+  background: color-mix(in srgb, var(--status-success), transparent 95%);
+  transform: translateX(8px);
 }
 .tree-node-wrapper {
   display: flex;
@@ -97,7 +97,7 @@
   border-left: 3px solid var(--brand-green);
   text-transform: capitalize;
 }
-.card-submit-proof-button {
+.list-task-row .card-submit-proof-button {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -111,30 +111,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1 !important;
+  opacity: 1;
 }
-.card-submit-proof-button:hover {
+.list-task-row .card-submit-proof-button:hover {
   background: var(--halo-bg);
   opacity: 1;
 }
 /* Icon Visibility Consistency */
-.list-task-row .standard-icon {
-  opacity: 0.9 !important; 
+.task-list-view .list-task-row .standard-icon {
+  opacity: 0.9;
   filter: contrast(1.2);
-  color: var(--text-color) !important;
+  color: var(--text-color);
 }
-.list-task-row button:hover .standard-icon {
-  opacity: 1 !important;
+.task-list-view .list-task-row button:hover .standard-icon {
+  opacity: 1;
   filter: contrast(1.5);
 }
 
 
-.list-task-row .card-delete-button:hover .standard-icon {
+.task-list-view .list-task-row .card-delete-button:hover .standard-icon {
   color: var(--status-danger);
 }
-.list-task-row .card-add-sub-button:hover .standard-icon,
-.list-task-row .card-reprio-button:hover .standard-icon,
-.list-task-row .card-clone-button:hover .standard-icon {
+.task-list-view .list-task-row .card-add-sub-button:hover .standard-icon,
+.task-list-view .list-task-row .card-reprio-button:hover .standard-icon,
+.task-list-view .list-task-row .card-clone-button:hover .standard-icon {
   color: var(--brand-green);
 }
 
@@ -192,12 +192,12 @@
   margin-left: 4px;
 }
 
-.promote-button {
-  color: var(--brand-blue) !important;
+.list-task-row .promote-button {
+  color: var(--brand-blue);
 }
 
-.card-reprio-button {
-  color: var(--brand-green) !important;
+.list-task-row .card-reprio-button {
+  color: var(--brand-green);
 }
 
 .list-row-content {

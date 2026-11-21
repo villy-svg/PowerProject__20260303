@@ -1,32 +1,30 @@
-/* AttendanceLegend.css */
+/* AttendanceLegend.css — Calm borderless reference legend (§15.C Border Minimalism) */
 
-/* Single wrapping flex row so legend items flow cleanly on desktop without forced 2-row stacking */
 .attendance-legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 14px;
   width: 100%;
 }
 
 .attendance-legend__item {
   font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 5px 10px;
-  border-radius: var(--radius-button, 8px);
-  border: 1px solid color-mix(in srgb, var(--border-color), transparent 35%);
-  background: transparent;
+  letter-spacing: 0.3px;
+  padding: 2px 0;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  line-height: 1;
+  gap: 5px;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
+/* Keep semantic color strictly on the icon/code; labels stay uniform muted text */
 .attendance-legend__label {
-  opacity: 0.65;
+  color: var(--text-color);
+  opacity: 0.62;
+  font-weight: 500;
 }
 
 .attendance-legend__icon {
@@ -41,7 +39,7 @@
 
 .attendance-legend__item--week-off,
 .attendance-legend__item--leave {
-  color: var(--status-info, var(--status-neutral));
+  color: var(--status-neutral);
 }
 
 .attendance-legend__item--absent,
@@ -55,17 +53,16 @@
 }
 
 .attendance-legend__icon-pending {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
 }
 
 @media screen and (max-width: 768px) {
   .attendance-legend {
-    gap: 6px;
+    gap: 6px 12px;
   }
 
   .attendance-legend__item {
     font-size: 0.65rem;
-    padding: 4px 8px;
   }
 }

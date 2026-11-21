@@ -949,7 +949,8 @@
   padding: 8px;
 }
 
-.empty-state-text {
+/* Scoped to .sync-modal so it does not collide with globalTheme.css .empty-state-text */
+.sync-modal .empty-state-text {
   padding: 12px;
   font-size: 13px;
   opacity: 0.5;

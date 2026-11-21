@@ -68,9 +68,10 @@ const EmployeeAttendanceBoard = ({
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
   const [showMobileDatePicker, setShowMobileDatePicker] = useState(false);
 
-  // --- Employee Search & Desktop Hub Filter State ---
+  // --- Employee Search, Desktop Hub Filter & By-Hub Grouping State ---
   const [searchedEmployee, setSearchedEmployee] = useState(null);
   const [selectedHubId, setSelectedHubId] = useState('');
+  const [groupByHub, setGroupByHub] = useState(false);
 
   // Derive unique Hub filter options from loaded employees (zero extra DB queries; Desktop-only per C.1)
   const hubOptions = useMemo(() => {
@@ -92,6 +93,12 @@ const EmployeeAttendanceBoard = ({
     setPage(1);
   }, [setPage]);
 
+  // Toggle "By Hub" grouping and reset pagination so hub groups stay contiguous from page 1
+  const handleToggleGroupByHub = useCallback(() => {
+    setGroupByHub((prev) => !prev);
+    setPage(1);
+  }, [setPage]);
+
   // Normalize active employees for records-mode SearchBar (searchable by name, emp_code, dept_code, hub_code)
   const searchRecords = useMemo(() => {
     const source = allEmployees.length > 0 ? allEmployees : employees;
@@ -102,21 +109,39 @@ const EmployeeAttendanceBoard = ({
     }));
   }, [allEmployees, employees]);
 
-  // Desktop: apply search or Hub filter (paginated 50/page); Mobile: pass full unpaginated list (C.2)
+  // Desktop: apply search, Hub filter, and optional By-Hub sort (paginated 50/page)
+  const desktopOrderedPool = useMemo(() => {
+    const source = allEmployees.length > 0 ? allEmployees : employees;
+    const filtered = selectedHubId
+      ? source.filter(e => e.hubs?.id === selectedHubId || e.hub_id === selectedHubId)
+      : source;
+
+    if (!groupByHub) return filtered;
+
+    // Sort by Hub name A-Z ('Unassigned' last), then employee full_name A-Z
+    return [...filtered].sort((a, b) => {
+      const hubA = a.hubs?.name || a.hubs?.hub_code || '';
+      const hubB = b.hubs?.name || b.hubs?.hub_code || '';
+      if (!hubA && hubB) return 1;
+      if (hubA && !hubB) return -1;
+      const hubCmp = hubA.localeCompare(hubB);
+      if (hubCmp !== 0) return hubCmp;
+      return (a.full_name || '').localeCompare(b.full_name || '');
+    });
+  }, [employees, allEmployees, selectedHubId, groupByHub]);
+
   const desktopFilteredEmployees = useMemo(() => {
     if (searchedEmployee) return [searchedEmployee];
-    if (!selectedHubId) return employees;
-    const filtered = allEmployees.filter(e => e.hubs?.id === selectedHubId || e.hub_id === selectedHubId);
+    if (!selectedHubId && !groupByHub) return employees;
     const startIdx = (page - 1) * 50;
-    return filtered.slice(startIdx, startIdx + 50);
-  }, [employees, allEmployees, searchedEmployee, selectedHubId, page]);
+    return desktopOrderedPool.slice(startIdx, startIdx + 50);
+  }, [employees, desktopOrderedPool, searchedEmployee, selectedHubId, groupByHub, page]);
 
   const desktopHasMore = useMemo(() => {
     if (searchedEmployee) return false;
-    if (!selectedHubId) return hasMore;
-    const filteredCount = allEmployees.filter(e => e.hubs?.id === selectedHubId || e.hub_id === selectedHubId).length;
-    return page * 50 < filteredCount;
-  }, [allEmployees, searchedEmployee, selectedHubId, page, hasMore]);
+    if (!selectedHubId && !groupByHub) return hasMore;
+    return page * 50 < desktopOrderedPool.length;
+  }, [desktopOrderedPool.length, searchedEmployee, selectedHubId, groupByHub, page, hasMore]);
 
   const mobileEmployees = useMemo(() => {
     const base = allEmployees.length > 0 ? allEmployees : employees;
@@ -250,6 +275,8 @@ const EmployeeAttendanceBoard = ({
         hubOptions={hubOptions}
         selectedHubId={selectedHubId}
         onHubChange={handleHubChange}
+        groupByHub={groupByHub}
+        onToggleGroupByHub={handleToggleGroupByHub}
         shellType={shellType}
         isBoardLoading={isBoardLoading}
         refreshBoard={refreshBoard}
@@ -294,7 +321,7 @@ const EmployeeAttendanceBoard = ({
           <span className="attendance-board__search-filter-chip">
             {searchedEmployee.full_name}
             {searchedEmployee.emp_code && (
-              <span className="attendance-board__search-filter-code">{searchedEmployee.emp_code}</span>
+              <span className="badge-base">{searchedEmployee.emp_code}</span>
             )}
           </span>
           <button
@@ -341,6 +368,7 @@ const EmployeeAttendanceBoard = ({
           getCellData={getCellData}
           isLoading={isBoardLoading}
           onCellClick={handleCellClick}
+          groupByHub={groupByHub && !searchedEmployee}
         />
       )}
 

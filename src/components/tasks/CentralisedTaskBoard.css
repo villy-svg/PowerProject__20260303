@@ -7,8 +7,8 @@
   padding-bottom: 40px;
 }
 
-.secondary-header {
-  border-left-color: var(--brand-blue) !important;
+.summary-header.secondary-header {
+  border-left-color: var(--brand-blue);
 }
 
 .flex-between {
@@ -23,16 +23,16 @@
   gap: 12px;
 }
 
-.centralised-task-view .summary-header h2 {
-  font-size: 1.25rem !important; /* Forces font size to exactly match vertical header on mobile */
-  font-weight: 800 !important; /* Bold, premium weight */
-  letter-spacing: -0.5px !important; /* Premium tighter tracking */
-  text-transform: uppercase !important; /* Preserve styling convention */
+.home-summary-view .centralised-task-view .summary-header h2 {
+  font-size: 1.25rem; /* Matches vertical header on mobile */
+  font-weight: 800; /* Bold, premium weight */
+  letter-spacing: -0.5px; /* Premium tighter tracking */
+  text-transform: uppercase; /* Preserve styling convention */
 }
 
 @media screen and (min-width: 769px) {
-  .centralised-task-view .summary-header h2 {
-    font-size: 1.4rem !important; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
+  .home-summary-view .centralised-task-view .summary-header h2 {
+    font-size: 1.4rem; /* Reduced by 20% on desktop (from 1.75rem to 1.4rem) */
   }
 }
 
@@ -206,40 +206,40 @@
 }
 
 @media screen and (max-width: 768px) {
-  .centralised-task-view {
-    margin-top: 0px !important; /* Reduced from 12px to 0 for flush stacked trays */
+  .home-summary-view .centralised-task-view {
+    margin-top: 0px; /* Flush stacked trays on mobile */
     padding-bottom: 20px;
   }
-  .summary-header {
-    margin-bottom: 24px !important;
+  .centralised-task-view .summary-header {
+    margin-bottom: 24px;
   }
-  .section-description {
-    margin-bottom: 24px !important; /* Expanded margin to space it beautifully above column contents */
+  .centralised-task-view .section-description {
+    margin-bottom: 24px; /* Breathing room above column contents */
   }
-  .centralised-board {
-    display: block !important;
-    overflow-x: hidden !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    gap: 0 !important;
+  .centralised-task-view .centralised-board {
+    display: block;
+    overflow-x: hidden;
+    padding-left: 0;
+    padding-right: 0;
+    gap: 0;
   }
-  .centralised-column {
-    display: none !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    margin: 0 !important;
-    padding: 12px 0 16px 0 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+  .centralised-task-view .centralised-column {
+    display: none;
+    width: 100%;
+    min-width: 100%;
+    margin: 0;
+    padding: 12px 0 16px 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
-  .centralised-column.active {
-    display: flex !important;
+  .centralised-task-view .centralised-column.active {
+    display: flex;
     animation: stageFadeSlideIn 0.3s ease forwards;
   }
-  .column-cards-container {
+  .centralised-task-view .column-cards-container {
     min-height: auto;
-    overflow-y: visible !important;
+    overflow-y: visible;
   }
 
   /* ==========================================================================
@@ -247,7 +247,7 @@
      ========================================================================== */
   .centralised-stage-navigation-tray {
     display: block;
-    padding: 0;
+    padding: 0 16px;
     background: color-mix(in srgb, var(--bg-color), transparent 10%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -255,8 +255,6 @@
     margin-bottom: 8px; /* Tightened from 16px */
     margin-left: -16px;
     margin-right: -16px;
-    padding-left: 16px;
-    padding-right: 16px;
   }
 
   .centralised-stage-nav-container {
@@ -268,9 +266,10 @@
     padding: 0 2px;
   }
 
-  .centralised-stage-nav-item {
+  .centralised-task-view .centralised-stage-nav-item {
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* Allow shrinking below global 44px button min-width */
+    min-height: 40px; /* Ergonomic touch height inside 46px tray */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -282,13 +281,11 @@
     gap: 1px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 40px !important; /* Ergonomic touch height inside 46px tray */
-    min-width: 0 !important; /* Override global 44px min-width */
     border-radius: 10px;
     margin: 1px;
     padding: 0 2px;
     position: relative;
-    box-shadow: none !important;
+    box-shadow: none;
   }
 
   .centralised-stage-nav-item .centralised-stage-icon-wrapper {
@@ -359,13 +356,9 @@
   }
 
   /* Active State */
-  .centralised-stage-nav-item.active {
+  .centralised-task-view .centralised-stage-nav-item.active {
     opacity: 1;
     color: var(--stage-accent);
-  }
-
-  .centralised-stage-nav-item.active .centralised-stage-icon-wrapper {
-    /* Background and halo removed per minimal cognitive clutter rules */
   }
 
   .add-escalation-btn {
@@ -402,9 +395,9 @@
   outline-offset: 2px;
 }
 
-.collapse-chevron-icon {
+.board-collapse-toggle-btn .collapse-chevron-icon {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 1 !important; /* Keep icon nice and crisp */
+  opacity: 1; /* Keep icon nice and crisp */
   color: var(--brand-green);
 }
 

@@ -1,9 +1,9 @@
-/* 1. Sidebar Container (Desktop inline panel) */
+/* 1. Sidebar Container (Desktop inline panel) — subtle tonal separation from workspace (§15.A) */
 .sidebar {
   position: relative;
   height: 100dvh;
-  background-color: var(--surface-card);
-  border-right: 1px solid transparent;
+  background-color: var(--bg-color);
+  border-right: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
   z-index: 1005;
   width: 200px;
   display: flex;
@@ -12,11 +12,81 @@
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
               opacity 0.3s ease;
 }
-/* 2. Collapsed State */
+/* 2. Collapsed & Icon Rail States */
 .sidebar:not(.open) {
   width: 0;
   opacity: 0;
   border-right: none;
+}
+
+.sidebar.rail {
+  width: 58px;
+  opacity: 1;
+}
+
+.sidebar.rail .sidebar-content-wrapper {
+  width: 58px;
+  padding: 12px 9px;
+  align-items: center;
+}
+
+.sidebar.rail .sidebar-top-section,
+.sidebar.rail .sidebar-bottom-section,
+.sidebar.rail .sidebar-nav,
+.sidebar.rail .sidebar-nav ul {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar.rail .sidebar-nav li,
+.sidebar.rail .sidebar-nav li.nav-parent-item {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: none;
+  border-radius: 10px;
+}
+
+.sidebar.rail .v-label-text,
+.sidebar.rail .v-actions-wrapper,
+.sidebar.rail .sub-nav-list {
+  display: none;
+}
+
+.sidebar.rail .nav-divider {
+  width: 28px;
+  margin: 10px 0;
+}
+
+/* Leading icon + label wrapper for desktop sidebar items */
+.sidebar-nav-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.sidebar.rail .sidebar-nav-leading {
+  flex: 0 0 auto;
+  justify-content: center;
+  gap: 0;
+}
+
+.sidebar-nav-icon {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.sidebar-nav li:hover .sidebar-nav-icon,
+.sidebar-nav li.active .sidebar-nav-icon {
+  opacity: 1;
 }
 /* 3. The Content Wrapper 
    Merged redundancies and applied space-between to push config to bottom 
@@ -53,15 +123,16 @@
   margin: 0;
 }
 .sidebar-nav li {
-  padding: 10px 12px;
-  margin-bottom: 4px;
-  border-radius: var(--radius-button);
+  padding: 9px 12px;
+  margin-bottom: 2px;
+  border-radius: 8px;
   cursor: pointer;
   background-color: transparent;
   color: var(--text-color);
+  opacity: 0.72;
   font-size: var(--font-sm);
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
   white-space: nowrap;
   overflow: hidden;
   display: block;
@@ -69,15 +140,16 @@
 /* B1 FIX: overflow:hidden from .sidebar-nav li was clipping the chevron
    button on large screens. Canonical override is on .nav-parent-item below. */
 .sidebar-nav li:not(.locked):hover {
-  background-color: var(--border-color);
-  color: var(--brand-mint);
-  transform: translateX(4px);
+  background-color: color-mix(in srgb, var(--text-color), transparent 95%);
+  color: var(--text-color);
+  opacity: 1;
 }
 .sidebar-nav li.active {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--brand-mint), transparent 90%), transparent);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
   color: var(--brand-mint);
-  font-weight: 700;
-  border-left: 3px solid var(--brand-mint);
+  opacity: 1;
+  font-weight: 600;
+  border-left: 2px solid var(--brand-mint);
 }
 .sidebar-nav li.locked {
   opacity: 0.5;
@@ -151,10 +223,10 @@
 }
 .sidebar-nav ul.sub-nav-list li:hover {
   opacity: 1;
-  background-color: var(--border-color);
+  background-color: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 .sidebar-nav ul.sub-nav-list li.sub-active {
-  background-color: color-mix(in srgb, var(--brand-green), transparent 95%);
+  background-color: color-mix(in srgb, var(--brand-green), transparent 92%);
   color: var(--brand-green);
   opacity: 1;
   font-weight: 600;
@@ -168,14 +240,10 @@
 }
 /* 7. Dividers & Cleanup */
 .nav-divider {
-  margin: 15px 0;
+  margin: 12px 0;
   border: none;
-  border-top: 1px solid var(--border-color);
-  opacity: 0.5;
+  border-top: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
   width: 100%;
-}
-.sidebar-bottom-section .nav-divider {
-  margin-bottom: 15px;
 }
 
 /* 8. Mobile Tray Grid Layout (App Drawer Style for MobileSidebar.jsx) */

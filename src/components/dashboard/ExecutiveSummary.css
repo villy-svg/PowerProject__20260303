@@ -31,49 +31,43 @@
   }
 }
 @media screen and (max-width: 768px) {
-  .home-summary-view {
-    padding-top: 0px !important; /* Set padding-top to 0px to draw switcher tray tight to the header when not scrolled */
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+  /* Scope under .mobile-layout to naturally beat @media (max-width: 1024px) .home-summary-view padding without !important */
+  .mobile-layout .home-summary-view {
+    padding-top: 0px; /* Draw switcher tray tight to the header when not scrolled */
     padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   /* ==========================================================================
      MOBILE VIEW SWITCHER TRAY
      ========================================================================== */
-  .mobile-header-switcher-sticky-container {
+  .home-summary-view .mobile-header-switcher-sticky-container {
     position: sticky;
     top: 0;
     z-index: 2004; /* Matches same z-index as summary-navigation-tray */
     background-color: var(--bg-color); /* Fills space with solid theme background */
     margin-left: -16px;
     margin-right: -16px;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding: 4px 16px;
   }
 
-  .mobile-header-switcher-spacer {
-    height: 10px; /* Spacer height controlling the gap between them, easily customized in the future */
-    background-color: var(--bg-color); /* Matches the background */
+  .home-summary-view .mobile-header-switcher-spacer {
+    height: 10px; /* Spacer height controlling the gap between header and switcher */
+    background-color: var(--bg-color);
     width: 100%;
   }
 
-  .summary-navigation-tray {
-    display: block !important;
+  .home-summary-view .summary-navigation-tray {
+    display: block;
     padding: 0;
     background: color-mix(in srgb, var(--bg-color), transparent 10%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    position: relative !important;
+    position: relative;
     margin-top: 0px;
     margin-bottom: 0px;
-    padding-left: 0;
-    padding-right: 0;
   }
 
-  .summary-nav-container {
+  .home-summary-view .summary-nav-container {
     display: flex;
     height: 46px; /* Reduced from 54px for tighter stacked layout */
     width: 100%;
@@ -82,9 +76,10 @@
     padding: 0 2px;
   }
 
-  .summary-nav-item {
+  .home-summary-view .summary-nav-item {
     flex: 1;
-    min-width: 0; /* Allow shrinking below content size */
+    min-width: 0; /* Allow shrinking below global 44px button min-width */
+    min-height: 40px; /* Ergonomic touch height inside 46px tray */
     display: flex;
     flex-direction: column; /* Icon on top, label at bottom */
     align-items: center;
@@ -96,8 +91,6 @@
     gap: 1px;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 40px !important; /* Ergonomic touch height inside 46px tray */
-    min-width: 0 !important; /* Override global 44px min-width */
     border-radius: 10px;
     margin: 1px;
     padding: 0 2px;
@@ -108,11 +101,11 @@
     user-select: none;
   }
 
-  .summary-nav-item:active {
+  .home-summary-view .summary-nav-item:active {
     background: transparent;
   }
 
-  .summary-icon-wrapper {
+  .home-summary-view .summary-icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -122,11 +115,11 @@
     position: relative;
   }
 
-  .summary-icon-wrapper svg {
-    opacity: 1 !important; /* Ensure icons in tray are beautifully visible */
+  .home-summary-view .summary-icon-wrapper svg {
+    opacity: 1; /* Ensure icons in tray are clearly visible */
   }
 
-  .summary-badge-count {
+  .home-summary-view .summary-badge-count {
     position: absolute;
     top: -2px;
     right: -4px;
@@ -158,7 +151,7 @@
     color: var(--brand-mint, var(--status-success));
   }
 
-  .summary-nav-label {
+  .home-summary-view .summary-nav-label {
     font-size: 0.58rem; /* Readable mobile label floor without crowding */
     font-weight: 600;
     text-transform: uppercase;
@@ -171,7 +164,7 @@
   }
 
   /* Active Switcher State (Kanban Stage switcher styling compliance) */
-  .summary-nav-item.active {
+  .home-summary-view .summary-nav-item.active {
     opacity: 1;
     color: var(--stage-accent); /* Dynamic teal/zinc colors */
     border: none;
@@ -179,13 +172,85 @@
     box-shadow: none;
   }
 
-  .summary-nav-item.active .summary-icon-wrapper {
-    /* Background and halo removed per minimal cognitive clutter rules */
-  }
-
   /* Animations for switching tabs */
   .animate-fade-in {
     animation: simpleFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* Mobile Welcome Header & Top Bar Controls (merged from duplicate 768px block, Phase 6B) */
+  .home-summary-view .home-dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 16px;
+    margin-bottom: 2px; /* Snug spacing above mobile navigation switcher tray */
+    margin-top: -8px; /* Pull card up snug against the search bar */
+  }
+
+  .home-summary-view .welcome-greeting h2 {
+    font-size: 0.98rem; /* Reduced font size for bigger mobile text, leaving subtitle unchanged */
+  }
+
+  /* .mobile-header-tutorial-btn is canonically styled in src/app/shells/MobileLayout.css (duplicate removed Phase 6B) */
+  .home-summary-view .halo-button.mobile-header-sandbox-btn {
+    position: absolute;
+    left: 38px;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    min-height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--status-warning), transparent 95%);
+    border: none;
+    color: var(--status-warning);
+    z-index: 2003;
+    box-sizing: border-box;
+  }
+
+  .home-summary-view .mobile-header-profile-container {
+    position: absolute;
+    right: 8px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2003;
+    display: flex;
+    align-items: center;
+  }
+
+  .home-summary-view .mobile-header-profile-container .user-profile-toggle {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    min-width: 26px;
+    min-height: 26px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-summary-view .mobile-header-profile-container .user-profile-toggle .user-info-text {
+    display: none;
+  }
+
+  .home-summary-view .mobile-header-profile-container .user-avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.65rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -257,100 +322,4 @@
 
 .tutorial-hub-trigger-btn .btn-icon {
   font-size: 1.1rem;
-}
-
-/* Mobile responsive scaling */
-@media screen and (max-width: 768px) {
-  .home-dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 12px 16px;
-    margin-bottom: 2px !important; /* Snug spacing above mobile navigation switcher tray */
-    margin-top: -8px !important; /* Pull card up snug against the search bar */
-  }
-
-  .welcome-greeting h2 {
-    font-size: 0.98rem !important; /* Reduced font size for bigger mobile text, leaving subtitle unchanged */
-  }
-
-  .mobile-header-sandbox-btn {
-    position: absolute !important;
-    left: 38px !important;
-    right: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    min-height: 26px !important;
-    padding: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 6px !important;
-    background: color-mix(in srgb, var(--status-warning), transparent 95%) !important;
-    border: none !important;
-    color: var(--status-warning) !important;
-    z-index: 2003 !important;
-    box-sizing: border-box !important;
-  }
-
-  .mobile-header-tutorial-btn {
-    position: absolute !important;
-    left: 8px !important;
-    right: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 26px !important;
-    height: 26px !important;
-    min-width: 26px !important;
-    min-height: 26px !important;
-    padding: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 6px !important;
-    z-index: 2003 !important;
-    box-sizing: border-box !important;
-  }
-
-  .mobile-header-profile-container {
-    position: absolute !important;
-    right: 8px !important;
-    left: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 2003 !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  .mobile-header-profile-container .user-profile-toggle {
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    min-width: 26px !important;
-    min-height: 26px !important;
-    width: 26px !important;
-    height: 26px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .mobile-header-profile-container .user-profile-toggle .user-info-text {
-    display: none !important;
-  }
-
-  .mobile-header-profile-container .user-avatar {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 0.65rem !important;
-    margin: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
 }

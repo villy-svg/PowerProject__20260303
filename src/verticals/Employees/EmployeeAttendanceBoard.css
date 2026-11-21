@@ -34,12 +34,45 @@
   flex-wrap: wrap;
 }
 
-/* Icon-only Refresh button (matches 36px height of .master-header-actions-row .halo-button) */
+/* Synchronize Row 3 button sizing & padding across all Attendance Board header controls */
+.attendance-board__wrapper .master-header-actions-row .halo-button.master-action-btn,
+.attendance-board__wrapper .master-header-actions-row .halo-button.board-filter-pill {
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  min-width: unset;
+  padding: 0 var(--menu-control-padding-x, 14px);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+}
+
+/* Icon-only Refresh button (matches 36px neutral icon preset of RBAC & MENU) */
 .attendance-board__wrapper .master-header-actions-row .attendance-board__refresh-btn.halo-button {
-  width: 36px;
-  min-width: 36px;
+  width: var(--menu-control-height, 36px);
+  min-width: var(--menu-control-height, 36px);
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
   padding: 0;
   gap: 0;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--text-color), transparent 15%);
+  opacity: 1;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 84%);
+  box-shadow: none;
+}
+
+.attendance-board__wrapper .master-header-actions-row .attendance-board__refresh-btn.halo-button:hover:not(:disabled) {
+  color: var(--text-color);
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
+  border: 1px solid transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Override global .standard-icon { opacity: 0.6 } so standalone icon stays crisp */
+.attendance-board__refresh-btn .standard-icon {
+  opacity: 1;
   flex-shrink: 0;
 }
 
@@ -52,23 +85,23 @@
   to { transform: rotate(360deg); }
 }
 
-/* Left Actions (Date Range Picker) */
+/* Left Actions (Date Range Picker + By Hub Toggle) */
 .attendance-board__left-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
-/* Option A — Border XOR Fill: matches adjacent Row 3 header buttons (transparent + light satin border at rest) */
+/* Option A — Border XOR Fill: matches adjacent Row 3 header buttons (36px height, 0.75rem font) */
 .attendance-board__date-range {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  height: 36px;
+  height: var(--menu-control-height, 36px);
   box-sizing: border-box;
   background: transparent;
-  padding: 0.2rem 0.35rem 0.2rem 0.75rem;
-  border-radius: var(--radius-button);
+  padding: 0 0.35rem 0 0.7rem;
+  border-radius: var(--menu-control-radius, var(--radius-button));
   border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   box-shadow: none;
   transition: background-color 0.2s ease, border-color 0.2s ease;
@@ -86,8 +119,9 @@
   color: var(--text-color);
   color-scheme: dark; /* Force native dark theme calendars */
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: 0.2px;
   padding: 0.15rem 0.2rem;
   outline: none;
   cursor: pointer;
@@ -108,12 +142,13 @@
   background: transparent;
   color: var(--brand-mint, var(--brand-green));
   border: none;
-  border-radius: 8px;
+  border-radius: var(--menu-segment-radius, 8px);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-left: 0.2rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  margin-left: 0.15rem;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
   text-transform: uppercase;
   opacity: 0.9;
   white-space: nowrap;
@@ -135,30 +170,28 @@
     gap: 8px;
   }
 
-  .attendance-board__wrapper .master-header-actions-row .halo-button:not(.attendance-board__refresh-btn) {
+  .attendance-board__wrapper .master-header-actions-row .halo-button:not(.attendance-board__refresh-btn):not(.rbac-manage-btn) {
     min-width: auto;
     padding: 0 12px;
     gap: 6px;
   }
 
   .attendance-board__date-range {
-    padding: 0.2rem 0.3rem 0.2rem 0.65rem;
+    padding: 0 0.3rem 0 0.6rem;
   }
 
   .attendance-board__date-input--range {
     width: 20ch;
-    font-size: 0.8rem;
   }
 }
 
 /* TODO(future-rebuild): Bulk Schedule Planner header/select/action/msg CSS removed per A.2. */
 
-/* Expanded Menu Content (Row 4 inside MasterHeaderMenu)
-   Replaces dead legacy dropdown CSS and missing utility classes */
+/* Expanded Menu Content (Row 4 inside MasterHeaderMenu) */
 .attendance-board__menu-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
@@ -166,48 +199,103 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
-/* Desktop-only Hub Filter (C.1) & Quick Date Presets (C.3) */
+/* Desktop-only Hub Filter (C.1): matches 36px Row 4 control height & satin hairline */
 .attendance-board__hub-filter {
-  min-width: 160px;
+  display: inline-flex;
+  align-items: center;
+  height: var(--menu-control-height, 36px);
+  min-width: 155px;
+  max-width: 220px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.attendance-board__hub-filter:hover,
+.attendance-board__hub-filter:focus-within {
+  border-color: color-mix(in srgb, var(--brand-mint), transparent 55%);
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
 }
 
 .attendance-board__hub-select {
   width: 100%;
 }
 
-.attendance-board__desktop-presets {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+.attendance-board__hub-select .custom-select-trigger {
+  color: var(--text-color);
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
 }
 
+/* Segmented Quick Date Presets (.board-view-toggle carries container & button styles) */
+.attendance-board__desktop-presets {
+  flex-shrink: 0;
+}
+
+/* Compact Right-Aligned Pagination */
 .attendance-board__pagination {
+  margin-left: auto;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  height: var(--menu-control-height, 36px);
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  border-radius: var(--menu-control-radius, var(--radius-button));
+  box-sizing: border-box;
+}
+
+.attendance-board__page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--menu-segment-radius, 8px);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.attendance-board__page-btn .standard-icon {
+  opacity: 0.85;
+}
+
+.attendance-board__page-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+  color: var(--brand-mint);
+}
+
+.attendance-board__page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .attendance-board__page-label {
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: 0.3px;
   color: var(--text-color);
-  opacity: 0.65;
+  opacity: 0.72;
   white-space: nowrap;
-  padding: 0 4px;
+  padding: 0 8px;
 }
 
 .attendance-board__menu-legend {
   display: flex;
   align-items: center;
   width: 100%;
-  padding-top: 10px;
-  border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
 }
 
 /* Option A — Border XOR Fill: inherits transparent + light satin border at rest, amber fill with no border on hover */
@@ -270,26 +358,12 @@
   color: var(--brand-green);
 }
 
-.attendance-board__search-filter-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 1px 8px;
-  min-height: 20px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-  opacity: 0.75;
-  display: inline-flex;
-  align-items: center;
-}
-
 .attendance-board__search-filter-clear {
   margin-left: auto;
-  padding: 0.25rem 0.65rem;
-  font-size: 0.7rem;
+  height: var(--menu-segment-height, 28px);
+  min-height: var(--menu-segment-height, 28px);
+  padding: 0 10px;
+  font-size: var(--menu-control-font-size, 0.75rem);
 }
 
 /* Errors & Feedback */
@@ -320,11 +394,15 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Replaces inline styles on RequestCard in AttendanceApprovalDrawer.jsx */
+/* Replaces inline styles on RequestCard (AttendanceApprovalDrawer) & PlanCard (SchedulePlanApprovalDrawer) */
 .approval-request-row {
   --stage-color: var(--brand-yellow);
   border-bottom-left-radius: var(--radius-button, 12px);
   border-bottom-right-radius: var(--radius-button, 12px);
+}
+
+.approval-request-row--plan {
+  --stage-color: var(--brand-blue);
 }
 
 .approval-request-row--expanded {
@@ -351,41 +429,46 @@
     flex-shrink: 0;
   }
 
-  .attendance-mobile-bar__range {
+  .attendance-mobile-bar__range,
+  .attendance-mobile-bar__actions {
     display: flex;
     align-items: center;
     gap: 8px;
     width: 100%;
   }
 
-  .attendance-mobile-bar__nav-btn.halo-button {
-    flex: 0 0 42px;
-    width: 42px;
-    min-width: 42px;
-    max-width: 42px;
-    height: 42px;
-    min-height: 42px;
-    padding: 0;
+  /* Shared mobile bar button base (44px HIG touch target + uniform 0.75rem typography) */
+  .attendance-mobile-bar__nav-btn.halo-button,
+  .attendance-mobile-bar__icon-btn.halo-button,
+  .attendance-mobile-bar__range-trigger.halo-button,
+  .attendance-mobile-bar__btn.halo-button,
+  .attendance-mobile-bar__picker-btn.halo-button {
+    height: 44px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: var(--menu-control-font-size, 0.75rem);
+    font-weight: var(--menu-control-font-weight, 700);
+    white-space: nowrap;
+  }
+
+  .attendance-mobile-bar__nav-btn.halo-button,
+  .attendance-mobile-bar__icon-btn.halo-button {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    padding: 0;
   }
 
   .attendance-mobile-bar__range-trigger.halo-button {
     flex: 1 1 auto;
     min-width: 0;
     width: auto;
-    height: 42px;
-    min-height: 42px;
     padding: 0 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     gap: 6px;
-    font-size: 0.82rem;
-    font-weight: 700;
     color: var(--text-color);
-    white-space: nowrap;
   }
 
   .attendance-mobile-bar__range-trigger--open.halo-button {
@@ -421,14 +504,14 @@
   }
 
   .attendance-mobile-bar__preset-chip {
-    min-height: 36px;
+    min-height: 44px;
     padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: transparent;
     color: var(--text-color);
-    font-size: 0.72rem;
-    font-weight: 700;
+    font-size: var(--menu-control-font-size, 0.75rem);
+    font-weight: var(--menu-control-font-weight, 700);
     cursor: pointer;
     white-space: nowrap;
   }
@@ -457,7 +540,7 @@
 
   .attendance-mobile-bar__native-date {
     width: 100%;
-    min-height: 40px;
+    min-height: 44px;
     padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -465,7 +548,7 @@
     color: var(--text-color);
     color-scheme: dark;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 16px; /* Prevents iOS Safari auto-zoom (§14.B) */
     font-weight: 600;
     box-sizing: border-box;
   }
@@ -477,9 +560,6 @@
 
   .attendance-mobile-bar__picker-btn.halo-button {
     flex: 1;
-    min-height: 40px;
-    font-size: 0.75rem;
-    font-weight: 700;
   }
 
   .attendance-mobile-bar__picker-btn--apply.halo-button {
@@ -487,40 +567,12 @@
     color: var(--brand-green);
   }
 
-  .attendance-mobile-bar__actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-  }
-
   .attendance-mobile-bar__btn.halo-button {
-    min-height: 40px;
-    height: 40px;
     flex: 1 1 0;
     min-width: 0;
     width: auto;
     padding: 0 10px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     gap: 4px;
-    white-space: nowrap;
-  }
-
-  .attendance-mobile-bar__icon-btn.halo-button {
-    flex: 0 0 42px;
-    width: 42px;
-    min-width: 42px;
-    max-width: 42px;
-    height: 40px;
-    min-height: 40px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
   }
 
   .attendance-mobile-bar__btn--approval.halo-button {
@@ -551,18 +603,8 @@
   }
 
   .approval-request-row__controls .halo-button {
-    min-height: 40px;
+    min-height: 44px;
     flex: 1;
-  }
-
-  .attendance-board__left-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .attendance-board__pagination {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .approval-page-container {
@@ -615,86 +657,83 @@
   }
 }
 
-/* --- React DatePicker Overrides --- */
-.react-datepicker-wrapper {
+/* --- React DatePicker Overrides (scoped via #root portalId for natural specificity — zero !important) --- */
+.attendance-board__date-wrapper.react-datepicker-wrapper {
   display: inline-block;
 }
 
-.react-datepicker-popper {
-  z-index: 4005 !important;
+#root .react-datepicker-popper {
+  z-index: 4005;
 }
 
-.react-datepicker {
-  background-color: var(--bg-color) !important;
-  border: 1px solid var(--border-color) !important;
-  border-radius: 12px !important;
-  font-family: inherit !important;
-  color: var(--text-color) !important;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--bg-color), transparent 50%) !important;
+#root .react-datepicker {
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-button, 12px);
+  font-family: inherit;
+  color: var(--text-color);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
-.react-datepicker__header {
-  background-color: color-mix(in srgb, var(--bg-color), transparent 20%) !important;
-  border-bottom: 1px solid var(--border-color) !important;
-  border-top-left-radius: 12px !important;
-  border-top-right-radius: 12px !important;
+#root .react-datepicker__header {
+  background-color: color-mix(in srgb, var(--bg-color), transparent 20%);
+  border-bottom: 1px solid var(--border-color);
+  border-top-left-radius: var(--radius-button, 12px);
+  border-top-right-radius: var(--radius-button, 12px);
 }
 
-.react-datepicker__current-month, 
-.react-datepicker-time__header, 
-.react-datepicker-year-header {
-  color: var(--text-color) !important;
+#root .react-datepicker__current-month,
+#root .react-datepicker-time__header,
+#root .react-datepicker-year-header,
+#root .react-datepicker__day-name,
+#root .react-datepicker__day,
+#root .react-datepicker__time-name {
+  color: var(--text-color);
 }
 
-.react-datepicker__day-name, 
-.react-datepicker__day, 
-.react-datepicker__time-name {
-  color: var(--text-color) !important;
+#root .react-datepicker__day:hover,
+#root .react-datepicker__month-text:hover,
+#root .react-datepicker__quarter-text:hover,
+#root .react-datepicker__year-text:hover {
+  background-color: var(--halo-bg);
+  border-radius: 50%;
 }
 
-.react-datepicker__day:hover, 
-.react-datepicker__month-text:hover, 
-.react-datepicker__quarter-text:hover, 
-.react-datepicker__year-text:hover {
-  background-color: var(--halo-bg) !important;
-  border-radius: 50% !important;
+#root .react-datepicker__day--in-range,
+#root .react-datepicker__day--in-selecting-range,
+#root .react-datepicker__month-text--in-selecting-range,
+#root .react-datepicker__month-text--in-range {
+  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 75%);
+  color: var(--text-color);
+  border-radius: 0;
 }
 
-.react-datepicker__day--in-range, 
-.react-datepicker__day--in-selecting-range,
-.react-datepicker__month-text--in-selecting-range, 
-.react-datepicker__month-text--in-range {
-  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 75%) !important;
-  color: var(--text-color) !important;
-  border-radius: 0 !important;
+#root .react-datepicker__day--range-start,
+#root .react-datepicker__day--range-end,
+#root .react-datepicker__day--selecting-range-start,
+#root .react-datepicker__day--selected,
+#root .react-datepicker__month-text--selected {
+  background-color: var(--brand-mint, var(--brand-green));
+  color: var(--bg-color);
+  border-radius: 50%;
+  font-weight: 700;
 }
 
-.react-datepicker__day--range-start,
-.react-datepicker__day--range-end,
-.react-datepicker__day--selecting-range-start,
-.react-datepicker__day--selected,
-.react-datepicker__month-text--selected {
-  background-color: var(--brand-mint, var(--brand-green)) !important;
-  color: var(--bg-color) !important;
-  border-radius: 50% !important;
-  font-weight: bold;
+#root .react-datepicker__day--keyboard-selected,
+#root .react-datepicker__month-text--keyboard-selected {
+  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 70%);
+  color: var(--brand-mint, var(--brand-green));
+  border-radius: 50%;
 }
 
-.react-datepicker__day--keyboard-selected, 
-.react-datepicker__month-text--keyboard-selected {
-  background-color: color-mix(in srgb, var(--brand-mint, var(--brand-green)), transparent 70%) !important;
-  color: var(--brand-mint, var(--brand-green)) !important;
-  border-radius: 50% !important;
+#root .react-datepicker__navigation-icon::before {
+  border-color: var(--text-color);
 }
 
-.react-datepicker__navigation-icon::before {
-  border-color: var(--text-color) !important;
+#root .react-datepicker__navigation:hover *::before {
+  border-color: var(--brand-mint, var(--brand-green));
 }
 
-.react-datepicker__navigation:hover *::before {
-  border-color: var(--brand-mint, var(--brand-green)) !important;
-}
-
-.react-datepicker__day--outside-month {
+#root .react-datepicker__day--outside-month {
   opacity: 0.3;
 }

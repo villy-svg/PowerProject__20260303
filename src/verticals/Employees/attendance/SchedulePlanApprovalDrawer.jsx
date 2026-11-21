@@ -78,11 +78,12 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
 
   return (
     <div className="u-mb-12">
-      <div className={`list-task-row u-h-auto ${(isExpanded || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
-        '--stage-color': 'var(--brand-blue)', 
-        borderBottomLeftRadius: (isExpanded || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
-        borderBottomRightRadius: (isExpanded || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
-      }}>
+      {/* Replaces inline styles with scoped CSS classes (zero inline styling policy) */}
+      <div
+        className={`list-task-row u-h-auto approval-request-row approval-request-row--plan ${
+          (isExpanded || showRejectNote) ? 'is-expanded approval-request-row--expanded' : ''
+        }`}
+      >
         {/* LEFT SIDE: Identity & Content */}
         <div className="list-row-main">
           <div className="list-row-badges">

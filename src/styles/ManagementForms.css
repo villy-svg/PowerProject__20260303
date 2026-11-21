@@ -90,7 +90,7 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px !important;
+  gap: 6px;
   background: transparent;
   /* Minimalist look */
   border: 1px solid transparent;
@@ -134,6 +134,28 @@
   background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
 
+/* Shared inner-control reset inside .form-input-container (merged duplicate select/input rules, Phase 6C) */
+.form-input-container input,
+.form-input-container textarea,
+.form-input-container select,
+.form-input-container .master-dropdown,
+.form-input-container .assignee-selector-trigger,
+.form-input-container .hub-selector-trigger,
+.form-input-container .task-hierarchy-trigger,
+.form-input-container .assignee-selector-container,
+.form-input-container .hub-selector-container {
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  transform: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--brand-green);
+  width: 100%;
+  outline: none;
+  min-height: unset;
+}
+
 .form-input-container input,
 .form-input-container textarea,
 .form-input-container .assignee-selector-trigger,
@@ -141,39 +163,15 @@
 .form-input-container .task-hierarchy-trigger,
 .form-input-container .assignee-selector-container,
 .form-input-container .hub-selector-container {
-  border: none !important;
-  background-color: transparent !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  color: var(--brand-green) !important;
-  width: 100%;
-  outline: none !important;
-  min-height: unset !important;
-}
-
-.form-input-container select,
-.form-input-container .master-dropdown {
-  border: none !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-  font-size: 0.95rem !important;
-  font-weight: 600 !important;
-  color: var(--brand-green) !important;
-  width: 100%;
-  outline: none !important;
-  min-height: unset !important;
+  padding: 0;
 }
 
 .form-input-container input {
-  color: var(--text-color) !important;
+  color: var(--text-color);
   /* Text inputs stay neutral */
 }
 
-/* Fix for browser autofill background */
+/* Fix for browser autofill background (UA stylesheet uses !important for :-webkit-autofill) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -190,7 +188,7 @@ select:-webkit-autofill:focus {
 }
 
 .form-input-container textarea {
-  min-height: 80px !important;
+  min-height: 80px;
   line-height: 1.5;
   resize: vertical;
 }
@@ -378,11 +376,11 @@ select:-webkit-autofill:focus {
 }
 
 /* ─── Shared Toggle Switch (used in RuleFormModal Active toggle) ─── */
-.rule-toggle {
+.rule-toggle.rule-toggle {
   width: 32px;
   height: 18px;
   background: transparent;
-  border: 1.5px solid var(--border-color) !important;
+  border: 1.5px solid var(--border-color);
   border-radius: 999px;
   position: relative;
   cursor: pointer;
@@ -393,8 +391,8 @@ select:-webkit-autofill:focus {
   align-items: center;
 }
 
-.rule-toggle.on {
-  border-color: var(--brand-green) !important;
+.rule-toggle.rule-toggle.on {
+  border-color: var(--brand-green);
   background: transparent;
 }
 

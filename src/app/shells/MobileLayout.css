@@ -32,8 +32,8 @@
 
 .mobile-layout .app-main-area,
 .mobile-layout .mobile-content-area {
-  margin-left: 0 !important;
-  width: 100% !important;
+  margin-left: 0;
+  width: 100%;
   padding-bottom: 0;
   flex: 1;
   display: flex;
@@ -80,21 +80,21 @@
 
 /* Actions row hidden on mobile — replaced by tray */
 .mobile-header-shell .master-header-actions-row {
-  display: none !important;
+  display: none;
 }
 
 /* Mobile scroll-aware hide disabled so it scrolls naturally with page content */
 .mobile-header-shell.header-hidden {
-  transform: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
   z-index: 2000;
-  transition: none !important;
+  transition: none;
 }
 
 /* Mobile sticky state */
 .mobile-header-shell.is-sticky {
-  position: sticky !important;
+  position: sticky;
   top: 0;
   z-index: 2000;
   background: var(--bg-color);
@@ -164,7 +164,43 @@
   width: 100%;
 }
 
-/* ── 3. Mobile Overlay Backdrops ─────────────────────────────────────── */
+/* Mobile expanded-menu button text colors (moved from MasterPageHeader.css Phase 6A) */
+.mobile-layout .expanded-menu-row .view-toggle-btn,
+.mobile-layout .expanded-menu-row .toggle-depri-btn,
+.mobile-layout .expanded-menu-row .clear-board-btn,
+.mobile-layout .expanded-menu-row .halo-button,
+.mobile-layout .expanded-menu-row .master-action-btn {
+  color: var(--text-color);
+}
+
+.mobile-layout .expanded-menu-row .view-toggle-btn.active,
+.mobile-layout .expanded-menu-row .toggle-depri-btn.active {
+  color: var(--brand-mint);
+}
+
+/* ── 3. Mobile Off-Canvas Sub-Sidebar & Overlay Backdrops ────────────── */
+/* Moved from VerticalWorkspace.css @media (max-width: 768px) (Phase 6A) */
+.mobile-layout .sub-sidebar {
+  width: 240px;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  bottom: 0; /* Full height by default (tray hidden) */
+  left: 0;
+  transform: translateX(-100%);
+  box-shadow: 10px 0 30px color-mix(in srgb, var(--bg-color), transparent 50%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-layout .sub-sidebar.tray-visible {
+  bottom: 64px; /* Docks above the tray */
+}
+
+.mobile-layout .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
+  transform: translateX(0);
+}
+
 .mobile-layout .sidebar-backdrop,
 .mobile-layout .menu-backdrop {
   position: fixed;
@@ -172,6 +208,67 @@
   z-index: 1000;
   background: transparent;
   cursor: pointer;
+}
+
+/* ── 4. Mobile Action Tray (Moved from MasterPageHeader.css Phase 6A) ── */
+.mobile-layout .mobile-action-tray {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: calc(100px + var(--safe-bottom, 0px));
+  margin-bottom: -100px;
+  background: color-mix(in srgb, var(--bg-color), transparent 10%);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--border-color);
+  border-radius: 20px 20px 0 0;
+  z-index: 4001;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  box-shadow: 0 -6px 24px color-mix(in srgb, var(--bg-color), transparent 50%);
+}
+
+.mobile-layout .mobile-action-tray-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 64px;
+  padding: 0 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mobile-layout .mobile-action-tray.tray-hidden {
+  transform: translateY(110%);
+  transition: transform 0.4s cubic-bezier(0.32, 0, 0.67, 0);
+}
+
+.mobile-layout .mobile-action-tray .nav-item {
+  border: none;
+  box-sizing: border-box;
+  background: transparent;
+  color: var(--text-color);
+  opacity: 0.6;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-layout .mobile-action-tray .nav-item.active {
+  border: none;
+  background: transparent;
+  opacity: 1;
+  color: var(--brand-mint);
+}
+
+/* Disabled tray actions (replaces inline opacity styles in MobileHeader.jsx) */
+.mobile-layout .mobile-action-tray .nav-item.mobile-tray-btn.disabled {
+  opacity: 0.4;
+}
+
+.mobile-layout .mobile-action-tray .nav-item.active .icon-wrapper {
+  background: var(--halo-bg);
+  box-shadow: 0 0 10px var(--halo-glow);
+  border-radius: 50%;
 }
 
 /* ── 5. Mobile Workspace ─────────────────────────────────────────────── */
@@ -200,146 +297,161 @@
 
 /* Ensure the centered title is perfectly sized and never squished or truncated on mobile */
 .mobile-layout .brand-title-centered {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important; /* Center vertically inside header bar */
-  transform: translate(-50%, -50%) !important;
-  font-size: 1.05rem !important; /* Slightly smaller for compact header */
-  font-weight: 800 !important;
-  max-width: none !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  white-space: nowrap !important;
-  z-index: 2002 !important;
-  pointer-events: none !important;
-  display: block !important;
-  margin: 0 !important;
+  position: absolute;
+  left: 50%;
+  top: 50%; /* Center vertically inside header bar */
+  transform: translate(-50%, -50%);
+  font-size: 1.05rem; /* Slightly smaller for compact header */
+  font-weight: 800;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  z-index: 2002;
+  pointer-events: none;
+  display: block;
+  margin: 0;
 }
 
 .mobile-layout .brand-title-centered.mobile-hidden {
-  display: none !important;
+  display: none;
 }
 
-.mobile-header-tutorial-btn {
-  position: absolute !important;
-  left: 8px !important;
-  right: auto !important; /* Prevent from stretching or centering */
-  top: 50% !important; /* Center vertically inside header bar */
-  transform: translateY(-50%) !important;
-  width: 26px !important; /* Fixed width */
-  height: 26px !important; /* Compressed height to fit 28px header bar */
-  min-width: 26px !important;
-  min-height: 26px !important;
-  padding: 0 !important; /* Remove padding */
+.mobile-layout .mobile-header-tutorial-btn {
+  position: absolute;
+  left: 8px;
+  right: auto; /* Prevent from stretching or centering */
+  top: 50%; /* Center vertically inside header bar */
+  transform: translateY(-50%);
+  width: 26px; /* Fixed width */
+  height: 26px; /* Compressed height to fit 28px header bar */
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0; /* Remove padding */
   border-radius: var(--radius-button, 8px);
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  pointer-events: auto !important;
+  pointer-events: auto;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 3px var(--halo-glow);
-  z-index: 2003 !important;
+  z-index: 2003;
 }
 
-.mobile-header-tutorial-btn.mobile-hidden {
-  display: none !important;
+.mobile-layout .mobile-header-tutorial-btn.mobile-hidden {
+  display: none;
 }
 
-.mobile-header-tutorial-btn.active {
-  border-color: var(--brand-green) !important;
-  background: var(--halo-bg) !important;
-  box-shadow: 0 0 10px var(--halo-glow) !important;
-  opacity: 1 !important;
+.mobile-layout .mobile-header-tutorial-btn.active {
+  border-color: var(--brand-green);
+  background: var(--halo-bg);
+  box-shadow: 0 0 10px var(--halo-glow);
+  opacity: 1;
 }
 
 /* ── 7. Ultra-Compact Viewport (≤360px, iPhone SE) ───────────────────── */
 @media screen and (max-width: 360px) {
-  .expanded-menu-row {
-    padding: calc(var(--safe-top, 0px) + 8px) 8px 12px 8px !important;
-    gap: 6px !important;
-    max-height: 95dvh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    align-items: stretch !important;
+  .mobile-layout .mobile-action-tray-container {
+    padding: 0 0.5rem;
   }
 
-  .master-header-left,
-  .master-header-right {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    width: 100% !important;
-    gap: 6px !important;
+  .mobile-layout .expanded-menu-row {
+    padding: calc(var(--safe-top, 0px) + 8px) 8px 12px 8px;
+    gap: 6px;
+    max-height: 95dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  .mobile-layout .master-header-left,
+  .mobile-layout .master-header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 6px;
   }
 
   /* Legacy button squashing overrides removed to allow full spacing, size parity and proper vertical alignment. */
 
-  .view-mode-toggle,
-  .header-filter-group {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    width: 100% !important;
-    gap: 4px !important;
+  .mobile-layout .view-mode-toggle,
+  .mobile-layout .header-filter-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
   }
 
-  .view-mode-toggle .view-toggle-btn,
-  .header-filter-group .toggle-depri-btn {
-    flex: 1 !important;
-    width: auto !important;
-    min-width: unset !important;
-    min-height: 30px !important;
-    font-size: 0.62rem !important;
-    padding: 4px 2px !important;
-    white-space: nowrap !important;
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+  .mobile-layout .view-mode-toggle .view-toggle-btn,
+  .mobile-layout .header-filter-group .toggle-depri-btn {
+    flex: 1;
+    width: auto;
+    min-width: unset;
+    min-height: 30px;
+    font-size: 0.62rem;
+    padding: 4px 2px;
+    white-space: nowrap;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  .clear-board-btn,
-  .expanded-menu-row .clear-board-btn {
-    width: 100% !important;
-    min-height: 30px !important;
-    font-size: 0.65rem !important;
-    padding: 4px 2px !important;
-    margin: 0 !important;
-    display: inline-flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+  .mobile-layout .clear-board-btn,
+  .mobile-layout .expanded-menu-row .clear-board-btn {
+    width: 100%;
+    min-height: 30px;
+    font-size: 0.65rem;
+    padding: 4px 2px;
+    margin: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
-.mobile-menu-sidebar-filters {
-  width: 100% !important;
-  margin-top: 4px !important;
-  padding-top: 8px !important;
+@media screen and (max-width: 330px) {
+  .mobile-layout .mobile-action-tray-container {
+    padding: 0 0.25rem;
+  }
+
+  .mobile-layout .mobile-action-tray .nav-item .standard-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.mobile-layout .mobile-menu-sidebar-filters {
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 8px;
   border-top: 1px solid var(--border-color);
   /* flex-shrink: 0 prevents this section from being squashed in the flex column */
-  flex-shrink: 0 !important;
+  flex-shrink: 0;
   /* display:block breaks out of any inherited flex context so children flow naturally */
-  display: block !important;
+  display: block;
 }
 
 /* Hide the top divider when the vertical sub-sidebar renders no filter groups on mobile */
-.mobile-menu-sidebar-filters:has(.sub-sidebar-body:empty) {
-  display: none !important;
+.mobile-layout .mobile-menu-sidebar-filters:has(.sub-sidebar-body:empty) {
+  display: none;
 }
 
 /* Ensure the sub-sidebar-body within the mobile expanded menu has natural height and flows correctly without collapsing.
    The global .sub-sidebar-body rule sets flex:1 + overflow-y:auto which collapses it inside a flex column
    when the parent has no explicit height. These overrides restore natural block flow. */
-.mobile-menu-sidebar-filters .sub-sidebar-body {
-  overflow: visible !important;
-  height: auto !important;
-  min-height: 1px !important;        /* Prevent total collapse if children are lazy-loading */
-  flex: none !important;
-  display: block !important;         /* Restore block flow; not a flex item here */
-  padding: 0 !important;
-  width: 100% !important;
+.mobile-layout .mobile-menu-sidebar-filters .sub-sidebar-body {
+  overflow: visible;
+  height: auto;
+  min-height: 1px;        /* Prevent total collapse if children are lazy-loading */
+  flex: none;
+  display: block;         /* Restore block flow; not a flex item here */
+  padding: 0;
+  width: 100%;
 }
 
 /* ── 8. Soft Keyboard Adaptation ─────────────────────────────────────── */
@@ -429,7 +541,7 @@ body[data-keyboard="open"] .mobile-layout[data-has-search="true"] .app-content {
 }
 
 .mobile-layout[data-has-search="true"] .workspace-content {
-  padding-bottom: calc(154px + var(--safe-bottom, 0px)) !important;
+  padding-bottom: calc(154px + var(--safe-bottom, 0px));
 }
 
 .mobile-layout[data-has-search="true"] .app-content {

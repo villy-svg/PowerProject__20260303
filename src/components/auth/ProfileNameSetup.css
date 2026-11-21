@@ -93,14 +93,14 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #6366f1;
+  background-color: var(--brand-blue);
   animation: setupPulse 2s infinite;
 }
 
 @keyframes setupPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
-  70%  { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-blue), transparent 50%); }
+  70%  { box-shadow: 0 0 0 6px color-mix(in srgb, var(--brand-blue), transparent 100%); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand-blue), transparent 100%); }
 }
 
 .setup-badge-text {
@@ -108,7 +108,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #6366f1;
+  color: var(--brand-blue);
 }
 
 /* Form */
@@ -143,7 +143,7 @@
 .setup-submit-btn {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: linear-gradient(135deg, var(--brand-blue), color-mix(in srgb, var(--brand-blue), var(--bg-color) 20%));
   border: none;
   border-radius: 12px;
   color: var(--color-white);

@@ -61,17 +61,17 @@ const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
 
   let icon = null;
   if (status === 'present') {
-    icon = shiftType === 'night' ? <IconMoon size={16} /> : <IconSun size={16} />;
+    icon = shiftType === 'night' ? <IconMoon size={14} /> : <IconSun size={14} />;
   } else if (status === 'week-off') {
-    icon = <IconCoffee size={16} />;
+    icon = <IconCoffee size={14} />;
   } else if (status === 'leave') {
-    icon = <IconFile size={16} />;
+    icon = <IconFile size={14} />;
   } else if (status === 'absent') {
     icon = <span className="u-fw-800">ABS</span>;
   } else if (status === 'no-show') {
     icon = <span className="u-fw-800">X</span>;
   } else if (status === 'no-call-no-show') {
-    icon = <span className="u-fw-900 u-text-1-1em">XX</span>;
+    icon = <span className="u-fw-900">XX</span>;
   } else {
     icon = <span className="u-fw-800 u-opacity-50">NULL</span>;
   }
@@ -107,32 +107,48 @@ const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
 });
 
 // ---------------------------------------------------------------------------
-// EmployeeRowHeader — left-column employee info cell (sub-component)
+// EmployeeRowCells — 3-column desktop identity (Employee | Code | Hub)
+// Keeps Code & Hub compact so rows stay single-line and high-density.
 // ---------------------------------------------------------------------------
-const EmployeeRowHeader = ({ employee }) => (
-  <td className="attendance-grid__employee-cell">
-    <div className="attendance-grid__employee-info">
-      <h4 className="attendance-grid__employee-name" title={employee.full_name}>{employee.full_name}</h4>
-      {(employee.emp_code || employee.hubs?.hub_code) && (
-        <div className="attendance-grid__employee-badges">
-          {employee.emp_code && (
-            <span className="attendance-grid__badge attendance-grid__badge--id" title="Employee ID">{employee.emp_code}</span>
-          )}
-          {employee.hubs?.hub_code && (
-            <span className="attendance-grid__badge attendance-grid__badge--hub" title="Primary Hub">{employee.hubs.hub_code}</span>
-          )}
-        </div>
+const EmployeeRowCells = ({ employee }) => (
+  <>
+    <td className="attendance-grid__employee-cell">
+      <span className="attendance-grid__employee-name" title={employee.full_name}>
+        {employee.full_name}
+      </span>
+    </td>
+    <td className="attendance-grid__code-cell">
+      {employee.emp_code ? (
+        <span className="badge-base attendance-grid__meta-badge" title="Employee Code">
+          {employee.emp_code}
+        </span>
+      ) : (
+        <span className="attendance-grid__meta-empty">—</span>
       )}
-    </div>
-  </td>
+    </td>
+    <td className="attendance-grid__hub-cell">
+      {employee.hubs?.hub_code ? (
+        <span
+          className="badge-base attendance-grid__meta-badge"
+          title={employee.hubs?.name || employee.hubs.hub_code}
+        >
+          {employee.hubs.hub_code}
+        </span>
+      ) : (
+        <span className="attendance-grid__meta-empty">—</span>
+      )}
+    </td>
+  </>
 );
 
 // ---------------------------------------------------------------------------
-// SkeletonRow — loading placeholder row
+// SkeletonRow — loading placeholder row (3 identity columns + date columns)
 // ---------------------------------------------------------------------------
 const SkeletonRow = ({ colCount }) => (
   <tr className="attendance-grid__skeleton-row">
     <td className="attendance-grid__employee-cell attendance-grid__skeleton-cell" />
+    <td className="attendance-grid__code-cell attendance-grid__skeleton-cell" />
+    <td className="attendance-grid__hub-cell attendance-grid__skeleton-cell" />
     {Array.from({ length: colCount }).map((_, i) => (
       <td key={i} className="attendance-cell attendance-grid__skeleton-cell" />
     ))}
@@ -152,16 +168,23 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
       if (!groups[hubName]) groups[hubName] = [];
       groups[hubName].push(emp);
     });
-    // Sort groups alphabetically
+    // Sort hub groups alphabetically with 'Unassigned' always last
     const sortedGroups = {};
-    Object.keys(groups).sort().forEach(key => {
-      sortedGroups[key] = groups[key];
-    });
+    Object.keys(groups)
+      .sort((a, b) => {
+        if (a === 'Unassigned') return 1;
+        if (b === 'Unassigned') return -1;
+        return a.localeCompare(b);
+      })
+      .forEach(key => {
+        sortedGroups[key] = groups[key];
+      });
     return sortedGroups;
   }, [employees, groupByHub]);
+
   if (!isLoading && (!dateRange || dateRange.length === 0)) {
     return (
-      <div className="attendance-grid__empty-state">
+      <div className="empty-state-container attendance-grid__empty-state">
         <div className="empty-state-icon">⚠️</div>
         <h3 className="empty-state-title">Invalid Date Range</h3>
         <p className="empty-state-text">Please select a valid From and To date to view attendance.</p>
@@ -171,7 +194,7 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
 
   if (!isLoading && (!employees || employees.length === 0)) {
     return (
-      <div className="attendance-grid__empty-state">
+      <div className="empty-state-container attendance-grid__empty-state">
         <div className="empty-state-icon">📅</div>
         <h3 className="empty-state-title">No Employees Found</h3>
         <p className="empty-state-text">
@@ -181,14 +204,18 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
     );
   }
 
+  const totalColumns = dateRange.length + 3;
+
   return (
     /* responsive-table-wrapper: per ui-design-system §11 */
     <div className="responsive-table-wrapper attendance-grid__wrapper">
       <table className="attendance-grid__table">
-        {/* X-Axis: Date headers */}
+        {/* X-Axis: Identity columns (Employee, Code, Hub) + Date headers */}
         <thead>
           <tr>
             <th className="attendance-grid__corner-cell">Employee</th>
+            <th className="attendance-grid__meta-header attendance-grid__meta-header--code">Code</th>
+            <th className="attendance-grid__meta-header attendance-grid__meta-header--hub">Hub</th>
             {dateRange.map(date => (
               <th
                 key={date}
@@ -209,15 +236,18 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
             : Object.entries(groupedEmployees).map(([groupName, groupEmployees]) => (
                 <React.Fragment key={groupName}>
                   {groupByHub && (
-                    <tr className="attendance-grid__group-header u-bg-secondary u-border-t-2-border">
-                      <td colSpan={dateRange.length + 1} className="u-px-12 u-py-8 u-fw-bold u-text-secondary u-text-sm-85 u-uppercase u-letter-spacing-05">
-                        {groupName}
+                    <tr className="attendance-grid__group-header">
+                      <td colSpan={totalColumns} className="attendance-grid__group-cell">
+                        <span className="attendance-grid__group-name">{groupName}</span>
+                        <span className="badge-base attendance-grid__group-count">
+                          {groupEmployees.length}
+                        </span>
                       </td>
                     </tr>
                   )}
                   {groupEmployees.map(employee => (
                     <tr key={employee.id} id={`attendance-row-${employee.id}`} className="attendance-grid__row">
-                      <EmployeeRowHeader employee={employee} />
+                      <EmployeeRowCells employee={employee} />
                       {dateRange.map(date => (
                         <AttendanceCell
                           key={`${employee.id}_${date}`}

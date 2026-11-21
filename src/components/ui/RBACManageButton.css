@@ -1,129 +1,55 @@
 /* ═══════════════════════════════════════════════════════════════════
    RBACManageButton.css
-   Styles for the master-admin RBAC shortcut button & dropdown.
-   Uses design system variables only — no hardcoded hex colors.
+   Compact icon-only master-admin RBAC trigger matching the neutral MENU
+   preset (Border XOR Fill). Uses design system variables only.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Core RBAC Button ────────────────────────────────────────────── */
-/* Option A — Border XOR Fill:
-   - Rest: inherits transparent fill + light satin border from .master-header-actions-row .halo-button;
-     semantic amber is carried by text/icon color only.
-   - Hover: subtle amber fill ONLY, no border (transparent 1px prevents layout shift). */
 .halo-button.rbac-manage-btn,
 .master-header-actions-row .halo-button.rbac-manage-btn {
-  color: var(--brand-amber);
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  gap: 0;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--text-color), transparent 15%);
+  opacity: 1;
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 84%);
   box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Override global .standard-icon { opacity: 0.6 } so standalone icon stays crisp */
+.halo-button.rbac-manage-btn .standard-icon {
+  opacity: 1;
+  flex-shrink: 0;
 }
 
 .halo-button.rbac-manage-btn:hover:not(:disabled),
 .master-header-actions-row .halo-button.rbac-manage-btn:hover:not(:disabled) {
-  color: var(--brand-amber);
-  background: color-mix(in srgb, var(--brand-amber), transparent 88%);
+  color: var(--text-color);
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 90%);
   border: 1px solid transparent;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--brand-amber), transparent 85%);
+  box-shadow: none;
+  transform: none;
 }
 
-/* ── Chevron indicator for dropdown group mode ──────────────────── */
-.rbac-chevron {
-  font-size: 0.75rem;
-  display: inline-block;
-  transition: transform 0.2s ease;
-  opacity: 0.75;
-  line-height: 1;
+.halo-button.rbac-manage-btn:focus-visible,
+.master-header-actions-row .halo-button.rbac-manage-btn:focus-visible {
+  outline: 2px solid var(--brand-mint);
+  outline-offset: 2px;
 }
 
-.rbac-chevron--open {
-  transform: rotate(180deg);
-}
-
-/* ── Dropdown Group Container ──────────────────────────────────── */
-.rbac-access-group {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* ── Dropdown Menu ─────────────────────────────────────────────── */
-.rbac-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 220px;
-  background: var(--bg-color, var(--bg-color));
-  border: 1px solid color-mix(in srgb, var(--brand-amber), transparent 70%);
-  border-radius: 12px;
-  padding: 8px;
-  z-index: 1200;
-  box-shadow: 0 8px 32px color-mix(in srgb, var(--bg-color), transparent 50%), 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 92%);
-  backdrop-filter: blur(12px);
-  animation: rbac-dropdown-in 0.15s ease;
-}
-
-@keyframes rbac-dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* ── Dropdown Header Label ─────────────────────────────────────── */
-.rbac-dropdown-header {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--brand-amber);
-  opacity: 0.6;
-  padding: 4px 8px 6px;
-  margin: 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
-  margin-bottom: 4px;
-}
-
-/* ── Individual Dropdown Item ──────────────────────────────────── */
-.rbac-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
-  color: var(--text-color, var(--text-color));
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-align: left;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.rbac-dropdown-item:hover {
-  background: color-mix(in srgb, var(--brand-amber), transparent 92%);
-  color: var(--brand-amber);
-}
-
-.rbac-item-icon {
-  font-size: 0.85rem;
-  opacity: 0.75;
-  flex-shrink: 0;
-}
-
-.rbac-item-label {
-  flex: 1;
-}
-
-/* ── Mobile: dropdown positioning ─────────────────────────────── */
+/* Mobile HIG touch target minimum (§14.B) */
 @media screen and (max-width: 768px) {
-  .rbac-dropdown-menu {
-    right: 0;
-    left: auto;
-    min-width: 200px;
+  .halo-button.rbac-manage-btn,
+  .master-header-actions-row .halo-button.rbac-manage-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
   }
 }

@@ -17,9 +17,10 @@
  */
 
 import React from 'react';
-import { 
-  IconHome, IconHubs, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconFile, IconLock, IconShield
+import {
+  IconHome, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconLock, IconShield,
 } from '../../components/ui/Icons';
+import { getIconForVertical } from '../../constants/verticalIcons';
 import powerLogo from '../../assets/logo.svg';
 import BoardRBACModal from '../../components/modals/BoardRBACModal';
 import '../../components/layout/Sidebar.css';
@@ -52,14 +53,6 @@ const MobileSidebar = ({
   const handleNavigate = (vId) => {
     setActiveVertical(vId);
     if (onClose) onClose();
-  };
-
-  const getIconForVertical = (id) => {
-    if (id === 'CHARGING_HUBS') return IconHubs;
-    if (id === 'CLIENTS') return IconDatabase;
-    if (id === 'EMPLOYEES') return IconPeople;
-    if (id === 'DATA_MANAGER') return IconDatabase;
-    return IconFile;
   };
 
   return (

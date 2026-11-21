@@ -31,7 +31,7 @@
 
 .sandbox-modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color, var(--border-color));
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -50,7 +50,7 @@
 .sandbox-close-btn {
   background: none;
   border: none;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
@@ -94,7 +94,7 @@
 .sandbox-safety-notice p {
   font-size: 0.9rem;
   line-height: 1.5;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   opacity: 0.9;
   margin: 0 0 12px 0;
 }
@@ -126,7 +126,7 @@
 
 .field-desc {
   font-size: 0.8rem;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   opacity: 0.6;
   line-height: 1.4;
   margin: 0 0 4px 0;
@@ -136,10 +136,10 @@
   width: 100%;
   height: 120px;
   background: color-mix(in srgb, var(--bg-color), transparent 60%);
-  border: 1px solid var(--border-color, var(--border-color));
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 12px;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
   line-height: 1.4;
@@ -178,7 +178,7 @@
 /* Modal Footer */
 .sandbox-modal-footer {
   padding: 16px 24px max(16px, calc(12px + env(safe-area-inset-bottom, 0px)));
-  border-top: 1px solid var(--border-color, var(--border-color));
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -191,40 +191,40 @@
   gap: 12px;
 }
 
-/* Buttons — scoped to sandbox-modal-footer to avoid global collision */
-.sandbox-modal-footer .clear-cache-btn {
-  color: color-mix(in srgb, var(--brand-red), white 20%) !important;
-  border-color: color-mix(in srgb, var(--brand-red), transparent 70%) !important;
-  background: color-mix(in srgb, var(--brand-red), transparent 95%) !important;
+/* Buttons — scoped to sandbox-modal-footer .halo-button to naturally beat base .halo-button */
+.sandbox-modal-footer .halo-button.clear-cache-btn {
+  color: color-mix(in srgb, var(--brand-red), white 20%);
+  border-color: color-mix(in srgb, var(--brand-red), transparent 70%);
+  background: color-mix(in srgb, var(--brand-red), transparent 95%);
 }
 
-.sandbox-modal-footer .clear-cache-btn:hover {
-  border-color: var(--brand-red) !important;
-  background: var(--badge-red-bg) !important;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-red), transparent 80%) !important;
+.sandbox-modal-footer .halo-button.clear-cache-btn:hover {
+  border-color: var(--brand-red);
+  background: var(--badge-red-bg);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-red), transparent 80%);
 }
 
 /* Scoped to sandbox footer to avoid .cancel-btn global collision */
-.sandbox-modal-footer .cancel-btn {
+.sandbox-modal-footer .halo-button.cancel-btn {
   opacity: 0.6;
-  border-color: transparent !important;
-  background: none !important;
+  border-color: transparent;
+  background: none;
 }
 
-.sandbox-modal-footer .cancel-btn:hover {
+.sandbox-modal-footer .halo-button.cancel-btn:hover {
   opacity: 1;
 }
 
-.sandbox-modal-footer .import-btn {
-  color: var(--brand-amber) !important;
-  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%) !important;
-  background: color-mix(in srgb, var(--brand-amber), transparent 95%) !important;
+.sandbox-modal-footer .halo-button.import-btn {
+  color: var(--brand-amber);
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
+  background: color-mix(in srgb, var(--brand-amber), transparent 95%);
 }
 
-.sandbox-modal-footer .import-btn:hover {
-  border-color: var(--brand-amber) !important;
-  background: color-mix(in srgb, var(--brand-amber), transparent 90%) !important;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
+.sandbox-modal-footer .halo-button.import-btn:hover {
+  border-color: var(--brand-amber);
+  background: color-mix(in srgb, var(--brand-amber), transparent 90%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%);
 }
 
 /* Keyframes */
@@ -245,7 +245,7 @@
   flex-direction: column;
   gap: 12px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color, var(--border-color));
+  border-bottom: 1px solid var(--border-color);
 }
 
 .role-simulator-section h3 {
@@ -275,17 +275,17 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   opacity: 0.8;
 }
 
 .role-select {
   width: 100%;
   background: color-mix(in srgb, var(--bg-color), transparent 60%);
-  border: 1px solid var(--border-color, var(--border-color));
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 12px;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   outline: none;
@@ -296,6 +296,11 @@
 .role-select:focus {
   border-color: var(--brand-amber);
   background: color-mix(in srgb, var(--bg-color), transparent 40%);
+}
+
+/* Preserve text cursor when .role-select styling is reused on text/email/password inputs */
+input.role-select {
+  cursor: text;
 }
 
 .role-select option {
@@ -315,7 +320,7 @@
   align-items: center;
   gap: 8px;
   background: color-mix(in srgb, var(--text-color), transparent 98%);
-  border: 1px solid var(--border-color, var(--border-color));
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 10px 12px;
   cursor: pointer;
@@ -341,21 +346,21 @@
 .vertical-checkbox-card span {
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
 }
 
-.save-role-btn {
+.sandbox-modal-card .halo-button.save-role-btn {
   align-self: flex-start;
-  color: var(--brand-amber) !important;
-  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%) !important;
-  background: color-mix(in srgb, var(--brand-amber), transparent 95%) !important;
+  color: var(--brand-amber);
+  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
+  background: color-mix(in srgb, var(--brand-amber), transparent 95%);
   margin-top: 4px;
 }
 
-.save-role-btn:hover {
-  border-color: var(--brand-amber) !important;
-  background: color-mix(in srgb, var(--brand-amber), transparent 90%) !important;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%) !important;
+.sandbox-modal-card .halo-button.save-role-btn:hover {
+  border-color: var(--brand-amber);
+  background: color-mix(in srgb, var(--brand-amber), transparent 90%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-amber), transparent 80%);
 }
 
 /* Small Screen Adaptations */

@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { devSanitizeDump } from '../../utils/devSanitizer';
 import { IconWarning } from '../ui/Icons';
 import { DEFAULT_ROLE_PERMISSIONS } from '../../constants/roles';
+import {
+  clearOfflineBypassCaches,
+  sendOfflineSnapshotOtp,
+  syncLiveSnapshotToOfflineCache,
+} from '../../services/core/offlineSnapshotService';
 import './SandboxManagerModal.css';
 
 const ROLES = [
@@ -27,6 +32,11 @@ const VERTICAL_OPTIONS = [
 const SandboxManagerModal = ({ isOpen, onClose }) => {
   const [pastedJson, setPastedJson] = useState('');
   const [status, setStatus] = useState({ type: '', message: '' });
+  const [showSyncAuth, setShowSyncAuth] = useState(false);
+  const [syncOtpSent, setSyncOtpSent] = useState(false);
+  const [syncEmail, setSyncEmail] = useState('');
+  const [syncOtp, setSyncOtp] = useState('');
+  const [isSyncingSnapshot, setIsSyncingSnapshot] = useState(false);
 
   // Load initial simulated user profile
   const [simulatedUser, setSimulatedUser] = useState(() => {
@@ -188,26 +198,66 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
   };
 
   const handleClearCache = () => {
-    // Purge simulated local storage bypass targets
-    localStorage.removeItem('power_project_user');
-    localStorage.removeItem('powerpod_tasks_v5');
-    localStorage.removeItem('power_project_permissions');
-    localStorage.removeItem('power_project_cache_verticals');
-    localStorage.removeItem('power_project_permissions_verticalCaps');
-
-    // Purge offline rules caching keys
-    localStorage.removeItem('powerpod_rule_categories_offline');
-    localStorage.removeItem('powerpod_rule_sub_categories_offline');
-    localStorage.removeItem('powerpod_employee_rules_offline');
+    // Purge all simulated local storage bypass caches (single source of truth)
+    clearOfflineBypassCaches();
 
     setStatus({ 
       type: 'success', 
-      message: 'Simulated caches cleared successfully! Reconnecting live...' 
+      message: 'Offline caches cleared! Reloading default mock data...' 
     });
 
     setTimeout(() => {
       window.location.reload();
     }, 1200);
+  };
+
+  const handleSendSnapshotOtp = async (e) => {
+    e.preventDefault();
+    setIsSyncingSnapshot(true);
+    setStatus({ type: 'success', message: 'Sending OTP to your email...' });
+    try {
+      await sendOfflineSnapshotOtp(syncEmail);
+      setSyncOtpSent(true);
+      setStatus({ type: 'success', message: `OTP sent to ${syncEmail}! Enter the code below to pull the snapshot.` });
+    } catch (err) {
+      setStatus({ type: 'error', message: err?.message || 'Failed to send OTP.' });
+    } finally {
+      setIsSyncingSnapshot(false);
+    }
+  };
+
+  const handleSyncLiveSnapshot = async (credentials = {}) => {
+    setIsSyncingSnapshot(true);
+    setStatus({ type: 'success', message: 'Pulling read-only snapshot from live database...' });
+
+    try {
+      const summary = await syncLiveSnapshotToOfflineCache(credentials);
+      setSyncOtp('');
+      setSyncOtpSent(false);
+      setShowSyncAuth(false);
+      setStatus({
+        type: 'success',
+        message: `Synced ${summary.taskCount} tasks & ${summary.ruleCount} rules (read-only). Reloading sandbox...`,
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err) {
+      if (err?.code === 'AUTH_REQUIRED') {
+        setShowSyncAuth(true);
+        setStatus({
+          type: 'error',
+          message: 'Verify with your email OTP below to pull a read-only snapshot (your local edits will never write to Supabase).',
+        });
+      } else {
+        setStatus({
+          type: 'error',
+          message: err?.message || 'Failed to sync live snapshot.',
+        });
+      }
+    } finally {
+      setIsSyncingSnapshot(false);
+    }
   };
 
   const isVerticalScope = simulatedUser.roleId && simulatedUser.roleId.startsWith('vertical');
@@ -300,6 +350,81 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
             />
           </div>
 
+          {/* Inline Read-Only Snapshot Email OTP Auth (shown only when no Supabase session is present) */}
+          {showSyncAuth && (
+            <form
+              className="import-dump-section"
+              onSubmit={
+                syncOtpSent
+                  ? (e) => {
+                      e.preventDefault();
+                      handleSyncLiveSnapshot({ email: syncEmail, otp: syncOtp });
+                    }
+                  : handleSendSnapshotOtp
+              }
+            >
+              <h3>READ-ONLY LIVE SNAPSHOT OTP</h3>
+              <p className="field-desc">
+                Used only to read live data into your local offline cache. Local token is cleared immediately after pull and all writes remain blocked.
+              </p>
+              <div className="simulator-controls">
+                <div className="form-group">
+                  <label className="field-label">PowerProject Email</label>
+                  <input
+                    type="email"
+                    className="role-select"
+                    placeholder="you@powerpod.in"
+                    value={syncEmail}
+                    onChange={(e) => setSyncEmail(e.target.value)}
+                    required
+                    disabled={isSyncingSnapshot || syncOtpSent}
+                  />
+                </div>
+                {syncOtpSent && (
+                  <div className="form-group">
+                    <label className="field-label">Email OTP Code</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      className="role-select"
+                      placeholder="Enter OTP from email"
+                      value={syncOtp}
+                      onChange={(e) => setSyncOtp(e.target.value)}
+                      required
+                      disabled={isSyncingSnapshot}
+                    />
+                  </div>
+                )}
+                <div className="footer-right-actions">
+                  {syncOtpSent && (
+                    <button
+                      type="button"
+                      className="halo-button cancel-btn"
+                      onClick={() => {
+                        setSyncOtpSent(false);
+                        setSyncOtp('');
+                      }}
+                      disabled={isSyncingSnapshot}
+                    >
+                      Change Email
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="halo-button save-role-btn"
+                    disabled={isSyncingSnapshot}
+                  >
+                    {isSyncingSnapshot
+                      ? '⏳ PLEASE WAIT...'
+                      : syncOtpSent
+                        ? '🔄 VERIFY & PULL SNAPSHOT'
+                        : '📧 SEND EMAIL OTP'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
           {/* Status Message */}
           {status.message && (
             <div className={`sandbox-status-message ${status.type}`}>
@@ -308,14 +433,29 @@ const SandboxManagerModal = ({ isOpen, onClose }) => {
           )}
         </main>
         <footer className="sandbox-modal-footer">
-          <button className="halo-button clear-cache-btn" onClick={handleClearCache}>
-            🔌 RECONNECT LIVE
-          </button>
           <div className="footer-right-actions">
-            <button className="halo-button cancel-btn" onClick={onClose}>
+            <button
+              type="button"
+              className="halo-button import-btn"
+              onClick={() => handleSyncLiveSnapshot()}
+              disabled={isSyncingSnapshot}
+            >
+              {isSyncingSnapshot ? '⏳ SYNCING...' : '🔄 SYNC LIVE SNAPSHOT'}
+            </button>
+            <button
+              type="button"
+              className="halo-button clear-cache-btn"
+              onClick={handleClearCache}
+              disabled={isSyncingSnapshot}
+            >
+              🧹 RESET MOCKS
+            </button>
+          </div>
+          <div className="footer-right-actions">
+            <button type="button" className="halo-button cancel-btn" onClick={onClose} disabled={isSyncingSnapshot}>
               Cancel
             </button>
-            <button className="halo-button import-btn" onClick={handleImport}>
+            <button type="button" className="halo-button import-btn" onClick={handleImport} disabled={isSyncingSnapshot}>
               ✨ ANONYMIZE & IMPORT
             </button>
           </div>

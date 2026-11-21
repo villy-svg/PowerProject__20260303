@@ -132,7 +132,6 @@
     color: var(--brand-mint);
     background: color-mix(in srgb, var(--brand-mint), transparent 88%);
     border-color: transparent;
-    border-width: 1px;
     box-shadow: 0 0 12px var(--halo-glow);
     transform: none;
   }
@@ -177,32 +176,33 @@
 }
 
 /* ── 3. Data Operations Dropdown (DataOperationsDropdown) ────────────────── */
+/* Content-sized on desktop so the trigger matches compact Row 4 controls; full-width restored on <=1024px */
 .data-operations-wrapper {
-  width: 100%;
-  display: flex;
+  width: auto;
+  display: inline-flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: flex-end;
 }
 
 .actions-dropdown-container {
   position: relative;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
-  align-items: stretch;
-  width: 100%;
+  align-items: flex-end;
+  width: auto;
 }
 
 /* Trigger button — unified Option A (Border XOR Fill): transparent + light satin border at rest, fill + no border on hover/open */
 .data-ops-trigger,
 .actions-dropdown-container .filters-row-toggle {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  width: 100%;
+  gap: 8px;
+  width: auto;
   height: var(--menu-control-height, 36px);
   min-height: var(--menu-control-height, 36px);
-  padding: 0 var(--menu-control-padding-x, 14px);
+  padding: 0 12px;
   margin: 0;
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
@@ -214,10 +214,12 @@
   letter-spacing: var(--menu-control-letter-spacing, 0.5px);
   text-transform: uppercase;
   line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   user-select: none;
   box-sizing: border-box;
   box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -279,6 +281,8 @@
 .actions-dropdown-container .actions-dropdown-menu {
   left: auto;
   right: 0;
+  min-width: 200px;
+  width: max-content;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -330,7 +334,6 @@
 .actions-dropdown-menu .halo-button:hover {
   background: var(--halo-bg);
   border: none;
-  border-width: 0;
   box-shadow: none;
   transform: none;
 }
@@ -375,12 +378,22 @@
 
 /* ── 4. Mobile & Tablet Responsive Alignment (≤1024px & ≤768px) ──────────── */
 @media screen and (max-width: 1024px) {
+  .data-operations-wrapper,
+  .actions-dropdown-container {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+  }
+
   .data-operations-wrapper {
     margin-top: 8px;
   }
 
   .data-ops-trigger,
   .actions-dropdown-container .filters-row-toggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
     height: 42px;
     min-height: 42px;
     padding: 0 14px;
@@ -394,6 +407,7 @@
     top: auto;
     right: auto;
     left: auto;
+    min-width: 0;
     width: 100%;
     max-height: none;
     margin-top: 8px;

@@ -1,6 +1,6 @@
 /* ==========================================================================
    VERTICAL WORKSPACE LAYOUT
-   MIGRATED TO SHELL CSS (DesktopLayout.css / MobileLayout.css) — Phase 3 will remove original media blocks below
+   Mobile @media (max-width: 768px) rules moved to src/app/shells/MobileLayout.css (Phase 6A)
    ========================================================================== */
 .workspace-container {
   display: flex;
@@ -21,9 +21,9 @@
 }
 /* 1. LEFT SUB-SIDEBAR */
 .sub-sidebar {
-  width: 260px; 
+  width: 210px; 
   background-color: var(--surface-card);
-  border-right: 1px solid var(--border-color);
+  border-right: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
   display: flex;
   flex-direction: column;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -39,7 +39,7 @@
   gap: 12px;
   min-height: 64px;
   width: 100%;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
 }
 .sub-sidebar-header .halo-button {
   width: 100%;
@@ -140,130 +140,80 @@
     padding: 16px;
   }
   .sub-sidebar {
-    width: 240px;
+    width: 196px;
   }
 }
-/* Align off-canvas sub-sidebar breakpoint with useIsMobile / MobileLayout (≤ 768px).
-   Previously @media (max-width: 1024px) set position: fixed; left: 200px on DesktopLayout
-   (769px–1024px), causing the sub-sidebar to float in the middle of medium screens. */
-@media (max-width: 768px) {
-  .workspace-content {
-    padding: 0 12px 12px 12px;
-  }
-  .sub-sidebar {
-    width: 240px;
-    position: fixed;
-    z-index: 1001;
-    top: 0;
-    bottom: 0; /* Full height by default (tray hidden) */
-    left: 0;
-    transform: translateX(-100%);
-    box-shadow: 10px 0 30px color-mix(in srgb, var(--bg-color), transparent 50%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .sub-sidebar.tray-visible {
-    bottom: 64px; /* Docks above the tray */
-  }
-  .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
-    transform: translateX(0);
-  }
-  .sidebar-backdrop, .menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: transparent;
-    cursor: pointer;
-  }
-}
-/* 5. FILTERS TOGGLE SYSTEM — Option A (Border XOR Fill) */
-/* Used by DataOperationsDropdown trigger; legacy .sub-nav-item & .filters-action-btn removed */
-.filters-row-toggle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: var(--menu-control-height, 36px);
-  min-height: var(--menu-control-height, 36px);
-  padding: 0 var(--menu-control-padding-x, 14px);
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  user-select: none;
-  border-radius: var(--menu-control-radius, var(--radius-button));
-  margin-bottom: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent; /* Fixes square flicker on touch/mobile */
-}
-.filters-row-toggle:hover {
-  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
-  border-color: transparent;
-  color: var(--brand-mint);
-}
-.filters-row-toggle p {
-  margin: 0;
-  font-weight: var(--menu-control-font-weight, 700);
-  font-size: var(--menu-control-font-size, 0.75rem);
-  color: inherit;
-  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-/* 6. SHARED SUB-SIDEBAR NAVIGATION LIST & LOCKED STATE */
+/* Mobile off-canvas .sub-sidebar, .workspace-content padding, and backdrops are canonically owned by src/app/shells/MobileLayout.css (Phase 6A) */
+/* 5. SHARED SUB-SIDEBAR NAVIGATION LIST & LOCKED STATE */
+/* (.filters-row-toggle is canonically managed in src/components/ui/board-menu/BoardMenu.css) */
 .sub-sidebar-nav-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 8px 4px;
+  gap: 4px;
+  padding: 8px 0;
 }
 
 .sub-sidebar-nav-btn {
   width: 100%;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
-  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 9px 12px;
+  font-size: var(--font-sm);
+  border-radius: 8px;
+  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Single source of truth for ALL sub-sidebar buttons (Option A — Border XOR Fill):
-   - Rest: transparent fill + light satin border ONLY, no glow
-   - Hover / Active: subtle mint fill ONLY + no border (transparent 1px prevents layout shift) */
+/* Clean navigation rail styling (§15.C/D): borderless quiet items at rest, calm tint on hover/active */
 .sub-sidebar .halo-button {
   text-transform: none;
   font-weight: 500;
+  color: var(--text-color);
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  border: 1px solid transparent;
   box-shadow: none;
   backdrop-filter: none;
-  opacity: 0.75;
+  opacity: 0.72;
 }
 
+/* Keep the vertical root header button visually distinct from board links below */
 .sub-sidebar-header .halo-button {
+  color: var(--brand-mint);
+  border-color: color-mix(in srgb, var(--text-color), transparent 90%);
+  font-weight: 700;
   opacity: 1;
 }
 
-.sub-sidebar .halo-button:hover:not(:disabled):not(.locked),
-.sub-sidebar .halo-button.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+.sub-sidebar .halo-button:hover:not(:disabled):not(.locked) {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid transparent;
-  color: var(--brand-mint);
-  box-shadow: 0 0 12px var(--halo-glow);
+  color: var(--text-color);
+  box-shadow: none;
   opacity: 1;
   transform: none;
 }
 
-/* Locked/disabled sub-sidebar item (Hubs, Employees, etc.): light satin border ONLY, no fill, no glow */
+.sub-sidebar .halo-button.active,
+.sub-sidebar .halo-button.active:hover:not(:disabled):not(.locked) {
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
+  border: 1px solid transparent;
+  color: var(--brand-mint);
+  font-weight: 600;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* Locked/disabled sub-sidebar item (Hubs, Employees, etc.): muted, borderless, no hover fill */
 .sub-sidebar .halo-button.locked,
 .sub-sidebar .halo-button:disabled,
 .sub-sidebar .halo-button.locked:hover,
 .sub-sidebar .halo-button:disabled:hover {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
   color: var(--text-color);
-  border: 1px solid color-mix(in srgb, var(--text-color), transparent 92%);
+  border: 1px solid transparent;
   background: transparent;
   box-shadow: none;
   transform: none;

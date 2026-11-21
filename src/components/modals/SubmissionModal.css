@@ -240,9 +240,9 @@
   0% { left: -100%; }
   100% { left: 200%; }
 }
-.is-done-chip {
-  border-color: var(--brand-mint) !important;
-  background: color-mix(in srgb, var(--brand-mint), transparent 92%) !important;
+.submission-file-chip.is-done-chip {
+  border-color: var(--brand-mint);
+  background: color-mix(in srgb, var(--brand-mint), transparent 92%);
   animation: successPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 @keyframes successPop {
@@ -324,10 +324,10 @@
   font-weight: 700;
 }
 
-.submission-actions-group button,
-.submission-actions-group .halo-button {
-  padding: 8px 16px !important; /* Reduced vertical padding */
-  min-height: unset !important;
+.master-modal-footer .submission-actions-group button,
+.master-modal-footer .submission-actions-group .halo-button {
+  padding: 8px 16px; /* Reduced vertical padding */
+  min-height: unset;
 }
 
 /* ─── Responsive ────────────────────────────────────────────────────────── */
@@ -343,10 +343,6 @@
     gap: 0.4rem;
   }
 
-  .submission-actions-group .btn-icon {
-    display: none; /* Prefer clear text labels over ambiguous symbols on mobile */
-  }
-
   .submission-actions-group .btn-text {
     display: inline;
     font-size: 0.76rem;
@@ -354,15 +350,15 @@
     white-space: nowrap;
   }
 
-  .submission-actions-group button,
-  .submission-actions-group .halo-button {
-    width: auto !important;
+  .master-modal-footer .submission-actions-group button,
+  .master-modal-footer .submission-actions-group .halo-button {
+    width: auto;
     flex: 1;
-    padding: 10px 6px !important;
-    min-width: 0 !important;
-    min-height: 40px !important;
-    margin: 0 !important;
-    font-size: 0.76rem !important;
+    padding: 10px 6px;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0;
+    font-size: 0.76rem;
   }
 }
 

@@ -1,6 +1,7 @@
 // @prod-critical
 import React, { useState } from 'react';
 import BoardRBACModal from '../modals/BoardRBACModal';
+import { IconShield } from './Icons';
 import './RBACManageButton.css';
 
 /**
@@ -26,12 +27,15 @@ const RBACManageButton = ({ user, verticalId, featureId, label = 'Access' }) => 
 
   return (
     <>
+      {/* Icon-only neutral trigger so RBAC never outweights primary board CTAs */}
       <button
+        type="button"
         className="halo-button rbac-manage-btn"
         onClick={() => setIsModalOpen(true)}
-        title={`Configure RBAC access for: ${label}`}
+        title={`Manage RBAC access for: ${label}`}
+        aria-label={`Manage RBAC access for ${label}`}
       >
-        🔐 Manage RBAC
+        <IconShield size={16} strokeWidth={1.8} />
       </button>
 
       <BoardRBACModal
