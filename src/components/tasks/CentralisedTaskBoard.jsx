@@ -22,6 +22,7 @@ const CentralisedTaskBoard = ({
   tasks = [],
   user,
   permissions = {},
+  resolveTaskPermissions = null,
   verticals = {},
   verticalList = [],
   isMobile = false,
@@ -57,7 +58,8 @@ const CentralisedTaskBoard = ({
     taskUtils.isAssignee(t, user) ||
     taskUtils.isCreator(t, user) ||
     (isEmployeeReqReviewer && isEmployeeApprovalTask(t)) ||
-    isAttendanceOrphanVisibleToUser(t, user);
+    isAttendanceOrphanVisibleToUser(t, user) ||
+    taskUtils.isAttendanceAlertVisibleToManager(t, user);
 
   const assignedTasks = tasks.filter(isVisibleToUser);
   const rootMyTasks = assignedTasks.filter(t => {
@@ -104,8 +106,8 @@ const CentralisedTaskBoard = ({
       <div className="centralised-task-view-wrapper animate-fade-in">
         <div className="centralised-task-view">
           {!isMobile && (
-            <div className="summary-header secondary-header flex-between">
-              <div className="flex-center-gap">
+            <div className="summary-header secondary-header u-flex-between">
+              <div className="u-flex-center-gap-12">
                 <div className="desktop-header-title-container">
                   <h2>{title}</h2>
                   <IconInfo size={16} className="title-info-icon" />
@@ -161,8 +163,8 @@ const CentralisedTaskBoard = ({
     <div className="centralised-task-view-wrapper animate-fade-in">
       <div className="centralised-task-view">
         {!isMobile && (
-          <div className="summary-header secondary-header flex-between">
-            <div className="flex-center-gap">
+          <div className="summary-header secondary-header u-flex-between">
+            <div className="u-flex-center-gap-12">
               <div className="desktop-header-title-container">
                 <h2>{title}</h2>
                 <IconInfo size={16} className="title-info-icon" />
@@ -257,6 +259,8 @@ const CentralisedTaskBoard = ({
                     ) : (
                       stageTasks.map(task => {
                         const { TaskTileComponent: DynTileComponent } = resolveVerticalComponents(task.verticalId, verticals);
+                        // Resolve per-task vertical RBAC when provided (e.g. Home -> Centralised Task View)
+                        const taskPermissions = resolveTaskPermissions ? resolveTaskPermissions(task) : permissions;
 
                         return (
                           <div
@@ -289,8 +293,8 @@ const CentralisedTaskBoard = ({
                               tasks={tasks}
                               onPromote={handleMoveToParent}
                               onDrillDown={(id) => setDrillDownId(id)}
-                              showHierarchy={permissions.canViewKanbanHierarchy !== false}
-                              permissions={permissions}
+                              showHierarchy={taskPermissions.canViewKanbanHierarchy !== false}
+                              permissions={taskPermissions}
                               isExpanded={expandedTaskId === task.id}
                               onToggleExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
                             >
@@ -336,6 +340,7 @@ const CentralisedTaskBoard = ({
                 currentUser={user}
                 canCreate={permissions.canCreate}
                 permissions={permissions}
+                resolveTaskPermissions={resolveTaskPermissions}
                 handleApproveSubmission={handleApproveSubmission}
                 handleRejectClick={handleRejectClick}
                 expandedTaskId={expandedTaskId}

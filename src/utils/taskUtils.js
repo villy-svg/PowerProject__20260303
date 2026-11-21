@@ -295,4 +295,38 @@ export const taskUtils = {
     if (current.hub_id) return 'Hub'; // Legacy fallback
     return 'Unassigned';
   },
+
+  /**
+   * Returns true if a task is an automated attendance escalation alert
+   * (Forced Checkout or Overtime Alert), matching either structured metadata
+   * or legacy title prefixes for rows created before metadata backfill.
+   */
+  isAttendanceAlertTask(task) {
+    if (!task) return false;
+    const type = task.metadata?.type;
+    if (type === 'forced_checkout' || type === 'overtime_alert') return true;
+    const title = task.text || '';
+    return title.startsWith('Forced Checkout:') || title.startsWith('Overtime Alert:');
+  },
+
+  /**
+   * Returns true when an automated attendance alert (Forced Checkout / Overtime)
+   * should be surfaced in Home -> Track Requests for an upward manager or Master Admin.
+   */
+  isAttendanceAlertVisibleToManager(task, user) {
+    if (!user || !taskUtils.isAttendanceAlertTask(task)) return false;
+    if (user.roleId === 'master_admin') return true;
+
+    const reporteeEmpIds = user.reporteeEmployeeIds || [];
+    const reporteeUserIds = user.reporteeUserIds || [];
+    const assignees = Array.isArray(task.assigned_to)
+      ? task.assigned_to
+      : (task.assigned_to ? [task.assigned_to] : []);
+    const creatorId = task.createdBy || task.created_by;
+
+    return (
+      assignees.some(id => reporteeEmpIds.includes(id) || reporteeUserIds.includes(id)) ||
+      (creatorId && (reporteeUserIds.includes(creatorId) || reporteeEmpIds.includes(creatorId)))
+    );
+  },
 };

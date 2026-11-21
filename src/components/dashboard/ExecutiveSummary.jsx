@@ -64,6 +64,10 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   const escalationPermissions = useRBAC(user, 'escalation_tasks', verticals);
   const attendancePermissions = useRBAC(user, 'attendance_self_service', verticals);
+  // Per-vertical RBAC for Home -> Centralised Task View (Home's base permissions resolve to 'none' for vertical roles)
+  const hubTaskPermissions = useRBAC(user, 'hub_tasks', verticals);
+  const employeeTaskPermissions = useRBAC(user, 'employee_tasks', verticals);
+  const clientTaskPermissions = useRBAC(user, 'client_tasks', verticals);
   
   const isSMRole = 
     user?.employeeRole === 'SM' || 
@@ -96,28 +100,57 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const [mergeTaskCluster, setMergeTaskCluster] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
+
+  // Helper: identifies tasks belonging to the Escalations board (legacy or canonical CHARGING_HUBS)
+  const isEscalationTask = (t) =>
+    !!t && (
+      t.verticalId === 'escalation_tasks' ||
+      ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') &&
+       (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+    );
+
+  // Helper: resolves the real vertical RBAC permissions object for any task shown on Home
+  const resolveTaskPermissions = (task) => {
+    if (!task) return permissions;
+    if (isEscalationTask(task)) return escalationPermissions;
+    const vid = task.verticalId;
+    if (vid === hubId || vid === 'CHARGING_HUBS') return hubTaskPermissions;
+    if (vid === verticals?.EMPLOYEES?.id || vid === 'EMPLOYEES') return employeeTaskPermissions;
+    if (vid === verticals?.CLIENTS?.id || vid === 'CLIENTS') return clientTaskPermissions;
+    return permissions;
+  };
+
   // Dynamic CRUD permission resolver per vertical
   const getTaskCRUD = (task) => {
     if (!task) return { canUserCreate: false, canUserUpdate: false, canUserDelete: false, hasVerticalAccess: false };
-    const rootVerticalId = task.verticalId;
-    const hasVerticalAccess = permissions.scope === 'global' || user?.assignedVerticals?.includes(rootVerticalId);
+    // Normalize legacy 'escalation_tasks' to its parent vertical ('CHARGING_HUBS')
+    // and evaluate per-task vertical permissions instead of Home's 'none' fallback.
+    const isEsc = isEscalationTask(task);
+    const effectivePerms = resolveTaskPermissions(task);
+    const rootVerticalId = task.verticalId === 'escalation_tasks' ? hubId : task.verticalId;
+    const hasVerticalAccess =
+      effectivePerms.scope === 'global' ||
+      user?.assignedVerticals?.includes(rootVerticalId) ||
+      (task.verticalId === 'escalation_tasks' && user?.assignedVerticals?.includes('escalation_tasks'));
 
     let featureBaseName = '';
-    if (rootVerticalId === 'CHARGING_HUBS') featureBaseName = 'HubTasks';
-    else if (rootVerticalId === 'EMPLOYEES') featureBaseName = 'EmployeeTasks';
-    else if (rootVerticalId === 'CLIENTS') featureBaseName = 'ClientTasks';
+    if (isEsc) featureBaseName = 'EscalationTasks';
+    else if (rootVerticalId === 'CHARGING_HUBS' || rootVerticalId === hubId) featureBaseName = 'HubTasks';
+    else if (rootVerticalId === 'EMPLOYEES' || rootVerticalId === verticals?.EMPLOYEES?.id) featureBaseName = 'EmployeeTasks';
+    else if (rootVerticalId === 'CLIENTS' || rootVerticalId === verticals?.CLIENTS?.id) featureBaseName = 'ClientTasks';
 
-    const fCanCreate = (featureBaseName && permissions[`canCreate${featureBaseName}`] !== undefined)
-      ? permissions[`canCreate${featureBaseName}`]
-      : permissions.canCreate;
+    const fCanCreate = (featureBaseName && effectivePerms[`canCreate${featureBaseName}`] !== undefined)
+      ? effectivePerms[`canCreate${featureBaseName}`]
+      : effectivePerms.canCreate;
 
-    const fCanUpdate = (featureBaseName && permissions[`canUpdate${featureBaseName}`] !== undefined)
-      ? permissions[`canUpdate${featureBaseName}`]
-      : permissions.canUpdate;
+    const fCanUpdate = (featureBaseName && effectivePerms[`canUpdate${featureBaseName}`] !== undefined)
+      ? effectivePerms[`canUpdate${featureBaseName}`]
+      : effectivePerms.canUpdate;
 
-    const fCanDelete = (featureBaseName && permissions[`canDelete${featureBaseName}`] !== undefined)
-      ? permissions[`canDelete${featureBaseName}`]
-      : permissions.canDelete;
+    const fCanDelete = (featureBaseName && effectivePerms[`canDelete${featureBaseName}`] !== undefined)
+      ? effectivePerms[`canDelete${featureBaseName}`]
+      : effectivePerms.canDelete;
 
     return {
       canUserCreate: fCanCreate && hasVerticalAccess,
@@ -139,11 +172,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
     const { canUserUpdate } = getTaskCRUD(task);
     if (canUserUpdate) return true;
 
+    const effectiveLevel = resolveTaskPermissions(task).level;
     const isCreator = (task.createdBy || task.created_by) === user?.id;
     const assignedTo = task.assigned_to || [];
     const isAssignee = (user?.employeeId && assignedTo.includes(user.employeeId)) || (user?.id && assignedTo.includes(user.id));
 
-    if (['contributor', 'viewer'].includes(permissions.level) && (isCreator || isAssignee)) {
+    if (['contributor', 'viewer'].includes(effectiveLevel) && (isCreator || isAssignee)) {
       return true;
     }
     return false;
@@ -375,7 +409,6 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const topLevelVisibleCount = visibleTasks.filter(t => !t.parentTask).length;
 
   const myTasks = tasks.filter(t => taskUtils.isAssignee(t, user) && t.stageId !== 'COMPLETED');
-  const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
 
   // isCreator: the current user raised this task (created_by or createdBy field)
   const isCreator = (t) =>
@@ -386,23 +419,20 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
 
   // escalationTasks: tasks shown in Track Requests panel.
   // Includes tasks the user is ASSIGNED to, tasks the user CREATED,
-  // or employee approval requests (BANK_UPDATE / EMPLOYEE_DEACTIVATION) when the
-  // user is an authorized approver (Master Admin / Employees Editor).
+  // employee approval requests (BANK_UPDATE / EMPLOYEE_DEACTIVATION) for authorized approvers,
+  // and automated attendance alerts (Forced Checkout / Overtime) for upward managers & Master Admin.
   const escalationTasks = tasks.filter(t =>
-    ['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId) && (
-      t.verticalId === 'escalation_tasks' ||
-      ((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') &&
-       (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
-    ) && (
-      taskUtils.isAssignee(t, user) || isCreator(t) || (isEmployeeReqReviewer && isEmployeeApprovalTask(t))
+    ['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId) &&
+    isEscalationTask(t) && (
+      taskUtils.isAssignee(t, user) ||
+      isCreator(t) ||
+      (isEmployeeReqReviewer && isEmployeeApprovalTask(t)) ||
+      taskUtils.isAttendanceAlertVisibleToManager(t, user)
     )
   );
   // Pre-filter exactly as passed to CentralisedTaskBoard
-  const centralisedTasksProp = tasks.filter(t => 
-    t.stageId !== 'COMPLETED' &&
-    t.verticalId !== 'escalation_tasks' && 
-    !((t.verticalId === hubId || t.verticalId === 'CHARGING_HUBS') && 
-      (t.priority === 'High' || t.priority === 'Urgent' || (Array.isArray(t.task_board) && t.task_board.includes('Escalations'))))
+  const centralisedTasksProp = tasks.filter(t =>
+    t.stageId !== 'COMPLETED' && !isEscalationTask(t)
   );
 
   const assignedCentralisedTasks = centralisedTasksProp.filter(t => taskUtils.isAssignee(t, user) || isCreator(t));
@@ -621,7 +651,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         <HomeEscalationsBoard
           tasks={escalationTasks}
           user={user}
-          permissions={permissions}
+          permissions={escalationPermissions}
           verticals={verticals}
           verticalList={verticalList}
           isMobile={isMobile}
@@ -656,6 +686,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
           tasks={centralisedTasksProp}
           user={user}
           permissions={permissions}
+          resolveTaskPermissions={resolveTaskPermissions}
           verticals={verticals}
           verticalList={verticalList}
           isMobile={isMobile}
@@ -715,7 +746,7 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
         setEditingTask={setEditingTask}
         saving={saving}
         user={user}
-        permissions={permissions}
+        permissions={editingTask ? resolveTaskPermissions(editingTask) : permissions}
         tasks={tasks}
         verticals={verticals}
         handleSaveTask={handleSaveTask}

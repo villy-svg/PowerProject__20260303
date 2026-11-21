@@ -31,6 +31,7 @@ const TaskListView = ({
   currentUser,
   canCreate,
   permissions = {},
+  resolveTaskPermissions = null,
   handleApproveSubmission,
   handleRejectClick,
   expandedTaskId,
@@ -110,9 +111,9 @@ const TaskListView = ({
 
     return (
       <section key={stage.id} className="list-stage-section">
-        <header className="list-stage-header">
+        <header className="list-stage-header" style={{ '--stage-color': stage.color }}>
           <div className="header-left-group">
-            <h4 className="stage-label-text" style={{ color: stage.color }}>{stage.label}</h4>
+            <h4 className="stage-label-text">{stage.label}</h4>
             {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
               <button
                 onClick={() => onToggleStageSelection(stage.id, stageTasks)}
@@ -122,7 +123,7 @@ const TaskListView = ({
               </button>
             )}
           </div>
-          <span className="task-count-badge" style={{ backgroundColor: `color-mix(in srgb, ${stage.color}, transparent 87%)`, color: stage.color }}>
+          <span className="task-count-badge">
             {stageTasks.length}
           </span>
         </header>
@@ -138,17 +139,20 @@ const TaskListView = ({
               if (!curr) break;
             }
             return true;
-          }).map((task) => (
+          }).map((task) => {
+            // Resolve per-row vertical RBAC when provided (e.g. Home -> Centralised Task View)
+            const rowPerms = resolveTaskPermissions ? resolveTaskPermissions(task) : permissions;
+            return (
             <ListViewRow
               key={task.id}
               task={task}
               stage={stage}
               stageList={stageList}
-              canUpdate={canUpdate}
+              canUpdate={resolveTaskPermissions ? rowPerms.canUpdate : canUpdate}
               canEditTask={canEditTask}
               canManageHierarchy={canManageHierarchy}
               canAddSubtask={canAddSubtask}
-              canDelete={canDelete}
+              canDelete={resolveTaskPermissions ? rowPerms.canDelete : canDelete}
 
               deleteTask={deleteTask}
               updateTaskStage={updateTaskStage}
@@ -162,19 +166,20 @@ const TaskListView = ({
               onSelect={onSelect}
               onDuplicateMerge={onDuplicateMerge}
               currentUser={currentUser}
-              canCreate={canCreate}
+              canCreate={resolveTaskPermissions ? rowPerms.canCreate : canCreate}
               canCloneTask={canCloneTask}
               isExpanded={expandedIds.has(task.id)}
               onToggleExpand={() => toggleExpand(task.id)}
               hasChildren={tasks.some(child => child.parentTask === task.id)}
               tasks={tasks}
-              permissions={permissions}
+              permissions={rowPerms}
               handleApproveSubmission={handleApproveSubmission}
               handleRejectClick={handleRejectClick}
               isRowExpanded={expandedTaskId === task.id}
               onToggleRowExpand={() => setExpandedTaskId(expandedTaskId === task.id ? null : task.id)}
             />
-          ))}
+            );
+          })}
         </div>
       </section>
     );

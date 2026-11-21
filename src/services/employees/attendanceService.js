@@ -450,40 +450,28 @@ export async function adminForceCheckout(recordId, currentSessions) {
     return { data: null, error };
   }
 
-  // Auto-allocate a "Logout Not Done" remark to the user
-  const { data: profile, error: profileError } = await supabase
-    .from('user_profiles')
-    .select('id')
-    .eq('employee_id', data.employee_id)
-    .single();
-
-  if (profileError || !profile) {
-    // Remark creation is best-effort — force checkout already succeeded.
-    console.warn('[attendanceService] adminForceCheckout: could not create remark — profile not found:', profileError);
-    return { data, error: null };
-  }
-
+  // Auto-allocate a "Logout Not Done" remark to the employee (best-effort — force checkout already succeeded).
   const { data: authData, error: authError } = await supabase.auth.getUser();
 
   if (authError || !authData?.user) {
-    // Remark creation is best-effort — force checkout already succeeded.
     console.warn('[attendanceService] adminForceCheckout: could not create remark — auth user not found:', authError);
     return { data, error: null };
   }
 
   const adminId = authData.user.id;
-  
   const shiftDateStr = data.shift_date;
   const timeStr = new Date(forcedLogoutTimeIso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-  
+
+  // tasks.assigned_to references public.employees(id) (NOT user_profiles.id)
   const { error: insertError } = await supabase.from('tasks').insert({
     text: 'Logout Not Done',
     description: `You have missed logging out from your shift on ${shiftDateStr}, ${timeStr}. Please ensure you Login/Logout on time.`,
     vertical_id: 'EMPLOYEES',
     stage_id: 'BACKLOG',
     priority: 'Low',
-    assigned_to: profile.id,
+    assigned_to: data.employee_id,
     created_by: adminId,
+    task_board: ['Employees'],
     metadata: { type: 'force_end_remark' }
   });
 

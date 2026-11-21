@@ -24,8 +24,7 @@ The purpose of this log is to maintain a clear record of *why* something is brok
 - **Reason for Deferral**: High effort to exploit, low impact. Drafts are temporary, and managers generally only see their own hubs. The risk of intentional sabotage is negligible in the current organizational trust model.
 - **Date Logged**: August 2026
 
-### 3. Silent Task Insertion Failures on Forced Checkout
+### 3. Best-Effort Task Insertion on Forced Checkout *(FK Fixed Nov 2026)*
 - **Location**: `attendanceService.js` (`adminForceCheckout`)
-- **Issue**: When forcing a checkout, a disciplinary task is inserted into the database. The code does not handle or log errors if this insert fails.
-- **Reason for Deferral**: The primary action (closing the session) is what matters most. If the task insert fails due to an edge case in RLS or a transient error, the system degraded gracefully rather than blocking the checkout entirely. 
-- **Date Logged**: August 2026
+- **Issue**: Previously passed `user_profiles.id` into `tasks.assigned_to` (FK to `employees(id)`), causing silent FK failures. The FK mismatch and missing `task_board: ['Employees']` were fixed in Nov 2026; best-effort non-blocking warning behavior is intentionally retained so transient errors never block closing an active shift.
+- **Date Logged**: August 2026 (Updated November 2026)

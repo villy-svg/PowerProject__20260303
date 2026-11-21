@@ -152,9 +152,14 @@
   gap: 8px;
 }
 
-.stage-label-text,
-.task-count-badge {
+.list-stage-header .stage-label-text,
+.list-stage-header .task-count-badge {
   font-weight: 700;
+  color: var(--stage-color);
+}
+
+.list-stage-header .task-count-badge {
+  background-color: color-mix(in srgb, var(--stage-color), transparent 87%);
 }
 
 .stage-select-all-btn {
