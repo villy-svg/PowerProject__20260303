@@ -60,20 +60,62 @@ const MasterPageHeader = ({
   const { shellType } = useLayoutShell();
   const { setSearchProps } = useAppNavigation();
 
+  // Keep latest search callbacks in refs so unmemoized parent handlers never
+  // re-trigger context updates or cause infinite render loops on mobile.
+  const searchCallbacksRef = React.useRef({
+    onSelect: onSearchSelect,
+    onEdit: onSearchEdit,
+    onGoTo: onSearchGoTo,
+  });
+  React.useEffect(() => {
+    searchCallbacksRef.current = {
+      onSelect: onSearchSelect,
+      onEdit: onSearchEdit,
+      onGoTo: onSearchGoTo,
+    };
+  });
+
+  const stableOnSelect = React.useCallback((...args) => searchCallbacksRef.current.onSelect?.(...args), []);
+  const stableOnEdit = React.useCallback((...args) => searchCallbacksRef.current.onEdit?.(...args), []);
+  const stableOnGoTo = React.useCallback((...args) => searchCallbacksRef.current.onGoTo?.(...args), []);
+
+  const hasOnSelect = Boolean(onSearchSelect);
+  const hasOnEdit = Boolean(onSearchEdit);
+  const hasOnGoTo = Boolean(onSearchGoTo);
+
   // Sync search parameters to mobile bottom nav via context
   React.useEffect(() => {
     if (shellType === 'mobile') {
       setSearchProps({
         records: searchRecords,
         recordType,
-        onSelect: onSearchSelect,
-        onEdit: onSearchEdit,
-        onGoTo: onSearchGoTo,
+        onSelect: hasOnSelect ? stableOnSelect : undefined,
+        onEdit: hasOnEdit ? stableOnEdit : undefined,
+        onGoTo: hasOnGoTo ? stableOnGoTo : undefined,
         hideSearchBar,
       });
-      return () => setSearchProps(null);
+    } else {
+      setSearchProps(null);
     }
-  }, [searchRecords, recordType, onSearchSelect, onSearchEdit, onSearchGoTo, hideSearchBar, shellType, setSearchProps]);
+  }, [
+    searchRecords,
+    recordType,
+    hasOnSelect,
+    hasOnEdit,
+    hasOnGoTo,
+    hideSearchBar,
+    shellType,
+    setSearchProps,
+    stableOnSelect,
+    stableOnEdit,
+    stableOnGoTo,
+  ]);
+
+  // Clear mobile search context only on unmount so prop updates never bounce
+  // searchProps through null (which defeated shallow equality and caused loops).
+  React.useEffect(() => {
+    return () => setSearchProps(null);
+  }, [setSearchProps]);
   
   const headerState = useHeaderState({
     isSubSidebarOpen,

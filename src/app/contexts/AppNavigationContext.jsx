@@ -17,7 +17,7 @@
  * Overlay state for MobileHeader (isMobileMenuOpen, isMobileBoardSubTrayOpen) is
  * lifted here so the back handler can dismiss them without prop drilling.
  */
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 
 const AppNavigationContext = createContext(null);
@@ -119,6 +119,8 @@ export function AppNavigationProvider({ verticals = {}, children }) {
         recordsEqual(prev.records, nextVal.records) &&
         prev.recordType === nextVal.recordType &&
         prev.onSelect === nextVal.onSelect &&
+        prev.onEdit === nextVal.onEdit &&
+        prev.onGoTo === nextVal.onGoTo &&
         prev.hideSearchBar === nextVal.hideSearchBar
       ) {
         return prev; // Return existing reference to prevent re-render
@@ -258,7 +260,8 @@ export function AppNavigationProvider({ verticals = {}, children }) {
   }, []); // Empty deps: listener is registered once; ref keeps handler current
 
   // ── Context Value ─────────────────────────────────────────────────────────
-  const value = {
+  // Memoized so unrelated consumers don't re-render on every provider pass
+  const value = useMemo(() => ({
     activeVertical,
     setActiveVertical,
     isSidebarOpen,
@@ -282,7 +285,21 @@ export function AppNavigationProvider({ verticals = {}, children }) {
     isSearchOpen,
     setIsSearchOpen,
     registerBackInterceptor,
-  };
+  }), [
+    activeVertical,
+    setActiveVertical,
+    isSidebarOpen,
+    isSubSidebarOpen,
+    showBottomNavOverlay,
+    isMobileMenuOpen,
+    isMobileBoardSubTrayOpen,
+    isMobileAddTrayOpen,
+    showExitModal,
+    searchProps,
+    setSearchProps,
+    isSearchOpen,
+    registerBackInterceptor,
+  ]);
 
   return (
     <AppNavigationContext.Provider value={value}>

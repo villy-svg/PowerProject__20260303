@@ -1,12 +1,17 @@
 /**
  * EmployeeAttendanceBoard.jsx
  *
- * Manager-facing Attendance Board and Week Off Planner.
- * Renders a date-range grid of employee attendance status.
+ * Manager-facing Attendance Board.
+ * Renders a date-range grid (Desktop) or mobile list + inline mobile control bar (Phone).
  *
  * Role-based behavior:
- *   - Contributor: clicking a cell opens SuggestEditModal (Maker) or toggles draft in Planner mode.
- *   - Editor/Admin: sees the pending approval queue drawers + can approve/reject.
+ *   - Contributor: clicking a cell opens SuggestEditModal (Maker), or uses Multi-Day Update (A.2).
+ *   - Editor/Admin: sees the pending approval queue + can approve/reject.
+ *
+ * TODO(future-rebuild): Bulk Schedule Planner (A.2), SchedulePlanApprovalDrawer (A.4),
+ * and ScheduleMyPlansDrawer (A.5) UI were stripped from this shell. External wiring
+ * (useSchedulePlanner, schedulePlannerService, useScheduleDrafting, and the two drawers)
+ * is intentionally preserved in the repo for future rebuild.
  *
  * Skill compliance:
  *   rbac-security-system §2 (UI Guards on all actions)
@@ -16,22 +21,21 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { useAttendanceBoard } from '../../hooks/useAttendanceBoard';
-import { useSchedulePlanner } from '../../hooks/useSchedulePlanner';
 import AttendanceGrid from './attendance/AttendanceGrid';
 import AttendanceMobileList from './attendance/AttendanceMobileList';
 import AttendanceApprovalDrawer from './attendance/AttendanceApprovalDrawer';
 import AttendanceSuggestEditModal from './attendance/AttendanceSuggestEditModal';
-import SchedulePlanApprovalDrawer from './attendance/SchedulePlanApprovalDrawer';
-import ScheduleMyPlansDrawer from './attendance/ScheduleMyPlansDrawer';
+import SingleEmployeeBulkUpdateModal from './attendance/SingleEmployeeBulkUpdateModal';
 import AttendanceBoardHeader from './attendance/components/AttendanceBoardHeader';
+import AttendanceMobileBar from './attendance/components/AttendanceMobileBar';
+import {
+  toISTDateString,
+  shiftDateString,
+  getPresetDateRange,
+} from './attendance/utils/attendanceDateUtils';
 import './EmployeeAttendanceBoard.css';
 import './attendance/AttendanceMobileList.css';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
-
-import { useHubs } from './attendance/hooks/useHubs';
-import { useScheduleDrafting } from './attendance/hooks/useScheduleDrafting';
-
-
 
 const EmployeeAttendanceBoard = ({
   user,
@@ -45,9 +49,9 @@ const EmployeeAttendanceBoard = ({
   activeVertical,
 }) => {
   const {
-    employees, allEmployees, dateRange: attendanceDateRange, startDate, setStartDate,
+    employees, allEmployees, dateRange, startDate, setStartDate,
     endDate, setEndDate, pendingRequests, isLoading: isBoardLoading,
-    error, refreshBoard, getCellData: getLiveCellData,
+    error, refreshBoard, getCellData,
     page, setPage, hasMore
   } = useAttendanceBoard(user);
 
@@ -56,15 +60,37 @@ const EmployeeAttendanceBoard = ({
   const canApprove = permissions?.canUpdate || permissions?.canUpdateEmployeeAttendanceBoard;
   const canSuggestEdit = permissions?.canCreate || permissions?.canCreateEmployeeAttendanceBoard;
 
-  const planner = useSchedulePlanner({ user, canApprove });
-  const { hubs } = useHubs();
-
   // --- UI View Mode State ---
-  const [viewMode, setViewMode] = useState('attendance'); // 'attendance' | 'planner'
+  // 'attendance' | 'pending-requests'
+  // TODO(future-rebuild): 'planner' and 'pending-plans' modes parked per A.2/A.4/A.5.
+  const [viewMode, setViewMode] = useState('attendance');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
+  const [showMobileDatePicker, setShowMobileDatePicker] = useState(false);
 
-  // --- Employee Search Filter State ---
+  // --- Employee Search & Desktop Hub Filter State ---
   const [searchedEmployee, setSearchedEmployee] = useState(null);
+  const [selectedHubId, setSelectedHubId] = useState('');
+
+  // Derive unique Hub filter options from loaded employees (zero extra DB queries; Desktop-only per C.1)
+  const hubOptions = useMemo(() => {
+    const map = new Map();
+    (allEmployees || []).forEach((emp) => {
+      if (emp.hubs?.id) {
+        map.set(emp.hubs.id, emp.hubs.hub_code || emp.hubs.name);
+      }
+    });
+    const sorted = Array.from(map.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }));
+    return [{ value: '', label: 'All Hubs' }, ...sorted];
+  }, [allEmployees]);
+
+  const handleHubChange = useCallback((hubId) => {
+    setSelectedHubId(hubId || '');
+    setSearchedEmployee(null);
+    setPage(1);
+  }, [setPage]);
 
   // Normalize active employees for records-mode SearchBar (searchable by name, emp_code, dept_code, hub_code)
   const searchRecords = useMemo(() => {
@@ -76,15 +102,30 @@ const EmployeeAttendanceBoard = ({
     }));
   }, [allEmployees, employees]);
 
-  // Filter grid to the searched employee on desktop; on mobile ensure the selected employee is present in the list
-  const displayedEmployees = useMemo(() => {
-    if (!searchedEmployee) return employees;
-    if (shellType === 'mobile') {
-      const alreadyInPage = employees.some(e => e.id === searchedEmployee.id);
-      return alreadyInPage ? employees : [searchedEmployee, ...employees];
-    }
-    return [searchedEmployee];
-  }, [employees, searchedEmployee, shellType]);
+  // Desktop: apply search or Hub filter (paginated 50/page); Mobile: pass full unpaginated list (C.2)
+  const desktopFilteredEmployees = useMemo(() => {
+    if (searchedEmployee) return [searchedEmployee];
+    if (!selectedHubId) return employees;
+    const filtered = allEmployees.filter(e => e.hubs?.id === selectedHubId || e.hub_id === selectedHubId);
+    const startIdx = (page - 1) * 50;
+    return filtered.slice(startIdx, startIdx + 50);
+  }, [employees, allEmployees, searchedEmployee, selectedHubId, page]);
+
+  const desktopHasMore = useMemo(() => {
+    if (searchedEmployee) return false;
+    if (!selectedHubId) return hasMore;
+    const filteredCount = allEmployees.filter(e => e.hubs?.id === selectedHubId || e.hub_id === selectedHubId).length;
+    return page * 50 < filteredCount;
+  }, [allEmployees, searchedEmployee, selectedHubId, page, hasMore]);
+
+  const mobileEmployees = useMemo(() => {
+    const base = allEmployees.length > 0 ? allEmployees : employees;
+    if (!searchedEmployee) return base;
+    const alreadyPresent = base.some(e => e.id === searchedEmployee.id);
+    return alreadyPresent ? base : [searchedEmployee, ...base];
+  }, [allEmployees, employees, searchedEmployee]);
+
+  const displayedEmployees = shellType === 'mobile' ? mobileEmployees : desktopFilteredEmployees;
 
   const handleSearchSelect = useCallback((emp) => {
     if (!emp) return;
@@ -105,78 +146,18 @@ const EmployeeAttendanceBoard = ({
     setPage(updater);
   }, [setPage]);
 
-  // --- Drawers & Modals & Views ---
+  // --- Modals & Cell Selection ---
   const [selectedCell, setSelectedCell] = useState(null);
-  
-  // Replace boolean drawers with setting the viewMode
-  // viewMode can now be 'attendance' | 'planner' | 'pending-requests' | 'pending-plans'
-  const [showMyPlans, setShowMyPlans] = useState(false);
 
-  const {
-    weekString, setWeekString,
-    activePlanId, setActivePlanId,
-    employeeSelections, setEmployeeSelections,
-    isSubmittingPlanner,
-    plannerError, setPlannerError,
-    plannerSuccess, setPlannerSuccess,
-    paintbrushStatus, setPaintbrushStatus,
-    paintbrushHubId, setPaintbrushHubId,
-    activeCellEdit, setActiveCellEdit,
-    plannerDateFrom, plannerDateTo,
-    plannerDateRange,
-    totalEntries,
-    handleCellClick: draftHandleCellClick,
-    handleCellChange: draftHandleCellChange,
-    handleSaveDraft,
-    handleSubmitForApproval,
-    loadPlanIntoGrid,
-  } = useScheduleDrafting({ planner, getLiveCellData, refreshBoard });
-
-  const activeDateRange = viewMode === 'planner' ? plannerDateRange : attendanceDateRange;
-  
-  // Custom cell data provider that overrides the live database when in planner mode
-  const getCellData = useCallback((empId, date) => {
-    if (viewMode === 'planner') {
-      const liveData = getLiveCellData(empId, date);
-      const isAlreadyMarked = liveData && !liveData.is_scheduled_only && liveData.attendance_status !== 'null';
-      
-      if (isAlreadyMarked) {
-        // Return this so already marked attendance displays in the planner grid
-        return { ...liveData, is_draft: false };
-      }
-
-      const selections = employeeSelections[empId] || {};
-      const sel = selections[date];
-      if (sel) {
-        return { attendance_status: sel.attendance_status, hub_id: sel.hub_id, is_draft: true, shift_date: date, employee_id: empId };
-      }
-      return { attendance_status: null, shift_date: date, employee_id: empId };
-    }
-    return getLiveCellData(empId, date);
-  }, [viewMode, employeeSelections, getLiveCellData]);
-
-  // Grid Cell Click
   const handleCellClick = useCallback((empId, date) => {
-    if (viewMode === 'planner') {
-      draftHandleCellClick(empId, date);
-      return;
-    }
-
-    // Normal Attendance Mode
     const record = getCellData(empId, date);
     const emp = displayedEmployees.find(e => e.id === empId) || allEmployees.find(e => e.id === empId);
     const employeeName = emp?.full_name || emp?.name || 'Unknown Employee';
     setSelectedCell({ employeeId: empId, date, record, employeeName });
     if (canApprove && record.has_pending_edit) {
       setViewMode('pending-requests');
-    } else if (canSuggestEdit) {
-      // Just open suggest edit modal, don't change viewMode
     }
-  }, [viewMode, getCellData, canApprove, canSuggestEdit, draftHandleCellClick, displayedEmployees, allEmployees]);
-
-  const handleCellChange = useCallback((empId, date, newStatus, newHubId) => {
-    draftHandleCellChange(empId, date, newStatus, newHubId);
-  }, [draftHandleCellChange]);
+  }, [getCellData, canApprove, displayedEmployees, allEmployees]);
 
   const handleCloseModal = useCallback(() => {
     setSelectedCell(null);
@@ -188,7 +169,7 @@ const EmployeeAttendanceBoard = ({
     refreshBoard();
   }, [handleCloseModal, refreshBoard]);
 
-  // --- ATTENDANCE DATE PICKERS ---
+  // --- ATTENDANCE DATE PICKERS (Android-8-safe IST serialization) ---
   const [inputStart, setInputStart] = useState(startDate);
   const [inputEnd, setInputEnd] = useState(endDate);
 
@@ -197,29 +178,40 @@ const EmployeeAttendanceBoard = ({
 
   const handleRangeChange = (dates) => {
     const [start, end] = dates;
-    
-    if (start) {
-      const dStart = new Date(start);
-      dStart.setMinutes(dStart.getMinutes() - dStart.getTimezoneOffset());
-      setInputStart(dStart.toISOString().split('T')[0]);
-    } else {
-      setInputStart('');
-    }
-
-    if (end) {
-      const dEnd = new Date(end);
-      dEnd.setMinutes(dEnd.getMinutes() - dEnd.getTimezoneOffset());
-      setInputEnd(dEnd.toISOString().split('T')[0]);
-    } else {
-      setInputEnd('');
-    }
+    setInputStart(start ? toISTDateString(new Date(start)) : '');
+    setInputEnd(end ? toISTDateString(new Date(end)) : '');
   };
 
   const handleApplyDates = () => {
+    if (!inputStart || !inputEnd) return;
     setStartDate(inputStart);
     setEndDate(inputEnd);
-    if (setPage) setPage(1); // Reset page on date change
+    setPage(1);
+    setShowMobileDatePicker(false);
   };
+
+  // Mobile 1-tap week shift (◀ / ▶)
+  const handleShiftWeek = useCallback((deltaDays) => {
+    const nextStart = shiftDateString(startDate, deltaDays);
+    const nextEnd = shiftDateString(endDate, deltaDays);
+    setInputStart(nextStart);
+    setInputEnd(nextEnd);
+    setStartDate(nextStart);
+    setEndDate(nextEnd);
+    setPage(1);
+  }, [startDate, endDate, setStartDate, setEndDate, setPage]);
+
+  // Quick date presets (This Week / Last 14 Days / Current Month / Last Month)
+  const handleApplyPreset = useCallback((preset) => {
+    const { startDate: fromStr, endDate: toStr } = getPresetDateRange(preset);
+    if (!fromStr || !toStr) return;
+    setInputStart(fromStr);
+    setInputEnd(toStr);
+    setStartDate(fromStr);
+    setEndDate(toStr);
+    setPage(1);
+    setShowMobileDatePicker(false);
+  }, [setStartDate, setEndDate, setPage]);
 
   // Guard: RBAC access check
   if (!permissions?.canAccessEmployeeAttendanceBoard) {
@@ -246,32 +238,22 @@ const EmployeeAttendanceBoard = ({
         setViewMode={setViewMode}
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        setShowMyPlans={setShowMyPlans}
+        onOpenBulkUpdate={() => setShowBulkUpdateModal(true)}
         parsedStart={parsedStart}
         parsedEnd={parsedEnd}
         handleRangeChange={handleRangeChange}
         handleApplyDates={handleApplyDates}
+        onApplyPreset={handleApplyPreset}
         page={page}
         setPage={handleSetPage}
-        hasMore={hasMore}
+        hasMore={desktopHasMore}
+        hubOptions={hubOptions}
+        selectedHubId={selectedHubId}
+        onHubChange={handleHubChange}
+        shellType={shellType}
         isBoardLoading={isBoardLoading}
         refreshBoard={refreshBoard}
-        planner={planner}
-        activePlanId={activePlanId}
-        setActivePlanId={setActivePlanId}
-        weekString={weekString}
-        setWeekString={setWeekString}
-        plannerDateFrom={plannerDateFrom}
-        setEmployeeSelections={setEmployeeSelections}
-        totalEntries={totalEntries}
-        isSubmittingPlanner={isSubmittingPlanner}
-        paintbrushStatus={paintbrushStatus}
-        setPaintbrushStatus={setPaintbrushStatus}
-        paintbrushHubId={paintbrushHubId}
-        setPaintbrushHubId={setPaintbrushHubId}
-        handleSaveDraft={handleSaveDraft}
-        handleSubmitForApproval={handleSubmitForApproval}
-        hubs={hubs}
+        pendingRequestsCount={pendingRequests.length}
         canApprove={canApprove}
         canSuggestEdit={canSuggestEdit}
         searchRecords={searchRecords}
@@ -279,8 +261,32 @@ const EmployeeAttendanceBoard = ({
         onSearchSelect={handleSearchSelect}
       />
 
+      {/* Mobile-Only Inline Control Strip (MobileHeader intentionally omits leftActions/rightActions) */}
+      {shellType === 'mobile' && viewMode === 'attendance' && (
+        <AttendanceMobileBar
+          startDate={startDate}
+          endDate={endDate}
+          inputStart={inputStart}
+          inputEnd={inputEnd}
+          setInputStart={setInputStart}
+          setInputEnd={setInputEnd}
+          showDatePicker={showMobileDatePicker}
+          setShowDatePicker={setShowMobileDatePicker}
+          onShiftWeek={handleShiftWeek}
+          onApplyPreset={handleApplyPreset}
+          onApplyDates={handleApplyDates}
+          canSuggestEdit={canSuggestEdit}
+          canApprove={canApprove}
+          pendingRequestsCount={pendingRequests.length}
+          isBoardLoading={isBoardLoading}
+          onOpenBulkUpdate={() => setShowBulkUpdateModal(true)}
+          onOpenApprovals={() => setViewMode('pending-requests')}
+          onRefresh={refreshBoard}
+        />
+      )}
+
       {/* Active Employee Search Filter Bar (Desktop) */}
-      {shellType !== 'mobile' && searchedEmployee && (viewMode === 'attendance' || viewMode === 'planner') && (
+      {shellType !== 'mobile' && searchedEmployee && viewMode === 'attendance' && (
         <div className="attendance-board__search-filter-bar">
           <span className="attendance-board__search-filter-label">
             Showing employee:
@@ -301,7 +307,6 @@ const EmployeeAttendanceBoard = ({
         </div>
       )}
 
-      {/* Notifications */}
       {/* Error state */}
       {viewMode === 'attendance' && error && (
         <div className="attendance-board__error">
@@ -309,22 +314,7 @@ const EmployeeAttendanceBoard = ({
         </div>
       )}
 
-      {viewMode === 'planner' && (
-        <>
-          {plannerError && (
-            <div className="attendance-board__planner-msg attendance-board__planner-msg--error">
-              <p>⚠ {plannerError}</p>
-            </div>
-          )}
-          {plannerSuccess && (
-            <div className="attendance-board__planner-msg attendance-board__planner-msg--success">
-              <p>✓ {plannerSuccess}</p>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Main Grid Content */}
+      {/* Main Content */}
       {viewMode === 'pending-requests' ? (
         <AttendanceApprovalDrawer
           isOpen={true}
@@ -334,24 +324,12 @@ const EmployeeAttendanceBoard = ({
           onClose={handleCloseModal}
           onActionComplete={handleActionComplete}
         />
-      ) : viewMode === 'pending-plans' ? (
-        <SchedulePlanApprovalDrawer
-          isOpen={true}
-          planner={planner}
-          currentUser={user}
-          onClose={() => setViewMode('attendance')}
-          onActionComplete={() => {
-            setViewMode('attendance');
-            planner.refreshPlanner();
-            refreshBoard();
-          }}
-        />
       ) : shellType === 'mobile' ? (
         <AttendanceMobileList
           employees={displayedEmployees}
-          dateRange={activeDateRange}
+          dateRange={dateRange}
           getCellData={getCellData}
-          isLoading={viewMode === 'attendance' ? isBoardLoading : false}
+          isLoading={isBoardLoading}
           onCellClick={handleCellClick}
           selectedEmployeeId={searchedEmployee?.id || ''}
           onSelectEmployee={handleMobileSelectEmployee}
@@ -359,18 +337,14 @@ const EmployeeAttendanceBoard = ({
       ) : (
         <AttendanceGrid
           employees={displayedEmployees}
-          dateRange={activeDateRange}
+          dateRange={dateRange}
           getCellData={getCellData}
-          isLoading={viewMode === 'attendance' ? isBoardLoading : false}
+          isLoading={isBoardLoading}
           onCellClick={handleCellClick}
-          activeCellEdit={activeCellEdit}
-          onCellChange={handleCellChange}
-          hubs={hubs}
-          groupByHub={viewMode === 'planner'}
         />
       )}
 
-      {/* Modals and Drawers */}
+      {/* Single-cell Suggest Edit Modal */}
       {selectedCell && viewMode === 'attendance' && canSuggestEdit && (
         <AttendanceSuggestEditModal
           selectedCell={selectedCell}
@@ -380,12 +354,19 @@ const EmployeeAttendanceBoard = ({
         />
       )}
 
-      {showMyPlans && (
-        <ScheduleMyPlansDrawer
-          isOpen={showMyPlans}
-          planner={planner}
-          onClose={() => setShowMyPlans(false)}
-          onLoadPlan={loadPlanIntoGrid}
+      {/* Simplified A.2: Single-employee, multi-day updater */}
+      {showBulkUpdateModal && canSuggestEdit && (
+        <SingleEmployeeBulkUpdateModal
+          employees={allEmployees.length > 0 ? allEmployees : employees}
+          dateRange={dateRange}
+          getCellData={getCellData}
+          initialEmployeeId={searchedEmployee?.id || ''}
+          currentUser={user}
+          onClose={() => setShowBulkUpdateModal(false)}
+          onSubmitComplete={() => {
+            setShowBulkUpdateModal(false);
+            refreshBoard();
+          }}
         />
       )}
     </div>

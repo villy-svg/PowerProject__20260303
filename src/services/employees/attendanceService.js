@@ -44,6 +44,9 @@ function toISTDateString(date) {
 // @returns {Promise<{ data: Array, error: object|null }>}
 // ---------------------------------------------------------------------------
 export async function fetchAttendanceForDateRange(startDate, endDate) {
+  // Trimmed select: omits unused heavy JSONB columns (login_geolocation,
+  // logout_geolocation, session_logs_data) and redundant employee/hub joins
+  // since the board already fetches employees separately.
   const { data, error } = await supabase
     .from('daily_attendances')
     .select(`
@@ -54,17 +57,7 @@ export async function fetchAttendanceForDateRange(startDate, endDate) {
       shift_type,
       first_login_time,
       logout_time,
-      login_geolocation,
-      logout_geolocation,
-      session_logs_data,
       updated_at,
-      employees (
-        id,
-        full_name,
-        emp_code,
-        hub_id,
-        hubs ( id, name, hub_code )
-      ),
       attendance_edit_requests (
         id,
         request_status
@@ -90,60 +83,11 @@ export async function fetchAttendanceForDateRange(startDate, endDate) {
   return { data: annotated, error: null };
 }
 
-// ---------------------------------------------------------------------------
-// MANAGER BOARD: Fetch all employees (for grid Y-axis — ensures employees
-// with NO attendance records still appear as rows with 'absent' status)
-//
-// @param {object} filters - { hubIds: [], departmentIds: [] }
-// @param {number} page - Page number (1-indexed)
-// @param {number} pageSize - Number of records per page
-// @returns {Promise<{ data: Array, error: object|null }>}
-// ---------------------------------------------------------------------------
-export async function fetchEmployeesForAttendance(filters = {}, page = 1, pageSize = 50) {
-  let query = supabase
-    .from('employees')
-    .select(`
-      id,
-      full_name,
-      emp_code,
-      status,
-      hub_id,
-      hubs ( id, name, hub_code ),
-      departments ( id, name, dept_code )
-    `)
-    .eq('status', 'Active')
-    .order('full_name', { ascending: true })
-    .range((page - 1) * pageSize, page * pageSize - 1);
-
-  // Apply optional hub filter
-  if (filters.hubIds && filters.hubIds.length > 0) {
-    query = query.in('hub_id', filters.hubIds);
-  }
-
-  // Apply optional employee filter for restricted visibility
-  if (filters.employeeId) {
-    query = query.eq('id', filters.employeeId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('[attendanceService] fetchEmployeesForAttendance error:', error);
-    return { data: null, error };
-  }
-
-  return { data: data || [], error: null };
-}
+// Dead code removed (2026-11-20): fetchEmployeesForAttendance() was superseded by
+// fetchAllEmployeesForAttendanceSearch() + client-side pagination in useAttendanceBoard.js.
 
 // ---------------------------------------------------------------------------
-// MANAGER BOARD SEARCH: Fetch all active employees (unpaginated) for search
-//
-// Returns the same lightweight shape as fetchEmployeesForAttendance so a
-// searched employee from any page can be rendered directly in the grid or
-// mobile list without extra lookups. Respects the same RBAC/seniority filters.
-//
-// @param {object} filters - { hubIds?: [], employeeId?: string }
-// @returns {Promise<{ data: Array, error: object|null }>}
+// MANAGER BOARD: Fetch all active employees (unpaginated) for board & search
 // ---------------------------------------------------------------------------
 export async function fetchAllEmployeesForAttendanceSearch(filters = {}) {
   let query = supabase
@@ -507,4 +451,22 @@ export async function adminForceCheckout(recordId, currentSessions) {
   }
 
   return { data, error: null };
+}
+
+// ---------------------------------------------------------------------------
+// ATTENDANCE BOARD: Fetch hubs for schedule/hub selectors
+// Keeps raw Supabase queries inside the service layer (development-best-practices §10).
+// ---------------------------------------------------------------------------
+export async function fetchActiveHubs() {
+  const { data, error } = await supabase
+    .from('hubs')
+    .select('id, name, hub_code')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('[attendanceService] fetchActiveHubs error:', error);
+    return { data: [], error };
+  }
+
+  return { data: data || [], error: null };
 }

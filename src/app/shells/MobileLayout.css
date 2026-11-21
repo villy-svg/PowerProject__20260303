@@ -59,6 +59,12 @@
   margin-bottom: 16px;
 }
 
+/* Mobile shell never renders the desktop floating sub-sidebar toggle,
+   so cancel VerticalWorkspace's collapsed-sidebar left offset to keep mobile titles centered. */
+.mobile-layout .workspace-container.sub-sidebar-collapsed .mobile-header-shell .header-row-1 {
+  padding-left: 0;
+}
+
 .mobile-header-shell .header-row-1 h1 {
   font-size: 1.25rem;
   text-align: center;
@@ -98,8 +104,7 @@
 }
 
 /* Mobile expanded menu renders inline on the same page as the board, making the workspace scrollable */
-.mobile-layout .expanded-menu-row,
-.mobile-header-shell .expanded-menu-row {
+.mobile-layout .expanded-menu-row {
   position: relative;
   top: auto;
   left: auto;
@@ -115,7 +120,6 @@
   box-shadow: none;
   max-height: none;
   overflow: visible;
-  overflow-y: visible;
   -webkit-overflow-scrolling: auto;
   display: flex;
   flex-direction: column;
@@ -130,16 +134,14 @@
 }
 
 /* Ensure Data Operations and Filters trigger buttons have identical sizes in the expanded menu */
-.mobile-layout .expanded-menu-row .filters-row-toggle,
-.mobile-header-shell .expanded-menu-row .filters-row-toggle {
+.mobile-layout .expanded-menu-row .filters-row-toggle {
   padding: 10px 14px;
   min-height: 42px;
   display: flex;
   align-items: center;
 }
 
-.mobile-layout .mobile-menu-header,
-.mobile-header-shell .mobile-menu-header {
+.mobile-layout .mobile-menu-header {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -148,13 +150,7 @@
 }
 
 .mobile-layout .master-header-left,
-.mobile-header-shell .master-header-left,
-.mobile-layout .master-header-right,
-.mobile-header-shell .master-header-right,
-.mobile-layout .expanded-menu-row .master-header-left,
-.mobile-header-shell .expanded-menu-row .master-header-left,
-.mobile-layout .expanded-menu-row .master-header-right,
-.mobile-header-shell .expanded-menu-row .master-header-right {
+.mobile-layout .master-header-right {
   flex-direction: column;
   align-items: stretch;
   width: 100%;
@@ -163,34 +159,12 @@
   flex-shrink: 0; /* Prevent flex elements from shrinking/collapsing inside scrolling flex container */
 }
 
-.mobile-layout .master-header-left .view-mode-toggle,
-.mobile-header-shell .master-header-left .view-mode-toggle {
+.mobile-layout .master-header-left .view-mode-toggle {
   margin-right: 0;
   width: 100%;
 }
 
-/* ── 3. Mobile Sub-Sidebar ───────────────────────────────────────────── */
-.mobile-layout .sub-sidebar {
-  width: 240px;
-  position: fixed;
-  z-index: 1001;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  box-shadow: 10px 0 30px color-mix(in srgb, var(--bg-color), transparent 50%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.mobile-layout .sub-sidebar.tray-visible {
-  bottom: 64px;
-}
-
-.mobile-layout .workspace-container:not(.sub-sidebar-collapsed) .sub-sidebar {
-  transform: translateX(0);
-}
-
+/* ── 3. Mobile Overlay Backdrops ─────────────────────────────────────── */
 .mobile-layout .sidebar-backdrop,
 .mobile-layout .menu-backdrop {
   position: fixed;
@@ -360,7 +334,6 @@
    when the parent has no explicit height. These overrides restore natural block flow. */
 .mobile-menu-sidebar-filters .sub-sidebar-body {
   overflow: visible !important;
-  overflow-y: visible !important;
   height: auto !important;
   min-height: 1px !important;        /* Prevent total collapse if children are lazy-loading */
   flex: none !important;

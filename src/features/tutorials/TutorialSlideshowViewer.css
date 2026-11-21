@@ -8,6 +8,7 @@
   --tutorial-scrim: color-mix(in srgb, var(--bg-color), transparent 50%);
   --tutorial-surface-subtle: color-mix(in srgb, var(--text-color), transparent 98%);
   --tutorial-surface-hover: color-mix(in srgb, var(--text-color), transparent 95%);
+  --tutorial-bubble-bg: color-mix(in srgb, var(--bg-color), transparent 12%);
 }
 
 /* Tutorial Hub Page Container */
@@ -378,7 +379,7 @@
 /* Annotation Thought/Speech Bubbles — uses CSS variables for Light & Dark theme parity */
 .annotation-thought-bubble {
   position: absolute;
-  background: color-mix(in srgb, var(--bg-color), transparent 12%);
+  background: var(--tutorial-bubble-bg);
   border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 12px 16px;
@@ -419,7 +420,7 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 8px solid color-mix(in srgb, var(--bg-color), transparent 12%);
+  border-top: 8px solid var(--tutorial-bubble-bg);
 }
 
 /* Adjust pointer and pulse styles for bottom-aligned thought bubbles */
@@ -428,7 +429,7 @@
   bottom: auto;
   top: -8px;
   border-top: none;
-  border-bottom: 8px solid color-mix(in srgb, var(--bg-color), transparent 12%);
+  border-bottom: 8px solid var(--tutorial-bubble-bg);
 }
 
 .annotation-thought-bubble.align-bottom-right .thought-bubble-pulse,
@@ -1021,7 +1022,8 @@
     gap: 8px;
     padding-top: 12px;
   }
-  .flow-version-btn {
+  /* Match .halo-button.flow-version-btn specificity so mobile overrides apply cleanly */
+  .halo-button.flow-version-btn {
     padding: 6px 8px;
     min-height: 44px;
     gap: 2px;

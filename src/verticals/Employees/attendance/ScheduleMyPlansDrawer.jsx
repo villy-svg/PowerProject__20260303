@@ -1,6 +1,10 @@
 /**
  * ScheduleMyPlansDrawer.jsx
  *
+ * TODO(future-rebuild): Currently unmounted from EmployeeAttendanceBoard while
+ * bulk Schedule Planning is parked (replaced by SingleEmployeeBulkUpdateModal).
+ * External wiring (useSchedulePlanner + schedulePlannerService) is kept intact.
+ *
  * Drawer for Contributors to view their past Schedule plans,
  * see rejection notes, and re-load rejected plans into the board for editing.
  */
@@ -55,9 +59,9 @@ const ScheduleMyPlansDrawer = ({
             <div className="sp-approval-list">
               {planner.myPlans.map((plan) => {
                 const uniqueEmployeeIds = new Set(
-                  (plan.employee_Schedule_plan_entries || []).map(e => e.employee_id)
+                  (plan.employee_schedule_plan_entries || []).map(e => e.employee_id)
                 );
-                const entryCount = plan.employee_Schedule_plan_entries?.length || 0;
+                const entryCount = plan.employee_schedule_plan_entries?.length || 0;
 
                 return (
                   <div key={plan.id} className="sp-approval-card">

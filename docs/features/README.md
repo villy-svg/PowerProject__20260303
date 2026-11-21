@@ -49,13 +49,15 @@ component already listed under a `Draft`, `In Review`, or `Approved` feature, yo
 
 | Feature | Status | Last Updated | Tables Touched | Components Touched | Owner Session |
 |---|---|---|---|---|---|
-| [Employee Attendance Board Optimization](./employee_attendance_board_optimization.md) | Draft | 2026-08-22 | None | `EmployeeAttendanceBoard.jsx`, `AttendanceGrid.jsx`, `MasterPageHeader.jsx` | Antigravity session |
+| [Employee Attendance Board Optimization](./employee_attendance_board_optimization.md) | Implemented | 2026-11-20 | None | `EmployeeAttendanceBoard.jsx`, `AttendanceGrid.jsx`, `MasterPageHeader.jsx` | Antigravity session |
 | [Signup & Login Flow](./signup_login_flow.md) | Implemented | 2026-08-22 | `hr_employees`, etc. | `Auth` components | Unknown |
 | [Employee Declaration Form & DEC NA Tag](./employee_declaration_form.md) | Implemented | 2026-10-23 | `submissions`, `submissions_backup`, `employees` | `EmployeeForm.jsx`, `EmployeeDocumentSection.jsx`, `EmployeeCard.jsx`, `EmployeeListRow.jsx`, `EmployeeManagement.jsx`, `EmployeeCSVDownload.jsx`, `submissionService.js`, `entity-archive/index.ts` | Antigravity session |
 | [Mobile Profile "Update App" Button](./ota_manual_update_trigger.md) | Implemented | 2026-10-27 | None | `UserProfile.jsx`, `UserProfile.css`, `OTAContext.jsx`, `useOTAUpdate.js`, `otaUpdateService.js` | Antigravity session |
 | [Remarks Manager Grouping, Collapsible Rows & Grade Tags](./remarks_manager_grouping_and_tags.md) | Implemented | 2026-11-13 | None | `TaskController.jsx`, `TaskKanbanView.jsx`, `TaskListView.jsx`, `ListViewRow.jsx`, `TaskCard.jsx`, `remarksBoard.js` | Antigravity session |
 | [Board Menu Control Standardization & Modularization](./board_menu_standardization.md) | Implemented | 2026-11-18 | None | `src/components/ui/board-menu/*`, `TaskController.jsx`, `HubManagement.jsx`, `HubFunctionManagement.jsx`, `DailyTasksManagement.jsx`, `MasterPageHeader.css`, `globalTheme.css` | Antigravity session |
 | [Tutorial Rich Text Formatting, Alignment & Associated CSS Audit](./tutorial_text_alignment_and_css_audit.md) | Implemented | 2026-11-19 | `employee_rules` (existing `metadata` JSONB) | `TutorialSlideshowViewer.jsx`, `TutorialFormModal.jsx`, `TutorialHub.jsx`, `TutorialSlideshowViewer.css`, `EmployeeRulesBoard.jsx`, `Icons.jsx`, `App.jsx` | Antigravity session |
+| [Attendance Board — Mobile Redesign & Cleanup](./attendance_board_mobile_and_cleanup.md) | Implemented | 2026-11-20 | `daily_attendances`, `attendance_edit_requests`, `employees` (read/insert only) | `EmployeeAttendanceBoard.jsx`, `AttendanceBoardHeader.jsx`, `AttendanceGrid.jsx`, `AttendanceMobileList.jsx`, `AttendanceApprovalDrawer.jsx`, `AttendanceSuggestEditModal.jsx`, `SingleEmployeeBulkUpdateModal.jsx`, `useAttendanceBoard.js` | Antigravity session |
+| [Unmarked Attendance Manager Tasks](./unmarked_attendance_manager_tasks.md) | In Review | 2026-11-20 | `daily_attendances`, `attendance_edit_requests`, `tasks`, `employees`, `user_profiles` | `TaskCard.jsx`, `ListViewRow.jsx`, `TaskTreeView.jsx`, `CentralisedTaskBoard.jsx`, `SubmissionHistory.jsx`, `WorkspaceModals.jsx`, `unmarkedAttendanceTaskService.js` | Antigravity session |
 
 ---
 

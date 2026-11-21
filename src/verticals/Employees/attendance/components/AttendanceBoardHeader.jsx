@@ -2,9 +2,15 @@ import React from 'react';
 import MasterPageHeader from '../../../../components/layout/MasterPageHeader';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import CustomSelect from '../../../../components/ui/CustomSelect';
 import AttendanceLegend from '../AttendanceLegend';
+import CustomSelect from '../../../../components/ui/CustomSelect';
 import RBACManageButton from '../../../../components/ui/RBACManageButton';
+
+// TODO(future-rebuild): Complex bulk Schedule Planner header controls (Week Picker,
+// Paintbrush Status/Hub selectors, Save Draft / Submit Plan, Pending Plans button,
+// and My Plans History button) were stripped per Section A.2/A.4/A.5.
+// Replaced with a single "Multi-Day Update" button (1 employee, multiple days).
+// External wiring (useSchedulePlanner + schedulePlannerService) remains intact.
 
 const CustomDateInput = React.forwardRef(({ value, onClick, className, placeholder }, ref) => {
   const formattedValue = value ? value.replace(' - ', '  to  ') : '';
@@ -25,33 +31,28 @@ const AttendanceBoardHeader = ({
   // Core Shell Props
   user, permissions, setActiveVertical, onShowBottomNav, isSubSidebarOpen, setIsSubSidebarOpen, SidebarComponent, verticals, activeVertical,
   // View State
-  viewMode, setViewMode, isMenuOpen, setIsMenuOpen, setShowMyPlans,
+  viewMode, setViewMode, isMenuOpen, setIsMenuOpen, onOpenBulkUpdate,
   // Board State
-  parsedStart, parsedEnd, handleRangeChange, handleApplyDates,
+  parsedStart, parsedEnd, handleRangeChange, handleApplyDates, onApplyPreset,
   page, setPage, hasMore, isBoardLoading, refreshBoard,
-  // Planner Hook
-  planner, activePlanId, setActivePlanId,
-  // Schedule Drafting Hook
-  weekString, setWeekString, plannerDateFrom, setEmployeeSelections, totalEntries, isSubmittingPlanner,
-  paintbrushStatus, setPaintbrushStatus, paintbrushHubId, setPaintbrushHubId,
-  handleSaveDraft, handleSubmitForApproval,
-  // Data
-  hubs, canApprove, canSuggestEdit,
+  pendingRequestsCount = 0,
+  // Desktop-only Hub Filter (C.1) & Shell Type (B.3)
+  hubOptions = [], selectedHubId = '', onHubChange, shellType = 'desktop',
+  // Permissions
+  canApprove, canSuggestEdit,
   // Employee Search (records-mode SearchBar)
   searchRecords, recordType, onSearchSelect
 }) => {
-
   const headerLeftActions = (
     <div className="attendance-board__left-actions">
-      {viewMode === 'pending-requests' || viewMode === 'pending-plans' ? (
-        <button 
-          className="halo-button u-flex-center-gap-8" 
+      {viewMode === 'pending-requests' ? (
+        <button
+          className="halo-button u-flex-center-gap-8"
           onClick={() => setViewMode('attendance')}
         >
           <span>←</span> Back to Board
         </button>
-      ) : viewMode === 'attendance' ? (
-        // Standard Attendance Date Pickers
+      ) : (
         <div className="attendance-board__date-range">
           <DatePicker
             selectsRange={true}
@@ -67,72 +68,13 @@ const AttendanceBoardHeader = ({
             placeholderText="Select Date Range"
             customInput={<CustomDateInput />}
           />
-          <button 
-            className="attendance-board__go-btn" 
+          <button
+            className="attendance-board__go-btn"
             onClick={handleApplyDates}
             aria-label="Apply Dates"
           >
             Apply
           </button>
-        </div>
-      ) : (
-        // Planner Header (Paintbrush & Week)
-        <div className="attendance-board__planner-header-group">
-          <div className="attendance-board__date-range">
-            <DatePicker
-              selected={plannerDateFrom ? new Date(plannerDateFrom + 'T00:00:00') : null}
-              onChange={(date) => {
-                if (!date) return;
-                const d = new Date(date);
-                const firstThursday = new Date(d.getFullYear(), 0, 4);
-                const days = Math.round((d.getTime() - firstThursday.getTime()) / 86400000);
-                const weekNumber = 1 + Math.ceil(days / 7);
-                setWeekString(`${d.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`);
-                setEmployeeSelections({});
-                setActivePlanId(null);
-                setPage(1);
-              }}
-              showWeekPicker
-              showWeekNumbers
-              calendarStartDay={1}
-              dateFormat="I-R"
-              className="attendance-board__week-input"
-              wrapperClassName="attendance-board__date-wrapper"
-              portalId="root"
-            />
-          </div>
-          {canSuggestEdit && (
-            <div className="u-flex-gap-8 u-items-center">
-              <label className="u-text-sm u-fw-600 u-text-secondary">Paintbrush:</label>
-              <CustomSelect
-                value={paintbrushStatus}
-                onChange={setPaintbrushStatus}
-                className="attendance-board__planner-select--status"
-                options={[
-                  { value: 'cursor', label: 'Cursor (Edit Cell)' },
-                  { value: 'eraser', label: 'Eraser (Clear Cell)' },
-                  { value: 'present', label: 'Present (Day)' },
-                  { value: 'present-night', label: 'Present (Night)' },
-                  { value: 'week-off', label: 'Week-Off' },
-                  { value: 'leave', label: 'Leave' },
-                  { value: 'absent', label: 'Absent' },
-                  { value: 'no-show', label: 'No Show' },
-                  { value: 'no-call-no-show', label: 'No Call No Show' }
-                ]}
-              />
-              {(paintbrushStatus === 'present' || paintbrushStatus === 'present-night') && (
-                <CustomSelect
-                  value={paintbrushHubId}
-                  onChange={setPaintbrushHubId}
-                  className="attendance-board__planner-select--hub"
-                  options={[
-                    { value: '', label: 'No Hub' },
-                    ...hubs.map(h => ({ value: h.id, label: h.hub_code || h.name }))
-                  ]}
-                />
-              )}
-            </div>
-          )}
         </div>
       )}
     </div>
@@ -140,45 +82,30 @@ const AttendanceBoardHeader = ({
 
   const headerRightActions = (
     <>
-      {viewMode === 'pending-requests' || viewMode === 'pending-plans' ? null : viewMode === 'planner' ? (
+      {viewMode === 'pending-requests' ? null : (
         <>
-          <button
-            className="halo-button attendance-board__planner-action--save"
-            onClick={handleSaveDraft}
-            disabled={isSubmittingPlanner || totalEntries === 0}
-          >
-            {isSubmittingPlanner ? 'Saving…' : '💾 Save Draft'}
-          </button>
-          <button
-            className="halo-button attendance-board__planner-action--submit"
-            onClick={handleSubmitForApproval}
-            disabled={isSubmittingPlanner || totalEntries === 0}
-          >
-            {isSubmittingPlanner ? 'Submitting…' : '→ Submit Plan'}
-          </button>
-        </>
-      ) : (
-        <>
-          {/* Pending Plans badge — editor */}
-          {canApprove && !!planner.pendingPlansCount && (
+          {/* Simplified A.2: Single-employee, multi-day updater */}
+          {canSuggestEdit && (
             <button
-              className="halo-button attendance-board__approval-btn"
-              onClick={() => setViewMode('pending-plans')}
-              title="Editors can approve or reject bulk week-off plans."
+              className="halo-button master-action-btn"
+              onClick={onOpenBulkUpdate}
+              title="Update multiple dates for one employee at once."
             >
-              <span className="attendance-board__pending-badge">
-                {planner.pendingPlansCount}
-              </span>
-              Pending Plans
+              + Multi-Day Update
             </button>
           )}
 
-          {/* Individual edit request approval queue badge — editors only */}
+          {/* Individual edit request approval queue — editors only (with live pending badge) */}
           {canApprove && (
             <button
               className="halo-button attendance-board__approval-btn"
               onClick={() => setViewMode('pending-requests')}
             >
+              {pendingRequestsCount > 0 && (
+                <span className="attendance-board__pending-badge">
+                  {pendingRequestsCount}
+                </span>
+              )}
               Approvals
             </button>
           )}
@@ -192,88 +119,68 @@ const AttendanceBoardHeader = ({
           </button>
         </>
       )}
-      <RBACManageButton 
-        user={user} 
-        verticalId="EMPLOYEES" 
-        featureId="canAccessEmployeeAttendanceBoard" 
-        label="Attendance Board" 
+      <RBACManageButton
+        user={user}
+        verticalId="EMPLOYEES"
+        featureId="canAccessEmployeeAttendanceBoard"
+        label="Attendance Board"
       />
     </>
   );
 
-  /* Scoped BEM layout for Row 4 expanded menu: controls row above, legend row cleanly separated below */
-  const headerExpandedLeft = (viewMode === 'pending-requests' || viewMode === 'pending-plans') ? null : (
+  /* Scoped BEM layout for Row 4 expanded menu (Desktop only — Mobile omits pagination, hub filter & legend per B.3/C.1/C.2) */
+  const headerExpandedLeft = (viewMode === 'pending-requests' || shellType === 'mobile') ? null : (
     <div className="attendance-board__menu-content">
       <div className="attendance-board__menu-controls">
-        {canSuggestEdit && (
-          <div className="view-mode-toggle">
-            <button
-              className={`view-toggle-btn ${viewMode === 'attendance' ? 'active' : ''}`}
-              onClick={() => { setViewMode('attendance'); setIsMenuOpen(false); }}
-            >
-              Attendance Board
-            </button>
-            <button
-              className={`view-toggle-btn ${viewMode === 'planner' ? 'active' : ''}`}
-              onClick={() => { setViewMode('planner'); setIsMenuOpen(false); }}
-            >
-              Schedule Planner
-            </button>
-          </div>
-        )}
-
-        {/* Date Filter & Pagination */}
-        {viewMode === 'attendance' ? (
-          <div className="attendance-board__pagination">
-            <button
-              className="halo-button"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              ◀ Prev
-            </button>
-            <span className="attendance-board__page-label">
-              PAGE {page}
-            </span>
-            <button
-              className="halo-button"
-              onClick={() => setPage(p => p + 1)}
-              disabled={!hasMore}
-            >
-              Next ▶
-            </button>
-          </div>
-        ) : (
-          <div className="attendance-board__date-range">
-            <span className="attendance-board__date-label">Week:</span>
-            <input
-              type="week"
-              value={weekString}
-              onChange={e => {
-                setWeekString(e.target.value);
-                setEmployeeSelections({});
-                setActivePlanId(null);
-                setPage(1);
-              }}
-              className="attendance-board__week-input"
+        {/* Desktop-only Hub Filter (C.1) */}
+        {hubOptions.length > 1 && onHubChange && (
+          <div className="attendance-board__hub-filter">
+            <CustomSelect
+              value={selectedHubId}
+              onChange={onHubChange}
+              className="attendance-board__hub-select"
+              options={hubOptions}
             />
           </div>
         )}
 
-        {canSuggestEdit && planner.myPlans.length > 0 && (
-          <button
-            className="halo-button master-action-btn u-flex-center-gap-8"
-            onClick={() => {
-              setShowMyPlans(true);
-              setIsMenuOpen(false);
-            }}
-          >
-            My Plans History
-            <span className="attendance-board__pending-badge u-m-0">
-              {planner.myPlans.length}
-            </span>
-          </button>
+        {/* Desktop Quick Date Presets (C.3 parity with Phone) */}
+        {onApplyPreset && (
+          <div className="attendance-board__desktop-presets" role="group" aria-label="Quick date presets">
+            <button type="button" className="halo-button" onClick={() => { onApplyPreset('this-week'); setIsMenuOpen(false); }}>
+              This Week
+            </button>
+            <button type="button" className="halo-button" onClick={() => { onApplyPreset('last-14'); setIsMenuOpen(false); }}>
+              Last 14 Days
+            </button>
+            <button type="button" className="halo-button" onClick={() => { onApplyPreset('this-month'); setIsMenuOpen(false); }}>
+              Current Month
+            </button>
+            <button type="button" className="halo-button" onClick={() => { onApplyPreset('last-month'); setIsMenuOpen(false); }}>
+              Last Month
+            </button>
+          </div>
         )}
+
+        <div className="attendance-board__pagination">
+          <button
+            className="halo-button"
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            ◀ Prev
+          </button>
+          <span className="attendance-board__page-label">
+            PAGE {page}
+          </span>
+          <button
+            className="halo-button"
+            onClick={() => setPage(p => p + 1)}
+            disabled={!hasMore}
+          >
+            Next ▶
+          </button>
+        </div>
       </div>
 
       <div className="attendance-board__menu-legend">
@@ -285,20 +192,16 @@ const AttendanceBoardHeader = ({
   return (
     <MasterPageHeader
       title={
-        viewMode === 'planner' ? "Schedule Planner" : 
-        viewMode === 'pending-requests' ? "Pending Edit Requests" : 
-        viewMode === 'pending-plans' ? "Pending Schedule Plans" : 
-        "Attendance Board"
+        viewMode === 'pending-requests'
+          ? 'Pending Edit Requests'
+          : 'Attendance Board'
       }
       description={
-        viewMode === 'planner' ? (
-          <span>Select a status and hub for your paintbrush, then click cells to paint shifts for this week.</span>
-        ) : viewMode === 'pending-requests' || viewMode === 'pending-plans' ? (
-          <span>Review and approve pending requests from your team.</span>
+        viewMode === 'pending-requests' ? (
+          <span>Review and approve pending attendance edit requests from your team.</span>
         ) : (
           <span>
             Daily log for employee shifts, check-ins, and leave tracking.
-            <span className="attendance-board__info-icon" title="Switch to the Schedule Planner via the Menu to submit bulk requests.">ⓘ</span>
           </span>
         )
       }
@@ -320,7 +223,7 @@ const AttendanceBoardHeader = ({
       searchRecords={searchRecords}
       recordType={recordType}
       onSearchSelect={onSearchSelect}
-      hideSearchBar={viewMode === 'pending-requests' || viewMode === 'pending-plans'}
+      hideSearchBar={viewMode === 'pending-requests'}
     />
   );
 };

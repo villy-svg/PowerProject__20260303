@@ -18,22 +18,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { IconSun, IconMoon, IconCoffee, IconFile, IconX } from '../../../components/ui/Icons';
+import { IconSun, IconMoon, IconCoffee, IconFile } from '../../../components/ui/Icons';
+import {
+  ATTENDANCE_STATUS_META,
+  formatAttendanceStatusLabel,
+} from './utils/attendanceStatusMeta';
+import { toISTDateString } from './utils/attendanceDateUtils';
 import './AttendanceGrid.css';
-
-// ---------------------------------------------------------------------------
-// STATUS_META: Maps status enum → display label + CSS modifier class.
-// Using a lookup object avoids a cascade of if/else in the render.
-// ---------------------------------------------------------------------------
-const STATUS_META = {
-  'present':  { label: 'P',   className: 'attendance-cell--present'  },
-  'week-off': { label: 'WO',  className: 'attendance-cell--week-off' },
-  'leave':    { label: 'L',   className: 'attendance-cell--leave'    },
-  'absent':   { label: 'A',   className: 'attendance-cell--absent'   },
-  'no-show':  { label: 'NS',  className: 'attendance-cell--no-show'  },
-  'no-call-no-show': { label: 'NCNS', className: 'attendance-cell--no-call-no-show' },
-  'null':     { label: 'NULL', className: 'attendance-cell--null' },
-};
 
 // ---------------------------------------------------------------------------
 // Utility: Format a 'YYYY-MM-DD' string to a short display like "Mon 9"
@@ -43,12 +34,28 @@ function formatDateHeader(dateStr) {
   return date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' });
 }
 
+function formatHoverTooltip(record, status, shiftType) {
+  const parts = [formatAttendanceStatusLabel(status, shiftType)];
+  if (record?.first_login_time) {
+    parts.push(`In: ${new Date(record.first_login_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`);
+  }
+  if (record?.logout_time) {
+    parts.push(`Out: ${new Date(record.logout_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`);
+  }
+  if (record?.has_pending_edit) {
+    parts.push('Pending Edit');
+  }
+  return parts.join(' • ');
+}
+
 // ---------------------------------------------------------------------------
 // AttendanceCell — individual grid cell (sub-component)
+// TODO(future-rebuild): Inline cell <select> editing (isEditing/onCellChange/hubs)
+// was stripped when bulk Schedule Planner was parked. Restore when rebuilding bulk planner.
 // ---------------------------------------------------------------------------
-const AttendanceCell = React.memo(({ record, onClick, isEditing, onCellChange, hubs, employeeId, date }) => {
+const AttendanceCell = React.memo(({ record, onClick, isToday }) => {
   const status = record?.attendance_status || 'null';
-  const meta = STATUS_META[status] || STATUS_META['null'];
+  const meta = ATTENDANCE_STATUS_META[status] || ATTENDANCE_STATUS_META['null'];
   const hasPendingEdit = !!record?.has_pending_edit;
   const shiftType = record?.shift_type;
 
@@ -69,51 +76,15 @@ const AttendanceCell = React.memo(({ record, onClick, isEditing, onCellChange, h
     icon = <span className="u-fw-800 u-opacity-50">NULL</span>;
   }
 
-  if (isEditing) {
-    return (
-      <td className={`attendance-cell ${meta.className} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''}`}>
-        <div 
-          className="u-flex-col-gap-4 u-p-4 u-min-w-90"
-          onClick={e => e.stopPropagation()}
-        >
-          <select 
-            className="master-dropdown u-w-full u-text-10px u-p-4 u-h-auto" 
-            value={status} 
-            onChange={e => onCellChange(employeeId, date, e.target.value, record?.hub_id || '')}
-            autoFocus
-          >
-            <option value="null">NULL (Not Marked)</option>
-            <option value="present">Present (Day)</option>
-            <option value="present-night">Present (Night)</option>
-            <option value="week-off">Week-Off</option>
-            <option value="leave">Leave</option>
-            <option value="absent">Absent</option>
-            <option value="no-show">No Show</option>
-            <option value="no-call-no-show">No Call No Show</option>
-          </select>
-          {(status === 'present' || status === 'present-night') && (
-            <select
-              className="master-dropdown u-w-full u-text-10px u-p-4 u-h-auto"
-              value={record?.hub_id || ''}
-              onChange={e => onCellChange(employeeId, date, status, e.target.value)}
-            >
-              <option value="">No Hub</option>
-              {hubs?.map(h => <option key={h.id} value={h.id}>{h.hub_code || h.name}</option>)}
-            </select>
-          )}
-        </div>
-      </td>
-    );
-  }
-
   return (
     <td
-      className={`attendance-cell ${meta.className} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''}`}
+      className={`attendance-cell ${meta.gridClass} ${hasPendingEdit ? 'attendance-cell--has-pending' : ''} ${isToday ? 'attendance-cell--today' : ''}`}
       onClick={onClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-      aria-label={`Status: ${status}${hasPendingEdit ? ', has pending edit' : ''}`}
+      title={formatHoverTooltip(record, status, shiftType)}
+      aria-label={`Status: ${meta.label}${hasPendingEdit ? ', has pending edit' : ''}`}
     >
       <span className="attendance-cell__status-label u-flex-center">
         {icon}
@@ -125,8 +96,11 @@ const AttendanceCell = React.memo(({ record, onClick, isEditing, onCellChange, h
     </td>
   );
 }, (prev, next) => {
-  return prev.isEditing === next.isEditing &&
+  return prev.isToday === next.isToday &&
          prev.record?.attendance_status === next.record?.attendance_status &&
+         prev.record?.shift_type === next.record?.shift_type &&
+         prev.record?.first_login_time === next.record?.first_login_time &&
+         prev.record?.logout_time === next.record?.logout_time &&
          prev.record?.hub_id === next.record?.hub_id &&
          prev.record?.has_pending_edit === next.record?.has_pending_edit &&
          prev.record?.is_draft === next.record?.is_draft;
@@ -168,7 +142,8 @@ const SkeletonRow = ({ colCount }) => (
 // ---------------------------------------------------------------------------
 // AttendanceGrid — main export
 // ---------------------------------------------------------------------------
-const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, activeCellEdit, onCellChange, hubs, groupByHub }) => {
+const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellClick, groupByHub = false }) => {
+  const todayStr = useMemo(() => toISTDateString(new Date()), []);
   const groupedEmployees = useMemo(() => {
     if (!groupByHub || !employees) return { 'All Employees': employees || [] };
     const groups = {};
@@ -215,7 +190,10 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
           <tr>
             <th className="attendance-grid__corner-cell">Employee</th>
             {dateRange.map(date => (
-              <th key={date} className="attendance-grid__date-header">
+              <th
+                key={date}
+                className={`attendance-grid__date-header ${date === todayStr ? 'attendance-grid__date-header--today' : ''}`}
+              >
                 {formatDateHeader(date)}
               </th>
             ))}
@@ -245,11 +223,7 @@ const AttendanceGrid = ({ employees, dateRange, getCellData, isLoading, onCellCl
                           key={`${employee.id}_${date}`}
                           record={getCellData(employee.id, date)}
                           onClick={() => onCellClick(employee.id, date)}
-                          isEditing={activeCellEdit?.empId === employee.id && activeCellEdit?.date === date}
-                          onCellChange={onCellChange}
-                          hubs={hubs}
-                          employeeId={employee.id}
-                          date={date}
+                          isToday={date === todayStr}
                         />
                       ))}
                     </tr>

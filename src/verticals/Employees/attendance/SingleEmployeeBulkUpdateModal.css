@@ -1,0 +1,91 @@
+/* ==========================================================================
+   SingleEmployeeBulkUpdateModal.css
+   Scoped BEM styles for the simplified 1-employee, multi-day updater (A.2).
+   ========================================================================== */
+
+.bulk-update-modal {
+  max-width: 540px;
+  width: 100%;
+}
+
+.bulk-update-modal__dates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bulk-update-modal__date-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bulk-update-modal__link-btn {
+  background: transparent;
+  border: none;
+  color: var(--brand-green);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.bulk-update-modal__date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.bulk-update-modal__date-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 48px;
+  padding: 6px 8px;
+  border-radius: var(--radius-button, 10px);
+  border: 1px solid var(--border-color);
+  background: var(--halo-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.bulk-update-modal__date-chip--selected {
+  border-color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 82%);
+  color: var(--brand-green);
+}
+
+.bulk-update-modal__date-weekday {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.bulk-update-modal__date-day {
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.bulk-update-modal__error {
+  margin: 8px 0 0;
+}
+
+@media screen and (max-width: 768px) {
+  .bulk-update-modal {
+    max-width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .bulk-update-modal__date-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

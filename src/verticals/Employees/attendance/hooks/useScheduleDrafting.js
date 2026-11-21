@@ -1,5 +1,9 @@
+// TODO(future-rebuild): Bulk Schedule Planner drafting hook is parked while
+// the Attendance Board uses the simplified SingleEmployeeBulkUpdateModal (1 person,
+// multiple days). External wiring (useSchedulePlanner + schedulePlannerService) is
+// intentionally kept intact for future rebuild.
 import { useState, useCallback, useMemo } from 'react';
-import { getCurrentWeekString, getDatesFromWeekString } from '../utils/attendanceDateUtils';
+import { getCurrentWeekString, getDatesFromWeekString, getWeekStringFromDate } from '../utils/attendanceDateUtils';
 
 export function useScheduleDrafting({ planner, getLiveCellData, refreshBoard }) {
   // Planner State
@@ -182,13 +186,7 @@ export function useScheduleDrafting({ planner, getLiveCellData, refreshBoard }) 
 
   const loadPlanIntoGrid = useCallback((plan, setViewMode, setShowMyPlans) => {
     setActivePlanId(plan.id);
-    
-    const d = new Date(plan.date_from);
-    const year = d.getFullYear();
-    const firstThursday = new Date(d.getFullYear(), 0, 4);
-    const days = Math.round((d.getTime() - firstThursday.getTime()) / 86400000);
-    const weekNumber = 1 + Math.ceil(days / 7);
-    setWeekString(`${year}-W${weekNumber.toString().padStart(2, '0')}`);
+    setWeekString(getWeekStringFromDate(new Date(plan.date_from)));
 
     const newSelections = {};
     const entries = plan.employee_schedule_plan_entries || [];
@@ -210,7 +208,7 @@ export function useScheduleDrafting({ planner, getLiveCellData, refreshBoard }) 
 
   return {
     weekString, setWeekString,
-    activePlanId,
+    activePlanId, setActivePlanId,
     employeeSelections, setEmployeeSelections,
     isSubmittingPlanner,
     plannerError, setPlannerError,

@@ -22,24 +22,21 @@
 import React, { useState } from 'react';
 import { submitEditRequest } from '../../../services/employees/editRequestService';
 import CustomSelect from '../../../components/ui/CustomSelect';
+import { useLayoutShell } from '../../../app/shells/useLayoutShell';
+import {
+  ATTENDANCE_STATUS_OPTIONS,
+  SHIFT_TYPE_OPTIONS,
+} from './utils/attendanceStatusMeta';
+import { buildDefaultShiftTimes } from './utils/attendanceDateUtils';
 
-// ---------------------------------------------------------------------------
-// STATUS_OPTIONS: The selectable statuses for the suggestion form.
-// Presentational helpers avoid mixing display logic with data logic.
-// ---------------------------------------------------------------------------
-const STATUS_OPTIONS = [
-  { value: 'present',  label: 'Present'  },
-  { value: 'week-off', label: 'Week-Off' },
-  { value: 'leave',    label: 'Leave'    },
-  { value: 'absent',   label: 'Absent'   },
-  { value: 'no-show',  label: 'No Show'  },
-  { value: 'no-call-no-show', label: 'No Call No Show' },
-];
-
-const SHIFT_TYPE_OPTIONS = [
-  { value: '',      label: '— None —'  },
-  { value: 'day',   label: '☀ Day'   },
-  { value: 'night', label: '🌙 Night' },
+const MOBILE_STATUS_CHIPS = [
+  { key: 'present-day',     status: 'present',         shiftType: 'day',   label: '☀ Day' },
+  { key: 'present-night',   status: 'present',         shiftType: 'night', label: '🌙 Night' },
+  { key: 'week-off',        status: 'week-off',        shiftType: '',      label: '☕ Week-Off' },
+  { key: 'leave',           status: 'leave',           shiftType: '',      label: '📄 Leave' },
+  { key: 'absent',          status: 'absent',          shiftType: '',      label: 'ABS Absent' },
+  { key: 'no-show',         status: 'no-show',         shiftType: '',      label: 'X No Show' },
+  { key: 'no-call-no-show', status: 'no-call-no-show', shiftType: '',      label: 'XX NCNS' },
 ];
 
 const AttendanceSuggestEditModal = ({
@@ -48,6 +45,8 @@ const AttendanceSuggestEditModal = ({
   onClose,
   onSubmitComplete,
 }) => {
+  const { shellType } = useLayoutShell();
+  const isMobileSheet = shellType === 'mobile';
   const { employeeId, date, record, employeeName } = selectedCell || {};
 
   // Form state — default to the existing record's values if available
@@ -57,7 +56,7 @@ const AttendanceSuggestEditModal = ({
     
   const [suggestedStatus, setSuggestedStatus] = useState(initialStatus);
   const [suggestedShiftType, setSuggestedShiftType] = useState(
-    record?.shift_type || ''
+    record?.shift_type || (initialStatus === 'present' ? 'day' : '')
   );
   const [suggestedLeaveReason, setSuggestedLeaveReason] = useState('');
 
@@ -77,29 +76,20 @@ const AttendanceSuggestEditModal = ({
   // ---------------------------------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError(null);
 
-    let finalLoginTime = null;
-    let finalLogoutTime = null;
-
-    if (suggestedStatus === 'present') {
-      if (suggestedShiftType === 'day') {
-        finalLoginTime = `${date}T10:00`;
-        finalLogoutTime = `${date}T20:00`;
-      } else if (suggestedShiftType === 'night') {
-        finalLoginTime = `${date}T22:00`;
-        
-        const nextDay = new Date(date + 'T00:00:00');
-        nextDay.setDate(nextDay.getDate() + 1);
-        const yyyy = nextDay.getFullYear();
-        const mm = String(nextDay.getMonth() + 1).padStart(2, '0');
-        const dd = String(nextDay.getDate()).padStart(2, '0');
-        const nextDateStr = `${yyyy}-${mm}-${dd}`;
-        
-        finalLogoutTime = `${nextDateStr}T08:00`;
-      }
+    if (suggestedStatus === 'present' && !suggestedShiftType) {
+      setSubmitError('Please select a Shift Type (Day or Night) for Present.');
+      return;
     }
+
+    setIsSubmitting(true);
+
+    const { loginTime: finalLoginTime, logoutTime: finalLogoutTime } = buildDefaultShiftTimes(
+      date,
+      suggestedStatus,
+      suggestedShiftType
+    );
 
     try {
       const { error } = await submitEditRequest({
@@ -127,11 +117,16 @@ const AttendanceSuggestEditModal = ({
   };
 
   return (
-    /* Modal overlay (ui-design-system §5) */
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+    /* Modal overlay (ui-design-system §5) — bottom-anchored sheet on mobile (adaptive-ui-strategy §4/§6) */
+    <div
+      className={`modal-overlay ${isMobileSheet ? 'modal-overlay--bottom-sheet' : ''}`}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       {/* Stop click propagation so clicking inside the modal doesn't close it */}
       <div
-        className="modal-content modal-body suggest-edit-modal"
+        className={`modal-content modal-body suggest-edit-modal ${isMobileSheet ? 'suggest-edit-modal--sheet' : ''}`}
         onClick={(e) => e.stopPropagation()}
         aria-label="Suggest attendance edit"
       >
@@ -164,39 +159,75 @@ const AttendanceSuggestEditModal = ({
               </div>
             )}
 
-            {/* Suggested Status — using Master Dropdown (ui-design-system §10) */}
-            <div className="form-group">
-              <label className="form-label" htmlFor="suggest-status-select">
-                SUGGESTED STATUS
-              </label>
-              <div className="form-input-container">
-                <CustomSelect
-                  id="suggest-status-select"
-                  className="master-dropdown"
-                  value={suggestedStatus}
-                  onChange={setSuggestedStatus}
-                  options={STATUS_OPTIONS}
-                  required
-                />
+            {record?.has_pending_edit && (
+              <div className="attendance-board__error u-mb-12">
+                <p>⚠ A pending edit request already exists for this date. Submitting again will create another pending request.</p>
               </div>
-            </div>
+            )}
 
-            {/* Shift Type (only relevant if suggesting 'present') */}
-            {suggestedStatus === 'present' && (
+            {/* Suggested Status — 1-tap chips on Mobile, Master Dropdown on Desktop */}
+            {isMobileSheet ? (
               <div className="form-group">
-                <label className="form-label" htmlFor="suggest-shift-type-select">
-                  SHIFT TYPE
-                </label>
-                <div className="form-input-container">
-                  <CustomSelect
-                    id="suggest-shift-type-select"
-                    className="master-dropdown"
-                    value={suggestedShiftType}
-                    onChange={setSuggestedShiftType}
-                    options={SHIFT_TYPE_OPTIONS}
-                  />
+                <label className="form-label">SELECT STATUS</label>
+                <div className="suggest-edit-chips" role="radiogroup" aria-label="Attendance status">
+                  {MOBILE_STATUS_CHIPS.map((chip) => {
+                    const isSelected =
+                      suggestedStatus === chip.status &&
+                      (chip.status !== 'present' || suggestedShiftType === chip.shiftType);
+                    return (
+                      <button
+                        key={chip.key}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        className={`suggest-edit-chip ${isSelected ? 'suggest-edit-chip--selected' : ''}`}
+                        onClick={() => {
+                          setSuggestedStatus(chip.status);
+                          setSuggestedShiftType(chip.shiftType);
+                        }}
+                      >
+                        {chip.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+            ) : (
+              <>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="suggest-status-select">
+                    SUGGESTED STATUS
+                  </label>
+                  <div className="form-input-container">
+                    <CustomSelect
+                      id="suggest-status-select"
+                      className="master-dropdown"
+                      value={suggestedStatus}
+                      onChange={setSuggestedStatus}
+                      options={ATTENDANCE_STATUS_OPTIONS}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Shift Type (only relevant if suggesting 'present') */}
+                {suggestedStatus === 'present' && (
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="suggest-shift-type-select">
+                      SHIFT TYPE
+                    </label>
+                    <div className="form-input-container">
+                      <CustomSelect
+                        id="suggest-shift-type-select"
+                        className="master-dropdown"
+                        value={suggestedShiftType}
+                        onChange={setSuggestedShiftType}
+                        options={SHIFT_TYPE_OPTIONS}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Leave Reason (only relevant if suggesting 'leave') */}

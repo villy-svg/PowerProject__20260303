@@ -50,6 +50,7 @@ import {
   resolveHeaderClickTarget,
   resolveVerticalRootId,
 } from '../../registry/verticalRegistry';
+import { LOCKED_FEATURE_VIEWS } from '../../constants/verticalFeatures';
 
 const ContentRouter = ({
   verticals,
@@ -90,6 +91,7 @@ const ContentRouter = ({
     activeVertical === 'client_category_management' ||
     activeVertical === 'client_service_management' ||
     activeVertical === 'client_billing_model_management';
+  const isLockedFeatureRoute = LOCKED_FEATURE_VIEWS.includes(activeVertical);
   const isLockedRoute = Boolean(
     (resolvedRootId && verticals?.[resolvedRootId]?.locked) ||
     (isClientMgmtRoute && verticals?.CLIENTS?.locked)
@@ -98,10 +100,16 @@ const ContentRouter = ({
   React.useEffect(() => {
     if (isLockedRoute) {
       setActiveVertical(null);
+    } else if (isLockedFeatureRoute) {
+      // Redirect locked employee feature routes (e.g. Leave Manager) to Employees Records Manager
+      const fallbackTarget = resolvedRootId === verticals?.EMPLOYEES?.id
+        ? (verticals?.EMPLOYEES?.id || null)
+        : null;
+      setActiveVertical(fallbackTarget);
     }
-  }, [isLockedRoute, setActiveVertical]);
+  }, [isLockedRoute, isLockedFeatureRoute, resolvedRootId, verticals, setActiveVertical]);
 
-  if (!activeVertical || isLockedRoute) {
+  if (!activeVertical || isLockedRoute || isLockedFeatureRoute) {
     return (
       <ExecutiveSummary
         tasks={tasks}

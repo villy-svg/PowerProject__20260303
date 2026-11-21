@@ -1,6 +1,10 @@
 /**
  * SchedulePlanApprovalDrawer.jsx
  *
+ * TODO(future-rebuild): Currently unmounted from EmployeeAttendanceBoard while
+ * bulk Schedule Planning is parked (replaced by SingleEmployeeBulkUpdateModal).
+ * External wiring (useSchedulePlanner + schedulePlannerService) is kept intact.
+ *
  * Slide-in approval panel for Editors to review, approve, or reject
  * pending bulk Schedule plans submitted by Contributors or other Editors.
  *
@@ -44,17 +48,17 @@ const PlanCard = ({ plan, onApprove, onReject, isActing }) => {
   const [rejectNote,      setRejectNote]     = useState('');
   const [isExpanded,      setIsExpanded]     = useState(false);
 
-  // Compute unique employee count from entries
+  // Compute unique employee count from entries (fixed lowercase relation key)
   const uniqueEmployees = [
     ...new Map(
-      (plan.employee_Schedule_plan_entries || []).map(e => [e.employee_id, e.employees])
+      (plan.employee_schedule_plan_entries || []).map(e => [e.employee_id, e.employees])
     ).values()
   ];
   const uniqueDates = [
-    ...new Set((plan.employee_Schedule_plan_entries || []).map(e => e.shift_date))
+    ...new Set((plan.employee_schedule_plan_entries || []).map(e => e.shift_date))
   ].sort();
 
-  const employeesData = (plan.employee_Schedule_plan_entries || []).reduce((acc, entry) => {
+  const employeesData = (plan.employee_schedule_plan_entries || []).reduce((acc, entry) => {
     if (!acc[entry.employee_id]) {
       acc[entry.employee_id] = {
         employeeId: entry.employee_id,
@@ -211,7 +215,7 @@ const SchedulePlanApprovalDrawer = ({
     setActionError(null);
 
     // Flatten entries into { employee_id, shift_date, attendance_status, hub_id } for the service
-    const entries = (plan.employee_Schedule_plan_entries || []).map(e => ({
+    const entries = (plan.employee_schedule_plan_entries || []).map(e => ({
       employee_id:       e.employee_id,
       shift_date:        e.shift_date,
       attendance_status: e.attendance_status,
@@ -288,35 +292,6 @@ const SchedulePlanApprovalDrawer = ({
           )}
         </div>
       </div>
-
-      {/* Scoped styles for plan-specific additions (extends existing approval-card CSS) */}
-      <style>{`
-        .sp-plan-card__expand-btn {
-          font-size: 0.72rem;
-          opacity: 0.6;
-          align-self: flex-start;
-          padding: 0.2rem 0.5rem;
-        }
-        .sp-plan-card__emp-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          padding: 0.5rem;
-          background: var(--halo-bg);
-          border-radius: var(--radius-button, 12px);
-          border: 1px solid var(--border-color);
-        }
-        .sp-plan-card__emp-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          padding: 0.2rem 0.6rem;
-          background: color-mix(in srgb, var(--text-color), transparent 90%);
-          border-radius: 99px;
-          font-size: 0.72rem;
-          font-weight: 500;
-        }
-      `}</style>
     </div>
   );
 };

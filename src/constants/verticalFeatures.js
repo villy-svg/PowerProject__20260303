@@ -5,6 +5,23 @@
  * Used in User Management for granular RBAC.
  */
 
+/**
+ * Ordered navigation items for the Employees vertical sub-sidebar and mobile board switcher.
+ * Kept in this neutral constants module to avoid circular imports with verticalRegistry.js.
+ */
+export const EMPLOYEE_NAV_ITEMS = [
+  { id: 'attendance_self_service',   label: 'Current Attendance',  permissionKey: 'canAccessAttendanceSelfService' },
+  { id: 'employee_attendance_board', label: 'Attendance Board',    permissionKey: 'canAccessEmployeeAttendanceBoard' },
+  { id: 'employee_tasks',            label: 'Remarks Manager',     permissionKey: 'canAccessEmployeeTasks', requireTruthy: true },
+  { id: 'employee_rules_board',      label: 'Rules & Regulations', permissionKey: 'canAccessEmployeeRulesBoard' },
+  { id: 'employee_leave_wallet',     label: 'Leave Manager',       permissionKey: 'canAccessEmployeeLeaveWallet', locked: true },
+];
+
+/** Feature sub-views that are currently locked/disabled across Desktop, Mobile, and ContentRouter */
+export const LOCKED_FEATURE_VIEWS = EMPLOYEE_NAV_ITEMS
+  .filter(item => item.locked)
+  .map(item => item.id);
+
 export const VERTICAL_FEATURES = {
   CLIENTS: [
     { id: 'canAccessClients', label: 'Clients List' },

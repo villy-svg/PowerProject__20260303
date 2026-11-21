@@ -84,8 +84,10 @@ export async function fetchPendingRequests() {
       shift_date,
       suggested_status,
       suggested_shift_type,
+      suggested_leave_type,
       suggested_first_login_time,
       suggested_logout_time,
+      maker_note,
       daily_attendance_id,
       request_status,
       created_at,
@@ -172,36 +174,5 @@ export async function rejectRequest({ requestId, reviewedBy, reviewNote = '' }) 
   return { data, error: null };
 }
 
-// ---------------------------------------------------------------------------
-// MANAGER BOARD: Fetch requests for a specific attendance record
-//
-// Used to load the request history when an editor clicks a ⚠️ cell.
-//
-// @param {string} dailyAttendanceId - UUID of the daily_attendances row
-// @returns {Promise<{ data: Array, error: object|null }>}
-// ---------------------------------------------------------------------------
-export async function fetchRequestsForAttendance(dailyAttendanceId) {
-  const { data, error } = await supabase
-    .from('attendance_edit_requests')
-    .select(`
-      id,
-      suggested_status,
-      suggested_shift_type,
-      suggested_first_login_time,
-      suggested_logout_time,
-      request_status,
-      review_note,
-      created_at,
-      requester:requested_by ( id, name, email ),
-      reviewer:reviewed_by ( id, name, email )
-    `)
-    .eq('daily_attendance_id', dailyAttendanceId)
-    .order('created_at', { ascending: false });
+// Dead code removed (2026-11-20): fetchRequestsForAttendance() had zero callers across src/.
 
-  if (error) {
-    console.error('[editRequestService] fetchRequestsForAttendance error:', error);
-    return { data: null, error };
-  }
-
-  return { data: data || [], error: null };
-}

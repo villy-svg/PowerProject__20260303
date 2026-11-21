@@ -19,17 +19,18 @@
  * - master-header-system §1-5
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   IconHome,
   IconPlus,
   IconBoards,
   IconFilter,
+  IconLock,
 } from '../../components/ui/Icons';
 import MasterHeaderMenu from '../../components/layout/MasterHeaderMenu';
-import SearchBar from '../../components/ui/SearchBar';
 import '../../components/layout/BottomNav.css';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
+import { EMPLOYEE_NAV_ITEMS } from '../../constants/verticalFeatures';
 
 const MobileHeader = ({
   title,
@@ -104,24 +105,15 @@ const MobileHeader = ({
         list.push({ id: 'daily_task_templates', label: 'Daily Task Templates' });
       }
     } else if (isEmp) {
-      if (permissions?.canAccessEmployeeTasks !== false) {
-        list.push({ id: 'employee_tasks', label: 'Remarks Manager' });
-      }
-      if (permissions?.canAccessEmployeeRulesBoard !== false) {
-        list.push({ id: 'employee_rules_board', label: 'Rules & Regulations' });
-      }
-      if (permissions?.canAccessEmployeeAttendanceBoard !== false) {
-        list.push({ id: 'employee_attendance_board', label: 'Attendance Board' });
-      }
-      if (permissions?.canAccessEmployeeLeaveWallet !== false) {
-        list.push({ id: 'employee_leave_wallet', label: 'Leave Manager' });
-      }
-      if (permissions?.canAccessAttendanceSelfService !== false) {
-        list.push({ id: 'attendance_self_service', label: 'Current Attendance' });
-      }
+      // Match desktop sub-sidebar order: Employees Records Manager first, then EMPLOYEE_NAV_ITEMS
       if (permissions?.canAccessEmployees !== false) {
-        list.push({ id: empId, label: 'Employees List' });
+        list.push({ id: empId, label: 'Employees' });
       }
+      EMPLOYEE_NAV_ITEMS.forEach(({ id, label, permissionKey, locked }) => {
+        if (permissions?.[permissionKey] !== false) {
+          list.push({ id, label, locked: Boolean(locked) });
+        }
+      });
     } else if (isClient) {
       if (permissions?.canAccessClientTasks !== false) {
         list.push({ id: 'client_tasks', label: 'Client Tasks' });
@@ -200,18 +192,28 @@ const MobileHeader = ({
           </div>
           <div className="mobile-board-sub-tray-content custom-scrollbar">
             {boards.map(board => {
-              const isActive = activeVertical === board.id;
+              const isLocked = Boolean(board.locked);
+              const isActive = !isLocked && activeVertical === board.id;
               return (
                 <button
                   key={board.id}
-                  className={`sub-tray-option-btn ${isActive ? 'active' : ''}`}
+                  type="button"
+                  disabled={isLocked}
+                  aria-disabled={isLocked}
+                  title={isLocked ? 'Coming Soon / Locked' : undefined}
+                  className={`sub-tray-option-btn ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
                   onClick={() => {
+                    if (isLocked) return;
                     setActiveVertical(board.id);
                     setIsBoardSubTrayOpen(false);
                   }}
                 >
                   <span className="option-label">{board.label}</span>
-                  {isActive && <span className="active-dot" />}
+                  {isLocked ? (
+                    <IconLock className="sub-tray-lock-icon" size={14} />
+                  ) : (
+                    isActive && <span className="active-dot" />
+                  )}
                 </button>
               );
             })}

@@ -17,5 +17,6 @@ Rules for maintaining 100% schema parity and ensuring predictable database evolu
 - **Mandatory Refresh**: Every schema-changing SQL migration MUST end with `NOTIFY pgrst, 'reload schema';` to prevent Supabase API caching errors (HTTP 406).
 
 ## 4. Staging → Production Pipeline
+- **Explicit Push Permission Required**: Agents MUST NEVER push any database migration anywhere — neither via `git push` (to `staging`, `main`, or any remote branch) nor via `supabase db push` (to any remote database) — without the user's explicit permission first. Always create the migration file locally and wait for user approval before pushing.
 - **Strict Flow**: Migrations MUST flow from Staging to Production. Never push a migration directly to production without validating it on staging first.
 - **No UI Edits**: Never create tables or columns directly in the Supabase UI. Always write the SQL first in a migration file.

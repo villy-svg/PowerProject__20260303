@@ -48,7 +48,6 @@ const WorkspaceSubSidebar = ({
           className={`halo-button ${onHeaderClick ? 'navigable-header' : ''}`}
           onClick={onHeaderClick}
           title={onHeaderClick ? "Click to open Management View" : ""}
-          style={{ width: '100%', padding: '8px 16px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >
           {label}
         </button>

@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import TaskController from '../tasks/TaskController';
-import { taskUtils } from '../../utils/taskUtils';
 import { resolveVerticalRootId } from '../../registry/verticalRegistry';
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
@@ -70,8 +69,9 @@ const VerticalWorkspace = ({
   if (!isAuthorized) {
     return (
       <div className="workspace-container access-denied-layout">
-        <div className="access-denied-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-          <IconLock className="lock-icon" size={48} style={{ opacity: 0.5, color: 'var(--brand-red)' }} />
+        {/* Styled via VerticalWorkspace.css (.access-denied-content) to avoid inline styles */}
+        <div className="access-denied-content">
+          <IconLock className="lock-icon" size={48} />
           <h2>Access Denied</h2>
           <p>You do not have permission to access the <strong>{label}</strong> {isFeatureView ? 'feature' : 'workspace'}.</p>
           <p>Please contact your administrator if you believe this is an error.</p>

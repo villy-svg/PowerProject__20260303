@@ -24,17 +24,7 @@ import React, { useState, useCallback } from 'react';
 import { approveRequest, rejectRequest } from '../../../services/employees/editRequestService';
 import '../../../styles/systems/systemLists.css';
 import { IconChevronDown, IconChevronRight } from '../../../components/ui/Icons';
-
-
-// ---------------------------------------------------------------------------
-// STATUS_LABELS: Human-readable labels for the suggested_status enum
-// ---------------------------------------------------------------------------
-const STATUS_LABELS = {
-  'present':  'Present',
-  'week-off': 'Week-Off',
-  'leave':    'Leave',
-  'absent':   'Absent',
-};
+import { formatAttendanceStatusLabel } from './utils/attendanceStatusMeta';
 
 // ---------------------------------------------------------------------------
 // RequestCard — renders a single pending request with Approve/Reject actions
@@ -52,16 +42,21 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
 
   const formattedDate = new Date(request.shift_date + 'T00:00:00')
     .toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+  const readableStatus = formatAttendanceStatusLabel(
+    request.suggested_status,
+    request.suggested_shift_type
+  );
+  const isExpanded = showDetails || showRejectNote;
 
   return (
     <div className="u-mb-12">
-      <div className={`list-task-row u-h-auto u-pl-12 ${(showDetails || showRejectNote) ? 'is-expanded' : ''}`} style={{ 
-        '--stage-color': 'var(--brand-yellow)', 
-        borderBottomLeftRadius: (showDetails || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
-        borderBottomRightRadius: (showDetails || showRejectNote) ? 0 : 'var(--radius-button, 12px)',
-      }}>
+      <div
+        className={`list-task-row u-h-auto u-pl-12 approval-request-row ${
+          isExpanded ? 'is-expanded approval-request-row--expanded' : ''
+        }`}
+      >
         {/* CHECKBOX FOR BULK ACTION */}
-        <div className="u-flex-center u-mr-12">
+        <div className="u-flex-center u-mr-12 approval-request-row__checkbox">
           <input 
             type="checkbox" 
             checked={isSelected} 
@@ -71,7 +66,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
         </div>
 
         {/* LEFT SIDE: Identity & Content */}
-        <div className="list-row-main u-flex-1">
+        <div className="list-row-main u-flex-1 approval-request-row__main">
           <div className="list-row-badges">
             <span className="card-priority priority-high">
               {formattedDate}
@@ -89,12 +84,12 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
           </div>
           
           <div className="list-row-content">
-            {request.employees?.full_name} • {STATUS_LABELS[request.suggested_status] || request.suggested_status}
+            {request.employees?.full_name} • {readableStatus}
           </div>
         </div>
 
         {/* RIGHT SIDE: Action Controls */}
-        <div className="list-row-controls u-flex-gap-8 u-opacity-100 u-pointer-events-auto">
+        <div className="list-row-controls u-flex-gap-8 u-opacity-100 u-pointer-events-auto approval-request-row__controls">
           {!showRejectNote && (
             <>
               <button
@@ -127,13 +122,12 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
       </div>
 
       {/* EXPANDED SECTIONS */}
-      {(showDetails || showRejectNote) && (
+      {isExpanded && (
         <div className="expanded-details-panel">
           {showDetails && (
             <div className="task-detailed-description u-border-none u-p-0 u-bg-transparent u-m-0">
               <p>
-                <strong>Suggested:</strong> {STATUS_LABELS[request.suggested_status] || request.suggested_status}
-                {request.suggested_shift_type && ` • ${request.suggested_shift_type === 'day' ? '☀ Day' : '🌙 Night'}`}
+                <strong>Suggested:</strong> {readableStatus}
                 <br/>
                 {(request.suggested_first_login_time || request.suggested_logout_time) && (
                   <>
@@ -199,6 +193,7 @@ const AttendanceApprovalDrawer = ({
   selectedCell,
   pendingRequests,
   currentUser,
+  onClose,
   onActionComplete,
 }) => {
   const [isActing, setIsActing] = useState(false);
@@ -278,6 +273,8 @@ const AttendanceApprovalDrawer = ({
   const handleBulkApprove = async () => {
     setIsActing(true);
     setActionError(null);
+    let succeeded = 0;
+    let firstError = null;
     try {
       const requestsToApprove = filteredRequests.filter(r => selectedIds.includes(r.id));
       for (const request of requestsToApprove) {
@@ -286,12 +283,23 @@ const AttendanceApprovalDrawer = ({
           reviewedBy: currentUser?.id,
           request
         });
-        if (error) throw error;
+        if (error) {
+          if (!firstError) firstError = error;
+        } else {
+          succeeded++;
+        }
       }
       setSelectedIds([]);
-      onActionComplete();
-    } catch {
-      setActionError('Failed to bulk approve some requests.');
+      if (firstError) {
+        setActionError(
+          succeeded > 0
+            ? `Approved ${succeeded} of ${requestsToApprove.length}. Error: ${firstError.message || 'Some failed.'}`
+            : firstError.message || 'Failed to bulk approve requests.'
+        );
+      }
+      if (succeeded > 0) onActionComplete();
+    } catch (err) {
+      setActionError(err?.message || 'Failed to bulk approve some requests.');
     } finally {
       setIsActing(false);
     }
@@ -300,6 +308,8 @@ const AttendanceApprovalDrawer = ({
   const handleBulkReject = async () => {
     setIsActing(true);
     setActionError(null);
+    let succeeded = 0;
+    let firstError = null;
     try {
       const requestsToReject = filteredRequests.filter(r => selectedIds.includes(r.id));
       for (const request of requestsToReject) {
@@ -308,12 +318,23 @@ const AttendanceApprovalDrawer = ({
           reviewedBy: currentUser?.id,
           reviewNote: 'Bulk Rejected'
         });
-        if (error) throw error;
+        if (error) {
+          if (!firstError) firstError = error;
+        } else {
+          succeeded++;
+        }
       }
       setSelectedIds([]);
-      onActionComplete();
-    } catch {
-      setActionError('Failed to bulk reject some requests.');
+      if (firstError) {
+        setActionError(
+          succeeded > 0
+            ? `Rejected ${succeeded} of ${requestsToReject.length}. Error: ${firstError.message || 'Some failed.'}`
+            : firstError.message || 'Failed to bulk reject requests.'
+        );
+      }
+      if (succeeded > 0) onActionComplete();
+    } catch (err) {
+      setActionError(err?.message || 'Failed to bulk reject some requests.');
     } finally {
       setIsActing(false);
     }
@@ -326,6 +347,19 @@ const AttendanceApprovalDrawer = ({
   return (
     <div className="approval-page-container u-flex-1 u-overflow-y-auto u-px-16 u-py-24">
       <div>
+        {/* Mobile-visible Back Bar (Desktop uses MasterPageHeader leftActions; MobileHeader omits leftActions) */}
+        {onClose && (
+          <div className="approval-mobile-back-bar">
+            <button
+              type="button"
+              className="halo-button u-flex-center-gap-8"
+              onClick={onClose}
+            >
+              <span>←</span> Back to Board
+            </button>
+          </div>
+        )}
+
         {/* Bulk Actions Header */}
         {filteredRequests.length > 0 && (
           <div className="u-flex-between u-mb-16 u-px-12">

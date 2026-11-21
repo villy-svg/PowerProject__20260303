@@ -7,8 +7,6 @@ export const introTutorial = {
   category: 'Getting Started',
   description: 'Learn how to request support across various entities and escalate to company leadership.',
   accessLevel: 'All Users',
-  badgeColor: 'rgba(59, 130, 246, 0.1)',
-  badgeText: '#3b82f6',
   layout: 'onboarding',
   desktopSlides: [
     {

@@ -19,8 +19,6 @@ import MobileBottomNav from './MobileBottomNav';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
 import { useVisualViewport } from '../../hooks/useVisualViewport';
-import powerLogo from '../../assets/logo.svg';
-import SearchBar from '../../components/ui/SearchBar';
 import ExitAppModal from '../../components/modals/ExitAppModal';
 import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
 import './MobileLayout.css';
@@ -47,7 +45,6 @@ const MobileLayout = ({
   } = useAppNavigation();
 
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
-  const isBypassActive = import.meta.env.DEV && import.meta.env.VITE_OFFLINE_BYPASS === 'true';
 
   // ── Soft Keyboard & Viewport Tracking ─────────────────────────────────
   // Syncs --visual-viewport-height / --keyboard-height CSS vars and

@@ -11,72 +11,18 @@
  *   development-best-practices §11 (Local state only — not global context)
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   fetchAttendanceForDateRange,
-  fetchEmployeesForAttendance,
   fetchAllEmployeesForAttendanceSearch,
 } from '../services/employees/attendanceService';
 import { fetchApprovedSchedulesForDateRange } from '../services/employees/schedulePlannerService';
 import { fetchPendingRequests } from '../services/employees/editRequestService';
 import { MANAGER_SENIORITY_THRESHOLD } from '../constants/roles';
-
-// ---------------------------------------------------------------------------
-// Utility: Build the array of dates between startDate and endDate (inclusive)
-// Returns an array of 'YYYY-MM-DD' strings.
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-// Utility: Format a Date object as a YYYY-MM-DD string in IST.
-//
-// WHY NOT toISOString().split('T')[0]?
-//   toISOString() always outputs UTC. At 01:00 IST (19:30 UTC previous day),
-//   new Date().toISOString().split('T')[0] gives "yesterday" in UTC =
-//   the wrong date from India's perspective.
-//
-// Intl.DateTimeFormat with timeZone: 'Asia/Kolkata' and locale 'en-CA'
-// (which natively outputs YYYY-MM-DD) is the correct, IST-aware approach.
-// This pattern is already used in attendanceService.js and is the standard.
-// ---------------------------------------------------------------------------
-function toISTDateString(date) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(date);
-}
-
-function buildDateRange(startDate, endDate) {
-  const dates = [];
-  const current = new Date(startDate + 'T00:00:00'); // 'T00:00:00' = local midnight, avoids UTC-shift on date-only parse
-  const end = new Date(endDate + 'T00:00:00');
-
-  while (current <= end) {
-    dates.push(toISTDateString(current));
-    current.setDate(current.getDate() + 1);
-  }
-
-  return dates;
-}
-
-// ---------------------------------------------------------------------------
-// Utility: Get the default start/end date for the current week (Mon–Sun) in IST.
-//
-// IST FIX: today.getDay() reads the browser's local time (correct for Indian
-// users), but the final date output previously used toISOString().split('T')[0]
-// which serialises in UTC. At 01:00 IST, this produces the wrong (UTC) date.
-// Now uses toISTDateString() for all date serialisation.
-// ---------------------------------------------------------------------------
-function getDefaultWeekRange() {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-  // Adjust so week starts on Monday
-  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
-  return {
-    startDate: toISTDateString(monday),
-    endDate:   toISTDateString(sunday),
-  };
-}
+import {
+  buildDateRange,
+  getDefaultWeekRange,
+} from '../verticals/Employees/attendance/utils/attendanceDateUtils';
 
 export function useAttendanceBoard(user, defaultStatus = null) {
   const { startDate: defaultStart, endDate: defaultEnd } = getDefaultWeekRange();
@@ -85,13 +31,11 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   const [startDate, setStartDate] = useState(defaultStart);
   const [endDate, setEndDate] = useState(defaultEnd);
 
-  // Pagination state
+  // Pagination state (client-side slice over allEmployees to avoid redundant DB queries)
   const [page, setPage] = useState(1);
   const [pageSize] = useState(50);
-  const [hasMore, setHasMore] = useState(true);
 
   // Data state
-  const [employees, setEmployees] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [scheduledRecords, setScheduledRecords] = useState([]);
@@ -102,10 +46,46 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   const [error, setError] = useState(null);
 
   // Derived: all dates in current range (for the X-axis of the grid)
-  const dateRange = buildDateRange(startDate, endDate);
+  const dateRange = useMemo(() => buildDateRange(startDate, endDate), [startDate, endDate]);
+
+  // Derived: paginated slice from allEmployees (eliminates redundant paginated DB query)
+  const employees = useMemo(() => {
+    const startIdx = (page - 1) * pageSize;
+    return allEmployees.slice(startIdx, startIdx + pageSize);
+  }, [allEmployees, page, pageSize]);
+
+  const hasMore = page * pageSize < allEmployees.length;
 
   // ---------------------------------------------------------------------------
-  // Fetch all data for the board: employees + attendance records + pending requests
+  // Fetch active employees once per user session (used for both board & search)
+  // ---------------------------------------------------------------------------
+  const loadEmployees = useCallback(async () => {
+    const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
+    const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
+    const filters = {};
+
+    if (isRestricted && user?.employeeId) {
+      filters.employeeId = user.employeeId;
+    }
+
+    const { data, error: empErr } = await fetchAllEmployeesForAttendanceSearch(filters);
+    if (empErr) throw empErr;
+    setAllEmployees(data || []);
+  }, [user]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    loadEmployees().catch((err) => {
+      if (!isCancelled) {
+        console.error('[useAttendanceBoard] loadEmployees error:', err);
+        setError(err?.message || 'Failed to load employees.');
+      }
+    });
+    return () => { isCancelled = true; };
+  }, [loadEmployees]);
+
+  // ---------------------------------------------------------------------------
+  // Fetch attendance records, pending requests, and approved schedules for range
   // ---------------------------------------------------------------------------
   const fetchBoardData = useCallback(async () => {
     if (!startDate || !endDate) {
@@ -115,33 +95,19 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     setError(null);
 
     try {
-      const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
-      const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
-      const filters = {};
-      
-      // If the user has restricted seniority or is a viewer, only fetch their own attendance row
-      if (isRestricted && user?.employeeId) {
-        filters.employeeId = user.employeeId;
-      }
-
-      // Fetch in parallel — employees, attendance records, pending requests, and approved schedules
-      const [employeesResult, attendanceResult, pendingResult, schedulesResult] = await Promise.all([
-        fetchEmployeesForAttendance(filters, page, pageSize),
+      const [attendanceResult, pendingResult, schedulesResult] = await Promise.all([
         fetchAttendanceForDateRange(startDate, endDate),
         fetchPendingRequests(),
         fetchApprovedSchedulesForDateRange(startDate, endDate),
       ]);
 
-      if (employeesResult.error) throw employeesResult.error;
       if (attendanceResult.error) throw attendanceResult.error;
       if (schedulesResult.error) throw schedulesResult.error;
-      // pendingRequests failure is non-fatal — editors may lack access, gracefully degrade
+      // pendingRequests failure is non-fatal — non-editors may lack access, gracefully degrade
       if (pendingResult.error) {
         console.warn('[useAttendanceBoard] Could not fetch pending requests:', pendingResult.error);
       }
 
-      setEmployees(employeesResult.data || []);
-      setHasMore((employeesResult.data || []).length === pageSize);
       setAttendanceRecords(attendanceResult.data || []);
       setScheduledRecords(schedulesResult.data || []);
       setPendingRequests(pendingResult.data || []);
@@ -151,67 +117,40 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate, user, page, pageSize]); // Re-fetch on date or page change
+  }, [startDate, endDate]);
 
   // Initial fetch and re-fetch when date range changes
   useEffect(() => {
     fetchBoardData();
   }, [fetchBoardData]);
 
-  // Fetch unpaginated active employee list once per user session for board-wide search
-  useEffect(() => {
-    let isCancelled = false;
+  // ---------------------------------------------------------------------------
+  // Derived: Memoized grid cell maps for fast O(1) lookup and stable getCellData ref
+  // ---------------------------------------------------------------------------
+  const liveMap = useMemo(() => {
+    const map = {};
+    attendanceRecords.forEach(record => {
+      map[`${record.employee_id}_${record.shift_date}`] = record;
+    });
+    return map;
+  }, [attendanceRecords]);
 
-    const loadSearchEmployees = async () => {
-      try {
-        const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
-        const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
-        const filters = {};
-
-        if (isRestricted && user?.employeeId) {
-          filters.employeeId = user.employeeId;
-        }
-
-        const { data, error: searchErr } = await fetchAllEmployeesForAttendanceSearch(filters);
-        if (searchErr) {
-          console.warn('[useAttendanceBoard] Could not fetch employee search list:', searchErr);
-          return;
-        }
-        if (!isCancelled) {
-          setAllEmployees(data || []);
-        }
-      } catch (err) {
-        console.error('[useAttendanceBoard] loadSearchEmployees error:', err);
+  const scheduleMap = useMemo(() => {
+    const map = {};
+    scheduledRecords.forEach(record => {
+      const key = `${record.employee_id}_${record.shift_date}`;
+      // Query orders by updated_at DESC — first encountered is most recently approved.
+      if (!map[key]) {
+        map[key] = record;
       }
-    };
-
-    loadSearchEmployees();
-    return () => { isCancelled = true; };
-  }, [user]);
-
-  // ---------------------------------------------------------------------------
-  // Derived: Build the grid cell maps for fast O(1) lookup in the UI
-  // ---------------------------------------------------------------------------
-  const liveMap = {};
-  attendanceRecords.forEach(record => {
-    const key = `${record.employee_id}_${record.shift_date}`;
-    liveMap[key] = record;
-  });
-
-  const scheduleMap = {};
-  scheduledRecords.forEach(record => {
-    const key = `${record.employee_id}_${record.shift_date}`;
-    // Because the query orders by updated_at DESC, the first one we encounter
-    // is the most recently approved. We only store it if it doesn't exist yet.
-    if (!scheduleMap[key]) {
-      scheduleMap[key] = record;
-    }
-  });
+    });
+    return map;
+  }, [scheduledRecords]);
 
   // ---------------------------------------------------------------------------
   // Helper: Get the cell data for a specific employee + date combo
   // Returns the attendance record if it exists and is valid, or falls back to
-  // the approved schedule, or finally a default 'absent' shell.
+  // the approved schedule, or finally a default 'null' shell.
   // ---------------------------------------------------------------------------
   const getCellData = useCallback((employeeId, date) => {
     const key = `${employeeId}_${date}`;
@@ -233,8 +172,8 @@ export function useAttendanceBoard(user, defaultStatus = null) {
         shift_date: date,
         attendance_status: scheduled.attendance_status,
         hub_id: scheduled.hub_id,
-        is_scheduled_only: true, // Optional flag for UI
-        has_pending_edit: false
+        is_scheduled_only: true,
+        has_pending_edit: false,
       };
     }
 
@@ -245,7 +184,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
       attendance_status: defaultStatus || 'null',
       has_pending_edit:  false,
     };
-  }, [liveMap, scheduleMap, defaultStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [liveMap, scheduleMap, defaultStatus]);
 
   return {
     // Data
@@ -253,7 +192,7 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     allEmployees,
     dateRange,
     pendingRequests,
-    
+
     // Pagination
     page,
     setPage,
@@ -262,7 +201,8 @@ export function useAttendanceBoard(user, defaultStatus = null) {
     // Controls
     startDate,
     setStartDate,
-    endDate, setEndDate,
+    endDate,
+    setEndDate,
     isLoading,
     error,
     // Actions

@@ -52,7 +52,9 @@ PowerProject runs **two independent Supabase projects**:
 - **Staging DB**: Push via `staging-db.yml` (triggers on push to `staging` branch).
 - **Production DB**: Push via `supabase-deploy.yml` (triggers on push to `main` branch).
 
-**Critical Rule**: Migrations flow **Staging → Production**. Never push a migration directly to production without first validating it on staging. The ordering is: write SQL → push to staging branch → verify → merge to main → production auto-deploys.
+**Explicit Push Permission Required**: Agents MUST NEVER push any migration anywhere (neither `git push` to `staging`/`main`/any remote branch nor `supabase db push` to any remote database) without the user's explicit permission. Create the migration locally and wait for explicit approval before pushing.
+
+**Critical Rule**: Migrations flow **Staging → Production**. Never push a migration directly to production without first validating it on staging. The ordering is: write SQL → get explicit user approval → push to staging branch → verify → get explicit user approval → merge to main → production auto-deploys.
 
 **Schema Parity Guard**: The staging and production schemas MUST remain identical. If a migration is applied to staging and causes an error, do NOT push the same migration to production until fixed.
 

@@ -23,6 +23,9 @@ import {
 } from '../verticals/DataManager';
 
 import { REMARK_GRADE_MAP } from '../verticals/Employees/remarksMapping';
+import { EMPLOYEE_NAV_ITEMS } from '../constants/verticalFeatures';
+
+export { EMPLOYEE_NAV_ITEMS };
 
 /** All activeVertical values belonging to ChargingHubs vertical */
 export const HUB_VIEWS = [
@@ -33,13 +36,7 @@ export const HUB_VIEWS = [
 ];
 
 /** All activeVertical values belonging to Employees vertical */
-export const EMPLOYEE_VIEWS = [
-  'employee_tasks',
-  'employee_rules_board',
-  'employee_attendance_board',
-  'employee_leave_wallet',
-  'attendance_self_service',
-];
+export const EMPLOYEE_VIEWS = EMPLOYEE_NAV_ITEMS.map(item => item.id);
 
 /** All activeVertical values belonging to Clients vertical */
 export const CLIENT_VIEWS = ['client_tasks', 'leads_funnel'];
@@ -126,7 +123,10 @@ export function resolveHeaderClickTarget(activeVertical, verticals = {}, permiss
   const empId    = verticals?.EMPLOYEES?.id;
   const clientId = verticals?.CLIENTS?.id;
 
-  if (activeVertical === 'employee_tasks') return empId || null;
+  // Return to Employees Records Manager from any employee sub-view when permitted
+  if (EMPLOYEE_VIEWS.includes(activeVertical) && permissions?.canAccessEmployees !== false) {
+    return empId || null;
+  }
   if (CLIENT_VIEWS.includes(activeVertical)) return clientId || null;
 
   const isHubConfigView = (

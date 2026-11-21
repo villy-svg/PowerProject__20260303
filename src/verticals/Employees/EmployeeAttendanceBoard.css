@@ -33,17 +33,7 @@
   box-shadow: 0 4px 12px color-mix(in srgb, var(--bg-color), transparent 50%);
 }
 
-.attendance-board__date-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-color);
-  opacity: 0.5;
-}
-
-.attendance-board__date-input,
-.attendance-board__week-input {
+.attendance-board__date-input {
   background: transparent;
   border: none;
   color: var(--text-color);
@@ -89,21 +79,7 @@
   transform: translateY(-1px);
 }
 
-/* Planner Header Group (Week Picker + Paintbrush Controls) */
-.attendance-board__planner-header-group {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.attendance-board__planner-select--status {
-  width: 180px;
-}
-
-.attendance-board__planner-select--hub {
-  width: 130px;
-}
+/* TODO(future-rebuild): Bulk Schedule Planner header/select/action/msg CSS removed per A.2. */
 
 /* Expanded Menu Content (Row 4 inside MasterHeaderMenu)
    Replaces dead legacy dropdown CSS and missing utility classes */
@@ -120,6 +96,22 @@
   flex-wrap: wrap;
   gap: 12px;
   width: 100%;
+}
+
+/* Desktop-only Hub Filter (C.1) & Quick Date Presets (C.3) */
+.attendance-board__hub-filter {
+  min-width: 160px;
+}
+
+.attendance-board__hub-select {
+  width: 100%;
+}
+
+.attendance-board__desktop-presets {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .attendance-board__pagination {
@@ -175,32 +167,6 @@
   margin-right: 0.4rem;
 }
 
-/* Planner Specific Actions */
-.attendance-board__planner-action--save {
-  color: var(--status-warning);
-}
-
-.attendance-board__planner-action--submit {
-  color: var(--brand-green);
-}
-
-/* Info Icon */
-.attendance-board__info-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8em;
-  margin-left: 0.35rem;
-  opacity: 0.45;
-  cursor: help;
-  vertical-align: super;
-  transition: opacity 0.2s;
-}
-
-.attendance-board__info-icon:hover {
-  opacity: 0.9;
-}
-
 /* Active Employee Search Filter Bar */
 .attendance-board__search-filter-bar {
   display: flex;
@@ -253,8 +219,7 @@
 }
 
 /* Errors & Feedback */
-.attendance-board__error,
-.attendance-board__planner-msg {
+.attendance-board__error {
   padding: 0.5rem 1rem;
   margin: 0 1.5rem 0.5rem;
   border-radius: var(--radius-button, 12px);
@@ -262,19 +227,9 @@
   align-items: center;
   gap: 1rem;
   font-size: 0.875rem;
-}
-
-.attendance-board__error,
-.attendance-board__planner-msg--error {
   background: color-mix(in srgb, var(--status-danger), transparent 85%);
   border: 1px solid color-mix(in srgb, var(--status-danger), transparent 50%);
   color: var(--status-danger);
-}
-
-.attendance-board__planner-msg--success {
-  background: color-mix(in srgb, var(--status-success), transparent 85%);
-  border: 1px solid color-mix(in srgb, var(--status-success), transparent 50%);
-  color: var(--status-success);
 }
 
 .attendance-board__no-access {
@@ -291,7 +246,241 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Replaces inline styles on RequestCard in AttendanceApprovalDrawer.jsx */
+.approval-request-row {
+  --stage-color: var(--brand-yellow);
+  border-bottom-left-radius: var(--radius-button, 12px);
+  border-bottom-right-radius: var(--radius-button, 12px);
+}
+
+.approval-request-row--expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.approval-mobile-back-bar {
+  display: none;
+}
+
+/* Mobile-only inline control bar (replaces dropped MobileHeader leftActions/rightActions) */
+.attendance-mobile-bar {
+  display: none;
+}
+
 @media screen and (max-width: 768px) {
+  .attendance-mobile-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 12px 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color), transparent 40%);
+    flex-shrink: 0;
+  }
+
+  .attendance-mobile-bar__range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .attendance-mobile-bar__nav-btn.halo-button {
+    flex: 0 0 42px;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .attendance-mobile-bar__range-trigger.halo-button {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-color);
+    white-space: nowrap;
+  }
+
+  .attendance-mobile-bar__range-trigger--open.halo-button {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+  }
+
+  .attendance-mobile-bar__range-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .attendance-mobile-bar__range-caret {
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
+
+  .attendance-mobile-bar__picker-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border-radius: var(--radius-button, 12px);
+    background: var(--halo-bg);
+    border: 1px solid var(--border-color);
+  }
+
+  .attendance-mobile-bar__presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .attendance-mobile-bar__preset-chip {
+    min-height: 36px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .attendance-mobile-bar__preset-chip:active {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+  }
+
+  .attendance-mobile-bar__date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .attendance-mobile-bar__date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-secondary);
+  }
+
+  .attendance-mobile-bar__native-date {
+    width: 100%;
+    min-height: 40px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    color-scheme: dark;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-sizing: border-box;
+  }
+
+  .attendance-mobile-bar__picker-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .attendance-mobile-bar__picker-btn.halo-button {
+    flex: 1;
+    min-height: 40px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .attendance-mobile-bar__picker-btn--apply.halo-button {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+  }
+
+  .attendance-mobile-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .attendance-mobile-bar__btn.halo-button {
+    min-height: 40px;
+    height: 40px;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    padding: 0 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .attendance-mobile-bar__icon-btn.halo-button {
+    flex: 0 0 42px;
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .attendance-mobile-bar__btn--approval.halo-button {
+    color: var(--status-warning);
+  }
+
+  .approval-mobile-back-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .approval-mobile-back-bar .halo-button {
+    min-height: 44px;
+  }
+
+  .approval-request-row {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .approval-request-row__controls {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 55%);
+  }
+
+  .approval-request-row__controls .halo-button {
+    min-height: 40px;
+    flex: 1;
+  }
+
   .attendance-board__left-actions {
     width: 100%;
     justify-content: space-between;
@@ -304,6 +493,51 @@
 
   .approval-page-container {
     padding-bottom: calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+
+  /* Bottom-anchored mobile sheet for Suggest Edit & Multi-Day Update (D.1 / D.2) */
+  .modal-overlay.modal-overlay--bottom-sheet {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .suggest-edit-modal--sheet,
+  .modal-overlay--bottom-sheet .bulk-update-modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    margin: 0;
+    padding-bottom: calc(16px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+
+  .suggest-edit-chips {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .suggest-edit-chip {
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: var(--radius-button, 10px);
+    border: 1px solid var(--border-color);
+    background: var(--halo-bg);
+    color: var(--text-color);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .suggest-edit-chip--selected {
+    border-color: var(--brand-green);
+    background: color-mix(in srgb, var(--brand-green), transparent 82%);
+    color: var(--brand-green);
   }
 }
 
