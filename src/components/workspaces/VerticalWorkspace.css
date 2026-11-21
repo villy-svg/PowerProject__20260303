@@ -21,7 +21,7 @@
 }
 /* 1. LEFT SUB-SIDEBAR */
 .sub-sidebar {
-  width: 210px; 
+  width: 244px; /* Fits widest single-line nav label + lock icon (e.g. "Daily Task Templates") */
   background-color: var(--surface-card);
   border-right: 1px solid color-mix(in srgb, var(--text-color), transparent 94%);
   display: flex;
@@ -140,7 +140,7 @@
     padding: 16px;
   }
   .sub-sidebar {
-    width: 196px;
+    width: 236px;
   }
 }
 /* Mobile off-canvas .sub-sidebar, .workspace-content padding, and backdrops are canonically owned by src/app/shells/MobileLayout.css (Phase 6A) */
@@ -153,11 +153,14 @@
   padding: 8px 0;
 }
 
-.sub-sidebar-nav-btn {
+/* Scoped under .sub-sidebar so left alignment and single-line nowrap beat base .halo-button cleanly */
+.sub-sidebar .sub-sidebar-nav-btn {
   width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
+  text-align: left;
+  white-space: nowrap;
   gap: 8px;
   padding: 9px 12px;
   font-size: var(--font-sm);
