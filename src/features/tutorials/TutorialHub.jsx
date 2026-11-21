@@ -216,7 +216,7 @@ const TutorialHub = ({ user, permissions, setActiveVertical, onShowBottomNav }) 
           <div className="u-flex-center-gap">
             {isMasterAdmin && (
               <button 
-                className="halo-button header-back-dashboard-btn u-border-brand-green u-text-brand-green"
+                className="halo-button master-action-btn"
                 onClick={() => {
                   setEditingFlow(null);
                   setIsFormOpen(true);

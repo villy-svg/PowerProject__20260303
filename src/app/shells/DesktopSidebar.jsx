@@ -115,7 +115,7 @@ const DesktopSidebar = ({
                               <li className={activeVertical === 'hub_function_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('hub_function_management')}>Function Manager</li>
                               {user?.roleId === 'master_admin' && (
                                 <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span className="u-flex-center-gap-6">
                                     <IconShield size={14} /> Manage Access
                                   </span>
                                 </li>
@@ -129,7 +129,7 @@ const DesktopSidebar = ({
                               <li className={activeVertical === 'client_billing_model_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('client_billing_model_management')}>Billing Model Manager</li>
                               {user?.roleId === 'master_admin' && (
                                 <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span className="u-flex-center-gap-6">
                                     <IconShield size={14} /> Manage Access
                                   </span>
                                 </li>
@@ -142,7 +142,7 @@ const DesktopSidebar = ({
                               <li className={activeVertical === 'employee_role_management' ? 'active sub-active' : ''} onClick={() => setActiveVertical('employee_role_management')}>Role Manager</li>
                               {user?.roleId === 'master_admin' && (
                                 <li className="sub-active" onClick={() => setRbacModalVertical(vertical)}>
-                                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <span className="u-flex-center-gap-6">
                                     <IconShield size={14} /> Manage Access
                                   </span>
                                 </li>

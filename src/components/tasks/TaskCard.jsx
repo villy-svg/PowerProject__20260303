@@ -24,6 +24,12 @@ import {
   isEmployeeApprovalTask,
   formatEmployeeApprovalSummary,
 } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureTask,
+  canMarkAttendanceTask,
+  canReviewAttendanceTask,
+} from '../../services/employees/unmarkedAttendanceTaskService';
+import './TaskCard.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -128,6 +134,9 @@ const TaskCard = ({
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
   const isEmpApproval = isEmployeeApprovalTask(task);
   const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
+  const isAttendanceTask = isAttendanceClosureTask(task);
+  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
+  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
   const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   return (
@@ -148,12 +157,7 @@ const TaskCard = ({
           openEditModal(task);
         }
       }}
-      style={{
-        borderLeft: `2px solid color-mix(in srgb, ${stage?.color || 'var(--border-color)'}, transparent 30%)`,
-        '--stage-color': stage?.color || 'var(--brand-green)',
-        opacity: task.isContextOnly ? 0.7 : 1,
-        cursor: task.isContextOnly ? 'default' : 'pointer'
-      }}
+      style={{ '--stage-color': stage?.color || 'var(--brand-green)' }}
     >
       {/* Row 0: Header (Selection + Drill Down) */}
       <div className="card-header-row">
@@ -407,15 +411,33 @@ const TaskCard = ({
         )}
       </div>
 
-      {/* Row 4: Approval Actions (Dedicated row for Review stage) */}
-      {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval) && (
+      {/* Row 4: Approval / Attendance Closure Actions */}
+      {!task.isContextOnly && task.stageId === 'BACKLOG' && canMarkAttendance && (
         <div className="card-row-approval">
           <button
             className="halo-button btn-review-submissions"
             onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-            title={isEmpApproval ? "Review Approval Request" : "Review Submissions"}
+            title="Mark Non-Present Attendance Status"
           >
-            {isEmpApproval ? 'Review Request' : 'Check Submissions'}
+            Mark Attendance
+          </button>
+        </div>
+      )}
+
+      {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval || canReviewAttendance) && (
+        <div className="card-row-approval">
+          <button
+            className="halo-button btn-review-submissions"
+            onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+            title={
+              canReviewAttendance
+                ? 'Review Attendance Closure'
+                : isEmpApproval
+                  ? 'Review Approval Request'
+                  : 'Review Submissions'
+            }
+          >
+            {canReviewAttendance ? 'Review Attendance' : isEmpApproval ? 'Review Request' : 'Check Submissions'}
           </button>
         </div>
       )}

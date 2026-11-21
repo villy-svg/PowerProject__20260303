@@ -2,7 +2,7 @@
    EmployeeAttendanceBoard.css
    ========================================================================== */
 
-@import '../../styles/DropdownSystem.css';
+/* DropdownSystem.css is canonically imported once in globalTheme.css */
 
 .attendance-board__wrapper {
   display: flex;
@@ -10,27 +10,74 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
-  background-color: var(--bg-color);
+  /* Inherit parent .workspace-content background (--surface-card) to eliminate mismatched dark frame band */
+  background-color: transparent;
   position: relative;
 }
 
-/* Left Actions (Date Pickers / Week Picker) */
+/* Scoped Row 3 header layout: prevents jagged 2x2 internal wrapping on 11"/13" laptops.
+   Left controls stay paired; right actions wrap cleanly while staying right-aligned. */
+.attendance-board__wrapper .master-header-actions-row {
+  flex-wrap: wrap;
+  row-gap: 10px;
+  column-gap: 16px;
+}
+
+.attendance-board__wrapper .master-header-actions-row .master-header-left {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+.attendance-board__wrapper .master-header-actions-row .master-header-right {
+  margin-left: auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Icon-only Refresh button (matches 36px height of .master-header-actions-row .halo-button) */
+.attendance-board__wrapper .master-header-actions-row .attendance-board__refresh-btn.halo-button {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.attendance-board__refresh-btn--loading .standard-icon {
+  animation: attendance-refresh-spin 0.8s linear infinite;
+}
+
+@keyframes attendance-refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Left Actions (Date Range Picker) */
 .attendance-board__left-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
+/* Option A — Border XOR Fill: matches adjacent Row 3 header buttons (transparent + light satin border at rest) */
 .attendance-board__date-range {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  background: color-mix(in srgb, var(--halo-bg), transparent 30%);
-  padding: 0.35rem 0.35rem 0.35rem 1rem;
-  border-radius: 100px;
-  border: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--bg-color), transparent 50%);
+  gap: 0.25rem;
+  height: 36px;
+  box-sizing: border-box;
+  background: transparent;
+  padding: 0.2rem 0.35rem 0.2rem 0.75rem;
+  border-radius: var(--radius-button);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  box-shadow: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.attendance-board__date-range:hover,
+.attendance-board__date-range:focus-within {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border-color: transparent;
 }
 
 .attendance-board__date-input {
@@ -39,25 +86,22 @@
   color: var(--text-color);
   color-scheme: dark; /* Force native dark theme calendars */
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 0.15rem 0.25rem;
+  padding: 0.15rem 0.2rem;
   outline: none;
   cursor: pointer;
 }
 
-.attendance-board__date-input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.attendance-board__date-input::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
+/* Explicit compact width overrides browser default <input size="20"> slack */
+.attendance-board__date-input--range {
+  width: 21ch;
+  min-width: 0;
+  text-align: center;
 }
 
 .attendance-board__go-btn {
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,16 +111,44 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-left: 0.5rem;
+  margin-left: 0.2rem;
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   opacity: 0.9;
+  white-space: nowrap;
 }
 
 .attendance-board__go-btn:hover {
   opacity: 1;
   transform: translateY(-1px);
+}
+
+/* Small/13" laptop density tuning (zero impact on 1440px+ desktop or <=1024px mobile) */
+@media screen and (max-width: 1366px) and (min-width: 1025px) {
+  .attendance-board__wrapper .master-header-actions-row {
+    column-gap: 12px;
+  }
+
+  .attendance-board__wrapper .master-header-actions-row .master-header-left,
+  .attendance-board__wrapper .master-header-actions-row .master-header-right {
+    gap: 8px;
+  }
+
+  .attendance-board__wrapper .master-header-actions-row .halo-button:not(.attendance-board__refresh-btn) {
+    min-width: auto;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  .attendance-board__date-range {
+    padding: 0.2rem 0.3rem 0.2rem 0.65rem;
+  }
+
+  .attendance-board__date-input--range {
+    width: 20ch;
+    font-size: 0.8rem;
+  }
 }
 
 /* TODO(future-rebuild): Bulk Schedule Planner header/select/action/msg CSS removed per A.2. */
@@ -138,15 +210,17 @@
   border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 50%);
 }
 
-.attendance-board__approval-btn {
+/* Option A — Border XOR Fill: inherits transparent + light satin border at rest, amber fill with no border on hover */
+.master-header-actions-row .halo-button.attendance-board__approval-btn {
   color: var(--status-warning);
   position: relative;
-  border: none;
-  background: transparent;
 }
 
-.attendance-board__approval-btn:hover {
-  background: transparent;
+.master-header-actions-row .halo-button.attendance-board__approval-btn:hover:not(:disabled) {
+  color: var(--status-warning);
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
+  border-color: transparent;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--status-warning), transparent 85%);
 }
 
 /* Header action buttons (.attendance-board__approval-btn and .master-action-btn)

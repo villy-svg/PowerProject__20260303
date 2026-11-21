@@ -87,7 +87,7 @@ const TaskCSVImport = ({ verticalId, onImportComplete, className, label }) => {
         <h5 className="u-m-0 u-mb-4 u-fw-600 u-text-brand-green">
           {conflict.csvRow.text}
         </h5>
-        <div className="u-text-sm u-opacity-70" style={{ lineHeight: 1.4 }}>
+        <div className="u-text-sm u-opacity-70 u-lh-1-4">
           <strong>Hub:</strong> {conflict.csvRow.hub_code || 'N/A'}<br />
           <strong>Function:</strong> {conflict.csvRow.function_code || 'N/A'}<br />
           <em className="u-text-0-7rem">Status: {stage?.label || existing?.stage_id || 'Unknown'}</em>

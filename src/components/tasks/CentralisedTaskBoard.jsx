@@ -3,6 +3,10 @@ import { STAGE_LIST } from '../../constants/stages';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { taskUtils } from '../../utils/taskUtils';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureTask,
+  isAttendanceOrphanVisibleToUser,
+} from '../../services/employees/unmarkedAttendanceTaskService';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
 import TaskCard from './TaskCard';
 import TaskListView from './TaskListView';
@@ -52,7 +56,8 @@ const CentralisedTaskBoard = ({
   const isVisibleToUser = (t) =>
     taskUtils.isAssignee(t, user) ||
     taskUtils.isCreator(t, user) ||
-    (isEmployeeReqReviewer && isEmployeeApprovalTask(t));
+    (isEmployeeReqReviewer && isEmployeeApprovalTask(t)) ||
+    isAttendanceOrphanVisibleToUser(t, user);
 
   const assignedTasks = tasks.filter(isVisibleToUser);
   const rootMyTasks = assignedTasks.filter(t => {
@@ -80,7 +85,9 @@ const CentralisedTaskBoard = ({
     if (!isMobile || myTasks.length === 0) return;
     const currentStageCount = myTasks.filter(t => t.stageId === activeBoardStageId).length;
     if (currentStageCount === 0) {
-      const hasReviewApproval = myTasks.some(t => t.stageId === 'REVIEW' && isEmployeeApprovalTask(t));
+      const hasReviewApproval = myTasks.some(
+        t => t.stageId === 'REVIEW' && (isEmployeeApprovalTask(t) || isAttendanceClosureTask(t))
+      );
       if (hasReviewApproval) {
         setActiveBoardStageId('REVIEW');
         return;

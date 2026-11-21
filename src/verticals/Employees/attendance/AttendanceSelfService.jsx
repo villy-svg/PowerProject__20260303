@@ -28,6 +28,7 @@ import { supabase } from '../../../services/core/supabaseClient';
 import { useAttendanceSelfService } from '../../../hooks/useAttendanceSelfService';
 import AttendanceReceiptScreen from './AttendanceReceiptScreen';
 import LiveAttendanceTab from './LiveAttendanceTab';
+import WeekOffPromptCard from './WeekOffPromptCard';
 import CustomSelect from '../../../components/ui/CustomSelect';
 import RBACManageButton from '../../../components/ui/RBACManageButton';
 import './AttendanceSelfService.css';
@@ -257,6 +258,12 @@ const CurrentAttendanceTab = ({ user }) => {
     handleCheckOut,
     clearSuccessData,
     loadTodayRecord, // BUG-3 fix: was missing — caused ReferenceError on Retry button
+    weekOffPrompt,
+    isClaimingWeekOff,
+    weekOffFeedback,
+    handleClaimWeekOff,
+    handleDismissWeekOff,
+    clearWeekOffFeedback,
   } = useAttendanceSelfService(user?.id);
 
   // Intercept check-in: trigger the No-Cash slide overlay immediately after
@@ -317,6 +324,16 @@ const CurrentAttendanceTab = ({ user }) => {
     <>
       {/* 12-hour alarm fallback banner */}
       {alarmFired && <AlarmBanner onDismiss={dismissAlarm} />}
+
+      {/* Phase 2: Retroactive previous-day Week-Off prompt */}
+      <WeekOffPromptCard
+        prompt={weekOffPrompt}
+        feedback={weekOffFeedback}
+        isClaiming={isClaimingWeekOff}
+        onClaim={handleClaimWeekOff}
+        onDismiss={handleDismissWeekOff}
+        onClearFeedback={clearWeekOffFeedback}
+      />
 
       {/* Error display */}
       {error && (

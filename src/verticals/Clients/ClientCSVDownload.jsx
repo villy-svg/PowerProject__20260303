@@ -70,7 +70,6 @@ const ClientCSVDownload = ({ data = [], label, filename, isTemplate = false, cla
       filename={filename || (isTemplate ? 'client_template.xlsx' : `clients_export_${new Date().toISOString().split('T')[0]}.xlsx`)}
       onDownload={handleDownload}
       validations={isTemplate ? validations : []}
-      style={{}}
       className={className}
     />
   );

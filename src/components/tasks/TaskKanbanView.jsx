@@ -13,6 +13,7 @@ import { useKanbanDnd } from '../../hooks/useKanbanDnd';
 import { useLayoutShell } from '../../app/shells/useLayoutShell';
 import { taskUtils } from '../../utils/taskUtils';
 import { isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import { isAttendanceClosureTask } from '../../services/employees/unmarkedAttendanceTaskService';
 import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
 import './TaskKanbanView.css';
 
@@ -257,7 +258,9 @@ const TaskKanbanView = ({
     if (!isMobile || groupByEmployee || !filteredTasks || filteredTasks.length === 0) return;
     const currentCount = filteredTasks.filter(t => t.stageId === activeStageId).length;
     if (currentCount === 0) {
-      const hasReviewApproval = filteredTasks.some(t => t.stageId === 'REVIEW' && isEmployeeApprovalTask(t));
+      const hasReviewApproval = filteredTasks.some(
+        t => t.stageId === 'REVIEW' && (isEmployeeApprovalTask(t) || isAttendanceClosureTask(t))
+      );
       if (hasReviewApproval && visibleStages.some(s => s.id === 'REVIEW')) {
         setActiveStageId('REVIEW');
         return;

@@ -165,12 +165,11 @@ const EmployeeCard = ({
           )}
           {permissions.canUpdate && (
             <button
-              className="action-icon-btn"
+              className={`action-icon-btn ${emp.status !== 'Active' ? 'u-text-brand-green' : ''}`}
               onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
               title={emp.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-              style={{ color: emp.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
             >
-              <IconChevronDown size={14} style={{ transform: emp.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
+              <IconChevronDown size={14} className={emp.status !== 'Active' ? 'u-rotate-180' : ''} />
             </button>
           )}
           {permissions.canDelete && (

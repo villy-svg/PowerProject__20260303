@@ -10,6 +10,7 @@ When writing code, adding new features, or modifying existing components, always
 ### 1. Core Rules
 - **Verify Imports**: Whenever adding new functions, buttons, components, hooks, or elements, ensure you are bringing in the correct imports before calling or rendering them. This applies heavily to React elements, contexts, customized hooks, icons, and UI components. Missing imports cause blank screen application crashes.
 - **Match Column and Variable Names**: Always ensure that variable names and database column names are matched correctly. Double-check destructured properties, prop names passed to components, and database queries. Pay distinct attention to differences between camelCase (often used in frontend) and snake_case (often used in database schemas).
+- **Do NOT Work on Locked Verticals or Features**: Never spend development, refactoring, styling, or debugging time on verticals locked in `src/constants/verticals.js` (`CLIENTS`, `PARTNERS`, `VENDORS`, `DATA_MANAGER`) or features locked in `src/constants/verticalFeatures.js` (Leave Manager, Daily Task Board, Daily Task Templates) until the user explicitly unlocks them. Keep them hidden from User Management UI and defaulted to `'none'`.
 
 ### 2. State Management & Hooks
 - **Isolate Business Logic:** Continue keeping Supabase data fetching and mutations inside global custom hooks (like `useEmployees`). This separates complex business logic from the UI components.

@@ -36,7 +36,7 @@ const FunctionCSVImport = ({ onImportComplete, className, label = 'Import CSV' }
       <h5 className="u-m-0 u-mb-4 u-fw-800 u-text-brand-green">
         {conflict.csvRow.name}
       </h5>
-      <div className="u-text-sm u-opacity-70" style={{ lineHeight: 1.4 }}>
+      <div className="u-text-sm u-opacity-70 u-lh-1-4">
         <strong>New Desc:</strong> {conflict.csvRow.description || 'N/A'}<br />
         <em className="u-text-0-7rem">Will overwrite existing entry</em>
       </div>

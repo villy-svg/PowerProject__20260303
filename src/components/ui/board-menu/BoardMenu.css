@@ -6,14 +6,15 @@
    ========================================================================== */
 
 /* ── 1. Segmented View Switcher (BoardViewToggle) ────────────────────────── */
+/* Option A — Border XOR Fill: container has light satin border & NO fill; active segment has fill & NO border */
 .board-view-toggle,
 .view-mode-toggle {
   display: inline-flex;
   align-items: center;
   height: var(--menu-control-height, 36px);
   min-height: var(--menu-control-height, 36px);
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: var(--menu-control-radius, var(--radius-button));
   padding: 3px;
   gap: 4px;
@@ -60,14 +61,14 @@
   outline-offset: 2px;
 }
 
-/* Style toggled state from both [aria-pressed="true"] and .active so visual & accessible state stay locked */
+/* Style toggled state from both [aria-pressed="true"] and .active — fill ONLY, no border */
 .board-view-toggle__btn[aria-pressed="true"],
 .board-view-toggle__btn.active,
 .view-toggle-btn[aria-pressed="true"],
 .view-toggle-btn.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
   color: var(--brand-mint);
-  border: 1px solid color-mix(in srgb, var(--brand-mint), transparent 65%);
+  border: 1px solid transparent;
   font-weight: var(--menu-control-font-weight, 700);
   opacity: 1;
 }
@@ -104,8 +105,8 @@
   min-width: unset;
   min-inline-size: 24px;
   padding: 0 var(--menu-control-padding-x, 14px);
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: var(--menu-control-radius, var(--radius-button));
   color: var(--text-color);
   font-family: var(--font-main);
@@ -116,10 +117,10 @@
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.85;
   box-sizing: border-box;
-  box-shadow: 0 0 3px var(--halo-glow);
-  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: none;
+  backdrop-filter: none;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -130,7 +131,7 @@
     opacity: 1;
     color: var(--brand-mint);
     background: color-mix(in srgb, var(--brand-mint), transparent 88%);
-    border-color: var(--brand-mint);
+    border-color: transparent;
     border-width: 1px;
     box-shadow: 0 0 12px var(--halo-glow);
     transform: none;
@@ -149,26 +150,26 @@
 .expanded-menu-row .halo-button.toggle-depri-btn.active,
 .halo-button.toggle-depri-btn[aria-pressed="true"],
 .halo-button.toggle-depri-btn.active {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
   color: var(--brand-mint);
-  border: 1px solid var(--brand-mint);
+  border: 1px solid transparent;
   opacity: 1;
-  box-shadow: 0 0 14px var(--halo-glow);
+  box-shadow: 0 0 12px var(--halo-glow);
 }
 
-/* Optional board-specific semantic variants for filter pills */
+/* Optional board-specific semantic variants for filter pills — fill ONLY, no border */
 .board-filter-pill--warning[aria-pressed="true"],
 .board-filter-pill--warning.active {
-  background: color-mix(in srgb, var(--status-warning), transparent 85%);
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
   color: var(--status-warning);
-  border-color: var(--status-warning);
+  border-color: transparent;
 }
 
 .board-filter-pill--danger[aria-pressed="true"],
 .board-filter-pill--danger.active {
-  background: color-mix(in srgb, var(--status-danger), transparent 85%);
+  background: color-mix(in srgb, var(--status-danger), transparent 88%);
   color: var(--status-danger);
-  border-color: var(--status-danger);
+  border-color: transparent;
 }
 
 .board-filter-pill--strikethrough:not([aria-pressed="true"]):not(.active) {
@@ -191,7 +192,7 @@
   width: 100%;
 }
 
-/* Trigger button — unified to match 36px height & 0.75rem typography of left menu controls */
+/* Trigger button — unified Option A (Border XOR Fill): transparent + light satin border at rest, fill + no border on hover/open */
 .data-ops-trigger,
 .actions-dropdown-container .filters-row-toggle {
   display: flex;
@@ -203,8 +204,8 @@
   min-height: var(--menu-control-height, 36px);
   padding: 0 var(--menu-control-padding-x, 14px);
   margin: 0;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: var(--menu-control-radius, var(--radius-button));
   color: var(--text-color);
   font-family: var(--font-main);
@@ -216,7 +217,7 @@
   cursor: pointer;
   user-select: none;
   box-sizing: border-box;
-  box-shadow: 0 0 3px var(--halo-glow);
+  box-shadow: none;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -236,7 +237,7 @@
   .data-ops-trigger:hover,
   .actions-dropdown-container .filters-row-toggle:hover {
     background: color-mix(in srgb, var(--brand-mint), transparent 88%);
-    border-color: var(--brand-mint);
+    border-color: transparent;
     color: var(--brand-mint);
     box-shadow: 0 0 12px var(--halo-glow);
   }
@@ -244,8 +245,8 @@
 
 .data-ops-trigger[aria-expanded="true"],
 .data-ops-trigger.is-open {
-  background: color-mix(in srgb, var(--brand-mint), transparent 85%);
-  border-color: var(--brand-mint);
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+  border-color: transparent;
   color: var(--brand-mint);
 }
 

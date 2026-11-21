@@ -23,17 +23,12 @@ import {
 } from '../verticals/DataManager';
 
 import { REMARK_GRADE_MAP } from '../verticals/Employees/remarksMapping';
-import { EMPLOYEE_NAV_ITEMS } from '../constants/verticalFeatures';
+import { EMPLOYEE_NAV_ITEMS, HUB_NAV_ITEMS } from '../constants/verticalFeatures';
 
-export { EMPLOYEE_NAV_ITEMS };
+export { EMPLOYEE_NAV_ITEMS, HUB_NAV_ITEMS };
 
 /** All activeVertical values belonging to ChargingHubs vertical */
-export const HUB_VIEWS = [
-  'hub_tasks',
-  'daily_hub_tasks',
-  'daily_task_templates',
-  'escalation_tasks',
-];
+export const HUB_VIEWS = HUB_NAV_ITEMS.map(item => item.id);
 
 /** All activeVertical values belonging to Employees vertical */
 export const EMPLOYEE_VIEWS = EMPLOYEE_NAV_ITEMS.map(item => item.id);

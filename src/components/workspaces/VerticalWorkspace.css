@@ -59,12 +59,12 @@
   cursor: pointer;
   position: relative;
 }
-/* Balanced Toggle Button */
+/* Balanced Toggle Button — Option A (Border XOR Fill) */
 .sub-sidebar-toggle {
-  background: var(--bg-color);
-  border: 1.5px solid var(--border-color);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   color: var(--text-color);
-  opacity: 1;
+  opacity: 0.85;
   border-radius: 8px;
   cursor: pointer;
   width: 32px;
@@ -73,11 +73,12 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
 }
 .sub-sidebar-toggle:hover {
-  background: var(--border-color);
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+  border-color: transparent;
   opacity: 1;
   color: var(--text-color);
 }
@@ -101,6 +102,7 @@
   left: 12px;
   z-index: 50;
   background: var(--surface-card);
+  border-color: transparent;
   box-shadow: var(--shadow-premium);
 }
 /* Shift the header title to make room for the floating toggle button */
@@ -174,56 +176,20 @@
     cursor: pointer;
   }
 }
-/* 5. SUB-NAV ITEMS */
-.sub-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: color-mix(in srgb, var(--text-color), transparent 95%);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  user-select: none;
-}
-.sub-nav-item.navigable {
-  cursor: pointer;
-}
-.sub-nav-item.navigable:hover {
-  background: color-mix(in srgb, var(--brand-green), transparent 95%);
-  border-color: var(--brand-green);
-  transform: translateX(4px);
-}
-.sub-nav-text p {
-  margin: 0;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-color);
-}
-.sub-nav-text small {
-  font-size: 0.7rem;
-  opacity: 0.5;
-}
-.nav-arrow {
-  margin-left: auto;
-  transition: opacity 0.3s;
-}
-.sub-nav-item:hover .nav-arrow {
-  color: var(--text-color);
-}
-/* 6. FILTERS TOGGLE SYSTEM */
+/* 5. FILTERS TOGGLE SYSTEM — Option A (Border XOR Fill) */
+/* Used by DataOperationsDropdown trigger; legacy .sub-nav-item & .filters-action-btn removed */
 .filters-row-toggle {
-  display: flex !important;
+  display: flex;
   justify-content: space-between;
   align-items: center;
   height: var(--menu-control-height, 36px);
   min-height: var(--menu-control-height, 36px);
   padding: 0 var(--menu-control-padding-x, 14px);
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   cursor: pointer;
   width: 100%;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
   border-radius: var(--menu-control-radius, var(--radius-button));
   margin-bottom: 0;
@@ -232,7 +198,7 @@
 }
 .filters-row-toggle:hover {
   background: color-mix(in srgb, var(--brand-mint), transparent 88%);
-  border-color: var(--brand-mint);
+  border-color: transparent;
   color: var(--brand-mint);
 }
 .filters-row-toggle p {
@@ -244,29 +210,66 @@
   text-transform: uppercase;
   line-height: 1;
 }
-.filters-action-btn {
-  background: none;
-  border: none;
-  color: var(--brand-green);
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 8px;
-  transition: all 0.2s;
-  opacity: 1;
-}
-.filters-action-btn:hover {
-  background: var(--halo-bg);
-  opacity: 1;
-}
-.filters-action-btn.active {
-  opacity: 1;
-  text-decoration: underline;
+
+/* 6. SHARED SUB-SIDEBAR NAVIGATION LIST & LOCKED STATE */
+.sub-sidebar-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 4px;
 }
 
-/* Normalize sub-sidebar halo buttons to Title Case and standard weight without !important */
+.sub-sidebar-nav-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Single source of truth for ALL sub-sidebar buttons (Option A — Border XOR Fill):
+   - Rest: transparent fill + light satin border ONLY, no glow
+   - Hover / Active: subtle mint fill ONLY + no border (transparent 1px prevents layout shift) */
 .sub-sidebar .halo-button {
   text-transform: none;
   font-weight: 500;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  box-shadow: none;
+  backdrop-filter: none;
+  opacity: 0.75;
+}
+
+.sub-sidebar-header .halo-button {
+  opacity: 1;
+}
+
+.sub-sidebar .halo-button:hover:not(:disabled):not(.locked),
+.sub-sidebar .halo-button.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+  border: 1px solid transparent;
+  color: var(--brand-mint);
+  box-shadow: 0 0 12px var(--halo-glow);
+  opacity: 1;
+  transform: none;
+}
+
+/* Locked/disabled sub-sidebar item (Hubs, Employees, etc.): light satin border ONLY, no fill, no glow */
+.sub-sidebar .halo-button.locked,
+.sub-sidebar .halo-button:disabled,
+.sub-sidebar .halo-button.locked:hover,
+.sub-sidebar .halo-button:disabled:hover {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--text-color);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 92%);
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.sub-sidebar-nav-lock-icon {
+  opacity: 0.7;
+  flex-shrink: 0;
 }

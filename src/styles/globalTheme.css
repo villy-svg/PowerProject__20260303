@@ -2,7 +2,11 @@
 @import "./systems/systemLists.css";
 @import "./systems/systemCards.css";
 @import "./systems/systemBadges.css";
+@import "./systems/systemModals.css";
+@import "./DropdownSystem.css";
+@import "./ManagementForms.css";
 @import "../components/ui/board-menu/BoardMenu.css";
+@import "../components/ui/Toggle.css";
 
 /* ==========================================================================
    1. THEME VARIABLES (Centralized Source of Truth)
@@ -131,7 +135,7 @@
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  color: #000;
+  color: var(--bg-color);
   font-weight: 900;
   transition: all 0.15s ease;
   cursor: pointer;
@@ -146,7 +150,7 @@
 .selection-checkbox.checked {
   background: var(--brand-green);
   border-color: var(--brand-green);
-  color: #000; /* Contrast for the checkmark */
+  color: var(--bg-color); /* Contrast for the checkmark */
 }
 /* Global alignment helper for selection columns in lists */
 .list-selection-col {
@@ -1237,3 +1241,14 @@ body[data-keyboard="open"] .task-form-actions {
 .u-text-brand-purple { color: #a855f7; }
 .u-min-h-80 { min-height: 80px; }
 .u-outline-none { outline: none; }
+.u-mr-16 { margin-right: 1rem; }
+.u-col-span-2 { grid-column: span 2; }
+.u-h-full { height: 100%; }
+.u-text-0-8rem { font-size: 0.8rem; }
+.u-text-0-85rem { font-size: 0.85rem; }
+.u-text-0-9rem { font-size: 0.9rem; }
+.u-opacity-90 { opacity: 0.9; }
+.u-ml-auto { margin-left: auto; }
+.u-mr-auto { margin-right: auto; }
+.u-lh-1-4 { line-height: 1.4; }
+.u-rotate-180 { transform: rotate(180deg); }

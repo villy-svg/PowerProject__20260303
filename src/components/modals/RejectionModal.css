@@ -1,5 +1,5 @@
 /* RejectionModal.css */
-@import '../../styles/DropdownSystem.css';
+/* DropdownSystem.css is canonically imported once in globalTheme.css */
 .rejection-form {
   padding: 0;
   display: flex;

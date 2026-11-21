@@ -32,32 +32,49 @@
   opacity: 0.5;
 }
 
+/* Option A — Border XOR Fill: container has light satin border & NO fill; active segment has fill & NO border */
 .platform-selector-group {
-  display: flex;
-  background: var(--halo-bg);
-  border: 1px solid var(--border-color);
+  display: inline-flex;
+  align-items: center;
+  height: var(--menu-control-height, 36px);
+  min-height: var(--menu-control-height, 36px);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   border-radius: var(--radius-button, 12px);
   padding: 3px;
   gap: 4px;
+  box-sizing: border-box;
 }
 
 .platform-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--menu-segment-height, 28px);
+  min-height: var(--menu-segment-height, 28px);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 9px;
-  padding: 5px 13px;
-  font-size: 0.8rem;
-  font-weight: 700;
+  border-radius: var(--menu-segment-radius, 8px);
+  padding: 0 12px;
+  font-size: var(--menu-control-font-size, 0.75rem);
+  font-weight: var(--menu-control-font-weight, 700);
+  letter-spacing: var(--menu-control-letter-spacing, 0.5px);
+  text-transform: uppercase;
+  line-height: 1;
   color: var(--text-color);
-  opacity: 0.6;
+  opacity: 0.75;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: auto;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.platform-toggle-btn:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 94%);
 }
 
 .platform-toggle-btn.active {
-  background: color-mix(in srgb, var(--brand-green) 15%, transparent);
-  border: 1px solid var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 88%);
+  border: 1px solid transparent;
   color: var(--brand-green);
   opacity: 1;
 }

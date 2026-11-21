@@ -263,7 +263,7 @@ const CSVImportButton = ({
           ref={inputRef}
           type="file"
           accept={accept}
-          style={{ display: 'none' }}
+          className="u-hidden"
           onChange={handleFileChange}
           disabled={disabled}
         />

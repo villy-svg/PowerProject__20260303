@@ -32,6 +32,11 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { taskUtils } from '../../utils/taskUtils';
 import { resolvePriorityLabel } from '../../registry/verticalRegistry';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureTask,
+  canMarkAttendanceTask,
+  canReviewAttendanceTask,
+} from '../../services/employees/unmarkedAttendanceTaskService';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -116,6 +121,9 @@ const ListViewRow = ({
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
   const isEmpApproval = isEmployeeApprovalTask(task);
   const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
+  const isAttendanceTask = isAttendanceClosureTask(task);
+  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
+  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
   const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   const handleTouchEnd = (e) => {
@@ -152,18 +160,16 @@ const ListViewRow = ({
           openEditModal(task);
         }
       }}
-      style={{
-        '--stage-color': taskStage.color,
-        opacity: task.isContextOnly ? 0.7 : 1,
-        cursor: task.isContextOnly ? 'default' : 'pointer',
-      }}
+      style={{ '--stage-color': taskStage.color }}
     >
       {/* LEFT SIDE: Identity & Content */}
-      <div className="list-row-main" style={{ paddingLeft: task.depth ? `${task.depth * 24}px` : undefined }}>
+      <div
+        className={`list-row-main${task.depth ? ' list-row-main--indented' : ''}`}
+        style={task.depth ? { '--tree-depth': task.depth } : undefined}
+      >
         <div
-          className="tree-expander"
+          className={`tree-expander${hasChildren ? '' : ' tree-expander--empty'}`}
           onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
-          style={{ opacity: hasChildren ? 1 : 0 }}
         >
           {hasChildren ? (isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
         </div>
@@ -322,15 +328,32 @@ const ListViewRow = ({
               </button>
             )}
 
+          {/* ATTENDANCE CLOSURE MAKER ACTION */}
+          {!task.isContextOnly && task.stageId === 'BACKLOG' && canMarkAttendance && (
+            <button
+              className="halo-button btn-review-submissions review-action-btn"
+              onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+              title="Mark Non-Present Attendance Status"
+            >
+              Mark Attendance
+            </button>
+          )}
+
           {/* MANAGER APPROVE / REJECT */}
-          {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval) && (
+          {!task.isContextOnly && task.stageId === 'REVIEW' && (canReviewSub || canReviewEmpApproval || canReviewAttendance) && (
             <>
               <button
                 className="halo-button btn-review-submissions review-action-btn"
                 onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                title={isEmpApproval ? "Review Approval Request" : "Review Submissions"}
+                title={
+                  canReviewAttendance
+                    ? 'Review Attendance Closure'
+                    : isEmpApproval
+                      ? 'Review Approval Request'
+                      : 'Review Submissions'
+                }
               >
-                {isEmpApproval ? 'Review Request' : 'Check Submissions'}
+                {canReviewAttendance ? 'Review Attendance' : isEmpApproval ? 'Review Request' : 'Check Submissions'}
               </button>
             </>
           )}
@@ -357,8 +380,7 @@ const ListViewRow = ({
 
           {!task.isContextOnly && task.stageId !== 'COMPLETED' && (
             <button
-              className="card-edit-button" // reuse card button styles for now or list action styles
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              className="card-edit-button card-edit-button--centered"
               onClick={(e) => { e.stopPropagation(); handleWhatsAppReminder(); }}
               title="Share WhatsApp Reminder"
             >

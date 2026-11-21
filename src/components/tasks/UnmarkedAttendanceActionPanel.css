@@ -1,0 +1,208 @@
+/* ==========================================================================
+   UnmarkedAttendanceActionPanel.css
+   Scoped styles for the Attendance Closure Maker-Checker action panel
+   rendered inside SubmissionHistory.jsx.
+
+   Skill compliance:
+     ui-design-system §7  (Semantic CSS tokens, zero hardcoded hex/rgba)
+     ui-design-system §14B (Touch targets >= 44px)
+     safe-code-modification §2B (BEM naming, zero !important)
+   ========================================================================== */
+
+.attendance-task-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-button, 12px);
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--text-color), transparent 97%);
+}
+
+.attendance-task-panel__orphan-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 55%);
+  color: var(--status-warning);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.attendance-task-panel__orphan-line {
+  margin: 0;
+}
+
+.attendance-task-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.attendance-task-panel__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-color);
+}
+
+/* Consolidated monospace badge base (ui-design-system §3A) */
+.attendance-task-panel__stage-pill,
+.attendance-task-panel__status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+}
+
+.attendance-task-panel__stage-pill {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--text-color), transparent 94%);
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.attendance-task-panel__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-color), transparent 40%);
+}
+
+.attendance-task-panel__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.attendance-task-panel__meta-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.55;
+}
+
+.attendance-task-panel__meta-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.attendance-task-panel__rejection-note,
+.attendance-task-panel__error {
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--status-danger), transparent 68%);
+  color: var(--status-danger);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.attendance-task-panel__form,
+.attendance-task-panel__review-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.attendance-task-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.attendance-task-panel__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.7;
+}
+
+.attendance-task-panel__textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.85rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.attendance-task-panel__submission-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--brand-green), transparent 72%);
+  background: color-mix(in srgb, var(--brand-green), transparent 94%);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.attendance-task-panel__status-badge {
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
+  color: var(--brand-green);
+}
+
+.attendance-task-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.attendance-task-panel__btn {
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.attendance-task-panel__btn--primary,
+.attendance-task-panel__btn--approve {
+  color: var(--status-success);
+  border-color: color-mix(in srgb, var(--status-success), transparent 55%);
+  background: color-mix(in srgb, var(--status-success), transparent 88%);
+}
+
+.attendance-task-panel__completed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 70%);
+  background: color-mix(in srgb, var(--status-success), transparent 93%);
+  font-size: 0.84rem;
+}
+
+.attendance-task-panel__completed-line {
+  margin: 0;
+  line-height: 1.45;
+}

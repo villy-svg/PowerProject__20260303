@@ -512,10 +512,10 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
 
                 {!initialData?.id && (
                   <div className="form-group upload-section">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <div className="u-flex-between u-mb-4">
                       <label className="section-label">Attach Photo(s)</label>
                       {files.length > 0 && (
-                        <span className="batch-counter" style={{ fontSize: '0.85rem', opacity: 0.6 }}>
+                        <span className="batch-counter u-text-0-85rem u-opacity-60">
                           {files.length} / 10 images
                         </span>
                       )}
@@ -543,8 +543,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
                           if (e.target.files?.length > 0) {
                             handleFiles(e.target.files);
                           }
-                        }} 
-                        style={{ display: 'none' }}
+                        }}
+                        className="u-hidden"
                       />
                       <div className="upload-icon">📸</div>
                       <div className="upload-text">
@@ -618,9 +618,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
             <button
               key="back-btn"
               type="button"
-              className="halo-button close-btn"
+              className="halo-button close-btn u-mr-auto"
               onClick={() => setStep(1)}
-              style={{ marginRight: 'auto' }}
             >
               ← Back
             </button>
@@ -647,11 +646,10 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               <button
                 key="next-btn"
                 type="button"
-                className="halo-button save-btn"
+                className="halo-button save-btn u-ml-auto"
                 onClick={handleNextStep}
                 // FIX Bug6: Disable until employee data is loaded to prevent null-assignee crash
                 disabled={!allEmployees || allEmployees.length === 0}
-                style={{ marginLeft: 'auto' }}
               >
                 Next: Orchestrate Team
               </button>
@@ -659,9 +657,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               <button
                 key="save-btn"
                 type="submit"
-                className="halo-button save-btn"
+                className="halo-button save-btn u-ml-auto"
                 disabled={loading}
-                style={{ marginLeft: 'auto' }}
               >
                 {loading ? 'Saving...' : (initialData?.id ? 'Update Task' : 'Create Batch')}
               </button>
@@ -669,9 +666,8 @@ const HubTaskForm = ({ onSubmit, onCancel, loading, initialData = {}, availableT
               <button
                 key="close-btn"
                 type="button"
-                className="halo-button close-btn"
+                className="halo-button close-btn u-opacity-60 u-ml-auto"
                 onClick={handleCancelWithConfirm}
-                style={{ opacity: 0.6, marginLeft: 'auto' }}
               >
                 Close
               </button>

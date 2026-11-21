@@ -254,6 +254,25 @@ input:checked + .slider:before {
     justify-content: flex-start;
   }
 }
+/* ClientListRow presentation helpers (replaces inline styles in ClientListRow.jsx) */
+.client-status-pill {
+  min-width: 70px;
+  text-align: center;
+}
+.client-list-row__name {
+  font-weight: 700;
+}
+.client-list-row__meta {
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+.card-deprio-button.is-inactive-action {
+  color: var(--brand-green);
+}
+.u-rotate-180 {
+  transform: rotate(180deg);
+}
+
 @media screen and (max-width: 768px) {
   .client-grid {
     grid-template-columns: 1fr;

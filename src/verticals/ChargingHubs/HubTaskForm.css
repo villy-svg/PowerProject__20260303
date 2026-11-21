@@ -1,4 +1,4 @@
-@import '../../styles/ManagementForms.css';
+/* ManagementForms.css is canonically imported once in globalTheme.css */
 
 /* Component-specific overrides or additions for HubTaskForm */
 .vertical-task-form .form-group label {

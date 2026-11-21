@@ -46,8 +46,32 @@
   color: var(--text-secondary);
   user-select: none;
 }
+.tree-expander--empty {
+  opacity: 0;
+  pointer-events: none;
+}
 .tree-expander:hover {
   color: var(--brand-green);
+}
+
+/* Consolidated from JSX inline styles (ListViewRow / TaskTreeView) */
+.list-task-row {
+  cursor: pointer;
+}
+.list-task-row.context-only {
+  opacity: 0.7;
+  cursor: default;
+}
+.list-row-main--indented {
+  padding-left: calc(var(--tree-depth, 0) * 24px);
+}
+.tree-row--indented {
+  margin-left: calc(var(--tree-depth, 0) * 24px);
+}
+.card-edit-button--centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .list-task-row.drop-target {
   border: 2px dashed var(--brand-green) !important;

@@ -154,3 +154,12 @@ Both environments MUST have **identical RLS policies**. The staging Supabase pro
 
 **Rule**: Whenever a new RLS policy is added to production migrations, it MUST also appear in the same migration file (applied to staging via `staging-db.yml` GitHub Actions workflow). Policy drift between environments is a blocking defect.
 
+---
+
+## 9. Locked Verticals & Features Policy
+
+Verticals marked `locked: true` (or in `LOCKED_VERTICAL_OVERRIDES` in `src/constants/verticals.js`) and features marked `locked: true` in `src/constants/verticalFeatures.js` (`VERTICAL_FEATURES`, `EMPLOYEE_NAV_ITEMS`, `HUB_NAV_ITEMS`) are strictly out of scope until explicitly unlocked by the user:
+- **Do NOT work on them**: Skip locked verticals (`CLIENTS`, `PARTNERS`, `VENDORS`, `DATA_MANAGER`) and locked features (Leave Manager, Daily Task Board, Daily Task Templates) during feature work, UI sweeps, and refactors.
+- **Hide in User Management UI**: Filter locked verticals out of `UserEditorModal` and `UserList`, and filter locked features out of `UserEditorModal`'s feature dropdowns.
+- **Force Default `'none'`**: `getDefaultFeatures()` and `handleSyncPermissions()` in `useUserManagement.js` MUST omit locked verticals and explicitly emit `'none'` for all locked features inside unlocked verticals.
+

@@ -127,12 +127,11 @@ const EmployeeListRow = ({
         )}
         {permissions.canUpdate && (
           <button
-            className="card-deprio-button"
+            className={`card-deprio-button ${emp.status !== 'Active' ? 'u-text-brand-green' : ''}`}
             onClick={(e) => { e.stopPropagation(); onToggleStatus(emp.id, emp.status); }}
             title={emp.status === 'Active' ? 'Deactivate Employee' : 'Activate Employee'}
-            style={{ color: emp.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
           >
-            <IconChevronDown size={14} style={{ transform: emp.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
+            <IconChevronDown size={14} className={emp.status !== 'Active' ? 'u-rotate-180' : ''} />
           </button>
         )}
         {permissions.canDelete && (
@@ -141,10 +140,9 @@ const EmployeeListRow = ({
           </button>
         )}
         <button
-          className={`card-nav-button ${showRemarks ? 'active' : ''}`}
+          className={`card-nav-button ${showRemarks ? 'active u-text-brand-green' : ''}`}
           onClick={(e) => { e.stopPropagation(); setShowRemarks(!showRemarks); }}
           title={showRemarks ? "Hide Remarks Summary" : `Show Remarks Summary (${remarks.length})`}
-          style={{ color: showRemarks ? 'var(--brand-green)' : 'inherit' }}
         >
           <IconComment size={14} />
         </button>

@@ -40,11 +40,7 @@
   color: var(--brand-green, var(--brand-green));
 }
 
-.dropdown-arrow {
-  font-size: 0.8rem;
-  opacity: 0.5;
-  transition: transform 0.2s ease;
-}
+/* .dropdown-arrow is canonically defined in DropdownSystem.css (globally imported via globalTheme.css) */
 
 .hub-selector-container.open .dropdown-arrow {
   transform: rotate(180deg);

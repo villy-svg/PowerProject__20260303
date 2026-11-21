@@ -1,0 +1,15 @@
+/* ==========================================================================
+   TaskCard.css
+   Scoped styles moved from TaskCard.jsx inline style attributes so TaskCard
+   does not depend on TaskListView.css being loaded.
+   ========================================================================== */
+
+.task-card-master {
+  border-left: 2px solid color-mix(in srgb, var(--stage-color, var(--border-color)), transparent 30%);
+  cursor: pointer;
+}
+
+.task-card-master.context-only {
+  opacity: 0.7;
+  cursor: default;
+}

@@ -2,7 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { userService } from '../../services/auth/userService';
 import { supabase } from '../../services/core/supabaseClient';
-import { getDefaultFeatures } from '../../constants/verticalFeatures';
+import { getDefaultFeatures, VERTICAL_FEATURES, isFeatureLocked } from '../../constants/verticalFeatures';
+import { VERTICALS, isVerticalForceLocked } from '../../constants/verticals';
 import { ROLE_LEVELS } from '../../constants/roles';
 
 export const LEVEL_RANKS = { none: 0, viewer: 1, contributor: 2, editor: 3, admin: 4 };
@@ -241,6 +242,9 @@ export const useUserManagement = () => {
 
         if (editRoleScope !== 'master') {
           Object.keys(editVerticalPermissions).forEach(vId => {
+            // Never grant access to locked verticals — keep them omitted ('none')
+            if (VERTICALS[vId]?.locked || isVerticalForceLocked(vId)) return;
+
             const vData = editVerticalPermissions[vId];
             const vLvl = vData.level;
 
@@ -253,16 +257,25 @@ export const useUserManagement = () => {
               // previously set via the Manage RBAC modal.
               // NOTE: 'none' is intentionally included — the DB now stores it as an
               // explicit deny override so the RBAC hook won't fall back to vertical level.
+              const emittedFeatures = new Set();
               if (vData.features) {
                 Object.keys(vData.features).forEach(fId => {
-                  const fLvl = vData.features[fId];
+                  const fLvl = isFeatureLocked(fId) ? 'none' : vData.features[fId];
                   // Include 'none' explicitly — the DB stores it as an intentional
                   // deny override. Only skip truly absent/undefined values.
                   if (fLvl !== undefined && fLvl !== null) {
                     fGrants.push({ vertical_id: vId, feature_id: fId, access_level: fLvl });
+                    emittedFeatures.add(fId);
                   }
                 });
               }
+
+              // Always force locked features within unlocked verticals to 'none'
+              (VERTICAL_FEATURES[vId] || []).forEach(f => {
+                if (f.locked && !emittedFeatures.has(f.id)) {
+                  fGrants.push({ vertical_id: vId, feature_id: f.id, access_level: 'none' });
+                }
+              });
             }
           });
         }

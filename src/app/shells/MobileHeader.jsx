@@ -30,7 +30,7 @@ import {
 import MasterHeaderMenu from '../../components/layout/MasterHeaderMenu';
 import '../../components/layout/BottomNav.css';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
-import { EMPLOYEE_NAV_ITEMS } from '../../constants/verticalFeatures';
+import { EMPLOYEE_NAV_ITEMS, HUB_NAV_ITEMS } from '../../constants/verticalFeatures';
 
 const MobileHeader = ({
   title,
@@ -92,18 +92,11 @@ const MobileHeader = ({
 
     const list = [];
     if (isHub) {
-      if (permissions?.canAccessHubTasks !== false) {
-        list.push({ id: 'hub_tasks', label: 'Hubs Task Board' });
-      }
-      if (permissions?.canAccessDailyHubTasks !== false) {
-        list.push({ id: 'daily_hub_tasks', label: 'Daily Task Board' });
-      }
-      if (permissions?.canAccessEscalationTasks !== false) {
-        list.push({ id: 'escalation_tasks', label: 'Escalation Task Board' });
-      }
-      if (permissions?.canAccessDailyTaskTemplates !== false) {
-        list.push({ id: 'daily_task_templates', label: 'Daily Task Templates' });
-      }
+      HUB_NAV_ITEMS.forEach(({ id, label, permissionKey, locked }) => {
+        if (permissions?.[permissionKey] !== false) {
+          list.push({ id, label, locked: Boolean(locked) });
+        }
+      });
     } else if (isEmp) {
       // Match desktop sub-sidebar order: Employees Records Manager first, then EMPLOYEE_NAV_ITEMS
       if (permissions?.canAccessEmployees !== false) {
@@ -193,7 +186,11 @@ const MobileHeader = ({
           <div className="mobile-board-sub-tray-content custom-scrollbar">
             {boards.map(board => {
               const isLocked = Boolean(board.locked);
-              const isActive = !isLocked && activeVertical === board.id;
+              const hubId = verticals?.CHARGING_HUBS?.id || 'CHARGING_HUBS';
+              const isActive = !isLocked && (
+                activeVertical === board.id ||
+                (board.id === 'hub_tasks' && activeVertical === hubId)
+              );
               return (
                 <button
                   key={board.id}

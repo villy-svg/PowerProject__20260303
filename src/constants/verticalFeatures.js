@@ -17,16 +17,30 @@ export const EMPLOYEE_NAV_ITEMS = [
   { id: 'employee_leave_wallet',     label: 'Leave Manager',       permissionKey: 'canAccessEmployeeLeaveWallet', locked: true },
 ];
 
+/**
+ * Ordered navigation items for the Charging Hubs vertical sub-sidebar and mobile board switcher.
+ * Daily Task Board & Daily Task Templates are locked until unlocked for build.
+ */
+export const HUB_NAV_ITEMS = [
+  { id: 'hub_tasks',            label: 'Hubs Task Board',       permissionKey: 'canAccessHubTasks' },
+  { id: 'escalation_tasks',     label: 'Escalation Task Board', permissionKey: 'canAccessEscalationTasks', buttonId: 'btn-nav-escalation' },
+  { id: 'daily_hub_tasks',      label: 'Daily Task Board',      permissionKey: 'canAccessDailyHubTasks',      locked: true },
+  { id: 'daily_task_templates', label: 'Daily Task Templates',  permissionKey: 'canAccessDailyTaskTemplates', locked: true },
+];
+
 /** Feature sub-views that are currently locked/disabled across Desktop, Mobile, and ContentRouter */
-export const LOCKED_FEATURE_VIEWS = EMPLOYEE_NAV_ITEMS
+export const LOCKED_FEATURE_VIEWS = [
+  ...EMPLOYEE_NAV_ITEMS,
+  ...HUB_NAV_ITEMS,
+]
   .filter(item => item.locked)
   .map(item => item.id);
 
 export const VERTICAL_FEATURES = {
   CLIENTS: [
-    { id: 'canAccessClients', label: 'Clients List' },
-    { id: 'canAccessClientTasks', label: 'Client Tasks Board' },
-    { id: 'canAccessLeadsFunnel', label: 'Leads Funnel' }
+    { id: 'canAccessClients', label: 'Clients List', locked: true },
+    { id: 'canAccessClientTasks', label: 'Client Tasks Board', locked: true },
+    { id: 'canAccessLeadsFunnel', label: 'Leads Funnel', locked: true }
   ],
   EMPLOYEES: [
     { id: 'canAccessEmployees', label: 'Employees List' },
@@ -34,29 +48,42 @@ export const VERTICAL_FEATURES = {
     { id: 'canAccessEmployeeAttendanceBoard', label: 'Attendance Board' },
     { id: 'canAccessEmployeeRulesBoard', label: 'Rules & Regulations' },
     { id: 'canAccessAttendanceSelfService', label: 'Current Attendance' },
-    { id: 'canAccessEmployeeLeaveWallet', label: 'Leave Manager' }
+    { id: 'canAccessEmployeeLeaveWallet', label: 'Leave Manager', locked: true }
   ],
   CHARGING_HUBS: [
     { id: 'canAccessHubTasks', label: 'Hub Tasks Board' },
-    { id: 'canAccessDailyHubTasks', label: 'Daily Task Board' },
-    { id: 'canAccessDailyTaskTemplates', label: 'Daily Task Template' },
+    { id: 'canAccessDailyHubTasks', label: 'Daily Task Board', locked: true },
+    { id: 'canAccessDailyTaskTemplates', label: 'Daily Task Template', locked: true },
     { id: 'canAccessEscalationTasks', label: 'Escalation Task Board' }
   ],
   DATA_MANAGER: [
-    { id: 'canAccessDataSheetBoard', label: 'Data Sheet Board' },
-    { id: 'canAccessModelVerificationBoard', label: 'Model Verification Board' }
+    { id: 'canAccessDataSheetBoard', label: 'Data Sheet Board', locked: true },
+    { id: 'canAccessModelVerificationBoard', label: 'Model Verification Board', locked: true }
   ]
 };
 
+/** Set of feature permission IDs that are currently locked (hidden from User Management & forced to 'none') */
+export const LOCKED_FEATURE_IDS = new Set(
+  Object.values(VERTICAL_FEATURES)
+    .flat()
+    .filter(f => f.locked)
+    .map(f => f.id)
+);
+
+export const isFeatureLocked = (featureId) => LOCKED_FEATURE_IDS.has(featureId);
+
 /**
- * Returns the default feature settings for a vertical.
- * By default, all are true to maintain existing access until explicitly disabled.
+ * Returns default feature-level overrides for a vertical when newly assigned.
+ * Locked features are explicitly forced to 'none'; unlocked features are left
+ * undefined so they inherit the vertical's access level cleanly.
  */
 export const getDefaultFeatures = (verticalId) => {
   const features = VERTICAL_FEATURES[verticalId] || [];
   const defaultMap = {};
   features.forEach(f => {
-    defaultMap[f.id] = true;
+    if (f.locked) {
+      defaultMap[f.id] = 'none';
+    }
   });
   return defaultMap;
 };

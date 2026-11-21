@@ -179,7 +179,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
         rightActions={
           <>
             {statusMsg.text && !ui.isAddModalOpen && (
-              <span className={`status-pill ${statusMsg.type}`} style={{ marginRight: '1rem' }}>
+              <span className={`status-pill ${statusMsg.type} u-mr-16`}>
                 {statusMsg.text}
               </span>
             )}
@@ -212,7 +212,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
                 <span className={`status-badge ${template.isActive ? 'active' : 'inactive'}`}>
                   {template.isActive ? 'Active' : 'Paused'}
                 </span>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="u-flex-gap-8">
                   {permissions?.canUpdateDailyTaskTemplates && (
                     <>
                       <button 
@@ -268,7 +268,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
                 <th>Vertical</th>
                 <th>Default Assignee</th>
                 <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="u-text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -283,7 +283,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
                       {template.isActive ? 'Active' : 'Paused'}
                     </span>
                   </td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="u-text-right">
                     <div className="table-actions">
                       {permissions?.canUpdateDailyTaskTemplates && (
                         <>
@@ -316,7 +316,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
               <div className="modal-content-area">
                 {/* Basic Info */}
                 <div className="form-row-grid">
-                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <div className="form-group u-col-span-2">
                     <label>Template Title *</label>
                     <div className="form-input-container">
                       <input
@@ -405,12 +405,12 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
                 <div className="form-row-grid">
                   <div className="form-group">
                     <label>Template Status</label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '100%' }}>
-                       <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}} onClick={() => setFormData({...formData, isActive: !formData.isActive})}>
+                    <div className="u-flex-center-gap-10 u-h-full">
+                       <label className="u-flex-center-gap-8 u-cursor-pointer" onClick={() => setFormData({...formData, isActive: !formData.isActive})}>
                           <div className={`selection-checkbox ${formData.isActive ? 'checked' : ''}`}>
                             {formData.isActive && '✓'}
                           </div>
-                          <span style={{ fontSize: '0.9rem', opacity: 0.9 }}>
+                          <span className="u-text-0-9rem u-opacity-90">
                             {formData.isActive ? 'Active (Generating)' : 'Paused'}
                           </span>
                         </label>
@@ -419,7 +419,7 @@ const DailyTasksManagement = ({ permissions = {}, refreshTasks, currentUser }) =
 
                   <div className="form-group">
                     <label>Upload Link (Future)</label>
-                    <div className="form-input-container" style={{ opacity: 0.5 }}>
+                    <div className="form-input-container u-opacity-50">
                       <input
                         type="url"
                         value={formData.uploadLink}

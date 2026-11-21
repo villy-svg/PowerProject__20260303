@@ -151,6 +151,41 @@ const MobileSidebar = ({
                   </>
                 )}
 
+                {/* Employees Managers (ordered above Clients to match main sidebar vertical order) */}
+                {filteredVerticals.find(v => v.id === 'EMPLOYEES' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
+                  <>
+                    <button 
+                      className={`tray-card ${activeVertical === 'department_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('department_management')}
+                    >
+                      <div className="tray-icon">
+                        <IconPeople size={20} />
+                      </div>
+                      <span>Departments</span>
+                    </button>
+                    <button 
+                      className={`tray-card ${activeVertical === 'employee_role_management' ? 'active' : ''}`} 
+                      onClick={() => handleNavigate('employee_role_management')}
+                    >
+                      <div className="tray-icon">
+                        <IconPeople size={20} />
+                      </div>
+                      <span>Roles</span>
+                    </button>
+                    {user?.roleId === 'master_admin' && (
+                      <button 
+                        className="tray-card" 
+                        onClick={() => setRbacModalVertical({ id: 'EMPLOYEES', label: 'Employees' })}
+                      >
+                        <div className="tray-icon">
+                          <IconShield size={20} />
+                        </div>
+                        <span>Access</span>
+                      </button>
+                    )}
+                  </>
+                )}
+
                 {/* Clients Managers */}
                 {filteredVerticals.find(v => v.id === 'CLIENTS' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
                   <>
@@ -185,41 +220,6 @@ const MobileSidebar = ({
                       <button 
                         className="tray-card" 
                         onClick={() => setRbacModalVertical({ id: 'CLIENTS', label: 'Clients' })}
-                      >
-                        <div className="tray-icon">
-                          <IconShield size={20} />
-                        </div>
-                        <span>Access</span>
-                      </button>
-                    )}
-                  </>
-                )}
-
-                {/* Employees Managers */}
-                {filteredVerticals.find(v => v.id === 'EMPLOYEES' && (!v.locked && (user?.assignedVerticals?.includes(v.id) || permissions?.scope === 'global'))) && (
-                  <>
-                    <button 
-                      className={`tray-card ${activeVertical === 'department_management' ? 'active' : ''}`} 
-                      onClick={() => handleNavigate('department_management')}
-                    >
-                      <div className="tray-icon">
-                        <IconPeople size={20} />
-                      </div>
-                      <span>Departments</span>
-                    </button>
-                    <button 
-                      className={`tray-card ${activeVertical === 'employee_role_management' ? 'active' : ''}`} 
-                      onClick={() => handleNavigate('employee_role_management')}
-                    >
-                      <div className="tray-icon">
-                        <IconPeople size={20} />
-                      </div>
-                      <span>Roles</span>
-                    </button>
-                    {user?.roleId === 'master_admin' && (
-                      <button 
-                        className="tray-card" 
-                        onClick={() => setRbacModalVertical({ id: 'EMPLOYEES', label: 'Employees' })}
                       >
                         <div className="tray-icon">
                           <IconShield size={20} />

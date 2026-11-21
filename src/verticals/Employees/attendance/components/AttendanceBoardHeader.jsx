@@ -5,6 +5,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import AttendanceLegend from '../AttendanceLegend';
 import CustomSelect from '../../../../components/ui/CustomSelect';
 import RBACManageButton from '../../../../components/ui/RBACManageButton';
+import { IconRefresh } from '../../../../components/ui/Icons';
 
 // TODO(future-rebuild): Complex bulk Schedule Planner header controls (Week Picker,
 // Paintbrush Status/Hub selectors, Save Draft / Submit Plan, Pending Plans button,
@@ -13,13 +14,15 @@ import RBACManageButton from '../../../../components/ui/RBACManageButton';
 // External wiring (useSchedulePlanner + schedulePlannerService) remains intact.
 
 const CustomDateInput = React.forwardRef(({ value, onClick, className, placeholder }, ref) => {
-  const formattedValue = value ? value.replace(' - ', '  to  ') : '';
+  // Single-spaced separator keeps the range pill compact on 11"/13" laptops
+  const formattedValue = value ? value.replace(' - ', ' to ') : '';
   return (
     <input
       value={formattedValue}
       onClick={onClick}
       className={className}
       placeholder={placeholder}
+      aria-label="Attendance date range"
       ref={ref}
       readOnly
     />
@@ -47,6 +50,7 @@ const AttendanceBoardHeader = ({
     <div className="attendance-board__left-actions">
       {viewMode === 'pending-requests' ? (
         <button
+          type="button"
           className="halo-button u-flex-center-gap-8"
           onClick={() => setViewMode('attendance')}
         >
@@ -69,6 +73,7 @@ const AttendanceBoardHeader = ({
             customInput={<CustomDateInput />}
           />
           <button
+            type="button"
             className="attendance-board__go-btn"
             onClick={handleApplyDates}
             aria-label="Apply Dates"
@@ -84,20 +89,22 @@ const AttendanceBoardHeader = ({
     <>
       {viewMode === 'pending-requests' ? null : (
         <>
-          {/* Simplified A.2: Single-employee, multi-day updater */}
+          {/* Simplified A.2: Single-employee, multi-day updater (compact label for laptop viewports) */}
           {canSuggestEdit && (
             <button
+              type="button"
               className="halo-button master-action-btn"
               onClick={onOpenBulkUpdate}
               title="Update multiple dates for one employee at once."
             >
-              + Multi-Day Update
+              + Multi
             </button>
           )}
 
           {/* Individual edit request approval queue — editors only (with live pending badge) */}
           {canApprove && (
             <button
+              type="button"
               className="halo-button attendance-board__approval-btn"
               onClick={() => setViewMode('pending-requests')}
             >
@@ -110,12 +117,16 @@ const AttendanceBoardHeader = ({
             </button>
           )}
 
+          {/* Icon-only Refresh to save horizontal space on 11"/13" laptop headers */}
           <button
-            className="halo-button master-action-btn"
+            type="button"
+            className={`halo-button attendance-board__refresh-btn${isBoardLoading ? ' attendance-board__refresh-btn--loading' : ''}`}
             onClick={refreshBoard}
             disabled={isBoardLoading}
+            title={isBoardLoading ? 'Refreshing attendance…' : 'Refresh attendance'}
+            aria-label="Refresh attendance"
           >
-            {isBoardLoading ? 'Loading…' : 'Refresh'}
+            <IconRefresh size={15} />
           </button>
         </>
       )}
@@ -164,6 +175,7 @@ const AttendanceBoardHeader = ({
 
         <div className="attendance-board__pagination">
           <button
+            type="button"
             className="halo-button"
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
@@ -174,6 +186,7 @@ const AttendanceBoardHeader = ({
             PAGE {page}
           </span>
           <button
+            type="button"
             className="halo-button"
             onClick={() => setPage(p => p + 1)}
             disabled={!hasMore}

@@ -7,11 +7,7 @@
   border-color: color-mix(in srgb, var(--text-color), transparent 80%);
   color: var(--text-color);
 }
-.assignee-none {
-  opacity: 0.4;
-  background: transparent;
-  border-style: dashed;
-}
+/* .assignee-none is canonically defined in globalTheme.css */
 /* Mini variant for list view */
 .assignee-badge-base.mini {
   padding: 1px 5px;

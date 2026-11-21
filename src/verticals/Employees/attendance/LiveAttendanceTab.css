@@ -1,0 +1,445 @@
+/* ==========================================================================
+   LiveAttendanceTab.css
+   Scoped styles for the Live Attendance Tab (extracted from the former
+   1,012-line AttendanceSelfService.css monolith).
+
+   Skill compliance:
+     ui-design-system §3  (Standardized badge system)
+     ui-design-system §7  (Semantic CSS variables, zero hardcoded rgba/hex)
+     safe-code-modification §2B (BEM naming, zero !important)
+   ========================================================================== */
+
+.live-attendance__container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Summary bar — "N currently active" + Refresh button */
+.live-attendance__summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.live-attendance__summary-count {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.live-attendance__summary-number {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.live-attendance__summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.halo-button.live-attendance__refresh-btn {
+  width: calc(1.8rem + 2px);
+  height: calc(1.8rem + 2px);
+  min-width: calc(1.8rem + 2px);
+  min-height: calc(1.8rem + 2px);
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Animated green pulse dot for "live" indicator */
+.live-attendance__pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-success);
+  animation: live-pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes live-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success), transparent 50%);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-success), transparent 100%);
+  }
+}
+
+.live-attendance__last-refresh {
+  font-size: 0.72rem;
+  opacity: 0.4;
+  margin: -0.5rem 0 0;
+}
+
+/* Hub card grid — 1 column on mobile, up to 2 columns on wider screens */
+.live-attendance__hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.live-attendance__hub-card {
+  background: color-mix(in srgb, var(--text-color), transparent 98%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-squircle, 24px);
+  overflow: hidden;
+}
+
+.live-attendance__hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--text-color), transparent 98.5%);
+}
+
+.live-attendance__hub-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.live-attendance__hub-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.live-attendance__hub-counts {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Consolidated monospace badge base (eliminates repeated boilerplate) */
+.live-attendance__hub-code,
+.live-attendance__hub-active-count,
+.live-attendance__hub-overtime-count,
+.live-attendance__emp-code,
+.live-attendance__overtime-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.live-attendance__hub-code,
+.live-attendance__hub-active-count,
+.live-attendance__hub-overtime-count {
+  font-size: 0.65rem;
+  padding: 1px 8px;
+  min-height: 20px;
+}
+
+.live-attendance__emp-code,
+.live-attendance__overtime-badge {
+  font-size: 0.6rem;
+  padding: 1px 6px;
+  min-height: 18px;
+}
+
+.live-attendance__hub-code {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.live-attendance__emp-code {
+  background: color-mix(in srgb, var(--text-color), transparent 95%);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+.live-attendance__hub-active-count {
+  background: color-mix(in srgb, var(--status-success), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--status-success), transparent 70%);
+  color: var(--status-success);
+}
+
+.live-attendance__hub-overtime-count {
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 65%);
+  color: var(--status-warning);
+}
+
+.live-attendance__overtime-badge {
+  background: color-mix(in srgb, var(--status-warning), transparent 85%);
+  border: 1px solid color-mix(in srgb, var(--status-warning), transparent 60%);
+  color: var(--status-warning);
+  animation: overtime-flash 3s ease-in-out infinite;
+}
+
+@keyframes overtime-flash {
+  0%, 80%, 100% { opacity: 1; }
+  90%           { opacity: 0.5; }
+}
+
+/* User list & rows */
+.live-attendance__user-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.live-attendance__user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 95%);
+  transition: background 0.15s ease;
+}
+
+.live-attendance__user-row:last-child {
+  border-bottom: none;
+}
+
+.live-attendance__user-row:hover {
+  background: color-mix(in srgb, var(--text-color), transparent 97.5%);
+}
+
+.live-attendance__user-row--overtime {
+  background: color-mix(in srgb, var(--status-warning), transparent 96%);
+}
+
+.live-attendance__user-row--overtime:hover {
+  background: color-mix(in srgb, var(--status-warning), transparent 93%);
+}
+
+.live-attendance__user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.live-attendance__user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.live-attendance__shift-badge {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.live-attendance__user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.live-attendance__hours {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.live-attendance__hours--overtime {
+  color: var(--status-warning);
+  opacity: 1;
+}
+
+/* Loading, error, empty states */
+.live-attendance__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+  opacity: 0.5;
+}
+
+.live-attendance__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--status-danger);
+  font-size: 0.875rem;
+}
+
+.live-attendance__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 3rem;
+  opacity: 0.4;
+  text-align: center;
+}
+
+.live-attendance__empty-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.live-attendance__empty-text {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Master Admin Force End Button */
+.halo-button.live-attendance__force-end-btn {
+  width: calc(1.4rem + 2px);
+  height: calc(1.4rem + 2px);
+  min-width: calc(1.4rem + 2px);
+  min-height: calc(1.4rem + 2px);
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  background: transparent;
+  color: var(--status-warning);
+  border: none;
+  margin-left: 0.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.halo-button.live-attendance__force-end-btn:hover {
+  background: transparent;
+  transform: scale(1.1);
+}
+
+.halo-button.live-attendance__force-end-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inline confirm group (Android 8 WebView safe) */
+.live-attendance__force-confirm-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.halo-button.live-attendance__force-confirm-btn,
+.halo-button.live-attendance__force-cancel-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
+  min-height: 1.6rem;
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.halo-button.live-attendance__force-confirm-btn {
+  background: color-mix(in srgb, var(--status-success), transparent 88%);
+  color: var(--status-success);
+  border-color: color-mix(in srgb, var(--status-success), transparent 65%);
+}
+
+.halo-button.live-attendance__force-confirm-btn:hover {
+  background: color-mix(in srgb, var(--status-success), transparent 75%);
+}
+
+.halo-button.live-attendance__force-cancel-btn {
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
+  color: var(--status-danger);
+  border-color: color-mix(in srgb, var(--status-danger), transparent 70%);
+}
+
+.halo-button.live-attendance__force-cancel-btn:hover {
+  background: color-mix(in srgb, var(--status-danger), transparent 80%);
+}
+
+/* Phone / contact link — ghost at rest, visible on row hover */
+.live-attendance__contact-btn {
+  text-decoration: none;
+  color: inherit;
+  line-height: 1;
+  width: calc(1.4rem + 2px);
+  height: calc(1.4rem + 2px);
+  min-width: calc(1.4rem + 2px);
+  min-height: calc(1.4rem + 2px);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.25;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+}
+
+.live-attendance__contact-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.live-attendance__user-row:hover .live-attendance__contact-btn {
+  opacity: 1;
+}
+
+.live-attendance__contact-btn:hover:not(.live-attendance__contact-btn--disabled) {
+  color: var(--brand-green);
+  background: color-mix(in srgb, var(--brand-mint), transparent 90%);
+  transform: scale(1.1);
+}
+
+.live-attendance__user-row .live-attendance__contact-btn.live-attendance__contact-btn--disabled {
+  opacity: 0.2;
+  cursor: default;
+  pointer-events: none;
+}
+
+@media screen and (max-width: 480px) {
+  .live-attendance__hub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .live-attendance__user-name {
+    max-width: 130px;
+  }
+}

@@ -17,3 +17,7 @@ Rules for ensuring data integrity, security, and proper access control across th
 ## 4. Sphere of Influence (Hierarchy Gating)
 - **Restricted Visibility**: Users with a seniority level `≤ 6` are restricted to viewing tasks they are assigned to, created by them, or created by someone in their downward reporting tree (`hierarchyUtils.getDescendants`).
 - **Context Only Mode**: Parent tasks rendered solely to maintain tree structure (Kanban/Tree views) must be flagged with `isContextOnly: true` and forced to Read-Only, regardless of standard RBAC.
+
+## 5. Locked Verticals & Features
+- **Hidden in User Management**: Locked verticals (`src/constants/verticals.js`) and locked features (`src/constants/verticalFeatures.js`) MUST NOT be shown in User Management UI (`UserEditorModal` / `UserList`).
+- **Default `'none'`**: All locked verticals and locked features MUST default to and sync as `'none'`. Do NOT work on locked verticals/features until explicitly unlocked (see `locked-verticals-and-features.md`).

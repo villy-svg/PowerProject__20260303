@@ -1,7 +1,7 @@
 /* HubFunctionManagement.css
    Pulls in the global ManagementForms + HubManagement foundations so
    cards, lists, and modals all inherit the design-system tokens correctly. */
-@import '../../styles/ManagementForms.css';
+/* ManagementForms.css is canonically imported once in globalTheme.css */
 @import './HubManagement.css';
 
 /* ==========================================================================

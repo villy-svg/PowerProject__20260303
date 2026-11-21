@@ -220,13 +220,13 @@ export const LeaveDashboard = ({
             {isGlobalViewer && viewMode === 'ledger' && (
               <>
                 <button 
-                  className="halo-button secondary btn-sm" 
+                  className="halo-button master-action-btn" 
                   onClick={() => setIsUpdateWalletModalOpen(true)}
                 >
                   + Update Wallet Balance
                 </button>
                 <button 
-                  className="halo-button secondary btn-sm" 
+                  className="halo-button master-action-btn" 
                   onClick={handleRunAccrual}
                   disabled={isSubmitting}
                 >

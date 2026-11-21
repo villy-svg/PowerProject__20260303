@@ -18,6 +18,11 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { taskUtils } from '../../utils/taskUtils';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureTask,
+  canMarkAttendanceTask,
+  canReviewAttendanceTask,
+} from '../../services/employees/unmarkedAttendanceTaskService';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import { TASK_STAGES, STAGE_LIST } from '../../constants/stages';
 import './TaskListView.css'; // Reusing some list styles for consistency
@@ -184,12 +189,10 @@ const TaskTreeView = ({
 
     return (
       <div
-        className={`list-task-row tree-row ${task.isContextOnly ? 'context-only' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${isDragOver ? 'drop-target' : ''}`}
+        className={`list-task-row tree-row ${task.depth ? 'tree-row--indented' : ''} ${task.isContextOnly ? 'context-only' : ''} ${isRowExpanded ? 'is-expanded' : ''} ${isDragOver ? 'drop-target' : ''}`}
         style={{
           '--stage-color': stage.color,
-          marginLeft: `${(task.depth || 0) * 24}px`,
-          opacity: task.isContextOnly ? 0.7 : 1,
-          cursor: task.isContextOnly ? 'default' : 'pointer'
+          ...(task.depth ? { '--tree-depth': task.depth } : {}),
         }}
         {...dragProps}
         {...dropProps}
@@ -354,18 +357,36 @@ const TaskTreeView = ({
                 </button>
               )}
 
+            {/* ATTENDANCE CLOSURE MAKER ACTION */}
+            {!task.isContextOnly && task.stageId === 'BACKLOG' && isAttendanceClosureTask(task) && canMarkAttendanceTask(task, currentUser) && (
+              <button
+                className="halo-button btn-review-submissions u-ml-4"
+                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
+                title="Mark Non-Present Attendance Status"
+              >
+                Mark Attendance
+              </button>
+            )}
+
             {/* MANAGER APPROVE / REJECT */}
             {!task.isContextOnly && task.stageId === 'REVIEW' && (
               (['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending') ||
-              (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(currentUser))
+              (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(currentUser)) ||
+              (isAttendanceClosureTask(task) && canReviewAttendanceTask(task, currentUser))
             ) && (
               <>
                 <button
                   className="halo-button btn-review-submissions u-ml-4"
                   onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                  title={isEmployeeApprovalTask(task) ? "Review Approval Request" : "Review Submissions"}
+                  title={
+                    isAttendanceClosureTask(task)
+                      ? 'Review Attendance Closure'
+                      : isEmployeeApprovalTask(task)
+                        ? 'Review Approval Request'
+                        : 'Review Submissions'
+                  }
                 >
-                  {isEmployeeApprovalTask(task) ? 'Review Request' : 'Check Submissions'}
+                  {isAttendanceClosureTask(task) ? 'Review Attendance' : isEmployeeApprovalTask(task) ? 'Review Request' : 'Check Submissions'}
                 </button>
               </>
             )}

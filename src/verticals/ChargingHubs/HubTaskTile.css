@@ -1,4 +1,4 @@
-@import '../../styles/ManagementForms.css';
+/* ManagementForms.css is canonically imported once in globalTheme.css */
 
 .hub-tile-meta {
   display: flex;

@@ -262,7 +262,8 @@
   gap: 16px;
 }
 
-.form-group {
+/* Scoped to .sandbox-modal so it never collides with global ManagementForms.css .form-group */
+.sandbox-modal .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;

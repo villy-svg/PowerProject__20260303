@@ -98,19 +98,20 @@
   transform: rotate(0);
 }
 
-.halo-button.menu-trigger-btn.active {
+/* Unified Option A (Border XOR Fill): active MENU uses subtle fill with no border */
+.master-header-actions-row .halo-button.menu-trigger-btn:hover,
+.master-header-actions-row .halo-button.menu-trigger-btn.active {
   color: var(--text-color);
   opacity: 1;
-  border: 1px solid transparent;
-  background: var(--halo-bg);
-  box-shadow: 0 0 3px var(--halo-glow);
+  border-color: transparent;
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+  box-shadow: none;
 }
 
-.halo-button.menu-trigger-btn.active:hover {
-  color: var(--text-color);
-}
-
-/* Single source of truth for all top-level header row buttons (MENU, + Add <Entity>, Manage RBAC, etc.) */
+/* Single source of truth for all top-level header row buttons (MENU, + Add <Entity>, Approvals, Manage RBAC, etc.)
+   Option A — Border XOR Fill:
+   - Rest: light satin border ONLY, no background fill, no glow
+   - Hover / Active: subtle tinted fill ONLY, no border (transparent 1px prevents layout shift) */
 .master-header-actions-row .halo-button {
   height: 36px;
   min-height: 36px;
@@ -129,9 +130,21 @@
   line-height: 1;
   text-transform: uppercase;
   border-radius: var(--radius-button);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
-/* Single source of truth for all halo buttons inside the Row 4 expanded menu */
+.master-header-actions-row .halo-button:hover:not(:disabled),
+.master-header-actions-row .halo-button.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+  border: 1px solid transparent;
+  box-shadow: 0 0 14px var(--halo-glow);
+  transform: translateY(-1px);
+}
+
+/* Single source of truth for all halo buttons inside the Row 4 expanded menu (Border XOR Fill) */
 .expanded-menu-row .halo-button {
   height: var(--menu-control-height, 36px);
   min-height: var(--menu-control-height, 36px);
@@ -149,6 +162,18 @@
   line-height: 1;
   text-transform: uppercase;
   border-radius: var(--menu-control-radius, var(--radius-button));
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.expanded-menu-row .halo-button:hover:not(:disabled),
+.expanded-menu-row .halo-button.active {
+  background: color-mix(in srgb, var(--brand-mint), transparent 88%);
+  border: 1px solid transparent;
+  box-shadow: 0 0 12px var(--halo-glow);
+  transform: none;
 }
 
 

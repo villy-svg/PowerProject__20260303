@@ -1,5 +1,5 @@
 /* UserManagement styles */
-@import '../../styles/DropdownSystem.css';
+/* DropdownSystem.css is canonically imported once in globalTheme.css */
 /* ── Lifecycle Category Sections ─────────────────────────────── */
 
 /*
@@ -204,7 +204,8 @@
   font-weight: 700;
   margin: 0;
 }
-.close-modal {
+/* Scoped to .user-modal so it does not collide with global ManagementForms.css .close-modal */
+.user-modal .close-modal {
   background: transparent;
   border: none;
   color: var(--text-color);
@@ -215,7 +216,7 @@
   padding: 4px 8px;
   border-radius: 6px;
 }
-.close-modal:hover {
+.user-modal .close-modal:hover {
   opacity: 1;
   background: color-mix(in srgb, var(--text-color), transparent 90%);
 }
@@ -415,9 +416,9 @@
   color: var(--text-secondary);
 }
 .v-lvl-btn.active.lvl-inherit {
-  border-color: var(--brand-blue, #3b82f6);
-  background: color-mix(in srgb, var(--brand-blue, #3b82f6), transparent 85%);
-  color: var(--brand-blue, #3b82f6);
+  border-color: var(--brand-blue);
+  background: color-mix(in srgb, var(--brand-blue), transparent 85%);
+  color: var(--brand-blue);
 }
 /* Table Tags */
 .v-tag {
@@ -886,10 +887,7 @@
   opacity: 0.5;
 }
 
-.header-action-btn {
-  padding: 6px 12px;
-  font-size: 12px;
-}
+/* Desktop .header-action-btn inherits uniform sizing, fill, and border from .master-header-actions-row .halo-button */
 
 .sync-modal {
   max-width: 600px;

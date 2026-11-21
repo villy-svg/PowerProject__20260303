@@ -16,8 +16,9 @@ export const isVerticalForceLocked = (verticalId) => LOCKED_VERTICAL_OVERRIDES.h
  */
 export const VERTICALS = {
   CHARGING_HUBS: { id: 'CHARGING_HUBS', label: 'Hubs' },
-  CLIENTS: { id: 'CLIENTS', label: 'Clients', locked: true },
+  // Ordered above CLIENTS to match public.verticals."order" and prevent pre-hydration flicker
   EMPLOYEES: { id: 'EMPLOYEES', label: 'Employees' },
+  CLIENTS: { id: 'CLIENTS', label: 'Clients', locked: true },
   PARTNERS: { id: 'PARTNERS', label: 'Partners', locked: true },
   VENDORS: { id: 'VENDORS', label: 'Vendors', locked: true },
   DATA_MANAGER: { id: 'DATA_MANAGER', label: 'Data', locked: true }

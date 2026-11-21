@@ -7,6 +7,8 @@ import {
   approveDeactivationRequest,
   rejectEmployeeRequest,
 } from '../../services/employees/employeeRequestService';
+import { isAttendanceClosureTask } from '../../services/employees/unmarkedAttendanceTaskService';
+import UnmarkedAttendanceActionPanel from './UnmarkedAttendanceActionPanel';
 import { useAuth } from '../../app/contexts/AuthContext';
 import RejectionModal from '../modals/RejectionModal';
 import { IconDatabase, IconCheck, IconX } from '../ui/Icons';
@@ -295,10 +297,11 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
     }
   };
 
+  const isAttendanceTask = isAttendanceClosureTask(task);
   const isTaskResolved = task?.stageId === 'COMPLETED' || task?.stageId === 'DEPRIORITIZED';
   const showFilterBar = unifiedTimeline.length > 0 && !historyDegraded;
 
-  if (!loading && unifiedTimeline.length === 0 && !bankUpdatePayload && !deactivationPayload) {
+  if (!loading && unifiedTimeline.length === 0 && !bankUpdatePayload && !deactivationPayload && !isAttendanceTask) {
     return (
       <div className="submission-history">
         <div className="submission-history-header">
@@ -354,6 +357,17 @@ const SubmissionHistory = ({ taskId, task, permissions = {}, currentUser = {}, o
           </div>
         )}
       </div>
+
+      {isAttendanceTask && (
+        <UnmarkedAttendanceActionPanel
+          task={task}
+          currentUser={currentUser}
+          onActionComplete={async () => {
+            if (onStatusUpdate) await onStatusUpdate();
+            if (isMountedRef.current) await fetchTimeline({ silent: true });
+          }}
+        />
+      )}
 
       {bankUpdatePayload && (
         <div className="bank-update-review-card employee-request-review-card">

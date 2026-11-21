@@ -470,3 +470,38 @@ export async function fetchActiveHubs() {
 
   return { data: data || [], error: null };
 }
+
+// ---------------------------------------------------------------------------
+// EMPLOYEE SELF-SERVICE (Phase 2): Check if previous shift day is unmarked
+// Respects the 05:00 AM IST night-shift boundary server-side.
+// @returns {Promise<{ data: { target_date: string, is_unmarked: boolean, already_escalated: boolean, previous_day_was_weekoff: boolean }|null, error: object|null }>}
+// ---------------------------------------------------------------------------
+export async function getUnmarkedPreviousShiftDay() {
+  const { data, error } = await supabase.rpc('rpc_get_unmarked_previous_shift_day');
+
+  if (error) {
+    console.error('[attendanceService] getUnmarkedPreviousShiftDay error:', error);
+    return { data: null, error };
+  }
+
+  return { data: data || null, error: null };
+}
+
+// ---------------------------------------------------------------------------
+// EMPLOYEE SELF-SERVICE (Phase 2): Claim previous shift day as Week-Off
+// Non-consecutive: auto-saves week-off. Consecutive: escalates to Task Board.
+// @param {string} targetDate - YYYY-MM-DD returned by getUnmarkedPreviousShiftDay
+// @returns {Promise<{ data: { status: 'marked'|'escalated'|'already_marked', shift_date?: string, task_id?: string }|null, error: object|null }>}
+// ---------------------------------------------------------------------------
+export async function claimYesterdayWeekOff(targetDate) {
+  const { data, error } = await supabase.rpc('rpc_claim_yesterday_weekoff', {
+    p_target_date: targetDate,
+  });
+
+  if (error) {
+    console.error('[attendanceService] claimYesterdayWeekOff error:', error);
+    return { data: null, error };
+  }
+
+  return { data: data || null, error: null };
+}

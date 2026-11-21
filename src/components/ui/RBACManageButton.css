@@ -5,22 +5,24 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Core RBAC Button ────────────────────────────────────────────── */
-/* Inherits size, font, height, padding, and border geometry from .halo-button
-   and .master-header-actions-row .halo-button; overrides only semantic amber theme */
+/* Option A — Border XOR Fill:
+   - Rest: inherits transparent fill + light satin border from .master-header-actions-row .halo-button;
+     semantic amber is carried by text/icon color only.
+   - Hover: subtle amber fill ONLY, no border (transparent 1px prevents layout shift). */
 .halo-button.rbac-manage-btn,
 .master-header-actions-row .halo-button.rbac-manage-btn {
   color: var(--brand-amber);
-  background: color-mix(in srgb, var(--brand-amber), transparent 94%);
-  border-color: color-mix(in srgb, var(--brand-amber), transparent 70%);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--brand-amber), transparent 88%);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  box-shadow: none;
 }
 
 .halo-button.rbac-manage-btn:hover:not(:disabled),
 .master-header-actions-row .halo-button.rbac-manage-btn:hover:not(:disabled) {
   color: var(--brand-amber);
-  background: color-mix(in srgb, var(--brand-amber), transparent 85%);
-  border-color: var(--brand-amber);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--brand-amber), transparent 80%);
+  background: color-mix(in srgb, var(--brand-amber), transparent 88%);
+  border: 1px solid transparent;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--brand-amber), transparent 85%);
 }
 
 /* ── Chevron indicator for dropdown group mode ──────────────────── */

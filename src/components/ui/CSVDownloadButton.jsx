@@ -1,6 +1,5 @@
 import React from 'react';
 import ExcelJS from 'exceljs';
-import './CSVDownloadButton.css';
 
 /**
  * CSVDownloadButton — Master Export/Template Downloader

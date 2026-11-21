@@ -43,7 +43,7 @@ const HubCSVImport = ({ onImportComplete, className, label = 'Import CSV' }) => 
       <h5 className="u-m-0 u-mb-4 u-fw-800 u-text-brand-green">
         {conflict.csvRow.name}
       </h5>
-      <div className="u-text-sm u-opacity-70" style={{ lineHeight: 1.4 }}>
+      <div className="u-text-sm u-opacity-70 u-lh-1-4">
         <strong>Code:</strong> {conflict.csvRow.hub_code}<br />
         <strong>New City:</strong> {conflict.csvRow.city || 'N/A'}<br />
         <em className="u-text-0-7rem">Existing: {conflict.existingRecord.name}</em>

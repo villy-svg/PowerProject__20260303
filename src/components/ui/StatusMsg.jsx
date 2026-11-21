@@ -12,7 +12,7 @@ import React from 'react';
 const StatusMsg = ({ msg }) => {
   if (!msg?.text) return null;
   return (
-    <div className={`status-message ${msg.type}`} style={{ marginTop: '0.75rem' }}>
+    <div className={`status-message ${msg.type} u-mt-12`}>
       {msg.text}
     </div>
   );

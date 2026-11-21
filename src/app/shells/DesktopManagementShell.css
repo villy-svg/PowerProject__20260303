@@ -23,3 +23,8 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Prevent double-padding black bands if a VerticalWorkspace renders inside DesktopManagementShell */
+.desktop-management-shell .workspace-content {
+  padding: 0;
+}

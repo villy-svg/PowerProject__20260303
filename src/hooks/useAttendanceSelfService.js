@@ -17,6 +17,8 @@ import {
   fetchMyTodayAttendance,
   employeeCheckIn,
   employeeCheckOut,
+  getUnmarkedPreviousShiftDay,
+  claimYesterdayWeekOff,
 } from '../services/employees/attendanceService';
 import { supabase } from '../services/core/supabaseClient';
 import { generateUUID } from '../utils/uuid';
@@ -203,6 +205,89 @@ export function useAttendanceSelfService(userId) {
   // Form state (for the check-in form)
   const [selectedShiftType, setSelectedShiftType] = useState(getDefaultShiftType);
   const [selectedHubId, setSelectedHubId] = useState(null);
+
+  // Phase 2: Previous-day self-service Week-Off prompt state
+  const [weekOffPrompt, setWeekOffPrompt] = useState(null);
+  const [isClaimingWeekOff, setIsClaimingWeekOff] = useState(false);
+  const [weekOffFeedback, setWeekOffFeedback] = useState(null);
+  const weekOffInFlightRef = useRef(false);
+
+  const getWeekOffDismissKey = useCallback(
+    (targetDate) => (userId && targetDate ? `pp_wo_dismissed_${userId}_${targetDate}` : null),
+    [userId]
+  );
+
+  // Check if previous logical shift day is unmarked (respects 05:00 AM IST boundary)
+  const loadPreviousShiftWeekOffPrompt = useCallback(async () => {
+    if (!userId || userId === 'dev-bypass-user-id') return;
+    try {
+      const { data, error: rpcErr } = await getUnmarkedPreviousShiftDay();
+      if (rpcErr || !data?.is_unmarked || !data?.target_date) {
+        setWeekOffPrompt(null);
+        return;
+      }
+      const dismissKey = getWeekOffDismissKey(data.target_date);
+      if (dismissKey && localStorage.getItem(dismissKey) === '1') {
+        setWeekOffPrompt(null);
+        return;
+      }
+      setWeekOffPrompt(data);
+    } catch (err) {
+      console.warn('[useAttendanceSelfService] Previous-day Week-Off check skipped:', err);
+    }
+  }, [userId, getWeekOffDismissKey]);
+
+  useEffect(() => {
+    loadPreviousShiftWeekOffPrompt();
+  }, [loadPreviousShiftWeekOffPrompt]);
+
+  const handleDismissWeekOff = useCallback((targetDate) => {
+    const dismissKey = getWeekOffDismissKey(targetDate);
+    if (dismissKey) {
+      try { localStorage.setItem(dismissKey, '1'); } catch { /* storage unavailable */ }
+    }
+    setWeekOffPrompt(null);
+  }, [getWeekOffDismissKey]);
+
+  const handleClaimWeekOff = useCallback(async (targetDate) => {
+    if (!targetDate || weekOffInFlightRef.current) return;
+    weekOffInFlightRef.current = true;
+    setIsClaimingWeekOff(true);
+    setWeekOffFeedback(null);
+    try {
+      const { data, error: rpcErr } = await claimYesterdayWeekOff(targetDate);
+      if (rpcErr) throw rpcErr;
+
+      setWeekOffPrompt(null);
+      if (data?.status === 'marked') {
+        setWeekOffFeedback({
+          tone: 'success',
+          message: `Week-Off recorded for ${targetDate}.`,
+        });
+      } else if (data?.status === 'escalated') {
+        setWeekOffFeedback({
+          tone: 'warning',
+          message: 'Consecutive Week-Off requires manager approval — sent to your manager.',
+        });
+      } else if (data?.status === 'already_marked') {
+        setWeekOffFeedback({
+          tone: 'success',
+          message: `Attendance for ${targetDate} is already recorded.`,
+        });
+      }
+    } catch (err) {
+      console.error('[useAttendanceSelfService] handleClaimWeekOff error:', err);
+      setWeekOffFeedback({
+        tone: 'error',
+        message: err?.message || 'Could not record Week-Off. Please try again.',
+      });
+    } finally {
+      weekOffInFlightRef.current = false;
+      setIsClaimingWeekOff(false);
+    }
+  }, []);
+
+  const clearWeekOffFeedback = useCallback(() => setWeekOffFeedback(null), []);
 
   // ---------------------------------------------------------------------------
   // Utility: Retry on Supabase AbortError (Lock Stolen)
@@ -512,5 +597,12 @@ export function useAttendanceSelfService(userId) {
     handleCheckOut,
     clearSuccessData,
     loadTodayRecord,
+    // Phase 2: Self-Service Week-Off prompt
+    weekOffPrompt,
+    isClaimingWeekOff,
+    weekOffFeedback,
+    handleClaimWeekOff,
+    handleDismissWeekOff,
+    clearWeekOffFeedback,
   };
 }

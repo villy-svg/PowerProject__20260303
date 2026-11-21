@@ -101,10 +101,13 @@ const ContentRouter = ({
     if (isLockedRoute) {
       setActiveVertical(null);
     } else if (isLockedFeatureRoute) {
-      // Redirect locked employee feature routes (e.g. Leave Manager) to Employees Records Manager
-      const fallbackTarget = resolvedRootId === verticals?.EMPLOYEES?.id
-        ? (verticals?.EMPLOYEES?.id || null)
-        : null;
+      // Redirect locked feature routes (e.g. Leave Manager, Daily Task Board/Templates) to their parent vertical
+      const fallbackTarget =
+        resolvedRootId === verticals?.EMPLOYEES?.id
+          ? (verticals?.EMPLOYEES?.id || null)
+          : resolvedRootId === verticals?.CHARGING_HUBS?.id
+            ? (verticals?.CHARGING_HUBS?.id || null)
+            : null;
       setActiveVertical(fallbackTarget);
     }
   }, [isLockedRoute, isLockedFeatureRoute, resolvedRootId, verticals, setActiveVertical]);

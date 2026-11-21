@@ -1,4 +1,4 @@
-@import './DropdownSystem.css';
+/* DropdownSystem.css is canonically imported once in globalTheme.css */
 
 /* Shared sophisticated form styles for all management modals */
 .modal-overlay {

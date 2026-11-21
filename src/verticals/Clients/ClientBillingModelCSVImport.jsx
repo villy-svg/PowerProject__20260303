@@ -4,7 +4,7 @@ import CSVImportButton from '../../components/ui/CSVImportButton';
 import { billingModelService } from '../../services/clients/clientService';
 import { normalizeValue, calculateSimilarity } from '../../utils/matchingAlgorithms';
 import { generateUUID } from '../../utils/uuid';
-import './ClientBillingModelCSVImport.css';
+import '../../styles/CSVImportTiles.css';
 
 /**
  * ClientBillingModelCSVImport — Thin Wrapper

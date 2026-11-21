@@ -419,12 +419,11 @@ const BaseDropdown = ({
           />
           <button 
             type="button" 
-            className="custom-select-clear-btn" 
+            className={`custom-select-clear-btn ${searchTerm ? '' : 'custom-select-clear-btn--hidden'}`}
             onClick={(e) => { 
               e.stopPropagation(); 
               setSearchTerm(''); 
             }}
-            style={{ visibility: searchTerm ? 'visible' : 'hidden' }}
           >
             ×
           </button>
@@ -486,7 +485,7 @@ const BaseDropdown = ({
             {displayedOptions.length === 0 ? (
               emptyState
                 ? <div className="bd-empty-state">{emptyState}</div>
-                : <div className="no-options" style={{ padding: '15px', textAlign: 'center', opacity: 0.5 }}>No options available</div>
+                : <div className="no-options">No options available</div>
             ) : (
               renderGroupedOptions(displayedOptions)
             )}

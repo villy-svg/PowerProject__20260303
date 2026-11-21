@@ -33,28 +33,28 @@ const ClientListRow = ({
       <div className="list-row-main">
         {/* 1. Badges / Metadata - Following ListViewRow North Star */}
         <div className="list-row-badges">
-          <span className={`card-priority ${client.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`} style={{ minWidth: '70px', textAlign: 'center' }}>
+          <span className={`card-priority client-status-pill ${client.status === 'Active' ? 'priority-completed' : 'priority-urgent'}`}>
             {client.status}
           </span>
-          <span className="billing-badge hub-badge" style={{ fontSize: '0.65rem' }}>{client.billing_model_code || 'MODEL'}</span>
+          <span className="billing-badge hub-badge">{client.billing_model_code || 'MODEL'}</span>
           {pendingTasksCount > 0 && (
             <span className="badge-base badge-info">
               {pendingTasksCount} TASKS
             </span>
           )}
-          <span className="dept-badge" style={{ opacity: 0.7 }}>
+          <span className="dept-badge u-opacity-70">
             {Object.keys(client.category_matrix || {}).length} VEH
           </span>
         </div>
 
         {/* 2. Content (Name + Subline) */}
-        <div className="list-row-content" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span className="list-name" style={{ fontWeight: 700 }}>{client.name}</span>
+        <div className="list-row-content u-flex-center-gap-16">
+          <span className="list-name client-list-row__name">{client.name}</span>
           {client.poc_name && (
-            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>👤 {client.poc_name}</span>
+            <span className="client-list-row__meta">👤 {client.poc_name}</span>
           )}
           {client.poc_phone && (
-            <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>📞 {client.poc_phone}</span>
+            <span className="client-list-row__meta">📞 {client.poc_phone}</span>
           )}
         </div>
       </div>
@@ -68,12 +68,11 @@ const ClientListRow = ({
         )}
         {permissions.canUpdate && (
           <button
-            className="card-deprio-button"
+            className={`card-deprio-button ${client.status !== 'Active' ? 'is-inactive-action' : ''}`}
             onClick={(e) => { e.stopPropagation(); onToggleStatus(client.id, client.status); }}
             title={client.status === 'Active' ? 'Move to Inactive' : 'Move to Active'}
-            style={{ color: client.status === 'Active' ? 'inherit' : 'var(--brand-green)' }}
           >
-            <IconChevronDown size={14} style={{ transform: client.status === 'Active' ? 'none' : 'rotate(180deg)' }} />
+            <IconChevronDown size={14} className={client.status !== 'Active' ? 'u-rotate-180' : ''} />
           </button>
         )}
         {permissions.canDelete && (

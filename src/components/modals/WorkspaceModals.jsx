@@ -4,6 +4,11 @@ import SubmissionModal from './SubmissionModal';
 import RejectionModal from './RejectionModal';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureTask,
+  canMarkAttendanceTask,
+  canReviewAttendanceTask,
+} from '../../services/employees/unmarkedAttendanceTaskService';
 
 /**
  * WorkspaceModals Component
@@ -48,7 +53,10 @@ const WorkspaceModals = ({
   const resolvedTaskFormComponent = TaskFormComponent || (editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null);
   const resolvedPermissions = resolvedActiveVertical === 'escalation_tasks'
     ? { ...permissions, canCreate: true, canUpdate: true, level: 'admin', canCreateEscalationTasks: true }
-    : (isEmployeeApprovalTask(editingTask) && canReviewEmployeeRequests(user))
+    : (
+        (isEmployeeApprovalTask(editingTask) && canReviewEmployeeRequests(user)) ||
+        (isAttendanceClosureTask(editingTask) && (canMarkAttendanceTask(editingTask, user) || canReviewAttendanceTask(editingTask, user)))
+      )
       ? { ...permissions, canUpdate: true }
       : permissions;
 

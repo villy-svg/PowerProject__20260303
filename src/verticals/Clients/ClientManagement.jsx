@@ -292,7 +292,7 @@ const ClientManagement = ({ user, permissions, filters, tasks = [], setActiveVer
               {inactiveClients.length === 0 ? (
                 <p className="client-empty-sub-state u-opacity-30">No inactive records.</p>
               ) : (
-                <div className={actualViewMode === 'grid' ? 'client-grid' : 'client-list'} style={{ opacity: 0.6 }}>
+                <div className={`${actualViewMode === 'grid' ? 'client-grid' : 'client-list'} u-opacity-60`}>
                   {inactiveClients.map(client => {
                     const props = {
                       client,

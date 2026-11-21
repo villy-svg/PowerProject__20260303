@@ -1,15 +1,13 @@
 import React from 'react';
 import { EMPLOYEE_NAV_ITEMS } from '../../constants/verticalFeatures';
 import { IconLock } from '../../components/ui/Icons';
-import './EmployeeSubSidebar.css';
 
 /**
  * EmployeeSubSidebar
  *
  * Vertical-specific sidebar navigation for the Employees vertical.
- * Renders ordered board links from EMPLOYEE_NAV_ITEMS with RBAC guards.
- * (Dead FilterGroup and unrendered Supabase queries were removed to follow
- *  Zero Raw Fetching in Components and eliminate wasted network calls.)
+ * Renders ordered board links from EMPLOYEE_NAV_ITEMS with RBAC guards,
+ * using shared .sub-sidebar-nav-* styles in VerticalWorkspace.css.
  */
 const EmployeeSubSidebar = ({
   permissions = {},
@@ -23,7 +21,7 @@ const EmployeeSubSidebar = ({
 
   return (
     <div className="sub-sidebar-body">
-      <nav className="employee-nav-list" aria-label="Employees navigation">
+      <nav className="sub-sidebar-nav-list" aria-label="Employees navigation">
         {EMPLOYEE_NAV_ITEMS.map(({ id, label, permissionKey, requireTruthy, locked }) => {
           const isAllowed = requireTruthy
             ? Boolean(permissions?.[permissionKey])
@@ -41,11 +39,11 @@ const EmployeeSubSidebar = ({
               disabled={isLocked}
               aria-disabled={isLocked}
               title={isLocked ? 'Coming Soon / Locked' : undefined}
-              className={`halo-button employee-nav-btn ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+              className={`halo-button sub-sidebar-nav-btn ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
               onClick={() => !isLocked && setActiveVertical(id)}
             >
               <span>{label}</span>
-              {isLocked && <IconLock className="employee-nav-lock-icon" size={14} />}
+              {isLocked && <IconLock className="sub-sidebar-nav-lock-icon" size={14} />}
             </button>
           );
         })}

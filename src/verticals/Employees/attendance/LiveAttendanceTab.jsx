@@ -17,6 +17,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLiveAttendance } from '../../../hooks/useLiveAttendance';
 import { adminForceCheckout } from '../../../services/employees/attendanceService';
+import './LiveAttendanceTab.css';
 
 // ---------------------------------------------------------------------------
 // Utility: Format decimal hours into "Xh Ym" string (e.g. 1.5 → "1h 30m")

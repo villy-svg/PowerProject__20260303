@@ -172,9 +172,9 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
               <p className="hub-name-small">{cat.name}</p>
               <p className="hub-city">{cat.description || 'No description provided'}</p>
               {cat.default_service_code && (
-                <div style={{ marginTop: '8px', fontSize: '0.8rem' }}>
-                  <span style={{ opacity: 0.6 }}>Default Service: </span>
-                  <code style={{ color: 'var(--brand-green)', fontWeight: 600 }}>{cat.default_service_code}</code>
+                <div className="u-mt-8 u-text-0-8rem">
+                  <span className="u-opacity-60">Default Service: </span>
+                  <code className="u-text-brand-green u-fw-600">{cat.default_service_code}</code>
                 </div>
               )}
             </div>
@@ -194,7 +194,7 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
                 <th>Code</th>
                 <th>Default Service</th>
                 <th>Description</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="u-text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -202,9 +202,9 @@ const ClientCategoryManagement = ({ user = {}, permissions = {}, setActiveVertic
                 <tr key={cat.id}>
                   <td className="name-cell">{cat.name}</td>
                   <td><code className="code-font">{cat.code || '—'}</code></td>
-                  <td><code className="code-font" style={{ color: 'var(--brand-green)' }}>{cat.default_service_code || '—'}</code></td>
-                  <td style={{ opacity: 0.7, fontSize: '0.85rem' }}>{cat.description || '—'}</td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td><code className="code-font u-text-brand-green">{cat.default_service_code || '—'}</code></td>
+                  <td className="u-opacity-70 u-text-0-85rem">{cat.description || '—'}</td>
+                  <td className="u-text-right">
                     <div className="table-actions">
                       {permissions.canUpdate && <button className="icon-btn edit" onClick={() => handleOpenModal(cat)} title="Edit">✎</button>}
                       {permissions.canDelete && <button className="icon-btn delete" onClick={() => handleDelete(cat.id)} title="Delete">×</button>}

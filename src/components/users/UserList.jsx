@@ -1,5 +1,5 @@
 import React from 'react';
-import { VERTICAL_LIST } from '../../constants/verticals';
+import { VERTICAL_LIST, isVerticalForceLocked } from '../../constants/verticals';
 import { IconEdit, IconLock, IconZap } from '../ui/Icons';
 
 /**
@@ -87,7 +87,11 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                       (() => {
                         const vPerms = u.verticalPermissions || {}; 
                         const activeVIds = Array.from(new Set(Object.entries(vPerms)
-                          .filter(([_, data]) => data?.level && data.level !== 'none')
+                          .filter(([vId, data]) => {
+                            const vInfo = VERTICAL_LIST.find(v => v.id === vId);
+                            const isLocked = Boolean(vInfo?.locked) || isVerticalForceLocked(vId);
+                            return !isLocked && data?.level && data.level !== 'none';
+                          })
                           .map(([vId]) => {
                             const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                             const label = vInfo ? vInfo.label : vId;
@@ -165,7 +169,11 @@ const UserList = ({ users = [], viewMode, onEdit, onDeactivate, onReactivate }) 
                     (() => {
                       const vPerms = u.verticalPermissions || {};
                       const activeVIds = Array.from(new Set(Object.entries(vPerms)
-                        .filter(([_, data]) => data?.level && data.level !== 'none')
+                        .filter(([vId, data]) => {
+                          const vInfo = VERTICAL_LIST.find(v => v.id === vId);
+                          const isLocked = Boolean(vInfo?.locked) || isVerticalForceLocked(vId);
+                          return !isLocked && data?.level && data.level !== 'none';
+                        })
                         .map(([vId]) => {
                           const vInfo = VERTICAL_LIST.find(v => v.id === vId);
                           const label = vInfo ? vInfo.label : vId;

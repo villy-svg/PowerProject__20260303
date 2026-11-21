@@ -1,6 +1,6 @@
 import React from 'react';
 import { ROLE_SCOPES, ROLE_LEVELS } from '../../constants/roles';
-import { VERTICAL_LIST } from '../../constants/verticals';
+import { VERTICAL_LIST, isVerticalForceLocked } from '../../constants/verticals';
 import { VERTICAL_FEATURES } from '../../constants/verticalFeatures';
 import { LEVEL_RANKS } from './useUserManagement';
 import { IconX } from '../ui/Icons';
@@ -138,15 +138,16 @@ const UserEditorModal = (props) => {
             <div className="form-section vertical-assignment-section">
               <label className="section-label">3. Configure Vertical Access Levels</label>
               <div className="vertical-permission-list">
-                {VERTICAL_LIST.map(v => {
+                {VERTICAL_LIST.filter(v => !v.locked && !isVerticalForceLocked(v.id)).map(v => {
                   const vData = verticalPermissions[v.id];
                   const normalizedVLevel = typeof vData === 'object' ? vData.level : (vData || 'none');
+                  const visibleFeatures = (VERTICAL_FEATURES[v.id] || []).filter(f => !f.locked);
                   
                   return (
                     <div key={v.id} className="vertical-perm-item-wrapper">
                       <div className="vertical-perm-item">
                         <div className="left-side-controls">
-                          {VERTICAL_FEATURES[v.id] && normalizedVLevel !== 'none' && (
+                          {visibleFeatures.length > 0 && normalizedVLevel !== 'none' && (
                             <button
                                type="button"
                                className={`features-toggle-btn ${expandedVertical === v.id ? 'active' : ''}`}
@@ -185,11 +186,11 @@ const UserEditorModal = (props) => {
                         </div>
                       </div>
 
-                        {expandedVertical === v.id && VERTICAL_FEATURES[v.id] && (
+                        {expandedVertical === v.id && visibleFeatures.length > 0 && (
                         <div className="features-dropdown">
                           <p className="features-header">Configure feature-specific levels for {mapVerticalLabel(v.label)}:</p>
                           <div className="features-level-list">
-                            {VERTICAL_FEATURES[v.id].map(feature => {
+                            {visibleFeatures.map(feature => {
                               // fLevelRaw is the explicit DB row value (undefined = no override)
                               const fLevelRaw = verticalPermissions[v.id]?.features?.[feature.id];
                               // Displayed level: explicit override if set, else fall back to vertical level

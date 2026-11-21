@@ -248,7 +248,7 @@ const CleaningQRGenerator = ({ permissions = {}, onBack }) => {
         <div className="cqr-form-group">
           <label className="cqr-label" htmlFor="cqr-summary-input">
             Issue Category Label{' '}
-            <span style={{ opacity: 0.5, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+            <span className="cqr-label-hint">
               (baked into the QR URL)
             </span>
           </label>
@@ -288,7 +288,7 @@ const CleaningQRGenerator = ({ permissions = {}, onBack }) => {
             {/* URL preview */}
             <div className="cqr-url-preview">
               {/* Link icon */}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ flexShrink: 0, color: 'var(--brand-mint)', opacity: 0.6 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="cqr-link-icon">
                 <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
               </svg>

@@ -261,6 +261,19 @@
   to { transform: rotate(360deg); }
 }
 
+/* Inline-style replacements for CleaningQRGenerator.jsx */
+.cqr-label-hint {
+  opacity: 0.5;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.cqr-link-icon {
+  flex-shrink: 0;
+  color: var(--brand-mint);
+  opacity: 0.6;
+}
+
 /* ==========================================================================
    MOBILE RESPONSIVE
    ========================================================================== */
