@@ -28,8 +28,11 @@ import {
   isAttendanceClosureTask,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
+  isSubjectEmployeeOfAttendanceTask,
+  getSubjectAttendanceWarningText,
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import './TaskCard.css';
+import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -93,20 +96,34 @@ const TaskCard = ({
   const isRejected = task.latestSubmission?.status === 'rejected';
   const blockArrows = isRejected && permissions.level !== 'admin';
 
+  const isAttendanceTask = isAttendanceClosureTask(task);
+  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
+  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
+  const isSubjectAttendanceReadOnly =
+    isAttendanceTask &&
+    isSubjectEmployeeOfAttendanceTask(task, currentUser) &&
+    !canMarkAttendance &&
+    !canReviewAttendance;
+
   const leftStageId = currentIndex > 0 ? STAGE_LIST[currentIndex - 1].id : null;
   const rightStageId = currentIndex < STAGE_LIST.length - 1 ? STAGE_LIST[currentIndex + 1].id : null;
 
-  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
-  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
+  // Attendance closure tasks must transition via Maker-Checker RPCs (blocked by DB trigger on direct move)
+  const canMoveLeft = !isAttendanceTask && leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
+  const canMoveRight = !isAttendanceTask && rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
-  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly;
-  const effectiveCanDelete = taskPerms.canDelete && !task.isContextOnly;
+  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly && !isSubjectAttendanceReadOnly;
+  const effectiveCanDelete =
+    taskPerms.canDelete &&
+    !task.isContextOnly &&
+    !isSubjectAttendanceReadOnly &&
+    (!isAttendanceTask || currentUser?.roleId === 'master_admin');
 
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
     itemId: task.id,
     onDrop: onMoveToParent,
-    dragDisabled: task.isContextOnly || (!canManageHierarchy && !effectiveCanUpdate),
-    dropDisabled: task.isContextOnly || !canManageHierarchy
+    dragDisabled: task.isContextOnly || isAttendanceTask || (!canManageHierarchy && !effectiveCanUpdate),
+    dropDisabled: task.isContextOnly || isAttendanceTask || !canManageHierarchy
   });
 
   const handleTouchEnd = (e) => {
@@ -134,9 +151,6 @@ const TaskCard = ({
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
   const isEmpApproval = isEmployeeApprovalTask(task);
   const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
-  const isAttendanceTask = isAttendanceClosureTask(task);
-  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
-  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
   const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   return (
@@ -241,6 +255,13 @@ const TaskCard = ({
           <span className="card-task-name" title={task.text}>{task.text}</span>
         </div>
 
+        {/* Subject Employee Read-Only Awareness Warning (Home -> Track Requests) */}
+        {isSubjectAttendanceReadOnly && (
+          <div className="attendance-subject-warning-strip" role="alert">
+            ⚠️ {getSubjectAttendanceWarningText(task)}
+          </div>
+        )}
+
         {/* Read More button & Description */}
         {task.description && (
           <div className="mobile-description-container">
@@ -258,8 +279,20 @@ const TaskCard = ({
             
             {showDetails && (
               <div className="task-detailed-description">
-                <div className="task-detailed-description-title">{isEmpApproval ? 'Approval Request Summary' : 'Detailed Description'}</div>
-                <p>{isEmpApproval ? formatEmployeeApprovalSummary(task) : task.description}</p>
+                <div className="task-detailed-description-title">
+                  {isSubjectAttendanceReadOnly
+                    ? 'Attendance Alert Notice'
+                    : isEmpApproval
+                      ? 'Approval Request Summary'
+                      : 'Detailed Description'}
+                </div>
+                <p>
+                  {isSubjectAttendanceReadOnly
+                    ? getSubjectAttendanceWarningText(task)
+                    : isEmpApproval
+                      ? formatEmployeeApprovalSummary(task)
+                      : task.description}
+                </p>
               </div>
             )}
           </div>
@@ -316,7 +349,7 @@ const TaskCard = ({
         )}
 
         {/* Subtask Creation Trigger — available to managers, creators, AND assignees */}
-        {!task.isContextOnly && canAddSubtask && showHierarchy && (
+        {!task.isContextOnly && !isAttendanceTask && canAddSubtask && showHierarchy && (
           <button
             className="action-icon-btn btn-add-subtask"
             onClick={() => tva.handleAddSubtask(task.id)}
@@ -328,6 +361,7 @@ const TaskCard = ({
 
 
         {!task.isContextOnly &&
+          !isAttendanceTask &&
           (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&
           task.stageId !== 'DEPRIORITIZED' &&
           task.stageId !== 'COMPLETED' && (
@@ -350,7 +384,7 @@ const TaskCard = ({
           </button>
         )}
 
-        {permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
+        {!isAttendanceTask && permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
           <button
             className="action-icon-btn btn-mark-completed"
             onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'COMPLETED'); }}
@@ -360,7 +394,7 @@ const TaskCard = ({
           </button>
         )}
 
-        {canCloneTask && (
+        {!isAttendanceTask && canCloneTask && (
           <button
             className="action-icon-btn"
             onClick={() => tva.handleClone(task)}
@@ -370,7 +404,7 @@ const TaskCard = ({
           </button>
         )}
 
-        {!task.isContextOnly && task.stageId !== 'COMPLETED' && (
+        {!task.isContextOnly && !isSubjectAttendanceReadOnly && task.stageId !== 'COMPLETED' && (
           <button
             className="action-icon-btn"
             onClick={(e) => { e.stopPropagation(); handleWhatsAppReminder(); }}
@@ -380,7 +414,7 @@ const TaskCard = ({
           </button>
         )}
 
-        {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
+        {!isAttendanceTask && task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
           <button
             className="action-icon-btn btn-restore"
             onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -390,7 +424,7 @@ const TaskCard = ({
           </button>
         )}
 
-        {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
+        {!isAttendanceTask && task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
           <button
             className="action-icon-btn"
             onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}

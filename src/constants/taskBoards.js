@@ -3,6 +3,13 @@
  * 
  * Maps activeVertical view keys to their canonical task_board labels.
  * Used for both inference (when creating tasks) and filtering (when viewing boards).
+ *
+ * Ownership Rule (see .agent/rules/verticals-and-boards-architecture.md):
+ *   - 'Escalations' (vertical_id = 'CHARGING_HUBS'): ALL operational & attendance
+ *     escalations (overtime_alert, forced_checkout, UNMARKED_ATTENDANCE,
+ *     CONSECUTIVE_WEEKOFF_ESCALATION). Also surfaced in Home -> Track Requests.
+ *   - 'Employees' (vertical_id = 'EMPLOYEES'): Remarks Manager ONLY — personal
+ *     remarks/mistakes assigned to the employee who committed them.
  */
 
 export const TASK_BOARD_MAP = {

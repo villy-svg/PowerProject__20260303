@@ -48,7 +48,7 @@ async function checkForUpdate(options = {}) {
     const prefix = OTA_CONFIG.tagPrefix[env];
 
     const response = await fetch(
-      `https://api.github.com/repos/${OTA_CONFIG.owner}/${OTA_CONFIG.repo}/releases`,
+      `https://api.github.com/repos/${OTA_CONFIG.owner}/${OTA_CONFIG.repo}/releases?per_page=50`,
       {
         headers: {
           'Accept': 'application/vnd.github.v3+json',
@@ -79,8 +79,17 @@ async function checkForUpdate(options = {}) {
       return { hasUpdate: false };
     }
 
-    // Get the latest release (GitHub returns them sorted by date, newest first)
-    const latest = relevantReleases[0];
+    // Sort by semantic version descending (safer than relying on GitHub publish timestamp
+    // if an older release is ever re-edited or re-published)
+    const sortedReleases = [...relevantReleases].sort((a, b) => {
+      const vA = a.tag_name.replace(prefix, '');
+      const vB = b.tag_name.replace(prefix, '');
+      if (isNewerVersion(vA, vB)) return -1;
+      if (isNewerVersion(vB, vA)) return 1;
+      return 0;
+    });
+
+    const latest = sortedReleases[0];
     const latestVersion = latest.tag_name.replace(prefix, '');
 
     // Compare versions
@@ -133,12 +142,14 @@ async function applyUpdate(downloadUrl, version) {
       version: version,
     });
 
-    console.log(`[OTA] Bundle downloaded. Applying...`);
+    console.log(`[OTA] Bundle downloaded. Staging as next bundle...`);
 
-    // Set the new bundle as active — it will load on next app launch
-    await CapacitorUpdater.set(bundle);
+    // Stage the bundle via next() — NOT set(), which immediately destroys the JS context
+    // and reloads mid-session. The staged bundle activates on next background/launch
+    // or immediately when the user taps "Restart Now" (CapacitorUpdater.reload()).
+    await CapacitorUpdater.next({ id: bundle.id });
 
-    console.log(`[OTA] Update applied. Will take effect on next launch.`);
+    console.log(`[OTA] Update staged (${bundle.id}). Will take effect on reload or next launch.`);
     return true;
   } catch (error) {
     console.error('[OTA] Update application failed:', error);

@@ -238,26 +238,38 @@ const RuleManagement = ({ user, permissions = {}, setActiveVertical, onShowBotto
                         aria-label={rule.is_active ? 'Deactivate rule' : 'Activate rule'}
                         aria-pressed={rule.is_active}
                       />
+                      <span className={`rule-toggle-label ${rule.is_active ? 'on' : ''}`}>
+                        {rule.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
                     <div className="rule-item-info">
-                      <p className="rule-item-title">{rule.title}</p>
-                      <div className="rule-item-meta">
-                        <span className="rule-badge">{catName}</span>
-                        {subName && <span className="rule-badge">{subName}</span>}
-                        {rule.impact && (
-                          <span className="rule-badge impact-badge">
-                            Impact: {rule.impact}
-                          </span>
-                        )}
-                        {rule.effective_date && (
-                          <span className="rule-badge date-badge">
-                            Eff: {formatEffectiveDate(rule.effective_date)}
-                          </span>
+                      <div className="rule-item-kicker">
+                        <span>{catName}</span>
+                        {subName && (
+                          <>
+                            <span className="rule-kicker-sep" aria-hidden="true">·</span>
+                            <span>{subName}</span>
+                          </>
                         )}
                         {rule.drive_url && (
-                          <span className="rule-badge drive-badge">📄 Drive</span>
+                          <>
+                            <span className="rule-kicker-sep" aria-hidden="true">·</span>
+                            <span className="rule-kicker-drive">Drive Doc</span>
+                          </>
                         )}
                       </div>
+
+                      <p className="rule-item-title">{rule.title}</p>
+
+                      {rule.impact && (
+                        <p className="rule-item-impact">{rule.impact}</p>
+                      )}
+
+                      {rule.effective_date && (
+                        <p className="rule-item-date">
+                          Effective {formatEffectiveDate(rule.effective_date)}
+                        </p>
+                      )}
                     </div>
                     {(canUpdate || canDelete) && (
                       <div className="rule-item-actions">

@@ -22,7 +22,10 @@ import {
   isAttendanceClosureTask,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
+  isSubjectEmployeeOfAttendanceTask,
+  getSubjectAttendanceWarningText,
 } from '../../services/employees/unmarkedAttendanceTaskService';
+import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import { TASK_STAGES, STAGE_LIST } from '../../constants/stages';
 import './TaskListView.css'; // Reusing some list styles for consistency
@@ -253,10 +256,18 @@ const TaskTreeView = ({
             )}
             {task.text}
           </div>
+          {isSubjectEmployeeOfAttendanceTask(task, currentUser) &&
+            !canMarkAttendanceTask(task, currentUser) &&
+            !canReviewAttendanceTask(task, currentUser) && (
+              <div className="attendance-subject-warning-strip" role="alert">
+                ⚠️ {getSubjectAttendanceWarningText(task)}
+              </div>
+            )}
         </div>
 
         <div className="list-row-controls">
           {(() => {
+            if (isAttendanceClosureTask(task)) return null;
             const isRejected = task.latestSubmission?.status === 'rejected';
             const blockArrows = isRejected && permissions.level !== 'admin';
 
@@ -329,7 +340,7 @@ const TaskTreeView = ({
                   </div>
                 )}
                 {/* Subtask Creation — available to managers, creators, AND assignees */}
-                {canAddSubtask && canAddSubtask(task) && (
+                {!isAttendanceClosureTask(task) && canAddSubtask && canAddSubtask(task) && (
                   <button
                     className="card-add-sub-button"
                     onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
@@ -344,6 +355,7 @@ const TaskTreeView = ({
 
             {/* RBAC: Only Contributor+ (non-creator) can submit proof on active tasks */}
             {!task.isContextOnly &&
+              !isAttendanceClosureTask(task) &&
               ['contributor', 'editor', 'admin'].includes(permissions.level) &&
               ((task.createdBy || task.created_by) !== currentUser.id) && // Only if NOT the creator
               task.stageId !== 'DEPRIORITIZED' &&
@@ -391,7 +403,9 @@ const TaskTreeView = ({
               </>
             )}
 
-            {!task.isContextOnly && (effectiveCanUpdate || canEditDescription) && (
+            {!task.isContextOnly &&
+              !(isSubjectEmployeeOfAttendanceTask(task, currentUser) && currentUser?.roleId !== 'master_admin') &&
+              (effectiveCanUpdate || canEditDescription) && (
               <button
                 className="card-edit-button"
                 onClick={(e) => { e.stopPropagation(); tva.handleEdit(task); }}
@@ -401,7 +415,7 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {canCloneTask && canCloneTask(task) && (
+            {!isAttendanceClosureTask(task) && canCloneTask && canCloneTask(task) && (
               <button
                 className="card-clone-button"
                 onClick={(e) => { e.stopPropagation(); tva.handleClone(task); }}
@@ -411,7 +425,7 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
+            {!isAttendanceClosureTask(task) && task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
               <button
                 className="card-reprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'BACKLOG'); }}
@@ -420,7 +434,7 @@ const TaskTreeView = ({
                 <IconPromote size={14} className="u-text-brand-green" />
               </button>
             )}
-            {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
+            {!isAttendanceClosureTask(task) && task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
               <button
                 className="card-deprio-button"
                 onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'DEPRIORITIZED'); }}
@@ -430,7 +444,9 @@ const TaskTreeView = ({
               </button>
             )}
 
-            {!task.isContextOnly && taskPerms.canDelete && (
+            {!task.isContextOnly &&
+              taskPerms.canDelete &&
+              (!isAttendanceClosureTask(task) || currentUser?.roleId === 'master_admin') && (
               <button
                 className="card-delete-button"
                 onClick={(e) => { e.stopPropagation(); tva.handleDelete(task.id); }}

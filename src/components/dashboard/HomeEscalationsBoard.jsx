@@ -4,7 +4,16 @@ import './HomeEscalationsBoard.css';
 
 /**
  * HomeEscalationsBoard Component
- * A wrapper around CentralisedTaskBoard specifically for handling and displaying Escalations on the Home page.
+ * A wrapper around CentralisedTaskBoard rendered as "Track Requests" on the Home page.
+ *
+ * Scope (see .agent/rules/verticals-and-boards-architecture.md):
+ *   Displays active CHARGING_HUBS / ['Escalations'] tasks scoped to the logged-in user:
+ *   - Support tickets & escalations assigned to or created by the user
+ *   - Employee approval requests for reviewers
+ *   - Attendance alerts (Overtime, Forced Checkout) for managers / Master Admin
+ *   - Attendance closure tasks (Unmarked Attendance, Consecutive Week-Off) for
+ *     Makers, Checkers, upward managers, Master Admin, AND read-only awareness
+ *     warnings for the subject employee themselves.
  */
 const HomeEscalationsBoard = (props) => {
   return (

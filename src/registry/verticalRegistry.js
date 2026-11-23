@@ -3,6 +3,15 @@
  * Single source of truth for mapping activeVertical IDs → vertical-specific
  * React components and derived labels.
  *
+ * Board Ownership Summary (see .agent/rules/verticals-and-boards-architecture.md):
+ *   - CHARGING_HUBS + ['Hubs']        -> Charging Hubs -> Hubs Task Board
+ *   - CHARGING_HUBS + ['Escalations'] -> Charging Hubs -> Escalations Task Board
+ *                                        (& Home -> Track Requests). Canonical home
+ *                                        for ALL attendance & operational escalations.
+ *   - EMPLOYEES     + ['Employees']   -> Employees -> Remarks Manager (strictly
+ *                                        personal remarks/mistakes assigned to the
+ *                                        employee who made the mistake).
+ *
  * RULE: When adding a new vertical, ONLY update this file.
  * No other file should contain vertical-routing ternaries.
  */

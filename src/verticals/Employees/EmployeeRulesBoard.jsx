@@ -6,40 +6,57 @@ import RBACManageButton from '../../components/ui/RBACManageButton';
 import FormattedText from '../../features/tutorials/FormattedText';
 
 /* ─── Static Rule Tile Component ────────────────────────────── */
-const RuleCard = ({ rule }) => {
+const RuleCard = ({ rule, hideSubBadge = false }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   // Format explicit tutorial page breaks cleanly for static rule card view
-  const content = (rule.content || '').replace(/\n?---PAGE_BREAK---\n?/g, '\n\n').replace(/^### /gm, '');
-  const isLongContent = content.length > 200;
+  const content = (rule.content || '').replace(/\n?---PAGE_BREAK---\n?/g, '\n\n').replace(/^### /gm, '').trim();
+  const hasContent = content.length > 0;
+  // Trigger expand toggle when content exceeds ~3 lines on mobile or 140 chars
+  const isLongContent = content.length > 140 || content.split('\n').length > 3;
+  // Avoid repeating sub-category chip when card is already under its sub-category heading
+  const showSubBadge = !hideSubBadge && Boolean(rule.sub_category?.name);
 
   return (
     <div className="rule-card">
+      {/* Zone 1: The Rule Title */}
       <div className="rule-card-header u-flex-col">
         <h4 className="rule-card-title">{rule.title}</h4>
-        {rule.impact && (
-          <div className="rule-card-subtitle u-whitespace-prewrap u-mt-6 u-text-danger u-fw-600 u-opacity-80 u-text-0-7rem">
-            {rule.impact}
+        {showSubBadge && (
+          <div className="rule-card-badges">
+            <span className="rule-badge">{rule.sub_category.name}</span>
           </div>
         )}
       </div>
 
-      <div className="rule-card-badges">
-        {rule.sub_category?.name && (
-          <span className="rule-badge">{rule.sub_category.name}</span>
-        )}
-      </div>
+      {/* Zone 2: Rule Details / Translation (Primary readable content) */}
+      {hasContent && (
+        <div className="rule-card-details">
+          <div className={`rule-card-content ${!isExpanded && isLongContent ? 'collapsed' : ''}`}>
+            <FormattedText text={content} />
+          </div>
 
-      <div className={`rule-card-content ${!isExpanded && isLongContent ? 'collapsed' : ''}`}>
-        <FormattedText text={content} />
-      </div>
+          {isLongContent && (
+            <button
+              type="button"
+              className="rule-expand-btn"
+              onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+            >
+              <span>{isExpanded ? 'Show Less' : 'Read More'}</span>
+              <span className="rule-expand-chevron" aria-hidden="true">
+                {isExpanded ? '↑' : '↓'}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
 
-      {isLongContent && (
-        <button 
-          className="rule-expand-btn" 
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {isExpanded ? 'Show Less' : 'Read More'}
-        </button>
+      {/* Zone 3: Compact Consequence Note (Secondary semantic accent) */}
+      {rule.impact && (
+        <div className="rule-impact-callout">
+          <span className="rule-impact-kicker" aria-hidden="true">Consequence</span>
+          <div className="rule-impact-body">{rule.impact}</div>
+        </div>
       )}
 
       {rule.drive_url && (
@@ -322,7 +339,7 @@ const EmployeeRulesBoard = ({
                   </p>
                   <div className="rules-grid">
                     {subRules.map(rule => (
-                      <RuleCard key={rule.id} rule={rule} />
+                      <RuleCard key={rule.id} rule={rule} hideSubBadge={true} />
                     ))}
                   </div>
                 </div>

@@ -6,6 +6,7 @@ import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../service
 import {
   isAttendanceClosureTask,
   isAttendanceOrphanVisibleToUser,
+  isAttendanceClosureVisibleToUser,
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import { resolveVerticalComponents } from '../../registry/verticalRegistry';
 import TaskCard from './TaskCard';
@@ -59,7 +60,8 @@ const CentralisedTaskBoard = ({
     taskUtils.isCreator(t, user) ||
     (isEmployeeReqReviewer && isEmployeeApprovalTask(t)) ||
     isAttendanceOrphanVisibleToUser(t, user) ||
-    taskUtils.isAttendanceAlertVisibleToManager(t, user);
+    taskUtils.isAttendanceAlertVisibleToManager(t, user) ||
+    isAttendanceClosureVisibleToUser(t, user);
 
   const assignedTasks = tasks.filter(isVisibleToUser);
   const rootMyTasks = assignedTasks.filter(t => {

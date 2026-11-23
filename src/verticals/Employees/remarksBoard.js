@@ -3,6 +3,13 @@
  * Column + grouping config for the Remarks Manager kanban.
  * Columns are driven by the remark grade (task.priority) instead of workflow stage,
  * and cards are grouped by employee (active first, inactive below).
+ *
+ * Architectural Boundary (see .agent/rules/verticals-and-boards-architecture.md):
+ *   Remarks Manager is STRICTLY for personal remarks/mistakes assigned to the
+ *   employee who made the mistake (e.g., force_end_remark / "Logout Not Done").
+ *   Manager-actioned attendance escalations (UNMARKED_ATTENDANCE,
+ *   CONSECUTIVE_WEEKOFF_ESCALATION, overtime_alert, forced_checkout) MUST NEVER
+ *   be placed here — they belong on Charging Hubs -> Escalations Task Board.
  */
 import { REMARK_GRADE_MAP } from './remarksMapping';
 

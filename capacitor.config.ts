@@ -36,6 +36,8 @@ const config: CapacitorConfig = {
       // We manage updates manually via otaUpdateService (Phase 3)
       // autoUpdate: false prevents the plugin from downloading bundles on its own
       autoUpdate: false,
+      // Give slow mobile devices extra safety margin before auto-rollback
+      appReadyTimeout: 30000,
     },
     PushNotifications: {
       // Show badge, play sound, and display alert when a push arrives

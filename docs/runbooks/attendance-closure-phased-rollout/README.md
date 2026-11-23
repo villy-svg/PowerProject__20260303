@@ -3,8 +3,10 @@
 **Linked PRD/TRD:** [unmarked_attendance_manager_tasks.md](../../features/unmarked_attendance_manager_tasks.md)
 **Master Implementation Runbook:** [unmarked_attendance_implementation_runbook.md](../unmarked_attendance_implementation_runbook.md)
 **Day-2 Operations Runbook:** [unmarked_attendance_operations_runbook.md](../unmarked_attendance_operations_runbook.md)
-**Status:** Parked for Review (No code or migrations implemented yet)
-**Last Updated:** 2026-11-20
+**Status:** Implemented (Phases 1–4; Escalations Board routing + Subject-Employee Track Requests warning added 2026-11-22)
+**Last Updated:** 2026-11-22
+
+> **Board Placement Rule (Mandatory):** All `UNMARKED_ATTENDANCE` and `CONSECUTIVE_WEEKOFF_ESCALATION` tasks are created on **Charging Hubs → Escalations Task Board** (`vertical_id = 'CHARGING_HUBS'`, `task_board = '["Escalations"]'`) and surfaced in **Home → Track Requests** (including read-only awareness warnings for the subject employee). They MUST NEVER be created in **Employees → Remarks Manager**, which is strictly for personal remarks/mistakes assigned to the employee who committed them.
 
 ---
 

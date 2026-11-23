@@ -382,10 +382,13 @@ select:-webkit-autofill:focus {
   background: color-mix(in srgb, var(--status-danger), transparent 92%);
 }
 
-/* ─── Shared Toggle Switch (used in RuleFormModal Active toggle) ─── */
+/* ─── Shared Toggle Switch (used in RuleManagement & RuleFormModal) ─── */
 .rule-toggle.rule-toggle {
-  width: 32px;
-  height: 18px;
+  width: 34px;
+  height: 20px;
+  /* Override globalTheme.css mobile button min-width/min-height (44px) so pill never becomes a circle */
+  min-width: 34px;
+  min-height: 20px;
   background: transparent;
   border: 1.5px solid var(--border-color);
   border-radius: 999px;
@@ -400,14 +403,14 @@ select:-webkit-autofill:focus {
 
 .rule-toggle.rule-toggle.on {
   border-color: var(--brand-green);
-  background: transparent;
+  background: color-mix(in srgb, var(--brand-green), transparent 88%);
 }
 
 .rule-toggle::after {
   content: '';
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--border-color);
   left: 2.5px;
@@ -417,7 +420,7 @@ select:-webkit-autofill:focus {
 }
 
 .rule-toggle.on::after {
-  left: calc(100% - 12.5px);
+  left: calc(100% - 14.5px);
   background: var(--brand-green);
 }
 

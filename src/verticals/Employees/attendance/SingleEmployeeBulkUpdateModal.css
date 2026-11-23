@@ -57,9 +57,10 @@
 }
 
 .bulk-update-modal__date-chip--selected {
-  border-color: var(--brand-green);
-  background: color-mix(in srgb, var(--brand-green), transparent 82%);
+  border: 2px solid var(--brand-green);
+  background: color-mix(in srgb, var(--brand-green), transparent 85%);
   color: var(--brand-green);
+  box-shadow: 0 0 12px var(--halo-glow);
 }
 
 .bulk-update-modal__date-weekday {
@@ -87,5 +88,13 @@
 
   .bulk-update-modal__date-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .bulk-update-modal__link-btn {
+    min-height: 44px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }

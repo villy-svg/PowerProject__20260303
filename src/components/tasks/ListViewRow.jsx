@@ -36,7 +36,10 @@ import {
   isAttendanceClosureTask,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
+  isSubjectEmployeeOfAttendanceTask,
+  getSubjectAttendanceWarningText,
 } from '../../services/employees/unmarkedAttendanceTaskService';
+import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
 
@@ -89,8 +92,21 @@ const ListViewRow = ({
   const currentIndex = stageList.findIndex(s => s.id === task.stageId);
   const taskPerms = tva.getTaskPermissions(task);
 
-  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly;
-  const effectiveCanDelete = taskPerms.canDelete && !task.isContextOnly;
+  const isAttendanceTask = isAttendanceClosureTask(task);
+  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
+  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
+  const isSubjectAttendanceReadOnly =
+    isAttendanceTask &&
+    isSubjectEmployeeOfAttendanceTask(task, currentUser) &&
+    !canMarkAttendance &&
+    !canReviewAttendance;
+
+  const effectiveCanUpdate = taskPerms.canUpdate && !task.isContextOnly && !isSubjectAttendanceReadOnly;
+  const effectiveCanDelete =
+    taskPerms.canDelete &&
+    !task.isContextOnly &&
+    !isSubjectAttendanceReadOnly &&
+    (!isAttendanceTask || currentUser?.roleId === 'master_admin');
   const canManage = canManageHierarchy(task);
 
   // Use task's own stage for color coding
@@ -100,15 +116,15 @@ const ListViewRow = ({
   const { isDragOver, dragProps, dropProps } = useHierarchyDnd({
     itemId: task.id,
     onDrop: onMoveToParent,
-    disabled: task.isContextOnly || !canManage
+    disabled: task.isContextOnly || isAttendanceTask || !canManage
   });
 
-  // Dynamic Check for buttons
+  // Dynamic Check for buttons (attendance closure tasks must transition via Maker-Checker RPCs)
   const leftStageId = currentIndex > 0 ? stageList[currentIndex - 1].id : null;
   const rightStageId = currentIndex < stageList.length - 1 ? stageList[currentIndex + 1].id : null;
 
-  const canMoveLeft = leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
-  const canMoveRight = rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
+  const canMoveLeft = !isAttendanceTask && leftStageId && taskUtils.canUserMoveTask(task, leftStageId, permissions, currentUser);
+  const canMoveRight = !isAttendanceTask && rightStageId && taskUtils.canUserMoveTask(task, rightStageId, permissions, currentUser);
 
   const isRejected = task.latestSubmission?.status === 'rejected';
   const blockArrows = isRejected && permissions.level !== 'admin';
@@ -121,9 +137,6 @@ const ListViewRow = ({
   const isQRSubmission = task.description?.includes('Public cleaning report submitted via QR code');
   const isEmpApproval = isEmployeeApprovalTask(task);
   const canReviewEmpApproval = isEmpApproval && canReviewEmployeeRequests(currentUser);
-  const isAttendanceTask = isAttendanceClosureTask(task);
-  const canMarkAttendance = isAttendanceTask && canMarkAttendanceTask(task, currentUser);
-  const canReviewAttendance = isAttendanceTask && canReviewAttendanceTask(task, currentUser);
   const canReviewSub = ['editor', 'admin'].includes(permissions.level) && task.latestSubmission && task.latestSubmission.status === 'pending';
 
   const handleTouchEnd = (e) => {
@@ -243,6 +256,11 @@ const ListViewRow = ({
             <span className="review-yellow-dot" title="Subtask(s) in Review: Action Required" />
           )}
           {task.text}
+          {isSubjectAttendanceReadOnly && (
+            <div className="attendance-subject-warning-strip" role="alert">
+              ⚠️ {getSubjectAttendanceWarningText(task)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -301,7 +319,7 @@ const ListViewRow = ({
                 </div>
               )}
               {/* Subtask Creation — available to managers, creators, AND assignees */}
-              {canAddSubtask && canAddSubtask(task) && (
+              {!isAttendanceTask && canAddSubtask && canAddSubtask(task) && (
                 <button
                   className="card-add-sub-button"
                   onClick={(e) => { e.stopPropagation(); tva.handleAddSubtask(task.id); }}
@@ -316,6 +334,7 @@ const ListViewRow = ({
 
           {/* RBAC: Contributor+ OR Viewer-as-Assignee can submit proof on active tasks */}
           {!task.isContextOnly &&
+            !isAttendanceTask &&
             (['contributor', 'editor', 'admin'].includes(permissions.level) || (permissions.level === 'viewer' && ((task.assigned_to || []).includes(currentUser?.employeeId) || (task.assigned_to || []).includes(currentUser?.id)))) &&
             task.stageId !== 'DEPRIORITIZED' &&
             task.stageId !== 'COMPLETED' && (
@@ -358,7 +377,7 @@ const ListViewRow = ({
             </>
           )}
 
-          {(effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
+          {!isSubjectAttendanceReadOnly && (effectiveCanUpdate || taskUtils.canUserEditField(task, 'description', permissions, currentUser)) && (
             <button
               className="card-edit-button"
               onClick={(e) => { e.stopPropagation(); tva.handleEdit(task); }}
@@ -368,7 +387,7 @@ const ListViewRow = ({
             </button>
           )}
 
-          {permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
+          {!isAttendanceTask && permissions?.level === 'admin' && task.stageId !== 'COMPLETED' && !task.isContextOnly && (
             <button
               className="card-mark-completed-button"
               onClick={(e) => { e.stopPropagation(); updateTaskStage(task.id, 'COMPLETED'); }}
@@ -378,7 +397,7 @@ const ListViewRow = ({
             </button>
           )}
 
-          {!task.isContextOnly && task.stageId !== 'COMPLETED' && (
+          {!task.isContextOnly && !isSubjectAttendanceReadOnly && task.stageId !== 'COMPLETED' && (
             <button
               className="card-edit-button card-edit-button--centered"
               onClick={(e) => { e.stopPropagation(); handleWhatsAppReminder(); }}
@@ -388,7 +407,7 @@ const ListViewRow = ({
             </button>
           )}
 
-          {canCloneTask && canCloneTask(task) && (
+          {!isAttendanceTask && canCloneTask && canCloneTask(task) && (
             <button
               className="card-clone-button"
               onClick={(e) => { e.stopPropagation(); tva.handleClone(task); }}
@@ -397,7 +416,7 @@ const ListViewRow = ({
               <IconCopy size={14} />
             </button>
           )}
-          {task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
+          {!isAttendanceTask && task.stageId === 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'BACKLOG', permissions, currentUser) && (
             <button
               className="card-reprio-button"
               onClick={() => updateTaskStage(task.id, 'BACKLOG')}
@@ -406,7 +425,7 @@ const ListViewRow = ({
               <IconPromote size={14} />
             </button>
           )}
-          {task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
+          {!isAttendanceTask && task.stageId !== 'DEPRIORITIZED' && taskUtils.canUserMoveTask(task, 'DEPRIORITIZED', permissions, currentUser) && (
             <button
               className="card-deprio-button"
               onClick={() => updateTaskStage(task.id, 'DEPRIORITIZED')}

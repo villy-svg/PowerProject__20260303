@@ -8,6 +8,7 @@ import {
   isAttendanceClosureTask,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
+  isSubjectEmployeeOfAttendanceTask,
 } from '../../services/employees/unmarkedAttendanceTaskService';
 
 /**
@@ -51,14 +52,18 @@ const WorkspaceModals = ({
   const resolvedActiveVertical = activeVertical || editingTask?.verticalId || 'CHARGING_HUBS';
   const resolvedRootVerticalId = rootVerticalId || editingTask?.verticalId || resolvedActiveVertical;
   const resolvedTaskFormComponent = TaskFormComponent || (editingTask?.verticalId ? resolveVerticalComponents(editingTask.verticalId, verticals).TaskFormComponent : null);
-  const resolvedPermissions = resolvedActiveVertical === 'escalation_tasks'
-    ? { ...permissions, canCreate: true, canUpdate: true, level: 'admin', canCreateEscalationTasks: true }
-    : (
-        (isEmployeeApprovalTask(editingTask) && canReviewEmployeeRequests(user)) ||
-        (isAttendanceClosureTask(editingTask) && (canMarkAttendanceTask(editingTask, user) || canReviewAttendanceTask(editingTask, user)))
-      )
-      ? { ...permissions, canUpdate: true }
-      : permissions;
+  const isSubjectAttendanceReadOnly =
+    isSubjectEmployeeOfAttendanceTask(editingTask, user) && user?.roleId !== 'master_admin';
+  const resolvedPermissions = isSubjectAttendanceReadOnly
+    ? { ...permissions, canUpdate: false, canDelete: false }
+    : resolvedActiveVertical === 'escalation_tasks'
+      ? { ...permissions, canCreate: true, canUpdate: true, level: 'admin', canCreateEscalationTasks: true }
+      : (
+          (isEmployeeApprovalTask(editingTask) && canReviewEmployeeRequests(user)) ||
+          (isAttendanceClosureTask(editingTask) && (canMarkAttendanceTask(editingTask, user) || canReviewAttendanceTask(editingTask, user)))
+        )
+        ? { ...permissions, canUpdate: true }
+        : permissions;
 
   return (
     <>

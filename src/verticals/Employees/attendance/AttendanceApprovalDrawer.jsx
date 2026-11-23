@@ -362,8 +362,8 @@ const AttendanceApprovalDrawer = ({
 
         {/* Bulk Actions Header */}
         {filteredRequests.length > 0 && (
-          <div className="u-flex-between u-mb-16 u-px-12">
-            <label className="u-flex-center-gap-8 u-cursor-pointer">
+          <div className="u-flex-between u-mb-16 u-px-12 approval-bulk-bar">
+            <label className="u-flex-center-gap-8 u-cursor-pointer approval-bulk-bar__select-all">
               <input 
                 type="checkbox" 
                 checked={isAllSelected}
@@ -374,7 +374,7 @@ const AttendanceApprovalDrawer = ({
             </label>
 
             {selectedIds.length > 0 && (
-              <div className="u-flex-gap-12">
+              <div className="u-flex-gap-12 approval-bulk-bar__actions">
                 <button 
                   className="halo-button btn-sm btn-approve"
                   onClick={handleBulkApprove}

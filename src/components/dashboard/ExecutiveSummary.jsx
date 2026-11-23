@@ -11,6 +11,10 @@ import ExecutiveMetricsSection from './ExecutiveMetricsSection';
 import CentralisedTaskBoard from '../tasks/CentralisedTaskBoard';
 import HomeEscalationsBoard from './HomeEscalationsBoard';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
+import {
+  isAttendanceClosureVisibleToUser,
+  isSubjectEmployeeOfAttendanceTask,
+} from '../../services/employees/unmarkedAttendanceTaskService';
 import WorkspaceModals from '../modals/WorkspaceModals';
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
 import powerLogo from '../../assets/logo.svg';
@@ -164,6 +168,12 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const canEditTask = (task) => {
     if (!task) return false;
     if (task.isContextOnly) return false;
+
+    // Subject employees have strictly read-only awareness on their own attendance closure tasks
+    // (blocks the isCreator gap on Consecutive Week-Off escalations).
+    if (isSubjectEmployeeOfAttendanceTask(task, user) && user?.roleId !== 'master_admin') {
+      return false;
+    }
 
     if (isEmployeeApprovalTask(task) && canReviewEmployeeRequests(user)) {
       return true;
@@ -427,7 +437,8 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
       taskUtils.isAssignee(t, user) ||
       isCreator(t) ||
       (isEmployeeReqReviewer && isEmployeeApprovalTask(t)) ||
-      taskUtils.isAttendanceAlertVisibleToManager(t, user)
+      taskUtils.isAttendanceAlertVisibleToManager(t, user) ||
+      isAttendanceClosureVisibleToUser(t, user)
     )
   );
   // Pre-filter exactly as passed to CentralisedTaskBoard

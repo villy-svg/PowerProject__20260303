@@ -396,13 +396,13 @@
 
 /* Replaces inline styles on RequestCard (AttendanceApprovalDrawer) & PlanCard (SchedulePlanApprovalDrawer) */
 .approval-request-row {
-  --stage-color: var(--brand-yellow);
+  --stage-color: var(--status-warning);
   border-bottom-left-radius: var(--radius-button, 12px);
   border-bottom-right-radius: var(--radius-button, 12px);
 }
 
 .approval-request-row--plan {
-  --stage-color: var(--brand-blue);
+  --stage-color: var(--status-neutral);
 }
 
 .approval-request-row--expanded {
@@ -412,6 +412,37 @@
 
 .approval-mobile-back-bar {
   display: none;
+}
+
+/* Modal close button & footer hierarchy for Suggest Edit / Bulk Update modals
+   (prevents base .halo-button min-width: 100px from inflating the ✕ icon button) */
+.suggest-edit-modal .halo-button.modal-close-btn,
+.bulk-update-modal .halo-button.modal-close-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-button, 12px);
+  font-size: 0.95rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.suggest-edit-modal .halo-button.suggest-edit-modal__cancel-btn,
+.bulk-update-modal .halo-button.suggest-edit-modal__cancel-btn {
+  color: var(--text-color);
+  opacity: 0.85;
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.suggest-edit-modal .halo-button.suggest-edit-modal__submit-btn,
+.bulk-update-modal .halo-button.suggest-edit-modal__submit-btn {
+  color: var(--brand-green);
+  border-color: color-mix(in srgb, var(--brand-green), transparent 55%);
+  box-shadow: 0 0 8px var(--halo-glow);
 }
 
 /* Mobile-only inline control bar (replaces dropped MobileHeader leftActions/rightActions) */
@@ -579,6 +610,11 @@
     color: var(--status-warning);
   }
 
+  /* ── Mobile Attendance Approval Queue (ui-design-system §2, §7, §14, §15) ── */
+  .approval-page-container {
+    padding: 12px 12px calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  }
+
   .approval-mobile-back-bar {
     display: flex;
     align-items: center;
@@ -587,31 +623,130 @@
 
   .approval-mobile-back-bar .halo-button {
     min-height: 44px;
+    height: 44px;
+    padding: 0 14px;
+    font-size: var(--menu-control-font-size, 0.75rem);
+    min-width: unset;
   }
 
-  .approval-request-row {
+  .approval-bulk-bar {
     flex-wrap: wrap;
     gap: 10px;
-    padding: 12px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: var(--radius-button, 10px);
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
   }
 
-  .approval-request-row__controls {
-    width: 100%;
-    justify-content: flex-end;
-    padding-top: 8px;
-    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 55%);
-  }
-
-  .approval-request-row__controls .halo-button {
+  .approval-bulk-bar__select-all {
     min-height: 44px;
-    flex: 1;
+    padding-right: 8px;
   }
 
-  .approval-page-container {
-    padding-bottom: calc(88px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+  .approval-bulk-bar__actions {
+    width: 100%;
+    gap: 8px;
   }
 
-  /* Bottom-anchored mobile sheet for Suggest Edit & Multi-Day Update (D.1 / D.2) */
+  .approval-bulk-bar__actions .halo-button.btn-sm {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-button, 10px);
+  }
+
+  /* Higher specificity beats systemLists.css mobile column-stack & display:none overrides */
+  .list-task-row.approval-request-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px 10px;
+    padding: 14px;
+    border-radius: var(--radius-squircle, 16px);
+    background: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--status-warning);
+  }
+
+  .list-task-row.approval-request-row.approval-request-row--expanded {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .approval-request-row .approval-request-row__checkbox {
+    min-width: 44px;
+    min-height: 44px;
+    margin: -8px 0 -8px -10px;
+    flex-shrink: 0;
+  }
+
+  .approval-request-row .approval-request-row__main {
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .approval-request-row .list-row-controls.approval-request-row__controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 45%);
+  }
+
+  .approval-request-row__controls .halo-button.btn-xs {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    height: 44px;
+    padding: 0 12px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-button, 10px);
+  }
+
+  .approval-request-row__controls .action-icon-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: var(--radius-button, 10px);
+    border: 1px solid var(--border-color);
+    background: var(--halo-bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .approval-page-container .expanded-details-panel {
+    padding: 14px;
+    background: var(--surface-card);
+    border-bottom-left-radius: var(--radius-squircle, 16px);
+    border-bottom-right-radius: var(--radius-squircle, 16px);
+  }
+
+  .approval-card__reject-note-form textarea {
+    font-size: 16px; /* Prevents iOS Safari auto-zoom (§14.B) */
+  }
+
+  .approval-card__reject-note-form .halo-button {
+    min-height: 44px;
+    height: 44px;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-button, 10px);
+  }
+
+  /* ── Bottom-anchored mobile sheet for Suggest Edit & Multi-Day Update (D.1 / D.2) ── */
   .modal-overlay.modal-overlay--bottom-sheet {
     align-items: flex-end;
     padding: 0;
@@ -621,9 +756,35 @@
   .modal-overlay--bottom-sheet .bulk-update-modal {
     width: 100%;
     max-width: 100%;
-    border-radius: 20px 20px 0 0;
+    border-radius: var(--radius-squircle, 16px) var(--radius-squircle, 16px) 0 0;
     margin: 0;
-    padding-bottom: calc(16px + var(--safe-bottom, env(safe-area-inset-bottom, 0px)));
+    padding-bottom: 0; /* .modal-footer already applies safe-area bottom padding */
+  }
+
+  .suggest-edit-modal .halo-button.modal-close-btn,
+  .bulk-update-modal .halo-button.modal-close-btn {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .suggest-edit-modal .modal-footer,
+  .bulk-update-modal .modal-footer {
+    gap: 10px;
+  }
+
+  .suggest-edit-modal .modal-footer .halo-button,
+  .bulk-update-modal .modal-footer .halo-button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    border-radius: var(--radius-button, 10px);
   }
 
   .suggest-edit-chips {
@@ -635,25 +796,34 @@
 
   .suggest-edit-chip {
     min-height: 44px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     border-radius: var(--radius-button, 10px);
     border: 1px solid var(--border-color);
     background: var(--halo-bg);
     color: var(--text-color);
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   }
 
+  /* Prevent orphaned 7th chip in 2-column grid */
+  .suggest-edit-chip:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  /* ui-design-system §4: Selected state MUST use 2px border + subtle tint (no solid fill) */
   .suggest-edit-chip--selected {
-    border-color: var(--brand-green);
-    background: color-mix(in srgb, var(--brand-green), transparent 82%);
+    border: 2px solid var(--brand-green);
+    background: color-mix(in srgb, var(--brand-green), transparent 85%);
     color: var(--brand-green);
+    box-shadow: 0 0 12px var(--halo-glow);
   }
 }
 

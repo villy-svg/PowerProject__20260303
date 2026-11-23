@@ -19,6 +19,9 @@ import {
   ATTENDANCE_TASK_TYPES,
   UNMARKED_ATTENDANCE_OPTIONS,
   getAttendanceOptionLabel,
+  formatAttendanceShiftDate,
+  isSubjectEmployeeOfAttendanceTask,
+  getSubjectAttendanceWarningText,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
   submitAttendanceTaskChoice,
@@ -26,20 +29,6 @@ import {
   rejectAttendanceTask,
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import './UnmarkedAttendanceActionPanel.css';
-
-function formatDateDisplay(isoDate) {
-  if (!isoDate) return '—';
-  const parts = String(isoDate).split('-').map(Number);
-  if (parts.length !== 3 || parts.some(Number.isNaN)) return isoDate;
-  const dt = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-  return dt.toLocaleDateString('en-IN', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-}
 
 const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) => {
   const meta = task?.metadata || {};
@@ -53,6 +42,8 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
   const isConsecutiveWO = meta.type === ATTENDANCE_TASK_TYPES.CONSECUTIVE_WEEKOFF;
   const canMark = canMarkAttendanceTask(task, currentUser);
   const canReview = canReviewAttendanceTask(task, currentUser);
+  const isSubjectReadOnly =
+    isSubjectEmployeeOfAttendanceTask(task, currentUser) && !canMark && !canReview;
   const isCompleted = task?.stageId === 'COMPLETED' || task?.stageId === 'DEPRIORITIZED';
 
   const handleMakerSubmit = async (e) => {
@@ -94,8 +85,17 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
 
   return (
     <div className="attendance-task-panel">
+      {/* Subject Employee Read-Only Awareness Banner */}
+      {isSubjectReadOnly && !isCompleted && (
+        <div className="attendance-task-panel__subject-banner" role="alert">
+          <p className="attendance-task-panel__orphan-line">
+            ⚠️ <strong>Read-Only Notice:</strong> {getSubjectAttendanceWarningText(task)}
+          </p>
+        </div>
+      )}
+
       {/* Orphan Hierarchy Warning Banner */}
-      {(meta.is_orphan_employee || meta.is_orphan_manager) && (
+      {!isSubjectReadOnly && (meta.is_orphan_employee || meta.is_orphan_manager) && (
         <div className="attendance-task-panel__orphan-banner" role="alert">
           {meta.is_orphan_employee && (
             <p className="attendance-task-panel__orphan-line">
@@ -128,7 +128,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
         </div>
         <div className="attendance-task-panel__meta-item">
           <span className="attendance-task-panel__meta-label">Shift Date</span>
-          <span className="attendance-task-panel__meta-value">{formatDateDisplay(meta.shift_date)}</span>
+          <span className="attendance-task-panel__meta-value">{formatAttendanceShiftDate(meta.shift_date)}</span>
         </div>
         <div className="attendance-task-panel__meta-item">
           <span className="attendance-task-panel__meta-label">Hub</span>

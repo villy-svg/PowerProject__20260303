@@ -301,7 +301,7 @@ const SingleEmployeeBulkUpdateModal = ({
           <div className="modal-footer">
             <button
               type="button"
-              className="halo-button"
+              className="halo-button suggest-edit-modal__cancel-btn"
               onClick={onClose}
               disabled={isSubmitting}
             >

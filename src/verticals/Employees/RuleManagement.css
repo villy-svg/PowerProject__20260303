@@ -135,9 +135,9 @@
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 0.9rem 1rem;
-  border-radius: 12px;
-  margin-bottom: 0.6rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  margin-bottom: 0.7rem;
   transition: border-color 0.2s ease, opacity 0.2s ease;
 }
 
@@ -150,43 +150,87 @@
 .rule-item-toggle-wrap {
   display: flex;
   align-items: center;
-  padding-top: 2px;
+  gap: 0.45rem;
+  padding-top: 3px;
   flex-shrink: 0;
+}
+
+/* Status text shown next to toggle only on phone footer row */
+.rule-toggle-label {
+  display: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.55;
+}
+
+.rule-toggle-label.on {
+  color: var(--brand-green);
+  opacity: 0.9;
 }
 
 .rule-item-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Quiet borderless breadcrumb above the title (replaces stacked category/sub-category boxes) */
+.rule-item-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-color);
+  opacity: 0.52;
+  line-height: 1.3;
+}
+
+.rule-kicker-sep { opacity: 0.5; }
+
+.rule-kicker-drive {
+  color: var(--brand-green);
+  opacity: 1;
 }
 
 .rule-item-title {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  margin: 0 0 0.35rem 0;
+  line-height: 1.35;
+  color: var(--text-color);
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Management-only .rule-badge variants */
-.rule-badge.impact-badge {
-  color: var(--status-danger);
-  border-color: color-mix(in srgb, var(--status-danger), transparent 75%);
-  background: color-mix(in srgb, var(--status-danger), transparent 90%);
-  opacity: 1;
+/* Readable prose callout for impact instead of an ALL-CAPS red monospace box */
+.rule-item-impact {
+  margin: 0.15rem 0 0 0;
+  padding-left: 0.65rem;
+  border-left: 2px solid color-mix(in srgb, var(--status-danger), transparent 40%);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--status-danger), var(--text-color) 35%);
   white-space: pre-wrap;
 }
 
-.rule-badge.drive-badge {
-  color: var(--brand-green);
-  opacity: 1;
+.rule-item-date {
+  margin: 0.1rem 0 0 0;
+  font-size: 0.72rem;
+  color: var(--text-color);
+  opacity: 0.45;
 }
 
-/* ── Unified Edit / Delete Action Buttons ───────────────────── */
+/* ── Unified Edit / Delete Action Buttons (borderless ghost at rest, §15.C) ─ */
 .rule-action-btn {
   background: transparent;
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   color: var(--text-color);
+  opacity: 0.55;
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -201,15 +245,14 @@
 }
 
 .rule-action-btn:hover {
-  background: color-mix(in srgb, var(--text-color), transparent 95%);
-  border-color: var(--brand-green);
+  opacity: 1;
+  background: color-mix(in srgb, var(--text-color), transparent 94%);
   color: var(--brand-green);
-  transform: translateY(-1px);
 }
 
 .rule-action-btn.delete:hover {
-  border-color: var(--status-danger);
   color: var(--status-danger);
+  background: color-mix(in srgb, var(--status-danger), transparent 90%);
 }
 
 /* ── Categories Tab Grid & Cards ────────────────────────────── */
@@ -407,6 +450,7 @@
 
   .rule-cat-filter-btn {
     min-height: 36px;
+    min-width: unset;
     padding: 0.35rem 0.85rem;
     font-size: 0.72rem;
     display: inline-flex;
@@ -468,29 +512,45 @@
 @media screen and (max-width: 480px) {
   .modal-content.rule-modal-wide { max-width: 100%; }
 
-  /* Stack rule row on phones so titles never crush to 2 words */
+  /* Two-zone phone card: Row 1 = kicker + title + impact + date; Row 2 = toggle (left) + actions (right) */
   .rule-item-row {
-    flex-direction: column;
-    gap: 0.65rem;
-    padding: 0.85rem;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.45rem;
+    column-gap: 0.5rem;
+    padding: 1rem 1rem 0.6rem 1rem;
   }
 
-  .rule-item-info { width: 100%; }
+  .rule-item-info {
+    order: 1;
+    flex: 1 0 100%;
+    gap: 0.45rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color), transparent 55%);
+  }
 
   .rule-item-title {
     white-space: normal;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-height: 1.4;
-    font-size: 0.92rem;
+    line-height: 1.38;
+    font-size: 0.98rem;
+  }
+
+  .rule-item-toggle-wrap {
+    order: 2;
+    margin-right: auto;
+    padding-top: 0;
+    min-height: 44px;
+  }
+
+  .rule-toggle-label {
+    display: inline-block;
   }
 
   .rule-item-actions {
-    width: 100%;
-    padding-top: 0.45rem;
-    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 40%);
+    order: 3;
+    width: auto;
   }
-
-  .rule-item-toggle-wrap { padding-top: 0; }
 }

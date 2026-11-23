@@ -4,6 +4,14 @@
  * closure Maker-Checker tasks (Phase 2 Consecutive Week-Off Escalations and
  * Phase 3 Unmarked Attendance Manager Tasks).
  *
+ * Board Placement Rule (see .agent/rules/verticals-and-boards-architecture.md):
+ *   - Created in Charging Hubs -> Escalations Task Board
+ *     (vertical_id = 'CHARGING_HUBS', task_board = ['Escalations']).
+ *   - NEVER placed in Employees -> Remarks Manager (which is strictly for
+ *     personal employee remarks/mistakes assigned to the employee themselves).
+ *   - Also surfaced read-only to the subject employee in Home -> Track Requests
+ *     so they are aware an attendance alert has been sent to their manager.
+ *
  * Canonical location: src/services/employees/unmarkedAttendanceTaskService.js
  * Mirrors: src/services/employees/employeeRequestService.js
  */
@@ -45,13 +53,58 @@ export const isAttendanceClosureTask = (task) => {
 };
 
 /**
+ * Formats an ISO YYYY-MM-DD shift_date for consistent display across cards & modals.
+ */
+export const formatAttendanceShiftDate = (isoDate) => {
+  if (!isoDate) return '—';
+  const parts = String(isoDate).split('-').map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return isoDate;
+  const dt = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  return dt.toLocaleDateString('en-IN', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
+
+/**
+ * True when the logged-in user is the subject employee whose attendance is
+ * unmarked or escalated on this task.
+ */
+export const isSubjectEmployeeOfAttendanceTask = (task, user) => {
+  if (!task || !user || !isAttendanceClosureTask(task)) return false;
+  const userEmpId = user.employeeId || user.employee_id;
+  const subjectEmpId = task.metadata?.employee_id;
+  if (!userEmpId || !subjectEmpId) return false;
+  return String(userEmpId) === String(subjectEmpId);
+};
+
+/**
+ * Builds the read-only awareness warning text shown to the subject employee
+ * in Home -> Track Requests and the task detail panel.
+ */
+export const getSubjectAttendanceWarningText = (task) => {
+  const meta = task?.metadata || {};
+  const dateLabel = formatAttendanceShiftDate(meta.shift_date);
+  const isConsecutiveWO = meta.type === ATTENDANCE_TASK_TYPES.CONSECUTIVE_WEEKOFF;
+  if (isConsecutiveWO) {
+    return `Alert sent to your manager — your consecutive Week-Off request for ${dateLabel} is under review.`;
+  }
+  return `Alert sent to your manager — your attendance for ${dateLabel} was unmarked. If you were Present, submit an Attendance Edit Request on the Attendance Board.`;
+};
+
+/**
  * True when the user can act as Maker (submit non-present status) on a
- * BACKLOG attendance closure task.
+ * BACKLOG attendance closure task. Blocks subject-employee self-marking
+ * (unless master_admin).
  */
 export const canMarkAttendanceTask = (task, user) => {
   if (!task || !user || !isAttendanceClosureTask(task)) return false;
   if (task.stageId !== 'BACKLOG') return false;
   if (user.roleId === 'master_admin') return true;
+  if (isSubjectEmployeeOfAttendanceTask(task, user)) return false;
   if (user.verticalPermissions?.EMPLOYEES?.level === 'admin') return true;
   const userEmpId = user.employeeId || user.employee_id;
   if (!userEmpId) return false;
@@ -62,13 +115,17 @@ export const canMarkAttendanceTask = (task, user) => {
 
 /**
  * True when the user can act as Checker (approve/reject) on a REVIEW
- * attendance closure task. Blocks non-master self-approval.
+ * attendance closure task. Blocks non-master self-approval and subject-employee
+ * self-review.
  */
 export const canReviewAttendanceTask = (task, user) => {
   if (!task || !user || !isAttendanceClosureTask(task)) return false;
   if (task.stageId !== 'REVIEW') return false;
 
   const isMasterAdmin = user.roleId === 'master_admin';
+  if (!isMasterAdmin && isSubjectEmployeeOfAttendanceTask(task, user)) {
+    return false;
+  }
   const makerUserId = task.metadata?.maker_user_id;
   if (!isMasterAdmin && makerUserId && makerUserId === user.id) {
     return false;
@@ -93,6 +150,37 @@ export const isAttendanceOrphanVisibleToUser = (task, user) => {
   if (!task || !user || !isAttendanceClosureTask(task)) return false;
   if (user.roleId !== 'master_admin') return false;
   return Boolean(task.metadata?.is_orphan_employee || task.metadata?.is_orphan_manager);
+};
+
+/**
+ * True when an attendance closure task (UNMARKED_ATTENDANCE or
+ * CONSECUTIVE_WEEKOFF_ESCALATION) should appear in Home -> Track Requests
+ * (HomeEscalationsBoard):
+ *   1. Subject employee (read-only warning awareness)
+ *   2. Master Admin (org-wide visibility)
+ *   3. Assigned Checker / Employees Editor+ (for REVIEW tasks)
+ *   4. Upward reporting manager (when assigned manager or subject employee is in reportees)
+ */
+export const isAttendanceClosureVisibleToUser = (task, user) => {
+  if (!task || !user || !isAttendanceClosureTask(task)) return false;
+  if (isSubjectEmployeeOfAttendanceTask(task, user)) return true;
+  if (user.roleId === 'master_admin') return true;
+  if (canReviewAttendanceTask(task, user)) return true;
+
+  const reporteeEmpIds = user.reporteeEmployeeIds || [];
+  if (reporteeEmpIds.length > 0) {
+    const subjectEmpId = task.metadata?.employee_id;
+    const assignees = Array.isArray(task.assigned_to)
+      ? task.assigned_to
+      : (task.assigned_to ? [task.assigned_to] : (task.assignedTo ? [task.assignedTo] : []));
+    if (
+      (subjectEmpId && reporteeEmpIds.includes(subjectEmpId)) ||
+      assignees.some((id) => reporteeEmpIds.includes(id))
+    ) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**

@@ -13,6 +13,7 @@
 |---|---|---|
 | 2026-11-20 | Draft | Initial PRD/TRD created with open options for direct save vs. maker-checker, SM1+ routing, and UI styles. |
 | 2026-11-20 | In Review | Incorporated all user decisions: Maker-Checker workflow (Reporting Manager → 1st Editor+ in manager's hierarchy), exclude `Present`, mirror Deactivate Employee task UX, and Master Admin fallback with top-of-description orphan notice. |
+| 2026-11-22 | Updated | Routed `UNMARKED_ATTENDANCE` and `CONSECUTIVE_WEEKOFF_ESCALATION` to **Charging Hubs → Escalations Task Board** (`vertical_id = 'CHARGING_HUBS'`, `task_board = '["Escalations"]'`), added read-only subject-employee awareness warning in **Home → Track Requests**, added DB tamper-protection trigger, and codified that **Employees → Remarks Manager** is strictly for personal remarks/mistakes assigned to the employee themselves (not used for missed attendance). |
 
 ---
 

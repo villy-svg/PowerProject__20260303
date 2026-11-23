@@ -9,9 +9,21 @@
      safe-code-modification §2B (BEM naming, zero !important)
    ========================================================================== */
 
-.attendance-task-panel {
+/* Shared vertical stack base */
+.attendance-task-panel,
+.attendance-task-panel__orphan-banner,
+.attendance-task-panel__subject-banner,
+.attendance-task-panel__meta-item,
+.attendance-task-panel__form,
+.attendance-task-panel__review-box,
+.attendance-task-panel__field,
+.attendance-task-panel__submission-summary,
+.attendance-task-panel__completed {
   display: flex;
   flex-direction: column;
+}
+
+.attendance-task-panel {
   gap: 0.9rem;
   padding: 1rem 1.15rem;
   margin-bottom: 1rem;
@@ -20,17 +32,36 @@
   background: color-mix(in srgb, var(--text-color), transparent 97%);
 }
 
-.attendance-task-panel__orphan-banner {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 8px;
+/* Shared semantic warning surface (ui-design-system §7 — single source of truth) */
+.attendance-task-panel__orphan-banner,
+.attendance-task-panel__subject-banner,
+.attendance-subject-warning-strip {
   background: color-mix(in srgb, var(--status-warning), transparent 88%);
   border: 1px solid color-mix(in srgb, var(--status-warning), transparent 55%);
   color: var(--status-warning);
+}
+
+.attendance-task-panel__orphan-banner,
+.attendance-task-panel__subject-banner {
+  gap: 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
   font-size: 0.82rem;
   line-height: 1.4;
+}
+
+/* Compact read-only awareness strip rendered directly on TaskCard / ListViewRow / TaskTreeView
+   for the subject employee in Home -> Track Requests. */
+.attendance-subject-warning-strip {
+  flex-basis: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .attendance-task-panel__orphan-line {
@@ -84,16 +115,19 @@
 }
 
 .attendance-task-panel__meta-item {
-  display: flex;
-  flex-direction: column;
   gap: 0.15rem;
+}
+
+/* Shared uppercase technical label typography */
+.attendance-task-panel__meta-label,
+.attendance-task-panel__label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .attendance-task-panel__meta-label {
   font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
   opacity: 0.55;
 }
 
@@ -116,22 +150,15 @@
 
 .attendance-task-panel__form,
 .attendance-task-panel__review-box {
-  display: flex;
-  flex-direction: column;
   gap: 0.8rem;
 }
 
 .attendance-task-panel__field {
-  display: flex;
-  flex-direction: column;
   gap: 0.35rem;
 }
 
 .attendance-task-panel__label {
   font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
   opacity: 0.7;
 }
 
@@ -150,8 +177,6 @@
 }
 
 .attendance-task-panel__submission-summary {
-  display: flex;
-  flex-direction: column;
   gap: 0.4rem;
   padding: 0.75rem 0.9rem;
   border-radius: 8px;
@@ -192,8 +217,6 @@
 }
 
 .attendance-task-panel__completed {
-  display: flex;
-  flex-direction: column;
   gap: 0.3rem;
   padding: 0.75rem 0.9rem;
   border-radius: 8px;
@@ -205,4 +228,11 @@
 .attendance-task-panel__completed-line {
   margin: 0;
   line-height: 1.45;
+}
+
+/* Mobile viewport guard (ui-design-system §14B: >=16px input font prevents iOS Safari auto-zoom) */
+@media screen and (max-width: 768px) {
+  .attendance-task-panel__textarea {
+    font-size: 16px;
+  }
 }
