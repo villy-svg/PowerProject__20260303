@@ -35,6 +35,7 @@ import './TaskCard.css';
 import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
+import QuickMarkAttendance from './QuickMarkAttendance';
 
 /**
  * TaskCard
@@ -448,13 +449,8 @@ const TaskCard = ({
       {/* Row 4: Approval / Attendance Closure Actions */}
       {!task.isContextOnly && task.stageId === 'BACKLOG' && canMarkAttendance && (
         <div className="card-row-approval">
-          <button
-            className="halo-button btn-review-submissions"
-            onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-            title="Mark Non-Present Attendance Status"
-          >
-            Mark Attendance
-          </button>
+          {/* Opens sleek quick-mark modal directly instead of full task edit modal */}
+          <QuickMarkAttendance task={task} />
         </div>
       )}
 

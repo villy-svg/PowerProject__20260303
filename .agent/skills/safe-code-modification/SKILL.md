@@ -68,13 +68,18 @@ AI agents often cause "CSS Specificity Wars" by dumping global styles. Follow th
 
 ---
 
-## 3. Pre-Flight Checklist for AI Models
+## 3. Pre-Flight & Post-Edit Checklist for AI Models
 Before submitting any tool call that modifies code, confirm:
 1. [ ] I have read the target line range in full.
 2. [ ] My replacement block includes all necessary logic and DOES NOT delete existing sibling lines.
 3. [ ] I have added explanatory comments for new logic.
 4. [ ] I validated dependencies to ensure modifications don't break downstream modules.
 5. [ ] (CSS) I prioritized reusing global/refactored styles and used design system variables.
+
+After finishing all needful edits, you MUST execute the **Post-Edit Audit & Bug-Hunt** (see `AGENTS.md` and `.agent/skills/post-edit-audit/SKILL.md`):
+6. [ ] (CSS) Audited for redundancies and bloat.
+7. [ ] (JSX & all other files) Audited for redundancies, bloat, and inline styling.
+8. [ ] Ran 1 additional bug-hunting pass across every touched file and clarified at the end of the response whether any mistakes were made while editing.
 
 ---
 

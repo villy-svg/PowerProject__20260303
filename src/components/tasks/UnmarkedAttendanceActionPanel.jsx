@@ -13,11 +13,10 @@
  */
 
 import React, { useState, useRef } from 'react';
-import CustomSelect from '../ui/CustomSelect';
 import { IconCheck, IconX } from '../ui/Icons';
+import AttendanceStatusPicker from './AttendanceStatusPicker';
 import {
   ATTENDANCE_TASK_TYPES,
-  UNMARKED_ATTENDANCE_OPTIONS,
   getAttendanceOptionLabel,
   formatAttendanceShiftDate,
   isSubjectEmployeeOfAttendanceTask,
@@ -32,7 +31,8 @@ import './UnmarkedAttendanceActionPanel.css';
 
 const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) => {
   const meta = task?.metadata || {};
-  const [selectedStatus, setSelectedStatus] = useState(meta.suggested_status || '');
+  // Default to 'absent' so Maker can submit immediately or switch with 1 tap (no keyboard popup)
+  const [selectedStatus, setSelectedStatus] = useState(meta.suggested_status || 'absent');
   const [makerNote, setMakerNote] = useState(meta.maker_note || '');
   const [reviewNote, setReviewNote] = useState('');
   const [submittingAction, setSubmittingAction] = useState(null);
@@ -89,7 +89,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
       {isSubjectReadOnly && !isCompleted && (
         <div className="attendance-task-panel__subject-banner" role="alert">
           <p className="attendance-task-panel__orphan-line">
-            ⚠️ <strong>Read-Only Notice:</strong> {getSubjectAttendanceWarningText(task)}
+            <strong>Read-Only Notice:</strong> {getSubjectAttendanceWarningText(task)}
           </p>
         </div>
       )}
@@ -99,12 +99,12 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
         <div className="attendance-task-panel__orphan-banner" role="alert">
           {meta.is_orphan_employee && (
             <p className="attendance-task-panel__orphan-line">
-              ⚠️ <strong>ORPHAN EMPLOYEE:</strong> This employee has no active reporting manager assigned in the system.
+              <strong>Orphan Employee:</strong> This employee has no active reporting manager assigned in the system.
             </p>
           )}
           {meta.is_orphan_manager && (
             <p className="attendance-task-panel__orphan-line">
-              ⚠️ <strong>ORPHAN MANAGER:</strong> Submitting manager {meta.maker_name || 'N/A'} has no Editor or above in their reporting hierarchy.
+              <strong>Orphan Manager:</strong> Submitting manager {meta.maker_name || 'N/A'} has no Editor or above in their reporting hierarchy.
             </p>
           )}
         </div>
@@ -113,7 +113,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
       {/* Header */}
       <div className="attendance-task-panel__header">
         <h4 className="attendance-task-panel__title">
-          {isConsecutiveWO ? '📅 Consecutive Week-Off Escalation' : '📋 Unmarked Attendance Closure'}
+          {isConsecutiveWO ? 'Consecutive Week-Off Escalation' : 'Unmarked Attendance Closure'}
         </h4>
         <span className="attendance-task-panel__stage-pill">{task?.stageId || 'BACKLOG'}</span>
       </div>
@@ -154,19 +154,12 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
       {task?.stageId === 'BACKLOG' && canMark && (
         <form className="attendance-task-panel__form" onSubmit={handleMakerSubmit}>
           <div className="attendance-task-panel__field">
-            <label className="attendance-task-panel__label" htmlFor="attendance-task-status-select">
-              Select Attendance Status (Present excluded)
-            </label>
-            <CustomSelect
-              id="attendance-task-status-select"
-              className="master-dropdown"
+            <span className="attendance-task-panel__label">Attendance Status</span>
+            {/* Shared 5-option tappable selector — zero <input> elements so phone keyboard never opens */}
+            <AttendanceStatusPicker
               value={selectedStatus}
-              onChange={(val) => setSelectedStatus(val || '')}
-              options={[
-                { value: '', label: '— Choose status —' },
-                ...UNMARKED_ATTENDANCE_OPTIONS,
-              ]}
-              required
+              onChange={setSelectedStatus}
+              disabled={Boolean(submittingAction)}
             />
           </div>
 

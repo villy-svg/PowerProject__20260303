@@ -42,6 +42,7 @@ import {
 import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
 import AttachmentBadge from './AttachmentBadge';
+import QuickMarkAttendance from './QuickMarkAttendance';
 
 const ListViewRow = ({
   task,
@@ -347,15 +348,9 @@ const ListViewRow = ({
               </button>
             )}
 
-          {/* ATTENDANCE CLOSURE MAKER ACTION */}
+          {/* ATTENDANCE CLOSURE MAKER ACTION — opens sleek quick-mark modal directly */}
           {!task.isContextOnly && task.stageId === 'BACKLOG' && canMarkAttendance && (
-            <button
-              className="halo-button btn-review-submissions review-action-btn"
-              onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-              title="Mark Non-Present Attendance Status"
-            >
-              Mark Attendance
-            </button>
+            <QuickMarkAttendance task={task} className="review-action-btn" />
           )}
 
           {/* MANAGER APPROVE / REJECT */}

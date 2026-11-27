@@ -53,8 +53,10 @@ A blank screen in React is usually caused by an uncaught runtime error during th
 ---
 
 ### Mandatory Final Check
-Before submitting ANY edit:
+Before finalizing ANY edit:
 1. "Did I add a new import for every new component/icon/hook I used?"
 2. "Is there any line that might try to access a property of `null` or `undefined`?"
 3. "Are the prop names passed from the parent 100% matched with the child's destructured props?"
 4. "Did I use `await` on every Supabase call?"
+5. "Did I run the mandatory Post-Edit Audit (redundancies, bloat, and inline styling across CSS, JSX, and all other touched files) per `.agent/skills/post-edit-audit/SKILL.md`?"
+6. "Did I run 1 extra bug-hunting iteration across every touched file and clarify at the end of my response whether any mistakes were made while editing?"

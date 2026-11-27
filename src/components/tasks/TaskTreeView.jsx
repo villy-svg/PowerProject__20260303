@@ -27,6 +27,7 @@ import {
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import './UnmarkedAttendanceActionPanel.css';
 import AssigneeBadge from '../ui/AssigneeBadge';
+import QuickMarkAttendance from './QuickMarkAttendance';
 import { TASK_STAGES, STAGE_LIST } from '../../constants/stages';
 import './TaskListView.css'; // Reusing some list styles for consistency
 
@@ -372,15 +373,9 @@ const TaskTreeView = ({
                 </button>
               )}
 
-            {/* ATTENDANCE CLOSURE MAKER ACTION */}
+            {/* ATTENDANCE CLOSURE MAKER ACTION — opens sleek quick-mark modal directly */}
             {!task.isContextOnly && task.stageId === 'BACKLOG' && isAttendanceClosureTask(task) && canMarkAttendanceTask(task, currentUser) && (
-              <button
-                className="halo-button btn-review-submissions u-ml-4"
-                onClick={(e) => { e.stopPropagation(); openEditModal(task); }}
-                title="Mark Non-Present Attendance Status"
-              >
-                Mark Attendance
-              </button>
+              <QuickMarkAttendance task={task} className="u-ml-4" />
             )}
 
             {/* MANAGER APPROVE / REJECT */}

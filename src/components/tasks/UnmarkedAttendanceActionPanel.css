@@ -28,7 +28,8 @@
   padding: 1rem 1.15rem;
   margin-bottom: 1rem;
   border-radius: var(--radius-button, 12px);
-  border: 1px solid var(--border-color);
+  /* Subtle satin edge + tonal surface per ui-design-system §15 */
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
   background: color-mix(in srgb, var(--text-color), transparent 97%);
 }
 
@@ -109,9 +110,9 @@
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.65rem;
   padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--bg-color), transparent 40%);
+  border-radius: 10px;
+  /* Tonal separation without hard inner border per ui-design-system §15C */
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
 }
 
 .attendance-task-panel__meta-item {

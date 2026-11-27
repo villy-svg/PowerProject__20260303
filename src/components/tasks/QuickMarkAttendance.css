@@ -1,0 +1,155 @@
+/* ==========================================================================
+   QuickMarkAttendance.css
+   Sleek, Apple-minimalist styles for QuickMarkAttendance modal body and the
+   shared 5-option AttendanceStatusPicker.
+
+   Skill compliance:
+     ui-design-system §4   (Halo selected state: 2px border + soft tint)
+     ui-design-system §7   (Unified 4-color semantic tokens, zero hardcoded hex)
+     ui-design-system §12  (Squircle/button radii, fluid spacing)
+     ui-design-system §14B (>= 44px touch targets on mobile, zero desktop impact)
+     ui-design-system §15  (Tonal depth layering, border minimalism)
+     safe-code-modification §2B (BEM naming, zero !important)
+   ========================================================================== */
+
+.modal-content.quick-mark-modal {
+  max-width: 440px;
+}
+
+.quick-mark-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Person + Date single sleek summary strip */
+.quick-mark-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-button, 12px);
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+}
+
+.quick-mark-meta__person {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+.quick-mark-meta__date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-color);
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+/* 5-option visible tappable status grid (shared by QuickMarkAttendance & UnmarkedAttendanceActionPanel) */
+.attendance-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.attendance-status-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-button, 12px);
+  border: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
+  background: color-mix(in srgb, var(--text-color), transparent 96%);
+  color: var(--text-color);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.12s ease;
+}
+
+/* 5th option spans full width so the 2-column grid stays visually balanced */
+.attendance-status-option:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.attendance-status-option:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--text-color), transparent 92%);
+}
+
+.attendance-status-option:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.attendance-status-option:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.attendance-status-option__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.attendance-status-option__dot--danger {
+  background: var(--status-danger);
+}
+
+.attendance-status-option__dot--warning {
+  background: var(--status-warning);
+}
+
+.attendance-status-option__dot--neutral {
+  background: var(--status-neutral);
+}
+
+.attendance-status-option__label {
+  line-height: 1.25;
+}
+
+/* Halo Selected States (ui-design-system §4: 2px border + soft tint, no solid fill;
+   1px padding compensation prevents layout shift when switching options) */
+.attendance-status-option.is-selected {
+  border-width: 2px;
+  padding: calc(0.6rem - 1px) calc(0.85rem - 1px);
+}
+
+.attendance-status-option--danger.is-selected {
+  border-color: var(--status-danger);
+  background: color-mix(in srgb, var(--status-danger), transparent 88%);
+  color: var(--status-danger);
+}
+
+.attendance-status-option--warning.is-selected {
+  border-color: var(--status-warning);
+  background: color-mix(in srgb, var(--status-warning), transparent 88%);
+  color: var(--status-warning);
+}
+
+.attendance-status-option--neutral.is-selected {
+  border-color: var(--status-neutral);
+  background: color-mix(in srgb, var(--status-neutral), transparent 88%);
+  color: var(--status-neutral);
+}
+
+.quick-mark-submit {
+  width: 100%;
+  min-height: 44px;
+  justify-content: center;
+}
+
+/* Preserve full-width bottom-sheet geometry on phones (<= 480px) matching ManagementForms.css */
+@media screen and (max-width: 480px) {
+  .modal-content.quick-mark-modal {
+    max-width: 100%;
+  }
+}
