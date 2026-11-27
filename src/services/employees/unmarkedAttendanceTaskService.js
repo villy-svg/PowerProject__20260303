@@ -24,19 +24,53 @@ export const ATTENDANCE_TASK_TYPES = {
 };
 
 /**
- * The 5 allowed non-present attendance statuses.
- * 'present' is intentionally excluded (enforced at both UI and DB layers).
+ * Allowed attendance statuses in the Mark Attendance closure flow,
+ * including Present (Day) and Present (Night) mapped to normalized
+ * (attendance_status, shift_type) DB enum values.
  */
 export const UNMARKED_ATTENDANCE_OPTIONS = [
-  { value: 'week-off', label: 'Week-Off' },
-  { value: 'leave', label: 'Leave' },
-  { value: 'absent', label: 'Absent' },
-  { value: 'no-show', label: 'No Show' },
-  { value: 'no-call-no-show', label: 'No Call No Show' },
+  { value: 'present-day', label: 'Present (Day)', status: 'present', shiftType: 'day' },
+  { value: 'present-night', label: 'Present (Night)', status: 'present', shiftType: 'night' },
+  { value: 'absent', label: 'Absent', status: 'absent', shiftType: null },
+  { value: 'week-off', label: 'Week-Off', status: 'week-off', shiftType: null },
+  { value: 'leave', label: 'Leave', status: 'leave', shiftType: null },
+  { value: 'no-show', label: 'No Show', status: 'no-show', shiftType: null },
+  { value: 'no-call-no-show', label: 'No Call No Show', status: 'no-call-no-show', shiftType: null },
 ];
 
-export const getAttendanceOptionLabel = (statusValue) => {
+/**
+ * Maps stored task metadata (suggested_status, suggested_shift_type) to a
+ * picker option value. Defaults to 'absent' when unset or unrecognized.
+ */
+export const toAttendanceOptionValue = (status, shiftType = null) => {
+  if (!status) return 'absent';
+  if (status === 'present') {
+    if (shiftType === 'day') return 'present-day';
+    if (shiftType === 'night') return 'present-night';
+    return 'absent';
+  }
+  const match = UNMARKED_ATTENDANCE_OPTIONS.find((opt) => opt.value === status);
+  return match ? match.value : 'absent';
+};
+
+/**
+ * Resolves a picker option value into normalized DB { status, shiftType }.
+ */
+export const parseAttendanceOptionValue = (optionValue) => {
+  const match = UNMARKED_ATTENDANCE_OPTIONS.find((opt) => opt.value === optionValue);
+  if (match) {
+    return { status: match.status, shiftType: match.shiftType };
+  }
+  return { status: optionValue || null, shiftType: null };
+};
+
+export const getAttendanceOptionLabel = (statusValue, shiftType = null) => {
   if (!statusValue) return '—';
+  if (statusValue === 'present') {
+    if (shiftType === 'day') return 'Present (Day)';
+    if (shiftType === 'night') return 'Present (Night)';
+    return 'Present';
+  }
   const match = UNMARKED_ATTENDANCE_OPTIONS.find((opt) => opt.value === statusValue);
   return match ? match.label : statusValue;
 };
@@ -276,13 +310,20 @@ export const isAttendanceClosureVisibleToUser = (task, user) => {
 };
 
 /**
- * Maker submits one of the 5 non-present statuses (moves task BACKLOG -> REVIEW).
+ * Maker submits an attendance status (including Present Day/Night via optional
+ * shiftType) moving the task BACKLOG -> REVIEW.
  */
-export const submitAttendanceTaskChoice = async (taskId, status, note = null) => {
+export const submitAttendanceTaskChoice = async (taskId, status, note = null, shiftType = null) => {
+  // Normalize composite picker keys ('present-day' / 'present-night') if passed directly
+  const parsed = parseAttendanceOptionValue(status);
+  const resolvedStatus = parsed.status;
+  const resolvedShiftType = shiftType ?? parsed.shiftType;
+
   const { data, error } = await supabase.rpc('rpc_submit_attendance_task_choice', {
     p_task_id: taskId,
-    p_status: status,
+    p_status: resolvedStatus,
     p_note: note,
+    p_shift_type: resolvedShiftType,
   });
   if (error) throw error;
   return data;

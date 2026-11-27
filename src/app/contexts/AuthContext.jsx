@@ -83,10 +83,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   /**
-   * handleLogout — Sign out and clear profile error state.
+   * handleLogout — Sign out and clear profile error state + user-scoped local caches.
    */
   const handleLogout = useCallback(async () => {
     await authService.signOut();
+    // Clear user-scoped caches on logout so another user on the same device never sees stale data
+    try {
+      localStorage.removeItem('power_project_user');
+      localStorage.removeItem('powerpod_tasks_v5');
+      localStorage.removeItem('power_project_react_query_cache');
+    } catch (err) {
+      console.warn('[AuthContext] Failed to clear local caches on logout:', err);
+    }
     setProfileError(null);
   }, []);
 
@@ -106,6 +114,7 @@ export function AuthProvider({ children }) {
       } else {
         setRealUser(null);
         setImpersonatedUser(null);
+        setImpersonationUsers([]);
       }
     });
     return () => subscription.unsubscribe();
@@ -133,13 +142,22 @@ export function AuthProvider({ children }) {
   }, [session?.user?.id, fetchUserProfile]);
 
   // ── Impersonation User List ───────────────────────────────────────────────
-  // Only loaded for master_admin users. Provides the dropdown options.
+  // Only loaded for master_admin users. Deferred briefly so it does not compete
+  // with primary task & dashboard queries during initial boot.
   useEffect(() => {
-    if (realUser?.roleId === 'master_admin') {
+    if (realUser?.roleId !== 'master_admin') return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
       userService.fetchUsers()
-        .then(data => setImpersonationUsers(data))
+        .then(data => {
+          if (!cancelled) setImpersonationUsers(data);
+        })
         .catch(err => console.error('[AuthContext] Impersonation users failed to load:', err));
-    }
+    }, 2500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [realUser?.roleId]);
 
   // ── localStorage Persistence ──────────────────────────────────────────────

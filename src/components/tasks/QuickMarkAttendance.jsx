@@ -4,7 +4,7 @@
  * Sleek, Bank-Update-style quick-mark modal trigger for BACKLOG attendance
  * closure tasks (TaskCard, ListViewRow, TaskTreeView).
  *
- * Shows ONLY: Person, Date, all 5 visible Status options (Absent defaulted),
+ * Shows ONLY: Person, Date, all 7 visible Status options (Absent defaulted),
  * and Submit for Approval. Zero <input> elements so the phone keyboard never
  * pops up. Consumes useTaskBoard().fetchTasks directly to avoid prop-drilling.
  */
@@ -13,7 +13,9 @@ import { createPortal } from 'react-dom';
 import { useTaskBoard } from '../../app/contexts/TaskBoardContext';
 import {
   formatAttendanceShiftDate,
+  parseAttendanceOptionValue,
   submitAttendanceTaskChoice,
+  toAttendanceOptionValue,
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import AttendanceStatusPicker from './AttendanceStatusPicker';
 import '../../styles/ManagementForms.css';
@@ -22,7 +24,7 @@ import './QuickMarkAttendance.css';
 const QuickMarkAttendance = ({ task, className = '', onActionComplete = null }) => {
   const { fetchTasks } = useTaskBoard();
   const meta = task?.metadata || {};
-  const defaultStatus = meta.suggested_status || 'absent';
+  const defaultStatus = toAttendanceOptionValue(meta.suggested_status, meta.suggested_shift_type);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(defaultStatus);
@@ -77,7 +79,8 @@ const QuickMarkAttendance = ({ task, className = '', onActionComplete = null }) 
     setError('');
 
     try {
-      await submitAttendanceTaskChoice(task.id, selectedStatus, null);
+      const { status, shiftType } = parseAttendanceOptionValue(selectedStatus);
+      await submitAttendanceTaskChoice(task.id, status, null, shiftType);
       if (isMountedRef.current) {
         setIsOpen(false);
       }
@@ -105,7 +108,7 @@ const QuickMarkAttendance = ({ task, className = '', onActionComplete = null }) 
         className={`halo-button btn-review-submissions${className ? ` ${className}` : ''}`}
         onClick={handleOpen}
         onDoubleClick={(e) => e.stopPropagation()}
-        title="Mark Non-Present Attendance Status"
+        title="Mark Attendance Status"
       >
         Mark Attendance
       </button>
@@ -157,7 +160,7 @@ const QuickMarkAttendance = ({ task, className = '', onActionComplete = null }) 
                     </div>
                   )}
 
-                  {/* All 5 non-present statuses immediately visible — Absent pre-selected */}
+                  {/* All 7 statuses (Present Day/Night + non-present) immediately visible — Absent pre-selected */}
                   <AttendanceStatusPicker
                     value={selectedStatus}
                     onChange={setSelectedStatus}

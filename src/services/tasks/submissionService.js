@@ -4,7 +4,6 @@
  * Handles file compression, Supabase Storage uploads, and DB inserts.
  */
 import { supabase } from '../core/supabaseClient';
-import imageCompression from 'browser-image-compression';
 import { taskService } from './taskService';
 import { createEntity } from '../storage/entityService';
 import { generateUUID } from '../../utils/uuid';
@@ -19,10 +18,12 @@ const COMPRESSION_OPTIONS = {
 /**
  * Compresses an image file if it's an image type.
  * Non-image files are returned as-is.
+ * Dynamically imports browser-image-compression on demand so it stays out of the initial boot bundle.
  */
 export const compressFile = async (file) => {
   if (!file.type.startsWith('image/')) return file;
   try {
+    const { default: imageCompression } = await import('browser-image-compression');
     const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
     return compressed;
   } catch (err) {

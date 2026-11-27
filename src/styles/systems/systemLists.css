@@ -17,6 +17,7 @@
   min-height: 48px;
   position: relative;
   overflow: visible;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 
@@ -58,10 +59,9 @@
     /* Prevent wrapping to 2nd row on large screens */
     align-items: center;
     justify-content: flex-end;
-
     gap: 8px;
     opacity: 0;
-    transition: all 0.25s ease;
+    transition: opacity 0.18s ease;
     pointer-events: none;
     flex-shrink: 0;
     margin-left: auto;
@@ -79,27 +79,33 @@
     background: color-mix(in srgb, var(--panel-bg), white 2%);
   }
 
-  /* Progressive Disclosure for Badges */
-  .list-row-badges>*:not(.card-priority):not(.assignee-badge-base) {
+  /* Progressive Disclosure for Badges — animate exact intrinsic inline-size (0 <-> auto) instead of max-width: 300px */
+  .list-row-badges > *:not(.card-priority):not(.assignee-badge-base) {
     opacity: 0;
-    transform: translateX(-10px);
-    max-width: 0;
-    margin: 0;
-    padding: 0;
+    inline-size: 0;
+    margin-inline-start: -8px; /* Cancel parent gap: 8px while collapsed so title doesn't shift */
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: inline-size 0.2s cubic-bezier(0.2, 0, 0, 1),
+                margin-inline-start 0.2s cubic-bezier(0.2, 0, 0, 1),
+                opacity 0.18s ease;
     pointer-events: none;
   }
 
-  .list-task-row:hover .list-row-badges>*,
-  .list-task-row.selected .list-row-badges>*,
-  .list-task-row.is-expanded .list-row-badges>* {
+  .list-task-row:hover .list-row-badges > *:not(.card-priority):not(.assignee-badge-base),
+  .list-task-row.selected .list-row-badges > *:not(.card-priority):not(.assignee-badge-base),
+  .list-task-row.is-expanded .list-row-badges > *:not(.card-priority):not(.assignee-badge-base) {
     opacity: 1;
-    transform: translateX(0);
-    max-width: 300px;
+    inline-size: auto;
+    margin-inline-start: 0;
     pointer-events: auto;
-    /* Re-apply standard badge spacing when revealed */
-    margin-right: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .list-task-row,
+    .list-row-controls,
+    .list-row-badges > *:not(.card-priority):not(.assignee-badge-base) {
+      transition: none;
+    }
   }
 }
 

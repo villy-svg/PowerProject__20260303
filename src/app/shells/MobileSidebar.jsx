@@ -21,7 +21,6 @@ import {
   IconHome, IconPeople, IconDatabase, IconSettings, IconZap, IconBoards, IconLock, IconShield,
 } from '../../components/ui/Icons';
 import { getIconForVertical } from '../../constants/verticalIcons';
-import powerLogo from '../../assets/logo.svg';
 import BoardRBACModal from '../../components/modals/BoardRBACModal';
 import '../../components/layout/Sidebar.css';
 

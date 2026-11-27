@@ -13,7 +13,9 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'autoUpdate',
         injectRegister: 'auto',
-        includeAssets: ['screenshots/screenshot-mobile.png', 'screenshots/screenshot-desktop.png', 'logos/powerpod-logo-512.png'],
+        // Only precache the core app icon; avoid precaching large store screenshots
+        // that are only read by the browser's install prompt.
+        includeAssets: ['logos/powerpod-logo-512.png'],
         manifest: {
           id: base,
           name: "PowerProject",
@@ -56,17 +58,38 @@ export default defineConfig(({ mode }) => {
           ]
         },
         workbox: {
-          // Precache the app shell (HTML, JS, CSS bundles)
-          globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+          // Precache ONLY the core boot shell (HTML + entry/core chunks) so first-load
+          // bandwidth is not choked by downloading 60+ lazy route chunks & 919KB exceljs.
+          // Lazy route chunks under /assets/ are cached on-demand via runtimeCaching below.
+          globPatterns: [
+            'index.html',
+            'registerSW.js',
+            'assets/index-*.{js,css}',
+            'assets/vendor-react-*.js',
+            'assets/vendor-supabase-*.js',
+            'assets/powerpod-logo-*.png',
+          ],
+          globIgnores: ['**/vendor-excel-*.js', '**/logos/powerpod-logo.svg'],
 
           // ── CRITICAL SECURITY RULE ──
-          // NEVER cache Supabase API responses.
+          // NEVER cache Supabase API responses or cold storage blobs.
           // Serving stale RLS-filtered data would be a security breach.
           // Users could see data their permissions no longer allow.
           navigateFallback: `${base}index.html`,
           navigateFallbackDenylist: [/^\/api/],
 
           runtimeCaching: [
+            // Hashed Vite lazy chunks (JS/CSS/images) — immutable & contain zero user data.
+            // Cached on first navigation instead of flooding initial boot.
+            {
+              urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.includes('/assets/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'vite-hashed-assets',
+                expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
             // Google Fonts — safe to cache aggressively
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -94,6 +117,14 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'supabase-api-bypass',
               },
             },
+            // Cold storage blobs — mandatory NetworkOnly per hot-cold-archival §7
+            {
+              urlPattern: /\/storage\/v1\/object\//i,
+              handler: 'NetworkOnly',
+              options: {
+                cacheName: 'supabase-storage-bypass',
+              },
+            },
           ],
         },
       }),
@@ -108,11 +139,24 @@ export default defineConfig(({ mode }) => {
       target: 'es2015',
       rollupOptions: {
         output: {
+          // Only explicitly chunk core boot libraries & heavy on-demand exceljs.
+          // Avoid a catch-all 'vendor' chunk, which forces lazy-route dependencies
+          // (react-datepicker, date-fns, papaparse, qrcode.react, etc.) into the
+          // eagerly preloaded boot bundle.
           manualChunks(id) {
             if (id.includes('node_modules')) {
+              if (
+                id.includes('/react/') ||
+                id.includes('/react-dom/') ||
+                id.includes('/scheduler/') ||
+                id.includes('\\react\\') ||
+                id.includes('\\react-dom\\') ||
+                id.includes('\\scheduler\\')
+              ) {
+                return 'vendor-react';
+              }
               if (id.includes('@supabase')) return 'vendor-supabase';
               if (id.includes('exceljs')) return 'vendor-excel';
-              return 'vendor';
             }
           }
         }

@@ -414,6 +414,21 @@
   display: none;
 }
 
+.approval-bulk-bar__select-all {
+  gap: 10px;
+}
+
+.approval-bulk-bar__label {
+  font-size: var(--font-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--text-color);
+  user-select: none;
+}
+
+.approval-request-row__checkbox {
+  margin-right: 4px;
+}
+
 /* Modal close button & footer hierarchy for Suggest Edit / Bulk Update modals
    (prevents base .halo-button min-width: 100px from inflating the ✕ icon button) */
 .suggest-edit-modal .halo-button.modal-close-btn,
@@ -468,7 +483,7 @@
     width: 100%;
   }
 
-  /* Shared mobile bar button base (44px HIG touch target + uniform 0.75rem typography) */
+  /* Shared mobile bar button base (44px HIG touch target + uniform 0.75rem typography; inherits flex centering from .halo-button) */
   .attendance-mobile-bar__nav-btn.halo-button,
   .attendance-mobile-bar__icon-btn.halo-button,
   .attendance-mobile-bar__range-trigger.halo-button,
@@ -476,9 +491,6 @@
   .attendance-mobile-bar__picker-btn.halo-button {
     height: 44px;
     min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     font-size: var(--menu-control-font-size, 0.75rem);
     font-weight: var(--menu-control-font-weight, 700);
     white-space: nowrap;
@@ -618,21 +630,29 @@
   .approval-mobile-back-bar {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+  }
+
+  /* Override phone-level .halo-button { width: 100% } across mobile approval queue actions */
+  .approval-mobile-back-bar .halo-button,
+  .approval-bulk-bar__actions .halo-button.btn-sm,
+  .approval-request-row__controls .halo-button.btn-xs,
+  .approval-card__reject-note-form .halo-button {
+    width: auto;
+    min-height: 44px;
+    height: 44px;
   }
 
   .approval-mobile-back-bar .halo-button {
-    min-height: 44px;
-    height: 44px;
     padding: 0 14px;
-    font-size: var(--menu-control-font-size, 0.75rem);
+    font-size: 0.72rem;
     min-width: unset;
   }
 
   .approval-bulk-bar {
     flex-wrap: wrap;
-    gap: 10px;
-    padding: 8px 12px;
+    gap: 8px;
+    padding: 4px 12px;
     margin-bottom: 12px;
     border-radius: var(--radius-button, 10px);
     background: var(--panel-bg);
@@ -640,22 +660,21 @@
   }
 
   .approval-bulk-bar__select-all {
-    min-height: 44px;
     padding-right: 8px;
+    justify-content: flex-start;
   }
 
   .approval-bulk-bar__actions {
     width: 100%;
     gap: 8px;
+    padding-bottom: 6px;
   }
 
   .approval-bulk-bar__actions .halo-button.btn-sm {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 44px;
-    height: 44px;
     padding: 0 12px;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     border-radius: var(--radius-button, 10px);
   }
 
@@ -664,8 +683,8 @@
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 10px 10px;
-    padding: 14px;
+    gap: 8px 6px;
+    padding: 12px 12px 10px 10px;
     border-radius: var(--radius-squircle, 16px);
     background: var(--surface-card);
     border: 1px solid var(--border-color);
@@ -677,11 +696,9 @@
     border-bottom-right-radius: 0;
   }
 
+  /* Offset 44px .halo-checkbox-hit wrapper so 18px box aligns cleanly with card header */
   .approval-request-row .approval-request-row__checkbox {
-    min-width: 44px;
-    min-height: 44px;
-    margin: -8px 0 -8px -10px;
-    flex-shrink: 0;
+    margin: -6px 0 -6px -6px;
   }
 
   .approval-request-row .approval-request-row__main {
@@ -696,31 +713,29 @@
     justify-content: flex-end;
     gap: 8px;
     width: 100%;
-    margin-top: 2px;
-    padding-top: 10px;
-    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 45%);
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--border-color), transparent 55%);
   }
 
   .approval-request-row__controls .halo-button.btn-xs {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 44px;
-    height: 44px;
-    padding: 0 12px;
-    font-size: 0.78rem;
+    flex: 0 1 auto;
+    min-width: 88px;
+    padding: 0 14px;
+    font-size: 0.72rem;
     border-radius: var(--radius-button, 10px);
   }
 
+  /* Subtle ghost chevron so it does not compete visually with Approve/Reject */
   .approval-request-row__controls .action-icon-btn {
     width: 44px;
     height: 44px;
-    min-width: 44px;
-    min-height: 44px;
     padding: 0;
     flex-shrink: 0;
     border-radius: var(--radius-button, 10px);
-    border: 1px solid var(--border-color);
-    background: var(--halo-bg);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -738,11 +753,9 @@
   }
 
   .approval-card__reject-note-form .halo-button {
-    min-height: 44px;
-    height: 44px;
     min-width: 0;
     padding: 0 12px;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     border-radius: var(--radius-button, 10px);
   }
 
@@ -781,8 +794,6 @@
     min-height: 44px;
     padding: 10px 12px;
     font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
     white-space: nowrap;
     border-radius: var(--radius-button, 10px);
   }

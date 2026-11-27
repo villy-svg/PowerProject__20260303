@@ -20,7 +20,7 @@ import DesktopSidebar from './DesktopSidebar';
 import UserProfile from '../../components/users/UserProfile';
 import { useAppNavigation } from '../contexts/AppNavigationContext';
 import { useTheme } from '../../theme/useTheme';
-import powerLogo from '../../assets/logo.svg';
+import powerLogo from '../../assets/powerpod-logo.png';
 import NotificationBell from '../../components/ui/NotificationBell';
 import SandboxManagerModal from '../../components/modals/SandboxManagerModal';
 import { IconBulb, IconWarning } from '../../components/ui/Icons';

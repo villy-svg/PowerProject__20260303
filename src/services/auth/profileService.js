@@ -58,14 +58,21 @@ export const profileService = {
       };
     }
 
-    // 1. Fetch the user's base profile (using maybeSingle to avoid crash)
-    let { data: profile, error: pError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    // 1. Fetch base profile, vertical access, and feature access in parallel (all keyed by userId)
+    // Reduces blocking boot waterfall by eliminating a full sequential round-trip.
+    const [
+      { data: initialProfile, error: pError },
+      { data: vAccess },
+      { data: fAccess },
+    ] = await Promise.all([
+      supabase.from('user_profiles').select('*').eq('id', userId).maybeSingle(),
+      supabase.from('vertical_access').select('*').eq('user_id', userId),
+      supabase.from('feature_access').select('*').eq('user_id', userId),
+    ]);
 
     if (pError) throw pError;
+
+    let profile = initialProfile;
 
     // FALLBACK: If the trigger failed silently, profile may be missing.
     if (!profile) {
@@ -99,38 +106,27 @@ export const profileService = {
       profile = recovered;
     }
 
-    // 2. Fetch role permissions, vertical access, and feature access in parallel
-    const [
-      { data: rolePerms },
-      { data: vAccess },
-      { data: fAccess },
-    ] = await Promise.all([
-      supabase.from('role_permissions').select('*').eq('role_id', profile.role_id).maybeSingle(),
-      supabase.from('vertical_access').select('*').eq('user_id', userId),
-      supabase.from('feature_access').select('*').eq('user_id', userId),
-    ]);
-
-    // 3. Build vertical permissions map: { [vertical_id]: { level, features: {} } }
+    // 2. Build vertical permissions map: { [vertical_id]: { level, features: {} } }
     const vPermsMap = {};
     (vAccess || []).forEach(v => {
       const vid = (v.vertical_id || '').toUpperCase();
       if (vid) vPermsMap[vid] = { level: v.access_level, features: {} };
     });
 
-    // 4. Add feature-level access into the vertical map
+    // 3. Add feature-level access into the vertical map
     (fAccess || []).forEach(f => {
       if (vPermsMap[(f.vertical_id || '').toUpperCase()]) {
         vPermsMap[(f.vertical_id || '').toUpperCase()].features[f.feature_id] = f.access_level;
       }
     });
 
-    // 5. Fetch linked employee and their seniority (over-and-above RBAC)
+    // 4. Fetch linked employee, role permissions, and reporting tree in parallel
     let employeeData = null;
     let seniority = 100; // Default high seniority
     let reporteeUserIds = [];
     let reporteeEmployeeIds = [];
-    
-    // 5. SELF-HEALING FALLBACK: If employee_id still missing, try to link by email.
+
+    // 4a. SELF-HEALING FALLBACK: If employee_id still missing, try to link by email.
     // This handles the edge case where an employee record was created AFTER the user registered.
     // The trigger handles the common case (employee exists at registration time).
     let effectiveEmployeeId = profile.employee_id;
@@ -157,9 +153,18 @@ export const profileService = {
       }
     }
 
+    // 4b. Fetch role_permissions alongside employee + hierarchy tree in a single parallel round-trip
+    const rolePermsPromise = supabase
+      .from('role_permissions')
+      .select('*')
+      .eq('role_id', profile.role_id)
+      .maybeSingle();
+
+    let rolePerms = null;
+
     if (effectiveEmployeeId) {
-      // 5b. Fetch employee, their role seniority, and the full list of employees for the tree in parallel
-      const [empResult, allEmpsResult] = await Promise.all([
+      const [rolePermsResult, empResult, allEmpsResult] = await Promise.all([
+        rolePermsPromise,
         supabase
           .from('employees')
           .select('id, role_id, manager_id, account_number, ifsc_code, account_name, pan_number, employee_roles(role_code, seniority_level)')
@@ -168,6 +173,7 @@ export const profileService = {
         supabase.from('employees').select('id, manager_id')
       ]);
 
+      rolePerms = rolePermsResult.data;
       const emp = empResult.data;
       const allEmps = allEmpsResult.data;
 
@@ -178,20 +184,29 @@ export const profileService = {
         // FETCH REPORTING TREE for all users (ensures reporteeUserIds populated for both managers and assignees)
         if (allEmps) {
           const descendants = hierarchyUtils.getDescendants(allEmps, emp.id, 'id', 'manager_id');
-          const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
-          
-          // Map Employee IDs to User IDs (Auth IDs) via user_profiles
-          const { data: treeProfiles } = await supabase
-            .from('user_profiles')
-            .select('id, employee_id')
-            .in('employee_id', treeEmployeeIds);
+          if (descendants.length === 0) {
+            // Fast path for non-managers: avoid a 3rd Supabase round-trip when the only tree member is self
+            reporteeEmployeeIds = [emp.id];
+            reporteeUserIds = [profile.id];
+          } else {
+            const treeEmployeeIds = [emp.id, ...descendants.map(d => d.id)];
 
-          if (treeProfiles) {
-            reporteeEmployeeIds = treeEmployeeIds;
-            reporteeUserIds = treeProfiles.map(p => p.id);
+            // Map Employee IDs to User IDs (Auth IDs) via user_profiles
+            const { data: treeProfiles } = await supabase
+              .from('user_profiles')
+              .select('id, employee_id')
+              .in('employee_id', treeEmployeeIds);
+
+            if (treeProfiles) {
+              reporteeEmployeeIds = treeEmployeeIds;
+              reporteeUserIds = treeProfiles.map(p => p.id);
+            }
           }
         }
       }
+    } else {
+      const rolePermsResult = await rolePermsPromise;
+      rolePerms = rolePermsResult.data;
     }
 
     // 6. Return normalized user object

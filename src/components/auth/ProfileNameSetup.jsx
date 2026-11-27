@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
 import { useAuth } from '../../app/contexts/AuthContext';
-import powerLogo from '../../assets/logo.svg';
+import powerLogo from '../../assets/powerpod-logo.png';
 import './ProfileNameSetup.css';
 
 /**

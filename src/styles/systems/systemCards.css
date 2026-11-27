@@ -1,3 +1,8 @@
+/* Enable native intrinsic-size transitions (block-size/inline-size: 0 <-> auto) in supporting browsers */
+:root {
+  interpolate-size: allow-keywords;
+}
+
 .task-card-master {
   background: var(--panel-bg);
   border: 1px solid transparent;
@@ -8,7 +13,7 @@
   flex-direction: column;
   /* Removed 'gap' to prevent phantom space from collapsed children */
   margin-bottom: 10px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   box-shadow: var(--shadow-premium);
   position: relative;
   overflow: hidden;
@@ -17,47 +22,64 @@
   /* More compact base */
 }
 
-/* Row 0, Row 3, and Row 4 are collapsed by default */
+/* Row 0, Row 3, and Row 4 stay display:flex and collapse via block-size: 0 for smooth intrinsic animation */
 .card-header-row,
 .card-row-3,
 .card-row-approval {
-  display: none;
-  /* Reclaim space */
-  max-height: 0;
+  display: flex;
+  block-size: 0;
   min-height: 0;
   opacity: 0;
   overflow: hidden;
-  padding: 0;
-  margin: 0;
-  transition: all 0.3s ease;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   pointer-events: none;
+  transition: block-size 0.22s cubic-bezier(0.2, 0, 0, 1),
+              opacity 0.18s ease,
+              padding 0.22s cubic-bezier(0.2, 0, 0, 1),
+              margin 0.22s cubic-bezier(0.2, 0, 0, 1),
+              border-color 0.18s ease;
 }
 
-/* Selection State reveals Header Row, Action Row, and Approval Row */
+/* Selection & Expansion States reveal Header Row, Action Row, and Approval Row */
 .task-card-master.selected .card-header-row,
-.task-card-master.selected .card-row-3,
-.task-card-master.selected .card-row-approval {
-  display: flex;
-  max-height: 100px;
+.task-card-master.is-expanded .card-header-row {
+  block-size: auto;
   min-height: 24px;
   opacity: 1;
+  margin-bottom: 8px;
   pointer-events: auto;
 }
 
-.task-card-master.selected .card-header-row {
-  margin-bottom: 8px;
+.task-card-master.selected .card-row-3,
+.task-card-master.is-expanded .card-row-3 {
+  block-size: auto;
+  opacity: 1;
+  padding-top: 12px;
+  margin-top: 10px;
+  pointer-events: auto;
 }
 
 .task-card-master.selected .card-row-3 {
-  padding-top: 12px;
-  margin-top: 10px;
+  min-height: 24px;
   padding-bottom: 12px;
 }
 
-.task-card-master.selected .card-row-approval {
+.task-card-master.selected .card-row-approval,
+.task-card-master.is-expanded .card-row-approval {
+  block-size: auto;
+  opacity: 1;
   padding-top: 12px;
   margin-top: 10px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px dashed var(--border-color);
+  pointer-events: auto;
+}
+
+.task-card-master.selected .card-row-approval {
+  min-height: 24px;
+  border-top-style: solid;
 }
 
 /* Base Layout (must come BEFORE collapse logic) */
@@ -118,98 +140,51 @@
   width: 100%;
 }
 
-.rejected-red-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--status-neutral);
-  /* Matching In Progress Blue */
-  border-radius: 50%;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--status-neutral), transparent 20%);
-  animation: pulse-blue-dot 2s infinite ease-in-out;
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-@keyframes pulse-blue-dot {
-  0% {
-    opacity: 0.6;
-    transform: scale(1);
-    box-shadow: 0 0 4px color-mix(in srgb, var(--status-neutral), transparent 60%);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.3);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--status-neutral), transparent 10%);
-  }
-
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-    box-shadow: 0 0 4px color-mix(in srgb, var(--status-neutral), transparent 60%);
-  }
-}
-
-.review-yellow-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--status-warning);
-  /* Matching Review Amber/Yellow */
-  border-radius: 50%;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--status-warning), transparent 20%);
-  animation: pulse-yellow-dot 2s infinite ease-in-out;
-  flex-shrink: 0;
-  display: inline-block;
-}
-
-@keyframes pulse-yellow-dot {
-  0% {
-    opacity: 0.6;
-    transform: scale(1);
-    box-shadow: 0 0 4px color-mix(in srgb, var(--status-warning), transparent 60%);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.3);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--status-warning), transparent 10%);
-  }
-
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-    box-shadow: 0 0 4px color-mix(in srgb, var(--status-warning), transparent 60%);
-  }
-}
-
+/* Status pulse dots — unified base + shared keyframe using per-dot tone variables */
+.rejected-red-dot,
+.review-yellow-dot,
 .draft-gray-dot {
   width: 8px;
   height: 8px;
-  background-color: var(--border-color); /* Neutral gray token */
+  background-color: var(--dot-bg);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(113, 113, 122, 0.8);
-  animation: pulse-gray-dot 2s infinite ease-in-out;
+  box-shadow: 0 0 8px var(--dot-glow-base);
+  animation: pulse-status-dot 2s infinite ease-in-out;
   flex-shrink: 0;
   display: inline-block;
 }
 
-@keyframes pulse-gray-dot {
-  0% {
+.rejected-red-dot {
+  --dot-bg: var(--status-neutral);
+  --dot-glow-base: color-mix(in srgb, var(--status-neutral), transparent 20%);
+  --dot-glow-low: color-mix(in srgb, var(--status-neutral), transparent 60%);
+  --dot-glow-high: color-mix(in srgb, var(--status-neutral), transparent 10%);
+}
+
+.review-yellow-dot {
+  --dot-bg: var(--status-warning);
+  --dot-glow-base: color-mix(in srgb, var(--status-warning), transparent 20%);
+  --dot-glow-low: color-mix(in srgb, var(--status-warning), transparent 60%);
+  --dot-glow-high: color-mix(in srgb, var(--status-warning), transparent 10%);
+}
+
+.draft-gray-dot {
+  --dot-bg: var(--border-color);
+  --dot-glow-base: rgba(113, 113, 122, 0.8);
+  --dot-glow-low: rgba(113, 113, 122, 0.4);
+  --dot-glow-high: rgba(113, 113, 122, 0.9);
+}
+
+@keyframes pulse-status-dot {
+  0%, 100% {
     opacity: 0.6;
     transform: scale(1);
-    box-shadow: 0 0 4px rgba(113, 113, 122, 0.4);
+    box-shadow: 0 0 4px var(--dot-glow-low);
   }
-
   50% {
     opacity: 1;
     transform: scale(1.3);
-    box-shadow: 0 0 12px rgba(113, 113, 122, 0.9);
-  }
-
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-    box-shadow: 0 0 4px rgba(113, 113, 122, 0.4);
+    box-shadow: 0 0 12px var(--dot-glow-high);
   }
 }
 
@@ -228,15 +203,12 @@
   display: none;
 }
 
-/* Row 4: Approval Actions */
+/* Row 4: Approval Actions — base layout only; spacing/border reveal on hover/selected/expanded */
 .card-row-approval {
-  display: flex;
   align-items: center;
   justify-content: flex-start; /* Snapped Left */
   gap: 12px;
-  padding-top: 12px;
-  margin-top: 10px;
-  border-top: 1px dashed var(--border-color);
+  border-top: 0 dashed transparent;
 }
 
 /* Hierarchy and Badges */
@@ -251,7 +223,10 @@
 /* Reveal on Hover / Selected / Expanded */
 .task-card-master:hover .subtask-tag,
 .task-card-master.selected .subtask-tag,
-.task-card-master.is-expanded .subtask-tag {
+.task-card-master.is-expanded .subtask-tag,
+.task-card-master:hover .hub-tile-meta,
+.task-card-master.selected .hub-tile-meta,
+.task-card-master.is-expanded .hub-tile-meta {
   display: flex;
 }
 
@@ -259,12 +234,6 @@
 .task-card-master.selected .assignee-badge-base,
 .task-card-master.is-expanded .assignee-badge-base {
   display: inline-flex;
-}
-
-.task-card-master:hover .hub-tile-meta,
-.task-card-master.selected .hub-tile-meta,
-.task-card-master.is-expanded .hub-tile-meta {
-  display: flex;
 }
 
 .task-card-master:hover .duplicate-badge,
@@ -330,13 +299,7 @@
   filter: brightness(1.2);
 }
 
-.badge-icon {
-  font-size: 0.75rem;
-  opacity: 0.8;
-}
-
-.assignee-badge,
-.assignee-badge-mini {
+.assignee-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -349,22 +312,11 @@
   color: var(--text-color);
   opacity: 0.7;
   border: 1px solid var(--border-color);
-}
-
-.assignee-badge {
   padding: 2px 8px;
   margin-left: 6px;
 }
 
-.assignee-badge-mini {
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 0.6rem;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.assignee-none,
-.assignee-none-mini {
+.assignee-none {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -378,16 +330,8 @@
   opacity: 0.4;
   background: color-mix(in srgb, var(--text-color), transparent 95%);
   border: 1px solid var(--border-color);
-}
-
-.assignee-none {
   padding: 2px 8px;
   margin-left: 6px;
-}
-
-.assignee-none-mini {
-  padding: 1px 5px;
-  font-size: 0.6rem;
 }
 
 /* Expansion Logic (Hover for Desktops) */
@@ -399,8 +343,7 @@
   }
 
   .task-card-master:hover .card-header-row {
-    display: flex;
-    max-height: 40px;
+    block-size: auto;
     min-height: 24px;
     opacity: 1;
     margin-bottom: 8px;
@@ -408,8 +351,7 @@
   }
 
   .task-card-master:hover .card-row-3 {
-    display: flex;
-    max-height: 180px; 
+    block-size: auto;
     opacity: 1;
     padding-top: 12px;
     margin-top: 10px;
@@ -417,9 +359,11 @@
   }
 
   .task-card-master:hover .card-row-approval {
-    display: flex;
-    max-height: 100px;
+    block-size: auto;
     opacity: 1;
+    padding-top: 12px;
+    margin-top: 10px;
+    border-top: 1px dashed var(--border-color);
     pointer-events: auto;
   }
 }
@@ -432,33 +376,15 @@
   box-shadow: 0 15px 35px var(--halo-glow);
 }
 
-.task-card-master.is-expanded .card-header-row {
-  display: flex;
-  max-height: 40px;
-  min-height: 24px;
-  opacity: 1;
-  margin-bottom: 8px;
-  pointer-events: auto;
-}
+/* Mobile Adaptation — strictly scoped to <=768px (Zero Desktop Impact §14G) */
+@media screen and (max-width: 768px) {
+  /* Keep resting and expanded padding identical on mobile so tapping never shifts text */
+  .task-card-master,
+  .task-card-master.is-expanded {
+    padding: 10px 12px;
+    gap: 0;
+  }
 
-.task-card-master.is-expanded .card-row-3 {
-  display: flex;
-  max-height: 350px; 
-  opacity: 1;
-  padding-top: 12px;
-  margin-top: 10px;
-  pointer-events: auto;
-}
-
-.task-card-master.is-expanded .card-row-approval {
-  display: flex;
-  max-height: 100px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* Mobile Adaptation */
-@media (max-width: 768px) {
   .task-card-master .subtask-tag,
   .task-card-master .hub-tile-meta {
     display: flex;
@@ -472,17 +398,60 @@
     display: inline-block;
   }
 
-  .card-row-3 {
-    flex-wrap: wrap; 
-    overflow-x: visible; 
-    justify-content: flex-start;
-    gap: 6px; 
+  .task-card-master.is-expanded .card-row-3,
+  .task-card-master.selected .card-row-3 {
+    padding-top: 8px;
+    padding-bottom: 4px;
+    margin-top: 4px;
+    overflow: visible;
+    gap: 12px;
   }
 
-  .action-icon-btn {
-    width: 26px;
-    height: 26px;
+  .task-card-master .promote-group {
+    gap: 12px;
+  }
+
+  .task-card-master.is-expanded .card-row-approval,
+  .task-card-master.selected .card-row-approval {
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+
+  /* Compact visual icon buttons (32x32) with ::after hit-area extension to 44x44 (§14B / WCAG 2.5.5) */
+  .task-card-master .action-icon-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     padding: 0;
+    position: relative;
+  }
+
+  .task-card-master .action-icon-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+
+  /* Compact visual Read More toggle with ::after vertical hit-area extension to 44px */
+  .task-card-master .read-more-btn {
+    min-height: 28px;
+    min-width: 0;
+  }
+
+  .task-card-master .read-more-btn::after {
+    content: '';
+    position: absolute;
+    inset: -8px -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-card-master,
+  .card-header-row,
+  .card-row-3,
+  .card-row-approval {
+    transition: none;
   }
 }
 
@@ -577,12 +546,8 @@
   color: var(--brand-blue, var(--status-neutral));
 }
 
-/* Promote-top button: promote to top level (green accent) */
-.action-icon-btn.btn-promote-top {
-  color: var(--brand-green);
-}
-
-/* Add-subtask button: green accent */
+/* Promote-top & Add-subtask buttons: green accent */
+.action-icon-btn.btn-promote-top,
 .action-icon-btn.btn-add-subtask {
   color: var(--brand-green);
 }

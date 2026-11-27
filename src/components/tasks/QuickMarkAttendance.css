@@ -1,7 +1,7 @@
 /* ==========================================================================
    QuickMarkAttendance.css
    Sleek, Apple-minimalist styles for QuickMarkAttendance modal body and the
-   shared 5-option AttendanceStatusPicker.
+   shared 7-option AttendanceStatusPicker.
 
    Skill compliance:
      ui-design-system §4   (Halo selected state: 2px border + soft tint)
@@ -46,7 +46,7 @@
   white-space: nowrap;
 }
 
-/* 5-option visible tappable status grid (shared by QuickMarkAttendance & UnmarkedAttendanceActionPanel) */
+/* 7-option visible tappable status grid (shared by QuickMarkAttendance & UnmarkedAttendanceActionPanel) */
 .attendance-status-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -71,7 +71,7 @@
   transition: background 0.16s ease, border-color 0.16s ease, transform 0.12s ease;
 }
 
-/* 5th option spans full width so the 2-column grid stays visually balanced */
+/* Odd trailing option (7th) spans full width so the 2-column grid stays visually balanced */
 .attendance-status-option:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
@@ -89,52 +89,32 @@
   cursor: not-allowed;
 }
 
+/* Semantic tone tokens scoped per option (ui-design-system §7) */
+.attendance-status-option--success { --option-tone: var(--status-success); }
+.attendance-status-option--danger  { --option-tone: var(--status-danger); }
+.attendance-status-option--warning { --option-tone: var(--status-warning); }
+.attendance-status-option--neutral { --option-tone: var(--status-neutral); }
+
 .attendance-status-option__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-.attendance-status-option__dot--danger {
-  background: var(--status-danger);
-}
-
-.attendance-status-option__dot--warning {
-  background: var(--status-warning);
-}
-
-.attendance-status-option__dot--neutral {
-  background: var(--status-neutral);
+  background: var(--option-tone, var(--status-neutral));
 }
 
 .attendance-status-option__label {
   line-height: 1.25;
 }
 
-/* Halo Selected States (ui-design-system §4: 2px border + soft tint, no solid fill;
+/* Halo Selected State (ui-design-system §4: 2px border + soft tint, no solid fill;
    1px padding compensation prevents layout shift when switching options) */
 .attendance-status-option.is-selected {
   border-width: 2px;
   padding: calc(0.6rem - 1px) calc(0.85rem - 1px);
-}
-
-.attendance-status-option--danger.is-selected {
-  border-color: var(--status-danger);
-  background: color-mix(in srgb, var(--status-danger), transparent 88%);
-  color: var(--status-danger);
-}
-
-.attendance-status-option--warning.is-selected {
-  border-color: var(--status-warning);
-  background: color-mix(in srgb, var(--status-warning), transparent 88%);
-  color: var(--status-warning);
-}
-
-.attendance-status-option--neutral.is-selected {
-  border-color: var(--status-neutral);
-  background: color-mix(in srgb, var(--status-neutral), transparent 88%);
-  color: var(--status-neutral);
+  border-color: var(--option-tone, var(--status-neutral));
+  background: color-mix(in srgb, var(--option-tone, var(--status-neutral)), transparent 88%);
+  color: var(--option-tone, var(--status-neutral));
 }
 
 .quick-mark-submit {

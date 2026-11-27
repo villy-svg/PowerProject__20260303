@@ -20,7 +20,7 @@
  *   development-best-practices §3 (try/catch + error display)
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { approveRequest, rejectRequest } from '../../../services/employees/editRequestService';
 import '../../../styles/systems/systemLists.css';
 import { IconChevronDown, IconChevronRight } from '../../../components/ui/Icons';
@@ -55,15 +55,16 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
           isExpanded ? 'is-expanded approval-request-row--expanded' : ''
         }`}
       >
-        {/* CHECKBOX FOR BULK ACTION */}
-        <div className="u-flex-center u-mr-12 approval-request-row__checkbox">
-          <input 
-            type="checkbox" 
-            checked={isSelected} 
+        {/* CHECKBOX FOR BULK ACTION — label provides 44px mobile hit target around 18px Halo checkbox */}
+        <label className="halo-checkbox-hit approval-request-row__checkbox">
+          <input
+            type="checkbox"
+            checked={isSelected}
             onChange={() => onToggleSelect(request.id)}
-            className="checkbox-sm"
+            className="halo-checkbox"
+            aria-label={`Select request for ${request.employees?.full_name || 'employee'}`}
           />
-        </div>
+        </label>
 
         {/* LEFT SIDE: Identity & Content */}
         <div className="list-row-main u-flex-1 approval-request-row__main">
@@ -93,6 +94,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
           {!showRejectNote && (
             <>
               <button
+                type="button"
                 className="halo-button btn-xs btn-approve"
                 onClick={() => onApprove(request)}
                 disabled={isActing}
@@ -100,6 +102,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
                 {isActing ? '...' : '✓ Appr'}
               </button>
               <button
+                type="button"
                 className="halo-button btn-xs btn-reject"
                 onClick={() => setShowRejectNote(true)}
                 disabled={isActing}
@@ -109,12 +112,14 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
             </>
           )}
           <button
+            type="button"
             className="action-icon-btn u-text-secondary"
             onClick={(e) => {
               e.stopPropagation();
               setShowDetails(!showDetails);
             }}
             title="Toggle Details"
+            aria-label={showDetails ? 'Hide Details' : 'Show Details'}
           >
             {showDetails ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
           </button>
@@ -164,6 +169,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
               />
               <div className="u-flex-gap-8 u-w-full">
                 <button
+                  type="button"
                   className="halo-button btn-reject u-flex-1"
                   onClick={handleRejectSubmit}
                   disabled={isActing}
@@ -171,6 +177,7 @@ const RequestCard = ({ request, onApprove, onReject, isActing, isSelected, onTog
                   {isActing ? 'Rejecting…' : 'Confirm'}
                 </button>
                 <button
+                  type="button"
                   className="halo-button u-flex-1"
                   onClick={() => setShowRejectNote(false)}
                 >
@@ -199,6 +206,7 @@ const AttendanceApprovalDrawer = ({
   const [isActing, setIsActing] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
+  const selectAllRef = useRef(null);
 
   // If a cell is selected, filter to just that cell's requests; otherwise show all
   const filteredRequests = selectedCell
@@ -207,6 +215,16 @@ const AttendanceApprovalDrawer = ({
         r.shift_date === selectedCell.date
       )
     : pendingRequests;
+
+  const isAllSelected = filteredRequests.length > 0 && selectedIds.length === filteredRequests.length;
+  const isPartiallySelected = selectedIds.length > 0 && selectedIds.length < filteredRequests.length;
+
+  // Sync native indeterminate property for partial bulk selection (modern-web-guidance: checkbox)
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = isPartiallySelected;
+    }
+  }, [isPartiallySelected]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === filteredRequests.length) {
@@ -342,8 +360,6 @@ const AttendanceApprovalDrawer = ({
 
   if (!isOpen) return null;
 
-  const isAllSelected = filteredRequests.length > 0 && selectedIds.length === filteredRequests.length;
-
   return (
     <div className="approval-page-container u-flex-1 u-overflow-y-auto u-px-16 u-py-24">
       <div>
@@ -352,7 +368,7 @@ const AttendanceApprovalDrawer = ({
           <div className="approval-mobile-back-bar">
             <button
               type="button"
-              className="halo-button u-flex-center-gap-8"
+              className="halo-button secondary u-flex-center-gap-8"
               onClick={onClose}
             >
               <span>←</span> Back to Board
@@ -363,26 +379,29 @@ const AttendanceApprovalDrawer = ({
         {/* Bulk Actions Header */}
         {filteredRequests.length > 0 && (
           <div className="u-flex-between u-mb-16 u-px-12 approval-bulk-bar">
-            <label className="u-flex-center-gap-8 u-cursor-pointer approval-bulk-bar__select-all">
-              <input 
-                type="checkbox" 
+            <label className="halo-checkbox-hit approval-bulk-bar__select-all">
+              <input
+                ref={selectAllRef}
+                type="checkbox"
                 checked={isAllSelected}
                 onChange={toggleSelectAll}
-                className="checkbox-sm"
+                className="halo-checkbox"
               />
-              <span className="u-text-base u-fw-600">Select All</span>
+              <span className="approval-bulk-bar__label">Select All</span>
             </label>
 
             {selectedIds.length > 0 && (
               <div className="u-flex-gap-12 approval-bulk-bar__actions">
-                <button 
+                <button
+                  type="button"
                   className="halo-button btn-sm btn-approve"
                   onClick={handleBulkApprove}
                   disabled={isActing}
                 >
                   ✓ Approve ({selectedIds.length})
                 </button>
-                <button 
+                <button
+                  type="button"
                   className="halo-button btn-sm btn-reject"
                   onClick={handleBulkReject}
                   disabled={isActing}

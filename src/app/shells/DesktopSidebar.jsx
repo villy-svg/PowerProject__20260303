@@ -26,7 +26,7 @@ import {
   IconSettings,
   IconShield,
 } from '../../components/ui/Icons';
-import powerLogo from '../../assets/logo.svg';
+import powerLogo from '../../assets/powerpod-logo.png';
 import BoardRBACModal from '../../components/modals/BoardRBACModal';
 import { getIconForVertical } from '../../constants/verticalIcons';
 import { resolveVerticalRootId } from '../../registry/verticalRegistry';

@@ -30,8 +30,7 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.mobile-layout .app-main-area,
-.mobile-layout .mobile-content-area {
+.mobile-layout .app-main-area {
   margin-left: 0;
   width: 100%;
   padding-bottom: 0;
@@ -201,7 +200,6 @@
   transform: translateX(0);
 }
 
-.mobile-layout .sidebar-backdrop,
 .mobile-layout .menu-backdrop {
   position: fixed;
   inset: 0;
@@ -273,8 +271,7 @@
 
 /* ── 5. Mobile Workspace ─────────────────────────────────────────────── */
 .mobile-layout .workspace-content {
-  padding: 0 12px 12px 12px;
-  padding-bottom: calc(64px + var(--safe-bottom, 0px));
+  padding: 0 12px calc(64px + var(--safe-bottom, 0px));
   transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -313,10 +310,6 @@
   margin: 0;
 }
 
-.mobile-layout .brand-title-centered.mobile-hidden {
-  display: none;
-}
-
 .mobile-layout .mobile-header-tutorial-btn {
   position: absolute;
   left: 8px;
@@ -339,10 +332,6 @@
   z-index: 2003;
 }
 
-.mobile-layout .mobile-header-tutorial-btn.mobile-hidden {
-  display: none;
-}
-
 .mobile-layout .mobile-header-tutorial-btn.active {
   border-color: var(--brand-green);
   background: var(--halo-bg);
@@ -357,21 +346,14 @@
   }
 
   .mobile-layout .expanded-menu-row {
-    padding: calc(var(--safe-top, 0px) + 8px) 8px 12px 8px;
+    padding: calc(var(--safe-top, 0px) + 8px) 8px 12px;
     gap: 6px;
     max-height: 95dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
   }
 
   .mobile-layout .master-header-left,
   .mobile-layout .master-header-right {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
     gap: 6px;
   }
 
@@ -485,9 +467,7 @@ body[data-keyboard="open"] .edit-modal,
 body[data-keyboard="open"] .leave-modal-body,
 body[data-keyboard="open"] .board-rbac-modal,
 body[data-keyboard="open"] .sandbox-modal-card,
-body[data-keyboard="open"] .suggest-edit-modal,
-body[data-keyboard="open"] .task-form-sheet,
-body[data-keyboard="open"] .form-sheet {
+body[data-keyboard="open"] .suggest-edit-modal {
   max-height: calc(var(--visual-viewport-height, 100dvh) - max(16px, env(safe-area-inset-top, 0px))) !important;
   transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -500,18 +480,6 @@ body[data-keyboard="open"] .master-modal-scroll-area {
   max-height: none !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Bring fixed submit/action buttons above the keyboard */
-body[data-keyboard="open"] .form-sticky-footer,
-body[data-keyboard="open"] .modal-footer-actions,
-body[data-keyboard="open"] .form-submit-row {
-  position: sticky;
-  bottom: 0;
-  background: var(--bg-color);
-  padding: 8px 0 4px;
-  z-index: 10;
-  border-top: 1px solid var(--border-color);
 }
 
 /* Hide fixed bottom action tray when soft keyboard is open so it doesn't cover content */

@@ -76,7 +76,8 @@ const ListViewRow = ({
   handleApproveSubmission,
   handleRejectClick,
   isRowExpanded,
-  onToggleRowExpand
+  onToggleRowExpand,
+  showTreeExpander = true
 }) => {
   const lastTapRef = useRef(0);
   const tva = useTaskViewActions({
@@ -181,21 +182,26 @@ const ListViewRow = ({
         className={`list-row-main${task.depth ? ' list-row-main--indented' : ''}`}
         style={task.depth ? { '--tree-depth': task.depth } : undefined}
       >
-        <div
-          className={`tree-expander${hasChildren ? '' : ' tree-expander--empty'}`}
-          onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
-        >
-          {hasChildren ? (isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
-        </div>
+        {/* Only reserve tree-expander gutter when this stage actually contains nested tasks */}
+        {showTreeExpander && (
+          <div
+            className={`tree-expander${hasChildren ? '' : ' tree-expander--empty'}`}
+            onClick={(e) => { e.stopPropagation(); onToggleExpand(task.id); }}
+          >
+            {hasChildren ? (isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />) : ''}
+          </div>
+        )}
         {task.depth > 0 && (
           <span className="hierarchy-arrow">↳</span>
         )}
-        {/* 1. Select Checkbox */}
-        <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
-          <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
-            {selectedTaskIds.includes(task.id) && '✓'}
+        {/* 1. Select Checkbox — only render when parent board supports multi-select */}
+        {typeof onSelect === 'function' && (
+          <div className="list-row-selection" onClick={(e) => { e.stopPropagation(); onSelect(task.id); }}>
+            <div className={`selection-checkbox ${selectedTaskIds.includes(task.id) ? 'checked' : ''}`}>
+              {selectedTaskIds.includes(task.id) && '✓'}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 2. Priority */}
         {task.isContextOnly && (

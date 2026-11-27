@@ -70,8 +70,11 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 
-// Assets
-import powerLogo from './assets/logo.svg';
+// Native platform detection (guards native-only startup logic on web)
+import { Capacitor } from '@capacitor/core';
+
+// Assets — use 31KB PNG instead of 273KB auto-traced SVG on the critical boot path
+import powerLogo from './assets/powerpod-logo.png';
 
 /**
  * AppShell handles the main authenticated UI layout.
@@ -474,16 +477,22 @@ function App() {
 
       try {
         // --- Cache Auto-Clean Logic ---
+        // Only clear non-Workbox legacy caches on an actual version upgrade.
+        // Never wipe Workbox precaches on first visit (cachedVersion === null), which
+        // races with SW install and forces redundant re-downloads of the app shell.
         const cachedVersion = localStorage.getItem('last_app_version');
         if (cachedVersion !== APP_VERSION) {
-          console.log(`[Cache] Version mismatch: ${cachedVersion} -> ${APP_VERSION}. Clearing caches...`);
-          try {
-            if (window.caches) {
-              const keys = await window.caches.keys();
-              await Promise.all(keys.map(key => window.caches.delete(key)));
+          if (cachedVersion !== null) {
+            console.log(`[Cache] Version upgrade: ${cachedVersion} -> ${APP_VERSION}. Clearing legacy caches...`);
+            try {
+              if (window.caches) {
+                const keys = await window.caches.keys();
+                const legacyKeys = keys.filter((key) => !key.startsWith('workbox-precache'));
+                await Promise.all(legacyKeys.map(key => window.caches.delete(key)));
+              }
+            } catch (e) {
+              console.warn('[Cache] Failed to clear legacy caches:', e);
             }
-          } catch (e) {
-            console.warn('[Cache] Failed to clear caches:', e);
           }
           localStorage.setItem('last_app_version', APP_VERSION);
         }
@@ -538,6 +547,10 @@ function App() {
   }, [fetchUserProfile, setIsAppInitializing, setSession]);
 
   useEffect(() => {
+    // Platform guard (hybrid-mobile-deployment §4): only pre-request native geolocation
+    // on Capacitor mobile apps so web boot doesn't import @capacitor/geolocation or prompt.
+    if (!Capacitor.isNativePlatform()) return;
+
     const requestLocationOnStartup = async () => {
       try {
         const { Geolocation } = await import('@capacitor/geolocation');

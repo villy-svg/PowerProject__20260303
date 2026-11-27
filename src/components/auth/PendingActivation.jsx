@@ -1,6 +1,6 @@
 // @prod-critical
 import React from 'react';
-import powerLogo from '../../assets/logo.svg';
+import powerLogo from '../../assets/powerpod-logo.png';
 import './PendingActivation.css';
 
 const PendingActivation = ({ onLogout }) => {

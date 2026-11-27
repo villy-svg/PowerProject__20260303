@@ -226,6 +226,14 @@
     display: none;
   }
 
+  /* Collapse empty card header when selection checkbox is hidden and no subtask badges exist */
+  .centralised-board .task-card-master.is-expanded .card-header-row:not(:has(.task-hierarchy-badges)),
+  .centralised-board .task-card-master.selected .card-header-row:not(:has(.task-hierarchy-badges)) {
+    display: none;
+    min-height: 0;
+    margin-bottom: 0;
+  }
+
   .centralised-drill-breadcrumb {
     margin-bottom: 10px;
     display: flex;

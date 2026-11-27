@@ -1,7 +1,7 @@
 // @prod-critical
 import React, { useState, useRef } from 'react';
 import { supabase } from '../../services/core/supabaseClient';
-import powerLogo from '../../assets/logo.svg';
+import powerLogo from '../../assets/powerpod-logo.png';
 import './Login.css';
 
 const Login = () => {

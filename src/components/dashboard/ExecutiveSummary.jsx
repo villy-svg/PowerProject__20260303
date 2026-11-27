@@ -18,7 +18,6 @@ import {
 } from '../../services/employees/unmarkedAttendanceTaskService';
 import WorkspaceModals from '../modals/WorkspaceModals';
 import { useAppNavigation } from '../../app/contexts/AppNavigationContext';
-import powerLogo from '../../assets/logo.svg';
 import SandboxManagerModal from '../modals/SandboxManagerModal';
 
 import { updateSubmissionStatus, submitProofOfWork } from '../../services/tasks/submissionService';

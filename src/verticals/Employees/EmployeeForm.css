@@ -1,11 +1,4 @@
 /* DropdownSystem.css is canonically imported once in globalTheme.css */
-.employee-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  padding: 1rem;
-}
-
 .employee-form {
   display: flex;
   flex-direction: column;
@@ -15,11 +8,6 @@
   padding: 0 24px;
 }
 
-@media screen and (max-width: 480px) {
-  .employee-form {
-    padding: 0 16px;
-  }
-}
 .form-section-header {
   font-size: 1.1rem;
   font-weight: 700;
@@ -89,9 +77,7 @@
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
   padding-right: 8px; /* Room for scrollbar */
-  margin-bottom: 0;
   margin-bottom: 0;
 }
 
@@ -114,9 +100,7 @@
   position: sticky;
   bottom: 0; /* Keep footer flush inside flex modal body */
   flex-shrink: 0;
-  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   background: var(--panel-bg); /* Match modal background */
-  padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
   z-index: 10;
   box-shadow: 0 -10px 20px color-mix(in srgb, var(--bg-color), transparent 50%);
@@ -167,15 +151,7 @@
   opacity: 1;
   background: color-mix(in srgb, var(--text-color), transparent 95%);
 }
-/* Wizard Header */
-.form-wizard-header {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--text-color), transparent 90%);
-  padding-bottom: 0.75rem;
-  justify-content: flex-start;
-}
+/* Wizard Steps */
 .step {
   font-size: 0.85rem;
   opacity: 0.5;
@@ -238,30 +214,34 @@
   .modal-content-area {
     max-height: none;
   }
-  
-  .form-wizard-header {
-    gap: 0.75rem;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding-bottom: max(1rem, calc(0.75rem + env(safe-area-inset-bottom, 0px)));
-  }
-  
+
   .step {
     font-size: 0.75rem;
   }
-  
+
   .form-grid {
     gap: 1.25rem;
   }
-  
+
   .employee-form .save-btn,
   .employee-form .next-btn {
     min-width: 120px;
     padding: 0.75rem 1rem;
   }
+
+  /* 5-step wizard: keep the tab row usable on narrow screens */
+  .employee-form .wizard-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+  }
 }
 
 @media screen and (max-width: 480px) {
+  .employee-form {
+    padding: 0 16px;
+  }
+
   .employee-form .form-group label {
     font-size: 0.78rem;
   }
@@ -542,13 +522,4 @@
 .employee-form .step.disabled-tab:hover {
   opacity: 0.25;
   color: inherit;
-}
-
-/* 5-step wizard: keep the tab row usable on narrow screens */
-@media screen and (max-width: 768px) {
-  .employee-form .wizard-tabs {
-    overflow-x: auto;
-    white-space: nowrap;
-    flex-wrap: nowrap;
-  }
 }

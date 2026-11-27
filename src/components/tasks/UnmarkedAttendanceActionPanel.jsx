@@ -23,6 +23,8 @@ import {
   getSubjectAttendanceWarningText,
   canMarkAttendanceTask,
   canReviewAttendanceTask,
+  parseAttendanceOptionValue,
+  toAttendanceOptionValue,
   submitAttendanceTaskChoice,
   approveAttendanceTask,
   rejectAttendanceTask,
@@ -32,7 +34,9 @@ import './UnmarkedAttendanceActionPanel.css';
 const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) => {
   const meta = task?.metadata || {};
   // Default to 'absent' so Maker can submit immediately or switch with 1 tap (no keyboard popup)
-  const [selectedStatus, setSelectedStatus] = useState(meta.suggested_status || 'absent');
+  const [selectedStatus, setSelectedStatus] = useState(
+    toAttendanceOptionValue(meta.suggested_status, meta.suggested_shift_type)
+  );
   const [makerNote, setMakerNote] = useState(meta.maker_note || '');
   const [reviewNote, setReviewNote] = useState('');
   const [submittingAction, setSubmittingAction] = useState(null);
@@ -53,7 +57,8 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
     setSubmittingAction('submit');
     setActionError(null);
     try {
-      await submitAttendanceTaskChoice(task.id, selectedStatus, makerNote);
+      const { status, shiftType } = parseAttendanceOptionValue(selectedStatus);
+      await submitAttendanceTaskChoice(task.id, status, makerNote, shiftType);
       if (onActionComplete) await onActionComplete();
     } catch (err) {
       setActionError(err?.message || 'Failed to submit attendance status.');
@@ -155,7 +160,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
         <form className="attendance-task-panel__form" onSubmit={handleMakerSubmit}>
           <div className="attendance-task-panel__field">
             <span className="attendance-task-panel__label">Attendance Status</span>
-            {/* Shared 5-option tappable selector — zero <input> elements so phone keyboard never opens */}
+            {/* Shared 7-option tappable selector — zero <input> elements so phone keyboard never opens */}
             <AttendanceStatusPicker
               value={selectedStatus}
               onChange={setSelectedStatus}
@@ -200,7 +205,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
             <div>
               <strong>Proposed Status:</strong>{' '}
               <span className="attendance-task-panel__status-badge">
-                {getAttendanceOptionLabel(meta.suggested_status)}
+                {getAttendanceOptionLabel(meta.suggested_status, meta.suggested_shift_type)}
               </span>
             </div>
             {meta.maker_note && (
@@ -272,7 +277,7 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
           ) : (
             <>
               <p className="attendance-task-panel__completed-line">
-                <strong>Final Status:</strong> {getAttendanceOptionLabel(meta.suggested_status)}
+                <strong>Final Status:</strong> {getAttendanceOptionLabel(meta.suggested_status, meta.suggested_shift_type)}
               </p>
               <p className="attendance-task-panel__completed-line">
                 <strong>Marked By:</strong> {meta.maker_name || '—'} · <strong>Approved By:</strong> {meta.checker_name || '—'}

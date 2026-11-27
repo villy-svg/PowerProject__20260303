@@ -115,12 +115,19 @@ const TaskListView = ({
 
     if (stageTasks.length === 0) return null;
 
+    // Only reserve the 20px tree-expander column in stages that actually contain hierarchy
+    const hasStageHierarchy = stageTasks.some(
+      t => t.depth > 0 || tasks.some(child => child.parentTask === t.id)
+    );
+
     return (
       <section key={stage.id} className="list-stage-section">
         <header className="list-stage-header" style={{ '--stage-color': stage.color }}>
           <div className="header-left-group">
             <h4 className="stage-label-text">{stage.label}</h4>
-            {(stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') && stageTasks.length > 0 && (
+            {typeof onToggleStageSelection === 'function' &&
+              (stage.id === 'DEPRIORITIZED' || stage.id === 'COMPLETED') &&
+              stageTasks.length > 0 && (
               <button
                 onClick={() => onToggleStageSelection(stage.id, stageTasks)}
                 className="stage-select-all-btn"
@@ -169,6 +176,7 @@ const TaskListView = ({
               isExpanded={expandedIds.has(task.id)}
               onToggleExpand={() => toggleExpand(task.id)}
               hasChildren={tasks.some(child => child.parentTask === task.id)}
+              showTreeExpander={hasStageHierarchy}
               tasks={tasks}
               permissions={rowPerms}
               handleApproveSubmission={handleApproveSubmission}

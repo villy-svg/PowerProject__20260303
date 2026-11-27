@@ -51,53 +51,15 @@
 .employee-list-row {
   min-height: unset;
 }
-.list-row-inner {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem; /* Reduced gap for better responsiveness */
-  padding: 0.5rem 0;
-}
-.list-col {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px; /* Gap between row 1 and row 2 in each column */
-}
-.col-row-1, .col-row-2 {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 22px;
-}
-/* Column Specific Adjustments */
-.col-identity { flex: 0 1 230px; }
-.col-org { flex: 1 1 auto; min-width: 150px; }
-.col-contact { flex: 0 1 200px; }
-.col-actions { 
-  flex: 0 0 100px; 
-  align-items: flex-end; /* Align actions and status to the right */
-}
-.management-info {
-  padding-left: 36px; /* Align row 2 with name (after checkbox) */
-}
-.actions-row, .status-row {
+.actions-row {
   justify-content: flex-end;
   width: 100%;
-}
-.email-id {
-  opacity: 0.6;
-  font-size: 0.85rem;
 }
 /* Local Badge Overrides */
 .app-user-badge-mini { 
   border-color: color-mix(in srgb, var(--brand-emerald), transparent 60%); 
   color: var(--badge-green-text); 
   background: var(--badge-green-bg);
-}
-.duplicate-badge-mini {
-  border-color: var(--badge-amber-text);
-  color: var(--badge-amber-text);
 }
 .app-user-badge-mini:hover {
   background: var(--border-color);
@@ -160,12 +122,6 @@
   color: var(--brand-green);
   font-size: 0.75rem;
 }
-.employee-management .status-toggle-btn {
-  padding: 2px 10px;
-  font-size: 0.8rem;
-  min-width: auto;
-  font-weight: 900;
-}
 .section-title {
   font-size: 0.8rem;
   font-weight: 700;
@@ -187,8 +143,7 @@
 /* Bulk Action Bar logic is now in globalTheme.css */
 
 /* System Badges (Mini) */
-
-.app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini {
+.app-user-badge-mini, .duplicate-badge-mini {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -201,12 +156,8 @@
   line-height: 1;
   white-space: nowrap;
 }
-.bank-missing-badge-mini {
-  background-color: color-mix(in srgb, var(--brand-red), transparent 90%);
-  color: var(--brand-red);
-  border: 1px solid color-mix(in srgb, var(--brand-red), transparent 60%);
-}
 .duplicate-badge-mini {
+  border-color: var(--badge-amber-text);
   background: var(--brand-amber);
   color: var(--color-white);
 }
@@ -432,24 +383,15 @@
 }
 /* Responsive Adjustments */
 @media screen and (max-width: 1400px) {
-  .list-row-inner {
-    gap: 1.25rem;
-  }
   .list-name { font-size: 0.95rem; }
-  .manager-info, .dept-badge, .hub-badge, .role-badge, .app-user-badge-mini, .bank-missing-badge-mini, .duplicate-badge-mini { 
+  .manager-info, .dept-badge, .hub-badge, .role-badge, .app-user-badge-mini, .duplicate-badge-mini { 
     font-size: 0.65rem; 
     padding: 2px 4px; /* Tighter padding */
     letter-spacing: -0.2px; /* Slight compression */
   }
-  .contact-item, .contact-item-id { font-size: 0.8rem; }
-  .email-id { font-size: 0.75rem; }
-  .col-identity { flex-basis: 220px; }
-  .col-contact { flex-basis: 180px; }
-  .col-org { flex-grow: 1.2; } /* Give more space to badges */
 }
 @media screen and (max-width: 1024px) {
   .employee-list-row { flex-wrap: wrap; gap: 12px; }
-  .list-main-info, .list-meta-badges, .list-contact { width: 100%; }
 }
 @media screen and (max-width: 768px) {
   .employee-grid {
