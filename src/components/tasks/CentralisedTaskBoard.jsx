@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { STAGE_LIST } from '../../constants/stages';
 import { VERTICAL_LIST } from '../../constants/verticals';
 import { taskUtils } from '../../utils/taskUtils';
+import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../../services/employees/employeeRequestService';
 import {
   isAttendanceClosureTask,
@@ -64,17 +65,16 @@ const CentralisedTaskBoard = ({
     isAttendanceClosureVisibleToUser(t, user);
 
   const assignedTasks = tasks.filter(isVisibleToUser);
+  const tasksMap = new Map(tasks.map(pt => [pt.id, pt]));
   const rootMyTasks = assignedTasks.filter(t => {
-    let current = t;
-    while (current.parentTask) {
-      const parent = tasks.find(pt => pt.id === current.parentTask);
-      if (!parent) break;
+    let hasVisibleAncestor = false;
+    hierarchyUtils.walkAncestors(t, tasksMap, (parent) => {
       if (isVisibleToUser(parent)) {
+        hasVisibleAncestor = true;
         return false;
       }
-      current = parent;
-    }
-    return true;
+    });
+    return !hasVisibleAncestor;
   });
   const drillParentTask = drillDownId ? tasks.find(t => t.id === drillDownId) : null;
   const myTasks = (isMobile && drillDownId && drillParentTask)

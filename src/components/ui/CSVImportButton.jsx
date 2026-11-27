@@ -1,6 +1,4 @@
 import React, { useRef, useState } from 'react';
-import Papa from 'papaparse';
-import ExcelJS from 'exceljs';
 import CSVConflictModal from '../modals/ConflictModal';
 import './CSVImportButton.css';
 
@@ -52,13 +50,16 @@ const CSVImportButton = ({
     if (!file) return;
     setStatus(null);
 
-    const isExcel = file.name.endsWith('.xlsx');
+    const isExcel = file.name.toLowerCase().endsWith('.xlsx');
 
     if (isExcel) {
       const reader = new FileReader();
       reader.onload = async (evt) => {
         try {
           const buffer = evt.target.result;
+          // Lazy-load ExcelJS on demand when importing an .xlsx file
+          const excelMod = await import('exceljs');
+          const ExcelJS = excelMod.default || excelMod;
           const workbook = new ExcelJS.Workbook();
           await workbook.xlsx.load(buffer);
           const worksheet = workbook.worksheets[0];
@@ -85,13 +86,23 @@ const CSVImportButton = ({
       };
       reader.readAsArrayBuffer(file);
     } else {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: (h) => h.trim().toLowerCase(),
-        complete: (result) => processRows(result.data),
-        error: () => setStatus('error'),
-      });
+      // Lazy-load PapaParse on demand when importing a .csv file
+      (async () => {
+        try {
+          const papaMod = await import('papaparse');
+          const Papa = papaMod.default || papaMod;
+          Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (h) => h.trim().toLowerCase(),
+            complete: (result) => processRows(result.data),
+            error: () => setStatus('error'),
+          });
+        } catch (err) {
+          console.error('CSV Parser Load Error:', err);
+          setStatus('error');
+        }
+      })();
     }
 
     // Reset so the same file can be re-uploaded

@@ -34,6 +34,24 @@ const applyLockOverrides = (result) => {
 
 export const verticalService = {
   /**
+   * Synchronously reads cached vertical configurations from localStorage
+   * with frontend lock overrides applied, enabling non-blocking app boot.
+   * Returns null if no valid cache exists.
+   */
+  getCachedVerticals() {
+    try {
+      const cached = localStorage.getItem('power_project_cache_verticals');
+      if (!cached) return null;
+      const parsed = JSON.parse(cached);
+      if (!parsed || !Array.isArray(parsed.list) || parsed.list.length === 0) return null;
+      return applyLockOverrides(parsed);
+    } catch (err) {
+      console.warn('[verticalService] Failed to parse cached verticals:', err);
+      return null;
+    }
+  },
+
+  /**
    * Fetches all verticals from the database.
    * Sorts by display_order to ensure consistent sidebar rendering.
    */

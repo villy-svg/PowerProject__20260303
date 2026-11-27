@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { 
   IconEdit, 
   IconDelete, 
@@ -58,12 +58,17 @@ const TaskTreeView = ({
 }) => {
   const [expandedIds, setExpandedIds] = useState(new Set());
 
+  // Pre-index tasks once per tasks-array change for O(1) ancestor lookups during render
+  const allTasksMap = useMemo(
+    () => new Map((tasks || []).map(item => [item.id, item])),
+    [tasks]
+  );
+
   // Auto-expand tree to show current user's tasks
   React.useEffect(() => {
     if (!currentUser || !tasks || tasks.length === 0) return;
 
     const newExpanded = new Set();
-    const taskMap = new Map(tasks.map(t => [t.id, t]));
 
     // Find tasks assigned to "YOU"
     const myTasks = tasks.filter(t => {
@@ -72,19 +77,17 @@ const TaskTreeView = ({
              (currentUser.id && assignedTo.includes(currentUser.id));
     });
 
-    // Trace back all ancestors for each of my tasks
+    // Trace back all ancestors for each of my tasks (cycle-safe & depth-capped via shared walkAncestors)
     myTasks.forEach(task => {
-      let curr = task;
-      while (curr.parentTask && taskMap.has(curr.parentTask)) {
-        newExpanded.add(curr.parentTask);
-        curr = taskMap.get(curr.parentTask);
-      }
+      hierarchyUtils.walkAncestors(task, allTasksMap, (parent) => {
+        newExpanded.add(parent.id);
+      });
     });
 
     if (newExpanded.size > 0) {
       setExpandedIds(prev => new Set([...prev, ...newExpanded]));
     }
-  }, [currentUser, tasks]);
+  }, [currentUser, tasks, allTasksMap]);
 
   const toggleExpand = (id, e) => {
     e.stopPropagation();
@@ -140,9 +143,9 @@ const TaskTreeView = ({
 
     // 1. Find the root of this task's branch to determine if it's a tree or standalone
     let root = task;
-    while (root.parentTask && taskMap.has(root.parentTask)) {
-      root = taskMap.get(root.parentTask);
-    }
+    hierarchyUtils.walkAncestors(task, taskMap, (parent) => {
+      root = parent;
+    });
 
     if (isRework) {
       reworkTasks.push(task);
@@ -477,18 +480,6 @@ const TaskTreeView = ({
     );
   };
 
-  // Filter out tasks whose ancestors are collapsed
-  const visibleTasks = treeTasks.filter(task => {
-    let curr = task;
-    const taskMap = new Map(tasks.map(t => [t.id, t]));
-    while (curr.parentTask) {
-      if (!expandedIds.has(curr.parentTask)) return false;
-      curr = taskMap.get(curr.parentTask);
-      if (!curr) break;
-    }
-    return true;
-  });
-
   return (
     <div className="task-tree-view">
       <div className="list-task-container">
@@ -502,16 +493,9 @@ const TaskTreeView = ({
         {projectTreeTasks.length > 0 && (
           <div className="tree-group-section">
             <h5 className="tree-group-header">Integrated Project Trees</h5>
-            {projectTreeTasks.filter(t => {
-              let curr = t;
-              const taskMap = new Map(tasks.map(t => [t.id, t]));
-              while (curr.parentTask) {
-                if (!expandedIds.has(curr.parentTask)) return false;
-                curr = taskMap.get(curr.parentTask);
-                if (!curr) break;
-              }
-              return true;
-            }).map(renderNode)}
+            {projectTreeTasks.filter(t =>
+              hierarchyUtils.areAncestorsExpanded(t, allTasksMap, expandedIds)
+            ).map(renderNode)}
           </div>
         )}
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { ROLE_SCOPES, ROLE_LEVELS } from '../../constants/roles';
 import { VERTICAL_LIST, isVerticalForceLocked } from '../../constants/verticals';
 import { VERTICAL_FEATURES } from '../../constants/verticalFeatures';
+import { MASTER_ROLE_ACCESS, normalizeContextName } from '../../constants/rbacCatalog';
 import { LEVEL_RANKS } from './useUserManagement';
 import { IconX } from '../ui/Icons';
 import RoleTooltip from '../ui/RoleTooltip';
@@ -35,18 +36,6 @@ const UserEditorModal = (props) => {
   const { shellType } = useLayoutShell();
   const isMobile = shellType === 'mobile';
 
-  const mapVerticalLabel = (label) => {
-    if (!label) return '';
-    const clean = label.trim().toLowerCase();
-    if (clean === 'hub manager' || clean === 'hub') return 'Hubs';
-    if (clean === 'client manager' || clean === 'client') return 'Clients';
-    if (clean === 'employee manager' || clean === 'employee') return 'Employees';
-    if (clean === 'partner manager' || clean === 'partner') return 'Partners';
-    if (clean === 'vendor manager' || clean === 'vendor') return 'Vendors';
-    if (clean === 'data manager' || clean === 'data') return 'Data';
-    return label;
-  };
-
   // On mobile, show single-letter abbreviations (N/V/C/E/A) to prevent horizontal overflow
   const formatLevelLabel = (lvl) => {
     if (!isMobile) return lvl.toUpperCase();
@@ -54,6 +43,10 @@ const UserEditorModal = (props) => {
   };
 
   if (!user) return null;
+
+  const masterMeta = roleScope === 'master'
+    ? (MASTER_ROLE_ACCESS[roleLevel] || MASTER_ROLE_ACCESS.viewer)
+    : null;
 
   return (
     <div className="edit-modal-overlay">
@@ -97,17 +90,23 @@ const UserEditorModal = (props) => {
               <label className="section-label">1. Select Access Scope</label>
               <div className="config-options">
                 {ROLE_SCOPES.map(scope => (
-                  <div 
-                    key={scope.id} 
-                    className={`config-card ${roleScope === scope.id ? 'active' : ''}`}
-                    onClick={() => setRoleScope(scope.id)}
+                  <RoleTooltip
+                    key={scope.id}
+                    tooltipType="scope"
+                    level={scope.id}
+                    fullWidth={true}
                   >
-                    <div className="radio-circle"></div>
-                    <div className="config-info">
-                      <span className="config-name">{scope.label}</span>
-                      <span className="config-desc">{scope.description}</span>
+                    <div
+                      className={`config-card ${roleScope === scope.id ? 'active' : ''}`}
+                      onClick={() => setRoleScope(scope.id)}
+                    >
+                      <div className="radio-circle"></div>
+                      <div className="config-info">
+                        <span className="config-name">{scope.label}</span>
+                        <span className="config-desc">{scope.description}</span>
+                      </div>
                     </div>
-                  </div>
+                  </RoleTooltip>
                 ))}
               </div>
             </div>
@@ -117,17 +116,23 @@ const UserEditorModal = (props) => {
               <label className="section-label">2. Select Capability Level</label>
               <div className="config-options">
                 {ROLE_LEVELS.map(level => (
-                  <div 
-                    key={level.id} 
-                    className={`config-card ${roleLevel === level.id ? 'active' : ''}`}
-                    onClick={() => onLevelChange(level.id)}
+                  <RoleTooltip
+                    key={level.id}
+                    tooltipType={roleScope === 'master' ? 'master' : 'level'}
+                    level={level.id}
+                    fullWidth={true}
                   >
-                    <div className="radio-circle"></div>
-                    <div className="config-info">
-                      <span className="config-name">{level.label}</span>
-                      <span className="config-desc">{level.description}</span>
+                    <div
+                      className={`config-card ${roleLevel === level.id ? 'active' : ''}`}
+                      onClick={() => onLevelChange(level.id)}
+                    >
+                      <div className="radio-circle"></div>
+                      <div className="config-info">
+                        <span className="config-name">{level.label}</span>
+                        <span className="config-desc">{level.description}</span>
+                      </div>
                     </div>
-                  </div>
+                  </RoleTooltip>
                 ))}
               </div>
             </div>
@@ -156,7 +161,7 @@ const UserEditorModal = (props) => {
                               <span className={`chevron ${expandedVertical === v.id ? 'up' : 'down'}`}></span>
                             </button>
                           )}
-                          <span className="v-name">{mapVerticalLabel(v.label)}</span>
+                          <span className="v-name">{normalizeContextName(v.label)}</span>
                         </div>
                         
                         <div className="v-level-selector">
@@ -168,7 +173,7 @@ const UserEditorModal = (props) => {
                               <RoleTooltip
                                 key={lvl}
                                 level={lvl}
-                                contextName={mapVerticalLabel(v.label)}
+                                contextName={normalizeContextName(v.label)}
                                 isFeature={false}
                               >
                                 <button
@@ -188,7 +193,7 @@ const UserEditorModal = (props) => {
 
                         {expandedVertical === v.id && visibleFeatures.length > 0 && (
                         <div className="features-dropdown">
-                          <p className="features-header">Configure feature-specific levels for {mapVerticalLabel(v.label)}:</p>
+                          <p className="features-header">Configure feature-specific levels for {normalizeContextName(v.label)}:</p>
                           <div className="features-level-list">
                             {visibleFeatures.map(feature => {
                               // fLevelRaw is the explicit DB row value (undefined = no override)
@@ -262,9 +267,32 @@ const UserEditorModal = (props) => {
             </div>
           )}
 
-          {roleScope === 'master' && (
-            <div className="master-scope-notice highlight-box">
-              <p>✨ <strong>Master Scope</strong> grants automatic read/write access to all current and future verticals.</p>
+          {masterMeta && (
+            <div className="master-scope-notice">
+              <p className="master-scope-notice__headline">
+                ✨ <strong>{masterMeta.headline}</strong>
+              </p>
+              <p className="master-scope-notice__summary">{masterMeta.summary}</p>
+              {masterMeta.can?.length > 0 && (
+                <ul className="role-tooltip-list role-tooltip-list--can">
+                  {masterMeta.can.map((item, idx) => (
+                    <li key={idx}>
+                      <span className="perm-icon perm-icon--yes">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {masterMeta.cannot?.length > 0 && (
+                <ul className="role-tooltip-list role-tooltip-list--cannot">
+                  {masterMeta.cannot.map((item, idx) => (
+                    <li key={idx}>
+                      <span className="perm-icon perm-icon--no">✕</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

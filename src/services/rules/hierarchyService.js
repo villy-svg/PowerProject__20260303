@@ -1,5 +1,6 @@
 import { MANAGER_SENIORITY_THRESHOLD } from '../../constants/roles';
 import { canReviewEmployeeRequests, isEmployeeApprovalTask } from '../employees/employeeRequestService';
+import { MAX_HIERARCHY_DEPTH } from '../../utils/hierarchyUtils';
 
 /**
  * Hierarchy Service
@@ -88,11 +89,13 @@ export const hierarchyService = {
       // 2. Identify and include all ancestors of direct matches to provide context
       directMatches.forEach(task => {
         let curr = task;
-        // Ascend the tree
-        while (curr.parentTask && taskMap.has(curr.parentTask)) {
+        let depth = 0;
+        // Ascend the tree (cycle-safe & depth-capped to MAX_HIERARCHY_DEPTH)
+        while (curr.parentTask && taskMap.has(curr.parentTask) && depth < MAX_HIERARCHY_DEPTH) {
           curr = taskMap.get(curr.parentTask);
           if (allVisibleTaskIds.has(curr.id)) break; // Already processed this path
           allVisibleTaskIds.add(curr.id);
+          depth += 1;
         }
       });
 
@@ -129,13 +132,16 @@ export const hierarchyService = {
       }
     });
 
-    const countRecursive = (id) => {
-      const children = taskMap.get(id) || [];
+    const visited = new Set([taskId]);
+    const countRecursive = (id, depth = 0) => {
+      if (depth >= MAX_HIERARCHY_DEPTH) return { total: 0, completed: 0 };
+      const children = (taskMap.get(id) || []).filter(c => !visited.has(c.id));
       let total = children.length;
       let completed = children.filter(c => c.stageId === 'COMPLETED').length;
       
       children.forEach(child => {
-        const stats = countRecursive(child.id);
+        visited.add(child.id);
+        const stats = countRecursive(child.id, depth + 1);
         total += stats.total;
         completed += stats.completed;
       });
@@ -143,7 +149,7 @@ export const hierarchyService = {
       return { total, completed };
     };
 
-    return countRecursive(taskId);
+    return countRecursive(taskId, 0);
   },
 
   /**

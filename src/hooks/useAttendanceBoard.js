@@ -71,12 +71,42 @@ export function useAttendanceBoard(user, defaultStatus = null) {
   // Fetch active employees once per user session (used for both board & search)
   // ---------------------------------------------------------------------------
   const loadEmployees = useCallback(async () => {
-    const isViewer = user?.roleId === 'master_viewer' || user?.verticalPermissions?.['EMPLOYEES']?.level === 'viewer';
-    const isRestricted = (user?.seniority || 0) <= MANAGER_SENIORITY_THRESHOLD || isViewer;
+    if (!user) return;
+
+    // RBAC-only scoping (seniority threshold removed):
+    //   - Global non-viewer roles & EMPLOYEES admin/editor see all active employees.
+    //   - EMPLOYEES viewer / master_viewer are restricted to self-only (matches daily_attendances RLS).
+    //   - EMPLOYEES contributor managers see their entire downward reporting tree (self + reportees).
+    const roleId = user?.roleId || '';
+    const empVerticalLevel = user?.verticalPermissions?.['EMPLOYEES']?.level || 'none';
+    const isMasterNonViewer = roleId.startsWith('master_') && roleId !== 'master_viewer';
+    const isViewer =
+      roleId === 'master_viewer' ||
+      (!isMasterNonViewer && (empVerticalLevel === 'viewer' || empVerticalLevel === 'none'));
+    const hasOrgWideScope =
+      isMasterNonViewer || empVerticalLevel === 'admin' || empVerticalLevel === 'editor';
+
     const filters = {};
 
-    if (isRestricted && user?.employeeId) {
+    if (isViewer) {
+      if (!user?.employeeId) {
+        setAllEmployees([]);
+        return;
+      }
       filters.employeeId = user.employeeId;
+    } else if (!hasOrgWideScope) {
+      // Contributor scope: include self + all direct/indirect downward reportees regardless of seniority
+      const treeIds = Array.isArray(user?.reporteeEmployeeIds)
+        ? user.reporteeEmployeeIds.filter(Boolean)
+        : [];
+      if (treeIds.length > 0) {
+        filters.employeeIds = treeIds;
+      } else if (user?.employeeId) {
+        filters.employeeId = user.employeeId;
+      } else {
+        setAllEmployees([]);
+        return;
+      }
     }
 
     const [empRes, hubsRes] = await Promise.all([

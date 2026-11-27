@@ -21,3 +21,16 @@ Rules for ensuring data integrity, security, and proper access control across th
 ## 5. Locked Verticals & Features
 - **Hidden in User Management**: Locked verticals (`src/constants/verticals.js`) and locked features (`src/constants/verticalFeatures.js`) MUST NOT be shown in User Management UI (`UserEditorModal` / `UserList`).
 - **Default `'none'`**: All locked verticals and locked features MUST default to and sync as `'none'`. Do NOT work on locked verticals/features until explicitly unlocked (see `locked-verticals-and-features.md`).
+
+## 6. MANDATORY RBAC Tooltip & Capability Catalog Sync (CRITICAL — ZERO DRIFT)
+- **Single Source of Truth**: `src/constants/rbacCatalog.js` is the **sole source of truth** for all RBAC tooltip copy (`RoleTooltip.jsx`), Master role capability summaries (`UserEditorModal.jsx`), and `BoardRBACModal` label aliases. NEVER hardcode permission descriptions directly inside UI components.
+- **Blocking Pre-Completion Gate**: ANY change that adds, modifies, or removes:
+  - A `useRBAC.js` flag or `roles.js` capability,
+  - A frontend role/permission guard (`permissions.can*`, `user.roleId === 'master_admin'`, `canReview*`, `canMark*`, etc.),
+  - A Sphere of Influence / seniority / reporting-tree visibility rule (`hierarchyService.js`, `useAttendanceBoard.js`, etc.),
+  - A Maker-Checker or approval workflow (`employeeRequestService.js`, `unmarkedAttendanceTaskService.js`, etc.),
+  - A Supabase RLS policy or `SECURITY DEFINER` RPC authorization check, or
+  - A new `RBACManageButton` / `BoardRBACModal` `label` or `titleLabel`
+  **MUST** update `src/constants/rbacCatalog.js` in the **same change** before the task is considered complete.
+- **No Silent Generic Fallbacks**: Every `label` / `titleLabel` passed to `RBACManageButton` or `BoardRBACModal` MUST resolve to a canonical key in `RAW_CONTEXT` (via `CONTEXT_ALIASES` / `normalizeContextName()`).
+- **Mandatory Skill**: Before finishing any RBAC-touching task, follow `.agent/skills/rbac-documentation-sync/SKILL.md`.

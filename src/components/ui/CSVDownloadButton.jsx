@@ -1,5 +1,4 @@
-import React from 'react';
-import ExcelJS from 'exceljs';
+import React, { useState } from 'react';
 
 /**
  * CSVDownloadButton — Master Export/Template Downloader
@@ -34,26 +33,34 @@ const CSVDownloadButton = ({
   validationRows = 100,
   style = {},
 }) => {
-  const handleDownload = async () => {
-    // 1. Resolve data rows
-    let exportData = sampleRows;
-    if (typeof onDownload === 'function') {
-      try {
-        const dynamicData = await onDownload();
-        if (dynamicData && Array.isArray(dynamicData)) {
-          exportData = dynamicData;
-        }
-      } catch (err) {
-        console.error('CSV Data Preparation Error:', err);
-        alert('Failed to prepare data for download.');
-        return;
-      }
-    }
+  const [isDownloading, setIsDownloading] = useState(false);
 
-    if (format === 'xlsx') {
-      await downloadXLSX(exportData);
-    } else {
-      downloadCSV(exportData);
+  const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      // 1. Resolve data rows
+      let exportData = sampleRows;
+      if (typeof onDownload === 'function') {
+        try {
+          const dynamicData = await onDownload();
+          if (dynamicData && Array.isArray(dynamicData)) {
+            exportData = dynamicData;
+          }
+        } catch (err) {
+          console.error('CSV Data Preparation Error:', err);
+          alert('Failed to prepare data for download.');
+          return;
+        }
+      }
+
+      if (format === 'xlsx') {
+        await downloadXLSX(exportData);
+      } else {
+        downloadCSV(exportData);
+      }
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -73,44 +80,52 @@ const CSVDownloadButton = ({
   };
 
   const downloadXLSX = async (exportData) => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(worksheetName);
+    try {
+      // Lazy-load ExcelJS on demand so the heavy spreadsheet library is excluded from initial boot
+      const excelMod = await import('exceljs');
+      const ExcelJS = excelMod.default || excelMod;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(worksheetName);
 
-    // Define columns
-    worksheet.columns = headers.map((h) => ({ header: h, key: h, width: 25 }));
+      // Define columns
+      worksheet.columns = headers.map((h) => ({ header: h, key: h, width: 25 }));
 
-    // Add data rows
-    exportData.forEach((row) => worksheet.addRow(row));
+      // Add data rows
+      exportData.forEach((row) => worksheet.addRow(row));
 
-    // Header styling
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE0E0E0' },
-    };
+      // Header styling
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' },
+      };
 
-    // Column dropdowns / data validation
-    if (validations.length > 0) {
-      for (let i = 2; i <= validationRows + 1; i++) {
-        validations.forEach(({ colLetter, values = [] }) => {
-          if (!values.length) return;
-          worksheet.getCell(`${colLetter}${i}`).dataValidation = {
-            type: 'list',
-            allowBlank: true,
-            formulae: [`"${values.join(',')}"`],
-          };
-        });
+      // Column dropdowns / data validation
+      if (validations.length > 0) {
+        for (let i = 2; i <= validationRows + 1; i++) {
+          validations.forEach(({ colLetter, values = [] }) => {
+            if (!values.length) return;
+            worksheet.getCell(`${colLetter}${i}`).dataValidation = {
+              type: 'list',
+              allowBlank: true,
+              formulae: [`"${values.join(',')}"`],
+            };
+          });
+        }
       }
-    }
 
-    // Trigger download
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-    const finalFilename = filename || `${worksheetName.toLowerCase()}_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-    triggerDownload(blob, finalFilename);
+      // Trigger download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const finalFilename = filename || `${worksheetName.toLowerCase()}_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+      triggerDownload(blob, finalFilename);
+    } catch (err) {
+      console.error('XLSX Export Error:', err);
+      alert('Failed to generate Excel file. Please try again.');
+    }
   };
 
   const triggerDownload = (blob, name) => {
@@ -130,8 +145,9 @@ const CSVDownloadButton = ({
       onClick={handleDownload}
       title={`Download ${filename || label}`}
       style={style}
+      disabled={isDownloading}
     >
-      {label}
+      {isDownloading ? 'Preparing...' : label}
     </button>
   );
 };

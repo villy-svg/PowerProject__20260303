@@ -10,6 +10,12 @@
   display: inline-flex;
 }
 
+/* Block modifier for full-width cards (e.g. Step 1/Step 2 cards in UserEditorModal) */
+.role-tooltip-anchor--block {
+  display: block;
+  width: 100%;
+}
+
 /* ==========================================================================
    Tooltip panel — position:fixed, coordinates set by JS via inline style.
    Transform positions it ABOVE & centred on the anchor button.
@@ -19,10 +25,10 @@
   /* JS sets top = rect.top (above) or rect.bottom (below).
      Default: shift UP by own height + 12px gap so bottom-of-tooltip = top-of-button - 12px */
   transform: translateX(-50%) translateY(calc(-100% - 12px));
-  width: 240px;
+  width: 280px;
   z-index: 99999;
 
-  background: color-mix(in srgb, var(--bg-color, var(--bg-color)), white 5%);
+  background: color-mix(in srgb, var(--bg-color), white 5%);
   border: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-radius: 12px;
   padding: 12px;
@@ -93,7 +99,7 @@
 .role-tooltip-headline {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--text-color, var(--text-color));
+  color: var(--text-color);
   line-height: 1.2;
 }
 
@@ -145,11 +151,11 @@
 }
 
 .perm-icon--yes {
-  color: var(--status-success, var(--status-success));
+  color: var(--status-success);
 }
 
 .perm-icon--no {
-  color: var(--status-danger, var(--status-danger));
+  color: var(--status-danger);
   opacity: 0.7;
 }
 
@@ -157,7 +163,7 @@
 .role-tooltip-list--cannot li {
   opacity: 0.55;
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--status-danger, var(--status-danger)), transparent 55%);
+  text-decoration-color: color-mix(in srgb, var(--status-danger), transparent 55%);
   text-decoration-thickness: 1px;
 }
 
@@ -180,7 +186,7 @@
   transform: translateX(-50%) rotate(45deg);
   width: 9px;
   height: 9px;
-  background: color-mix(in srgb, var(--bg-color, var(--bg-color)), white 5%);
+  background: color-mix(in srgb, var(--bg-color), white 5%);
   border-right: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
   border-bottom: 1px solid color-mix(in srgb, var(--tooltip-accent, var(--brand-green)), transparent 55%);
 }

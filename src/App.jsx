@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useTheme } from './theme/useTheme';
 import './App.css';
 import './components/layout/Header.css';
@@ -6,7 +6,6 @@ import './components/layout/Header.css';
 // Services — Core
 import { verticalService } from './services/core/verticalService';
 import { authService } from './services/auth/authService';
-import { masterErrorHandler } from './services/core/masterErrorHandler';
 
 // Hooks
 import { useAuth } from './app/contexts/AuthContext';
@@ -29,12 +28,12 @@ import { DEFAULT_ROLE_PERMISSIONS } from './constants/roles';
 import { APP_VERSION } from './constants/appVersion';
 
 import Login from './components/auth/Login';
-import PublicSupportForm from './components/public/PublicSupportForm';
 import PendingActivation from './components/auth/PendingActivation';
 import ProfileNameSetup from './components/auth/ProfileNameSetup';
 import OnlineSyncBanner from './components/ui/OnlineSyncBanner';
 import TutorialSlideshowViewer from './features/tutorials/TutorialSlideshowViewer';
-import { TUTORIAL_FLOWS } from './features/tutorials/TutorialHub';
+// Import TUTORIAL_FLOWS directly from flows.js so TutorialHub stays code-split
+import { TUTORIAL_FLOWS } from './features/tutorials/flows';
 import { buildRuleFlow } from './features/tutorials/tutorialUtils';
 import { fetchRules } from './services/employees/rulesService';
 import {
@@ -46,6 +45,9 @@ import OTAUpdateToast from './components/ota/OTAUpdateToast';
 import OTARestartModal from './components/ota/OTARestartModal';
 import { otaUpdateService } from './services/core/otaUpdateService';
 import { OTAContextProvider } from './app/contexts/OTAContext';
+
+// Lazy-load public-only QR support route so it doesn't bloat authenticated initial boot
+const PublicSupportForm = lazy(() => import('./components/public/PublicSupportForm'));
 
 // TanStack Query Imports
 import { QueryClient } from '@tanstack/react-query';
@@ -444,12 +446,32 @@ function App() {
     fetchUserProfile,
   } = useAuth();
   
-  const [verticals, setVerticals] = useState(STATIC_VERTICALS);
-  const [verticalList, setVerticalList] = useState(STATIC_VERTICAL_LIST);
+  // Seed verticals from localStorage cache (or static defaults) so boot never blocks on verticals fetch
+  const [verticalState, setVerticalState] = useState(() => {
+    const cached = verticalService.getCachedVerticals();
+    if (cached?.list?.length > 0 && cached?.map) {
+      return { map: cached.map, list: cached.list };
+    }
+    return { map: STATIC_VERTICALS, list: STATIC_VERTICAL_LIST };
+  });
+  const { map: verticals, list: verticalList } = verticalState;
 
-  // Unified Initial Data Load
+  // Keep static vertical registry synchronized whenever verticalList changes
   useEffect(() => {
+    if (verticalList && verticalList.length > 0) {
+      updateStaticVerticals(verticalList);
+    }
+  }, [verticalList]);
+
+  // Unified Initial Data Load (auth + profile block boot; verticals refresh in background)
+  useEffect(() => {
+    let cancelled = false;
+
     const initAppData = async () => {
+      const bootStart = performance.now();
+      let getSessionMs = null;
+      let fetchProfileMs = null;
+
       try {
         // --- Cache Auto-Clean Logic ---
         const cachedVersion = localStorage.getItem('last_app_version');
@@ -467,34 +489,53 @@ function App() {
         }
         // ------------------------------
 
-        const [vResult, sessionData] = await Promise.all([
-          verticalService.getVerticals().catch(err => {
-            console.warn('Falling back to static verticals.', err);
-            return { list: null, map: null };
-          }),
-          authService.getSession()
-        ]);
-        if (vResult.list && vResult.list.length > 0) {
-          setVerticals(vResult.map);
-          setVerticalList(vResult.list);
-          updateStaticVerticals(vResult.list);
-        }
+        // Refresh verticals in the background without blocking splash screen exit
+        const verticalsStart = performance.now();
+        verticalService.getVerticals()
+          .then((vResult) => {
+            const verticalsMs = Math.round(performance.now() - verticalsStart);
+            console.info(`[Perf:Boot] getVerticals (background): ${verticalsMs}ms`);
+            if (!cancelled && vResult?.list && vResult.list.length > 0) {
+              setVerticalState({ map: vResult.map, list: vResult.list });
+              updateStaticVerticals(vResult.list);
+            }
+          })
+          .catch((err) => {
+            console.warn('Falling back to cached/static verticals.', err);
+          });
+
+        const sessionStart = performance.now();
+        const sessionData = await authService.getSession();
+        getSessionMs = Math.round(performance.now() - sessionStart);
+
+        if (cancelled) return;
         setSession(sessionData);
+
         if (sessionData) {
+          const profileStart = performance.now();
           await fetchUserProfile(sessionData.user.id);
+          fetchProfileMs = Math.round(performance.now() - profileStart);
         }
       } catch (err) {
         console.error('App Initialization Error:', err);
       } finally {
-        setIsAppInitializing(false);
+        if (!cancelled) {
+          const totalBlockingInitMs = Math.round(performance.now() - bootStart);
+          console.info('[Perf:Boot] Startup timings:', {
+            getSessionMs,
+            fetchProfileMs,
+            totalBlockingInitMs,
+          });
+          setIsAppInitializing(false);
+        }
       }
     };
     initAppData();
-  }, [fetchUserProfile, setIsAppInitializing, setSession]);
 
-  useEffect(() => {
-    masterErrorHandler.testDatabaseConnection();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchUserProfile, setIsAppInitializing, setSession]);
 
   useEffect(() => {
     const requestLocationOnStartup = async () => {
@@ -515,7 +556,11 @@ function App() {
   // Must be FIRST — before loading screen and before session check.
   // Anonymous QR code users must never see the login page.
   if (window.location.hash.startsWith('#/support')) {
-    return <PublicSupportForm />;
+    return (
+      <Suspense fallback={<div className="loading-screen-layout"><p>Loading support form...</p></div>}>
+        <PublicSupportForm />
+      </Suspense>
+    );
   }
 
   if (isAppInitializing) {

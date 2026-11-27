@@ -16,6 +16,7 @@
  * Mirrors: src/services/employees/employeeRequestService.js
  */
 import { supabase } from '../core/supabaseClient';
+import { getMinLevel } from '../../constants/roles';
 
 export const ATTENDANCE_TASK_TYPES = {
   CONSECUTIVE_WEEKOFF: 'CONSECUTIVE_WEEKOFF_ESCALATION',
@@ -96,20 +97,114 @@ export const getSubjectAttendanceWarningText = (task) => {
 };
 
 /**
+ * Computes the user's effective Attendance Board permission level as the
+ * intersection (minimum) of the EMPLOYEES vertical level and the
+ * canAccessEmployeeAttendanceBoard feature override.
+ * Master roles resolve directly to their global tier.
+ */
+export const getEffectiveAttendanceBoardLevel = (user) => {
+  if (!user) return 'none';
+  if (user.roleId === 'master_admin') return 'admin';
+  if (user.roleId === 'master_editor') return 'editor';
+  if (user.roleId === 'master_contributor') return 'contributor';
+  if (user.roleId === 'master_viewer') return 'viewer';
+  const empPerm = user.verticalPermissions?.EMPLOYEES;
+  const verticalLevel = empPerm?.level || 'none';
+  // Nullish coalesce respects explicit 'none' overrides while allowing inherited access
+  const rawFeatureLevel = empPerm?.features?.canAccessEmployeeAttendanceBoard ?? verticalLevel;
+  return getMinLevel(verticalLevel, rawFeatureLevel);
+};
+
+/**
+ * True when the user holds effective Contributor, Editor, or Admin access on
+ * Employees -> Attendance Board (blocks Viewer and None roles).
+ */
+export const hasAttendanceBoardContributorAccess = (user) => {
+  const effectiveLevel = getEffectiveAttendanceBoardLevel(user);
+  return effectiveLevel === 'contributor' || effectiveLevel === 'editor' || effectiveLevel === 'admin';
+};
+
+/**
+ * True when the user holds effective Editor or Admin access on
+ * Employees -> Attendance Board (intersection of EMPLOYEES vertical level
+ * and canAccessEmployeeAttendanceBoard feature override).
+ * Blocks Viewer, Contributor, and None roles.
+ */
+export const hasAttendanceBoardEditorAccess = (user) => {
+  const effectiveLevel = getEffectiveAttendanceBoardLevel(user);
+  return effectiveLevel === 'editor' || effectiveLevel === 'admin';
+};
+
+/**
+ * True when the logged-in user is a strict upward reporting manager
+ * (ancestor in the employees.manager_id hierarchy) of either the subject
+ * employee or a current assignee on this attendance closure task.
+ * Excludes the user's own employeeId (which profileService includes in reporteeEmployeeIds).
+ */
+export const isUpwardManagerOfAttendanceTask = (task, user) => {
+  if (!task || !user || !isAttendanceClosureTask(task)) return false;
+  const userEmpId = user.employeeId || user.employee_id;
+  if (!userEmpId) return false;
+  const reporteeEmpIds = user.reporteeEmployeeIds || [];
+  if (reporteeEmpIds.length === 0) return false;
+
+  const userEmpIdStr = String(userEmpId);
+  const descendantSet = new Set(
+    reporteeEmpIds.map((id) => String(id)).filter((id) => id !== userEmpIdStr)
+  );
+  if (descendantSet.size === 0) return false;
+
+  const subjectEmpId = task.metadata?.employee_id;
+  if (subjectEmpId && descendantSet.has(String(subjectEmpId))) return true;
+
+  const assignees = [];
+  if (Array.isArray(task.assigned_to)) assignees.push(...task.assigned_to);
+  else if (task.assigned_to) assignees.push(task.assigned_to);
+  if (task.assignedTo) assignees.push(task.assignedTo);
+  if (Array.isArray(task.assigneeIds)) assignees.push(...task.assigneeIds);
+
+  return assignees.some((id) => id && descendantSet.has(String(id)));
+};
+
+/**
  * True when the user can act as Maker (submit non-present status) on a
  * BACKLOG attendance closure task. Blocks subject-employee self-marking
  * (unless master_admin).
+ * - All non-master_admin Maker paths (direct reporting manager, EMPLOYEES admin,
+ *   upward reporting manager) require at least Contributor access on
+ *   Employees -> Attendance Board (blocking Viewer/None and downgraded admins).
+ * - Upward reporting managers (within MAX_HIERARCHY_DEPTH = 10 hops) may act
+ *   as Maker ONLY if they hold effective Editor+ access on Attendance Board.
  */
 export const canMarkAttendanceTask = (task, user) => {
   if (!task || !user || !isAttendanceClosureTask(task)) return false;
   if (task.stageId !== 'BACKLOG') return false;
   if (user.roleId === 'master_admin') return true;
   if (isSubjectEmployeeOfAttendanceTask(task, user)) return false;
+
+  // All non-master_admin Maker paths require effective Attendance Board Contributor+
+  const attendanceLevel = getEffectiveAttendanceBoardLevel(user);
+  if (attendanceLevel !== 'contributor' && attendanceLevel !== 'editor' && attendanceLevel !== 'admin') {
+    return false;
+  }
+
   if (user.verticalPermissions?.EMPLOYEES?.level === 'admin') return true;
   const userEmpId = user.employeeId || user.employee_id;
   if (!userEmpId) return false;
-  if (task.assignedTo === userEmpId || task.assigned_to === userEmpId) return true;
-  if (Array.isArray(task.assigneeIds) && task.assigneeIds.includes(userEmpId)) return true;
+  const userEmpIdStr = String(userEmpId);
+  if (
+    (task.assignedTo && String(task.assignedTo) === userEmpIdStr) ||
+    (task.assigned_to && String(task.assigned_to) === userEmpIdStr)
+  ) {
+    return true;
+  }
+  if (Array.isArray(task.assigneeIds) && task.assigneeIds.some((id) => String(id) === userEmpIdStr)) {
+    return true;
+  }
+  // Upward reporting manager with effective Attendance Board Editor+ access
+  if ((attendanceLevel === 'editor' || attendanceLevel === 'admin') && isUpwardManagerOfAttendanceTask(task, user)) {
+    return true;
+  }
   return false;
 };
 
@@ -166,21 +261,18 @@ export const isAttendanceClosureVisibleToUser = (task, user) => {
   if (isSubjectEmployeeOfAttendanceTask(task, user)) return true;
   if (user.roleId === 'master_admin') return true;
   if (canReviewAttendanceTask(task, user)) return true;
+  if (isUpwardManagerOfAttendanceTask(task, user)) return true;
 
-  const reporteeEmpIds = user.reporteeEmployeeIds || [];
-  if (reporteeEmpIds.length > 0) {
-    const subjectEmpId = task.metadata?.employee_id;
-    const assignees = Array.isArray(task.assigned_to)
-      ? task.assigned_to
-      : (task.assigned_to ? [task.assigned_to] : (task.assignedTo ? [task.assignedTo] : []));
-    if (
-      (subjectEmpId && reporteeEmpIds.includes(subjectEmpId)) ||
-      assignees.some((id) => reporteeEmpIds.includes(id))
-    ) {
-      return true;
-    }
-  }
-  return false;
+  // Direct assignee visibility fallback (matches pre-refactor behavior when reporteeEmployeeIds included self)
+  const userEmpId = user.employeeId || user.employee_id;
+  if (!userEmpId) return false;
+  const userEmpIdStr = String(userEmpId);
+  const assignees = [];
+  if (Array.isArray(task.assigned_to)) assignees.push(...task.assigned_to);
+  else if (task.assigned_to) assignees.push(task.assigned_to);
+  if (task.assignedTo) assignees.push(task.assignedTo);
+  if (Array.isArray(task.assigneeIds)) assignees.push(...task.assigneeIds);
+  return assignees.some((id) => id && String(id) === userEmpIdStr);
 };
 
 /**

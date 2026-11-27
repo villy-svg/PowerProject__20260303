@@ -3,6 +3,7 @@ import { hierarchyService } from '../../services/rules/hierarchyService';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { IconEye, IconBoards, IconAlertCircle, IconBulb, IconWarning, IconClock } from '../ui/Icons';
 import { taskUtils } from '../../utils/taskUtils';
+import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { useMobileLongPress } from '../../app/contexts/MobileLongPressContext';
 import './ExecutiveSummary.css';
 
@@ -449,19 +450,17 @@ const ExecutiveSummary = ({ tasks = [], user, permissions = {}, verticals = {}, 
   const assignedCentralisedTasks = centralisedTasksProp.filter(t => taskUtils.isAssignee(t, user) || isCreator(t));
 
   // regularMyTasks matches exactly what CentralisedTaskBoard renders
+  const centralisedTasksMap = new Map(centralisedTasksProp.map(pt => [pt.id, pt]));
   const regularMyTasks = assignedCentralisedTasks.filter(t => {
     if (!['BACKLOG', 'IN_PROGRESS', 'REVIEW'].includes(t.stageId)) return false;
-    
-    let current = t;
-    while (current.parentTask) {
-      const parent = centralisedTasksProp.find(pt => pt.id === current.parentTask);
-      if (!parent) break;
+    let hasVisibleAncestor = false;
+    hierarchyUtils.walkAncestors(t, centralisedTasksMap, (parent) => {
       if (taskUtils.isAssignee(parent, user) || isCreator(parent)) {
+        hasVisibleAncestor = true;
         return false;
       }
-      current = parent;
-    }
-    return true;
+    });
+    return !hasVisibleAncestor;
   });
   const hasEscalations = escalationTasks.length > 0;
 

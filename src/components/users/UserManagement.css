@@ -1038,3 +1038,29 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* ── Master Scope Notice (Dynamic capability summary in UserEditorModal) ── */
+/* Permission list/icon classes (.role-tooltip-list, .perm-icon) are reused from RoleTooltip.css */
+.master-scope-notice {
+  margin: 0 20px 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--brand-amber), transparent 60%);
+  background: color-mix(in srgb, var(--brand-amber), transparent 93%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.master-scope-notice__headline {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-color);
+}
+
+.master-scope-notice__summary {
+  margin: 0;
+  font-size: 0.76rem;
+  color: color-mix(in srgb, var(--text-color), transparent 30%);
+  line-height: 1.4;
+}

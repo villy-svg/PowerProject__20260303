@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { IconSun, IconMoon, IconCoffee, IconFile } from '../../../components/ui/Icons';
 import BaseDropdown from '../../../components/ui/BaseDropdown';
 import {
@@ -67,6 +67,8 @@ const AttendanceMobileList = ({
 
   // Dual-mode mobile view: Managers default to 'by-day' roll-call; restricted viewers open 'by-employee'
   const [mobileMode, setMobileMode] = useState(isSingleEmployeeScope ? 'by-employee' : 'by-day');
+  // Track whether we have already defaulted to 'by-day' once multi-employee data finishes loading
+  const hasAutoSelectedByDayRef = useRef(!isSingleEmployeeScope);
   const [selectedDay, setSelectedDay] = useState(() =>
     dateRange?.includes(todayStr) ? todayStr : (dateRange?.[0] || '')
   );
@@ -94,12 +96,19 @@ const AttendanceMobileList = ({
     }
   }, [dateRange, selectedDay, todayStr]);
 
-  // If restricted viewer only has 1 employee, force timeline view
+  // If restricted viewer only has 1 employee, force timeline view.
+  // When async employee loading resolves to >1 employees for the first time,
+  // default managers to 'by-day' roll-call without overriding subsequent manual tab switches.
   useEffect(() => {
     if (isSingleEmployeeScope) {
       setMobileMode('by-employee');
+    } else if (!hasAutoSelectedByDayRef.current) {
+      hasAutoSelectedByDayRef.current = true;
+      if (!controlledSelectedEmployeeId) {
+        setMobileMode('by-day');
+      }
     }
-  }, [isSingleEmployeeScope]);
+  }, [isSingleEmployeeScope, controlledSelectedEmployeeId]);
 
   // When a manager picks an employee via the global SearchBar, jump to their Timeline view
   useEffect(() => {

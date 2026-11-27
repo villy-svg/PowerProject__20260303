@@ -121,12 +121,13 @@ Standard RBAC defines *what* a user can do. The [Sphere of Influence & Hierarchy
 ---
 
 ## 6. Deployment Checklist
-When building a new vertical or feature:
+When building a new vertical or feature, or modifying ANY existing RBAC/RLS/hierarchy rule:
 1. [ ] Enable RLS on the new table(s).
 2. [ ] Apply the 4 standard policies (SELECT, INSERT, UPDATE, DELETE).
-3. [ ] Update `App.jsx` to pass `permissions` to the new view.
+3. [ ] Update `App.jsx` / `useRBAC.js` to pass `permissions` to the new view.
 4. [ ] Implement UI guards in the new view (Buttons, Imports, Modals).
 5. [ ] Verify as both 'Viewer' and 'Admin'.
+6. [ ] **MANDATORY — Sync RBAC Tooltips & Catalog:** Update `src/constants/rbacCatalog.js` (and verify `CONTEXT_ALIASES` for `RBACManageButton`/`BoardRBACModal`) following [RBAC Tooltip & Capability Sync](file:///c:/Users/villy/OneDrive/Documents/PowerPod%20New/Coding%20Practice/PowerProject/.agent/skills/rbac-documentation-sync/SKILL.md) so there is **zero drift** between actual permissions and Master Admin tooltips.
 
 ---
 

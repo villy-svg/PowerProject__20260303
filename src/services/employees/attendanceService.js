@@ -149,7 +149,10 @@ export async function fetchAllEmployeesForAttendanceSearch(filters = {}) {
     query = query.in('hub_id', filters.hubIds);
   }
 
-  if (filters.employeeId) {
+  // Support downward reporting tree scoping (multiple employee IDs) alongside single-employee fallback
+  if (Array.isArray(filters.employeeIds) && filters.employeeIds.length > 0) {
+    query = query.in('id', filters.employeeIds);
+  } else if (filters.employeeId) {
     query = query.eq('id', filters.employeeId);
   }
 

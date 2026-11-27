@@ -6,6 +6,8 @@
  * Use isAssignee(task, user) helper for all membership checks.
  */
 
+import { hierarchyUtils } from './hierarchyUtils';
+
 /**
  * Internal helper: checks if a user is in the task's assigned_to array.
  * Handles both employeeId and auth user.id comparisons.
@@ -282,12 +284,13 @@ export const taskUtils = {
    * @returns {string} Hub code, 'MULTI', or 'Unassigned'.
    */
   getTaskHub(task, allTasks) {
-    // Walk up to root parent to find the authoritative hub assignment
+    // Walk up to root parent to find the authoritative hub assignment (cycle-safe & depth-capped)
     let current = task;
-    while (current.isSubTask && current.parentTask) {
-      const parent = allTasks.find(p => p.id === current.parentTask);
-      if (!parent) break;
-      current = parent;
+    if (task?.isSubTask) {
+      hierarchyUtils.walkAncestors(task, allTasks, (parent) => {
+        current = parent;
+        if (!parent.isSubTask) return false;
+      });
     }
     // Resolve hub from root
     if (current.hubCodes && current.hubCodes.length > 1) return 'MULTI';

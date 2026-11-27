@@ -15,21 +15,21 @@
  * RULE: When adding a new vertical, ONLY update this file.
  * No other file should contain vertical-routing ternaries.
  */
-import {
-  HubSubSidebar, HubTaskForm, HubTaskTile,
-} from '../verticals/ChargingHubs';
+// Direct component imports (bypassing barrel index.js files) so Rollup can
+// code-split lazy management pages and their CSS out of the main entry bundle.
+import HubSubSidebar from '../verticals/ChargingHubs/HubSubSidebar';
+import HubTaskForm from '../verticals/ChargingHubs/HubTaskForm';
+import HubTaskTile from '../verticals/ChargingHubs/HubTaskTile';
 
-import {
-  EmployeeSubSidebar, EmployeeRemarkForm, EmployeeTaskTile,
-} from '../verticals/Employees';
+import EmployeeSubSidebar from '../verticals/Employees/EmployeeSubSidebar';
+import EmployeeRemarkForm from '../verticals/Employees/EmployeeRemarkForm';
+import EmployeeTaskTile from '../verticals/Employees/EmployeeTaskTile';
 
-import {
-  ClientSubSidebar, ClientTaskForm, ClientTaskTile,
-} from '../verticals/Clients';
+import ClientSubSidebar from '../verticals/Clients/ClientSubSidebar';
+import ClientTaskForm from '../verticals/Clients/ClientTaskForm';
+import ClientTaskTile from '../verticals/Clients/ClientTaskTile';
 
-import {
-  DataManagerSubSidebar
-} from '../verticals/DataManager';
+import DataManagerSubSidebar from '../verticals/DataManager/DataManagerSubSidebar';
 
 import { REMARK_GRADE_MAP } from '../verticals/Employees/remarksMapping';
 import { EMPLOYEE_NAV_ITEMS, HUB_NAV_ITEMS } from '../constants/verticalFeatures';

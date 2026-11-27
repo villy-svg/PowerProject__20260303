@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { hierarchyUtils } from '../../utils/hierarchyUtils';
 import { taskUtils } from '../../utils/taskUtils';
 import { groupRemarksByEmployee, getRemarkGradeCounts } from '../../verticals/Employees/remarksBoard';
@@ -44,6 +44,12 @@ const TaskListView = ({
   const [expandedIds, setExpandedIds] = React.useState(new Set(['ALL'])); // Default expand all or empty? 
   // Actually, user wants "dropdown kind of a nesting", let's default to expanded so they see the hierarchy first, or collapsed? 
   // Conventionally, project boards start expanded but let's just use an empty set and they can expand.
+
+  // Pre-index tasks once per tasks-array change for O(1) ancestor lookups during render
+  const allTasksMap = useMemo(
+    () => new Map((tasks || []).map(item => [item.id, item])),
+    [tasks]
+  );
 
   const toggleExpand = (id, e) => {
     if (e) e.stopPropagation();
@@ -129,17 +135,9 @@ const TaskListView = ({
         </header>
 
         <div className="list-task-container">
-          {stageTasks.filter(t => {
-            // Visibility filter: ancestors must be expanded
-            let curr = t;
-            const taskMap = new Map(tasks.map(item => [item.id, item]));
-            while (curr.parentTask) {
-              if (!expandedIds.has(curr.parentTask)) return false;
-              curr = taskMap.get(curr.parentTask);
-              if (!curr) break;
-            }
-            return true;
-          }).map((task) => {
+          {stageTasks.filter(t =>
+            hierarchyUtils.areAncestorsExpanded(t, allTasksMap, expandedIds)
+          ).map((task) => {
             // Resolve per-row vertical RBAC when provided (e.g. Home -> Centralised Task View)
             const rowPerms = resolveTaskPermissions ? resolveTaskPermissions(task) : permissions;
             return (

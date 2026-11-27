@@ -193,3 +193,17 @@ When an active employee has no attendance record (`NULL` / "Not Marked") for the
 
 ### 3d. Rollback & Reversibility
 - **Reversible without data loss?** **Yes.** Disable the GitHub Actions cron workflow to stop new tasks; additive columns (`marked_by`, `approved_by`, `marked_source`) and RPCs are non-breaking; frontend commit can be reverted via Capacitor OTA.
+
+---
+
+## Amendment: 2026-11-27 — Upward Reporting Maker Access, Contributor+ Floor & Hierarchy Depth Parity
+**Type:** Major
+**Requested Change:**
+1. Allow upward reporting managers (ancestors in `employees.manager_id` above the subject employee or current `assigned_to`) to act as Maker on `BACKLOG` attendance closure tasks **only** when they hold effective **Editor+** access on `EMPLOYEES → Attendance Board` (blocking upward Viewers/Contributors and Attendance Board feature downgrades).
+2. Enforce an effective **Contributor+** floor on `EMPLOYEES → Attendance Board` for **all** non-`master_admin` Maker paths — including direct assigned managers (`assigned_to`) and `EMPLOYEES` `admin`s downgraded to `viewer`/`none` on `canAccessEmployeeAttendanceBoard`.
+3. Align hierarchy traversal depth cap (`MAX_HIERARCHY_DEPTH = 10`) and cycle guards across UI (`hierarchyUtils.js`, `hierarchyService.js`, `taskUtils.js`, `CentralisedTaskBoard.jsx`, `ExecutiveSummary.jsx`, `TaskListView.jsx`, `TaskTreeView.jsx`) and SQL (`rpc_submit_attendance_task_choice`, `fn_find_first_editor_in_hierarchy`).
+
+**Reason:** Upward reporting managers with Editor access (e.g., Raju) saw `BACKLOG` attendance closure tasks in **Home → Track Requests** but had no **Mark Attendance** button or RPC right; meanwhile Viewer managers could bypass feature-level read-only restrictions on the direct-assignee path, and UI hierarchy traversals lacked the depth cap & cycle guard enforced in SQL.
+**Phases Affected:** Phase 1e (RBAC), Phase 2a (RPC & Frontend Service), Phase 3a (Hierarchy Cycle/Depth Risk), Phase 3c (Verification).
+**Migration:** `supabase/migrations/20261127080000_allow_upward_editor_mark_attendance_task.sql` (local only — pending explicit approval to push to `staging`).
+**Approved:** Yes (user-directed in session 2026-11-27).

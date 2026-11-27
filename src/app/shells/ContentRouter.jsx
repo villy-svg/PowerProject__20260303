@@ -13,30 +13,89 @@
  * - development-best-practices §10 Service & Data Fetching Layer
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
-// Components
-import VerticalWorkspace from '../../components/workspaces/VerticalWorkspace';
+// Eagerly loaded: default landing view (and AttendanceSelfService, already bundled inside ExecutiveSummary)
 import ExecutiveSummary from '../../components/dashboard/ExecutiveSummary';
-import Configuration from '../../components/workspaces/Configuration';
-import UserRoleManagement from '../../components/users/UserRoleManagement';
-import UserManagement from '../../components/users/UserManagement';
-import TutorialHub from '../../features/tutorials/TutorialHub';
+import AttendanceSelfService from '../../verticals/Employees/attendance/AttendanceSelfService';
 
-// Vertical Management Pages
-import {
-  HubManagement, HubFunctionManagement, DailyTasksManagement,
-} from '../../verticals/ChargingHubs';
-import CleaningQRGenerator from '../../verticals/ChargingHubs/CleaningQRGenerator';
-import {
-  EmployeeManagement, DepartmentManagement, EmployeeRoleManagement,
-  EmployeeRulesBoard, EmployeeAttendanceBoard, RuleManagement, AttendanceSelfService,
-} from '../../verticals/Employees';
-import {
-  ClientManagement, ClientCategoryManagement, ClientBillingModelManagement, ClientServiceManagement,
-} from '../../verticals/Clients';
-import { DataManagerWorkspace } from '../../verticals/DataManager';
-import { LeaveDashboard } from '../../features/LeaveManagement/components/LeaveDashboard';
+// Route-level code splitting: lazy-load secondary views directly from their module files
+// (bypassing barrel exports so Rollup splits each view into its own chunk)
+const VerticalWorkspace = lazy(() => import('../../components/workspaces/VerticalWorkspace'));
+const Configuration = lazy(() => import('../../components/workspaces/Configuration'));
+const UserRoleManagement = lazy(() => import('../../components/users/UserRoleManagement'));
+const UserManagement = lazy(() => import('../../components/users/UserManagement'));
+const TutorialHub = lazy(() => import('../../features/tutorials/TutorialHub'));
+
+// Vertical Management Pages (lazy-loaded on navigation)
+const HubManagement = lazy(() => import('../../verticals/ChargingHubs/HubManagement'));
+const HubFunctionManagement = lazy(() => import('../../verticals/ChargingHubs/HubFunctionManagement'));
+const DailyTasksManagement = lazy(() => import('../../verticals/ChargingHubs/DailyTasksManagement'));
+const CleaningQRGenerator = lazy(() => import('../../verticals/ChargingHubs/CleaningQRGenerator'));
+
+const EmployeeManagement = lazy(() => import('../../verticals/Employees/EmployeeManagement'));
+const DepartmentManagement = lazy(() => import('../../verticals/Employees/DepartmentManagement'));
+const EmployeeRoleManagement = lazy(() => import('../../verticals/Employees/EmployeeRoleManagement'));
+const EmployeeRulesBoard = lazy(() => import('../../verticals/Employees/EmployeeRulesBoard'));
+const EmployeeAttendanceBoard = lazy(() => import('../../verticals/Employees/EmployeeAttendanceBoard'));
+const RuleManagement = lazy(() => import('../../verticals/Employees/RuleManagement'));
+
+const ClientManagement = lazy(() => import('../../verticals/Clients/ClientManagement'));
+const ClientCategoryManagement = lazy(() => import('../../verticals/Clients/ClientCategoryManagement'));
+const ClientBillingModelManagement = lazy(() => import('../../verticals/Clients/ClientBillingModelManagement'));
+const ClientServiceManagement = lazy(() => import('../../verticals/Clients/ClientServiceManagement'));
+
+const DataManagerWorkspace = lazy(() => import('../../verticals/DataManager/DataManagerWorkspace'));
+const LeaveDashboard = lazy(() =>
+  import('../../features/LeaveManagement/components/LeaveDashboard').then((m) => ({
+    default: m.LeaveDashboard,
+  }))
+);
+
+/**
+ * Guards lazy-loaded route chunks against stale-deploy 404s or network errors.
+ * Resets automatically when `resetKey` (activeVertical) changes.
+ */
+class LazyRouteErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('[ContentRouter] Lazy route load failed:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="loading-screen-layout">
+          <h2 className="error-heading">Unable to Load View</h2>
+          <p className="error-message-text">
+            A newer version of the app may be available or your connection dropped.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="halo-button error-logout-btn"
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Contexts
 import { useAppNavigation } from '../contexts/AppNavigationContext';
@@ -126,9 +185,11 @@ const ContentRouter = ({
     );
   }
 
-  if (activeVertical === 'configuration') {
-    return (
-      <Configuration
+  // All secondary views are lazy-loaded; render inside Suspense + chunk error boundary
+  const renderLazyRoute = () => {
+    if (activeVertical === 'configuration') {
+      return (
+        <Configuration
         tasks={tasks}
         setTasks={setTasks}
         user={user}
@@ -377,6 +438,15 @@ const ContentRouter = ({
         <DailyTasksManagement permissions={permissions} refreshTasks={fetchTasks} currentUser={user} />
       )}
     </VerticalWorkspace>
+    );
+  };
+
+  return (
+    <LazyRouteErrorBoundary resetKey={activeVertical}>
+      <Suspense fallback={<div className="loading-screen-layout"><p>Loading view...</p></div>}>
+        {renderLazyRoute()}
+      </Suspense>
+    </LazyRouteErrorBoundary>
   );
 };
 
