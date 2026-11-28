@@ -12,7 +12,7 @@
  *   runtime-stability-and-coding-health (Safe destructuring, inFlightRef guard)
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { IconCheck, IconX } from '../ui/Icons';
 import AttendanceStatusPicker from './AttendanceStatusPicker';
 import {
@@ -42,6 +42,17 @@ const UnmarkedAttendanceActionPanel = ({ task, currentUser, onActionComplete }) 
   const [submittingAction, setSubmittingAction] = useState(null);
   const [actionError, setActionError] = useState(null);
   const inFlightRef = useRef(false);
+
+  // Reset form state when switching to a different task or when a task
+  // transitions stages (e.g. rejected REVIEW -> BACKLOG) while mounted.
+  useEffect(() => {
+    setSelectedStatus(
+      toAttendanceOptionValue(meta.suggested_status, meta.suggested_shift_type)
+    );
+    setMakerNote(meta.maker_note || '');
+    setReviewNote('');
+    setActionError(null);
+  }, [task?.id, task?.stageId, meta.suggested_status, meta.suggested_shift_type, meta.maker_note]);
 
   const isConsecutiveWO = meta.type === ATTENDANCE_TASK_TYPES.CONSECUTIVE_WEEKOFF;
   const canMark = canMarkAttendanceTask(task, currentUser);

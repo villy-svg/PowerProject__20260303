@@ -76,10 +76,11 @@ Before submitting any tool call that modifies code, confirm:
 4. [ ] I validated dependencies to ensure modifications don't break downstream modules.
 5. [ ] (CSS) I prioritized reusing global/refactored styles and used design system variables.
 
-After finishing all needful edits, you MUST execute the **Post-Edit Audit & Bug-Hunt** (see `AGENTS.md` and `.agent/skills/post-edit-audit/SKILL.md`):
+After finishing all needful edits, you MUST execute the **Post-Edit Audit, Bug-Hunt & Automated Tests** (see `AGENTS.md`, `.agent/skills/post-edit-audit/SKILL.md`, and `.agent/skills/automated-testing/SKILL.md`):
 6. [ ] (CSS) Audited for redundancies and bloat.
 7. [ ] (JSX & all other files) Audited for redundancies, bloat, and inline styling.
 8. [ ] Ran 1 additional bug-hunting pass across every touched file and clarified at the end of the response whether any mistakes were made while editing.
+9. [ ] (Runtime Code) Added/updated colocated **Vitest + React Testing Library** tests and confirmed `npx vitest run` passes with zero failures.
 
 ---
 

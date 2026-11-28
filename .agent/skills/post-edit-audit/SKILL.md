@@ -1,6 +1,6 @@
 ---
 name: post-edit-audit
-description: MANDATORY post-edit audit and bug-hunt workflow for EVERY file edit. Audits CSS for redundancies and bloat; audits JSX and all other files for redundancies, bloat, and inline styling; runs one final bug-hunting iteration over all touched files; and clarifies at the end whether any mistakes were made during editing.
+description: MANDATORY post-edit audit, bug-hunt, and fast automated Vite + React testing workflow for EVERY file edit. Audits CSS for redundancies and bloat; audits JSX and all other files for redundancies, bloat, and inline styling; runs one final bug-hunting iteration over all touched files; runs fast Vitest + React Testing Library tests on code changes; and clarifies at the end whether any mistakes were made during editing.
 ---
 
 # Post-Edit Audit & Final Bug-Hunt
@@ -44,3 +44,9 @@ After all needful edits and Steps 1–3 are complete:
 3. **Clarify at the End of Your Response**: Include a brief closing note stating whether any mistakes were made while editing:
    - If mistakes/issues were found during the audit or bug-hunt pass, briefly list what they were and confirm they were fixed.
    - If no mistakes were found, explicitly state that the post-edit audit and final bug-hunt pass found no mistakes.
+
+## Step 5: Fast Automated Vite + React Testing (Code Changes)
+For every edit touching runtime code (`.js`, `.jsx`, `.ts`, `.tsx`):
+1. **Add / Update Colocated Tests**: Ensure colocated `*.test.{js,jsx,ts,tsx}` tests using **Vitest + React Testing Library** cover new behavior, bug-fix regressions, edge/empty/error states, and RBAC guards (see `.agent/skills/automated-testing/SKILL.md`).
+2. **Run Fast Non-Watch Verification**: Execute targeted tests (`npx vitest run <path>`) — and the full fast suite (`npx vitest run`) for shared modules — with external services (Supabase, `fetch`, Capacitor, timers) mocked.
+3. **Zero-Failure Gate**: Confirm 100% pass (`exit code 0`) and report the test command and result in the final response. (Docs-only `.md`, copy-only, and purely cosmetic CSS-only edits are exempt.)

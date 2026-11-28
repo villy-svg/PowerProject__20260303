@@ -81,3 +81,8 @@ When writing code, adding new features, or modifying existing components, always
 - **Strict Prop Validation:** If you are not using TypeScript, utilize PropTypes or JSDoc extensively to define exactly what shapes of objects a component expects.
 - **Defensive Rendering:** If a component expects an array, ensure it defaults to an empty array in the parameter list: `const UserList = ({ users = [] }) => ...`. This prevents mapping over `undefined` if the parent forgets to pass the prop.
 - **Opaque IDs:** Never assume an ID is safe to render mathematically. Treat all database IDs as opaque strings unless you specifically need to sort them numerically.
+
+### 14. Fast Automated Vite + React Testing (MANDATORY)
+- **Vitest + React Testing Library:** All new features, bug fixes, hooks, services, and component changes MUST include fast, colocated automated tests (`*.test.{js,jsx,ts,tsx}`) using **Vitest** and **React Testing Library** (`@testing-library/react`, `@testing-library/user-event`).
+- **Keep It Fast & Isolated:** Mock Supabase, `fetch`, Capacitor plugins, and timers so tests run in milliseconds–seconds without live network/DB calls or slow headless browsers.
+- **Run Before Finishing:** Execute targeted tests in single-run mode (`npx vitest run <path>`) and confirm 100% pass before concluding. See `.agent/skills/automated-testing/SKILL.md` for full standards.

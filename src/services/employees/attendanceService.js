@@ -14,6 +14,14 @@
 import { supabase } from '../core/supabaseClient';
 
 // ---------------------------------------------------------------------------
+// Utility: Detect open (unchecked-out) session entry.
+// Capacitor Android native HTTP can deserialize JSONB null as the string "null".
+// ---------------------------------------------------------------------------
+function isOpenSessionEntry(session) {
+  return session?.logout_time === null || session?.logout_time === 'null';
+}
+
+// ---------------------------------------------------------------------------
 // Utility: toISTDateString(date)
 //
 // Returns a 'YYYY-MM-DD' string in the Asia/Kolkata (IST, UTC+5:30) timezone.
@@ -400,7 +408,7 @@ export async function fetchLiveAttendance() {
     if (typeof sessions === 'string') {
       try { sessions = JSON.parse(sessions); } catch(e) { sessions = []; }
     }
-    const hasOpenSession = sessions.some(s => s.logout_time === null);
+    const hasOpenSession = sessions.some(isOpenSessionEntry);
     return hasOpenSession;
   });
 
@@ -415,7 +423,7 @@ export async function fetchLiveAttendance() {
 // ---------------------------------------------------------------------------
 export async function adminForceCheckout(recordId, currentSessions) {
   // Find the open session to calculate the 11-hour auto-fallback
-  const openSession = currentSessions.find(s => s.logout_time === null);
+  const openSession = currentSessions.find(isOpenSessionEntry);
   
   let forcedLogoutTimeIso = new Date().toISOString();
   if (openSession && openSession.login_time) {
@@ -426,7 +434,7 @@ export async function adminForceCheckout(recordId, currentSessions) {
   
   // Update the open session(s)
   const updatedSessions = currentSessions.map(s => {
-    if (s.logout_time === null) {
+    if (isOpenSessionEntry(s)) {
       return { 
         ...s, 
         logout_time: forcedLogoutTimeIso, 

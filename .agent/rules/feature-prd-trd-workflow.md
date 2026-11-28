@@ -167,10 +167,10 @@ A pre-mortem. Think about what can go wrong BEFORE we build it.
   an existing mental model? Could it break a current workflow users rely on?
 - **3c. Logical Risks:** Are there edge cases in the business logic? (e.g., "What happens
   if an employee has no manager?", "What if a shift spans midnight?")
-- **3d. Testing Plan:** Be specific. List exact test scenarios:
-  - "Log in as a Viewer and verify the Create button is hidden."
-  - "Create a record, then delete it, and verify it no longer appears in any list."
-  - "Test on a mobile viewport to confirm the layout switches correctly."
+- **3d. Testing Plan:** Be specific. List exact automated **Vitest + React Testing Library** test scenarios (mandatory per `automated-testing-policy.md`) alongside any manual viewport checks:
+  - "Unit/component test: Render as a Viewer and assert the Create button is absent."
+  - "Hook/service test: Create and delete a record with mocked Supabase and assert state updates cleanly."
+  - "Component/viewport test: Verify layout/shell switching on desktop vs. mobile."
 - **3e. Rollback & Reversibility:** If this breaks in production after deployment:
   - What is the exact rollback procedure? (e.g., "Revert the migration with
     `supabase db reset` on staging, then deploy previous app version via OTA.")
@@ -235,3 +235,4 @@ you MUST consult the following rule files to ensure the plan is compliant:
 | `architecture-and-modularity.md` | Any feature requiring new components or refactoring |
 | `mobile-and-archival.md` | Any feature that affects the Capacitor mobile app |
 | `adaptive-shell-architecture.md` | Any feature that changes a page's layout or shell |
+| `automated-testing-policy.md` | Any feature, refactor, or bug fix touching runtime code |

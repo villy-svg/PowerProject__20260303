@@ -390,7 +390,7 @@ export const RAW_CONTEXT = {
   'Attendance Board': {
     none: {
       can: [],
-      cannot: ['View or interact with the Attendance Board'],
+      cannot: ['View, mark, or approve/reject Attendance Board records & closure tasks'],
       summary: 'Blocked from the Attendance Board.',
     },
     viewer: {

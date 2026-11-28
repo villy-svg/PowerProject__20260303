@@ -208,8 +208,14 @@ function AppShell({ verticals, verticalList }) {
       const isCtrlF5 = e.ctrlKey && (e.key === 'F5' || e.keyCode === 116);
       if (isCtrlShiftR || isCtrlF5) {
         console.log('[App] Hard reload detected via keypress. Clearing intro tutorial seen flags...');
-        localStorage.removeItem(`intro_tutorial_seen_${APP_VERSION}`);
-        localStorage.removeItem(`intro_tutorial_seen_standalone_${APP_VERSION}`);
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i += 1) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('intro_tutorial_seen')) {
+            keysToRemove.push(k);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
       }
     };
     window.addEventListener('keydown', handleKeyDown, { capture: true });
@@ -222,8 +228,28 @@ function AppShell({ verticals, verticalList }) {
     const checkOnboarding = async () => {
       if (user && user.isActive !== false && user.roleId !== 'master_admin') {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-        const storageKey = isStandalone ? `intro_tutorial_seen_standalone_${APP_VERSION}` : `intro_tutorial_seen_${APP_VERSION}`;
-        const seen = localStorage.getItem(storageKey);
+        // Use a stable (non-versioned) storage key so routine OTA updates do not
+        // re-trigger the startup policy/rules slideshow for users who already saw it.
+        const storageKey = isStandalone ? 'intro_tutorial_seen_standalone' : 'intro_tutorial_seen';
+        const legacyPrefix = isStandalone ? 'intro_tutorial_seen_standalone_' : 'intro_tutorial_seen_';
+        let seen = localStorage.getItem(storageKey);
+
+        // Migrate any existing versioned flag (e.g. intro_tutorial_seen_2.4.6) so
+        // current users are not re-prompted after upgrading to this release.
+        if (!seen) {
+          for (let i = 0; i < localStorage.length; i += 1) {
+            const k = localStorage.key(i);
+            const matchesMode = k
+              && k.startsWith(legacyPrefix)
+              && (isStandalone || !k.startsWith('intro_tutorial_seen_standalone_'));
+            if (matchesMode && localStorage.getItem(k) === 'true') {
+              localStorage.setItem(storageKey, 'true');
+              seen = 'true';
+              break;
+            }
+          }
+        }
+
         if (!seen) {
           try {
             // Evaluate global Master Admin startup tutorial toggles before queueing
@@ -283,7 +309,7 @@ function AppShell({ verticals, verticalList }) {
       setCurrentTutorialIndex(currentTutorialIndex + 1);
     } else {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      const storageKey = isStandalone ? `intro_tutorial_seen_standalone_${APP_VERSION}` : `intro_tutorial_seen_${APP_VERSION}`;
+      const storageKey = isStandalone ? 'intro_tutorial_seen_standalone' : 'intro_tutorial_seen';
       localStorage.setItem(storageKey, 'true');
       setTutorialQueue([]);
       setCurrentTutorialIndex(-1);

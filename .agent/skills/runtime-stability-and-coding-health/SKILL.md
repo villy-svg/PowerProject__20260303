@@ -60,3 +60,4 @@ Before finalizing ANY edit:
 4. "Did I use `await` on every Supabase call?"
 5. "Did I run the mandatory Post-Edit Audit (redundancies, bloat, and inline styling across CSS, JSX, and all other touched files) per `.agent/skills/post-edit-audit/SKILL.md`?"
 6. "Did I run 1 extra bug-hunting iteration across every touched file and clarify at the end of my response whether any mistakes were made while editing?"
+7. "Did I write/update and run fast automated **Vitest + React Testing Library** tests (`npx vitest run`) for all touched runtime code per `.agent/skills/automated-testing/SKILL.md`?"

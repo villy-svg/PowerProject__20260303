@@ -17,7 +17,7 @@
  *   safe-code-modification §2 (No inline styles)
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../services/core/supabaseClient';
 import './AttendanceSelfService.css';
 
@@ -42,8 +42,9 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
   });
 
   // Geolocation tag (human-readable lat/lng or 'Unavailable')
+  const accuracyTag = geolocation?.accuracy != null ? ` (±${Math.round(geolocation.accuracy)}m)` : '';
   const geoTag = geolocation
-    ? `📍 ${geolocation.lat.toFixed(5)}, ${geolocation.lng.toFixed(5)} (±${Math.round(geolocation.accuracy)}m)`
+    ? `📍 ${geolocation.lat.toFixed(5)}, ${geolocation.lng.toFixed(5)}${accuracyTag}`
     : '📍 Location unavailable';
 
   return [
@@ -63,12 +64,20 @@ function buildShareText({ action, record, deviceId, geolocation, timestamp, empl
 const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
   const { action, record, deviceId, geolocation, timestamp, hubName: successHubName } = successData || {};
 
-  // Fix A: seed from successData.hubName — the hub the employee actually checked in/out at.
+  // Fix A: use successData.hubName directly — the hub the employee actually checked in/out at.
   // Previously seeded from record.employees.hubs.name which is the employee's PROFILE hub
   // (e.g. Kadubeesanahalli for Ebinezer) and NOT the hub they selected at check-in time.
   // The race: useMemo baked the wrong hub into shareText before the async correction landed.
-  const [resolvedHubName, setResolvedHubName] = useState(successHubName || '—');
+  const hubName = successHubName || '—';
   const [resolvedEmpName, setResolvedEmpName] = useState(record?.employees?.full_name || user?.name || 'Employee');
+  const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     // Fix C: hub name is now pre-resolved upstream (successData.hubName) so we no longer
@@ -110,7 +119,6 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
   }, [record]);
 
   const employeeName = resolvedEmpName;
-  const hubName      = resolvedHubName;
   const shiftLabel   = record?.shift_type === 'day' ? '☀ Day Shift' : '🌙 Night Shift';
   const actionLabel  = action === 'checkin' ? '✅ Shift Started' : '👋 Shift Ended';
   const actionClass  = action === 'checkin' ? 'receipt__card--checkin' : 'receipt__card--checkout';
@@ -128,39 +136,96 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
       })
     : '—';
 
+  const geoAccuracyDisplay = geolocation?.accuracy != null ? ` (±${Math.round(geolocation.accuracy)}m)` : '';
   const geoDisplay = geolocation
-    ? `${geolocation.lat.toFixed(5)}, ${geolocation.lng.toFixed(5)} (±${Math.round(geolocation.accuracy)}m)`
+    ? `${geolocation.lat.toFixed(5)}, ${geolocation.lng.toFixed(5)}${geoAccuracyDisplay}`
     : 'Location not captured';
 
   // ---------------------------------------------------------------------------
   // WhatsApp Share Handler
-  // Primary: Web Share API (guards against unsupported browsers)
-  // Fallback: WhatsApp deep link URL
+  // On native Capacitor (Android/iOS): open WhatsApp deep link directly because
+  // Chromium WebView exposes navigator.share but frequently rejects/fails it
+  // without opening any share sheet.
+  // On web: try Web Share API first; on any non-cancel failure, fall through
+  // to the wa.me deep link.
+  // IMPORTANT: Never auto-dismiss the receipt (onDone) here — let the employee
+  // explicitly tap "Done" after confirming their message was sent in the group.
   // ---------------------------------------------------------------------------
-  const handleWhatsAppShare = async () => {
-    const encoded = encodeURIComponent(shareText);
+  const openWhatsAppDeepLink = (text) => {
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    const popup = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!popup) {
+      // Fallback when WebView or mobile browser blocks window.open
+      window.location.href = url;
+    }
+  };
 
-    // Platform guard per hybrid-mobile-deployment §4
-    if (navigator.share) {
-      try {
-        await navigator.share({ text: shareText });
-      } catch (err) {
-        // User cancelled share — fall through to deep link fallback
-        if (err.name !== 'AbortError') {
-          console.warn('[AttendanceReceiptScreen] navigator.share error:', err);
-        }
-      } finally {
-        // Automatically finish the flow after the share sheet closes (even if cancelled)
-        onDone();
-      }
+  const handleWhatsAppShare = async () => {
+    let isNative = false;
+    try {
+      const { Capacitor } = await import('@capacitor/core');
+      isNative = Capacitor?.isNativePlatform() || false;
+    } catch {
+      // Web environment
+    }
+
+    if (isNative) {
+      openWhatsAppDeepLink(shareText);
       return;
     }
 
-    // Fallback: wa.me deep link (works on all platforms)
-    window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
-    
-    // Automatically finish the flow after opening the fallback share link
-    onDone();
+    // Web platform guard per hybrid-mobile-deployment §4
+    if (navigator.share) {
+      try {
+        await navigator.share({ text: shareText });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') {
+          // User explicitly dismissed the share sheet — stay on receipt
+          return;
+        }
+        console.warn('[AttendanceReceiptScreen] navigator.share failed, falling back to wa.me:', err);
+      }
+    }
+
+    openWhatsAppDeepLink(shareText);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Copy Message Handler — reliable fallback for pasting into WhatsApp groups
+  // Uses Clipboard API with a legacy textarea fallback for Android 8 WebViews.
+  // ---------------------------------------------------------------------------
+  const handleCopyMessage = async () => {
+    let didCopy = false;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText);
+        didCopy = true;
+      }
+    } catch {
+      // Fall through to legacy execCommand fallback
+    }
+
+    if (!didCopy) {
+      try {
+        const el = document.createElement('textarea');
+        el.value = shareText;
+        el.setAttribute('readonly', '');
+        el.className = 'receipt__copy-buffer';
+        document.body.appendChild(el);
+        el.select();
+        didCopy = document.execCommand('copy');
+        document.body.removeChild(el);
+      } catch (err) {
+        console.warn('[AttendanceReceiptScreen] Fallback copy failed:', err);
+      }
+    }
+
+    if (didCopy) {
+      setCopied(true);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -248,6 +313,26 @@ const AttendanceReceiptScreen = ({ successData, user, onDone }) => {
           <span className="receipt__share-icon">💬</span>
           Share to WhatsApp
         </button>
+
+        {/* Secondary actions: Copy for manual paste + explicit Done */}
+        <div className="receipt__secondary-actions">
+          <button
+            id="receipt-copy-btn"
+            type="button"
+            className="halo-button receipt__secondary-btn"
+            onClick={handleCopyMessage}
+          >
+            {copied ? '✓ Copied!' : '📋 Copy Message'}
+          </button>
+          <button
+            id="receipt-done-btn"
+            type="button"
+            className="halo-button receipt__secondary-btn receipt__secondary-btn--done"
+            onClick={onDone}
+          >
+            Done
+          </button>
+        </div>
       </div>
 
     </div>

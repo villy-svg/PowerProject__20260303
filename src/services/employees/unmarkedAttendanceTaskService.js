@@ -244,31 +244,30 @@ export const canMarkAttendanceTask = (task, user) => {
 
 /**
  * True when the user can act as Checker (approve/reject) on a REVIEW
- * attendance closure task. Blocks non-master self-approval and subject-employee
- * self-review.
+ * attendance closure task. Blocks non-master self-approval, subject-employee
+ * self-review, and users whose effective Attendance Board level
+ * (min(EMPLOYEES vertical, canAccessEmployeeAttendanceBoard feature)) is below
+ * Editor.
  */
 export const canReviewAttendanceTask = (task, user) => {
   if (!task || !user || !isAttendanceClosureTask(task)) return false;
   if (task.stageId !== 'REVIEW') return false;
 
   const isMasterAdmin = user.roleId === 'master_admin';
-  if (!isMasterAdmin && isSubjectEmployeeOfAttendanceTask(task, user)) {
+  if (isMasterAdmin) return true;
+
+  if (isSubjectEmployeeOfAttendanceTask(task, user)) {
     return false;
   }
   const makerUserId = task.metadata?.maker_user_id;
-  if (!isMasterAdmin && makerUserId && makerUserId === user.id) {
+  if (makerUserId && String(makerUserId) === String(user.id)) {
     return false;
   }
 
-  if (isMasterAdmin || user.roleId === 'master_editor') return true;
-  const empLevel = user.verticalPermissions?.EMPLOYEES?.level;
-  if (empLevel === 'editor' || empLevel === 'admin') return true;
-
-  const userEmpId = user.employeeId || user.employee_id;
-  if (!userEmpId) return false;
-  if (task.assignedTo === userEmpId || task.assigned_to === userEmpId) return true;
-  if (Array.isArray(task.assigneeIds) && task.assigneeIds.includes(userEmpId)) return true;
-  return false;
+  // Enforce effective Attendance Board Editor+ cap (covers master_editor and
+  // vertical min(EMPLOYEES, canAccessEmployeeAttendanceBoard); matches SQL RPC)
+  const attendanceLevel = getEffectiveAttendanceBoardLevel(user);
+  return attendanceLevel === 'editor' || attendanceLevel === 'admin';
 };
 
 /**

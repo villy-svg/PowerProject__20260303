@@ -25,3 +25,6 @@ This rule enforces a strict "Zero-Crash Policy" for all code modifications, aimi
 
 ## 7. Circular Dependencies
 - **No Circular Imports**: Ensure File A does not import File B if File B already imports File A.
+
+## 8. Fast Automated Verification (Vitest + React Testing Library)
+- **Verify Runtime Stability with Tests**: Every code change touching components, hooks, services, or utilities MUST be verified with fast, colocated **Vitest + React Testing Library** tests (`npx vitest run`) covering null/empty/error states, user interactions, and bug-fix regressions (see `.agent/rules/automated-testing-policy.md`).

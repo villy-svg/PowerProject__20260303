@@ -48,9 +48,20 @@ async function getDeviceId() {
 }
 
 // ---------------------------------------------------------------------------
+// Utility: Detect whether a geolocation error is a permission denial
+// Permission denials should fail fast instead of retrying coarse location.
+// ---------------------------------------------------------------------------
+function isLocationPermissionError(err) {
+  const msg = String(err?.message || '').toLowerCase();
+  return msg.includes('permission') || msg.includes('denied');
+}
+
+// ---------------------------------------------------------------------------
 // Utility: Capture current geolocation
-// Uses Capacitor Geolocation on native, Web Geolocation API on web.
-// Returns { lat, lng, accuracy } or null if denied.
+// Uses Capacitor Geolocation on native (2-tier: high-accuracy GPS -> network/
+// fused fallback so indoor hubs do not hit the 10s cold-GPS timeout), and
+// Web Geolocation API on web.
+// Returns { lat, lng, accuracy } or null if denied on web.
 // ---------------------------------------------------------------------------
 async function captureGeolocation() {
   let isNative = false;
@@ -66,7 +77,7 @@ async function captureGeolocation() {
     try {
       const { Geolocation } = await import('@capacitor/geolocation');
       let status = await Geolocation.checkPermissions();
-      
+
       // On every update, if not granted, request permission
       if (status.location !== 'granted') {
         status = await Geolocation.requestPermissions();
@@ -76,7 +87,32 @@ async function captureGeolocation() {
         throw new Error('Location permission is required to update attendance. Please enable it in device settings.');
       }
 
-      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, maximumAge: 0 });
+      // Tier 1: High-accuracy GPS with 15s timeout and 15s cache window
+      // (avoids cold-start timeout when a recent fix is already available).
+      let position;
+      try {
+        position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 15000,
+        });
+      } catch (highAccErr) {
+        if (isLocationPermissionError(highAccErr)) {
+          throw highAccErr;
+        }
+        // Tier 2: Fall back to network/fused location when GPS satellite lock
+        // times out indoors (hubs, basements, warehouses).
+        console.warn(
+          '[useAttendanceSelfService] High-accuracy GPS failed; retrying with network/fused location:',
+          highAccErr?.message
+        );
+        position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: 15000,
+          maximumAge: 60000,
+        });
+      }
+
       return {
         lat:      position.coords.latitude,
         lng:      position.coords.longitude,
@@ -84,7 +120,10 @@ async function captureGeolocation() {
       };
     } catch (err) {
       console.error('[useAttendanceSelfService] Native geolocation error:', err);
-      throw new Error(err?.message || 'Location permission or GPS is required to update attendance.');
+      if (isLocationPermissionError(err)) {
+        throw new Error(err?.message || 'Location permission is required to update attendance. Please enable it in device settings.');
+      }
+      throw new Error('Could not obtain your location in time. Please ensure Location/GPS is turned on and try again.');
     }
   } else {
     // Web Geolocation API (non-fatal)
@@ -101,6 +140,15 @@ async function captureGeolocation() {
       return null;
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Utility: Detect whether a session entry is still open (unchecked-out).
+// Capacitor native HTTP on Android can deserialize JSONB null as the string
+// "null". Treat both as open consistently across alarm, UI, and receipt logic.
+// ---------------------------------------------------------------------------
+function isOpenSession(session) {
+  return session?.logout_time === null || session?.logout_time === 'null';
 }
 
 function getDefaultShiftType() {
@@ -342,12 +390,15 @@ export function useAttendanceSelfService(userId) {
 
   // ---------------------------------------------------------------------------
   // Auto-Update 1: Refresh when app comes to foreground (tab focus)
-  // This handles the "stale connections/data" if left open overnight
+  // Handles stale data, shift boundary crossover (6 AM / 6 PM IST), and
+  // overnight previous-day Week-Off prompt checks if left open in background.
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        setSelectedShiftType(getDefaultShiftType());
         loadTodayRecord();
+        loadPreviousShiftWeekOffPrompt();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -357,7 +408,7 @@ export function useAttendanceSelfService(userId) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
     };
-  }, [loadTodayRecord]);
+  }, [loadTodayRecord, loadPreviousShiftWeekOffPrompt]);
 
   // ---------------------------------------------------------------------------
   // Auto-Update 2: Realtime database subscription
@@ -412,7 +463,7 @@ export function useAttendanceSelfService(userId) {
     if (typeof sessions === 'string') {
       try { sessions = JSON.parse(sessions); } catch (e) { sessions = []; }
     }
-    const openSession = sessions.find(s => s.logout_time === null);
+    const openSession = sessions.find(isOpenSession);
     if (!openSession?.login_time) return;
 
     // Clear any existing timer before setting a new one
@@ -430,26 +481,29 @@ export function useAttendanceSelfService(userId) {
 
   // ---------------------------------------------------------------------------
   // Derived: Is there currently an open (active) session?
-  // An open session has a session log entry with logout_time === null.
+  // An open session has a session log entry with logout_time === null or 'null'.
   // ---------------------------------------------------------------------------
   let parsedSessions = todayRecord?.session_logs_data || [];
   if (typeof parsedSessions === 'string') {
     try { parsedSessions = JSON.parse(parsedSessions); } catch (e) { parsedSessions = []; }
   }
-  const hasActiveSession = !!parsedSessions.some(
-    // Capacitor native HTTP on Android can deserialize JSONB null as the string "null".
-    // We treat both as an open (unclosed) session to stay consistent across platforms.
-    (session) => session.logout_time === null || session.logout_time === 'null'
-  );
+  const hasActiveSession = !!parsedSessions.some(isOpenSession);
 
   // ---------------------------------------------------------------------------
   // Action: Start Shift (Check In)
+  // Returns true on success, false on validation or runtime failure so callers
+  // (e.g. No-Cash slide trigger) only react to confirmed check-ins.
   // ---------------------------------------------------------------------------
   const handleCheckIn = useCallback(async (hubName) => {
     if (!selectedHubId) {
       setError('Please select a hub before starting your shift.');
-      return;
+      return false;
     }
+
+    // Recompute shift type at check-in time so leaving the app open across
+    // 6 AM / 6 PM IST never submits a stale Day/Night shift.
+    const currentShiftType = getDefaultShiftType();
+    setSelectedShiftType(currentShiftType);
 
     setIsActing(true);
     setError(null);
@@ -462,7 +516,7 @@ export function useAttendanceSelfService(userId) {
 
       const { data } = await withRetry(async () => {
         const res = await employeeCheckIn({
-          shiftType:   selectedShiftType,
+          shiftType:   currentShiftType,
           hubId:       selectedHubId,
           deviceId,
           geolocation,
@@ -479,7 +533,7 @@ export function useAttendanceSelfService(userId) {
       if (typeof newSessions === 'string') {
         try { newSessions = JSON.parse(newSessions); } catch { newSessions = []; }
       }
-      const newOpenSession = newSessions.find(s => s.logout_time === null || s.logout_time === 'null');
+      const newOpenSession = newSessions.find(isOpenSession);
       const loginTimeForAlarm = newOpenSession?.login_time || new Date().toISOString();
       if (alarmTimerRef.current) clearTimeout(alarmTimerRef.current);
       alarmTimerRef.current = scheduleOvertimeAlarm(
@@ -498,13 +552,15 @@ export function useAttendanceSelfService(userId) {
         timestamp:   new Date().toISOString(),
         hubName:     hubName || null,
       });
+      return true;
     } catch (err) {
       console.error('[useAttendanceSelfService] handleCheckIn error:', err);
       setError(err?.message || 'Check-in failed. Please try again.');
+      return false;
     } finally {
       setIsActing(false);
     }
-  }, [selectedShiftType, selectedHubId, withRetry]);
+  }, [selectedHubId, withRetry]);
 
   // ---------------------------------------------------------------------------
   // Action: End Shift (Check Out)
@@ -574,6 +630,32 @@ export function useAttendanceSelfService(userId) {
   // Clear success data (e.g., when user navigates away from receipt screen)
   const clearSuccessData = useCallback(() => setSuccessData(null), []);
 
+  // Re-open the active shift's check-in receipt so employees can re-share to
+  // WhatsApp even if the app reloaded or they dismissed the receipt early.
+  const openActiveSessionReceipt = useCallback((hubName) => {
+    if (!todayRecord) return;
+    let sessions = todayRecord.session_logs_data || [];
+    if (typeof sessions === 'string') {
+      try { sessions = JSON.parse(sessions); } catch { sessions = []; }
+    }
+    const openSession = sessions.find(isOpenSession);
+    if (!openSession) return;
+
+    const rawGeo = openSession.login_geolocation || todayRecord.login_geolocation || null;
+    const validGeo = (rawGeo && typeof rawGeo.lat === 'number' && typeof rawGeo.lng === 'number')
+      ? rawGeo
+      : null;
+
+    setSuccessData({
+      action:      'checkin',
+      record:      todayRecord,
+      deviceId:    openSession.device_id || null,
+      geolocation: validGeo,
+      timestamp:   openSession.login_time || todayRecord.first_login_time || new Date().toISOString(),
+      hubName:     hubName || null,
+    });
+  }, [todayRecord]);
+
   // Dismiss the in-page alarm banner
   const dismissAlarm = useCallback(() => setAlarmFired(false), []);
 
@@ -596,6 +678,7 @@ export function useAttendanceSelfService(userId) {
     handleCheckIn,
     handleCheckOut,
     clearSuccessData,
+    openActiveSessionReceipt,
     loadTodayRecord,
     // Phase 2: Self-Service Week-Off prompt
     weekOffPrompt,

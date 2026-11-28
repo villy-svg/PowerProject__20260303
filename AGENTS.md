@@ -1,6 +1,6 @@
 # Mandatory Post-Edit Audit & Bug-Check Protocol
 
-Whenever you create or edit **any** file in this workspace, you MUST complete all four steps below before concluding your response:
+Whenever you create or edit **any** file in this workspace, you MUST complete all five steps below before concluding your response:
 
 ## 1. CSS Files (`.css`, `.scss`) — Post-Edit Audit
 - Audit every touched stylesheet for **redundancies** (duplicate selectors, repeated declarations, overridden/dead rules) and **bloat** (overly specific selectors, unnecessary `!important`, hardcoded colors/spacing instead of design tokens, or rules already covered by shared/global classes).
@@ -18,4 +18,9 @@ Whenever you create or edit **any** file in this workspace, you MUST complete al
 - After completing all needful edits and the audits above, run **1 additional dedicated pass** across every file you touched specifically to catch **new bugs** (missing/broken imports, null/undefined access, prop/variable/column mismatches, hook ordering, async/error-handling gaps, broken CSS selectors/cascades, edge cases, or unintended regressions). Fix anything discovered.
 - **Required Closing Clarification:** At the end of your response, explicitly clarify whether any mistakes were made while editing — listing what was caught and fixed during the audit/bug-hunt pass, or confirming that no mistakes were found.
 
-For the detailed checklist, see `.agent/skills/post-edit-audit/SKILL.md`.
+## 5. Fast Automated Vite + React Testing (Mandatory for Code Changes)
+- For any change touching runtime code (`.js`, `.jsx`, `.ts`, `.tsx`), write/update colocated **Vitest + React Testing Library** tests (`*.test.{js,jsx,ts,tsx}`) covering new logic, bug-fix regressions, edge/empty/error states, and RBAC guards.
+- Keep tests fast and deterministic: mock Supabase, `fetch`, Capacitor plugins, and timers — never hit live networks or spin up slow browser harnesses for unit/component checks.
+- Run targeted tests in non-watch mode (`npx vitest run <path>`) — and the full fast suite (`npx vitest run`) for shared modules — and confirm 100% pass before concluding. Purely docs (`.md`), copy-only, or cosmetic CSS-only edits are exempt.
+
+For detailed checklists, see `.agent/skills/post-edit-audit/SKILL.md` and `.agent/skills/automated-testing/SKILL.md`.

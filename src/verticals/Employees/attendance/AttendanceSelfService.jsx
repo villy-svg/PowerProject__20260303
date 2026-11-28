@@ -153,9 +153,14 @@ const ShiftTypeIndicator = ({ value }) => (
 
 // ---------------------------------------------------------------------------
 // ActiveSessionCard — shown when employee is already checked in
+// Includes a "Share Login Receipt" button so employees can re-open and share
+// their check-in receipt to WhatsApp even after an app reload or dismissal.
 // ---------------------------------------------------------------------------
-const ActiveSessionCard = ({ record }) => {
-  const sessions = record?.session_logs_data || [];
+const ActiveSessionCard = ({ record, onShareReceipt }) => {
+  let sessions = record?.session_logs_data || [];
+  if (typeof sessions === 'string') {
+    try { sessions = JSON.parse(sessions); } catch { sessions = []; }
+  }
   // Find the open session (the one with no logout_time).
   // Also handle the 'null' string case from Capacitor/Android native HTTP.
   const activeSession = sessions.find(s => s.logout_time === null || s.logout_time === 'null');
@@ -203,6 +208,17 @@ const ActiveSessionCard = ({ record }) => {
       </p>
       <p className="self-service__active-time">Started at {loginTime}</p>
       <p className="self-service__active-hub">📍 {hubName}</p>
+      {onShareReceipt && (
+        <button
+          id="self-service-reshare-btn"
+          type="button"
+          className="halo-button self-service__reshare-btn"
+          disabled={hubName === 'Loading...'}
+          onClick={() => onShareReceipt(hubName !== 'Loading...' ? hubName : null)}
+        >
+          💬 Share Login Receipt
+        </button>
+      )}
     </div>
   );
 };
@@ -257,6 +273,7 @@ const CurrentAttendanceTab = ({ user }) => {
     handleCheckIn,
     handleCheckOut,
     clearSuccessData,
+    openActiveSessionReceipt,
     loadTodayRecord, // BUG-3 fix: was missing — caused ReferenceError on Retry button
     weekOffPrompt,
     isClaimingWeekOff,
@@ -266,14 +283,20 @@ const CurrentAttendanceTab = ({ user }) => {
     clearWeekOffFeedback,
   } = useAttendanceSelfService(user?.id);
 
-  // Intercept check-in: trigger the No-Cash slide overlay immediately after
-  // a successful check-in. The hook's successData is already set by this point,
-  // so the receipt screen is ready underneath when the slide is dismissed.
+  // Intercept check-in: trigger the No-Cash slide overlay ONLY when check-in
+  // actually succeeded. Previously setShowNoCashSlide(true) ran unconditionally,
+  // leaking the policy slide onto later retries or even checkouts after an error.
   const handleCheckInWithSlide = async (hubName) => {
-    await handleCheckIn(hubName);
-    // Only show the slide if check-in was error-free (successData will be set
-    // by the hook; if an error occurred, successData stays null and we skip).
-    setShowNoCashSlide(true);
+    const succeeded = await handleCheckIn(hubName);
+    if (succeeded) {
+      setShowNoCashSlide(true);
+    }
+  };
+
+  // Ensure the No-Cash check-in slide can never linger when checking out.
+  const handleCheckOutClean = async () => {
+    setShowNoCashSlide(false);
+    await handleCheckOut();
   };
 
   // Dismiss handler for the No-Cash slide.
@@ -294,10 +317,11 @@ const CurrentAttendanceTab = ({ user }) => {
           onDone={clearSuccessData}
         />
         {/* No-Cash mandatory slide — full-screen overlay above the receipt.
+            Strictly scoped to fresh check-ins (action === 'checkin').
             preventSkip=true  : hides the Skip button entirely.
             NO_CASH_VIEWER_PERMISSIONS : forces canSkipTutorial=false for ALL
-            users (master_admin included), activating the 10-second countdown. */}
-        {showNoCashSlide && (
+            users (master_admin included), activating the compulsory countdown. */}
+        {showNoCashSlide && successData.action === 'checkin' && (
           <TutorialSlideshowViewer
             flow={NO_CASH_FLOW}
             platform={window.innerWidth <= 768 ? 'mobile' : 'desktop'}
@@ -345,11 +369,14 @@ const CurrentAttendanceTab = ({ user }) => {
       {hasActiveSession ? (
         /* State 2: Active session — show End Shift button */
         <>
-          <ActiveSessionCard record={todayRecord} />
+          <ActiveSessionCard
+            record={todayRecord}
+            onShareReceipt={openActiveSessionReceipt}
+          />
           <button
             id="self-service-checkout-btn"
             className="halo-button self-service__action-btn self-service__checkout-btn"
-            onClick={handleCheckOut}
+            onClick={handleCheckOutClean}
             disabled={isActing}
           >
             {isActing ? 'Logging Out…' : '👋 End Shift'}
